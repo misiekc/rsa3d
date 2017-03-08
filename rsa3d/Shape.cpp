@@ -13,7 +13,7 @@ Shape::Shape(int dim) {
 }
 
 Shape::~Shape() {
-	delete this->position;
+	delete [] this->position;
 }
 
 
