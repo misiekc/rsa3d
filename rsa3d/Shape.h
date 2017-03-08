@@ -28,13 +28,13 @@ public:
 	virtual void translate(double* v);
 
 	// checks if there is overlap with the shape pointed by s.
-	virtual int overlap(BoundaryConditions bc, Shape *s) = 0;
+	virtual int overlap(BoundaryConditions *bc, Shape *s) = 0;
 
 	// returns a volume of the shape
 	virtual double getVolume() = 0;
 
 	// checks if a given point is within excluded volume
-	virtual int pointInside(BoundaryConditions bc, double* da) = 0;
+	virtual int pointInside(BoundaryConditions *bc, double* da) = 0;
 
 	// returns string representation of the shape
 	// virtual char* toString();
