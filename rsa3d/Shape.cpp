@@ -2,17 +2,29 @@
  * Shape.cpp
  *
  *  Created on: 07.03.2017
- *      Author: ciesla
+ *      Author: Michal Ciesla
  */
 
 #include "Shape.h"
 
-Shape::Shape() {
-	// TODO Auto-generated constructor stub
-
+Shape::Shape(int dim) {
+	this->dimension = dim;
+	this->position = new double[dim];
 }
 
 Shape::~Shape() {
-	// TODO Auto-generated destructor stub
+	delete this->position;
 }
+
+
+double* Shape::getPosition(){
+	return this->position;
+
+}
+
+void Shape::translate(double* v){
+		for(int i=0; i<this->dimension; i++){
+			this->position[i] += v[i];
+		}
+	}
 
