@@ -8,10 +8,11 @@
 #ifndef VOXEL_H_
 #define VOXEL_H_
 
-class Voxel {
+#include "Positioned.h"
+
+class Voxel : public Positioned{
+
 private:
-	int dimension;
-	double* center;
 	int index;
 	short missCounter;
 	int lastAnalyzed;

@@ -11,6 +11,8 @@
 #include <vector>
 #include <set>
 
+#include "Positioned.h"
+
 class NeighbourGrid {
 public:
 
@@ -18,19 +20,19 @@ public:
 	double linearSize;
 	int n;
 	double dx;
-	std::vector<std::set<Shape*>> lists;
+	std::vector<std::set<Positioned*>> lists;
 
 
 
 	NeighbourGrid(int dim, double size, double dx);
 	virtual ~NeighbourGrid();
 
-	void add(Shape* s);
-	void remove(Shape* s);
+	void add(Positioned* s);
+	void remove(Positioned* s);
 
-	std::vector<Shape*> getNeighbours(double* da, int radius);
+	std::vector<Positioned*> getNeighbours(double* da, int radius);
 	void NeighbourGrid::clear();
-	std::vector<Shape*> NeighbourGrid::getNeighbours(double* da);
+	std::vector<Positioned*> NeighbourGrid::getNeighbours(double* da);
 };
 
 #endif /* NEIGHBOURGRID_H_ */

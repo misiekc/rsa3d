@@ -8,7 +8,7 @@
 #include "NeighbourGrid.h"
 #include <math.h>
 #include <vector>
-#include "Shape.h"
+#include "Positioned.h"
 
 #include "Utils.c"
 
@@ -32,14 +32,11 @@ NeighbourGrid::~NeighbourGrid() {
 	// TODO Auto-generated destructor stub
 }
 
-void NeighbourGrid::add(Shape* s){
+void NeighbourGrid::add(Positioned* s){
 	double* da = s->getPosition();
 	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
 	this->lists[i].insert(s);
 }
-
-
-
 
 /*
 
@@ -55,22 +52,22 @@ void NeighbourGrid::add(Shape* s){
 */
 
 
-void NeighbourGrid::remove(Shape* s){
+void NeighbourGrid::remove(Positioned* s){
 	double* da = s->getPosition();
 	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
 	this->lists[i].erase(s);
 }
 
-std::vector<Shape*> NeighbourGrid::getNeighbours(double* da, int radius){
+std::vector<Positioned*> NeighbourGrid::getNeighbours(double* da, int radius){
 		std::vector<Shape*> vRes;
 		std::vector<Shape*> *vTmp;
 
-		int* in = new int[this->dimension];
+		int in[this->dimension];
 		for(int i=0; i<this->dimension; i++){
 			in[i] = 0;
 		}
 
-		int* coordinates = new int[this->dimension];
+		int coordinates[this->dimension];
 
 		coordinates(coordinates, da, this->dimension, this->linearSize, this->dx, this->n);
 		do{
@@ -87,7 +84,7 @@ void NeighbourGrid::clear(){
 	}
 }
 
-std::vector<Shape*> NeighbourGrid::getNeighbours(double* da){
+std::vector<Positioned*> NeighbourGrid::getNeighbours(double* da){
 	return this->getNeighbours(da, 1);
 }
 

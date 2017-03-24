@@ -13,8 +13,8 @@ public:
 	BoundaryConditions();
 	virtual ~BoundaryConditions();
 
-	virtual double distance2(double *p1, double *p2);
-	virtual double* getTranslation(double* p1, double* p2);
+	virtual double distance2(double *p1, double *p2) = 0;
+	virtual double* getTranslation(double* p1, double* p2) = 0;
 
 };
 

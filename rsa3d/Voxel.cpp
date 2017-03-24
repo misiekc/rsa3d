@@ -7,11 +7,11 @@
 
 #include <string.h>
 #include "Voxel.h"
+#include "Positioned.h"
 
-Voxel::Voxel(int dim, double* da, double s, int i){
+Voxel::Voxel(int dim, double* da, double s, int i) : Positioned(dim){
 	this->dimension = dim;
-	this->center = new double[this->dimension];
-	memcpy(this->center, da, sizeof(double)*this->dimension);
+	memcpy(this->position, da, sizeof(double)*this->dimension);
 	this->index = i;
 	this->missCounter = 0;
 	this->lastAnalyzed = 0;
@@ -31,9 +31,5 @@ int Voxel::getMissCounter(){
 
 void Voxel::resetMissCounter(){
 	this->missCounter = 0;
-}
-
-double* Voxel::getPosition(){
-	return this->center;
 }
 

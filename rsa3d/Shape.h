@@ -9,14 +9,12 @@
 #define SHAPE_H_
 
 #include "BoundaryConditions.h"
+#include "Positioned.h"
 
-class Shape {
+class Shape : public Positioned{
 public:
 	Shape(int dimension);
 	virtual ~Shape();
-
-	// returns position of the shape's center
-	double* getPosition();
 
 	// returns linear size of a cell in a NeighbourGrig. This size should be as small as possible but big enough to avoid overlapping between shapes having centers in cells that are not neighbours
 	virtual double getNeighbourListCellSize() = 0;
