@@ -4,6 +4,7 @@
 // (C)PKua 2017
 //-----------------------------------------------------------------------------------------------------------------------------
 
+#include "stdafx.h"
 #include "Matrix.h"
 
 #define MATRIX_DEBUG
@@ -42,8 +43,7 @@ Matrix::Matrix(const Matrix & other) :
 	// Alloc an array and copy data
 	unsigned int max = other.rows * other.cols;
 	arr = new double[max];
-	for (unsigned  i = 0; i < max; i++)
-		arr[i] = other.arr[i];
+	std::copy(other.arr, other.arr + max, arr);
 }
 
 // Move ctor
@@ -77,14 +77,13 @@ Matrix & Matrix::operator=(const Matrix & other)
 	unsigned int max = other.rows * other.cols;
 	if (max != rows * cols) {
 		delete[] arr;
-		rows = other.rows;
-		cols = other.cols;
 		arr = new double[max];
 	}
+	rows = other.rows;
+	cols = other.cols;
 
 	// Copy data
-	for (unsigned int i = 0; i < max; i++)
-		arr[i] = other.arr[i];
+	std::copy(other.arr, other.arr + max, arr);
 
 	return *this;
 }
@@ -432,15 +431,104 @@ Matrix Matrix::transpose() const
 	return matrix;
 }
 
-/*double Matrix::det() const
+// Returns determinant of the matrix
+//--------------------------------------------------------------------------------------------
+double Matrix::det() const
 {
-	return 0.0;
+	if (rows != cols)  throw std::runtime_error("rows != cols");
+
+	// Small matrices
+	if (rows == 1)  return arr[0];
+	if (rows == 2)  return arr[0] * arr[3] - arr[1] * arr[2];
+	if (rows == 3)  return arr[0] * arr[4] * arr[8] + arr[1] * arr[5] * arr[6] + arr[2] * arr[3] * arr[7]
+		- arr[2] * arr[4] * arr[6] - arr[1] * arr[3] * arr[8] - arr[0] * arr[5] * arr[7];
+
+	// Bigger matrices - Laplace expansion
+	double determinant = 0.0;
+	bool even_perm = true;
+	for (mxsize_t i = 0; i < rows; i++) {
+		if (even_perm)  determinant += _get(0, i) * minor(0, i);
+		else			determinant -= _get(0, i) * minor(0, i);
+		even_perm = !even_perm;
+	}
+	return determinant;
 }
 
-Matrix & Matrix::inverse() const
+// Returns inversion of the matrix. Throws an exception, when matrix isn't square or isn't
+// invertible
+//--------------------------------------------------------------------------------------------
+Matrix Matrix::inverse() const
 {
-	// TODO: insert return statement here
-}*/
+	if (rows != cols)	throw std::runtime_error("rows != cols");
+
+	// Small matrices
+	if (rows == 1) {
+		if (arr[0] == 0)  throw std::runtime_error("cannot invert, det == 0");
+		return Matrix(1, 1, 1 / arr[0]);
+	} else if (rows == 2) {
+		double determinant = det();
+		Matrix out(2, 2);
+		if (determinant == 0)  throw std::runtime_error("cannot invert, det == 0");
+		
+		out.arr[0] = arr[3] / determinant;
+		out.arr[1] = -arr[1] / determinant;
+		out.arr[2] = -arr[2] / determinant;
+		out.arr[3] = arr[0] / determinant;
+		return out;
+	}
+	// Bigger matrices
+	else {
+		double determinant = det();
+		Matrix out(rows, rows);
+		if (determinant == 0)  throw std::runtime_error("cannot invert, det == 0");
+
+		for (mxsize_t i = 0; i < rows; i++)
+			for (mxsize_t j = 0; j < cols; j++)
+				out._get(i, j) = ((i + j) % 2 == 0) ? (minor(j, i) / determinant) : (-minor(j, i) / determinant);
+		return out;
+	}
+}
+
+// Calculates minor of matrix created by removing (_row + 1) row and (_column + 1) column 
+//--------------------------------------------------------------------------------------------
+double Matrix::minor(mxsize_t _row, mxsize_t _column) const
+{
+	if (rows != cols)	throw std::runtime_error("rows != cols");
+	if (rows == 1)		throw std::runtime_error("zero-size minor");
+	if (rows == 2)		return arr[3 ^ (_row << 1 | _column)];
+
+	Matrix minor_mx(rows - 1, rows - 1);
+
+	if (_row > 0) {
+		// Copy left-top part (if exists)
+		if (_column > 0)
+			for (mxsize_t i = 0; i < _row; i++)
+				for (mxsize_t j = 0; j < _column; j++)
+					minor_mx._get(i, j) = _get(i, j);
+
+		// Copy right-top part (if exists)
+		if (_column < cols - 1)
+			for (mxsize_t i = 0; i < _row; i++)
+				for (mxsize_t j = _column + 1; j < cols; j++)
+					minor_mx._get(i, j - 1) = _get(i, j);
+	}
+
+	if (_row < rows - 1) {
+		// Copy left-bottom part (if exists)
+		if (_column > 0)
+			for (mxsize_t i = _row + 1; i < rows; i++)
+				for (mxsize_t j = 0; j < _column; j++)
+					minor_mx._get(i - 1, j) = _get(i, j);
+
+		// Copy right-bottom part (if exists)
+		if (_column < cols - 1)
+			for (mxsize_t i = _row + 1; i < rows; i++)
+				for (mxsize_t j = _column + 1; j < cols; j++)
+					minor_mx._get(i - 1, j - 1) = _get(i, j);
+	}
+
+	return minor_mx.det();
+}
 
 // Depicts the matrix in the form of a string
 //--------------------------------------------------------------------------------------------
