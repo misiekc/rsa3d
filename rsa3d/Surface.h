@@ -52,19 +52,19 @@ public:
 	std::vector<Shape *> getNeighbours(double *da);
 	double distance2(double *a1, double *a2);
 
-	virtual double * getTranslation(double *p1, double *p2) = 0;
+	virtual double * getTranslation(double *result, double *p1, double *p2) = 0;
 	virtual void vector(double *v) = 0;
-	virtual double* getRandomPosition(RND *rnd) = 0;
+	virtual double * getRandomPosition(double *result, RND *rnd) = 0;
 	virtual double getArea() = 0;
 
 	void setParameters(int ia, int is, double dvs, int imv);
-	bool doIteration(Shape *s, RND *rnd)
+	bool doIteration(Shape *s, RND *rnd);
 
 	bool isSaturated();
 
 	double getFactor();
 
-	public std::vector<Shape *> getShapes();
+	std::vector<Shape *> getShapes();
 
 //	void drawShapes(Graphics g, double scale);
 //	void drawShapes(Graphics g, double scale, double[] ta);

@@ -10,7 +10,7 @@
 
 #include <stdlib.h>
 
-Surface::Surface(int dim, double s, double ndx, double vdx) {
+Surface::Surface(int dim, double s, double ndx, double vdx) : BoundaryConditions() {
 	this->dimension = dim;
 	this->size = s;
 	this->list = new NeighbourGrid(dim, s, ndx);
