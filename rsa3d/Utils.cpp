@@ -9,9 +9,9 @@
 #ifndef UTILS_C_
 #define UTILS_C_
 
-#include <stdio.h>
+#include <iostream>
 
-int increment(int* in, int inlength, int max){
+bool increment(int* in, int inlength, int max){
 	int i=0;
 	while(i<inlength){
 		in[i]++;
@@ -23,8 +23,8 @@ int increment(int* in, int inlength, int max){
 		}
 	}
 	if(in[inlength-1]>max)
-		return 0;
-	return 1;
+		return false;
+	return true;
 }
 
 
@@ -93,16 +93,16 @@ void testda(double* da, int dalength){
 	double size = 316.22776601683796;
 	int radius = 1;
 	int index = position2i(da, dalength, size, dx, n);
-	int ccordinates[2]; int clength = 2;
-	coordinates(coordinates, da, dalength, size, dx, n );
+	int coords[2]; int clength = 2;
+	coordinates(coords, da, dalength, size, dx, n );
 
 	for(int i=0; i<inlength; i++){
 		in[i] = 0;
 	}
 	do{
 //		int i = Commons.neighbour2i(index, in, 1, n);
-		int i = neighbour2i(coordinates, in, clength, 1, n);
-		printf("%d ", i);
+		int i = neighbour2i(coords, in, clength, 1, n);
+		std::cout << i << " ";
 	}while(increment(in, inlength, 2*radius));
 }
 
@@ -111,8 +111,8 @@ void test(){
 	double da1[2] = {35.972999837894264, 298.6595567936803};
 	double da2[2] = {35.972999837894264, 298.3801383300324};
 	testda(da1, 2);
-	printf("\n");
-	testda(da2);
+	std::cout << std::endl;
+	testda(da2, 2);
 }
 
 #endif /* UTILS_C_ */
