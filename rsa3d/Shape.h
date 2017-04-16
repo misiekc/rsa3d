@@ -13,6 +13,8 @@
 
 class Shape : public Positioned{
 public:
+	int no;
+
 	Shape(int dimension);
 	virtual ~Shape();
 

@@ -19,8 +19,8 @@ private:
 	static double voxelSize;
 	static int dimension;
 
-	static const double g20 = 1.0; // Gamma(2.0)
-	static const double g15 = 0.5*sqrt(M_PI); // Gamma(1.5)
+	static constexpr double g20 = 1.0; // Gamma(2.0)
+	static constexpr double g15 = 0.5*sqrt(M_PI); // Gamma(1.5)
 
 	double r;
 
@@ -33,11 +33,11 @@ public:
 
 	static void init(char* args);
 
-	double Sphere::getNeighbourListCellSize();
-	double Sphere::getVoxelSize();
-	int Sphere::overlap(BoundaryConditions *bc, Shape *s);
-	double Sphere::getVolume();
-	int Sphere::pointInside(BoundaryConditions *bc, double* da);
+	double getNeighbourListCellSize();
+	double getVoxelSize();
+	int overlap(BoundaryConditions *bc, Shape *s);
+	double getVolume();
+	int pointInside(BoundaryConditions *bc, double* da);
 };
 
 #endif /* SHAPES_SPHERE_H_ */
