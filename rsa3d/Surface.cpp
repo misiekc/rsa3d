@@ -57,9 +57,6 @@ bool Surface::check(Shape *s){
 			break;
 		}
 	}
-	if (this->list != NULL)
-		delete neighbours;
-
 	return bRet;
 }
 

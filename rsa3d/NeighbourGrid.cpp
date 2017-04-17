@@ -24,6 +24,7 @@ NeighbourGrid::NeighbourGrid(int dim, double size, double dx) {
 	this->dx = size/this->n;
 	int length = (int) round(pow(this->n, dim));
 	this->lists.reserve(length);
+	this->neighbours.clear();
 }
 
 
@@ -60,24 +61,24 @@ void NeighbourGrid::remove(Positioned* s){
 }
 
 std::vector<Positioned*> * NeighbourGrid::getNeighbours(double* da, int radius){
-		std::vector<Positioned *> *vRes = new std::vector<Positioned *>;
-		std::vector<Positioned *> *vTmp;
+	this->neighbours.clear();
+	std::vector<Positioned *> *vTmp;
 
-		int in[this->dimension];
-		for(int i=0; i<this->dimension; i++){
-			in[i] = 0;
-		}
-
-		int coords[this->dimension];
-
-		coordinates(coords, da, this->dimension, this->linearSize, this->dx, this->n);
-		do{
-			int i = neighbour2i(coords, in, this->dimension, radius, this->n);
-			vTmp = &(this->lists[i]);
-			vRes->insert(vRes->end(), vTmp->begin(), vTmp->end());
-		}while(increment(in, this->dimension, 2*radius));
-		return vRes;
+	int in[this->dimension];
+	for(int i=0; i<this->dimension; i++){
+		in[i] = 0;
 	}
+
+	int coords[this->dimension];
+
+	coordinates(coords, da, this->dimension, this->linearSize, this->dx, this->n);
+	do{
+		int i = neighbour2i(coords, in, this->dimension, radius, this->n);
+		vTmp = &(this->lists[i]);
+		this->neighbours.insert(this->neighbours.end(), vTmp->begin(), vTmp->end());
+	}while(increment(in, this->dimension, 2*radius));
+	return &this->neighbours;
+}
 
 void NeighbourGrid::clear(){
 	for(unsigned int i=0; i<this->lists.size(); i++){

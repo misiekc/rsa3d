@@ -19,8 +19,8 @@ class PackingGenerator {
 private:
 	int seed;
 	Parameters *params;
-	Shape* newShape(RND &rnd);
-	std::vector<Positioned *> * createPacking();
+	std::vector<Shape *> packing;
+	void createPacking();
 
 public:
 	PackingGenerator(int seed);

@@ -19,9 +19,11 @@ PackingGenerator::PackingGenerator(int s) {
 
 PackingGenerator::~PackingGenerator() {
 	delete this->params;
+	for(Shape *s : this->packing)
+		delete s;
 }
 
-std::vector<Positioned *> * PackingGenerator::createPacking(){
+void PackingGenerator::createPacking(){
 	std::cout << "[" << this->seed << "] started" << std::endl;
 	int missCount = 0;
 	RND rnd(this->seed);
@@ -30,6 +32,7 @@ std::vector<Positioned *> * PackingGenerator::createPacking(){
 	Surface *surface = new NBoxPBC(this->params->dimension, this->params->surfaceSize, s->getNeighbourListCellSize(), s->getVoxelSize());
 	surface->setSeed(this->seed);
 	double dt = s->getVolume() / surface->getArea();
+	delete s;
 	int l = 0;
 	double t = 0;
 	surface->setParameters(params->analyze, params->split, params->minDx, params->maxVoxels);
@@ -40,6 +43,7 @@ std::vector<Positioned *> * PackingGenerator::createPacking(){
 			l++;
 			s->no = l;
 			s->time = t;
+			this->packing.push_back(s);
 			// double[] da = s.getCoordinates();
 			if (t>0.1*params->maxTime)
 				std::cout << "[" << this->seed << "]" << "\t" << t << "\t" << surface->getFactor()
@@ -50,7 +54,17 @@ std::vector<Positioned *> * PackingGenerator::createPacking(){
 			missCount++;
 		}
 	}
+	delete surface;
 	std::cout << "[" << seed << "] finished after generating " << l << " shapes" << std::endl;
-	return surface->getShapes();
 }
 
+void PackingGenerator::run(){
+	this->createPacking();
+	for(Shape *s : this->packing){
+		double *da = s->getPosition();
+		std::cout << s->no << "\t";
+		for(int i=0; i<this->params->dimension; i++)
+			std::cout << da[i] << "\t";
+		std::cout << std::endl;
+	}
+}

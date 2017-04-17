@@ -21,7 +21,8 @@ public:
 	double linearSize;
 	int n;
 	double dx;
-	std::vector<std::vector<Positioned*>> lists;
+	std::vector<std::vector<Positioned* > > lists;
+	std::vector<Positioned *> neighbours;
 
 
 

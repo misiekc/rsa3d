@@ -18,8 +18,8 @@ Parameters::Parameters() {
 	split = 3000;
 	surfaceSize = pow(100.0, 1.0/2.0);
 
-	std::string particleType("Sphere");
-	std::string particleAttributes();
+	particleType = "Sphere";
+	particleAttributes = "2";
 }
 
 Parameters::~Parameters() {

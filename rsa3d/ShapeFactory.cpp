@@ -12,7 +12,7 @@
 Shape* (*ShapeFactory::createShape)(RND *rnd);
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr){
-	if (sClass.compare("Sphere")){
+	if (sClass.compare("Sphere")==0){
 		Sphere::initClass(attr);
 		ShapeFactory::createShape = Sphere::create;
 
