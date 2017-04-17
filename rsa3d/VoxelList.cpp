@@ -10,12 +10,14 @@
 
 #include <iostream>
 #include <cmath>
+#include <algorithm>
 
 #include "Voxel.h"
 #include "math.h"
 #include "NeighbourGrid.h"
+#include "Shape.h"
 
-#include "Utils.cpp"
+#include "Utils.h"
 
 VoxelList::VoxelList(int dim, double s, double d){
 	this->dimension = dim;
@@ -25,11 +27,11 @@ VoxelList::VoxelList(int dim, double s, double d){
 
 	n = (int)(this->size/this->voxelSize + 0.5);
 	int voxelsLength = (int)(pow(n, dim)+0.5);
-	this->voxels = new Voxel[voxelsLength];
+	this->voxels = new Voxel*[voxelsLength];
 	this->voxelNeighbourGrid = new NeighbourGrid(dim, s, this->voxelSize);
 
 	this->initVoxels(dim);
-	this->voxelSize *= dxFactor;
+	this->voxelSize *= this->dxFactor;
 	this->beginningVoxelNumber = voxelsLength;
 	this->last = voxelsLength-1;
 	this->fillNeighbourGrid();
@@ -65,7 +67,7 @@ void VoxelList::initVoxels(int N){
 			std::cout << "Problem" << std::endl;
 		}
 
-		this->voxels[index] = this->createVoxel(da, this->voxelSize*dxFactor, index);
+		this->voxels[index] = this->createVoxel(da, this->voxelSize*this->dxFactor, index);
 		index++;
 	}while(increment(in, N, n-1));
 }
@@ -74,18 +76,18 @@ void VoxelList::initVoxels(int N){
 void VoxelList::fillNeighbourGrid(){
 	this->voxelNeighbourGrid->clear();
 	for(int i=0; i<=this->last; i++){
-		this->voxelNeighbourGrid->add(this->voxels + i);
+		this->voxelNeighbourGrid->add(this->voxels[i]);
 	}
 }
 
-Voxel* VoxelList::getNeighbours(Voxel *v){
+std::vector<Positioned *> * VoxelList::getNeighbours(Voxel *v){
 	return this->voxelNeighbourGrid->getNeighbours(v->getPosition());
 }
 
 
 void VoxelList::checkIndexes(){
 	for(int i=0; i<=this->last; i++){
-		if(this->voxels[i].index!=i)
+		if(this->voxels[i]->index!=i)
 			std::cout << "Error " << i << std::endl;
 	}
 }
@@ -95,7 +97,7 @@ void VoxelList::remove(Voxel *v){
 	int index = v->index;
 
 	if (index!=last){
-		Voxel *vl = this->voxels + last;
+		Voxel *vl = this->voxels[last];
 		vl->index = index;
 		this->voxels[index] = vl;
 	}
@@ -107,10 +109,10 @@ void VoxelList::remove(Voxel *v){
 //		this.checkIndexes();
 	}
 
-bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::vector<Shape*> *neighbours, BoundaryConditions *bc){
+bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::vector<Positioned *> *neighbours, BoundaryConditions *bc){
 
-	std::vector<Shape *> vAll;
-	std::vector<Shape *>::iterator it1, it2;
+	std::vector<Positioned *> vAll;
+	std::vector<Positioned *>::iterator it1, it2;
 
 	int in[this->dimension];
 	double da[this->dimension];
@@ -125,7 +127,7 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::vector<Shape*> *n
 		for(int j=0; j<this->dimension; j++){
 			da[j] = vpos[j] + (in[j]-0.5)*this->voxelSize;
 		}
-		std::vector<Shape*> *vNeighbours = (neighbours==NULL) ? nl->getNeighbours(da) : neighbours;
+		std::vector<Positioned *> *vNeighbours = (neighbours==NULL) ? nl->getNeighbours(da) : neighbours;
 		if (vAll.size()==0){
 			vAll.insert(vAll.end(), vNeighbours->begin(), vNeighbours->end());
 		}else{
@@ -137,7 +139,7 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::vector<Shape*> *n
 			}
 		}
 		for(it1 = vAll.begin(); it1 != vAll.end(); it1++){
-			if(! (*it1)->pointInside(bc, da)){
+			if(! ((Shape*)(*it1))->pointInside(bc, da)){
 				vAll.erase(it1);
 				it1--;
 			}
@@ -161,7 +163,7 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc
 	return this->analyzeVoxel(v, nl, NULL, bc);
 }
 
-bool VoxelList::analyzeVoxel(Voxel *v, std::vector<Shape *> *neighbours, BoundaryConditions *bc){
+bool VoxelList::analyzeVoxel(Voxel *v, std::vector<Positioned *> *neighbours, BoundaryConditions *bc){
 	return this->analyzeVoxel(v, NULL, neighbours, bc);
 }
 
@@ -209,12 +211,12 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 		return false;
 	}
 
-	Voxel* newList = new Voxel[ ((int)round( pow(2, this->dimension)))*(this->last+1) ];
-	double newDx = (this->voxelSize/2.0)*VoxelList::dxFactor;
+	Voxel** newList = new Voxel*[ ((int)round( pow(2, this->dimension)))*(this->last+1) ];
+	double newDx = (this->voxelSize/2.0)*this->dxFactor;
 	int index = 0;
 	for(int i=0; i<=this->last; i++){
-		Voxel v = this->voxels[i];
-		double* vpos = v.getPosition();
+		Voxel *v = this->voxels[i];
+		double* vpos = v->getPosition();
 
 		int in[this->dimension];
 		double da[this->dimension];
@@ -234,24 +236,25 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 		}while(increment(in, this->dimension, 1));
 		delete this->voxels[i];
 	}
+	delete[] this->voxels;
+
 	this->last = index-1;
 	this->voxels = newList;
 	this->voxelSize = newDx;
-	this->fillNeighbourList();
+	this->fillNeighbourGrid();
 //	this->checkIndexes();
 	return true;
 }
 
 Voxel * VoxelList::getRandomVoxel(RND *rnd){
-	return &(this->voxels[(int)(rnd->nextValue()*(this->last+1)]);
+	return this->voxels[(int)(rnd->nextValue()*(this->last+1))];
 }
 
 double * VoxelList::getRandomPosition(double *result, Voxel *v, RND *rnd){
-	double da[this->dimension];
 	double *vpos = v->getPosition();
 	for (int i=0; i < this->dimension; i++)
-		da[i] = vpos[i] + (rnd->nextValue()-0.5)*this->voxelSize;
-	return da;
+		result[i] = vpos[i] + (rnd->nextValue()-0.5)*this->voxelSize;
+	return result;
 }
 
 double VoxelList::getVoxelSize(){
@@ -259,7 +262,7 @@ double VoxelList::getVoxelSize(){
 }
 
 Voxel* VoxelList::get(int i){
-	return this->voxels + i;
+	return this->voxels[i];
 }
 
 int VoxelList::length(){

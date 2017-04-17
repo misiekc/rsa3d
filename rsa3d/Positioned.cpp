@@ -13,7 +13,7 @@ Positioned::Positioned(int dim) {
 }
 
 Positioned::~Positioned() {
-	delete this->position;
+	delete[] this->position;
 }
 
 double* Positioned::getPosition(){

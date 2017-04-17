@@ -13,8 +13,8 @@
 class RND {
 
 private:
-	std::mt19937 mt;
-	std::uniform_real_distribution<double> distribution;
+	std::mt19937 *mt;
+	std::uniform_real_distribution<double> *distribution;
 
 public:
 	RND();

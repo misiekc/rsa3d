@@ -6,15 +6,13 @@
  */
 
 #include "Surface.h"
-#include "NeighbourGrid.h"
-
-#include <stdlib.h>
+#include <iostream>
 
 Surface::Surface(int dim, double s, double ndx, double vdx) : BoundaryConditions() {
 	this->dimension = dim;
 	this->size = s;
 	this->list = new NeighbourGrid(dim, s, ndx);
-//	this->voxels = new VoxelList(N, s, vdx);
+	this->voxels = new VoxelList(dim, s, vdx);
 
 	this->iAnalyze = 0;
 	this->tmpSplit = 0;
@@ -45,23 +43,28 @@ void Surface::add(Shape *s) {
 	}
 
 bool Surface::check(Shape *s){
-	std::vector<Shape *> neighbours;
+	bool bRet = true;
+	std::vector<Positioned *> * neighbours;
 	if (this->list == NULL) {
-		neighbours = this->shapes;
+		neighbours = &this->shapes;
 	} else {
 		neighbours = this->list->getNeighbours(s->getPosition());
 	}
 
-	std::iterator = neighbours.begin();
-	for(Shape * shape: neighbours) {
-		if (shape->overlap(this, s))
-			return false;
+	for(Positioned *shape: *neighbours) {
+		if (((Shape *)shape)->overlap(this, s)){
+			bRet = false;
+			break;
+		}
 	}
-	return true;
+	if (this->list != NULL)
+		delete neighbours;
+
+	return bRet;
 }
 
 
-std::vector<Shape *> Surface::getNeighbours(double* da) {
+std::vector<Positioned *> * Surface::getNeighbours(double* da) {
 	return this->list->getNeighbours(da);
 }
 
@@ -89,122 +92,81 @@ void Surface::vectorPeriodicBC(double* v) {
 	}
 }
 
-/*
 int Surface::analyzeVoxels() {
-		std::cout << "[" << this->seed << "] " + this.voxels.length() + " voxels, " + this.shapes.size() + " shapes, factor = " + this.getFactor());
-		int begin = this.voxels.length();
-		int timestamp = this.shapes.size();
-		for (int i = 0; i < this.voxels.length(); i++) {
-			Voxel v = this.voxels.get(i);
-			if (this.voxels.analyzeVoxel(v, this.list, this, timestamp)) {
-				this.voxels.remove(v);
-				i--;
-			}
+	std::cout << "[" << this->seed << "] " << this->voxels->length() << " voxels, " << this->shapes.size() << " shapes, factor = " << this->getFactor() << std::endl;
+	int begin = this->voxels->length();
+	int timestamp = this->shapes.size();
+	for (int i = 0; i < this->voxels->length(); i++) {
+		Voxel *v = this->voxels->get(i);
+		if (this->voxels->analyzeVoxel(v, this->list, this, timestamp)) {
+			this->voxels->remove(v);
+			i--;
 		}
-		Globals.logger.info("[" + this.seed + "] " + this.voxels.length() + " voxels remained, factor = " + this.getFactor());
-		return begin - this.voxels.length();
 	}
-
-	// analyzes all voxels inside a region around v
-	private int analyzeRegion(Voxel v){
-		int begin = this.voxels.length();
-		Collection<Voxel> region = this.voxels.getNeighbours(v);
-		for(Voxel v1: region){
-			if (this.voxels.analyzeVoxel(v1, this.list, this))
-				this.voxels.remove(v1);
-			}
-		return begin - this.voxels.length();
-	}
-*/
-
-
-void Surface::setParameters(int ia, int is, double dvs, int imv) {
-	this->iAnalyze = ia;
-	this->tmpSplit = is;
-	this->iMaxVoxels = imv;
-	this->dMinVoxelSize = dvs;
+	std::cout << "[" << this->seed << "] " << this->voxels->length() << " voxels remained, factor = " << this->getFactor() << std::endl;
+	return begin - this->voxels->length();
 }
 
-/*
+// analyzes all voxels inside a region around v
+int Surface::analyzeRegion(Voxel *v){
+	int begin = this->voxels->length();
+	std::vector<Positioned *> *region = this->voxels->getNeighbours(v);
+	for(Positioned *v1: *region){
+		if (this->voxels->analyzeVoxel((Voxel *)v1, this->list, this))
+			this->voxels->remove((Voxel *)v1);
+	}
+	delete region;
+	return begin - this->voxels->length();
+}
+
 bool Surface::doIteration(Shape *s, RND *rnd) {
-		Voxel v = this.voxels.getRandomVoxel(rnd);
-		s.translate(this.voxels.getRandomPosition(v, rnd));
-		if (this.check(s)) {
-			this.add(s);
-			if(this.getFactor()>FACTOR_LIMIT){
-				this.analyzeRegion(v);
-			}else{
-				this.voxels.remove(v);
-			}
-			this.missCounter = 0;
-			return true;
-		} else {
-			v.miss();
-			this.missCounter++;
-			if (v.getMissCounter() % iAnalyze == 0) {
-//				this.voxels.analyzeVoxel(v, this.list, this, this.shapes.size());
-				if(this.voxels.analyzeVoxel(v, this.list, this) && this.getFactor()>FACTOR_LIMIT)
-					this.analyzeRegion(v);
-			}
-			if (missCounter > tmpSplit) { // v.getMissCounter() % iSplit == 0){ //
-				missCounter = 0;
-				int v0 = this.voxels.length();
-				boolean b;
-				if (s instanceof shapes.Disk || s instanceof shapes.NSphere) {
-					b = voxels.splitVoxels(dMinVoxelSize, iMaxVoxels, this.list, this);
-					Globals.logger.info("[" + this.seed + "] new voxel size " + voxels.getVoxelSize());
-				} else {
-					b = voxels.splitVoxels(dMinVoxelSize, iMaxVoxels, null, null);
-					Globals.logger.info("[" + this.seed + "] new voxel size " + voxels.getVoxelSize());
-					this.analyzeVoxels();
-				}
-				if (b) {
-					if (this.getFactor() > FACTOR_LIMIT)
-						s.shapeSpecificVoxelAnalysis(this, this.voxels);
-					int v1 = this.voxels.length();
-					if (v1 < v0)
-						tmpSplit /= (2.0 * v0 / v1);
-//					if (v1<10000)
-//						tmpSplit = Math.min(tmpSplit,  iSplit);
-				} else {
-					this.analyzeVoxels();
-				}
-				if (tmpSplit < 0.4 * Integer.MAX_VALUE)
-					tmpSplit *= 2.0;
-			}
-			return false;
+	Voxel *v = this->voxels->getRandomVoxel(rnd);
+	double da[this->dimension];
+	s->translate(this->voxels->getRandomPosition(da, v, rnd));
+	if (this->check(s)) {
+		this->add(s);
+		if(this->getFactor()>FACTOR_LIMIT){
+			this->analyzeRegion(v);
+		}else{
+			this->voxels->remove(v);
 		}
-	}
-
-	public boolean isSaturated() {
-		return (this.voxels.length() == 0);
-	}
-
-	public double getFactor() {
-		return this.getArea() / this.voxels.getVoxelsSurface();
-	}
-
-	public Shape[] getShapes() {
-		return this.shapes.toArray(new Shape[0]);
-	}
-
-	synchronized public void drawShapes(Graphics g, double scale) {
-		for (Shape s : this.shapes) {
-			s.draw(g, scale);
+		this->missCounter = 0;
+		return true;
+	} else {
+		v->miss();
+		this->missCounter++;
+		if (v->getMissCounter() % iAnalyze == 0) {
+			if(this->voxels->analyzeVoxel(v, this->list, this) && this->getFactor()>FACTOR_LIMIT)
+				this->analyzeRegion(v);
 		}
-	}
-
-	synchronized public void drawShapes(Graphics g, double scale, double[] ta) {
-		for (Shape s : this.shapes) {
-			Shape sc;
-			try {
-				sc = (Shape) s.clone();
-				sc.translate(ta);
-				sc.draw(g, scale);
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
+		if (missCounter > tmpSplit) { // v.getMissCounter() % iSplit == 0){ //
+			missCounter = 0;
+			int v0 = this->voxels->length();
+			bool b = voxels->splitVoxels(dMinVoxelSize, iMaxVoxels, this->list, this);
+			std::cout << "[" << this->seed << "] new voxel size " << voxels->getVoxelSize() << std::endl;
+			if (b) {
+				int v1 = this->voxels->length();
+				if (v1 < v0)
+					tmpSplit /= (2.0 * v0 / v1);
+			} else {
+				this->analyzeVoxels();
 			}
+			if (tmpSplit < 0.4 * std::numeric_limits<int>::max())
+				tmpSplit *= 2.0;
 		}
+		return false;
 	}
-*/
+}
+
+bool Surface::isSaturated() {
+	return (this->voxels->length() == 0);
+}
+
+double Surface::getFactor() {
+	return this->getArea() / this->voxels->getVoxelsSurface();
+	}
+
+std::vector<Positioned *> * Surface::getShapes() {
+	return &(this->shapes);
+}
 

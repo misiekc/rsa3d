@@ -6,10 +6,15 @@
  */
 
 #include <math.h>
-#include <stdlib.h>
+#include <string>
 
 #include "Sphere.h"
 #include "../BoundaryConditions.h"
+
+double Sphere::radius;
+double Sphere::neighbourListCellSize;
+double Sphere::voxelSize;
+int Sphere::dimension;
 
 
 Sphere::~Sphere() {
@@ -36,14 +41,16 @@ double Sphere::volume(int d){
 	return pow(M_PI, d/2.0) / gamma(d);
 }
 
-void Sphere::init(char* args){
-		Sphere::dimension = atoi(args);
+void Sphere::initClass(const std::string &args){
+	Sphere::dimension = std::stoi(args);
+	Sphere::radius = pow(1.0/Sphere::volume(Sphere::dimension), 1.0/Sphere::dimension);
+	Sphere::neighbourListCellSize = 2.0*Sphere::radius;
+	Sphere::voxelSize = pow(1.96, 1.0/Sphere::dimension)*Sphere::radius;
+}
 
-		Sphere::radius = pow(1.0/Sphere::volume(Sphere::dimension), 1.0/Sphere::dimension);
-		neighbourListCellSize = 2.0*radius;
-		voxelSize = pow(1.96, 1.0/Sphere::dimension)*radius;
-	}
-
+Shape * Sphere::create(RND *rnd){
+	return new Sphere();
+}
 
 Sphere::Sphere() : Shape(Sphere::dimension){
 	this->r = Sphere::radius;

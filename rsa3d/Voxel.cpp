@@ -9,16 +9,21 @@
 #include "Voxel.h"
 #include "Positioned.h"
 
+Voxel::Voxel(int dim) : Positioned(dim){
+	this->index = 0;
+	this->missCounter = 0;
+	this->lastAnalyzed = 0;
+}
+
 Voxel::Voxel(int dim, double* da, double s, int i) : Positioned(dim){
 	this->dimension = dim;
 	memcpy(this->position, da, sizeof(double)*this->dimension);
 	this->index = i;
 	this->missCounter = 0;
 	this->lastAnalyzed = 0;
-	}
+}
 
 Voxel::~Voxel() {
-	delete this->dimension;
 }
 
 void Voxel::miss(){

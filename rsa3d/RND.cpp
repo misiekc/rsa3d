@@ -8,20 +8,20 @@
 #include "RND.h"
 
 RND::RND(int seed) {
-	this->mt(seed);
-	this->distribution(0.0, 1.0);
+	this->mt = new std::mt19937(seed);
+	this->distribution = new std::uniform_real_distribution<double>(0.0, 1.0);
 }
 
 RND::RND() {
-	this->mt();
-	this->distribution(0.0, 1.0);
+	this->mt = new std::mt19937();
+	this->distribution = new std::uniform_real_distribution<double>(0.0, 1.0);
 }
 
 RND::~RND() {
-
+	delete this->mt;
+	delete this->distribution;
 }
 
 double RND::nextValue(){
-	return this->distribution(mt);
+	return (*this->distribution)(*this->mt);
 }
-

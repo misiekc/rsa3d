@@ -11,13 +11,16 @@
 #include "Shape.h"
 #include <vector>
 #include "RND.h"
+#include "Voxel.h"
+#include "NeighbourGrid.h"
+#include "VoxelList.h"
 
 class Surface : public BoundaryConditions{
 
 private:
 	static const int FACTOR_LIMIT = 5;
 
-	std::vector<Shape *> shapes;
+	std::vector<Positioned *> shapes;
 	int missCounter;
 	int seed=-1;
 
@@ -32,24 +35,23 @@ private:
 protected:
 
 	NeighbourGrid *list;
-	// VoxelList *voxels;
+
 	double size;
 	int dimension;
 
 	void vectorFreeBC(double* v);
 	void vectorPeriodicBC(double* v);
 
-
-
-
 public:
+	VoxelList *voxels;
+
 	Surface(int dim, double s, double ndx, double vdx);
 	virtual ~Surface();
 
 	void setSeed(int s);
 	void add(Shape *s);
 	bool check(Shape *s);
-	std::vector<Shape *> getNeighbours(double *da);
+	std::vector<Positioned *> * getNeighbours(double *da);
 	double distance2(double *a1, double *a2);
 
 	virtual double * getTranslation(double *result, double *p1, double *p2) = 0;
@@ -64,7 +66,7 @@ public:
 
 	double getFactor();
 
-	std::vector<Shape *> getShapes();
+	std::vector<Positioned *> * getShapes();
 
 //	void drawShapes(Graphics g, double scale);
 //	void drawShapes(Graphics g, double scale, double[] ta);

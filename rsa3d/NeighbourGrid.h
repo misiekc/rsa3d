@@ -12,6 +12,7 @@
 #include <set>
 
 #include "Positioned.h"
+#include <vector>
 
 class NeighbourGrid {
 public:
@@ -20,7 +21,7 @@ public:
 	double linearSize;
 	int n;
 	double dx;
-	std::vector<std::set<Positioned*>> lists;
+	std::vector<std::vector<Positioned*>> lists;
 
 
 
@@ -30,9 +31,9 @@ public:
 	void add(Positioned* s);
 	void remove(Positioned* s);
 
-	std::vector<Positioned*> getNeighbours(double* da, int radius);
-	void NeighbourGrid::clear();
-	std::vector<Positioned*> NeighbourGrid::getNeighbours(double* da);
+	std::vector<Positioned*> * getNeighbours(double* da, int radius);
+	void clear();
+	std::vector<Positioned*> * getNeighbours(double* da);
 };
 
 #endif /* NEIGHBOURGRID_H_ */

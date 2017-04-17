@@ -8,24 +8,26 @@
 #ifndef VOXELLIST_H_
 #define VOXELLIST_H_
 
-#include <random>
-
 #include "Voxel.h"
 #include "RND.h"
+#include "NeighbourGrid.h"
+#include "BoundaryConditions.h"
+#include "Positioned.h"
+#include <vector>
 
 class VoxelList {
 
 private:
 
-	static const double dxFactor = 1.001;
+	const double dxFactor = 1.001;
 	NeighbourGrid* voxelNeighbourGrid;
 
 	void fillNeighbourGrid();
-	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::vector<Shape*> *neighbours, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::vector<Positioned *> *neighbours, BoundaryConditions *bc);
 
 
 protected:
-	Voxel* voxels;
+	Voxel** voxels;
 	int last;
 	double voxelSize;
 	double size;
@@ -42,11 +44,11 @@ public:
 
 	virtual ~VoxelList();
 
-	Voxel* getNeighbours(Voxel *v);
+	std::vector<Positioned *> * getNeighbours(Voxel *v);
 	void remove(Voxel *v);
 	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc, int timestamp);
 	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel *v, std::vector<Shape*> *neighbours, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel *v, std::vector<Positioned *> *neighbours, BoundaryConditions *bc);
 	bool splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, BoundaryConditions *bc);
 
 	Voxel *getRandomVoxel(RND *rnd);

@@ -9,6 +9,8 @@
 #define SHAPES_SPHERE_H_
 
 #include <math.h>
+#include <string>
+#include "../RND.h"
 #include "../Shape.h"
 
 class Sphere : public Shape{
@@ -31,7 +33,8 @@ public:
 	Sphere();
 	virtual ~Sphere();
 
-	static void init(char* args);
+	static void initClass(const std::string &args);
+	static Shape * create(RND *rnd);
 
 	double getNeighbourListCellSize();
 	double getVoxelSize();

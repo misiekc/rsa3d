@@ -86,6 +86,7 @@ int neighbour2i(int* coordinates, int* neighbour, int clength, int offset, int n
 	}
 */
 
+/*
 void testda(double* da, int dalength){
 	int in[2]; int inlength = 2;
 	double dx = 1.5971099293779696;
@@ -114,5 +115,5 @@ void test(){
 	std::cout << std::endl;
 	testda(da2, 2);
 }
-
+*/
 #endif /* UTILS_C_ */

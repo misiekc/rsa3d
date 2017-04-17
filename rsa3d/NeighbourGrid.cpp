@@ -6,11 +6,10 @@
  */
 
 #include "NeighbourGrid.h"
-#include <math.h>
-#include <vector>
-#include "Positioned.h"
+#include <cmath>
+#include <algorithm>
 
-#include "Utils.c"
+#include "Utils.h"
 
 /**
  *
@@ -35,7 +34,7 @@ NeighbourGrid::~NeighbourGrid() {
 void NeighbourGrid::add(Positioned* s){
 	double* da = s->getPosition();
 	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
-	this->lists[i].insert(s);
+	this->lists[i].push_back(s);
 }
 
 /*
@@ -55,36 +54,38 @@ void NeighbourGrid::add(Positioned* s){
 void NeighbourGrid::remove(Positioned* s){
 	double* da = s->getPosition();
 	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
-	this->lists[i].erase(s);
+	std::vector<Positioned *>::iterator it;
+	if ( (it = std::find(this->lists[i].begin(), this->lists[i].end(), s)) != this->lists[i].end())
+		this->lists[i].erase(it);
 }
 
-std::vector<Positioned*> NeighbourGrid::getNeighbours(double* da, int radius){
-		std::vector<Shape*> vRes;
-		std::vector<Shape*> *vTmp;
+std::vector<Positioned*> * NeighbourGrid::getNeighbours(double* da, int radius){
+		std::vector<Positioned *> *vRes = new std::vector<Positioned *>;
+		std::vector<Positioned *> *vTmp;
 
 		int in[this->dimension];
 		for(int i=0; i<this->dimension; i++){
 			in[i] = 0;
 		}
 
-		int coordinates[this->dimension];
+		int coords[this->dimension];
 
-		coordinates(coordinates, da, this->dimension, this->linearSize, this->dx, this->n);
+		coordinates(coords, da, this->dimension, this->linearSize, this->dx, this->n);
 		do{
-			int i = neighbour2i(coordinates, in, this->dimension, radius, this->n);
+			int i = neighbour2i(coords, in, this->dimension, radius, this->n);
 			vTmp = &(this->lists[i]);
-			vRes.insert(vRes.end(), vTmp->begin(), vTmp->end());
+			vRes->insert(vRes->end(), vTmp->begin(), vTmp->end());
 		}while(increment(in, this->dimension, 2*radius));
 		return vRes;
 	}
 
 void NeighbourGrid::clear(){
-	for(int i=0; i<this->lists.size(); i++){
+	for(unsigned int i=0; i<this->lists.size(); i++){
 		this->lists[i].clear();
 	}
 }
 
-std::vector<Positioned*> NeighbourGrid::getNeighbours(double* da){
+std::vector<Positioned*> * NeighbourGrid::getNeighbours(double* da){
 	return this->getNeighbours(da, 1);
 }
 

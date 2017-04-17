@@ -14,7 +14,7 @@ public:
 	virtual ~BoundaryConditions();
 
 	virtual double distance2(double *p1, double *p2) = 0;
-	virtual double* getTranslation(double* p1, double* p2) = 0;
+	virtual double * getTranslation(double *result, double* p1, double* p2) = 0;
 
 };
 

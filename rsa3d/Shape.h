@@ -10,12 +10,19 @@
 
 #include "BoundaryConditions.h"
 #include "Positioned.h"
+#include "RND.h"
+#include <string>
+
 
 class Shape : public Positioned{
-public:
-	int no;
 
-	Shape(int dimension);
+public:
+	static Shape* (*createShape)(RND *rnd);
+
+	int no;
+	double time;
+
+	Shape(const int dimension);
 	virtual ~Shape();
 
 	// returns linear size of a cell in a NeighbourGrig. This size should be as small as possible but big enough to avoid overlapping between shapes having centers in cells that are not neighbours
@@ -41,10 +48,6 @@ public:
 
 	// draws the shape
 	// virtual void draw()
-
-protected:
-	double* position;
-	int dimension;
 };
 
 

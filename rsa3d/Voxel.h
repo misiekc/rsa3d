@@ -13,11 +13,13 @@
 class Voxel : public Positioned{
 
 private:
-	int index;
 	short missCounter;
-	int lastAnalyzed;
 
 public:
+	int index;
+	int lastAnalyzed;
+
+	Voxel(int dim);
 	Voxel(int dim, double* da, double s, int i);
 
 	virtual ~Voxel();
@@ -28,7 +30,6 @@ public:
 
 	void resetMissCounter();
 
-	double* getPosition();
 
 };
 
