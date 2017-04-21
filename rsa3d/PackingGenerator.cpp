@@ -11,14 +11,13 @@
 #include "ShapeFactory.h"
 #include <iostream>
 
-PackingGenerator::PackingGenerator(int s) {
-	this->params = new Parameters();
+PackingGenerator::PackingGenerator(int s, Parameters *p) {
+	this->params = p;
 	this->seed = s;
 
 }
 
 PackingGenerator::~PackingGenerator() {
-	delete this->params;
 	for(Shape *s : this->packing)
 		delete s;
 }
@@ -60,11 +59,8 @@ void PackingGenerator::createPacking(){
 
 void PackingGenerator::run(){
 	this->createPacking();
-	for(Shape *s : this->packing){
-		double *da = s->getPosition();
-		std::cout << s->no << "\t";
-		for(int i=0; i<this->params->dimension; i++)
-			std::cout << da[i] << "\t";
-		std::cout << std::endl;
-	}
+}
+
+std::vector<Shape *> * PackingGenerator::getPacking(){
+	return &this->packing;
 }

@@ -10,6 +10,7 @@
 
 #include "Shape.h"
 #include <vector>
+#include <unordered_set>
 #include "RND.h"
 #include "Voxel.h"
 #include "NeighbourGrid.h"
@@ -51,7 +52,7 @@ public:
 	void setSeed(int s);
 	void add(Shape *s);
 	bool check(Shape *s);
-	std::vector<Positioned *> * getNeighbours(double *da);
+	std::unordered_set<Positioned *> * getNeighbours(double *da);
 	double distance2(double *a1, double *a2);
 
 	virtual double * getTranslation(double *result, double *p1, double *p2) = 0;

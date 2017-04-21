@@ -24,18 +24,23 @@ NeighbourGrid::NeighbourGrid(int dim, double size, double dx) {
 	this->dx = size/this->n;
 	int length = (int) round(pow(this->n, dim));
 	this->lists.reserve(length);
+	for(int i=0; i<length; i++){
+		this->lists.push_back(new std::vector<Positioned *>);
+	}
 	this->neighbours.clear();
 }
 
 
 NeighbourGrid::~NeighbourGrid() {
-	// TODO Auto-generated destructor stub
+	for(unsigned int i=0; i<this->lists.size(); i++){
+		delete this->lists[i];
+	}
 }
 
 void NeighbourGrid::add(Positioned* s){
 	double* da = s->getPosition();
 	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
-	this->lists[i].push_back(s);
+	this->lists[i]->push_back(s);
 }
 
 /*
@@ -56,11 +61,11 @@ void NeighbourGrid::remove(Positioned* s){
 	double* da = s->getPosition();
 	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
 	std::vector<Positioned *>::iterator it;
-	if ( (it = std::find(this->lists[i].begin(), this->lists[i].end(), s)) != this->lists[i].end())
-		this->lists[i].erase(it);
+	if ( (it = std::find(this->lists[i]->begin(), this->lists[i]->end(), s)) != this->lists[i]->end())
+		this->lists[i]->erase(it);
 }
 
-std::vector<Positioned*> * NeighbourGrid::getNeighbours(double* da, int radius){
+std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da, int radius){
 	this->neighbours.clear();
 	std::vector<Positioned *> *vTmp;
 
@@ -74,19 +79,19 @@ std::vector<Positioned*> * NeighbourGrid::getNeighbours(double* da, int radius){
 	coordinates(coords, da, this->dimension, this->linearSize, this->dx, this->n);
 	do{
 		int i = neighbour2i(coords, in, this->dimension, radius, this->n);
-		vTmp = &(this->lists[i]);
-		this->neighbours.insert(this->neighbours.end(), vTmp->begin(), vTmp->end());
+		vTmp = (this->lists[i]);
+		this->neighbours.insert(vTmp->begin(), vTmp->end());
 	}while(increment(in, this->dimension, 2*radius));
 	return &this->neighbours;
 }
 
 void NeighbourGrid::clear(){
 	for(unsigned int i=0; i<this->lists.size(); i++){
-		this->lists[i].clear();
+		this->lists[i]->clear();
 	}
 }
 
-std::vector<Positioned*> * NeighbourGrid::getNeighbours(double* da){
+std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da){
 	return this->getNeighbours(da, 1);
 }
 

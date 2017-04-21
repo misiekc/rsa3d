@@ -23,6 +23,7 @@ Surface::Surface(int dim, double s, double ndx, double vdx) : BoundaryConditions
 
 Surface::~Surface() {
 	delete this->list;
+	delete this->voxels;
 }
 
 void Surface::setParameters(int ia, int is, double dvs, int imv) {
@@ -44,12 +45,8 @@ void Surface::add(Shape *s) {
 
 bool Surface::check(Shape *s){
 	bool bRet = true;
-	std::vector<Positioned *> * neighbours;
-	if (this->list == NULL) {
-		neighbours = &this->shapes;
-	} else {
-		neighbours = this->list->getNeighbours(s->getPosition());
-	}
+	std::unordered_set<Positioned *> * neighbours;
+	neighbours = this->list->getNeighbours(s->getPosition());
 
 	for(Positioned *shape: *neighbours) {
 		if (((Shape *)shape)->overlap(this, s)){
@@ -61,7 +58,7 @@ bool Surface::check(Shape *s){
 }
 
 
-std::vector<Positioned *> * Surface::getNeighbours(double* da) {
+std::unordered_set<Positioned *> * Surface::getNeighbours(double* da) {
 	return this->list->getNeighbours(da);
 }
 
@@ -107,12 +104,11 @@ int Surface::analyzeVoxels() {
 // analyzes all voxels inside a region around v
 int Surface::analyzeRegion(Voxel *v){
 	int begin = this->voxels->length();
-	std::vector<Positioned *> *region = this->voxels->getNeighbours(v);
+	std::unordered_set<Positioned *> *region = this->voxels->getNeighbours(v);
 	for(Positioned *v1: *region){
 		if (this->voxels->analyzeVoxel((Voxel *)v1, this->list, this))
 			this->voxels->remove((Voxel *)v1);
 	}
-	delete region;
 	return begin - this->voxels->length();
 }
 
@@ -140,16 +136,17 @@ bool Surface::doIteration(Shape *s, RND *rnd) {
 			missCounter = 0;
 			int v0 = this->voxels->length();
 			bool b = voxels->splitVoxels(dMinVoxelSize, iMaxVoxels, this->list, this);
-			std::cout << "[" << this->seed << "] new voxel size " << voxels->getVoxelSize() << std::endl;
+			int v1 = this->voxels->length();
+			std::cout << "[" << this->seed << "] " << this->shapes.size() << " shapes, " << this->voxels->length() << " voxels, new voxel size " << voxels->getVoxelSize() << ", factor " << this->getFactor() << std::endl;
 			if (b) {
-				int v1 = this->voxels->length();
-				if (v1 < v0)
-					tmpSplit /= (2.0 * v0 / v1);
+				tmpSplit *=  ((double)v1 / v0);
+				if (tmpSplit > 0.5 * std::numeric_limits<int>::max())
+					tmpSplit = 0.5 * std::numeric_limits<int>::max();
+				if(voxels->length()<1000 && tmpSplit>100)
+					tmpSplit /= 10.0;
 			} else {
 				this->analyzeVoxels();
 			}
-			if (tmpSplit < 0.4 * std::numeric_limits<int>::max())
-				tmpSplit *= 2.0;
 		}
 		return false;
 	}

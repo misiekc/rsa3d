@@ -40,7 +40,11 @@ VoxelList::VoxelList(int dim, double s, double d){
 	}
 
 VoxelList::~VoxelList() {
-	// TODO Auto-generated destructor stub
+	for(int i=0; i<=this->last; i++){
+		delete this->voxels[i];
+	}
+	delete[] this->voxels;
+	delete this->voxelNeighbourGrid;
 }
 
 
@@ -80,7 +84,7 @@ void VoxelList::fillNeighbourGrid(){
 	}
 }
 
-std::vector<Positioned *> * VoxelList::getNeighbours(Voxel *v){
+std::unordered_set<Positioned *> * VoxelList::getNeighbours(Voxel *v){
 	return this->voxelNeighbourGrid->getNeighbours(v->getPosition());
 }
 
@@ -109,10 +113,11 @@ void VoxelList::remove(Voxel *v){
 //		this.checkIndexes();
 	}
 
-bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::vector<Positioned *> *neighbours, BoundaryConditions *bc){
+// returns true when the whole voxel is inside an exclusion area of one shape, thus, should be removed
+bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Positioned *> *neighbours, BoundaryConditions *bc){
 
-	std::vector<Positioned *> vAll;
-	std::vector<Positioned *>::iterator it1, it2;
+	std::unordered_set<Positioned *> vAll;
+	std::unordered_set<Positioned *>::iterator itN, itA;
 
 	int in[this->dimension];
 	double da[this->dimension];
@@ -127,30 +132,32 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::vector<Positioned
 		for(int j=0; j<this->dimension; j++){
 			da[j] = vpos[j] + (in[j]-0.5)*this->voxelSize;
 		}
-		std::vector<Positioned *> *vNeighbours = (neighbours==NULL) ? nl->getNeighbours(da) : neighbours;
+		std::unordered_set<Positioned *> *vNeighbours = (neighbours==NULL) ? nl->getNeighbours(da) : neighbours;
+		// at the beginning we add all neighbouring shapes
 		if (vAll.size()==0){
-			vAll.insert(vAll.end(), vNeighbours->begin(), vNeighbours->end());
+			vAll.insert(vNeighbours->begin(), vNeighbours->end());
 		}else{
-			for(it1 = vAll.begin(); it1 != vAll.end(); it1++){
-				if( (it2 = std::find(vNeighbours->begin(), vNeighbours->end(), *it1)) != vNeighbours->end()){
-					vAll.erase(it1);
-					it1--;
+			for(itA = vAll.begin(); itA != vAll.end(); ){
+				if( vNeighbours->find(*itA) == vNeighbours->end() ){
+					itA = vAll.erase(itA);
+				}else{
+					itA++;
 				}
 			}
 		}
-		for(it1 = vAll.begin(); it1 != vAll.end(); it1++){
-			if(! ((Shape*)(*it1))->pointInside(bc, da)){
-				vAll.erase(it1);
-				it1--;
+		for(itA = vAll.begin(); itA != vAll.end(); ){
+			if(! ((Shape*)(*itA))->pointInside(bc, da)){
+				itA = vAll.erase(itA);
+			}else{
+				itA++;
 			}
+		}
+		if (vAll.size()==0){
+			return false;
 		}
 	}while(increment(in, this->dimension, 1));
 //	v.analyzed = true;
-	if (vAll.size()>0){
-		return true;
-	}else{
-		return false;
-	}
+	return true;
 }
 
 bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc, int timestamp){
@@ -163,46 +170,9 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc
 	return this->analyzeVoxel(v, nl, NULL, bc);
 }
 
-bool VoxelList::analyzeVoxel(Voxel *v, std::vector<Positioned *> *neighbours, BoundaryConditions *bc){
+bool VoxelList::analyzeVoxel(Voxel *v, std::unordered_set<Positioned *> *neighbours, BoundaryConditions *bc){
 	return this->analyzeVoxel(v, NULL, neighbours, bc);
 }
-
-/*
-	public boolean splitVoxels(double minDx, int maxVoxels){
-		if ((this.voxelSize<2*minDx && Math.pow(2, this.dimension)*this.last>this.beginningVoxelsNumber) || Math.pow(2, this.dimension)*this.last>maxVoxels){
-//			for(int i=0; i<this.last; i++)
-//				this.voxels[i].missCounter = 0;
-			return false;
-		}
-		Commons.logger.info("Voxel size " + this.voxelSize);
-		Voxel[] newList = new Voxel[ ((int)Math.round(Math.pow(2, this.dimension)))*(this.last+1) ];
-		double newDx = (this.voxelSize/2.0)*dxFactor;
-		int index = 0;
-		for(int i=0; i<=this.last; i++){
-			Voxel v = this.voxels[i];
-
-			int[] in = new int[v.center.length];
-			double[] da = v.center.clone();
-			for(int j=0; j<in.length; j++){
-				in[j] = 0;
-			}
-			do{
-				for(int j=0; j<da.length; j++){
-					da[j] = v.center[j] + (in[j]-0.5)*newDx;
-				}
-				newList[index] = new Voxel(da, newDx, index);
-				index++;
-			}while(Commons.increment(in, 1));
-			this.voxels[i] = null;
-		}
-		this.last = newList.length-1;
-		this.voxels = newList;
-		this.voxelSize = newDx;
-//		this.checkIndexes();
-		Commons.logger.info("Voxel size " + this.voxelSize);
-		return true;
-	}
-*/
 
 bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, BoundaryConditions *bc){
 	if ((this->voxelSize<2*minDx && pow(2, this->dimension)*this->last > this->beginningVoxelNumber) || pow(2, this->dimension)*this->last > maxVoxels){
@@ -222,7 +192,7 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 		double da[this->dimension];
 		for(int j=0; j < this->dimension; j++){
 			in[j] = 0;
-			da[i] = vpos[i];
+			da[j] = vpos[j];
 		}
 		do{
 			for(int j=0; j < this->dimension; j++){
@@ -237,6 +207,7 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 		delete this->voxels[i];
 	}
 	delete[] this->voxels;
+	this->voxelNeighbourGrid->clear();
 
 	this->last = index-1;
 	this->voxels = newList;
@@ -247,7 +218,8 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 }
 
 Voxel * VoxelList::getRandomVoxel(RND *rnd){
-	return this->voxels[(int)(rnd->nextValue()*(this->last+1))];
+	double d = rnd->nextValue();
+	return this->voxels[(int)(d*(this->last+1))];
 }
 
 double * VoxelList::getRandomPosition(double *result, Voxel *v, RND *rnd){

@@ -23,9 +23,10 @@ private:
 	void createPacking();
 
 public:
-	PackingGenerator(int seed);
+	PackingGenerator(int seed, Parameters *params);
 	virtual ~PackingGenerator();
 	void run();
+	std::vector<Shape *> * getPacking();
 };
 
 #endif /* PACKINGGENERATOR_H_ */

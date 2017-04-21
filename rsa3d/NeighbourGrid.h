@@ -13,6 +13,7 @@
 
 #include "Positioned.h"
 #include <vector>
+#include <unordered_set>
 
 class NeighbourGrid {
 public:
@@ -21,8 +22,10 @@ public:
 	double linearSize;
 	int n;
 	double dx;
-	std::vector<std::vector<Positioned* > > lists;
-	std::vector<Positioned *> neighbours;
+	// contains vectors of cells (vectors with Positioned* inside)
+	std::vector<std::vector<Positioned* > * > lists;
+
+	std::unordered_set<Positioned *> neighbours;
 
 
 
@@ -32,9 +35,9 @@ public:
 	void add(Positioned* s);
 	void remove(Positioned* s);
 
-	std::vector<Positioned*> * getNeighbours(double* da, int radius);
+	std::unordered_set<Positioned*> * getNeighbours(double* da, int radius);
 	void clear();
-	std::vector<Positioned*> * getNeighbours(double* da);
+	std::unordered_set<Positioned*> * getNeighbours(double* da);
 };
 
 #endif /* NEIGHBOURGRID_H_ */

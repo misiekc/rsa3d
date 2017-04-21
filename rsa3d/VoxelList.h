@@ -13,7 +13,7 @@
 #include "NeighbourGrid.h"
 #include "BoundaryConditions.h"
 #include "Positioned.h"
-#include <vector>
+#include <unordered_set>
 
 class VoxelList {
 
@@ -23,7 +23,7 @@ private:
 	NeighbourGrid* voxelNeighbourGrid;
 
 	void fillNeighbourGrid();
-	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::vector<Positioned *> *neighbours, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Positioned *> *neighbours, BoundaryConditions *bc);
 
 
 protected:
@@ -44,11 +44,11 @@ public:
 
 	virtual ~VoxelList();
 
-	std::vector<Positioned *> * getNeighbours(Voxel *v);
+	std::unordered_set<Positioned *> * getNeighbours(Voxel *v);
 	void remove(Voxel *v);
 	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc, int timestamp);
 	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel *v, std::vector<Positioned *> *neighbours, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel *v, std::unordered_set<Positioned *> *neighbours, BoundaryConditions *bc);
 	bool splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, BoundaryConditions *bc);
 
 	Voxel *getRandomVoxel(RND *rnd);
