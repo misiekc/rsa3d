@@ -69,7 +69,7 @@ public:
 	Matrix transpose() const;
 	double det() const;
 	Matrix inverse() const;
-	double minor(mxsize_t _row, mxsize_t _column) const;
+	double matrix_minor(mxsize_t _row, mxsize_t _column) const;
 	std::string toString() const;
 };
 

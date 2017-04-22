@@ -48,9 +48,9 @@ Matrix::Matrix(const Matrix & other) :
 // Move ctor
 //--------------------------------------------------------------------------------------------
 Matrix::Matrix(Matrix && other) :
+	arr(other.arr),
 	rows(other.rows),
-	cols(other.cols),
-	arr(other.arr)
+	cols(other.cols)
 {
 #ifdef MATRIX_DEBUG
 	std::cout << "in matrix move ctor" << std::endl;
@@ -73,7 +73,7 @@ Matrix & Matrix::operator=(const Matrix & other)
 		return *this;
 
 	// Alloc a new array of different size, if needed
-	unsigned int max = other.rows * other.cols;
+	mxsize_t max = other.rows * other.cols;
 	if (max != rows * cols) {
 		delete[] arr;
 		arr = new double[max];
@@ -162,9 +162,9 @@ Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, double **_arr) :
 }
 
 // Ctor creating matrix from given one-dimentional array. When desired matrix is
-// / 1 2 3 \
+// / 1 2 3 |
 // | 4 5 6 |
-// \ 7 8 9 /
+// \ 7 8 9 |
 // then the array should be: {1, 2, 3, 4, 5, 6, 7, 8, 9}
 //--------------------------------------------------------------------------------------------
 // _rows, _cols - matrix dimensions
@@ -187,9 +187,9 @@ Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, double *_arr) :
 }
 
 // Ctor creating matrix from initializer lsit. When desired matrix is
-// / 1 2 3 \
+// / 1 2 3 |
 // | 4 5 6 |
-// \ 7 8 9 /
+// \ 7 8 9 |
 // then the list should be: {1, 2, 3, 4, 5, 6, 7, 8, 9}
 //--------------------------------------------------------------------------------------------
 // _rows, _cols - matrix dimensions
@@ -203,8 +203,8 @@ Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, std::initializer_list<double> _ar
 	std::cout << "in il ctor" << std::endl;
 #endif
 
-	if (_rows == 0 || _cols == 0)		throw std::invalid_argument("_rows == 0 || _cols == 0");
-	if (_arr.size() != _rows * _cols)	throw std::invalid_argument("initializer list size doesn't mach given dimensions");
+	if (_rows == 0 || _cols == 0)			throw std::invalid_argument("_rows == 0 || _cols == 0");
+	if ((mxsize_t)_arr.size() != _rows * _cols)	throw std::invalid_argument("initializer list size doesn't mach given dimensions");
 
 	// Alloc an array and copy elements from list
 	arr = new double[_arr.size()];
@@ -446,8 +446,8 @@ double Matrix::det() const
 	double determinant = 0.0;
 	bool even_perm = true;
 	for (mxsize_t i = 0; i < rows; i++) {
-		if (even_perm)  determinant += _get(0, i) * minor(0, i);
-		else			determinant -= _get(0, i) * minor(0, i);
+		if (even_perm)  determinant += _get(0, i) * matrix_minor(0, i);
+		else			determinant -= _get(0, i) * matrix_minor(0, i);
 		even_perm = !even_perm;
 	}
 	return determinant;
@@ -483,14 +483,14 @@ Matrix Matrix::inverse() const
 
 		for (mxsize_t i = 0; i < rows; i++)
 			for (mxsize_t j = 0; j < cols; j++)
-				out._get(i, j) = ((i + j) % 2 == 0) ? (minor(j, i) / determinant) : (-minor(j, i) / determinant);
+				out._get(i, j) = ((i + j) % 2 == 0) ? (matrix_minor(j, i) / determinant) : (-matrix_minor(j, i) / determinant);
 		return out;
 	}
 }
 
 // Calculates minor of matrix created by removing (_row + 1) row and (_column + 1) column 
 //--------------------------------------------------------------------------------------------
-double Matrix::minor(mxsize_t _row, mxsize_t _column) const
+double Matrix::matrix_minor(mxsize_t _row, mxsize_t _column) const
 {
 	if (rows != cols)	throw std::runtime_error("rows != cols");
 	if (rows == 1)		throw std::runtime_error("zero-size minor");
