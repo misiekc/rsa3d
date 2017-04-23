@@ -5,7 +5,7 @@
 //-----------------------------------------------------------------------------------------------------------------------------
 
 #ifndef _MATRIX_H
-	#define _MATRIX_H
+    #define _MATRIX_H
 
 #include <utility>
 #include <ostream>
@@ -14,63 +14,63 @@
 class Matrix
 {
 public:
-	typedef unsigned short mxsize_t;
+    typedef unsigned short mxsize_t;
 
 private:
-	double *arr;
-	mxsize_t rows;
-	mxsize_t cols;
+    double *arr;
+    mxsize_t rows;
+    mxsize_t cols;
 
-	double & _get(mxsize_t row, mxsize_t column);
-	const double & _get(mxsize_t row, mxsize_t column) const;
+    double & _get(mxsize_t row, mxsize_t column);
+    const double & _get(mxsize_t row, mxsize_t column) const;
 
 public:
-	// Default, copy and move ctor, copy and move assingment operation, dtor
-	Matrix();
-	Matrix(const Matrix & other);
-	Matrix(Matrix && other);
-	Matrix & operator=(const Matrix & other);
-	Matrix & operator=(Matrix && other);
-	~Matrix();
-	
-	// Other ctors
-	Matrix(mxsize_t _rows, mxsize_t _cols, double _fill);
-	Matrix(mxsize_t _rows, mxsize_t _cols, double **_arr);
-	Matrix(mxsize_t _rows, mxsize_t _cols, double *_arr);
-	Matrix(mxsize_t _rows, mxsize_t _cols, std::initializer_list<double> _arr);
+    // Default, copy and move ctor, copy and move assingment operation, dtor
+    Matrix();
+    Matrix(const Matrix & other);
+    Matrix(Matrix && other);
+    Matrix & operator=(const Matrix & other);
+    Matrix & operator=(Matrix && other);
+    ~Matrix();
+    
+    // Other ctors
+    Matrix(mxsize_t _rows, mxsize_t _cols, double _fill);
+    Matrix(mxsize_t _rows, mxsize_t _cols, double **_arr);
+    Matrix(mxsize_t _rows, mxsize_t _cols, double *_arr);
+    Matrix(mxsize_t _rows, mxsize_t _cols, std::initializer_list<double> _arr);
 
-	// Static functions that generate matrices
-	static Matrix identity(short _size);
-	static Matrix rotation2D(double _a);
-	static Matrix rotation3D(double _ax, double _ay, double _az);
+    // Static functions that generate matrices
+    static Matrix identity(short _size);
+    static Matrix rotation2D(double _a);
+    static Matrix rotation3D(double _ax, double _ay, double _az);
 
-	// Operators
-	friend Matrix operator+(Matrix matrix1, const Matrix & matrix2);
-	friend Matrix operator*(const Matrix & matrix1, const Matrix & matrix2);
-	friend Matrix operator*(double x, Matrix matrix);
-	friend Matrix operator*(Matrix matrix, double x);
-	friend Matrix operator-(Matrix matrix1, const Matrix & matrix2);
-	friend bool operator==(const Matrix & matrix1, const Matrix & matrix2);
-	friend bool operator!=(const Matrix & matrix1, const Matrix & matrix2);
+    // Operators
+    friend Matrix operator+(Matrix matrix1, const Matrix & matrix2);
+    friend Matrix operator*(const Matrix & matrix1, const Matrix & matrix2);
+    friend Matrix operator*(double x, Matrix matrix);
+    friend Matrix operator*(Matrix matrix, double x);
+    friend Matrix operator-(Matrix matrix1, const Matrix & matrix2);
+    friend bool operator==(const Matrix & matrix1, const Matrix & matrix2);
+    friend bool operator!=(const Matrix & matrix1, const Matrix & matrix2);
 
-	Matrix & operator+=(const Matrix & other);
-	Matrix & operator*=(const Matrix & other);
-	Matrix & operator*=(double x);
-	Matrix & operator-=(const Matrix & other);
-	Matrix operator-(void);
+    Matrix & operator+=(const Matrix & other);
+    Matrix & operator*=(const Matrix & other);
+    Matrix & operator*=(double x);
+    Matrix & operator-=(const Matrix & other);
+    Matrix operator-(void);
 
-	double & operator()(mxsize_t row, mxsize_t column);
-	const double & operator()(mxsize_t row, mxsize_t column) const;
-	friend std::ostream & operator<< (std::ostream & _stream, const Matrix & _matrix);
+    double & operator()(mxsize_t row, mxsize_t column);
+    const double & operator()(mxsize_t row, mxsize_t column) const;
+    friend std::ostream & operator<< (std::ostream & _stream, const Matrix & _matrix);
 
-	// Other operations
-	mxsize_t getRows() const;
-	mxsize_t getCols() const;
-	Matrix transpose() const;
-	double det() const;
-	Matrix inverse() const;
-	double matrix_minor(mxsize_t _row, mxsize_t _column) const;
-	std::string toString() const;
+    // Other operations
+    mxsize_t getRows() const;
+    mxsize_t getCols() const;
+    Matrix transpose() const;
+    double det() const;
+    Matrix inverse() const;
+    double matrix_minor(mxsize_t _row, mxsize_t _column) const;
+    std::string toString() const;
 };
 
 // Private inline function returning the element from the array of given address. Doesn't perform
@@ -78,7 +78,7 @@ public:
 //-------------------------------------------------------------------------------------------------------
 inline double & Matrix::_get(mxsize_t _row, mxsize_t _col)
 {
-	return arr[_row * cols + _col];
+    return arr[_row * cols + _col];
 }
 
 // Private inline function returning immutable element from the array of given address. Doesn't perform
@@ -86,21 +86,21 @@ inline double & Matrix::_get(mxsize_t _row, mxsize_t _col)
 //-------------------------------------------------------------------------------------------------------
 inline const double & Matrix::_get(mxsize_t _row, mxsize_t _col) const
 {
-	return arr[_row * cols + _col];
+    return arr[_row * cols + _col];
 }
 
 // Inline function returning number of rows in matrix
 //-------------------------------------------------------------------------------------------------------
 inline Matrix::mxsize_t Matrix::getRows() const
 {
-	return rows;
+    return rows;
 }
 
 // Inline function returning number of columns in matrix
 //-------------------------------------------------------------------------------------------------------
 inline Matrix::mxsize_t Matrix::getCols() const
 {
-	return cols;
+    return cols;
 }
 
 #endif  // _MATRIX_H
