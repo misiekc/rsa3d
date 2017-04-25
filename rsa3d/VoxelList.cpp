@@ -55,8 +55,8 @@ Voxel* VoxelList::createVoxel(double* center, double vs, int index){
 
 void VoxelList::initVoxels(int N){
 	int n = (int)(this->size/this->voxelSize + 0.5);
-	double da[N];
-	int in[N];
+	double *da = new double[N];
+	int *in = new int[N];
 
 	for(int i=0; i<N; i++){
 		in[i] = 0;
@@ -74,6 +74,8 @@ void VoxelList::initVoxels(int N){
 		this->voxels[index] = this->createVoxel(da, this->voxelSize*this->dxFactor, index);
 		index++;
 	}while(increment(in, N, n-1));
+	delete[] da;
+	delete[] in;
 }
 
 
@@ -119,8 +121,8 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Pos
 	std::unordered_set<Positioned *> vAll;
 	std::unordered_set<Positioned *>::iterator itN, itA;
 
-	int in[this->dimension];
-	double da[this->dimension];
+	int *in = new int[this->dimension];
+	double *da = new double[this->dimension];
 	double* vpos = v->getPosition();
 
 	for(int j=0; j<this->dimension; j++){
@@ -157,6 +159,8 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Pos
 		}
 	}while(increment(in, this->dimension, 1));
 //	v.analyzed = true;
+	delete[] in;
+	delete[] da;
 	return true;
 }
 
@@ -188,8 +192,8 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 		Voxel *v = this->voxels[i];
 		double* vpos = v->getPosition();
 
-		int in[this->dimension];
-		double da[this->dimension];
+		int *in = new int[this->dimension];
+		double *da = new double[this->dimension];
 		for(int j=0; j < this->dimension; j++){
 			in[j] = 0;
 			da[j] = vpos[j];
@@ -205,6 +209,8 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 			}
 		}while(increment(in, this->dimension, 1));
 		delete this->voxels[i];
+		delete[] in;
+		delete[] da;
 	}
 	delete[] this->voxels;
 	this->voxelNeighbourGrid->clear();
