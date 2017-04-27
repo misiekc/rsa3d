@@ -28,6 +28,8 @@ NeighbourGrid::NeighbourGrid(int dim, double size, double dx) {
 		this->lists.push_back(new std::vector<Positioned *>);
 	}
 	this->neighbours.clear();
+
+	this->in = new int[dim];
 }
 
 
@@ -35,6 +37,8 @@ NeighbourGrid::~NeighbourGrid() {
 	for(unsigned int i=0; i<this->lists.size(); i++){
 		delete this->lists[i];
 	}
+
+	delete[] this->in;
 }
 
 void NeighbourGrid::add(Positioned* s){
@@ -69,16 +73,15 @@ std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da, int r
 	this->neighbours.clear();
 	std::vector<Positioned *> *vTmp;
 
-	int in[this->dimension];
 	for(int i=0; i<this->dimension; i++){
-		in[i] = 0;
+		this->in[i] = 0;
 	}
 
 	int coords[this->dimension];
 
 	coordinates(coords, da, this->dimension, this->linearSize, this->dx, this->n);
 	do{
-		int i = neighbour2i(coords, in, this->dimension, radius, this->n);
+		int i = neighbour2i(coords, this->in, this->dimension, radius, this->n);
 		vTmp = (this->lists[i]);
 		this->neighbours.insert(vTmp->begin(), vTmp->end());
 	}while(increment(in, this->dimension, 2*radius));

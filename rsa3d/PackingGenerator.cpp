@@ -43,14 +43,20 @@ void PackingGenerator::createPacking(){
 			s->no = l;
 			s->time = t;
 			this->packing.push_back(s);
-			// double[] da = s.getCoordinates();
+
+			#ifdef DEBUG
+
 			if (t>0.1*params->maxTime)
 				std::cout << "[" << this->seed << "]" << "\t" << t << "\t" << surface->getFactor()
 				<< "\t" << l << "\t" << surface->voxels->length()
 				<< "\t" << missCount << std::endl;
+
+			#endif //DEBUG
+
 			missCount = 0;
 		}else{
 			missCount++;
+			delete s;
 		}
 	}
 	delete surface;

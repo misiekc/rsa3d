@@ -16,6 +16,10 @@
 #include <unordered_set>
 
 class NeighbourGrid {
+
+private:
+	int* in;
+
 public:
 
 	int dimension;
