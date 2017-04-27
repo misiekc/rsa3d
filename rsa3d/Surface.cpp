@@ -63,13 +63,14 @@ std::unordered_set<Positioned *> * Surface::getNeighbours(double* da) {
 }
 
 double Surface::distance2(double *a1, double *a2) {
-	double v[this->dimension];
+	double *v = new double[this->dimension];
 	for (int i = 0; i < this->dimension; i++)
 		v[i] = a1[i] - a2[i];
 	this->vector(v);
 	double res = 0.0;
 	for (int i = 0; i < this->dimension; i++)
 		res += v[i] * v[i];
+	delete[] v;
 	return res;
 }
 
@@ -114,8 +115,9 @@ int Surface::analyzeRegion(Voxel *v){
 
 bool Surface::doIteration(Shape *s, RND *rnd) {
 	Voxel *v = this->voxels->getRandomVoxel(rnd);
-	double da[this->dimension];
+	double *da = new double[this->dimension];
 	s->translate(this->voxels->getRandomPosition(da, v, rnd));
+	delete[] da;
 	if (this->check(s)) {
 		this->add(s);
 		if(this->getFactor()>FACTOR_LIMIT){

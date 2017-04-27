@@ -8,6 +8,7 @@
 #include <string.h>
 #include "Voxel.h"
 #include "Positioned.h"
+#include <algorithm>
 
 Voxel::Voxel(int dim) : Positioned(dim){
 	this->index = 0;
@@ -16,11 +17,16 @@ Voxel::Voxel(int dim) : Positioned(dim){
 }
 
 Voxel::Voxel(int dim, double* da, double s, int i) : Positioned(dim){
-	this->dimension = dim;
-	memcpy(this->position, da, sizeof(double)*this->dimension);
+	std::copy(da, da+this->dimension, this->position);
 	this->index = i;
 	this->missCounter = 0;
 	this->lastAnalyzed = 0;
+}
+
+Voxel::Voxel(const Voxel & other) : Positioned(other){
+	this->index = other.index;
+	this->missCounter = other.missCounter;
+	this->lastAnalyzed = other.lastAnalyzed;
 }
 
 Voxel::~Voxel() {

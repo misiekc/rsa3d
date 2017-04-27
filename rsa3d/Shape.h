@@ -23,6 +23,8 @@ public:
 	double time;
 
 	Shape(const int dimension);
+	Shape(const Shape & other);
+
 	virtual ~Shape();
 
 	// returns linear size of a cell in a NeighbourGrig. This size should be as small as possible but big enough to avoid overlapping between shapes having centers in cells that are not neighbours

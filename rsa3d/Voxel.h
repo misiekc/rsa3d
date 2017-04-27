@@ -21,6 +21,7 @@ public:
 
 	Voxel(int dim);
 	Voxel(int dim, double* da, double s, int i);
+	Voxel(const Voxel & other);
 
 	virtual ~Voxel();
 

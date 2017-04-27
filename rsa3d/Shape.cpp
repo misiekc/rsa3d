@@ -11,7 +11,12 @@
 Shape::Shape(const int dimension) : Positioned(dimension){
 	this->no = 0;
 	this->time = 0.0;
-};
+}
+
+Shape::Shape(const Shape & other) : Positioned(other){
+	this->no = 0;
+	this->time = 0.0;
+}
 
 Shape::~Shape() {
 

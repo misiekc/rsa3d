@@ -15,7 +15,10 @@ protected:
 
 public:
 	Positioned(int dimension);
+	Positioned(const Positioned & other);
 	virtual ~Positioned();
+
+	virtual Positioned & operator=(const Positioned & other);
 
 	// returns position of the shape's center
 	double* getPosition();

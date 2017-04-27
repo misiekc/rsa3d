@@ -6,14 +6,35 @@
  */
 
 #include "Positioned.h"
+#include <algorithm>
 
 Positioned::Positioned(int dim) {
 	this->dimension = dim;
 	this->position = new double[dim];
+	for(int i=0; i<dim; i++){
+		this->position[i] = 0.0;
+	}
 }
+
+Positioned::Positioned(const Positioned & other) {
+	this->dimension = other.dimension;
+	this->position = new double[this->dimension];
+    std::copy(other.position, other.position+other.dimension, this->position);
+}
+
 
 Positioned::~Positioned() {
 	delete[] this->position;
+}
+
+Positioned & Positioned::operator=(const Positioned & other){
+    // Self assingment, skip
+    if (this == &other)
+        return *this;
+
+    this->dimension = other.dimension;
+    std::copy(other.position, other.position+other.dimension, this->position);
+    return *this;
 }
 
 double* Positioned::getPosition(){

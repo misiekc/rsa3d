@@ -69,12 +69,12 @@ std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da, int r
 	this->neighbours.clear();
 	std::vector<Positioned *> *vTmp;
 
-	int in[this->dimension];
+	int *in = new int[this->dimension];
 	for(int i=0; i<this->dimension; i++){
 		in[i] = 0;
 	}
 
-	int coords[this->dimension];
+	int *coords = new int[this->dimension];
 
 	coordinates(coords, da, this->dimension, this->linearSize, this->dx, this->n);
 	do{
@@ -82,6 +82,8 @@ std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da, int r
 		vTmp = (this->lists[i]);
 		this->neighbours.insert(vTmp->begin(), vTmp->end());
 	}while(increment(in, this->dimension, 2*radius));
+	delete[] coords;
+	delete[] in;
 	return &this->neighbours;
 }
 
