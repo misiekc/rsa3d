@@ -32,6 +32,7 @@ public:
 
 
 	Parameters();
+	Parameters(const std::string & sFile);
 	virtual ~Parameters();
 };
 

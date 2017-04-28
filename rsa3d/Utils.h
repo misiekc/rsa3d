@@ -14,4 +14,11 @@ int position2i(double* da, int dalength, double size, double dx, int n);
 void coordinates(int* result, double* da, int dalength, double size, double dx, int n);
 int neighbour2i(int* coordinates, int* neighbour, int clength, int offset, int n);
 
+// trim from start
+std::string &ltrim(std::string &s);
+// trim from end
+std::string &rtrim(std::string &s);
+// trim from both ends
+std::string &trim(std::string &s);
+
 #endif /* UTILS_C_ */
