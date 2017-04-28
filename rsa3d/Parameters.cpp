@@ -20,7 +20,7 @@ Parameters::Parameters() {
 	maxTime = std::numeric_limits<double>::infinity();
 	analyze = 10;
 	split = 500;
-	surfaceSize = 1000.0;
+	surfaceSize = pow(1000.0, 1.0/this->dimension);
 
 	particleType = "Sphere";
 	particleAttributes = "2";
@@ -49,7 +49,7 @@ Parameters::Parameters(const std::string& sFile){
 		else if (sKey.compare("maxTime")==0) 					this->maxTime = std::stod(sValue);
 		else if (sKey.compare("analyze")==0) 					this->analyze = std::stoi(sValue);
 		else if (sKey.compare("split")==0) 						this->split = std::stoi(sValue);
-		else if (sKey.compare("surfaceSize")==0) 				this->surfaceSize = std::stod(sValue);
+		else if (sKey.compare("surfaceVolume")==0) 				this->surfaceSize = pow(std::stod(sValue), 1.0/this->dimension);
 		else if (sKey.compare("particleType")==0) 				this->particleType = sValue;
 		else if (sKey.compare("particleAttributes")==0)			this->particleAttributes = sValue;
 
@@ -58,8 +58,6 @@ Parameters::Parameters(const std::string& sFile){
 	}
 	file.close();
 }
-
-
 
 Parameters::~Parameters() {
 	// TODO Auto-generated destructor stub

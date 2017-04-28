@@ -18,7 +18,6 @@ void toPovRay(char *filename, double size, PackingGenerator &pg){
 		file << "  sphere { <" << da[0] << ", " << da[1] << ", 0.0>, " << 0.56418958354775628 << std::endl;
 		file << "    texture { pigment { color Red } }" << std::endl;
 		file << "  }" << std::endl;
-		std::cout << s->no << "\t";
 	}
 
 

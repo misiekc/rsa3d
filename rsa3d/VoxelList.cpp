@@ -155,6 +155,8 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Pos
 			}
 		}
 		if (vAll.size()==0){
+			delete[] in;
+			delete[] da;
 			return false;
 		}
 	}while(increment(in, this->dimension, 1));
@@ -188,12 +190,13 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 	Voxel** newList = new Voxel*[ ((int)round( pow(2, this->dimension)))*(this->last+1) ];
 	double newDx = (this->voxelSize/2.0)*this->dxFactor;
 	int index = 0;
+
+	int *in = new int[this->dimension];
+	double *da = new double[this->dimension];
 	for(int i=0; i<=this->last; i++){
 		Voxel *v = this->voxels[i];
 		double* vpos = v->getPosition();
 
-		int *in = new int[this->dimension];
-		double *da = new double[this->dimension];
 		for(int j=0; j < this->dimension; j++){
 			in[j] = 0;
 			da[j] = vpos[j];
@@ -206,12 +209,15 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 			if (nl==NULL || bc==NULL || !this->analyzeVoxel(vTmp, nl, NULL, bc)){
 				newList[index] = vTmp;
 				index++;
+			}else{
+				delete vTmp;
 			}
 		}while(increment(in, this->dimension, 1));
 		delete this->voxels[i];
-		delete[] in;
-		delete[] da;
 	}
+	delete[] in;
+	delete[] da;
+
 	delete[] this->voxels;
 	this->voxelNeighbourGrid->clear();
 

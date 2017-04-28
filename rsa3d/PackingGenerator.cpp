@@ -50,6 +50,7 @@ void PackingGenerator::createPacking(){
 				<< "\t" << missCount << std::endl;
 			missCount = 0;
 		}else{
+			delete s;
 			missCount++;
 		}
 	}
