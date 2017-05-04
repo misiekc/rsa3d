@@ -19,8 +19,8 @@ public:
 	int index;
 	int lastAnalyzed;
 
-	Voxel(int dim);
-	Voxel(int dim, double* da, double s, int i);
+	Voxel(unsigned char dim);
+	Voxel(unsigned char dim, double* da, double s, int i);
 	Voxel(const Voxel & other);
 
 	virtual ~Voxel();

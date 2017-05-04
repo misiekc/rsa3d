@@ -10,13 +10,13 @@
 #include "Positioned.h"
 #include <algorithm>
 
-Voxel::Voxel(int dim) : Positioned(dim){
+Voxel::Voxel(unsigned char dim) : Positioned(dim){
 	this->index = 0;
 	this->missCounter = 0;
 	this->lastAnalyzed = 0;
 }
 
-Voxel::Voxel(int dim, double* da, double s, int i) : Positioned(dim){
+Voxel::Voxel(unsigned char dim, double* da, double s, int i) : Positioned(dim){
 	std::copy(da, da+this->dimension, this->position);
 	this->index = i;
 	this->missCounter = 0;

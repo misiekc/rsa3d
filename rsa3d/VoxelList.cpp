@@ -19,7 +19,7 @@
 
 #include "Utils.h"
 
-VoxelList::VoxelList(int dim, double s, double d){
+VoxelList::VoxelList(unsigned char dim, double s, double d){
 	this->dimension = dim;
 	this->size = s;
 	int n = (int)(s/d)+1;
@@ -53,27 +53,27 @@ Voxel* VoxelList::createVoxel(double* center, double vs, int index){
 }
 
 
-void VoxelList::initVoxels(int N){
+void VoxelList::initVoxels(unsigned char dim){
 	int n = (int)(this->size/this->voxelSize + 0.5);
-	double *da = new double[N];
-	int *in = new int[N];
+	double *da = new double[dim];
+	int *in = new int[dim];
 
-	for(int i=0; i<N; i++){
+	for(unsigned char i=0; i<dim; i++){
 		in[i] = 0;
 	}
 
 	int index = 0;
 	do{
-		for(int i=0; i<N; i++){
+		for(unsigned char i=0; i<dim; i++){
 			da[i] = this->voxelSize*(in[i] + 0.5);
 		}
-		if(index!=position2i(da, N, this->size, this->voxelSize, n)){
+		if(index!=position2i(da, dim, this->size, this->voxelSize, n)){
 			std::cout << "Problem" << std::endl;
 		}
 
 		this->voxels[index] = this->createVoxel(da, this->voxelSize*this->dxFactor, index);
 		index++;
-	}while(increment(in, N, n-1));
+	}while(increment(in, dim, n-1));
 	delete[] da;
 	delete[] in;
 }
@@ -125,13 +125,13 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Pos
 	double *da = new double[this->dimension];
 	double* vpos = v->getPosition();
 
-	for(int j=0; j<this->dimension; j++){
+	for(unsigned char j=0; j<this->dimension; j++){
 		in[j] = 0;
 		da[j] = vpos[j];
 	}
 
 	do{
-		for(int j=0; j<this->dimension; j++){
+		for(unsigned char j=0; j<this->dimension; j++){
 			da[j] = vpos[j] + (in[j]-0.5)*this->voxelSize;
 		}
 		std::unordered_set<Positioned *> *vNeighbours = (neighbours==NULL) ? nl->getNeighbours(da) : neighbours;
@@ -197,12 +197,12 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 		Voxel *v = this->voxels[i];
 		double* vpos = v->getPosition();
 
-		for(int j=0; j < this->dimension; j++){
+		for(unsigned char j=0; j < this->dimension; j++){
 			in[j] = 0;
 			da[j] = vpos[j];
 		}
 		do{
-			for(int j=0; j < this->dimension; j++){
+			for(unsigned char j=0; j < this->dimension; j++){
 				da[j] = vpos[j] + (in[j]-0.5)*newDx;
 			}
 			Voxel *vTmp = new Voxel(this->dimension, da, newDx, index);
@@ -212,7 +212,7 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 			}else{
 				delete vTmp;
 			}
-		}while(increment(in, this->dimension, 1));
+		}while(increment(in, this->dimension, (unsigned char)1));
 		delete this->voxels[i];
 	}
 	delete[] in;

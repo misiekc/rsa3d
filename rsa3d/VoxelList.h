@@ -32,15 +32,15 @@ protected:
 	double voxelSize;
 	double size;
 	int beginningVoxelNumber;
-	int dimension;
+	unsigned char dimension;
 
 	Voxel* createVoxel(double* center, double vs, int index);
-	void initVoxels(int n);
+	void initVoxels(unsigned char dim);
 	void checkIndexes();
 
 public:
 	VoxelList(double s, double d);
-	VoxelList(int N, double s, double d);
+	VoxelList(unsigned char dim, double s, double d);
 
 	virtual ~VoxelList();
 

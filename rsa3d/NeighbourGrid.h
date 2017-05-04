@@ -18,7 +18,7 @@
 class NeighbourGrid {
 public:
 
-	int dimension;
+	unsigned char dimension;
 	double linearSize;
 	int n;
 	double dx;
@@ -35,7 +35,7 @@ public:
 	void add(Positioned* s);
 	void remove(Positioned* s);
 
-	std::unordered_set<Positioned*> * getNeighbours(double* da, int radius);
+	std::unordered_set<Positioned*> * getNeighbours(double* da, unsigned char radius);
 	void clear();
 	std::unordered_set<Positioned*> * getNeighbours(double* da);
 };

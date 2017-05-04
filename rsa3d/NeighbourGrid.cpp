@@ -65,12 +65,12 @@ void NeighbourGrid::remove(Positioned* s){
 		this->lists[i]->erase(it);
 }
 
-std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da, int radius){
+std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da, unsigned char radius){
 	this->neighbours.clear();
 	std::vector<Positioned *> *vTmp;
 
 	int *in = new int[this->dimension];
-	for(int i=0; i<this->dimension; i++){
+	for(unsigned char i=0; i<this->dimension; i++){
 		in[i] = 0;
 	}
 
