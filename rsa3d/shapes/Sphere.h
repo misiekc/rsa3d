@@ -19,18 +19,19 @@ private:
 	static double radius;
 	static double neighbourListCellSize;
 	static double voxelSize;
-	static int dimension;
+	static unsigned char staticDimension;
 
 	static constexpr double g20 = 1.0; // Gamma(2.0)
 	static constexpr double g15 = 0.5*sqrt(M_PI); // Gamma(1.5)
 
 	double r;
 
-	static double gamma(int d);
-	static double volume(int d);
+	static double gamma(unsigned char d);
+	static double volume(unsigned char d);
 
 public:
 	Sphere();
+	Sphere(unsigned char dim);
 	virtual ~Sphere();
 
 	static void initClass(const std::string &args);
@@ -41,6 +42,10 @@ public:
 	int overlap(BoundaryConditions *bc, Shape *s);
 	double getVolume();
 	int pointInside(BoundaryConditions *bc, double* da);
+
+	std::string toPovray();
+	void store(std::ostream &f);
+	static Sphere * restore(std::istream &f);
 };
 
 #endif /* SHAPES_SPHERE_H_ */

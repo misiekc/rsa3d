@@ -8,7 +8,7 @@
 #include "Shape.h"
 #include "Positioned.h"
 
-Shape::Shape(const int dimension) : Positioned(dimension){
+Shape::Shape(const unsigned short dimension) : Positioned(dimension){
 	this->no = 0;
 	this->time = 0.0;
 }
@@ -23,8 +23,20 @@ Shape::~Shape() {
 }
 
 void Shape::translate(double* v){
-		for(int i=0; i<this->dimension; i++){
-			this->position[i] += v[i];
-		}
+	for(unsigned short i=0; i<this->dimension; i++){
+		this->position[i] += v[i];
 	}
+}
+
+std::string Shape::toString(){
+	return "";
+}
+
+std::string Shape::toPovray(){
+	return "";
+}
+
+void Shape::store(std::ostream &f){
+}
+
 

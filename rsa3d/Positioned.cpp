@@ -8,10 +8,10 @@
 #include "Positioned.h"
 #include <algorithm>
 
-Positioned::Positioned(int dim) {
+Positioned::Positioned(unsigned char dim) {
 	this->dimension = dim;
 	this->position = new double[dim];
-	for(int i=0; i<dim; i++){
+	for(unsigned char i=0; i<dim; i++){
 		this->position[i] = 0.0;
 	}
 }

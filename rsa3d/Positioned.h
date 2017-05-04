@@ -11,10 +11,10 @@
 class Positioned {
 protected:
 	double *position;
-	int dimension;
+	unsigned char dimension;
 
 public:
-	Positioned(int dimension);
+	Positioned(unsigned char dimension);
 	Positioned(const Positioned & other);
 	virtual ~Positioned();
 

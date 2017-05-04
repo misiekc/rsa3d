@@ -12,6 +12,8 @@
 #include "Positioned.h"
 #include "RND.h"
 #include <string>
+#include <ostream>
+#include <istream>
 
 
 class Shape : public Positioned{
@@ -22,7 +24,7 @@ public:
 	int no;
 	double time;
 
-	Shape(const int dimension);
+	Shape(const unsigned short dimension);
 	Shape(const Shape & other);
 
 	virtual ~Shape();
@@ -46,7 +48,13 @@ public:
 	virtual int pointInside(BoundaryConditions *bc, double* da) = 0;
 
 	// returns string representation of the shape
-	// virtual char* toString();
+	virtual std::string toString();
+
+	// returns povray string representation of the shape
+	virtual std::string toPovray();
+
+	// serialize shape
+	virtual void store(std::ostream &f);
 
 	// draws the shape
 	// virtual void draw()
