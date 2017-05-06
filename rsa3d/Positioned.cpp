@@ -33,6 +33,7 @@ Positioned & Positioned::operator=(const Positioned & other){
         return *this;
 
     this->dimension = other.dimension;
+    delete [] this->position;
     std::copy(other.position, other.position+other.dimension, this->position);
     return *this;
 }
