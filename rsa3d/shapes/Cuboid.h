@@ -19,13 +19,17 @@ private:
     static double           *size;
     static double           volume;
     static unsigned char    staticDimension;
-    Matrix                  rotation;
+    static double           *auxDoubleArray;          // Auxiliary double array of dimension size
+    Matrix                  orientation;
     
     static double           neighbourListCellSize;
     static double           voxelSize;
+    
+    bool        checkPoint(const Matrix & vertex);
 
 public:
-    Cuboid(unsigned char dimension, const Matrix & rotation);
+    // Implicit copy ctor and copy assignment operator - trivial destructor
+    Cuboid(const Matrix & rotation);
     ~Cuboid();
 
 	static void initClass(const std::string &args);

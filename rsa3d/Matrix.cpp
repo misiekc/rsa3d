@@ -6,7 +6,7 @@
 
 #include "Matrix.h"
 
-#define MATRIX_DEBUG
+//#define MATRIX_DEBUG
 
 #include <stdexcept>
 #include <algorithm>
@@ -261,7 +261,7 @@ Matrix Matrix::rotation3D(double _ax, double _ay, double _az)
     matrix.arr[2] = cos_ax * sin_ay * cos_az + sin_ax * sin_az;
 
     matrix.arr[3] = cos_ay * sin_az;
-    matrix.arr[4] = sin_ax * sin_ay * sin_az + cos_az * cos_az;
+    matrix.arr[4] = sin_ax * sin_ay * sin_az + cos_ax * cos_az;
     matrix.arr[5] = cos_ax * sin_ay * sin_az - sin_ax * cos_az;
     
     matrix.arr[6] = -sin_ay;
@@ -400,7 +400,7 @@ Matrix Matrix::operator-(void)
 //--------------------------------------------------------------------------------------------
 double & Matrix::operator()(mxsize_t _row, mxsize_t _column)
 {
-    if (_row >= rows)        throw std::invalid_argument("row index out of bounds");
+    if (_row >= rows)       throw std::invalid_argument("row index out of bounds");
     if (_column >= cols)    throw std::invalid_argument("column index out of bounds");
 
     return _get(_row, _column);
@@ -412,7 +412,7 @@ double & Matrix::operator()(mxsize_t _row, mxsize_t _column)
 //--------------------------------------------------------------------------------------------
 const double & Matrix::operator()(mxsize_t _row, mxsize_t _column) const
 {
-    if (_row >= rows)        throw std::invalid_argument("row index out of bounds");
+    if (_row >= rows)       throw std::invalid_argument("row index out of bounds");
     if (_column >= cols)    throw std::invalid_argument("column index out of bounds");
 
     return _get(_row, _column);
