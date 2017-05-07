@@ -31,7 +31,6 @@ double          Cuboid::voxelSize;
 
 // Vertex recognition helper. P states positive, N - negative. First position
 // corresponds to positive/negative X, second for Y, etc.
-//----------------------------------------------------------------------------
 enum V {
     PPP = 0,
     NPP,
@@ -43,6 +42,19 @@ enum V {
     NNN,
     SIZE
 };
+
+// Coord recognition helper
+enum C {
+    X = 0,
+    Y,
+    Z
+};
+
+
+inline bool checkSegmentFace(double plane_pos, double bound1, double bound2, 
+                             double p1p, double p1b1, double p1b2,
+                             double p2p, double p2b1, double p2b2);
+
 
 // Default constructor creating new Cuboid in (0, 0, 0) with size set in
 // Cuboid::initClass
@@ -75,6 +87,7 @@ void Cuboid::initClass(const std::string &args)
     else if (staticDimension == 0)  throw std::runtime_error("Cuboid::initClass: 0 dimension");
         
     size = new double[staticDimension];
+    auxDoubleArray = new double[staticDimension];
     auxDoubleArray = new double[staticDimension];
     for (unsigned char i = 0; i < staticDimension; i++) {
         args_stream >> size[i];
@@ -158,20 +171,28 @@ int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
     Matrix v_trans[V::SIZE];    // Calculated vertices coordinates
     
     // Check whether vertices of s lie in this. TO OPTIMIZE
-    if (checkPoint( (v_trans[V::PPP] = new_orientation * Matrix(3, 1, { size[0] / 2,  size[1] / 2,  size[2] / 2}) + sTranslation) ) ||      
-        checkPoint( (v_trans[V::NPP] = new_orientation * Matrix(3, 1, {-size[0] / 2,  size[1] / 2,  size[2] / 2}) + sTranslation) ) ||
-        checkPoint( (v_trans[V::PNP] = new_orientation * Matrix(3, 1, { size[0] / 2, -size[1] / 2,  size[2] / 2}) + sTranslation) ) ||
-        checkPoint( (v_trans[V::PPN] = new_orientation * Matrix(3, 1, { size[0] / 2,  size[1] / 2, -size[2] / 2}) + sTranslation) ) ||
-        checkPoint( (v_trans[V::PNN] = new_orientation * Matrix(3, 1, { size[0] / 2, -size[1] / 2, -size[2] / 2}) + sTranslation) ) ||
-        checkPoint( (v_trans[V::NPN] = new_orientation * Matrix(3, 1, {-size[0] / 2,  size[1] / 2, -size[2] / 2}) + sTranslation) ) ||
-        checkPoint( (v_trans[V::NNP] = new_orientation * Matrix(3, 1, {-size[0] / 2, -size[1] / 2,  size[2] / 2}) + sTranslation) ) ||
-        checkPoint( (v_trans[V::NNN] = new_orientation * Matrix(3, 1, {-size[0] / 2, -size[1] / 2, -size[2] / 2}) + sTranslation) ))
+    if (checkPoint( (v_trans[V::PPP] = new_orientation * Matrix(3, 1, { size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ) ||      
+        checkPoint( (v_trans[V::NPP] = new_orientation * Matrix(3, 1, {-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ) ||
+        checkPoint( (v_trans[V::PNP] = new_orientation * Matrix(3, 1, { size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ) ||
+        checkPoint( (v_trans[V::PPN] = new_orientation * Matrix(3, 1, { size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ) ||
+        checkPoint( (v_trans[V::PNN] = new_orientation * Matrix(3, 1, { size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ) ||
+        checkPoint( (v_trans[V::NPN] = new_orientation * Matrix(3, 1, {-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ) ||
+        checkPoint( (v_trans[V::NNP] = new_orientation * Matrix(3, 1, {-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ) ||
+        checkPoint( (v_trans[V::NNN] = new_orientation * Matrix(3, 1, {-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ))
     {    
         return true;    
     }
     
-    // Check whether edges of s lie in this
-    
+    // Check whether edges of s lie in this. TO OPTIMIZE
+    if (checkSegment(v_trans[V::PPP], v_trans[V::PPN]) || checkSegment(v_trans[V::PPN], v_trans[V::PNN]) ||
+        checkSegment(v_trans[V::PNN], v_trans[V::PNP]) || checkSegment(v_trans[V::PNP], v_trans[V::PPP]) ||
+        checkSegment(v_trans[V::NNN], v_trans[V::NNP]) || checkSegment(v_trans[V::NNP], v_trans[V::NPP]) ||
+        checkSegment(v_trans[V::NPP], v_trans[V::NPN]) || checkSegment(v_trans[V::NPN], v_trans[V::NNN]) ||
+        checkSegment(v_trans[V::PPP], v_trans[V::NPP]) || checkSegment(v_trans[V::PPN], v_trans[V::NPN]) ||
+        checkSegment(v_trans[V::PNN], v_trans[V::NNN]) || checkSegment(v_trans[V::PNP], v_trans[V::NNP]))
+    {
+        return true;
+    }
     return false;
 }
 
@@ -184,6 +205,53 @@ bool Cuboid::checkPoint(const Matrix & vertex)
             return false;
     return true;
 }
+
+// Checks whether a segment determined by point1 and point2 intersects with
+// Cuboid
+//----------------------------------------------------------------------------
+bool Cuboid::checkSegment(const Matrix & point1, const Matrix & point2)
+{
+    double hsize_x = size[C::X] / 2;
+    double hsize_y = size[C::Y] / 2;
+    double hsize_z = size[C::Z] / 2;
+
+    // Check intersections with all faces
+    return checkSegmentFace( hsize_x, hsize_y, hsize_z, point1(C::X, 0), point1(C::Y, 0), point1(C::Z, 0), point2(C::X, 0), point2(C::Y, 0), point2(C::Z, 0)) ||
+           checkSegmentFace(-hsize_x, hsize_y, hsize_z, point1(C::X, 0), point1(C::Y, 0), point1(C::Z, 0), point2(C::X, 0), point2(C::Y, 0), point2(C::Z, 0)) ||
+           checkSegmentFace( hsize_y, hsize_z, hsize_x, point1(C::Y, 0), point1(C::Z, 0), point1(C::X, 0), point2(C::Y, 0), point2(C::Z, 0), point2(C::X, 0)) ||
+           checkSegmentFace(-hsize_y, hsize_z, hsize_x, point1(C::Y, 0), point1(C::Z, 0), point1(C::X, 0), point2(C::Y, 0), point2(C::Z, 0), point2(C::X, 0)) ||
+           checkSegmentFace( hsize_z, hsize_x, hsize_y, point1(C::Z, 0), point1(C::X, 0), point1(C::Y, 0), point2(C::Z, 0), point2(C::X, 0), point2(C::Y, 0)) ||
+           checkSegmentFace(-hsize_z, hsize_x, hsize_y, point1(C::Z, 0), point1(C::X, 0), point1(C::Y, 0), point2(C::Z, 0), point2(C::X, 0), point2(C::Y, 0));          
+}
+
+// Checks whether given segment intersects with axis-oriented rectangular face
+// with middle on the perpendicular axis (OP)
+//----------------------------------------------------------------------------
+// plane_pos - face-determined plane coordinate on OP
+// bound1 - positive face edge coordinate on the 1st axis perpendicular to OP (OB1)
+// bound2 - positive face edge coordinate on the 2nd axis perpendicular to OP (OB2)
+// p1p, p1b1, p1b2 - 1st segment point coordinates respectively on OP, OB1, OB2
+// p2p, p2b1, p2b2 - 2nd segment point coordinates respectively on OP, OB1, OB2
+//----------------------------------------------------------------------------
+inline bool checkSegmentFace(double plane_pos, double bound1, double bound2, 
+                             double p1p, double p1b1, double p1b2,
+                             double p2p, double p2b1, double p2b2)
+{
+    // Check weather a plane determined by face lies between segment points
+    if ((plane_pos > p1p && plane_pos > p2p) || (plane_pos < p1p && plane_pos < p2p))
+        return false;
+    
+    // Intersect plane's face with segment's line
+    double b1i = ((p1b1 - p2b1) * plane_pos + p1p * p2b1 - p2p * p1b1) / (p1p - p2p);
+    double b2i = ((p1b2 - p2b2) * plane_pos + p1p * p2b2 - p2p * p1b2) / (p1p - p2p);
+    
+    // Check whether intersection point lies on face
+    if (std::abs(b1i) > bound1 || std::abs(b2i) > bound2)
+        return false;
+    else
+        return true;
+}
+
 
 // Returns volume of the Cuboid determined during class initialization
 //----------------------------------------------------------------------------

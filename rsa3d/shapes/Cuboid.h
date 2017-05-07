@@ -19,13 +19,15 @@ private:
     static double           *size;
     static double           volume;
     static unsigned char    staticDimension;
-    static double           *auxDoubleArray;          // Auxiliary double array of dimension size
+    static double           *auxDoubleArray;        // Auxiliary double array of dimension size
+    static double           *auxDoubleArray2;       // Second aux array
     Matrix                  orientation;
     
     static double           neighbourListCellSize;
     static double           voxelSize;
     
     bool        checkPoint(const Matrix & vertex);
+    bool        checkSegment(const Matrix & point1, const Matrix & point2);
 
 public:
     // Implicit copy ctor and copy assignment operator - trivial destructor
