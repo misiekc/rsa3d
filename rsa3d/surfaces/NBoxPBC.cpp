@@ -20,10 +20,10 @@ double NBoxPBC::getArea(){
 double * NBoxPBC::getTranslation(double *result, int dim, double s, double *p1, double *p2) {
 	double d;
 	for(int i=0; i<dim; i++){
-		d = p1[i] - p2[i];
-		if (d > s/2.0)
+		d = 2*(p1[i] - p2[i]);
+		if (d > s)
 			result[i] = s;
-		else if (d < s/2.0)
+		else if (d < -s)
 			result[i] = -s;
 		else
 			result[i] = 0.0;
