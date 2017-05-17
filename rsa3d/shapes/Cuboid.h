@@ -8,7 +8,7 @@
 #ifndef _CUBOID_H
 #define _CUBOID_H
 
-#define CUBOID_DEBUG        // Used for debbuging output
+//#define CUBOID_DEBUG        // Used for debbuging output
 
 #include "../Shape.h"
 #include "../Matrix.h"
@@ -22,6 +22,7 @@ private:
     static double           *auxDoubleArray;        // Auxiliary double array of dimension size
     static double           *auxDoubleArray2;       // Second aux array
     Matrix                  orientation;
+    static double           minDimension;
     
     static double           neighbourListCellSize;
     static double           voxelSize;

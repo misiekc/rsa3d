@@ -28,6 +28,7 @@ double          Cuboid::volume;
 unsigned char   Cuboid::staticDimension;    
 double          Cuboid::neighbourListCellSize;
 double          Cuboid::voxelSize;
+double          Cuboid::minDimension;
 
 // Vertex recognition helper. P states positive, N - negative. First position
 // corresponds to positive/negative X, second for Y, etc.
@@ -49,7 +50,6 @@ enum C {
     Y,
     Z
 };
-
 
 inline bool checkSegmentFace(double plane_pos, double bound1, double bound2, 
                              double p1p, double p1b1, double p1b2,
@@ -88,7 +88,6 @@ void Cuboid::initClass(const std::string &args)
         
     size = new double[staticDimension];
     auxDoubleArray = new double[staticDimension];
-    auxDoubleArray = new double[staticDimension];
     for (unsigned char i = 0; i < staticDimension; i++) {
         args_stream >> size[i];
         if (!args_stream)           throw std::runtime_error("Cuboid::initClass: invalid or missing dimentions");
@@ -97,6 +96,7 @@ void Cuboid::initClass(const std::string &args)
         
     // Calculate static params
     volume = std::accumulate(size, size + staticDimension, 1.0, std::multiplies<double>());
+    
     // Neighbour list cell size - diagonal length. It satisfies conditions
     // at the least favourable case - Cuboids with centers near opposite edges
     // of a cell and with diagonals lying on the line connecting their centers
@@ -105,10 +105,12 @@ void Cuboid::initClass(const std::string &args)
             [](double sum, double x){
                 return sum + x * x;
             }));
+            
     // Voxel size. It satisfies conditions at the least favourable case
     // - center of Cuboid lies in the corner of a voxel and voxel's diagonal
     // is parallel to the smallest Cuboid edge
-    voxelSize = *std::min_element(size, size + staticDimension) / 2 / std::sqrt(staticDimension);
+    minDimension = *std::min_element(size, size + staticDimension) / 2;
+    voxelSize = minDimension / std::sqrt(staticDimension);
     
 #ifdef CUBOID_DEBUG
     std::cout << "Initializing Cuboid class" << std::endl;
@@ -164,7 +166,7 @@ int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
     sTranslation += Matrix(this->dimension, 1, bc->getTranslation(auxDoubleArray, this->position, sCuboid->position));
     Matrix backwards_rot = this->orientation.transpose();
     
-    // Transfotm s coordinates to this coordinate system
+    // Transform s coordinates to this coordinate system
     Matrix new_orientation = backwards_rot * sCuboid->orientation;
     sTranslation = backwards_rot * (sTranslation - thisTranslation);
     
@@ -180,6 +182,25 @@ int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
         checkPoint( (v_trans[V::NNP] = new_orientation * Matrix(3, 1, {-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ) ||
         checkPoint( (v_trans[V::NNN] = new_orientation * Matrix(3, 1, {-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ))
     {    
+        //std::cout << "PRZECINA w1" << std::endl;
+        return true;    
+    }
+    
+    // Transform this coordinates to s coordinate system
+    new_orientation = new_orientation.transpose();
+    sTranslation = -new_orientation * sTranslation;
+    
+    // Check whether vertices of this lie in s
+    if (sCuboid->checkPoint( new_orientation * Matrix(3, 1, { size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ||      
+        sCuboid->checkPoint( new_orientation * Matrix(3, 1, {-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ||
+        sCuboid->checkPoint( new_orientation * Matrix(3, 1, { size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ||
+        sCuboid->checkPoint( new_orientation * Matrix(3, 1, { size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ||
+        sCuboid->checkPoint( new_orientation * Matrix(3, 1, { size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ||
+        sCuboid->checkPoint( new_orientation * Matrix(3, 1, {-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ||
+        sCuboid->checkPoint( new_orientation * Matrix(3, 1, {-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ||
+        sCuboid->checkPoint( new_orientation * Matrix(3, 1, {-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation))
+    {
+        //std::cout << "PRZECINA w2" << std::endl;
         return true;    
     }
     
@@ -191,8 +212,11 @@ int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
         checkSegment(v_trans[V::PPP], v_trans[V::NPP]) || checkSegment(v_trans[V::PPN], v_trans[V::NPN]) ||
         checkSegment(v_trans[V::PNN], v_trans[V::NNN]) || checkSegment(v_trans[V::PNP], v_trans[V::NNP]))
     {
+        //std::cout << "PRZECINA e" << std::endl;
         return true;
     }
+    
+    //std::cout << "NIE PRZECINA" << std::endl;
     return false;
 }
 
@@ -260,7 +284,8 @@ double Cuboid::getVolume()
     return Cuboid::volume;
 }
 
-// Checks whether the point with coordinates da lies inside Cuboid
+// Checks whether the point with coordinates da lies inside excluded volume.
+// It is an interior of a set of point which distanse from
 //----------------------------------------------------------------------------
 int Cuboid::pointInside(BoundaryConditions *bc, double* da)
 {
@@ -272,6 +297,38 @@ int Cuboid::pointInside(BoundaryConditions *bc, double* da)
     cuboidTranslation += Matrix(this->dimension, 1, bc->getTranslation(auxDoubleArray, this->position, da));
     pointTranslation = this->orientation.transpose() * (pointTranslation - cuboidTranslation);
     
-    // Check whether the point lies inside Cuboid
-    return this->checkPoint(pointTranslation);
+    // Save absolute values of point coords
+    for (unsigned char i = 0; i < 3; i++)
+        auxDoubleArray[i] = std::abs(pointTranslation(i, 0));
+    
+    // Map which coords lie in this and which lie in this + minDimension
+    bool liesInSmaller[3];
+    bool liesInBigger[3];
+    for (unsigned char i = 0; i < 3; i++) {
+        liesInSmaller[i] = (auxDoubleArray[i] <= this->size[i] / 2);
+        liesInBigger[i] = (auxDoubleArray[i] <= this->size[i] / 2 + minDimension);
+    }
+    
+    // Check optimistic cases - "lies in this" and "doesn't lie in this + minDimension" 
+    if (!liesInBigger[0] || !liesInBigger[1] || !liesInBigger[2])       return false;
+    if (liesInSmaller[0] && liesInSmaller[1] && liesInSmaller[2])       return true;
+    
+    // Check "pushed rectangles"
+    if ((liesInSmaller[0] && liesInSmaller[1]) || (liesInSmaller[1] && liesInSmaller[2]) || (liesInSmaller[2] && liesInSmaller[0]))    
+        return true;
+        
+    // Check cylinders on edges
+    if (liesInSmaller[0] && std::pow(auxDoubleArray[1] - this->size[1] / 2, 2) + std::pow(auxDoubleArray[2] - this->size[2] / 2, 2) <= std::pow(minDimension, 2))
+        return true;
+    if (liesInSmaller[1] && std::pow(auxDoubleArray[2] - this->size[2] / 2, 2) + std::pow(auxDoubleArray[0] - this->size[0] / 2, 2) <= std::pow(minDimension, 2))
+        return true;
+    if (liesInSmaller[2] && std::pow(auxDoubleArray[0] - this->size[0] / 2, 2) + std::pow(auxDoubleArray[1] - this->size[1] / 2, 2) <= std::pow(minDimension, 2))
+        return true;
+    
+    // Check spheres in vertices
+    if (std::pow(auxDoubleArray[0] - this->size[0] / 2, 2) + std::pow(auxDoubleArray[1] - this->size[1] / 2, 2) +
+        std::pow(auxDoubleArray[2] - this->size[2] / 2, 2) <= std::pow(minDimension, 2))
+        return true;
+        
+    return false;
 }
