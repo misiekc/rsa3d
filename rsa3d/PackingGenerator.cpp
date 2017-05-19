@@ -23,7 +23,9 @@ PackingGenerator::~PackingGenerator() {
 }
 
 void PackingGenerator::createPacking(){
-	std::cout << "[" << this->seed << "] started" << std::endl;
+
+	std::cout << "[" << this->seed << " PackingGenerator::createPacking] started" << std::endl;
+
 	int missCount = 0;
 	RND rnd(this->seed);
 	ShapeFactory::initShapeClass(this->params->particleType, this->params->particleAttributes);
@@ -44,18 +46,28 @@ void PackingGenerator::createPacking(){
 			s->time = t;
 			this->packing.push_back(s);
 			// double[] da = s.getCoordinates();
-			if (t>0.1*params->maxTime)
-				std::cout << "[" << this->seed << "]" << "\t" << t << "\t" << surface->getFactor()
+
+			if (t>0.1*params->maxTime){
+				std::cout << "[" << this->seed << " PackingGenerator::createPacking] " << t << "\t" << s->toString() << surface->getFactor()
 				<< "\t" << l << "\t" << surface->voxels->length()
 				<< "\t" << missCount << std::endl;
+			}else{
+				std::cout << "[" << this->seed << " PackingGenerator::createPacking] " << t << "\t" << s->toString()
+				<< "\t" << l << "\t" << "\t" << missCount << std::endl;
+			}
+
 			missCount = 0;
+
+
 		}else{
 			delete s;
 			missCount++;
 		}
 	}
 	delete surface;
-	std::cout << "[" << seed << "] finished after generating " << l << " shapes" << std::endl;
+
+	std::cout << "[" << seed << " PackingGenerator::createPacking] finished after generating " << l << " shapes" << std::endl;
+
 }
 
 void PackingGenerator::run(){

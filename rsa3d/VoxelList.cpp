@@ -68,7 +68,7 @@ void VoxelList::initVoxels(unsigned char dim){
 			da[i] = this->voxelSize*(in[i] + 0.5);
 		}
 		if(index!=position2i(da, dim, this->size, this->voxelSize, n)){
-			std::cout << "Problem" << std::endl;
+			std::cout << "VoxelList::initVoxels: Problem" << std::endl;
 		}
 
 		this->voxels[index] = this->createVoxel(da, this->voxelSize*this->dxFactor, index);
@@ -94,7 +94,7 @@ std::unordered_set<Positioned *> * VoxelList::getNeighbours(Voxel *v){
 void VoxelList::checkIndexes(){
 	for(int i=0; i<=this->last; i++){
 		if(this->voxels[i]->index!=i)
-			std::cout << "Error " << i << std::endl;
+			std::cout << "VoxelList::checkIndexes: Error " << i << std::endl;
 	}
 }
 
@@ -214,6 +214,8 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 			}
 		}while(increment(in, this->dimension, (unsigned char)1));
 		delete this->voxels[i];
+
+		if (i%10000 == 0){ std::cout << "."; std::cout.flush(); }
 	}
 	delete[] in;
 	delete[] da;

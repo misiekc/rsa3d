@@ -88,7 +88,9 @@ void Surface::vectorPeriodicBC(double* v) {
 }
 
 int Surface::analyzeVoxels() {
-	std::cout << "[" << this->seed << "] " << this->voxels->length() << " voxels, " << this->shapes.size() << " shapes, factor = " << this->getFactor() << std::endl;
+
+	std::cout << "[" << this->seed << " Surface::analyzeVoxels] " << this->voxels->length() << " voxels, " << this->shapes.size() << " shapes, factor = " << this->getFactor() << std::endl;
+
 	int begin = this->voxels->length();
 	int timestamp = this->shapes.size();
 	for (int i = 0; i < this->voxels->length(); i++) {
@@ -98,7 +100,9 @@ int Surface::analyzeVoxels() {
 			i--;
 		}
 	}
-	std::cout << "[" << this->seed << "] " << this->voxels->length() << " voxels remained, factor = " << this->getFactor() << std::endl;
+
+	std::cout << "[" << this->seed << " Surface::analyzeVoxels] " << this->voxels->length() << " voxels remained, factor = " << this->getFactor() << std::endl;
+
 	return begin - this->voxels->length();
 }
 
@@ -137,9 +141,15 @@ bool Surface::doIteration(Shape *s, RND *rnd) {
 		if (missCounter > tmpSplit) { // v.getMissCounter() % iSplit == 0){ //
 			missCounter = 0;
 			int v0 = this->voxels->length();
+
+			std::cout << "[" << this->seed << " Surface::doIteration] splitting voxels ";
+			std::cout.flush();
+
 			bool b = voxels->splitVoxels(dMinVoxelSize, iMaxVoxels, this->list, this);
 			int v1 = this->voxels->length();
-			std::cout << "[" << this->seed << "] " << this->shapes.size() << " shapes, " << this->voxels->length() << " voxels, new voxel size " << voxels->getVoxelSize() << ", factor " << this->getFactor() << std::endl;
+
+			std::cout << " done: " << this->shapes.size() << " shapes, " << this->voxels->length() << " voxels, new voxel size " << voxels->getVoxelSize() << ", factor " << this->getFactor() << std::endl;
+
 			if (b) {
 				tmpSplit *=  ((double)v1 / v0);
 				if (tmpSplit > 0.5 * std::numeric_limits<int>::max())
