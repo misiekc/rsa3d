@@ -43,6 +43,7 @@ public:
     int overlap(BoundaryConditions *bc, Shape *s);
     double getVolume();
     int pointInside(BoundaryConditions *bc, double* da);
+    std::string toPovray();
 };
 
 #endif      // _CUBOID_H

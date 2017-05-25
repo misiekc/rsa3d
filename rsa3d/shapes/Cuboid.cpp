@@ -332,3 +332,38 @@ int Cuboid::pointInside(BoundaryConditions *bc, double* da)
         
     return false;
 }
+
+std::string Cuboid::toPovray(){
+	std::string s = "  box { < ";
+	for(unsigned char i=0; i<this->dimension; i++){
+		s += std::to_string(-this->size[i]/2);
+		if (i<this->dimension-1)
+			s+= ", ";
+	}
+	s += ">, <";
+	for(unsigned char i=0; i<this->dimension; i++){
+		s += std::to_string(this->size[i]/2);
+		if (i<this->dimension-1)
+			s+= ", ";
+	}
+	s += ">\n";
+	s += "    matrix < \n    ";
+	for (unsigned char i=0; i<this->dimension; i++){
+		for (unsigned char j=0; j<this->dimension; j++){
+			s += std::to_string(this->orientation(i, j));
+			if (j<this->dimension-1)
+						s+= ", ";
+		}
+		s+= ",\n    ";
+	}
+
+	for(unsigned char i=0; i<this->dimension; i++){
+		s += std::to_string(this->position[i]);
+		if (i<this->dimension-1)
+			s+= ", ";
+	}
+	s += "\n    >\n";
+	s += "    texture { pigment { color Red } }\n  }\n";
+	return s;
+}
+
