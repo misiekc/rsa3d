@@ -90,8 +90,15 @@ void Cuboid::initClass(const std::string &args)
     auxDoubleArray = new double[staticDimension];
     for (unsigned char i = 0; i < staticDimension; i++) {
         args_stream >> size[i];
-        if (!args_stream)           throw std::runtime_error("Cuboid::initClass: invalid or missing dimentions");
+        if (!args_stream)           throw std::runtime_error("Cuboid::initClass: invalid or missing dimensions");
         else if (size[i] <= 0.0)    throw std::runtime_error("Cuboid::initClass: non-positive size: " + std::to_string(size[i]));
+    }
+
+    // renormailze sizes to obtain unit volume
+    double v = std::accumulate(size, size + staticDimension, 1.0, std::multiplies<double>());
+    double factor = 1.0/pow(v, 1.0/staticDimension);
+    for (unsigned char i = 0; i < staticDimension; i++) {
+        size[i] *= factor;
     }
         
     // Calculate static params
@@ -366,4 +373,28 @@ std::string Cuboid::toPovray(){
 	s += "    texture { pigment { color Red } }\n  }\n";
 	return s;
 }
+
+void Cuboid::store(std::ostream &f){
+	Shape::store(f);
+	double d;
+	for (unsigned char i=0; i<this->dimension; i++){
+		for (unsigned char j=0; j<this->dimension; j++){
+			d = this->orientation(i, j);
+			f.write((char *)(&d), sizeof(double));
+		}
+	}
+}
+
+void Cuboid::restore(std::istream &f){
+	Shape::restore(f);
+	double d;
+	for (unsigned char i=0; i<this->dimension; i++){
+		for (unsigned char j=0; j<this->dimension; j++){
+			f.read((char *)d, sizeof(double));
+			this->orientation(i, j) = d;
+		}
+	}
+}
+
+
 

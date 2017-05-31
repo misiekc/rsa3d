@@ -7,6 +7,7 @@
 
 #include "Shape.h"
 #include "Positioned.h"
+#include <iostream>
 
 Shape::Shape(const unsigned short dimension) : Positioned(dimension){
 	this->no = 0;
@@ -37,6 +38,22 @@ std::string Shape::toPovray(){
 }
 
 void Shape::store(std::ostream &f){
+	f.write((char *)(&this->dimension), sizeof(unsigned char));
+	f.write((char *)(&this->no), sizeof(int));
+	f.write((char *)(&this->time), sizeof(double));
+	f.write((char *)(this->position), this->dimension*sizeof(double));
+}
+
+void Shape::restore(std::istream &f){
+	unsigned char d;
+	f.read((char *)(&d), sizeof(unsigned char));
+	if (this->dimension!=d){
+		std::cout << "[ERROR] cannot restore: incompatible dimensions" << std::endl;
+		return;
+	}
+	f.read((char *)(&this->no), sizeof(int));
+	f.read((char *)(&this->time), sizeof(double));
+	f.read((char *)(this->position), d*sizeof(double));
 }
 
 

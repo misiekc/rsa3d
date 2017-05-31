@@ -56,6 +56,9 @@ public:
 	// serialize shape
 	virtual void store(std::ostream &f);
 
+	// deserialize shape
+	virtual void restore(std::istream &f);
+
 	// draws the shape
 	// virtual void draw()
 };

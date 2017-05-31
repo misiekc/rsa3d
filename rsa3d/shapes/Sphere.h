@@ -45,7 +45,7 @@ public:
 
 	std::string toPovray();
 	void store(std::ostream &f);
-	static Sphere * restore(std::istream &f);
+	void restore(std::istream &f);
 };
 
 #endif /* SHAPES_SPHERE_H_ */

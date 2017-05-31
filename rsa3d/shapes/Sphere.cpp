@@ -104,19 +104,12 @@ std::string Sphere::toPovray(){
 }
 
 void Sphere::store(std::ostream &f){
-	f.write((char *)(&this->dimension), sizeof(unsigned char));
-	f.write((char *)(this->position), this->dimension*sizeof(double));
+	Shape::store(f);
 	f.write((char *)(&this->r), sizeof(double));
 }
 
-Sphere * Sphere::restore(std::istream &f){
-	unsigned char d;
-	f.read((char *)(&d), sizeof(unsigned char));
-	Sphere *s = new Sphere(d);
-
-	f.read((char *)(s->position), s->dimension*sizeof(double));
-	f.read((char *)(&s->r), sizeof(double));
-
-	return s;
+void Sphere::restore(std::istream &f){
+	Shape::restore(f);
+	f.read((char *)(&this->r), sizeof(double));
 }
 
