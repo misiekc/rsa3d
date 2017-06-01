@@ -1,13 +1,14 @@
-dimension = 2
-# maxTriesWithoutSuccess = std::numeric_limits<int>::max();
+dimension = 3
+# maxTriesWithoutSuccess = std::numeric_limits<int>::max()
 maxVoxels = 40000000
 minDx = 0.0
 from = 0
-collectors = 1
+collectors = 3
+maxTime = 100000.0
 # maxTime = std::numeric_limits<double>::infinity()
-analyze = 10
-split = 500
-surfaceVolume = 100.0
+analyze = 100
+split = 100000
+surfaceVolume = 10000.0
 
-particleType = Sphere
-particleAttributes = 2
+particleType = Cuboid
+particleAttributes = 3 1 1 1

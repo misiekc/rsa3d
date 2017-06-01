@@ -390,7 +390,7 @@ void Cuboid::restore(std::istream &f){
 	double d;
 	for (unsigned char i=0; i<this->dimension; i++){
 		for (unsigned char j=0; j<this->dimension; j++){
-			f.read((char *)d, sizeof(double));
+			f.read((char *)&d, sizeof(double));
 			this->orientation(i, j) = d;
 		}
 	}

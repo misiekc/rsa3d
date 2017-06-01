@@ -24,6 +24,7 @@ private:
 
 	void fillNeighbourGrid();
 	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Positioned *> *neighbours, BoundaryConditions *bc);
+	bool disabled;
 
 
 protected:
@@ -39,8 +40,8 @@ protected:
 	void checkIndexes();
 
 public:
-	VoxelList(double s, double d);
 	VoxelList(unsigned char dim, double s, double d);
+	void disable();
 
 	virtual ~VoxelList();
 

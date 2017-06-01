@@ -24,6 +24,7 @@ VoxelList::VoxelList(unsigned char dim, double s, double d){
 	this->size = s;
 	int n = (int)(s/d)+1;
 	this->voxelSize = (s/n);
+	this->disabled = false;
 
 	n = (int)(this->size/this->voxelSize + 0.5);
 	int voxelsLength = (int)(pow(n, dim)+0.5);
@@ -47,6 +48,9 @@ VoxelList::~VoxelList() {
 	delete this->voxelNeighbourGrid;
 }
 
+void VoxelList::disable(){
+	this->disabled = true;
+}
 
 Voxel* VoxelList::createVoxel(double* center, double vs, int index){
 	return new Voxel(this->dimension, center, vs, index);
@@ -100,6 +104,9 @@ void VoxelList::checkIndexes(){
 
 
 void VoxelList::remove(Voxel *v){
+	if (this->disabled)
+		return;
+
 	int index = v->index;
 
 	if (index!=last){
@@ -181,6 +188,8 @@ bool VoxelList::analyzeVoxel(Voxel *v, std::unordered_set<Positioned *> *neighbo
 }
 
 bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, BoundaryConditions *bc){
+	if (this->disabled)
+		return false;
 	if ((this->voxelSize<2*minDx && pow(2, this->dimension)*this->last > this->beginningVoxelNumber) || pow(2, this->dimension)*this->last > maxVoxels){
 //		for(int i=0; i<this.last; i++)
 //			this.voxels[i].missCounter = 0;

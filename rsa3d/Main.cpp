@@ -1,6 +1,9 @@
 #include "PackingGenerator.h"
 #include "Shape.h"
 #include "shapes/Sphere.h"
+#include "shapes/Cuboid.h"
+#include "ShapeFactory.h"
+#include "RND.h"
 #include <fstream>
 #include <iostream>
 
@@ -36,12 +39,14 @@ void toFile(std::string filename, std::vector<Shape *> *packing){
 	file.close();
 }
 
-std::vector<Shape *> * fromFile(std::string filename){
+std::vector<Shape *> * fromFile(unsigned char dim, std::string filename){
 	std::ifstream file(filename, std::ios::binary);
 	std::vector<Shape *> * v = new std::vector<Shape *>;
+	RND rnd(1);
 
 	while(!file.eof()){
-		Shape *s = Sphere::restore(file);
+		Shape *s = ShapeFactory::createShape(&rnd);
+		s->restore(file);
 		v->push_back(s);
 	}
 	v->pop_back();
@@ -50,20 +55,47 @@ std::vector<Shape *> * fromFile(std::string filename){
 	return v;
 }
 
-
+/*
 int main(int argc, char **argv){
 	Parameters params(argv[1]);
 	PackingGenerator pg(1, &params);
 	pg.run();
 
-	toPovRay("cubs.pov", 10.0, pg.getPacking());
-//	toFile("surf.bin", pg.getPacking());
-}
+//	toPovRay("cubs.pov", 10.0, pg.getPacking());
+	toFile("cubs.bin", pg.getPacking());
 
-/*
-int main(int argc, char **argv){
-
-	std::vector<Shape *> *packing = fromFile("surf.bin");
-	toPovRay("surf2.pov", 100.0, packing);
 }
 */
+/*
+int main(int argc, char **argv){
+	Parameters params(argv[1]);
+	ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
+
+
+	std::vector<Shape *> *packing = fromFile(3, "cubs.bin");
+	toPovRay("cubs2.pov", 100.0, packing);
+}
+*/
+
+int main(int argc, char **argv){
+	Parameters params(argv[1]);
+	PackingGenerator *pg;
+	char buf[20];
+	std::string size(buf);
+	std::string filename = "packing_" + params.particleType + "_" + params.particleAttributes + "_" + size + ".dat";
+	std::ofstream file(filename);
+	file.precision(std::numeric_limits<double>::digits10 + 1);
+	std::sprintf(buf, "%.0f", pow(params.surfaceSize, params.dimension));
+	std::vector<Shape *> *packing;
+
+	for(int i=params.from; i<params.from+params.collectors; i++){
+		pg = new PackingGenerator(i, &params);
+		pg->run();
+		packing = pg->getPacking();
+		std::string fpacking = "packing_" + params.particleType + "_" + params.particleAttributes + "_" + size + "_" + std::to_string(i) + ".bin";
+		file << i << "\t" << packing->size() << "\t" << (*packing)[packing->size()-1]->time << std::endl;
+		file.flush();
+		toFile(fpacking, packing);
+	}
+	file.close();
+}
