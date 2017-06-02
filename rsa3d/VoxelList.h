@@ -19,7 +19,7 @@ class VoxelList {
 
 private:
 
-	const double dxFactor = 1.001;
+	const double dxFactor = 1.0000000001;
 	NeighbourGrid* voxelNeighbourGrid;
 
 	void fillNeighbourGrid();

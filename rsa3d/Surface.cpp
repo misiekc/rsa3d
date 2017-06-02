@@ -30,6 +30,8 @@ void Surface::setParameters(int ia, int is, double dvs, int imv) {
 	this->iAnalyze = ia;
 	this->tmpSplit = is;
 	this->iMaxVoxels = imv;
+	if (imv==0)
+		this->voxels->disable();
 	this->dMinVoxelSize = dvs;
 }
 

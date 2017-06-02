@@ -82,20 +82,23 @@ int main(int argc, char **argv){
 	PackingGenerator *pg;
 	char buf[20];
 	std::string size(buf);
-	std::string filename = "packing_" + params.particleType + "_" + params.particleAttributes + "_" + size + ".dat";
-	std::ofstream file(filename);
-	file.precision(std::numeric_limits<double>::digits10 + 1);
 	std::sprintf(buf, "%.0f", pow(params.surfaceSize, params.dimension));
+
+	std::string sFile = "packing_" + params.particleType + "_" + params.particleAttributes + "_" + size + ".dat";
+	std::ofstream file(sFile);
+	file.precision(std::numeric_limits<double>::digits10 + 1);
 	std::vector<Shape *> *packing;
 
 	for(int i=params.from; i<params.from+params.collectors; i++){
 		pg = new PackingGenerator(i, &params);
 		pg->run();
 		packing = pg->getPacking();
-		std::string fpacking = "packing_" + params.particleType + "_" + params.particleAttributes + "_" + size + "_" + std::to_string(i) + ".bin";
+		std::string sPackingFile = "packing_" + params.particleType + "_" + params.particleAttributes + "_" + size + "_" + std::to_string(i) + ".bin";
+		toFile(sPackingFile, packing);
+
 		file << i << "\t" << packing->size() << "\t" << (*packing)[packing->size()-1]->time << std::endl;
 		file.flush();
-		toFile(fpacking, packing);
+
 	}
 	file.close();
 }
