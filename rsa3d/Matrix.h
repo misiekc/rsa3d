@@ -50,6 +50,7 @@ public:
     friend Matrix operator*(double x, Matrix matrix);
     friend Matrix operator*(Matrix matrix, double x);
     friend Matrix operator-(Matrix matrix1, const Matrix & matrix2);
+    friend Matrix operator^(const Matrix & matrix1, const Matrix & matrix2);
     friend bool operator==(const Matrix & matrix1, const Matrix & matrix2);
     friend bool operator!=(const Matrix & matrix1, const Matrix & matrix2);
 
@@ -58,6 +59,7 @@ public:
     Matrix & operator*=(double x);
     Matrix & operator-=(const Matrix & other);
     Matrix operator-(void);
+    Matrix & operator^=(const Matrix & other);
 
     double & operator()(mxsize_t row, mxsize_t column);
     const double & operator()(mxsize_t row, mxsize_t column) const;

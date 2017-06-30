@@ -242,9 +242,9 @@ Matrix Matrix::rotation2D(double _a)
 // Generates three-dimentional rotate matrix. The rotations are performed about X, Y and Z 
 // axis in mentioned order
 //--------------------------------------------------------------------------------------------
-// _ax - clockwise rotation angle about X axis
-// _ay - clockwise rotation angle about Y axis
-// _az - clockwise rotation angle about Z axis
+// _ax - counter-clockwise rotation angle about X axis
+// _ay - counter-clockwise rotation angle about Y axis
+// _az - counter-clockwise rotation angle about Z axis
 //--------------------------------------------------------------------------------------------
 Matrix Matrix::rotation3D(double _ax, double _ay, double _az)
 {
@@ -313,6 +313,20 @@ Matrix operator-(Matrix matrix1, const Matrix & matrix2)
     return (matrix1 -= matrix2);
 }
 
+// Cross product operator between two R3 vector
+//--------------------------------------------------------------------------------------------
+Matrix operator^(const Matrix & matrix1, const Matrix & matrix2)
+{
+    if (matrix1.getRows() != 3 || matrix1.getCols() != 1)
+        throw std::runtime_error("matrix1 not in M(3, 1, R)");
+    if (matrix2.getRows() != 3 || matrix2.getCols() != 1)
+        throw std::runtime_error("matrix2 not in M(3, 1, R)");
+    return Matrix(3, 1, {
+        matrix1._get(1, 0) * matrix2._get(2, 0) - matrix1._get(2, 0) * matrix2._get(1, 0),
+        matrix1._get(2, 0) * matrix2._get(0, 0) - matrix1._get(0, 0) * matrix2._get(2, 0),
+        matrix1._get(0, 0) * matrix2._get(1, 0) - matrix1._get(1, 0) * matrix2._get(0, 0) });
+}
+
 // Equality operator of 2 matrices
 //--------------------------------------------------------------------------------------------
 bool operator==(const Matrix & matrix1, const Matrix & matrix2)
@@ -379,6 +393,14 @@ Matrix & Matrix::operator-=(const Matrix & other)
     unsigned int max = rows * cols;
     for (unsigned int i = 0; i < max; i++)
         arr[i] -= other.arr[i];
+    return *this;
+}
+
+// Cross product assignment operator between two R3 vectors
+//--------------------------------------------------------------------------------------------
+Matrix & Matrix::operator^=(const Matrix & other)
+{
+    *this = std::move(*this ^ other);
     return *this;
 }
 
