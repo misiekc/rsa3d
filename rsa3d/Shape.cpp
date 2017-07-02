@@ -47,8 +47,12 @@ void Shape::store(std::ostream &f){
 void Shape::restore(std::istream &f){
 	unsigned char d;
 	f.read((char *)(&d), sizeof(unsigned char));
+
+	if (f.gcount()==0){ // end of file
+		return;
+	}
 	if (this->dimension!=d){
-		std::cout << "[ERROR] cannot restore: incompatible dimensions" << std::endl;
+		std::cout << "[ERROR] cannot restore: incompatible dimensions: read " << f.gcount() << " bytes." << std::endl;
 		return;
 	}
 	f.read((char *)(&this->no), sizeof(int));

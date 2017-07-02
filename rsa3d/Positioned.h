@@ -22,6 +22,8 @@ public:
 
 	// returns position of the shape's center
 	double* getPosition();
+
+	double distanceOf(Positioned & pos);
 };
 
 #endif /* POSITIONED_H_ */

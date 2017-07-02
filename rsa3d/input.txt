@@ -1,9 +1,10 @@
 dimension = 3
 # maxTriesWithoutSuccess = std::numeric_limits<int>::max()
-maxVoxels = 40000000
+# maxVoxels = 40000000
+maxVoxels = 0
 minDx = 0.0
 from = 0
-collectors = 3
+collectors = 100
 maxTime = 100000.0
 # maxTime = std::numeric_limits<double>::infinity()
 analyze = 100

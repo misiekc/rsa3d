@@ -4,8 +4,12 @@
 #include "shapes/Cuboid.h"
 #include "ShapeFactory.h"
 #include "RND.h"
+#include "analizator/Analyzer.h"
+
+#include <string.h>
 #include <fstream>
 #include <iostream>
+
 
 void toPovRay(std::string filename, double size, std::vector<Shape *> *packing){
 	std::ofstream file(filename);
@@ -77,8 +81,7 @@ int main(int argc, char **argv){
 }
 */
 
-int main(int argc, char **argv){
-	Parameters params(argv[1]);
+int simulate(Parameters &params){
 	PackingGenerator *pg;
 	char buf[20];
 	std::string size(buf);
@@ -98,7 +101,23 @@ int main(int argc, char **argv){
 
 		file << i << "\t" << packing->size() << "\t" << (*packing)[packing->size()-1]->time << std::endl;
 		file.flush();
+		delete pg;
 
 	}
 	file.close();
+	return 1;
+}
+
+int main(int argc, char **argv){
+	Parameters params(argv[2]);
+	ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
+
+	if (strcmp(argv[1], "simulate")==0){
+			return simulate(params);
+	}else if (strcmp(argv[1], "analyze")==0){
+		Analyzer an(&params);
+		an.analyzePackingsInDirectory(argv[3], 0.01, 1.0);
+
+	}
+	return 1;
 }
