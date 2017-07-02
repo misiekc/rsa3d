@@ -9,6 +9,7 @@
 #define ANALIZATOR_ANALYZER_H_
 
 #include "../Shape.h"
+#include "../Parameters.h"
 
 #include <Plot.h>
 #include <LogPlot.h>
