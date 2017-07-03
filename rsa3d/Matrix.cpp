@@ -406,7 +406,7 @@ Matrix & Matrix::operator^=(const Matrix & other)
 
 // Unary minus operator
 //--------------------------------------------------------------------------------------------
-Matrix Matrix::operator-(void)
+Matrix Matrix::operator-(void) const
 {
     Matrix ret(rows, cols);
     unsigned int max = rows * cols;

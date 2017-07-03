@@ -58,7 +58,7 @@ public:
     Matrix & operator*=(const Matrix & other);
     Matrix & operator*=(double x);
     Matrix & operator-=(const Matrix & other);
-    Matrix operator-(void);
+    Matrix operator-(void) const;
     Matrix & operator^=(const Matrix & other);
 
     double & operator()(mxsize_t row, mxsize_t column);
