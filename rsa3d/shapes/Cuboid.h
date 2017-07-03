@@ -43,11 +43,8 @@ public:
     int overlap(BoundaryConditions *bc, Shape *s);
     double getVolume();
     int pointInside(BoundaryConditions *bc, double* da);
-
-    std::string toPovray();
-	void store(std::ostream &f);
-	void restore(std::istream &f);
-
+    
+    Matrix getOrientation() const;
 };
 
 #endif      // _CUBOID_H

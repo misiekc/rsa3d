@@ -1,3 +1,12 @@
+//--------------------------------------------------------------------------------------------
+// Class representing vectors and operations on them
+//--------------------------------------------------------------------------------------------
+// (C)PKua 2017
+//--------------------------------------------------------------------------------------------
+
+#ifndef _VECTOR_H
+    #define _VECTOR_H
+
 #include "Matrix.h"
 
 
@@ -51,3 +60,5 @@ inline Matrix::mxsize_t Vector::getDimension() const
 {
     return this->v.getRows();
 }
+
+#endif  // _VECTOR_H
