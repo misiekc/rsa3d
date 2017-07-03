@@ -29,6 +29,7 @@ public:
 	virtual double** getAsPointsWithErrors(double **points);
 
 	double** getAsHistogramPoints(double **points);
+	int getTotalNumberOfPoints();
 };
 
 #endif /* PLOT_H_ */

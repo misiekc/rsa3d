@@ -62,12 +62,22 @@ void Analyzer::analyzePacking(std::vector<Shape *> *packing, LogPlot *nvt, Plot 
 	if (nvt != NULL)
 		nvt->addBetween(lastt, nvt->getMax()+1.0, packing->size());
 	if (corr!=NULL){
+		double *posi, *posj, *da = new double[this->params->dimension];
 		for(unsigned int i=0; i<packing->size(); i++){
+			posi = (*packing)[i]->getPosition();
 			for(unsigned int j=i+1; j<packing->size(); j++){
-				double dist = (*packing)[i]->distanceOf(*(*packing)[j]);
-				corr->add(dist, 1.0);
+				posj = (*packing)[j]->getPosition();
+				double dist = 0.0;
+				for(unsigned char k=0; k<this->params->dimension; k++){
+					da[k] = fabs(posi[k] - posj[k]);
+					if (da[k]>0.5*this->params->surfaceSize)
+						da[k] = this->params->surfaceSize - da[k];
+					dist += da[k]*da[k];
+				}
+				corr->add(sqrt(dist), 1.0);
 			}
 		}
+		delete[] da;
 	}
 }
 
@@ -154,18 +164,20 @@ void Analyzer::printCorr(Plot& corr, std::string filename, int counter, double p
 		points[i] = new double[2];
 	corr.getAsHistogramPoints(points);
 
-	double r, volume, expectedNumberOfParticles;
+	double r, volume, expectedNumberOfParticles, packingVolume = 4.0/3.0 * M_PI * pow(corr.getMax(), 3.0);
+	int totalPoints = corr.getTotalNumberOfPoints();
+
 	std::ofstream file(filename);
 
 	volume = 0.0;
 	for (int i = 0; i < corr.size()-1; i++) {
 		if (i>0){
 			volume = -4.0/3.0* M_PI * r*r*r;
-		}else{
-			r = 0.5*(points[i][0]+points[i+1][0]);
-			volume += 4.0/3.0* M_PI * r*r*r;
 		}
-		expectedNumberOfParticles = counter * packingFraction*volume / particleSize;
+		r = 0.5*(points[i][0]+points[i+1][0]);
+		volume += 4.0/3.0* M_PI * r*r*r;
+
+		expectedNumberOfParticles = totalPoints * volume / packingVolume;
 		file << points[i][0] << "\t" << points[i][1] / expectedNumberOfParticles << std::endl;
 	}
 	file.close();

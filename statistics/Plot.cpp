@@ -134,3 +134,11 @@ double** Plot::getAsHistogramPoints(double** points) {
 	}
 	return points;
 }
+
+int Plot::getTotalNumberOfPoints(){
+	int res = 0;
+	for (int i = 0; i < this->bins; i++) {
+		res += this->yCounter[i];
+	}
+	return res;
+}

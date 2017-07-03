@@ -9,6 +9,7 @@
 #define POSITIONED_H_
 
 class Positioned {
+
 protected:
 	double *position;
 	unsigned char dimension;
@@ -22,8 +23,6 @@ public:
 
 	// returns position of the shape's center
 	double* getPosition();
-
-	double distanceOf(Positioned & pos);
 };
 
 #endif /* POSITIONED_H_ */

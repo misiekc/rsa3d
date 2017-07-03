@@ -42,15 +42,3 @@ Positioned & Positioned::operator=(const Positioned & other){
 double* Positioned::getPosition(){
 	return this->position;
 }
-
-double Positioned::distanceOf(Positioned &pos){
-	double d, res = 0.0;
-	if (this->dimension != pos.dimension){
-		return -1;
-	}
-	for(unsigned char i=0; i<this->dimension; i++){
-		d = (this->position[i] - pos.position[i]);
-		res += d*d;
-	}
-	return sqrt(res);
-}
