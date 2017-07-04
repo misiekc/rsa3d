@@ -95,7 +95,7 @@ int Sphere::pointInside(BoundaryConditions *bc, double* da) {
 	return (d2<4.0*this->r*this->r);
 }
 
-std::string Sphere::toPovray(){
+std::string Sphere::toPovray() const{
 	std::string s = "  sphere { < ";
 	for(unsigned char i=0; i<this->dimension; i++)
 		s += std::to_string(this->position[i]) + ", ";
@@ -103,7 +103,7 @@ std::string Sphere::toPovray(){
 	return s;
 }
 
-void Sphere::store(std::ostream &f){
+void Sphere::store(std::ostream &f) const{
 	Shape::store(f);
 	f.write((char *)(&this->r), sizeof(double));
 }

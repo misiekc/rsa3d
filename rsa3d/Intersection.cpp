@@ -63,7 +63,7 @@ namespace intersection
         t1_tri2 = ptri2[0] + (ptri2[1] - ptri2[0]) * dtri2[0] / (dtri2[0] - dtri2[1]);
         t2_tri2 = ptri2[0] + (ptri2[2] - ptri2[0]) * dtri2[0] / (dtri2[0] - dtri2[2]);
         
-        // Check interval intersection
+        // Check intervals intersection
         if (t2_tri1 < t1_tri1)
             std::swap(t1_tri1, t2_tri1);
         if (t2_tri2 < t1_tri2)

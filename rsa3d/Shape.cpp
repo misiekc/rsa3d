@@ -33,11 +33,11 @@ std::string Shape::toString(){
 	return "";
 }
 
-std::string Shape::toPovray(){
+std::string Shape::toPovray() const{
 	return "";
 }
 
-void Shape::store(std::ostream &f){
+void Shape::store(std::ostream &f) const{
 	f.write((char *)(&this->dimension), sizeof(unsigned char));
 	f.write((char *)(&this->no), sizeof(int));
 	f.write((char *)(&this->time), sizeof(double));

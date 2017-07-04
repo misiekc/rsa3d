@@ -51,10 +51,10 @@ public:
 	virtual std::string toString();
 
 	// returns povray string representation of the shape
-	virtual std::string toPovray();
+	virtual std::string toPovray() const;
 
 	// serialize shape
-	virtual void store(std::ostream &f);
+	virtual void store(std::ostream &f) const;
 
 	// deserialize shape
 	virtual void restore(std::istream &f);

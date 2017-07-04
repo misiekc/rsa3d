@@ -45,6 +45,9 @@ public:
     int pointInside(BoundaryConditions *bc, double* da);
     
     Matrix getOrientation() const;
+    std::string toPovray() const;
+	void store(std::ostream &f) const;
+	void restore(std::istream &f);
 };
 
 #endif      // _CUBOID_H

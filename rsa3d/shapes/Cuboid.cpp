@@ -14,7 +14,6 @@
 #include <functional>
 #include <algorithm>
 #include <iterator>
-#include <cassert>
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -91,8 +90,15 @@ void Cuboid::initClass(const std::string &args)
     auxDoubleArray = new double[staticDimension];
     for (unsigned char i = 0; i < staticDimension; i++) {
         args_stream >> size[i];
-        if (!args_stream)           throw std::runtime_error("Cuboid::initClass: invalid or missing dimentions");
+        if (!args_stream)           throw std::runtime_error("Cuboid::initClass: invalid or missing dimensions");
         else if (size[i] <= 0.0)    throw std::runtime_error("Cuboid::initClass: non-positive size: " + std::to_string(size[i]));
+    }
+
+    // renormailze sizes to obtain unit volume
+    double v = std::accumulate(size, size + staticDimension, 1.0, std::multiplies<double>());
+    double factor = 1.0/pow(v, 1.0/staticDimension);
+    for (unsigned char i = 0; i < staticDimension; i++) {
+        size[i] *= factor;
     }
         
     // Calculate static params
@@ -183,7 +189,6 @@ int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
         checkPoint( (v_trans[V::NNP] = new_orientation * Matrix(3, 1, {-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ) ||
         checkPoint( (v_trans[V::NNN] = new_orientation * Matrix(3, 1, {-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ))
     {    
-        //assert(bc->distance2(this->position, sCuboid->position) < 3);
         //std::cout << "PRZECINA w1" << std::endl;
         return true;    
     }
@@ -202,7 +207,6 @@ int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
         sCuboid->checkPoint( new_orientation * Matrix(3, 1, {-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ||
         sCuboid->checkPoint( new_orientation * Matrix(3, 1, {-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation))
     {
-        //assert(bc->distance2(this->position, sCuboid->position) < 3);
         //std::cout << "PRZECINA w2" << std::endl;
         return true;    
     }
@@ -215,14 +219,11 @@ int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
         checkSegment(v_trans[V::PPP], v_trans[V::NPP]) || checkSegment(v_trans[V::PPN], v_trans[V::NPN]) ||
         checkSegment(v_trans[V::PNN], v_trans[V::NNN]) || checkSegment(v_trans[V::PNP], v_trans[V::NNP]))
     {
-        //assert(bc->distance2(this->position, sCuboid->position) < 3);
         //std::cout << "PRZECINA e" << std::endl;
         return true;
     }
     
     //std::cout << "NIE PRZECINA" << std::endl;
-    //assert(bc->distance2(this->position, sCuboid->position) > 1);
-    
     return false;
 }
 
@@ -303,8 +304,6 @@ int Cuboid::pointInside(BoundaryConditions *bc, double* da)
     cuboidTranslation += Matrix(this->dimension, 1, bc->getTranslation(auxDoubleArray, this->position, da));
     pointTranslation = this->orientation.transpose() * (pointTranslation - cuboidTranslation);
     
-    //std::cout << "Punkt przetransformowany: " << pointTranslation(0, 0) << ", " << pointTranslation(1, 0) << ", " << pointTranslation(2, 0) << std::endl;
-    
     // Save absolute values of point coords
     for (unsigned char i = 0; i < 3; i++)
         auxDoubleArray[i] = std::abs(pointTranslation(i, 0));
@@ -347,3 +346,62 @@ Matrix Cuboid::getOrientation() const
 {
     return this->orientation;
 }
+
+std::string Cuboid::toPovray() const{
+	std::string s = "  box { < ";
+	for(unsigned char i=0; i<this->dimension; i++){
+		s += std::to_string(-this->size[i]/2);
+		if (i<this->dimension-1)
+			s+= ", ";
+	}
+	s += ">, <";
+	for(unsigned char i=0; i<this->dimension; i++){
+		s += std::to_string(this->size[i]/2);
+		if (i<this->dimension-1)
+			s+= ", ";
+	}
+	s += ">\n";
+	s += "    matrix < \n    ";
+	for (unsigned char i=0; i<this->dimension; i++){
+		for (unsigned char j=0; j<this->dimension; j++){
+			s += std::to_string(this->orientation(i, j));
+			if (j<this->dimension-1)
+						s+= ", ";
+		}
+		s+= ",\n    ";
+	}
+
+	for(unsigned char i=0; i<this->dimension; i++){
+		s += std::to_string(this->position[i]);
+		if (i<this->dimension-1)
+			s+= ", ";
+	}
+	s += "\n    >\n";
+	s += "    texture { pigment { color Red } }\n  }\n";
+	return s;
+}
+
+void Cuboid::store(std::ostream &f) const{
+	Shape::store(f);
+	double d;
+	for (unsigned char i=0; i<this->dimension; i++){
+		for (unsigned char j=0; j<this->dimension; j++){
+			d = this->orientation(i, j);
+			f.write((char *)(&d), sizeof(double));
+		}
+	}
+}
+
+void Cuboid::restore(std::istream &f){
+	Shape::restore(f);
+	double d;
+	for (unsigned char i=0; i<this->dimension; i++){
+		for (unsigned char j=0; j<this->dimension; j++){
+			f.read((char *)&d, sizeof(double));
+			this->orientation(i, j) = d;
+		}
+	}
+}
+
+
+

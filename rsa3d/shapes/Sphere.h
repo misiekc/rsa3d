@@ -43,8 +43,8 @@ public:
 	double getVolume();
 	int pointInside(BoundaryConditions *bc, double* da);
 
-	std::string toPovray();
-	void store(std::ostream &f);
+	std::string toPovray() const;
+	void store(std::ostream &f) const;
 	void restore(std::istream &f);
 };
 
