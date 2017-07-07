@@ -1,15 +1,13 @@
 //--------------------------------------------------------------------------------------------
-// Test of cuboid intersection algorithm. It uses standard triangle-triangle intersection
-// algorithm to check results given by Cuboid::overlap
+// Test of intersections::tri_tri3D algorithm. It generates output to be inspected manually
+// in Mathematica
 //--------------------------------------------------------------------------------------------
 // (C)PKua 2017
 //--------------------------------------------------------------------------------------------
 
-#ifndef _INTTEST_H
-    #define _INTTEST_H
+#ifndef _TRIANGLE_INT_TEST_H
+    #define _TRIANGLE_INT_TEST_H
 
-void CuboidIntTest_run();
-void CuboidIntTimeTest_run();
-void TriTriInt_selftest_run();
+void TriangleIntTest_run();
 
-#endif  // _INTTEST_H
+#endif  // _TRIANGLE_INT_TEST_H

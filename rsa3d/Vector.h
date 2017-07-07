@@ -28,6 +28,7 @@ public:
     Vector(std::initializer_list<double> _coords);
     Vector(mxsize_t dim, double *_arr);
     Vector(mxsize_t dim, double _fill);
+    Vector(mxsize_t dim);
     explicit Vector(const Matrix & _v);
     explicit Vector(Matrix && _v);
     

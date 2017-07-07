@@ -46,6 +46,7 @@ public:
     
     Matrix getOrientation() const;
     std::string toPovray() const;
+    std::string toWolfram() const;
 	void store(std::ostream &f) const;
 	void restore(std::istream &f);
 };

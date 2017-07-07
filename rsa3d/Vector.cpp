@@ -54,6 +54,11 @@ Vector::Vector(mxsize_t dim, double _fill) : v(Matrix(dim, 1, _fill))
 
 }
 
+Vector::Vector(mxsize_t dim) : v(Matrix(dim, 1, 0.))
+{
+
+}
+
 Vector::Vector(const Matrix & _v) : v(_v)
 {
 

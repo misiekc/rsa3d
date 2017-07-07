@@ -381,6 +381,26 @@ std::string Cuboid::toPovray() const{
 	return s;
 }
 
+// Returns Wolfram Language for drawing shape
+//----------------------------------------------------------------------------
+std::string Cuboid::toWolfram() const
+{
+    if (staticDimension != 3)
+        throw std::runtime_error("Cuboid::toWolfram supports only 3D Cuboids");
+    
+    std::stringstream out;
+    out << "cube" << this->no << " = " << std::endl;
+    out << "    GeometricTransformation[" << std::endl;
+    out << "        Cuboid[{" << (-this->size[0] / 2) << ", " << (-this->size[1] / 2) << ", " << (-this->size[2] / 2) << "}, ";
+    out << "{" << (this->size[0] / 2) << ", " << (this->size[1] / 2) << ", " << (this->size[2] / 2) << "}]," << std::endl;
+    out << "        AffineTransform[" << std::endl;
+    out << "            {{{" << this->orientation(0, 0) << ", " << this->orientation(0, 1) << ", " << this->orientation(0, 2) << "}," << std::endl;
+    out << "            {" << this->orientation(1, 0) << ", " << this->orientation(1, 1) << ", " << this->orientation(1, 2) << "}," << std::endl;
+    out << "            {" << this->orientation(2, 0) << ", " << this->orientation(2, 1) << ", " << this->orientation(2, 2) << "}}," << std::endl;
+    out << "            {" << this->position[0] << ", " << this->position[1] << ", " << this->position[2] << "}}]];";
+    return out.str();
+}
+
 void Cuboid::store(std::ostream &f) const{
 	Shape::store(f);
 	double d;
