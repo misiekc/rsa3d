@@ -14,7 +14,8 @@
 class Matrix
 {
 public:
-    typedef unsigned short mxsize_t;
+    typedef unsigned char mxsize_t;     // type for storing matrix size and indices
+    typedef unsigned short mxsizel_t;   // type for storing mxsize_t variables product
 
 private:
     double *arr;
@@ -40,7 +41,7 @@ public:
     Matrix(mxsize_t _rows, mxsize_t _cols, std::initializer_list<double> _arr);
 
     // Static functions that generate matrices
-    static Matrix identity(short _size);
+    static Matrix identity(mxsize_t _size);
     static Matrix rotation2D(double _a);
     static Matrix rotation3D(double _ax, double _ay, double _az);
 

@@ -224,11 +224,14 @@ void CuboidIntTest_run()
 	            disjunct++;
 	    }
 	    
+	    if ((i % 10000) == 9999)
+	        std::cout << (i + 1) << " pairs tested..." << std::endl;
+	    
 	    delete cube1;
 	    delete cube2;
 	}
 	std::cout << ">> " << missed << " from " << tries << " intersection results missed" << std::endl;
-	std::cout << ">> " << intersected << " cuboids overlapped, " << disjunct << " cuboid where disjunctive" << std::endl;
+	std::cout << ">> " << intersected << " cuboids overlapped, " << disjunct << " cuboids were disjunctive" << std::endl;
 }
 
 // Performs Cuboid::overlap and intersection::polyh_polyh time comparison

@@ -40,7 +40,7 @@ Matrix::Matrix(const Matrix & other) :
 #endif
 
     // Alloc an array and copy data
-    unsigned int max = other.rows * other.cols;
+    mxsizel_t max = other.rows * other.cols;
     arr = new double[max];
     std::copy(other.arr, other.arr + max, arr);
 }
@@ -73,7 +73,7 @@ Matrix & Matrix::operator=(const Matrix & other)
         return *this;
 
     // Alloc a new array of different size, if needed
-    mxsize_t max = other.rows * other.cols;
+    mxsizel_t max = other.rows * other.cols;
     if (max != rows * cols) {
         delete[] arr;
         arr = new double[max];
@@ -132,7 +132,7 @@ Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, double _fill = 0) :
     if (_rows == 0 || _cols == 0)    throw std::invalid_argument("_rows == 0 || _cols == 0");
 
     // Alloc an array and fill
-    unsigned int max = _rows * _cols;
+    mxsizel_t max = _rows * _cols;
     arr = new double[max];
     std::fill(arr, arr + max, _fill);
 }
@@ -155,7 +155,7 @@ Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, double **_arr) :
 
     // Alloc an array and copy elements from given
     arr = new double[_rows * _cols];
-    unsigned int arr_index = 0;
+    mxsizel_t arr_index = 0;
     for (mxsize_t i = 0; i < _rows; i++)
         for (mxsize_t j = 0; j < _cols; j++)
             arr[arr_index++] = _arr[i][j];
@@ -181,7 +181,7 @@ Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, double *_arr) :
     if (_rows == 0 || _cols == 0)    throw std::invalid_argument("_rows == 0 || _cols == 0");
 
     // Alloc an array and copy elements from given
-    unsigned int max = _rows * _cols;
+    mxsizel_t max = _rows * _cols;
     arr = new double[max];
     std::copy(_arr, _arr + max, arr);
 }
@@ -204,7 +204,7 @@ Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, std::initializer_list<double> _ar
 #endif
 
     if (_rows == 0 || _cols == 0)            throw std::invalid_argument("_rows == 0 || _cols == 0");
-    if ((mxsize_t)_arr.size() != _rows * _cols)    throw std::invalid_argument("initializer list size doesn't mach given dimensions");
+    if ((mxsizel_t)_arr.size() != _rows * _cols)    throw std::invalid_argument("initializer list size doesn't mach given dimensions");
 
     // Alloc an array and copy elements from list
     arr = new double[_arr.size()];
@@ -215,7 +215,7 @@ Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, std::initializer_list<double> _ar
 //--------------------------------------------------------------------------------------------
 // _size - matrix size
 //--------------------------------------------------------------------------------------------
-Matrix Matrix::identity(short _size)
+Matrix Matrix::identity(mxsize_t _size)
 {
     Matrix matrix(_size, _size);
     for (mxsize_t i = 0; i < _size; i++)
@@ -334,8 +334,8 @@ bool operator==(const Matrix & matrix1, const Matrix & matrix2)
     if (matrix1.rows != matrix2.rows || matrix1.cols != matrix2.cols)
         throw std::invalid_argument("cannot compare matrices of different sizes");
 
-    unsigned int max = matrix1.rows * matrix1.cols;
-    for (unsigned int i = 0; i < max; i++)
+    Matrix::mxsizel_t max = matrix1.rows * matrix1.cols;
+    for (Matrix::mxsizel_t i = 0; i < max; i++)
         if (matrix1.arr[i] != matrix2.arr[i])
             return false;
     return true;
@@ -355,8 +355,8 @@ Matrix & Matrix::operator+=(const Matrix & other)
     if (rows != other.rows || cols != other.cols)
         throw std::invalid_argument("cannot add matrices of different sizes");
 
-    unsigned int max = rows * cols;
-    for (unsigned int i = 0; i < max; i++)
+    Matrix::mxsizel_t max = rows * cols;
+    for (Matrix::mxsizel_t i = 0; i < max; i++)
         arr[i] += other.arr[i];
     return *this;
 }
@@ -376,8 +376,8 @@ Matrix & Matrix::operator*=(double x)
     if (x == 0) {
         std::fill(arr, arr + rows * cols, 0);
     } else if (x != 1) {
-        unsigned int max = rows * cols;
-        for (unsigned int i = 0; i < max; i++)
+        mxsizel_t max = rows * cols;
+        for (mxsizel_t i = 0; i < max; i++)
             arr[i] *= x;
     }
     return *this;
@@ -390,8 +390,8 @@ Matrix & Matrix::operator-=(const Matrix & other)
     if (rows != other.rows || cols != other.cols)
         throw new std::invalid_argument("cannot subtract matrices of different sizes");
 
-    unsigned int max = rows * cols;
-    for (unsigned int i = 0; i < max; i++)
+    mxsizel_t max = rows * cols;
+    for (mxsizel_t i = 0; i < max; i++)
         arr[i] -= other.arr[i];
     return *this;
 }
@@ -409,8 +409,8 @@ Matrix & Matrix::operator^=(const Matrix & other)
 Matrix Matrix::operator-(void) const
 {
     Matrix ret(rows, cols);
-    unsigned int max = rows * cols;
-    for (unsigned int i = 0; i < max; i++)
+    mxsizel_t max = rows * cols;
+    for (mxsizel_t i = 0; i < max; i++)
         ret.arr[i] = -arr[i];
     return ret;
 }
@@ -514,9 +514,9 @@ Matrix Matrix::inverse() const
 //--------------------------------------------------------------------------------------------
 double Matrix::matrix_minor(mxsize_t _row, mxsize_t _column) const
 {
-    if (rows != cols)    throw std::runtime_error("rows != cols");
-    if (rows == 1)        throw std::runtime_error("zero-size minor");
-    if (rows == 2)        return arr[3 ^ (_row << 1 | _column)];
+    if (rows != cols)   throw std::runtime_error("rows != cols");
+    if (rows == 1)      throw std::runtime_error("zero-size minor");
+    if (rows == 2)      return arr[3 ^ (_row << 1 | _column)];
 
     Matrix minor_mx(rows - 1, rows - 1);
 
