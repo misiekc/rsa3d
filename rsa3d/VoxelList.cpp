@@ -174,7 +174,7 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Pos
 }
 
 bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc, int timestamp){
-	if (v->lastAnalyzed < timestamp)
+	if (v->lastAnalyzed < timestamp && !this->disabled)
 		return this->analyzeVoxel(v, nl, NULL, bc);
 	return false;
 }
