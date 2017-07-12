@@ -21,5 +21,9 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
 		Cuboid::initClass(attr);
 		ShapeFactory::createShape = Cuboid::create;
 
+	} else if (sClass.compare("OrientedCuboid")==0){
+		OrientedCuboid::initClass(attr);
+		ShapeFactory::createShape = OrientedCuboid::create;
+
 	}
 }

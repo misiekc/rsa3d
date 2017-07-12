@@ -164,7 +164,7 @@ void Analyzer::printCorr(Plot& corr, std::string filename, int counter, double p
 		points[i] = new double[2];
 	corr.getAsHistogramPoints(points);
 
-	double r, volume, expectedNumberOfParticles, packingVolume = 4.0/3.0 * M_PI * pow(corr.getMax(), 3.0);
+	double r = 0.0, volume, expectedNumberOfParticles, packingVolume = 4.0/3.0 * M_PI * pow(corr.getMax(), 3.0);
 	int totalPoints = corr.getTotalNumberOfPoints();
 
 	std::ofstream file(filename);
