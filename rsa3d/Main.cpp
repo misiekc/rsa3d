@@ -16,14 +16,22 @@ void toPovRay(std::string filename, double size, std::vector<Shape *> *packing){
 
 	file << "#include \"colors.inc\"" << std::endl;
 	file << "background { color White }" << std::endl;
-	file << "camera { orthographic location <" << size/2 << ", " << size/2 << ", " << (2*size) << "> look_at  <" << size/2 << ", " << size/2 << ",  0> }" << std::endl;
+	file << "camera { orthographic location <" << size/2 << ", " << size/2 << ", " << (5*size) << "> look_at  <" << size/2 << ", " << size/2 << ",  0> }" << std::endl;
 	file << "light_source { < 1000.0, 1000.0, 1000.0> color White shadowless parallel point_at <" << size/2 << ", " << size/2 << ",  0>}" << std::endl;
 	file << "#declare layer=union{" << std::endl;
 
-//	file << "  polygon {4, <0, 0, 0.0>, <0, " << size << ", 0.0>, <" << size << ", " << size << ", 0.0>, <" << size << ", 0, 0.0>  texture { finish { ambient 1 diffuse 0 } pigment { color Gray} } }" << std::endl;
-	for(Shape *s : *packing){
-		file << s->toPovray();
-	}
+	file << "  polygon {4, <0, 0, 0.0>, <0, " << size << ", 0.0>, <" << size << ", " << size << ", 0.0>, <" << size << ", 0, 0.0>  texture { finish { ambient 1 diffuse 0 } pigment { color Gray} } }" << std::endl;
+//	for(int ix=-1; ix<=1; ix++){
+//		for(int iy=-1; iy<=1; iy++){
+			for(Shape *s : *packing){
+//				double t1[2] = {ix*size, iy*size};
+//				s->translate(t1);
+				file << s->toPovray();
+//				double t2[2] = {-ix*size, -iy*size};
+//				s->translate(t2);
+			}
+//		}
+//	}
 
 
 	file << "}" << std::endl;
@@ -84,8 +92,8 @@ int main(int argc, char **argv){
 int simulate(Parameters &params){
 	PackingGenerator *pg;
 	char buf[20];
-	std::string size(buf);
 	std::sprintf(buf, "%.0f", pow(params.surfaceSize, params.dimension));
+	std::string size(buf);
 
 	std::string sFile = "packing_" + params.particleType + "_" + params.particleAttributes + "_" + size + ".dat";
 	std::ofstream file(sFile);
@@ -117,7 +125,11 @@ int main(int argc, char **argv){
 	}else if (strcmp(argv[1], "analyze")==0){
 		Analyzer an(&params);
 		an.analyzePackingsInDirectory(argv[3], 0.01, 1.0);
-
+	}else if (strcmp(argv[1], "povray")==0){
+		std::string file(argv[3]);
+		std::vector<Shape *> *packing = fromFile(params.dimension, file);
+		toPovRay(file + ".pov", params.surfaceSize, packing);
+		delete packing;
 	}
 	return 1;
 }

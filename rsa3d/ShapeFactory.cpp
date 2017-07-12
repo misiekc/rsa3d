@@ -9,6 +9,7 @@
 
 #include "shapes/Sphere.h"
 #include "shapes/Cuboid.h"
+#include "shapes/OrientedCuboid.h"
 
 Shape* (*ShapeFactory::createShape)(RND *rnd);
 
