@@ -19,7 +19,7 @@
 class Surface : public BoundaryConditions{
 
 private:
-	static const int FACTOR_LIMIT = 5;
+	static double FACTOR_LIMIT;
 
 	std::vector<Positioned *> shapes;
 	int missCounter;
@@ -51,7 +51,7 @@ public:
 
 	void setSeed(int s);
 	void add(Shape *s);
-	bool check(Shape *s);
+	Shape* check(Shape *s);
 	std::unordered_set<Positioned *> * getNeighbours(double *da);
 	double distance2(double *a1, double *a2);
 

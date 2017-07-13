@@ -8,6 +8,7 @@
 #include "PackingGenerator.h"
 #include "RND.h"
 #include "surfaces/NBoxPBC.h"
+#include "surfaces/NBoxFBC.h"
 #include "ShapeFactory.h"
 #include <iostream>
 
@@ -30,7 +31,12 @@ void PackingGenerator::createPacking(){
 	RND rnd(this->seed);
 	ShapeFactory::initShapeClass(this->params->particleType, this->params->particleAttributes);
 	Shape *s = ShapeFactory::createShape(&rnd);
-	Surface *surface = new NBoxPBC(this->params->dimension, this->params->surfaceSize, s->getNeighbourListCellSize(), s->getVoxelSize());
+	Surface *surface;
+	if(params->boundaryConditions.compare("free")==0)
+		surface = new NBoxFBC(this->params->dimension, this->params->surfaceSize, s->getNeighbourListCellSize(), s->getVoxelSize());
+	else
+		surface = new NBoxPBC(this->params->dimension, this->params->surfaceSize, s->getNeighbourListCellSize(), s->getVoxelSize());
+
 	surface->setSeed(this->seed);
 	double dt = s->getVolume() / surface->getArea();
 	delete s;

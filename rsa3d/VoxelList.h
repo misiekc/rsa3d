@@ -9,6 +9,7 @@
 #define VOXELLIST_H_
 
 #include "Voxel.h"
+#include "Shape.h"
 #include "RND.h"
 #include "NeighbourGrid.h"
 #include "BoundaryConditions.h"
@@ -47,6 +48,7 @@ public:
 
 	std::unordered_set<Positioned *> * getNeighbours(Voxel *v);
 	void remove(Voxel *v);
+	bool analyzeVoxel(Voxel *v, Shape *s, BoundaryConditions *bc);
 	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc, int timestamp);
 	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc);
 	bool analyzeVoxel(Voxel *v, std::unordered_set<Positioned *> *neighbours, BoundaryConditions *bc);

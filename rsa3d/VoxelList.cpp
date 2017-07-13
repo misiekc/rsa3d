@@ -53,6 +53,14 @@ void VoxelList::disable(){
 }
 
 Voxel* VoxelList::createVoxel(double* center, double vs, int index){
+	double d = 0.5*vs;
+	for(unsigned char i=0; i< this->dimension; i++){
+		if (center[i] - d < 0.0){
+			center[i] = d;
+		}else if (center[i] + d > this->size){
+			center[i] = this->size - d;
+		}
+	}
 	return new Voxel(this->dimension, center, vs, index);
 }
 
@@ -121,6 +129,35 @@ void VoxelList::remove(Voxel *v){
 
 //		this.checkIndexes();
 	}
+
+bool VoxelList::analyzeVoxel(Voxel *v, Shape *s, BoundaryConditions *bc){
+
+	int *in = new int[this->dimension];
+	double *da = new double[this->dimension];
+	double* vpos = v->getPosition();
+
+	for(unsigned char j=0; j<this->dimension; j++){
+		in[j] = 0;
+		da[j] = vpos[j];
+	}
+
+	do{
+		for(unsigned char j=0; j<this->dimension; j++){
+			da[j] = vpos[j] + (in[j]-0.5)*this->voxelSize;
+
+			if( !(s->pointInside(bc, da)) ){
+				delete[] in;
+				delete[] da;
+				return false;
+			}
+		}
+	}while(increment(in, this->dimension, 1));
+
+	delete[] in;
+	delete[] da;
+	return true;
+
+}
 
 // returns true when the whole voxel is inside an exclusion area of one shape, thus, should be removed
 bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Positioned *> *neighbours, BoundaryConditions *bc){
@@ -214,7 +251,7 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 			for(unsigned char j=0; j < this->dimension; j++){
 				da[j] = vpos[j] + (in[j]-0.5)*newDx;
 			}
-			Voxel *vTmp = new Voxel(this->dimension, da, newDx, index);
+			Voxel *vTmp = this->createVoxel(da, newDx, index);
 			if (nl==NULL || bc==NULL || !this->analyzeVoxel(vTmp, nl, NULL, bc)){
 				newList[index] = vTmp;
 				index++;

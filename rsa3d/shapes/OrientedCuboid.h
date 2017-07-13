@@ -11,6 +11,9 @@
 #include "Cuboid.h"
 
 class OrientedCuboid: public Cuboid {
+private:
+	static bool do2Drotation;
+
 public:
 	OrientedCuboid(const Matrix & rotation);
 	virtual ~OrientedCuboid();

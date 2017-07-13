@@ -22,6 +22,7 @@ Parameters::Parameters() {
 	split = 500;
 	surfaceSize = pow(1000.0, 1.0/this->dimension);
 
+	boundaryConditions = "periodic";
 	particleType = "Sphere";
 	particleAttributes = "2";
 }
@@ -50,6 +51,7 @@ Parameters::Parameters(const std::string& sFile){
 		else if (sKey.compare("analyze")==0) 					this->analyze = std::stoi(sValue);
 		else if (sKey.compare("split")==0) 						this->split = std::stoi(sValue);
 		else if (sKey.compare("surfaceVolume")==0) 				this->surfaceSize = pow(std::stod(sValue), 1.0/this->dimension);
+		else if (sKey.compare("boundaryConditions")==0) 		this->boundaryConditions = sValue;
 		else if (sKey.compare("particleType")==0) 				this->particleType = sValue;
 		else if (sKey.compare("particleAttributes")==0)			this->particleAttributes = sValue;
 

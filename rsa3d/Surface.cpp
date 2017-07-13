@@ -8,6 +8,8 @@
 #include "Surface.h"
 #include <iostream>
 
+double Surface::FACTOR_LIMIT = 5.0;
+
 Surface::Surface(int dim, double s, double ndx, double vdx) : BoundaryConditions() {
 	this->dimension = dim;
 	this->size = s;
@@ -45,18 +47,16 @@ void Surface::add(Shape *s) {
 		this->list->add(s);
 	}
 
-bool Surface::check(Shape *s){
-	bool bRet = true;
+Shape* Surface::check(Shape *s){
 	std::unordered_set<Positioned *> * neighbours;
 	neighbours = this->list->getNeighbours(s->getPosition());
 
 	for(Positioned *shape: *neighbours) {
 		if (((Shape *)shape)->overlap(this, s)){
-			bRet = false;
-			break;
+			return (Shape *)shape;
 		}
 	}
-	return bRet;
+	return NULL;
 }
 
 
@@ -124,7 +124,8 @@ bool Surface::doIteration(Shape *s, RND *rnd) {
 	double *da = new double[this->dimension];
 	s->translate(this->voxels->getRandomPosition(da, v, rnd));
 	delete[] da;
-	if (this->check(s)) {
+	Shape *sTmp = this->check(s);
+	if (sTmp==NULL) {
 		this->add(s);
 		if(this->getFactor()>FACTOR_LIMIT){
 			this->analyzeRegion(v);
@@ -136,6 +137,11 @@ bool Surface::doIteration(Shape *s, RND *rnd) {
 	} else {
 		v->miss();
 		this->missCounter++;
+
+		if(this->getFactor()>FACTOR_LIMIT && this->voxels->analyzeVoxel(v, sTmp, this))
+			this->voxels->remove(v);
+
+
 		if (v->getMissCounter() % iAnalyze == 0) {
 			if(this->voxels->analyzeVoxel(v, this->list, this) && this->getFactor()>FACTOR_LIMIT)
 				this->analyzeRegion(v);

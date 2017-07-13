@@ -27,6 +27,7 @@ public:
 	int split = 3000;
 	double surfaceSize = pow(100000.0, 1.0/2.0);
 
+	std::string boundaryConditions;
 	std::string particleType;
 	std::string particleAttributes;
 
