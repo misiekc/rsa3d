@@ -26,6 +26,7 @@ public:
 	int analyze = 10;
 	int split = 3000;
 	double surfaceSize = pow(100000.0, 1.0/2.0);
+	bool storePackings = true;
 
 	std::string boundaryConditions;
 	std::string particleType;
