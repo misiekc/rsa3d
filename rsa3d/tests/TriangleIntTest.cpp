@@ -16,12 +16,12 @@
 
 namespace
 {
-    std::string triangleToWolfram(const Vector * _tri)
+    std::string triangleToWolfram(const Vector<3> * _tri)
     {
         std::stringstream out;
-        out << "Triangle[{{" << _tri[0](0) << ", " << _tri[0](1) << ", " << _tri[0](2) << "}, ";
-        out << "{" << _tri[1](0) << ", " << _tri[1](1) << ", " << _tri[1](2) << "}, ";
-        out << "{" << _tri[2](0) << ", " << _tri[2](1) << ", " << _tri[2](2) << "}}]";
+        out << "Triangle[{{" << _tri[0][0] << ", " << _tri[0][1] << ", " << _tri[0][2] << "}, ";
+        out << "{" << _tri[1][0] << ", " << _tri[1][1] << ", " << _tri[1][2] << "}, ";
+        out << "{" << _tri[2][0] << ", " << _tri[2][1] << ", " << _tri[2][2] << "}}]";
         return out.str();
     }
 }
@@ -31,15 +31,15 @@ void TriangleIntTest_run()
 {
     RND rnd;
     std::ofstream out("triangles.nb", std::ofstream::out);
-    Vector triangle1[] = {Vector(3), Vector(3), Vector(3)};
-    Vector triangle2[] = {Vector(3), Vector(3), Vector(3)};
+    Vector<3> triangle1[3];
+    Vector<3> triangle2[3];
     int no = 0;
     
     for (int i = 0; i < 100; i++) {
         for (int j = 0; j < 3; j++) {
             for (int k = 0; k < 3; k++) {
-                triangle1[j](k) = rnd.nextValue();
-                triangle2[j](k) = rnd.nextValue();
+                triangle1[j][k] = rnd.nextValue();
+                triangle2[j][k] = rnd.nextValue();
             }
         }
         out << "tri1 = " << triangleToWolfram(triangle1) << ";" << std::endl;

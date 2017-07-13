@@ -4,7 +4,7 @@
 // (C)PKua 2017
 //-----------------------------------------------------------------------------------------------------------------------------
 
-#include "Matrix.h"
+#include "DynamicMatrix.h"
 
 //#define MATRIX_DEBUG
 
@@ -21,7 +21,7 @@
 
 // Default ctor generating zero 1x1 matrix
 //--------------------------------------------------------------------------------------------
-Matrix::Matrix() :
+DynamicMatrix::DynamicMatrix() :
     rows(1),
     cols(1)
 {
@@ -31,7 +31,7 @@ Matrix::Matrix() :
 
 // Copy ctor
 //--------------------------------------------------------------------------------------------
-Matrix::Matrix(const Matrix & other) :
+DynamicMatrix::DynamicMatrix(const DynamicMatrix & other) :
     rows(other.rows),
     cols(other.cols)
 {
@@ -47,7 +47,7 @@ Matrix::Matrix(const Matrix & other) :
 
 // Move ctor
 //--------------------------------------------------------------------------------------------
-Matrix::Matrix(Matrix && other) :
+DynamicMatrix::DynamicMatrix(DynamicMatrix && other) :
     arr(other.arr),
     rows(other.rows),
     cols(other.cols)
@@ -62,7 +62,7 @@ Matrix::Matrix(Matrix && other) :
 // Copy assingment operator. Returns this reference for operations such as
 // (matrix = getmatrix()).getWidth()
 //--------------------------------------------------------------------------------------------
-Matrix & Matrix::operator=(const Matrix & other)
+DynamicMatrix & DynamicMatrix::operator=(const DynamicMatrix & other)
 {
 #ifdef MATRIX_DEBUG
     std::cout << "in matrix copy assignment" << std::endl;
@@ -90,7 +90,7 @@ Matrix & Matrix::operator=(const Matrix & other)
 // Move assignment operator. Returns this reference for operations such as
 // (matrix = getmatrix()).getWidth()
 //--------------------------------------------------------------------------------------------
-Matrix & Matrix::operator=(Matrix && other)
+DynamicMatrix & DynamicMatrix::operator=(DynamicMatrix && other)
 {
 #ifdef MATRIX_DEBUG
     std::cout << "in matrix move assignment" << std::endl;
@@ -107,7 +107,7 @@ Matrix & Matrix::operator=(Matrix && other)
 
 // Dtor
 //--------------------------------------------------------------------------------------------
-Matrix::~Matrix()
+DynamicMatrix::~DynamicMatrix()
 {
 #ifdef MATRIX_DEBUG
     std::cout << "in matrix dtor" << std::endl;
@@ -121,7 +121,7 @@ Matrix::~Matrix()
 // _rows, _cols - matrix dimensions
 // _fill - value to be filled with
 //--------------------------------------------------------------------------------------------
-Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, double _fill = 0) :
+DynamicMatrix::DynamicMatrix(mxsize_t _rows, mxsize_t _cols, double _fill = 0) :
     rows(_rows),
     cols(_cols)
 {
@@ -143,7 +143,7 @@ Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, double _fill = 0) :
 // _rows, _cols - matrix dimensions
 // _arr - array with matrix elements
 //--------------------------------------------------------------------------------------------
-Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, double **_arr) :
+DynamicMatrix::DynamicMatrix(mxsize_t _rows, mxsize_t _cols, double **_arr) :
     rows(_rows),
     cols(_cols)
 {
@@ -170,7 +170,7 @@ Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, double **_arr) :
 // _rows, _cols - matrix dimensions
 // _arr - array with matrix elements
 //--------------------------------------------------------------------------------------------
-Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, double *_arr) :
+DynamicMatrix::DynamicMatrix(mxsize_t _rows, mxsize_t _cols, double *_arr) :
     rows(_rows),
     cols(_cols)
 {
@@ -195,7 +195,7 @@ Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, double *_arr) :
 // _rows, _cols - matrix dimensions
 // _arr - initializer lsit with matrix elements
 //--------------------------------------------------------------------------------------------
-Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, std::initializer_list<double> _arr) :
+DynamicMatrix::DynamicMatrix(mxsize_t _rows, mxsize_t _cols, std::initializer_list<double> _arr) :
     rows(_rows),
     cols(_cols)
 {
@@ -215,9 +215,9 @@ Matrix::Matrix(mxsize_t _rows, mxsize_t _cols, std::initializer_list<double> _ar
 //--------------------------------------------------------------------------------------------
 // _size - matrix size
 //--------------------------------------------------------------------------------------------
-Matrix Matrix::identity(mxsize_t _size)
+DynamicMatrix DynamicMatrix::identity(mxsize_t _size)
 {
-    Matrix matrix(_size, _size);
+    DynamicMatrix matrix(_size, _size);
     for (mxsize_t i = 0; i < _size; i++)
         matrix._get(i, i) = 1;
     return matrix;
@@ -227,11 +227,11 @@ Matrix Matrix::identity(mxsize_t _size)
 //--------------------------------------------------------------------------------------------
 // _a - rotate angle
 //--------------------------------------------------------------------------------------------
-Matrix Matrix::rotation2D(double _a)
+DynamicMatrix DynamicMatrix::rotation2D(double _a)
 {
     double sin_a = sin(_a);
     double cos_a = cos(_a);
-    Matrix matrix(2, 2);
+    DynamicMatrix matrix(2, 2);
     matrix.arr[0] = cos_a;
     matrix.arr[1] = -sin_a;
     matrix.arr[2] = sin_a;
@@ -246,7 +246,7 @@ Matrix Matrix::rotation2D(double _a)
 // _ay - counter-clockwise rotation angle about Y axis
 // _az - counter-clockwise rotation angle about Z axis
 //--------------------------------------------------------------------------------------------
-Matrix Matrix::rotation3D(double _ax, double _ay, double _az)
+DynamicMatrix DynamicMatrix::rotation3D(double _ax, double _ay, double _az)
 {
     double sin_ax = sin(_ax);
     double sin_ay = sin(_ay);
@@ -255,7 +255,7 @@ Matrix Matrix::rotation3D(double _ax, double _ay, double _az)
     double cos_ay = cos(_ay);
     double cos_az = cos(_az);
 
-    Matrix matrix(3, 3);
+    DynamicMatrix matrix(3, 3);
     matrix.arr[0] = cos_ay * cos_az;
     matrix.arr[1] = sin_ax * sin_ay * cos_az - cos_ax * sin_az;
     matrix.arr[2] = cos_ax * sin_ay * cos_az + sin_ax * sin_az;
@@ -273,55 +273,55 @@ Matrix Matrix::rotation3D(double _ax, double _ay, double _az)
 
 // Addition of 2 matrices
 //--------------------------------------------------------------------------------------------
-Matrix operator+(Matrix matrix1, const Matrix & matrix2)
+DynamicMatrix operator+(DynamicMatrix matrix1, const DynamicMatrix & matrix2)
 {
     return (matrix1 += matrix2);
 }
 
 // Multiplication of 2 matrices
 //--------------------------------------------------------------------------------------------
-Matrix operator*(const Matrix & matrix1, const Matrix & matrix2)
+DynamicMatrix operator*(const DynamicMatrix & matrix1, const DynamicMatrix & matrix2)
 {
     if (matrix1.cols != matrix2.rows)
         throw std::invalid_argument("cannot multiply matrices; matrix1.getCols() != matrix2.getRows()");
 
-    Matrix::mxsize_t kmax = matrix1.cols;
-    Matrix ret(matrix1.rows, matrix2.cols);
-    for (Matrix::mxsize_t i = 0; i < matrix1.rows; i++)
-        for (Matrix::mxsize_t j = 0; j < matrix2.cols; j++)
-            for (Matrix::mxsize_t k = 0; k < kmax; k++)
+    DynamicMatrix::mxsize_t kmax = matrix1.cols;
+    DynamicMatrix ret(matrix1.rows, matrix2.cols);
+    for (DynamicMatrix::mxsize_t i = 0; i < matrix1.rows; i++)
+        for (DynamicMatrix::mxsize_t j = 0; j < matrix2.cols; j++)
+            for (DynamicMatrix::mxsize_t k = 0; k < kmax; k++)
                 ret._get(i, j) += matrix1._get(i, k) * matrix2._get(k, j);
     return ret;
 }
 
 // Multiplying matrix by scalar
 //--------------------------------------------------------------------------------------------
-Matrix operator*(double x, Matrix matrix)
+DynamicMatrix operator*(double x, DynamicMatrix matrix)
 {
     return (matrix *= x);
 }
 
-Matrix operator*(Matrix matrix, double x)
+DynamicMatrix operator*(DynamicMatrix matrix, double x)
 {
     return (matrix *= x);
 }
 
 // Subtraction of 2 matrices
 //--------------------------------------------------------------------------------------------
-Matrix operator-(Matrix matrix1, const Matrix & matrix2)
+DynamicMatrix operator-(DynamicMatrix matrix1, const DynamicMatrix & matrix2)
 {
     return (matrix1 -= matrix2);
 }
 
 // Cross product operator between two R3 vector
 //--------------------------------------------------------------------------------------------
-Matrix operator^(const Matrix & matrix1, const Matrix & matrix2)
+DynamicMatrix operator^(const DynamicMatrix & matrix1, const DynamicMatrix & matrix2)
 {
     if (matrix1.getRows() != 3 || matrix1.getCols() != 1)
         throw std::runtime_error("matrix1 not in M(3, 1, R)");
     if (matrix2.getRows() != 3 || matrix2.getCols() != 1)
         throw std::runtime_error("matrix2 not in M(3, 1, R)");
-    return Matrix(3, 1, {
+    return DynamicMatrix(3, 1, {
         matrix1._get(1, 0) * matrix2._get(2, 0) - matrix1._get(2, 0) * matrix2._get(1, 0),
         matrix1._get(2, 0) * matrix2._get(0, 0) - matrix1._get(0, 0) * matrix2._get(2, 0),
         matrix1._get(0, 0) * matrix2._get(1, 0) - matrix1._get(1, 0) * matrix2._get(0, 0) });
@@ -329,13 +329,13 @@ Matrix operator^(const Matrix & matrix1, const Matrix & matrix2)
 
 // Equality operator of 2 matrices
 //--------------------------------------------------------------------------------------------
-bool operator==(const Matrix & matrix1, const Matrix & matrix2)
+bool operator==(const DynamicMatrix & matrix1, const DynamicMatrix & matrix2)
 {
     if (matrix1.rows != matrix2.rows || matrix1.cols != matrix2.cols)
         throw std::invalid_argument("cannot compare matrices of different sizes");
 
-    Matrix::mxsizel_t max = matrix1.rows * matrix1.cols;
-    for (Matrix::mxsizel_t i = 0; i < max; i++)
+    DynamicMatrix::mxsizel_t max = matrix1.rows * matrix1.cols;
+    for (DynamicMatrix::mxsizel_t i = 0; i < max; i++)
         if (matrix1.arr[i] != matrix2.arr[i])
             return false;
     return true;
@@ -343,35 +343,35 @@ bool operator==(const Matrix & matrix1, const Matrix & matrix2)
 
 // Inequality operator of 2 matrices
 //--------------------------------------------------------------------------------------------
-bool operator!=(const Matrix & matrix1, const Matrix & matrix2)
+bool operator!=(const DynamicMatrix & matrix1, const DynamicMatrix & matrix2)
 {
     return !(matrix1 == matrix2);
 }
 
 // Addition assignment operator
 //--------------------------------------------------------------------------------------------
-Matrix & Matrix::operator+=(const Matrix & other)
+DynamicMatrix & DynamicMatrix::operator+=(const DynamicMatrix & other)
 {
     if (rows != other.rows || cols != other.cols)
         throw std::invalid_argument("cannot add matrices of different sizes");
 
-    Matrix::mxsizel_t max = rows * cols;
-    for (Matrix::mxsizel_t i = 0; i < max; i++)
+    DynamicMatrix::mxsizel_t max = rows * cols;
+    for (DynamicMatrix::mxsizel_t i = 0; i < max; i++)
         arr[i] += other.arr[i];
     return *this;
 }
 
-// Matrix multiplication assignment operator
+// DynamicMatrix multiplication assignment operator
 //--------------------------------------------------------------------------------------------
-Matrix & Matrix::operator*=(const Matrix & other)
+DynamicMatrix & DynamicMatrix::operator*=(const DynamicMatrix & other)
 {
     *this = std::move(*this * other);
     return *this;
 }
 
-// Matrix multiplication by scalar assignment operator
+// DynamicMatrix multiplication by scalar assignment operator
 //--------------------------------------------------------------------------------------------
-Matrix & Matrix::operator*=(double x)
+DynamicMatrix & DynamicMatrix::operator*=(double x)
 {
     if (x == 0) {
         std::fill(arr, arr + rows * cols, 0);
@@ -385,7 +385,7 @@ Matrix & Matrix::operator*=(double x)
 
 // Subtraction assignment operator
 //--------------------------------------------------------------------------------------------
-Matrix & Matrix::operator-=(const Matrix & other)
+DynamicMatrix & DynamicMatrix::operator-=(const DynamicMatrix & other)
 {
     if (rows != other.rows || cols != other.cols)
         throw new std::invalid_argument("cannot subtract matrices of different sizes");
@@ -398,7 +398,7 @@ Matrix & Matrix::operator-=(const Matrix & other)
 
 // Cross product assignment operator between two R3 vectors
 //--------------------------------------------------------------------------------------------
-Matrix & Matrix::operator^=(const Matrix & other)
+DynamicMatrix & DynamicMatrix::operator^=(const DynamicMatrix & other)
 {
     *this = std::move(*this ^ other);
     return *this;
@@ -406,9 +406,9 @@ Matrix & Matrix::operator^=(const Matrix & other)
 
 // Unary minus operator
 //--------------------------------------------------------------------------------------------
-Matrix Matrix::operator-(void) const
+DynamicMatrix DynamicMatrix::operator-(void) const
 {
-    Matrix ret(rows, cols);
+    DynamicMatrix ret(rows, cols);
     mxsizel_t max = rows * cols;
     for (mxsizel_t i = 0; i < max; i++)
         ret.arr[i] = -arr[i];
@@ -420,7 +420,7 @@ Matrix Matrix::operator-(void) const
 // use matrix(i-1, j-1). Check if indexes are in bounds and throws std::invalid_argument
 // exception if needed
 //--------------------------------------------------------------------------------------------
-double & Matrix::operator()(mxsize_t _row, mxsize_t _column)
+double & DynamicMatrix::operator()(mxsize_t _row, mxsize_t _column)
 {
     if (_row >= rows)       throw std::invalid_argument("row index out of bounds");
     if (_column >= cols)    throw std::invalid_argument("column index out of bounds");
@@ -432,7 +432,7 @@ double & Matrix::operator()(mxsize_t _row, mxsize_t _column)
 // should use matrix(i-1, j-1). Check if indexes are in bounds and throws
 // std::invalid_argument exception if needed
 //--------------------------------------------------------------------------------------------
-const double & Matrix::operator()(mxsize_t _row, mxsize_t _column) const
+const double & DynamicMatrix::operator()(mxsize_t _row, mxsize_t _column) const
 {
     if (_row >= rows)       throw std::invalid_argument("row index out of bounds");
     if (_column >= cols)    throw std::invalid_argument("column index out of bounds");
@@ -442,9 +442,9 @@ const double & Matrix::operator()(mxsize_t _row, mxsize_t _column) const
 
 // Returns transposition of the matrix
 //--------------------------------------------------------------------------------------------
-Matrix Matrix::transpose() const
+DynamicMatrix DynamicMatrix::transpose() const
 {
-    Matrix matrix(cols, rows);
+    DynamicMatrix matrix(cols, rows);
     for (mxsize_t i = 0; i < rows; i++)
         for (mxsize_t j = 0; j < cols; j++)
             matrix._get(j, i) = _get(i, j);
@@ -454,7 +454,7 @@ Matrix Matrix::transpose() const
 
 // Returns determinant of the matrix
 //--------------------------------------------------------------------------------------------
-double Matrix::det() const
+double DynamicMatrix::det() const
 {
     if (rows != cols)  throw std::runtime_error("rows != cols");
 
@@ -478,17 +478,17 @@ double Matrix::det() const
 // Returns inversion of the matrix. Throws an exception, when matrix isn't square or isn't
 // invertible
 //--------------------------------------------------------------------------------------------
-Matrix Matrix::inverse() const
+DynamicMatrix DynamicMatrix::inverse() const
 {
     if (rows != cols)    throw std::runtime_error("rows != cols");
 
     // Small matrices
     if (rows == 1) {
         if (arr[0] == 0)  throw std::runtime_error("cannot invert, det == 0");
-        return Matrix(1, 1, 1 / arr[0]);
+        return DynamicMatrix(1, 1, 1 / arr[0]);
     } else if (rows == 2) {
         double determinant = det();
-        Matrix out(2, 2);
+        DynamicMatrix out(2, 2);
         if (determinant == 0)  throw std::runtime_error("cannot invert, det == 0");
         
         out.arr[0] = arr[3] / determinant;
@@ -500,7 +500,7 @@ Matrix Matrix::inverse() const
     // Bigger matrices
     else {
         double determinant = det();
-        Matrix out(rows, rows);
+        DynamicMatrix out(rows, rows);
         if (determinant == 0)  throw std::runtime_error("cannot invert, det == 0");
 
         for (mxsize_t i = 0; i < rows; i++)
@@ -512,13 +512,13 @@ Matrix Matrix::inverse() const
 
 // Calculates minor of matrix created by removing (_row + 1) row and (_column + 1) column 
 //--------------------------------------------------------------------------------------------
-double Matrix::matrix_minor(mxsize_t _row, mxsize_t _column) const
+double DynamicMatrix::matrix_minor(mxsize_t _row, mxsize_t _column) const
 {
     if (rows != cols)   throw std::runtime_error("rows != cols");
     if (rows == 1)      throw std::runtime_error("zero-size minor");
     if (rows == 2)      return arr[3 ^ (_row << 1 | _column)];
 
-    Matrix minor_mx(rows - 1, rows - 1);
+    DynamicMatrix minor_mx(rows - 1, rows - 1);
 
     if (_row > 0) {
         // Copy left-top part (if exists)
@@ -553,7 +553,7 @@ double Matrix::matrix_minor(mxsize_t _row, mxsize_t _column) const
 
 // Depicts the matrix in the form of a string
 //--------------------------------------------------------------------------------------------
-std::string Matrix::toString() const
+std::string DynamicMatrix::toString() const
 {
     std::stringstream sstream;
     sstream << *this;
@@ -562,10 +562,10 @@ std::string Matrix::toString() const
 
 // Friend stream insertion operator
 //--------------------------------------------------------------------------------------------
-std::ostream & operator<<(std::ostream & _stream, const Matrix & _matrix)
+std::ostream & operator<<(std::ostream & _stream, const DynamicMatrix & _matrix)
 {
-    for (Matrix::mxsize_t i = 0; i < _matrix.getRows(); i++) {
-        for (Matrix::mxsize_t j = 0; j < _matrix.getCols(); j++) {
+    for (DynamicMatrix::mxsize_t i = 0; i < _matrix.getRows(); i++) {
+        for (DynamicMatrix::mxsize_t j = 0; j < _matrix.getCols(); j++) {
             _stream << _matrix._get(i, j) << " ";
         }
         _stream << std::endl;

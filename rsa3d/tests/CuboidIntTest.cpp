@@ -28,28 +28,28 @@ namespace
     const double    sizex = 1;
     const double    sizey = 1;
     const double    sizez = 1;
-    const double    box_halfsize = 4;
+    const double    box_halfsize = 1;
     const int       tries = 10000;
     
 	int             no = 0; 
-    Vector          cuboid1_tris[12][3];
-    Vector          cuboid2_tris[12][3];
+    Vector<3>       cuboid1_tris[12][3];
+    Vector<3>       cuboid2_tris[12][3];
     
     // Helper method. Obtains and saves triangles from cuboid's faces
     //--------------------------------------------------------------------------------------------
-    void obtain_tris(Cuboid * cuboid, Vector (&arr)[12][3])
+    void obtain_tris(Cuboid * cuboid, Vector<3> (&arr)[12][3])
     {
-        Vector pos(3, cuboid->getPosition()); 
-        Matrix orientation = cuboid->getOrientation();   
-        Vector vert[] = {
-            pos + orientation * Vector{ sizex / 2,  sizey / 2,  sizez / 2},
-            pos + orientation * Vector{-sizex / 2,  sizey / 2,  sizez / 2},
-            pos + orientation * Vector{ sizex / 2, -sizey / 2,  sizez / 2},
-            pos + orientation * Vector{ sizex / 2,  sizey / 2, -sizez / 2},
-            pos + orientation * Vector{ sizex / 2, -sizey / 2, -sizez / 2},
-            pos + orientation * Vector{-sizex / 2,  sizey / 2, -sizez / 2},
-            pos + orientation * Vector{-sizex / 2, -sizey / 2,  sizez / 2},
-            pos + orientation * Vector{-sizex / 2, -sizey / 2, -sizez / 2} 
+        Vector<3> pos(cuboid->getPosition()); 
+        Matrix<3, 3> orientation = cuboid->getOrientation();   
+        Vector<3> vert[] = {
+            pos + orientation * Vector<3>{{ sizex / 2,  sizey / 2,  sizez / 2}},
+            pos + orientation * Vector<3>{{-sizex / 2,  sizey / 2,  sizez / 2}},
+            pos + orientation * Vector<3>{{ sizex / 2, -sizey / 2,  sizez / 2}},
+            pos + orientation * Vector<3>{{ sizex / 2,  sizey / 2, -sizez / 2}},
+            pos + orientation * Vector<3>{{ sizex / 2, -sizey / 2, -sizez / 2}},
+            pos + orientation * Vector<3>{{-sizex / 2,  sizey / 2, -sizez / 2}},
+            pos + orientation * Vector<3>{{-sizex / 2, -sizey / 2,  sizez / 2}},
+            pos + orientation * Vector<3>{{-sizex / 2, -sizey / 2, -sizez / 2}} 
         };
         
         arr[0][0] = vert[0];
@@ -139,36 +139,36 @@ namespace
 //--------------------------------------------------------------------------------------------
 void TriTriInt_selftest_run()
 {
-    Vector triangle1[] = {
-        Vector{0, -1, 0},
-        Vector{0, 1, 0},
-        Vector{0, 0, 1}
+    Vector<3> triangle1[] = {
+        Vector<3>{{0, -1, 0}},
+        Vector<3>{{0, 1, 0}},
+        Vector<3>{{0, 0, 1}}
     };
     
     // Triangle on z = 1.00000001 plane containing x = 0, y = 0
-    Vector triangle2[] = {
-        Vector{1.4, 0.8, 1.00000001},
-        Vector{-1.3, 0, 1.00000001},
-        Vector{0, -4.5, 1.00000001}
+    Vector<3> triangle2[] = {
+        Vector<3>{{1.4, 0.8, 1.00000001}},
+        Vector<3>{{-1.3, 0, 1.00000001}},
+        Vector<3>{{0, -4.5, 1.00000001}}
     };
     
     // Triangle on z = 0.99999999 plane containing x = 0, y = 0
-    Vector triangle3[] = {
-        Vector{1.4, 0.8, 0.99999999},
-        Vector{-1.3, 0, 0.99999999},
-        Vector{0, -4.5, 0.99999999}
+    Vector<3> triangle3[] = {
+        Vector<3>{{1.4, 0.8, 0.99999999}},
+        Vector<3>{{-1.3, 0, 0.99999999}},
+        Vector<3>{{0, -4.5, 0.99999999}}
     };
     
-    Vector triangle4[] = {
-        Vector{-1, -1, 0},
-        Vector{1, 0, 2.00000001},
-        Vector{-1, 1, 0}
+    Vector<3> triangle4[] = {
+        Vector<3>{{-1, -1, 0}},
+        Vector<3>{{1, 0, 2.00000001}},
+        Vector<3>{{-1, 1, 0}}
     };
     
-    Vector triangle5[] = {
-        Vector{-1, -1, 0},
-        Vector{1, 0, 1.99999999},
-        Vector{-1, 1, 0}
+    Vector<3> triangle5[] = {
+        Vector<3>{{-1, -1, 0}},
+        Vector<3>{{1, 0, 1.99999999}},
+        Vector<3>{{-1, 1, 0}}
     };
     
     std::cout << std::boolalpha;

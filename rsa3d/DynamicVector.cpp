@@ -4,67 +4,67 @@
 // (C)PKua 2017
 //--------------------------------------------------------------------------------------------
 
-#include "Vector.h"
+#include "DynamicVector.h"
 
 #include <stdexcept>
 
 
 
-// Nothing special here, let the Matrix class do the magic
+// Nothing special here, let the DynamicMatrix class do the magic
 //--------------------------------------------------------------------------------------------
-Vector::Vector()
+DynamicVector::DynamicVector()
 {
 
 }
 
-Vector::Vector(const Vector & other) : v(other.v)
-{
-    
-}
-
-Vector::Vector(const Vector && other) : v(std::move(other.v))
+DynamicVector::DynamicVector(const DynamicVector & other) : v(other.v)
 {
     
 }
 
-Vector & Vector::operator=(const Vector & other)
+DynamicVector::DynamicVector(const DynamicVector && other) : v(std::move(other.v))
+{
+    
+}
+
+DynamicVector & DynamicVector::operator=(const DynamicVector & other)
 {
     this->v = other.v;
     return *this;
 }
 
-Vector & Vector::operator=(Vector && other)
+DynamicVector & DynamicVector::operator=(DynamicVector && other)
 {
     this->v = std::move(other.v);
     return *this;
 }
 
-Vector::Vector(std::initializer_list<double> _coords) : v(Matrix(_coords.size(), 1, _coords))
+DynamicVector::DynamicVector(std::initializer_list<double> _coords) : v(DynamicMatrix(_coords.size(), 1, _coords))
 {
     
 }
 
-Vector::Vector(mxsize_t dim, double *_arr) : v(Matrix(dim, 1, _arr))
+DynamicVector::DynamicVector(vsize_t dim, double *_arr) : v(DynamicMatrix(dim, 1, _arr))
 {
 
 }
 
-Vector::Vector(mxsize_t dim, double _fill) : v(Matrix(dim, 1, _fill))
+DynamicVector::DynamicVector(vsize_t dim, double _fill) : v(DynamicMatrix(dim, 1, _fill))
 {
 
 }
 
-Vector::Vector(mxsize_t dim) : v(Matrix(dim, 1, 0.))
+DynamicVector::DynamicVector(vsize_t dim) : v(DynamicMatrix(dim, 1, 0.))
 {
 
 }
 
-Vector::Vector(const Matrix & _v) : v(_v)
+DynamicVector::DynamicVector(const DynamicMatrix & _v) : v(_v)
 {
 
 }
 
-Vector::Vector(Matrix && _v) : v(std::move(_v))
+DynamicVector::DynamicVector(DynamicMatrix && _v) : v(std::move(_v))
 {
 
 }
@@ -73,74 +73,74 @@ Vector::Vector(Matrix && _v) : v(std::move(_v))
 // Operators.
 //--------------------------------------------------------------------------------------------
 
-Vector operator+(const Vector & _v1, const Vector & _v2)
+DynamicVector operator+(const DynamicVector & _v1, const DynamicVector & _v2)
 {
-    return Vector(std::move(_v1.v + _v2.v));
+    return DynamicVector(std::move(_v1.v + _v2.v));
 }
 
 // Scalar product
 //--------------------------------------------------------------------------------------------
-double operator*(const Vector & _v1, const Vector & _v2)
+double operator*(const DynamicVector & _v1, const DynamicVector & _v2)
 {
     if (_v1.getDimension() != _v2.getDimension())
         throw std::invalid_argument("_v1.getDimension() != _v2.getDimension()");
     double prod = 0;
-    for (Matrix::mxsize_t i = 0; i < _v1.getDimension(); i++)
+    for (DynamicVector::vsize_t i = 0; i < _v1.getDimension(); i++)
         prod += _v1(i) * _v2(i);
     return prod;
 }
 
 // Multiplication by scalar
 //--------------------------------------------------------------------------------------------
-Vector operator*(double _x, Vector _v)
+DynamicVector operator*(double _x, DynamicVector _v)
 {
-    return Vector(std::move(_x * _v.v));
+    return DynamicVector(std::move(_x * _v.v));
 }
 
 // Multiplication by scalar (different operands order)
 //--------------------------------------------------------------------------------------------
-Vector operator*(const Vector & _v, double _x)
+DynamicVector operator*(const DynamicVector & _v, double _x)
 {
-    return Vector(std::move(_x * _v.v));
+    return DynamicVector(std::move(_x * _v.v));
 }
 
 // Linear transformation (multiplication of matrix and this)
 //--------------------------------------------------------------------------------------------
-Vector operator*(const Matrix & _m, const Vector & _v)
+DynamicVector operator*(const DynamicMatrix & _m, const DynamicVector & _v)
 {
-    return Vector(std::move(_m * _v.v));
+    return DynamicVector(std::move(_m * _v.v));
 }
 
-Vector operator-(const Vector & _v1, const Vector & _v2)
+DynamicVector operator-(const DynamicVector & _v1, const DynamicVector & _v2)
 {
-    return Vector(std::move(_v1.v - _v2.v));
+    return DynamicVector(std::move(_v1.v - _v2.v));
 }
 
 // Cross product
 //--------------------------------------------------------------------------------------------
-Vector operator^(const Vector & _v1, const Vector & _v2)
+DynamicVector operator^(const DynamicVector & _v1, const DynamicVector & _v2)
 {
     if (_v1.getDimension() != 3)
         throw std::runtime_error("_v1 not a R^3 vector");
     if (_v2.getDimension() != 3)
         throw std::runtime_error("_v2 not a R^3 vector");
-    return Vector({
+    return DynamicVector({
         _v1(1) * _v2(2) - _v1(2) * _v2(1),
         _v1(2) * _v2(0) - _v1(0) * _v2(2),
         _v1(0) * _v2(1) - _v1(1) * _v2(0) });
 }
 
-bool operator==(const Vector & _v1, const Vector & _v2)
+bool operator==(const DynamicVector & _v1, const DynamicVector & _v2)
 {
     return (_v1.v == _v2.v);
 }
 
-bool operator!=(const Vector & _v1, const Vector & _v2)
+bool operator!=(const DynamicVector & _v1, const DynamicVector & _v2)
 {
     return (_v1.v != _v2.v);
 }
 
-Vector & Vector::operator+=(const Vector & other)
+DynamicVector & DynamicVector::operator+=(const DynamicVector & other)
 {
     this->v += other.v;
     return *this;
@@ -148,38 +148,38 @@ Vector & Vector::operator+=(const Vector & other)
 
 // Multiplication by scalar
 //--------------------------------------------------------------------------------------------
-Vector & Vector::operator*=(double x)
+DynamicVector & DynamicVector::operator*=(double x)
 {
     this->v *= x;
     return *this;
 }
 
-Vector & Vector::operator-=(const Vector & other)
+DynamicVector & DynamicVector::operator-=(const DynamicVector & other)
 {
     this->v -= other.v;
     return *this;
 }
 
-Vector Vector::operator-(void) const
+DynamicVector DynamicVector::operator-(void) const
 {
-    return Vector(std::move(-this->v));
+    return DynamicVector(std::move(-this->v));
 }
 
 // Cross product assignment operator
 //--------------------------------------------------------------------------------------------
-Vector & Vector::operator^=(const Vector & other)
+DynamicVector & DynamicVector::operator^=(const DynamicVector & other)
 {
     *this = std::move(*this ^ other);
     return *this;
 }
 
 
-double & Vector::operator()(mxsize_t coord)
+double & DynamicVector::operator()(vsize_t coord)
 {
     return this->v(coord, 0);
 }
 
-const double & Vector::operator()(mxsize_t coord) const
+const double & DynamicVector::operator()(vsize_t coord) const
 {
     return this->v(coord, 0);
 }
@@ -187,10 +187,10 @@ const double & Vector::operator()(mxsize_t coord) const
 
 // Print vector to _ostr output stream
 //-----------------------------------------------------------------------------------------
-std::ostream & operator<<(std::ostream & _ostr, const Vector & _v)
+std::ostream & operator<<(std::ostream & _ostr, const DynamicVector & _v)
 {
     _ostr << "(";
-    for (Vector::mxsize_t i = 0; i < _v.v.getRows() - 1; i++)
+    for (DynamicVector::vsize_t i = 0; i < _v.v.getRows() - 1; i++)
         _ostr << _v.v(i, 0) << ", ";
     _ostr << _v.v(_v.v.getRows() - 1, 0) << ")";
     return _ostr;

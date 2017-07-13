@@ -34,9 +34,10 @@ EXEC = rsa
 
 # Source files list (withous extensions)
 OBJS = rsa3d/BoundaryConditions \
+       rsa3d/DynamicMatrix \
+       rsa3d/DynamicVector \
        rsa3d/Intersection \
        rsa3d/Main \
-       rsa3d/Matrix \
        rsa3d/NeighbourGrid \
        rsa3d/PackingGenerator \
        rsa3d/Parameters \
@@ -46,12 +47,13 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/ShapeFactory \
        rsa3d/Surface \
        rsa3d/Utils \
-       rsa3d/Vector \
        rsa3d/Voxel \
        rsa3d/VoxelList \
        rsa3d/analizator/Analyzer \
-       rsa3d/shapes/Sphere \
        rsa3d/shapes/Cuboid \
+       rsa3d/shapes/OrientedCuboid \
+       rsa3d/shapes/Sphere \
+       rsa3d/surfaces/NBoxFBC \
        rsa3d/surfaces/NBoxPBC \
        rsa3d/tests/CuboidIntTest \
        rsa3d/tests/TriangleIntTest \

@@ -9,7 +9,7 @@
 
 bool OrientedCuboid::do2Drotation;
 
-OrientedCuboid::OrientedCuboid(const Matrix & rotation) : Cuboid(rotation){
+OrientedCuboid::OrientedCuboid(const Matrix<3, 3> & rotation) : Cuboid(rotation){
 }
 
 OrientedCuboid::~OrientedCuboid() {
@@ -29,12 +29,12 @@ void OrientedCuboid::initClass(const std::string &args){
 Shape * OrientedCuboid::create(RND *rnd){
 	OrientedCuboid *cuboid;
 	if (OrientedCuboid::do2Drotation)
-	    cuboid = new OrientedCuboid(Matrix::rotation3D(
+	    cuboid = new OrientedCuboid(Matrix<3, 3>::rotation(
 	        0,
 	        std::asin(rnd->nextValue() * 2 - 1),
 	        rnd->nextValue() * 2 * M_PI));
 	else
-    	cuboid = new OrientedCuboid(Matrix::identity(3));
+    	cuboid = new OrientedCuboid(Matrix<3, 3>::identity());
 
 #ifdef CUBOID_DEBUG
     std::cout << "Creating OrientedCuboid:" << std::endl;

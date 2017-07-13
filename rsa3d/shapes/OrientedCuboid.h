@@ -15,7 +15,7 @@ private:
 	static bool do2Drotation;
 
 public:
-	OrientedCuboid(const Matrix & rotation);
+	OrientedCuboid(const Matrix<3, 3> & rotation);
 	virtual ~OrientedCuboid();
 
 	static void initClass(const std::string &args);

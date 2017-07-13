@@ -5,6 +5,7 @@
 //----------------------------------------------------------------------------
 
 #include "Cuboid.h"
+#include "../Vector.h"
 
 #include <iostream>
 #include <string>
@@ -59,7 +60,7 @@ inline bool checkSegmentFace(double plane_pos, double bound1, double bound2,
 // Default constructor creating new Cuboid in (0, 0, 0) with size set in
 // Cuboid::initClass
 //----------------------------------------------------------------------------
-Cuboid::Cuboid(const Matrix & orientation) : Shape(Cuboid::staticDimension), orientation(orientation)
+Cuboid::Cuboid(const Matrix<3, 3> & orientation) : Shape(Cuboid::staticDimension), orientation(orientation)
 {
 
 }
@@ -135,7 +136,7 @@ void Cuboid::initClass(const std::string &args)
 //----------------------------------------------------------------------------
 Shape * Cuboid::create(RND *rnd)
 {
-    Cuboid * cuboid = new Cuboid(Matrix::rotation3D(
+    Cuboid * cuboid = new Cuboid(Matrix<3, 3>::rotation(
         rnd->nextValue() * 2 * M_PI,
         std::asin(rnd->nextValue() * 2 - 1),
         rnd->nextValue() * 2 * M_PI));
@@ -168,46 +169,44 @@ int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
 {
     // Prepare matrices of translations for operations on shapes
     Cuboid *sCuboid = (Cuboid*)s;
-    Matrix thisTranslation(this->dimension, 1, this->position);
-    Matrix sTranslation(this->dimension, 1, sCuboid->position);
-    sTranslation += Matrix(this->dimension, 1, bc->getTranslation(auxDoubleArray, this->position, sCuboid->position));
-    Matrix backwards_rot = this->orientation.transpose();
+    Vector<3> thisTranslation(this->position);
+    Vector<3> sTranslation(sCuboid->position);
+    sTranslation += Vector<3>(bc->getTranslation(auxDoubleArray, this->position, sCuboid->position));
+    Matrix<3, 3> backwards_rot = this->orientation.transpose();
     
     // Transform s coordinates to this coordinate system
-    Matrix new_orientation = backwards_rot * sCuboid->orientation;
+    Matrix<3, 3> new_orientation = backwards_rot * sCuboid->orientation;
     sTranslation = backwards_rot * (sTranslation - thisTranslation);
     
-    Matrix v_trans[V::SIZE];    // Calculated vertices coordinates
+    Vector<3> v_trans[V::SIZE];    // Calculated vertices coordinates
     
     // Check whether vertices of s lie in this. TO OPTIMIZE
-    if (checkPoint( (v_trans[V::PPP] = new_orientation * Matrix(3, 1, { size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ) ||      
-        checkPoint( (v_trans[V::NPP] = new_orientation * Matrix(3, 1, {-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ) ||
-        checkPoint( (v_trans[V::PNP] = new_orientation * Matrix(3, 1, { size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ) ||
-        checkPoint( (v_trans[V::PPN] = new_orientation * Matrix(3, 1, { size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ) ||
-        checkPoint( (v_trans[V::PNN] = new_orientation * Matrix(3, 1, { size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ) ||
-        checkPoint( (v_trans[V::NPN] = new_orientation * Matrix(3, 1, {-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ) ||
-        checkPoint( (v_trans[V::NNP] = new_orientation * Matrix(3, 1, {-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ) ||
-        checkPoint( (v_trans[V::NNN] = new_orientation * Matrix(3, 1, {-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ))
+    if (checkPoint( (v_trans[V::PPP] = new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||      
+        checkPoint( (v_trans[V::NPP] = new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
+        checkPoint( (v_trans[V::PNP] = new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
+        checkPoint( (v_trans[V::PPN] = new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
+        checkPoint( (v_trans[V::PNN] = new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
+        checkPoint( (v_trans[V::NPN] = new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
+        checkPoint( (v_trans[V::NNP] = new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
+        checkPoint( (v_trans[V::NNN] = new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ))
     {    
-        //std::cout << "PRZECINA w1" << std::endl;
         return true;    
     }
     
     // Transform this coordinates to s coordinate system
     new_orientation = new_orientation.transpose();
-    sTranslation = -new_orientation * sTranslation;
+    sTranslation = -(new_orientation * sTranslation);
     
     // Check whether vertices of this lie in s
-    if (sCuboid->checkPoint( new_orientation * Matrix(3, 1, { size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ||      
-        sCuboid->checkPoint( new_orientation * Matrix(3, 1, {-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ||
-        sCuboid->checkPoint( new_orientation * Matrix(3, 1, { size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ||
-        sCuboid->checkPoint( new_orientation * Matrix(3, 1, { size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ||
-        sCuboid->checkPoint( new_orientation * Matrix(3, 1, { size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ||
-        sCuboid->checkPoint( new_orientation * Matrix(3, 1, {-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation) ||
-        sCuboid->checkPoint( new_orientation * Matrix(3, 1, {-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}) + sTranslation) ||
-        sCuboid->checkPoint( new_orientation * Matrix(3, 1, {-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}) + sTranslation))
+    if (sCuboid->checkPoint( new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ||      
+        sCuboid->checkPoint( new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ||
+        sCuboid->checkPoint( new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ||
+        sCuboid->checkPoint( new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ||
+        sCuboid->checkPoint( new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ||
+        sCuboid->checkPoint( new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ||
+        sCuboid->checkPoint( new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ||
+        sCuboid->checkPoint( new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation))
     {
-        //std::cout << "PRZECINA w2" << std::endl;
         return true;    
     }
     
@@ -219,20 +218,18 @@ int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
         checkSegment(v_trans[V::PPP], v_trans[V::NPP]) || checkSegment(v_trans[V::PPN], v_trans[V::NPN]) ||
         checkSegment(v_trans[V::PNN], v_trans[V::NNN]) || checkSegment(v_trans[V::PNP], v_trans[V::NNP]))
     {
-        //std::cout << "PRZECINA e" << std::endl;
         return true;
     }
     
-    //std::cout << "NIE PRZECINA" << std::endl;
     return false;
 }
 
 // Checks whether given vertex (in this coordinates) lies in Cuboid
 //----------------------------------------------------------------------------
-bool Cuboid::checkPoint(const Matrix & vertex)
+bool Cuboid::checkPoint(const Vector<3> & vertex)
 {
     for (unsigned char i = 0; i < this->dimension; i++)
-        if (std::abs(vertex(i, 0)) > this->size[i] / 2)
+        if (std::abs(vertex[i]) > this->size[i] / 2)
             return false;
     return true;
 }
@@ -240,19 +237,19 @@ bool Cuboid::checkPoint(const Matrix & vertex)
 // Checks whether a segment determined by point1 and point2 intersects with
 // Cuboid
 //----------------------------------------------------------------------------
-bool Cuboid::checkSegment(const Matrix & point1, const Matrix & point2)
+bool Cuboid::checkSegment(const Vector<3> & point1, const Vector<3> & point2)
 {
     double hsize_x = size[C::X] / 2;
     double hsize_y = size[C::Y] / 2;
     double hsize_z = size[C::Z] / 2;
 
     // Check intersections with all faces
-    return checkSegmentFace( hsize_x, hsize_y, hsize_z, point1(C::X, 0), point1(C::Y, 0), point1(C::Z, 0), point2(C::X, 0), point2(C::Y, 0), point2(C::Z, 0)) ||
-           checkSegmentFace(-hsize_x, hsize_y, hsize_z, point1(C::X, 0), point1(C::Y, 0), point1(C::Z, 0), point2(C::X, 0), point2(C::Y, 0), point2(C::Z, 0)) ||
-           checkSegmentFace( hsize_y, hsize_z, hsize_x, point1(C::Y, 0), point1(C::Z, 0), point1(C::X, 0), point2(C::Y, 0), point2(C::Z, 0), point2(C::X, 0)) ||
-           checkSegmentFace(-hsize_y, hsize_z, hsize_x, point1(C::Y, 0), point1(C::Z, 0), point1(C::X, 0), point2(C::Y, 0), point2(C::Z, 0), point2(C::X, 0)) ||
-           checkSegmentFace( hsize_z, hsize_x, hsize_y, point1(C::Z, 0), point1(C::X, 0), point1(C::Y, 0), point2(C::Z, 0), point2(C::X, 0), point2(C::Y, 0)) ||
-           checkSegmentFace(-hsize_z, hsize_x, hsize_y, point1(C::Z, 0), point1(C::X, 0), point1(C::Y, 0), point2(C::Z, 0), point2(C::X, 0), point2(C::Y, 0));          
+    return checkSegmentFace( hsize_x, hsize_y, hsize_z, point1[C::X], point1[C::Y], point1[C::Z], point2[C::X], point2[C::Y], point2[C::Z]) ||
+           checkSegmentFace(-hsize_x, hsize_y, hsize_z, point1[C::X], point1[C::Y], point1[C::Z], point2[C::X], point2[C::Y], point2[C::Z]) ||
+           checkSegmentFace( hsize_y, hsize_z, hsize_x, point1[C::Y], point1[C::Z], point1[C::X], point2[C::Y], point2[C::Z], point2[C::X]) ||
+           checkSegmentFace(-hsize_y, hsize_z, hsize_x, point1[C::Y], point1[C::Z], point1[C::X], point2[C::Y], point2[C::Z], point2[C::X]) ||
+           checkSegmentFace( hsize_z, hsize_x, hsize_y, point1[C::Z], point1[C::X], point1[C::Y], point2[C::Z], point2[C::X], point2[C::Y]) ||
+           checkSegmentFace(-hsize_z, hsize_x, hsize_y, point1[C::Z], point1[C::X], point1[C::Y], point2[C::Z], point2[C::X], point2[C::Y]);          
 }
 
 // Checks whether given segment intersects with axis-oriented rectangular face
@@ -297,16 +294,16 @@ double Cuboid::getVolume()
 int Cuboid::pointInside(BoundaryConditions *bc, double* da)
 {
     // Prepare matrices of translations for operations on the point
-    Matrix cuboidTranslation(this->dimension, 1, this->position);
-    Matrix pointTranslation(this->dimension, 1, da);
+    Vector<3> cuboidTranslation(this->position);
+    Vector<3> pointTranslation(da);
     
     // Transform point coordinates to Cuboid coordinate system
-    cuboidTranslation += Matrix(this->dimension, 1, bc->getTranslation(auxDoubleArray, this->position, da));
+    cuboidTranslation += Vector<3>(bc->getTranslation(auxDoubleArray, this->position, da));
     pointTranslation = this->orientation.transpose() * (pointTranslation - cuboidTranslation);
     
     // Save absolute values of point coords
     for (unsigned char i = 0; i < 3; i++)
-        auxDoubleArray[i] = std::abs(pointTranslation(i, 0));
+        auxDoubleArray[i] = std::abs(pointTranslation[i]);
     
     // Map which coords lie in this and which lie in this + minDimension
     bool liesInSmaller[3];
@@ -342,7 +339,7 @@ int Cuboid::pointInside(BoundaryConditions *bc, double* da)
 
 // Returns Cuboid orientation
 //----------------------------------------------------------------------------
-Matrix Cuboid::getOrientation() const
+Matrix<3, 3> Cuboid::getOrientation() const
 {
     return this->orientation;
 }

@@ -21,18 +21,18 @@ private:
     static unsigned char    staticDimension;
     static double           *auxDoubleArray;        // Auxiliary double array of dimension size
     static double           *auxDoubleArray2;       // Second aux array
-    Matrix                  orientation;
+    Matrix<3, 3>            orientation;
     static double           minDimension;
     
     static double           neighbourListCellSize;
     static double           voxelSize;
     
-    bool        checkPoint(const Matrix & vertex);
-    bool        checkSegment(const Matrix & point1, const Matrix & point2);
+    bool        checkPoint(const Vector<3> & vertex);
+    bool        checkSegment(const Vector<3> & point1, const Vector<3> & point2);
 
 public:
     // Implicit copy ctor and copy assignment operator - trivial destructor
-    Cuboid(const Matrix & rotation);
+    Cuboid(const Matrix<3, 3> & rotation);
     ~Cuboid();
 
 	static void initClass(const std::string &args);
@@ -44,7 +44,7 @@ public:
     double getVolume();
     int pointInside(BoundaryConditions *bc, double* da);
     
-    Matrix getOrientation() const;
+    Matrix<3, 3> getOrientation() const;
     std::string toPovray() const;
     std::string toWolfram() const;
 	void store(std::ostream &f) const;
