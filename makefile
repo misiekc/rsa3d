@@ -1,38 +1,38 @@
 #############################################
-#    PLIK MAKEFILE OGÓLNEGO PRZEZNACZENIA   #
+#         GENERAL PURPOSE MAKEFILE          #
 #############################################
-# KOMPILACJA I LINKOWANIE PROGRAMU:         #
+# COMPILATION AND CONSOLIDATION:            #
 #     make                                  #
 #                                           #
-# CZYSZCZENIE PLIÓW POMOCNICZYCH (OBJ i D): #
+# CLEANING HELPER FILES (OBJ & D):          #
 #     make clean                            #
 #                                           #
-# CZYSZCZENIE WSZYSTKICH WYNIKÓW KOMPILACJI #
+# CLEANING ALL RESULT OF COMPILATION        #
 #     make clean_all                        #
 #############################################
 
 
-##########################
-# USTAWIENIA KOMPILATORA #
-##########################
+#####################
+# COMPILER SETTINGS #
+#####################
 
-# Kompilator
+# Compiler to use
 CC = g++
 
-# Flagi kompilacji
+# Compiler flags
 CFLAGS = -Wall -pedantic -std=c++11 -I./ -g
 
-# Flagi linkowania
+# Linker flags
 LFLAGS =
 
-#######################
-# USTAWIENIA PROJEKTU #
-#######################
+####################
+# PROJECT SETTINGS #
+####################
 
-# Nazwa pliku wykonywalnego
+# Executable name
 EXEC = rsa
 
-# Lista plików źródłowych (bez rozszerzenia)
+# Source files list (withous extensions)
 OBJS = rsa3d/BoundaryConditions \
        rsa3d/Intersection \
        rsa3d/Main \
@@ -61,28 +61,28 @@ OBJS = rsa3d/BoundaryConditions \
        statistics/Plot \
        statistics/PowerRegression
 
-# Lista wszystkich podfolderów w projekcie (foldery w ścieżce tworzone
-# automatycznie)
+# A list of all subfolders in the project (all dirs in path
+# are created automaticly, dosen't have to bi listed explicitly)
 SUBDIRS = rsa3d/analizator/ \
           rsa3d/shapes/ \
           rsa3d/surfaces/ \
           rsa3d/tests/ \
           statistics/
 
-# Folder na pliki OBJ
+# OBJ files folder
 OBJDIR = build/obj
 
-# Folder na pliki D
+# D files folder
 DEPSDIR = build/deps
 
-####################################
-# WEWNĘTRZNA KONFIGURACJA MAKEFILE #
-####################################
+###################################
+# MAKEFILE INTERNAL CONFIGURATION #
+###################################
 
 OBJSD = $(OBJS:%=$(OBJDIR)/%.o)
 DEPS = $(OBJS:%=$(DEPSDIR)/%.d)
 
-# tworzenie potrzebnych folderów
+# creating folders
 #-----------------------------------
 define make_dirs
 @mkdir -p $(OBJDIR)
@@ -94,21 +94,21 @@ done
 endef
 
 ####################
-# CELE             #
+# TARGETS          #
 ####################
 
-# linkowanie programu
+# executable linking
 #-----------------------------------------------------------------
 $(EXEC): $(OBJSD)
 	@echo '## LINKING'
 	$(CC) -o $@ $^ $(LFLAGS)	
 
-# załączenie zależności - po $(EXEC), aby puste make odnosiło się
-# do pliku wykonywalnego
+# including dependencies - after $(EXEC) so make with no targets
+# refer to executable linking
 #----------------------------------------------------------------
 -include $(DEPS)
 
-# kompilacja plików *.c i *.cpp, tworzenie plików zależności
+# *.c and *.cpp compilation, generating dependency files
 #----------------------------------------------------------------
 $(OBJDIR)/%.o: %.c
 	$(make_dirs)
@@ -118,7 +118,7 @@ $(OBJDIR)/%.o: %.cpp
 	$(make_dirs)
 	$(CC) $(CFLAGS) -c $*.cpp -o $@ -MMD -MF $(DEPSDIR)/$*.d -MT '$@'
 
-# czyszczenie wyników kompilacji
+# cleaning compilation results
 #---------------------------------------------------------------
 clean_all:
 	rm -rf $(EXEC) build
