@@ -42,6 +42,7 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/Intersection \
        rsa3d/Main \
        rsa3d/NeighbourGrid \
+       rsa3d/OrientedFace \
        rsa3d/PackingGenerator \
        rsa3d/Parameters \
        rsa3d/Positioned \
