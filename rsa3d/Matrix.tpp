@@ -160,16 +160,25 @@ inline Matrix<ROWS, COLS, E> operator-(Matrix<ROWS, COLS, E> matrix1, const Matr
 // Multiplying matrix by scalar
 //--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
-inline Matrix<ROWS, COLS, E> operator*(double x, Matrix<ROWS, COLS, E> matrix)
+inline Matrix<ROWS, COLS, E> operator*(Matrix<ROWS, COLS, E> matrix, E x)
 {
     return (matrix *= x);
 }
 
 
 template <std::size_t ROWS, std::size_t COLS, typename E>
-inline Matrix<ROWS, COLS, E> operator*(Matrix<ROWS, COLS, E> matrix, double x)
+inline Matrix<ROWS, COLS, E> operator*(E x, Matrix<ROWS, COLS, E> matrix)
 {
     return (matrix *= x);
+}
+
+
+// Dividing matrix by scalar
+//--------------------------------------------------------------------------------------------
+template <std::size_t ROWS, std::size_t COLS, typename E>
+inline Matrix<ROWS, COLS, E> operator/(Matrix<ROWS, COLS, E> matrix, E x)
+{
+    return (matrix /= x);
 }
 
 
@@ -256,6 +265,18 @@ Matrix<ROWS, COLS, E> & Matrix<ROWS, COLS, E>::operator*=(E x)
         for (std::size_t i = 0; i < ROWS * COLS; i++)
             arr[i] *= x;
     }
+    return *this;
+}
+
+
+// Matrix division by scalar assignment operator
+//--------------------------------------------------------------------------------------------
+template <std::size_t ROWS, std::size_t COLS, typename E>
+Matrix<ROWS, COLS, E> & Matrix<ROWS, COLS, E>::operator/=(E x)
+{
+    if (x != 1)
+        for (std::size_t i = 0; i < ROWS * COLS; i++)
+            arr[i] /= x;
     return *this;
 }
 

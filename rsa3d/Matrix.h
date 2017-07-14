@@ -82,9 +82,10 @@ public:
     // Operators
     //----------------------------------------------------------------------------------------
     Matrix<ROWS, COLS, E> & operator+=(const Matrix<ROWS, COLS, E> & other);
+    Matrix<ROWS, COLS, E> & operator/=(E x);
+    Matrix<ROWS, COLS, E> & operator-=(const Matrix<ROWS, COLS, E> & other);
     Matrix<ROWS, COLS, E> & operator*=(const Matrix<COLS, COLS, E> & other);
     Matrix<ROWS, COLS, E> & operator*=(E x);
-    Matrix<ROWS, COLS, E> & operator-=(const Matrix<ROWS, COLS, E> & other);
     Matrix<ROWS, COLS, E> operator-(void) const;
 
     E & operator()(std::size_t row, std::size_t column);

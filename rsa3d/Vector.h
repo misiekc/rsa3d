@@ -37,6 +37,9 @@ Vector<DIM, E> operator*(const Vector<DIM, E> & _v, E _x);
 template <std::size_t DIM, typename E>
 Vector<DIM, E> operator*(E _x, const Vector<DIM, E> & _v);
 
+template <std::size_t DIM, typename E>
+Vector<DIM, E> operator/(const Vector<DIM, E> & _v, E _x);
+
 template <std::size_t DIM1, std::size_t DIM2, typename E>
 Vector<DIM2, E> operator*(const Matrix<DIM2, DIM1, E> & _m, const Vector<DIM1, E> & _v);
 
@@ -130,6 +133,7 @@ public:
     friend Vector operator- <> (const Vector & _v1, const Vector & _v2);    // Subtraction
     friend Vector operator* <> (const Vector & _v, E _x);                   // Scalar multiplication
     friend Vector operator* <> (E _x, const Vector & _v);
+    friend Vector operator/ <> (const Vector & _v, E _x);                   // Scalar division
     friend E operator* <> (const Vector & _v1, const Vector & _v2);         // Scalar product
     friend bool operator== <> (const Vector & _v1, const Vector & _v2);     // Equality
     friend bool operator!= <> (const Vector & _v1, const Vector & _v2);     // Inequality
@@ -159,9 +163,15 @@ public:
         return *this;
     }
     
-    Vector & operator*=(double x)       // Multiplication by scalar assignment
+    Vector & operator*=(E x)       // Multiplication by scalar assignment
     {
         this->v *= x;
+        return *this;
+    }
+    
+    Vector & operator/=(E x)       // Division by scalar assignment
+    {
+        this->v /= x;
         return *this;
     }
 
@@ -173,6 +183,16 @@ public:
     template <std::size_t _DIM = DIM, typename _E = E>
     enabled<_DIM == 3, Vector> &
     operator^=(const Vector<3, E> & other);      // Vector product assignemnt
+
+    
+    // Norm of vector (for double)
+    //---------------------------------------------------------------------------------------
+    template <typename _E = E>
+    enabled<std::is_same<_E, double>::value, double>
+    norm() const
+    {
+        return sqrt((*this) * (*this));
+    }
 
 
     // Public access operators
