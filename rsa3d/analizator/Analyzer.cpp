@@ -8,11 +8,11 @@
 #include "Analyzer.h"
 #include "../Shape.h"
 #include "../ShapeFactory.h"
-#include "../../statistics/Plot.h"
-#include "../../statistics/LogPlot.h"
-#include "../../statistics/LinearRegression.h"
-#include "../../statistics/PowerRegression.h"
-#include "../../statistics/ASFRegression.h"
+#include <Plot.h>
+#include <LogPlot.h>
+#include <LinearRegression.h>
+#include <PowerRegression.h>
+#include <ASFRegression.h>
 #include <fstream>
 #include <iostream>
 #include <dirent.h>

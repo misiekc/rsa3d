@@ -20,9 +20,9 @@
 CC = g++
 
 # Compiler flags
-CFLAGS = -Wall -pedantic -std=c++11 -I./ -g
+CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -g
 
-# Linker flags
+# Linker flags 
 LFLAGS =
 
 ####################
@@ -31,6 +31,9 @@ LFLAGS =
 
 # Executable name
 EXEC = rsa
+
+# Libraries
+LIBSTAT = libstat.a
 
 # Source files list (withous extensions)
 OBJS = rsa3d/BoundaryConditions \
@@ -56,12 +59,14 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/surfaces/NBoxFBC \
        rsa3d/surfaces/NBoxPBC \
        rsa3d/tests/CuboidIntTest \
-       rsa3d/tests/TriangleIntTest \
-       statistics/ASFRegression \
-       statistics/LinearRegression \
-       statistics/LogPlot \
-       statistics/Plot \
-       statistics/PowerRegression
+       rsa3d/tests/TriangleIntTest
+       
+# Source files list (withous extensions) for statistics lib
+OBJS_STAT = statistics/ASFRegression \
+            statistics/LinearRegression \
+            statistics/LogPlot \
+            statistics/Plot \
+            statistics/PowerRegression
 
 # A list of all subfolders in the project (all dirs in path
 # are created automaticly, dosen't have to bi listed explicitly)
@@ -82,6 +87,7 @@ DEPSDIR = build/deps
 ###################################
 
 OBJSD = $(OBJS:%=$(OBJDIR)/%.o)
+OBJS_STATD = $(OBJS_STAT:%=$(OBJDIR)/%.o)
 DEPS = $(OBJS:%=$(DEPSDIR)/%.d)
 
 # creating folders
@@ -101,9 +107,13 @@ endef
 
 # executable linking
 #-----------------------------------------------------------------
-$(EXEC): $(OBJSD)
+$(EXEC): $(OBJSD) $(LIBSTAT)
 	@echo '## LINKING'
-	$(CC) -o $@ $^ $(LFLAGS)	
+	$(CC) -o $@ $^ $(LFLAGS)
+	
+$(LIBSTAT): $(OBJS_STATD)
+	@echo '## MAKING $(LIBSTAT)'
+	ar crf $@ $^
 
 # including dependencies - after $(EXEC) so make with no targets
 # refer to executable linking
@@ -123,7 +133,7 @@ $(OBJDIR)/%.o: %.cpp
 # cleaning compilation results
 #---------------------------------------------------------------
 clean_all:
-	rm -rf $(EXEC) build
+	rm -rf $(EXEC) $(LIBSTAT) build
 
 clean:
 	rm -rf build

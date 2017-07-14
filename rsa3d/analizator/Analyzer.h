@@ -11,8 +11,8 @@
 #include "../Shape.h"
 #include "../Parameters.h"
 
-#include "../../statistics/Plot.h"
-#include "../../statistics/LogPlot.h"
+#include <Plot.h>
+#include <LogPlot.h>
 
 #include <string>
 #include <vector>
