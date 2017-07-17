@@ -62,4 +62,4 @@ inline DynamicVector::vsize_t DynamicVector::getDimension() const
     return this->v.getRows();
 }
 
-#endif  // _VECTOR_H
+#endif  // _DYNAMIC_VECTOR_H
