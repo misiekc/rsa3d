@@ -26,7 +26,6 @@ PackingGenerator::PackingGenerator(int s, Parameters *p) {
 PackingGenerator::~PackingGenerator() {
 	for(Shape *s : this->packing)
 		delete s;
-	delete this->voxels;
 }
 
 bool PackingGenerator::isSaturated() {
@@ -128,9 +127,7 @@ void PackingGenerator::createPacking(){
 
 			if(this->getFactor()>FACTOR_LIMIT && this->voxels->analyzeVoxel(v, sTmp, this->surface))
 				this->voxels->remove(v);
-
-
-			if (v->getMissCounter() % this->params->analyze == 0) {
+			else if (v->getMissCounter() % this->params->analyze == 0) {
 				if(this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface) && this->getFactor()>FACTOR_LIMIT)
 					this->analyzeRegion(v);
 			}
