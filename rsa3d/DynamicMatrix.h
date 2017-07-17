@@ -4,8 +4,8 @@
 // (C)PKua 2017
 //-----------------------------------------------------------------------------------------------------------------------------
 
-#ifndef _GENERAL_MATRIX_H
-    #define _GENERAL_MATRIX_H
+#ifndef _DYNAMIC_MATRIX_H
+    #define _DYNAMIC_MATRIX_H
 
 #include <utility>
 #include <ostream>
@@ -106,4 +106,4 @@ inline DynamicMatrix::mxsize_t DynamicMatrix::getCols() const
     return cols;
 }
 
-#endif  // _MATRIX_H
+#endif  // _DYNAMIC_MATRIX_H

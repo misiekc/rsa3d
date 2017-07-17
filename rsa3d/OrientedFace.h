@@ -5,7 +5,12 @@
 //--------------------------------------------------------------------------------------------
 
 
+#ifndef _ORIENTED_FACE_H
+    #define _ORIENTED_FACE_H
+
+
 #include <vector>
+#include <memory>
 
 #include "Vector.h"
 
@@ -13,16 +18,27 @@
 class OrientedFace
 {
 private:
-    std::vector<Vector<3> *> vertices;
+    typedef std::shared_ptr<Vector<3>> vptr;
+    
+    std::vector<vptr> vertices;
     
 public:
-    OrientedFace(const std::vector<Vector<3> *> & _vertices);
-    OrientedFace(Vector<3> ** _vertices, std::size_t _num);
+    OrientedFace(const std::vector<vptr> & _vertices);
     
     Vector<3>   getOrthogonal() const;
     Vector<3>   getNormal() const;
     double      pointSignedDistance(const Vector<3> & _point) const;
     double      pointSign(const Vector<3> & _point) const;
     void        translate(const Vector<3> & _translation);
-    std::vector<Vector<3> *> getVertices() const;
+    double      getSurface() const;
+    
+    // Returns vertices of this face (as vector of R^3 Vector)
+    //----------------------------------------------------------------------------------------
+    std::vector<vptr> getVertices() const
+    {
+        return this->vertices;
+    }
 };
+
+
+#endif // _ORIENTED_FACE_H

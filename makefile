@@ -54,6 +54,7 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/Voxel \
        rsa3d/VoxelList \
        rsa3d/analizator/Analyzer \
+       rsa3d/shapes/ConvexPolyhedron \
        rsa3d/shapes/Cuboid \
        rsa3d/shapes/OrientedCuboid \
        rsa3d/shapes/Sphere \
@@ -70,7 +71,7 @@ OBJS_STAT = statistics/ASFRegression \
             statistics/PowerRegression
 
 # A list of all subfolders in the project (all dirs in path
-# are created automaticly, dosen't have to bi listed explicitly)
+# are created automaticly, they don't have to be listed explicitly)
 SUBDIRS = rsa3d/analizator/ \
           rsa3d/shapes/ \
           rsa3d/surfaces/ \
