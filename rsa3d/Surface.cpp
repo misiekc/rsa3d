@@ -8,42 +8,18 @@
 #include "Surface.h"
 #include <iostream>
 
-double Surface::FACTOR_LIMIT = 5.0;
-
 Surface::Surface(int dim, double s, double ndx, double vdx) : BoundaryConditions() {
 	this->dimension = dim;
 	this->size = s;
 	this->list = new NeighbourGrid(dim, s, ndx);
-	this->voxels = new VoxelList(dim, s, vdx);
-
-	this->iAnalyze = 0;
-	this->tmpSplit = 0;
-	this->iMaxVoxels = 0;
-	this->dMinVoxelSize = 0;
-	this->missCounter = 0;
 }
 
 Surface::~Surface() {
 	delete this->list;
-	delete this->voxels;
 }
 
-void Surface::setParameters(int ia, int is, double dvs, int imv) {
-	this->iAnalyze = ia;
-	this->tmpSplit = is;
-	this->iMaxVoxels = imv;
-	if (imv==0)
-		this->voxels->disable();
-	this->dMinVoxelSize = dvs;
-}
-
-void Surface::setSeed(int s){
-	this->seed = s;
-}
 
 void Surface::add(Shape *s) {
-		s->no = this->shapes.size();
-		this->shapes.insert(this->shapes.end(), s);
 		this->list->add(s);
 	}
 
@@ -62,6 +38,10 @@ Shape* Surface::check(Shape *s){
 
 std::unordered_set<Positioned *> * Surface::getNeighbours(double* da) {
 	return this->list->getNeighbours(da);
+}
+
+NeighbourGrid * Surface::getNeighbourGrid(){
+	return this->list;
 }
 
 double Surface::distance2(double *a1, double *a2) {
@@ -88,99 +68,3 @@ void Surface::vectorPeriodicBC(double* v) {
 			v[i] += this->size;
 	}
 }
-
-int Surface::analyzeVoxels() {
-
-	std::cout << "[" << this->seed << " Surface::analyzeVoxels] " << this->voxels->length() << " voxels, " << this->shapes.size() << " shapes, factor = " << this->getFactor() << std::endl;
-
-	int begin = this->voxels->length();
-	int timestamp = this->shapes.size();
-	for (int i = 0; i < this->voxels->length(); i++) {
-		Voxel *v = this->voxels->get(i);
-		if (this->voxels->analyzeVoxel(v, this->list, this, timestamp)) {
-			this->voxels->remove(v);
-			i--;
-		}
-	}
-
-	std::cout << "[" << this->seed << " Surface::analyzeVoxels] " << this->voxels->length() << " voxels remained, factor = " << this->getFactor() << std::endl;
-
-	return begin - this->voxels->length();
-}
-
-// analyzes all voxels inside a region around v
-int Surface::analyzeRegion(Voxel *v){
-	int begin = this->voxels->length();
-	std::unordered_set<Positioned *> *region = this->voxels->getNeighbours(v);
-	for(Positioned *v1: *region){
-		if (this->voxels->analyzeVoxel((Voxel *)v1, this->list, this))
-			this->voxels->remove((Voxel *)v1);
-	}
-	return begin - this->voxels->length();
-}
-
-bool Surface::doIteration(Shape *s, RND *rnd) {
-	Voxel *v = this->voxels->getRandomVoxel(rnd);
-	double *da = new double[this->dimension];
-	s->translate(this->voxels->getRandomPosition(da, v, rnd));
-	delete[] da;
-	Shape *sTmp = this->check(s);
-	if (sTmp==NULL) {
-		this->add(s);
-		if(this->getFactor()>FACTOR_LIMIT){
-			this->analyzeRegion(v);
-		}else{
-			this->voxels->remove(v);
-		}
-		this->missCounter = 0;
-		return true;
-	} else {
-		v->miss();
-		this->missCounter++;
-
-		if(this->getFactor()>FACTOR_LIMIT && this->voxels->analyzeVoxel(v, sTmp, this))
-			this->voxels->remove(v);
-
-
-		if (v->getMissCounter() % iAnalyze == 0) {
-			if(this->voxels->analyzeVoxel(v, this->list, this) && this->getFactor()>FACTOR_LIMIT)
-				this->analyzeRegion(v);
-		}
-		if (missCounter > tmpSplit) { // v.getMissCounter() % iSplit == 0){ //
-			missCounter = 0;
-			int v0 = this->voxels->length();
-
-			std::cout << "[" << this->seed << " Surface::doIteration] splitting voxels ";
-			std::cout.flush();
-
-			bool b = voxels->splitVoxels(dMinVoxelSize, iMaxVoxels, this->list, this);
-			int v1 = this->voxels->length();
-
-			std::cout << " done: " << this->shapes.size() << " shapes, " << this->voxels->length() << " voxels, new voxel size " << voxels->getVoxelSize() << ", factor " << this->getFactor() << std::endl;
-
-			if (b) {
-				tmpSplit *=  ((double)v1 / v0);
-				if (tmpSplit > 0.5 * std::numeric_limits<int>::max())
-					tmpSplit = 0.5 * std::numeric_limits<int>::max();
-				if(voxels->length()<1000 && tmpSplit>100)
-					tmpSplit /= 10.0;
-			} else {
-				this->analyzeVoxels();
-			}
-		}
-		return false;
-	}
-}
-
-bool Surface::isSaturated() {
-	return (this->voxels->length() == 0);
-}
-
-double Surface::getFactor() {
-	return this->getArea() / this->voxels->getVoxelsSurface();
-	}
-
-std::vector<Positioned *> * Surface::getShapes() {
-	return &(this->shapes);
-}
-

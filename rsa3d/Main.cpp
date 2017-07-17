@@ -10,6 +10,7 @@
 #include <fstream>
 #include <iostream>
 
+/*
 void toPovRay(std::string filename, double size,
 		std::vector<Shape *> *packing) {
 	std::ofstream file(filename);
@@ -41,6 +42,7 @@ void toPovRay(std::string filename, double size,
 
 	file.close();
 }
+*/
 
 void toFile(std::string filename, std::vector<Shape *> *packing) {
 	std::ofstream file(filename, std::ios::binary);
@@ -122,7 +124,7 @@ int boundaries(Parameters &params) {
 	PackingGenerator *pg;
 	char buf[20];
 	unsigned long counter = 0UL, max = 200000000UL;
-	int seed = 805;
+	int seed = 0;
 	std::sprintf(buf, "%.0f", pow(params.surfaceSize, params.dimension));
 	std::string size(buf);
 	std::string filename = "packing_" + params.particleType + "_" + params.particleAttributes + "_" + size + ".dat";
@@ -157,7 +159,7 @@ int main(int argc, char **argv) {
 	} else if (strcmp(argv[1], "povray")==0) {
 		std::string file(argv[3]);
 		std::vector<Shape *> *packing = fromFile(params.dimension, file);
-		toPovRay(file + ".pov", params.surfaceSize, packing);
+		PackingGenerator::toPovray(packing, params.surfaceSize, file + ".pov");
 		delete packing;
 	}
 	return 1;
