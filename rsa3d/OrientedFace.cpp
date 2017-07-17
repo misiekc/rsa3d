@@ -15,7 +15,7 @@
 // Constructor taking vector of vertices (as R^3 Vectors). The caller is obligated to assure
 // that veries are co-planar and lie in counter-clockwise order looking from "positive" side
 //--------------------------------------------------------------------------------------------
-OrientedFace::OrientedFace(const std::vector<Vector<3> *> & _vertices) : vertices(_vertices)
+OrientedFace::OrientedFace(const std::vector<vptr> & _vertices) : vertices(_vertices)
 {
     if (vertices.size() < 3)
         throw std::runtime_error("face with less than 3 vertices");
@@ -25,14 +25,14 @@ OrientedFace::OrientedFace(const std::vector<Vector<3> *> & _vertices) : vertice
 // Constructor taking array of vertices (as R^3 Vectors). The caller is obligated to assure
 // that veries are co-planar and lie in counter-clockwise order looking from "positive" side
 //--------------------------------------------------------------------------------------------
-OrientedFace::OrientedFace(Vector<3> ** _vertices, std::size_t _num)
+/*OrientedFace::OrientedFace(Vector<3> ** _vertices, std::size_t _num)
 {
     if (_num < 3)
         throw std::runtime_error("face with less than 3 vertices");
     
     this->vertices.reserve(_num);
     std::copy(_vertices, _vertices + _num, std::back_inserter(this->vertices));
-}
+}*/
 
 
 // Returns vector orthogonal to face, positive oriented
@@ -77,13 +77,20 @@ double OrientedFace::pointSign(const Vector<3> & _point) const
 //--------------------------------------------------------------------------------------------
 void OrientedFace::translate(const Vector<3> & _translation)
 {
-    std::for_each(this->vertices.begin(), this->vertices.end(), [&](Vector<3> * v){ (*v) += _translation; });
+    std::for_each(this->vertices.begin(), this->vertices.end(), [&](vptr v){ (*v) += _translation; });
 }
 
 
-// Returns vertices of this face (as vector of R^3 Vector)
+// Calculates surface of face
 //--------------------------------------------------------------------------------------------
-std::vector<Vector<3> *> OrientedFace::getVertices() const
+double OrientedFace::getSurface() const
 {
-    return this->vertices;
+    double surf = 0;
+    for (std::size_t i = 1; i < this->vertices.size() - 1; i++) {
+        Vector<3> product = (*vertices[0] - *vertices[i]) ^ (*vertices[0] - *vertices[i + 1]);
+        surf += std::abs(product.norm()) / 2;
+    }
+    return surf;
 }
+
+
