@@ -20,7 +20,7 @@
 CC = g++
 
 # Compiler flags
-CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -g
+CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -O3
 
 # Linker flags 
 LFLAGS =

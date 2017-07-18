@@ -193,6 +193,15 @@ public:
     {
         return sqrt((*this) * (*this));
     }
+    
+    // Returns projection on vector (for double)
+    //---------------------------------------------------------------------------------------
+    template <typename _E = E>
+    enabled<std::is_same<_E, double>::value, Vector>
+    projectOn(Vector _axis)
+    {
+        return (((*this) * _axis) / (_axis * _axis)) * _axis;
+    }
 
 
     // Public access operators

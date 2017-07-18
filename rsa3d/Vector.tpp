@@ -26,7 +26,7 @@ Vector<DIM, E> operator-(const Vector<DIM, E> & _v1, const Vector<DIM, E> & _v2)
 // Multiplication by scalar
 //--------------------------------------------------------------------------------------------
 template <std::size_t DIM, typename E>
-Vector<DIM, E> operator*(E _x, Vector<DIM, E> _v)
+Vector<DIM, E> operator*(E _x, const Vector<DIM, E> & _v)
 {
     return Vector<DIM, E>(std::move(_x * _v.v));
 }
@@ -107,9 +107,9 @@ operator^(const Vector<DIM, E> & _v1, const Vector<DIM, E> & _v2)
 template <std::size_t DIM, typename E>
 std::ostream & operator<<(std::ostream & _ostr, const Vector<DIM, E> & _v)
 {
-    _ostr << "(";
+    _ostr << "{";
     for (std::size_t i = 0; i < DIM - 1; i++)
         _ostr << _v.v(i, 0) << ", ";
-    _ostr << _v.v(DIM - 1, 0) << ")";
+    _ostr << _v.v(DIM - 1, 0) << "}";
     return _ostr;
 }

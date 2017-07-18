@@ -344,6 +344,14 @@ Matrix<3, 3> Cuboid::getOrientation() const
     return this->orientation;
 }
 
+// Returns Cuboid size
+//----------------------------------------------------------------------------
+double * Cuboid::getSize(double * arr)
+{
+    std::copy(size, size + staticDimension, arr);
+    return arr;
+}
+
 std::string Cuboid::toPovray() const{
 	std::string s = "  box { < ";
 	for(unsigned char i=0; i<this->dimension; i++){

@@ -45,6 +45,7 @@ public:
     int pointInside(BoundaryConditions *bc, double* da);
     
     Matrix<3, 3> getOrientation() const;
+    static double * getSize(double * arr);
     std::string toPovray() const;
     std::string toWolfram() const;
 	void store(std::ostream &f) const;
