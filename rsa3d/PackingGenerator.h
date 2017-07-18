@@ -40,7 +40,7 @@ public:
 	void run();
 	std::vector<Shape *> * getPacking();
 	void toPovray(std::string filename);
-	static void toPovray(std::vector<Shape *> * packing, double size, std::string filename);
+	static void toPovray(std::vector<Shape *> * packing, double size, VoxelList *voxels, std::string filename);
 };
 
 #endif /* PACKINGGENERATOR_H_ */

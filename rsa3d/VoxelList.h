@@ -60,10 +60,7 @@ public:
 	Voxel* get(int i);
 	int length();
 	double getVoxelsSurface();
-
-
-
-
+	std::string toPovray();
 };
 
 #endif /* VOXELLIST_H_ */

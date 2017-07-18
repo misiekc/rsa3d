@@ -234,7 +234,8 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 	}
 
 	Voxel** newList = new Voxel*[ ((int)round( pow(2, this->dimension)))*(this->last+1) ];
-	double newDx = (this->voxelSize/2.0)*this->dxFactor;
+	this->voxelSize = (this->voxelSize/2.0)*this->dxFactor;
+
 	int index = 0;
 
 	int *in = new int[this->dimension];
@@ -249,9 +250,9 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 		}
 		do{
 			for(unsigned char j=0; j < this->dimension; j++){
-				da[j] = vpos[j] + (in[j]-0.5)*newDx;
+				da[j] = vpos[j] + (in[j]-0.5)*this->voxelSize;
 			}
-			Voxel *vTmp = this->createVoxel(da, newDx, index);
+			Voxel *vTmp = this->createVoxel(da, this->voxelSize, index);
 			if (nl==NULL || bc==NULL || !this->analyzeVoxel(vTmp, nl, NULL, bc)){
 				newList[index] = vTmp;
 				index++;
@@ -271,7 +272,6 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 
 	this->last = index-1;
 	this->voxels = newList;
-	this->voxelSize = newDx;
 	this->fillNeighbourGrid();
 //	this->checkIndexes();
 	return true;
@@ -305,14 +305,19 @@ double VoxelList::getVoxelsSurface(){
 	return (this->last+1)*pow(this->voxelSize, this->dimension);
 }
 
-/*
-	synchronized public void drawVoxels(Graphics g, double scale, double[] ta){
-		int w = (int)(this.voxelSize*scale);
-		w += 1;
-		for(int i=0; i<=this.last; i++){
-			Voxel v = this.voxels[i];
-			g.fillRect((int)((v.center[0]-0.5*this.voxelSize+ta[0])*scale), (int)((v.center[1]-0.5*this.voxelSize+ta[1])*scale), w, w);
-		}
+std::string VoxelList::toPovray(){
+	double d = 0.5*this->voxelSize;
+	std::string sRes = "";
+	for(int i=0; i<=this->last; i++){
+		double *da = this->voxels[i]->getPosition();
+		double x1 = da[0] - d, x2 = da[0] + d;
+		double y1 = da[1] - d, y2 = da[1] + d;
+
+		sRes += "  polygon {4, < " + std::to_string(x1) + ", " + std::to_string(y1) + ", 1.0>, "
+				+ "< " + std::to_string(x1) + ", " + std::to_string(y2) + ", 1.0>, "
+				+ "< " + std::to_string(x2) + ", " + std::to_string(y2) + ", 1.0>, "
+				+ "< " + std::to_string(x2) + ", " + std::to_string(y1) + ", 1.0> "
+				+ " texture { finish { ambient 1 diffuse 0 } pigment { color Black} } }\r\n";
 	}
+	return sRes;
 }
-*/

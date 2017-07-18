@@ -26,6 +26,8 @@ PackingGenerator::PackingGenerator(int s, Parameters *p) {
 PackingGenerator::~PackingGenerator() {
 	for(Shape *s : this->packing)
 		delete s;
+	if (this->voxels!=NULL)
+		delete this->voxels;
 }
 
 bool PackingGenerator::isSaturated() {
@@ -152,12 +154,12 @@ void PackingGenerator::createPacking(){
 				} else {
 					this->analyzeVoxels();
 				}
+//				this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
 			}
 			delete s;
 		} // else
 	} // while
 	delete this->surface;
-	delete this->voxels;
 
 	std::cout << "[" << seed << " PackingGenerator::createPacking] finished after generating " << l << " shapes" << std::endl;
 
@@ -172,12 +174,12 @@ std::vector<Shape *> * PackingGenerator::getPacking(){
 }
 
 
-void PackingGenerator::toPovray(std::vector<Shape *> * packing, double size, std::string filename){
+void PackingGenerator::toPovray(std::vector<Shape *> * packing, double size, VoxelList *voxels, std::string filename){
 	std::ofstream file(filename);
 
 	file << "#include \"colors.inc\"" << std::endl;
 	file << "background { color White }" << std::endl;
-	file << "camera { orthographic location <" << size / 2 << ", " << size / 2 << ", " << (1.2 * size) << "> look_at  <" << size / 2 << ", " << size / 2 << ",  0> }" << std::endl;
+	file << "camera { orthographic location <" << size / 2 << ", " << size / 2 << ", " << (1.3 * size) << "> look_at  <" << size / 2 << ", " << size / 2 << ",  0> }" << std::endl;
 	file << "light_source { < 1000.0, 1000.0, 1000.0> color White shadowless parallel point_at <" << size / 2 << ", " << size / 2 << ",  0>}" << std::endl;
 	file << "#declare layer=union{" << std::endl;
 
@@ -187,8 +189,15 @@ void PackingGenerator::toPovray(std::vector<Shape *> * packing, double size, std
 	}
 
 	file << "}" << std::endl;
+
+	if(voxels!=NULL){
+		file << "#declare voxels=union{" << std::endl;
+		file << voxels->toPovray() << std::endl;
+		file << "}" << std::endl;
+	}
 	file << "#declare result=union{" << std::endl;
 	file << "  object { layer }" << std::endl;
+	file << "  object { voxels }" << std::endl;
 	file << "}" << std::endl;
 	file << "object{ result	rotate x*360*clock }" << std::endl;
 
@@ -196,6 +205,6 @@ void PackingGenerator::toPovray(std::vector<Shape *> * packing, double size, std
 }
 
 void PackingGenerator::toPovray(std::string filename){
-	PackingGenerator::toPovray(&(this->packing), this->params->surfaceSize, filename);
+	PackingGenerator::toPovray(&(this->packing), this->params->surfaceSize, this->voxels, filename);
 }
 
