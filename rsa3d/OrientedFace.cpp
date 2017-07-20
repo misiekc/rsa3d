@@ -94,3 +94,11 @@ double OrientedFace::getSurface() const
 }
 
 
+// Check whether face intersects with another face
+//--------------------------------------------------------------------------------------------
+bool OrientedFace::intersectsWith(const OrientedFace & face) const
+{
+    return false;
+}
+
+

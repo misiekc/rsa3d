@@ -16,6 +16,7 @@
 #include "../Vector.h"
 #include "../Intersection.h"
 #include "../shapes/Cuboid.h"
+#include "../shapes/ConvexPolyhedron.h"
 #include "../BoundaryConditions.h"
 #include "../ShapeFactory.h"
 
@@ -234,6 +235,62 @@ void CuboidIntTest_run()
 	std::cout << ">> " << intersected << " cuboids overlapped, " << disjunct << " cuboids were disjunctive" << std::endl;
 }
 
+
+// Performs Cuboid::overlap algorithm check. It generates some random pairs of cuboids
+// and compares result given by Cuboid::overlap and ConvexPolyhedron::overlap
+//--------------------------------------------------------------------------------------------
+void CuboidIntSATTest_run()
+{
+    RND rnd;
+    std::stringstream stream;
+    stream << "3 " << sizex << " " <<  sizey << " " << sizez;
+	ShapeFactory::initShapeClass("Cuboid", stream.str());
+	MockBC bc;
+	
+	std::cout << std::boolalpha;
+	Cuboid  *cube1, *cube2;
+	bool    int1, int2;
+	int     intersected = 0;
+	int     disjunct = 0;
+	int     missed = 0;
+	int     no = 0;
+	
+	std::cout << ">> Performing Cuboid::overlap and ConvexPolyhedron::overlap comparison..." << std::endl;
+	for (int i = 0; i < tries; i++) {
+	    cube1 = random_cuboid(&rnd);
+	    cube2 = random_cuboid(&rnd);
+	    ConvexPolyhedron cp1(cube1);
+	    ConvexPolyhedron cp2(cube2);
+	    
+	    cube1->no = no;
+	    cp1.no = no;
+	    no++;
+	    
+	    cube2->no = no;
+	    cp2.no = no;
+	    no++;
+	    
+	    int1 = (bool)cube1->overlap(&bc, cube2);
+	    int2 = (bool)cp1.overlap(&bc, &cp2);
+	    if (int1 != int2) {
+	        missed++;
+	    } else {
+	        if (int1)
+	            intersected++;
+	        else
+	            disjunct++;
+	    }
+	    
+	    if ((i % 10000) == 9999)
+	        std::cout << (i + 1) << " pairs tested..." << std::endl;
+	    
+	    delete cube1;
+	    delete cube2;
+	}
+	std::cout << ">> " << missed << " from " << tries << " intersection results missed" << std::endl;
+	std::cout << ">> " << intersected << " cuboids overlapped, " << disjunct << " cuboids were disjunctive" << std::endl;
+}
+
 // Performs Cuboid::overlap and intersection::polyh_polyh time comparison
 //--------------------------------------------------------------------------------------------
 void CuboidIntTimeTest_run()
@@ -248,7 +305,7 @@ void CuboidIntTimeTest_run()
 	
 	Cuboid  *cube1, *cube2;
 	system_clock::time_point time_before, time_after;
-	nanoseconds     overlap_time, polyh_time;
+	nanoseconds     overlap_time, polyh_time, sat_time;
 	
 	std::cout << ">> Performing Cuboid::overlap and intersection::polyh_polyh time comparison..." << std::endl;
 	time_before = system_clock::now();
@@ -281,6 +338,23 @@ void CuboidIntTimeTest_run()
 	polyh_time = duration_cast<std::chrono::nanoseconds>(time_after - time_before);
 	polyh_time /= tries;
 	
+	time_before = system_clock::now();
+	for (int i = 0; i < tries; i++) {
+	    cube1 = random_cuboid(&rnd);
+	    cube2 = random_cuboid(&rnd);
+	    ConvexPolyhedron cp1(cube1);
+	    ConvexPolyhedron cp2(cube2);
+	    
+	    cp1.overlap(&bc, &cp2);
+	    
+	    delete cube1;
+	    delete cube2;
+	}
+	time_after = system_clock::now();
+	sat_time = duration_cast<std::chrono::nanoseconds>(time_after - time_before);
+	sat_time /= tries;
+	
 	std::cout << ">> Average Cuboid::overlap time: " << overlap_time.count() << " ns" << std::endl;
 	std::cout << ">> Average intersection::polyh_polyh time: " << polyh_time.count() << " ns" << std::endl;
+	std::cout << ">> Average ConvexPolyhedron::overlap (SAT) time: " << sat_time.count() << " ns" << std::endl;
 }

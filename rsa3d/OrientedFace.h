@@ -10,7 +10,6 @@
 
 
 #include <vector>
-#include <memory>
 
 #include "Vector.h"
 
@@ -18,7 +17,7 @@
 class OrientedFace
 {
 private:
-    typedef std::shared_ptr<Vector<3>> vptr;
+    typedef Vector<3> * vptr;
     
     std::vector<vptr> vertices;
     
@@ -31,6 +30,7 @@ public:
     double      pointSign(const Vector<3> & _point) const;
     void        translate(const Vector<3> & _translation);
     double      getSurface() const;
+    bool        intersectsWith(const OrientedFace & face) const;
     
     // Returns vertices of this face (as vector of R^3 Vector)
     //----------------------------------------------------------------------------------------

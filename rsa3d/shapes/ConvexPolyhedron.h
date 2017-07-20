@@ -9,8 +9,6 @@
 
 #include <vector>
 #include <map>
-#include <memory>
-#include <array>
 #include <iosfwd>
 
 #include "../Shape.h"
@@ -23,16 +21,16 @@
 class ConvexPolyhedron : public Shape
 {
 private:
-    typedef std::shared_ptr<Vector<3>>          vptr;
-    typedef std::shared_ptr<OrientedFace>       fptr;
-    typedef std::pair<double, double>           interval;
+    typedef Vector<3> *                 vptr;
+    typedef OrientedFace *              fptr;
+    typedef std::pair<double, double>   interval;
 
     std::vector<vptr>       vertices;           // Shape vertices
     std::vector<fptr>       faces;              // All faces of polyhedron
-    std::map<vptr, std::vector<fptr>>    vert_faces_map;     // Map of faces containing vertex
+    //std::map<vptr, std::vector<fptr>>    vert_faces_map;     // Map of faces containing vertex
     
     bool checkAxis(const Vector<3> & _axis, const ConvexPolyhedron * _second) const;
-    interval getProjection(const Vector<3> & _axis, const ConvexPolyhedron * _polyh) const;
+    static interval getProjection(const Vector<3> & _axis, const ConvexPolyhedron * _polyh);
     void wolframFaceToStream(fptr _face, std::stringstream & _stream) const;
 
 protected:

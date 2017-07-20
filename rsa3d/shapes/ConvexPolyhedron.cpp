@@ -26,7 +26,7 @@ ConvexPolyhedron::ConvexPolyhedron(const std::vector<Vector<3>> & _vertices) : S
     std::transform(_vertices.begin(), _vertices.end(),
         std::back_inserter(this->vertices),
         [](const Vector<3> & v) { 
-            return  std::make_shared<Vector<3>>(v);
+            return new Vector<3>(v);
         });
 }
 
@@ -42,14 +42,14 @@ ConvexPolyhedron::ConvexPolyhedron(Cuboid * _cube) : Shape(3)
     
     // Calculate verties
     this->vertices.reserve(8);
-    this->vertices.push_back(std::make_shared<Vector<3>>(pos + orientation * Vector<3>{{ size[0] / 2,  size[1] / 2,  size[2] / 2}}));
-    this->vertices.push_back(std::make_shared<Vector<3>>(pos + orientation * Vector<3>{{-size[0] / 2,  size[1] / 2,  size[2] / 2}}));
-    this->vertices.push_back(std::make_shared<Vector<3>>(pos + orientation * Vector<3>{{ size[0] / 2, -size[1] / 2,  size[2] / 2}}));
-    this->vertices.push_back(std::make_shared<Vector<3>>(pos + orientation * Vector<3>{{ size[0] / 2,  size[1] / 2, -size[2] / 2}}));
-    this->vertices.push_back(std::make_shared<Vector<3>>(pos + orientation * Vector<3>{{ size[0] / 2, -size[1] / 2, -size[2] / 2}}));
-    this->vertices.push_back(std::make_shared<Vector<3>>(pos + orientation * Vector<3>{{-size[0] / 2,  size[1] / 2, -size[2] / 2}}));
-    this->vertices.push_back(std::make_shared<Vector<3>>(pos + orientation * Vector<3>{{-size[0] / 2, -size[1] / 2,  size[2] / 2}}));
-    this->vertices.push_back(std::make_shared<Vector<3>>(pos + orientation * Vector<3>{{-size[0] / 2, -size[1] / 2, -size[2] / 2}}));
+    this->vertices.push_back(new Vector<3>(pos + orientation * Vector<3>{{ size[0] / 2,  size[1] / 2,  size[2] / 2}}));
+    this->vertices.push_back(new Vector<3>(pos + orientation * Vector<3>{{-size[0] / 2,  size[1] / 2,  size[2] / 2}}));
+    this->vertices.push_back(new Vector<3>(pos + orientation * Vector<3>{{ size[0] / 2, -size[1] / 2,  size[2] / 2}}));
+    this->vertices.push_back(new Vector<3>(pos + orientation * Vector<3>{{ size[0] / 2,  size[1] / 2, -size[2] / 2}}));
+    this->vertices.push_back(new Vector<3>(pos + orientation * Vector<3>{{ size[0] / 2, -size[1] / 2, -size[2] / 2}}));
+    this->vertices.push_back(new Vector<3>(pos + orientation * Vector<3>{{-size[0] / 2,  size[1] / 2, -size[2] / 2}}));
+    this->vertices.push_back(new Vector<3>(pos + orientation * Vector<3>{{-size[0] / 2, -size[1] / 2,  size[2] / 2}}));
+    this->vertices.push_back(new Vector<3>(pos + orientation * Vector<3>{{-size[0] / 2, -size[1] / 2, -size[2] / 2}}));
     
     // Make faces
     this->faces.reserve(6);
@@ -62,11 +62,14 @@ ConvexPolyhedron::ConvexPolyhedron(Cuboid * _cube) : Shape(3)
 }
 
 
-// Trivial destructor
+// Destructor
 //----------------------------------------------------------------------------
 ConvexPolyhedron::~ConvexPolyhedron()
 {
-    // Let C++ and std::shared_ptr do GC
+    for (auto f : this->faces)
+        delete f;
+    for (auto v : this->vertices)
+        delete v;
 }
 
 
@@ -86,12 +89,12 @@ void ConvexPolyhedron::makeFace(const std::vector<std::size_t> & _vertices)
         });
     
     // Add face to vector
-    auto face = std::make_shared<OrientedFace>(vert_ptrs);
+    fptr face = new OrientedFace(vert_ptrs);
     this->faces.push_back(face);
     
     // Add face to vertices map
-    for (auto v : vert_ptrs)
-        this->vert_faces_map[v].push_back(face);
+    /*for (auto v : vert_ptrs)
+        this->vert_faces_map[v].push_back(face);*/
 }
 
 
@@ -144,18 +147,18 @@ int ConvexPolyhedron::overlap(BoundaryConditions *bc, Shape *s)
     
     // Check all possible separating axes - normals ...
     for (auto f : this->faces)
-        if (!checkAxis (f->getNormal(), sPolyh))
+        if (!checkAxis (f->getOrthogonal(), sPolyh))
             goto ret_false;
     for (auto f : sPolyh->faces)
-        if (!checkAxis (f->getNormal(), sPolyh))
+        if (!checkAxis (f->getOrthogonal(), sPolyh))
             goto ret_false;
     // ... and normals cross products
     for (auto f1 : this->faces)
         for (auto f2 : sPolyh->faces)
-            if (!checkAxis (f1->getNormal() ^ f2->getNormal(), sPolyh))
+            if (!checkAxis (f1->getOrthogonal() ^ f2->getOrthogonal(), sPolyh))
                 goto ret_false;
    
-    // Translate back befor return
+    // Translate back before return
     sPolyh->translate(-translation);
     return true;
     
@@ -180,7 +183,7 @@ bool ConvexPolyhedron::checkAxis(const Vector<3> & _axis, const ConvexPolyhedron
 // Projects polyhedron _polyh on axis _axis and returns interval given by
 // the projection
 //----------------------------------------------------------------------------
-ConvexPolyhedron::interval ConvexPolyhedron::getProjection(const Vector<3> & _axis, const ConvexPolyhedron * _polyh) const
+ConvexPolyhedron::interval ConvexPolyhedron::getProjection(const Vector<3> & _axis, const ConvexPolyhedron * _polyh)
 {
     interval proj_int = {std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
     
