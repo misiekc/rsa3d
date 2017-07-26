@@ -197,7 +197,9 @@ void PackingGenerator::toPovray(std::vector<Shape *> * packing, double size, Vox
 	}
 	file << "#declare result=union{" << std::endl;
 	file << "  object { layer }" << std::endl;
-	file << "  object { voxels }" << std::endl;
+
+	if (voxels!=NULL)
+		file << "  object { voxels }" << std::endl;
 	file << "}" << std::endl;
 	file << "object{ result	rotate x*360*clock }" << std::endl;
 

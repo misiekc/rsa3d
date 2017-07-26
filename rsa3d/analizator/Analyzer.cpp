@@ -164,7 +164,15 @@ void Analyzer::printCorr(Plot& corr, std::string filename, int counter, double p
 		points[i] = new double[2];
 	corr.getAsHistogramPoints(points);
 
-	double r = 0.0, volume, expectedNumberOfParticles, packingVolume = 4.0/3.0 * M_PI * pow(corr.getMax(), 3.0);
+	double r = 0.0, volume, expectedNumberOfParticles, packingVolume;
+
+	if (this->params->dimension==2)
+		packingVolume = M_PI * pow(corr.getMax(), 2.0);
+	else if (this->params->dimension==3)
+		packingVolume = 4.0/3.0 * M_PI * pow(corr.getMax(), 3.0);
+	else
+		return;
+
 	int totalPoints = corr.getTotalNumberOfPoints();
 
 	std::ofstream file(filename);
@@ -172,10 +180,16 @@ void Analyzer::printCorr(Plot& corr, std::string filename, int counter, double p
 	volume = 0.0;
 	for (int i = 0; i < corr.size()-1; i++) {
 		if (i>0){
-			volume = -4.0/3.0* M_PI * r*r*r;
+			if (this->params->dimension==2)
+				volume = -M_PI * r*r;
+			else if (this->params->dimension==3)
+				volume = -4.0/3.0* M_PI * r*r*r;
 		}
 		r = 0.5*(points[i][0]+points[i+1][0]);
-		volume += 4.0/3.0* M_PI * r*r*r;
+		if (dim==2)
+			volume += M_PI * r*r;
+		else if (dim==3)
+			volume += 4.0/3.0* M_PI * r*r*r;
 
 		expectedNumberOfParticles = totalPoints * volume / packingVolume;
 		file << points[i][0] << "\t" << points[i][1] / expectedNumberOfParticles << std::endl;
