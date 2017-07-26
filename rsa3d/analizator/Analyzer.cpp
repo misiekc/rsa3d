@@ -186,9 +186,9 @@ void Analyzer::printCorr(Plot& corr, std::string filename, int counter, double p
 				volume = -4.0/3.0* M_PI * r*r*r;
 		}
 		r = 0.5*(points[i][0]+points[i+1][0]);
-		if (dim==2)
+		if (this->params->dimension==2)
 			volume += M_PI * r*r;
-		else if (dim==3)
+		else if (this->params->dimension==3)
 			volume += 4.0/3.0* M_PI * r*r*r;
 
 		expectedNumberOfParticles = totalPoints * volume / packingVolume;
