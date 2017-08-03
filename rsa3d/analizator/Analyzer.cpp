@@ -105,7 +105,7 @@ double * Analyzer::printNvT(LogPlot &nvt, std::string filename, double surfaceFa
 	LinearRegression lr1;
 	LinearRegression lr2;
 	for(int i=0; i<nvt.size(); i++){
-		if (points[i][0] > maxX/1000.0){
+		if (points[i][0] > maxX/100.0){
 			lr1.addXY(pow(points[i][0], pr.getA()+1+pr.getSA()), points[i][1]);
 			lr2.addXY(pow(points[i][0], pr.getA()+1-pr.getSA()), points[i][1]);
 		}
