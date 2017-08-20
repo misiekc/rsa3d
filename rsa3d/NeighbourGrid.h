@@ -16,6 +16,7 @@
 #include <unordered_set>
 
 class NeighbourGrid {
+
 public:
 
 	unsigned char dimension;
@@ -24,6 +25,8 @@ public:
 	double dx;
 	// contains vectors of cells (vectors with Positioned* inside)
 	std::vector<std::vector<Positioned* > * > lists;
+	std::vector<std::vector<int> * > neighbouringCells;
+
 
 	std::unordered_set<Positioned *> neighbours;
 

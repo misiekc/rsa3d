@@ -31,6 +31,24 @@ VoxelList::VoxelList(unsigned char dim, double s, double d){
 	this->voxels = new Voxel*[voxelsLength];
 	this->voxelNeighbourGrid = new NeighbourGrid(dim, s, this->voxelSize);
 
+	counter = new double*[(1 << this->dimension)];
+
+	int *in = new int[this->dimension];
+	for(unsigned char i=0; i<this->dimension; i++){
+		in[i] = 0;
+	}
+	int index = 0;
+	do{
+		counter[index] = new double[this->dimension];
+
+		for(unsigned char i=0; i<this->dimension; i++){
+			counter[index][i] = in[i];
+		}
+		index++;
+	}while(increment(in, this->dimension, 1));
+
+	delete[] in;
+
 	this->initVoxels(dim);
 	this->voxelSize *= this->dxFactor;
 	this->beginningVoxelNumber = voxelsLength;
@@ -46,6 +64,11 @@ VoxelList::~VoxelList() {
 	}
 	delete[] this->voxels;
 	delete this->voxelNeighbourGrid;
+	int counterSize = 1 << this->dimension;
+	for(int i=0; i<counterSize; i++){
+		delete[] counter[i];
+	}
+	delete[] this->counter;
 }
 
 void VoxelList::disable(){
@@ -132,28 +155,22 @@ void VoxelList::remove(Voxel *v){
 
 bool VoxelList::analyzeVoxel(Voxel *v, Shape *s, BoundaryConditions *bc){
 
-	int *in = new int[this->dimension];
 	double *da = new double[this->dimension];
 	double* vpos = v->getPosition();
 
-	for(unsigned char j=0; j<this->dimension; j++){
-		in[j] = 0;
-		da[j] = vpos[j];
-	}
 
-	do{
+	int counterSize = 1 << this->dimension;
+	for(int i=0; i<counterSize; i++){
 		for(unsigned char j=0; j<this->dimension; j++){
-			da[j] = vpos[j] + (in[j]-0.5)*this->voxelSize;
+			da[j] = vpos[j] + (this->counter[i][j]-0.5)*this->voxelSize;
 
 			if( !(s->pointInside(bc, da)) ){
-				delete[] in;
 				delete[] da;
 				return false;
 			}
 		}
-	}while(increment(in, this->dimension, 1));
+	}
 
-	delete[] in;
 	delete[] da;
 	return true;
 
@@ -165,18 +182,14 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Pos
 	std::unordered_set<Positioned *> vAll;
 	std::unordered_set<Positioned *>::iterator itN, itA;
 
-	int *in = new int[this->dimension];
 	double *da = new double[this->dimension];
 	double* vpos = v->getPosition();
 
-	for(unsigned char j=0; j<this->dimension; j++){
-		in[j] = 0;
-		da[j] = vpos[j];
-	}
 
-	do{
+	int counterSize = 1 << this->dimension;
+	for(int i=0; i<counterSize; i++){
 		for(unsigned char j=0; j<this->dimension; j++){
-			da[j] = vpos[j] + (in[j]-0.5)*this->voxelSize;
+			da[j] = vpos[j] + (this->counter[i][j]-0.5)*this->voxelSize;
 		}
 		std::unordered_set<Positioned *> *vNeighbours = (neighbours==NULL) ? nl->getNeighbours(da) : neighbours;
 		// at the beginning we add all neighbouring shapes
@@ -199,13 +212,11 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Pos
 			}
 		}
 		if (vAll.size()==0){
-			delete[] in;
 			delete[] da;
 			return false;
 		}
-	}while(increment(in, this->dimension, 1));
+	}
 //	v.analyzed = true;
-	delete[] in;
 	delete[] da;
 	return true;
 }

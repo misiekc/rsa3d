@@ -40,6 +40,13 @@ int position2i(double* da, int dalength, double size, double dx, int n){
 	return result;
 }
 
+void i2position(double* da, int dalength, int index, double dx, int n){
+	for(int i=0; i<dalength; i++){
+		int iTmp = index % n;
+		da[i] = (iTmp+0.5)*dx;
+		index /= n;
+	}
+}
 
 void coordinates(int* result, double* da, int dalength, double size, double dx, int n){
 	for(int i=dalength-1; i>=0; i--){

@@ -6,6 +6,7 @@
  */
 
 #include "OrientedCuboid.h"
+#include <algorithm>
 
 bool OrientedCuboid::do2Drotation;
 
@@ -19,8 +20,11 @@ void OrientedCuboid::initClass(const std::string &args){
     Cuboid::initClass(args);
     if (args.compare(args.length() - 4, 4, "true")==0)
     	OrientedCuboid::do2Drotation = true;
-    else
+    else{
     	OrientedCuboid::do2Drotation = false;
+    	neighbourListCellSize = *std::max_element(size, size + staticDimension);
+    	voxelSize = 0.5*(*std::min_element(size, size + staticDimension));
+    }
 }
 
 // Method creating (dynamically alocated) cuboid with random orientation.
@@ -44,3 +48,23 @@ Shape * OrientedCuboid::create(RND *rnd){
     return cuboid;
 }
 
+int OrientedCuboid::overlap(BoundaryConditions *bc, Shape *s){
+    return this->pointInside(bc, s->getPosition());
+}
+
+int OrientedCuboid::pointInside(BoundaryConditions *bc, double* da){
+    if (OrientedCuboid::do2Drotation){
+    	return Cuboid::pointInside(bc, da);
+    }else{
+    	double *ta = new double[this->dimension];
+   		bc->getTranslation(ta, this->position, da);
+    	for(unsigned char i=0; i<this->dimension; i++){
+    		if (std::fabs(this->position[i] - (da[i] + ta[i])) > size[i]){
+    			delete[] ta;
+    			return false;
+    		}
+    	}
+    	delete[] ta;
+    	return true;
+    }
+}

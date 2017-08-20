@@ -53,8 +53,8 @@ Shape * Ellipse::create(RND *rnd){
 	el->a = Ellipse::longSemiAxis;
 	el->b = Ellipse::shortSemiAxis;
 	el->orientation = rnd->nextValue()*2*M_PI;
-	el->u[0]  = cos(el->orientation); el->u[1]  = -sin(el->orientation);
-	el->uT[0] = sin(el->orientation); el->uT[1] =  cos(el->orientation);
+	el->u[0]  = cos(el->orientation); el->u[1]  = sin(el->orientation);
+	el->uT[0] = -sin(el->orientation); el->uT[1] = cos(el->orientation);
 	return el;
 }
 
@@ -70,8 +70,8 @@ void Ellipse::rotate(double* point, double alpha){
 	double sina = sin(alpha);
 	double x = point[0];
 	double y = point[1];
-	point[0] = x*cosa+y*sina;
-	point[1] = -x*sina+y*cosa;
+	point[0] = x*cosa - y*sina;
+	point[1] = x*sina + y*cosa;
 }
 
 int Ellipse::overlap(BoundaryConditions *bc, Shape *s) {
@@ -143,7 +143,7 @@ int Ellipse::pointInside(BoundaryConditions *bc, double* da, double angleFrom, d
 	// transforming coordinate system to one connected with "this" ellipse
 	double point[2];
 	point[0] = da[0] - this->position[0];
-	point[1] = da[1] = this->position[1];
+	point[1] = da[1] - this->position[1];
 	angleFrom -= this->orientation;
 	angleTo -= this->orientation;
 

@@ -353,36 +353,57 @@ double * Cuboid::getSize(double * arr)
 }
 
 std::string Cuboid::toPovray() const{
-	std::string s = "  box { < ";
-	for(unsigned char i=0; i<this->dimension; i++){
-		s += std::to_string(-this->size[i]/2);
-		if (i<this->dimension-1)
-			s+= ", ";
-	}
-	s += ">, <";
-	for(unsigned char i=0; i<this->dimension; i++){
-		s += std::to_string(this->size[i]/2);
-		if (i<this->dimension-1)
-			s+= ", ";
-	}
-	s += ">\n";
-	s += "    matrix < \n    ";
-	for (unsigned char i=0; i<this->dimension; i++){
-		for (unsigned char j=0; j<this->dimension; j++){
-			s += std::to_string(this->orientation(i, j));
-			if (j<this->dimension-1)
-						s+= ", ";
-		}
-		s+= ",\n    ";
-	}
+	std::string s = "";
+	if (this->dimension==2){
+		double factor = 0.5;
+		s += "  polygon {4, ";
 
-	for(unsigned char i=0; i<this->dimension; i++){
-		s += std::to_string(this->position[i]);
-		if (i<this->dimension-1)
-			s+= ", ";
+		s += "< " + std::to_string(this->position[0] - factor*size[0]) + ", ";
+		s += 		std::to_string(this->position[1] - factor*size[1]) + ", 0.1>, ";
+
+		s += "< " + std::to_string(this->position[0] - factor*size[0]) + ", ";
+		s += 		std::to_string(this->position[1] + factor*size[1]) + ", 0.1>, ";
+
+		s += "< " + std::to_string(this->position[0] + factor*size[0]) + ", ";
+		s += 		std::to_string(this->position[1] + factor*size[1]) + ", 0.1>, ";
+
+		s += "< " + std::to_string(this->position[0] + factor*size[0]) + ", ";
+		s += 		std::to_string(this->position[1] - factor*size[1]) + ", 0.1> ";
+
+		s += "\n    texture { pigment { color Red } }\n  }\n";
 	}
-	s += "\n    >\n";
-	s += "    texture { pigment { color Red } }\n  }\n";
+	else if (this->dimension==3){
+		s += "  box { < ";
+		for(unsigned char i=0; i<this->dimension; i++){
+			s += std::to_string(-this->size[i]/2);
+			if (i<this->dimension-1)
+				s+= ", ";
+		}
+		s += ">, <";
+		for(unsigned char i=0; i<this->dimension; i++){
+			s += std::to_string(this->size[i]/2);
+			if (i<this->dimension-1)
+				s+= ", ";
+		}
+		s += ">\n";
+		s += "    matrix < \n    ";
+		for (unsigned char i=0; i<this->dimension; i++){
+			for (unsigned char j=0; j<this->dimension; j++){
+				s += std::to_string(this->orientation(i, j));
+				if (j<this->dimension-1)
+					s+= ", ";
+			}
+			s+= ",\n    ";
+		}
+
+		for(unsigned char i=0; i<this->dimension; i++){
+			s += std::to_string(this->position[i]);
+			if (i<this->dimension-1)
+				s+= ", ";
+		}
+		s += "\n    >\n";
+		s += "    texture { pigment { color Red } }\n  }\n";
+	}
 	return s;
 }
 

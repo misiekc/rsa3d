@@ -24,9 +24,29 @@ NeighbourGrid::NeighbourGrid(int dim, double size, double dx) {
 	this->dx = size/this->n;
 	int length = (int) round(pow(this->n, dim));
 	this->lists.reserve(length);
+
+	int *in = new int[this->dimension];
+	double *da = new double[this->dimension];
+	int *coords = new int[this->dimension];
+
 	for(int i=0; i<length; i++){
 		this->lists.push_back(new std::vector<Positioned *>);
+		this->neighbouringCells.push_back(new std::vector<int>);
+
+		i2position(da, this->dimension, i, this->dx, this->n);
+		for(unsigned char i=0; i<this->dimension; i++){
+			in[i] = 0;
+		}
+		coordinates(coords, da, this->dimension, this->linearSize, this->dx, this->n);
+		do{
+			int iCell = neighbour2i(coords, in, this->dimension, 1, this->n);
+			this->neighbouringCells[i]->push_back(iCell);
+		}while(increment(in, this->dimension, 2));
 	}
+	delete[] coords;
+	delete[] da;
+	delete[] in;
+
 	this->neighbours.clear();
 }
 
@@ -34,6 +54,7 @@ NeighbourGrid::NeighbourGrid(int dim, double size, double dx) {
 NeighbourGrid::~NeighbourGrid() {
 	for(unsigned int i=0; i<this->lists.size(); i++){
 		delete this->lists[i];
+		delete this->neighbouringCells[i];
 	}
 }
 
@@ -65,6 +86,18 @@ void NeighbourGrid::remove(Positioned* s){
 		this->lists[i]->erase(it);
 }
 
+std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da){
+	this->neighbours.clear();
+	std::vector<Positioned *> *vTmp;
+
+	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+	for(int iCell : *(this->neighbouringCells[i])){
+		vTmp = (this->lists[iCell]);
+		this->neighbours.insert(vTmp->begin(), vTmp->end());
+	}
+	return &this->neighbours;
+}
+
 std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da, unsigned char radius){
 	this->neighbours.clear();
 	std::vector<Positioned *> *vTmp;
@@ -93,7 +126,8 @@ void NeighbourGrid::clear(){
 	}
 }
 
+/*
 std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da){
 	return this->getNeighbours(da, 1);
 }
-
+*/

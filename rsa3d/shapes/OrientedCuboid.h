@@ -20,6 +20,9 @@ public:
 
 	static void initClass(const std::string &args);
 	static Shape * create(RND *rnd);
+
+    int overlap(BoundaryConditions *bc, Shape *s);
+    int pointInside(BoundaryConditions *bc, double* da);
 };
 
 #endif /* SHAPES_ORIENTEDCUBOID_H_ */
