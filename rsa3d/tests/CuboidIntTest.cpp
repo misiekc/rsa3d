@@ -32,75 +32,7 @@ namespace
     const double    box_halfsize = 1;
     const int       tries = 10000;
     
-	int             no = 0; 
-    Vector<3>       cuboid1_tris[12][3];
-    Vector<3>       cuboid2_tris[12][3];
-    
-    // Helper method. Obtains and saves triangles from cuboid's faces
-    //--------------------------------------------------------------------------------------------
-    void obtain_tris(Cuboid * cuboid, Vector<3> (&arr)[12][3])
-    {
-        Vector<3> pos(cuboid->getPosition()); 
-        Matrix<3, 3> orientation = cuboid->getOrientation();   
-        Vector<3> vert[] = {
-            pos + orientation * Vector<3>{{ sizex / 2,  sizey / 2,  sizez / 2}},
-            pos + orientation * Vector<3>{{-sizex / 2,  sizey / 2,  sizez / 2}},
-            pos + orientation * Vector<3>{{ sizex / 2, -sizey / 2,  sizez / 2}},
-            pos + orientation * Vector<3>{{ sizex / 2,  sizey / 2, -sizez / 2}},
-            pos + orientation * Vector<3>{{ sizex / 2, -sizey / 2, -sizez / 2}},
-            pos + orientation * Vector<3>{{-sizex / 2,  sizey / 2, -sizez / 2}},
-            pos + orientation * Vector<3>{{-sizex / 2, -sizey / 2,  sizez / 2}},
-            pos + orientation * Vector<3>{{-sizex / 2, -sizey / 2, -sizez / 2}} 
-        };
-        
-        arr[0][0] = vert[0];
-        arr[0][1] = vert[1];
-        arr[0][2] = vert[2];
-
-        arr[1][0] = vert[2];
-        arr[1][1] = vert[1];
-        arr[1][2] = vert[6];
-
-        arr[2][0] = vert[0];
-        arr[2][1] = vert[2];
-        arr[2][2] = vert[3];
-
-        arr[3][0] = vert[3];
-        arr[3][1] = vert[2];
-        arr[3][2] = vert[4];
-
-        arr[4][0] = vert[7];
-        arr[4][1] = vert[2];
-        arr[4][2] = vert[6];
-
-        arr[5][0] = vert[7];
-        arr[5][1] = vert[4];
-        arr[5][2] = vert[2];
-
-        arr[6][0] = vert[1];
-        arr[6][1] = vert[0];
-        arr[6][2] = vert[3];
-
-        arr[7][0] = vert[5];
-        arr[7][1] = vert[1];
-        arr[7][2] = vert[3];
-
-        arr[8][0] = vert[7];
-        arr[8][1] = vert[1];
-        arr[8][2] = vert[5];
-
-        arr[9][0] = vert[7];
-        arr[9][1] = vert[6];
-        arr[9][2] = vert[1];
-
-        arr[10][0] = vert[7];
-        arr[10][1] = vert[5];
-        arr[10][2] = vert[3];
-
-        arr[11][0] = vert[7];
-        arr[11][1] = vert[3];
-        arr[11][2] = vert[4];
-    }
+	int             no = 0;
     
     // Helper method. Creates random Cuboid based on global parameters
     //--------------------------------------------------------------------------------------------
@@ -211,11 +143,13 @@ void CuboidIntTest_run()
 	for (int i = 0; i < tries; i++) {
 	    cube1 = random_cuboid(&rnd);
 	    cube2 = random_cuboid(&rnd);
-	    obtain_tris(cube1, cuboid1_tris);
-	    obtain_tris(cube2, cuboid2_tris);
 	    
+	    Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::MINE);
 	    int1 = (bool)cube1->overlap(&bc, cube2);
-	    int2 = (bool)intersection::polyh_polyh(cuboid1_tris, 12, cuboid2_tris, 12);
+	    
+	    Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::TRI_TRI);
+	    int2 = (bool)cube1->overlap(&bc, cube2);
+	    
 	    if (int1 != int2) {
 	        missed++;
 	    } else {
@@ -259,19 +193,19 @@ void CuboidIntSATTest_run()
 	for (int i = 0; i < tries; i++) {
 	    cube1 = random_cuboid(&rnd);
 	    cube2 = random_cuboid(&rnd);
-	    ConvexPolyhedron cp1(cube1);
-	    ConvexPolyhedron cp2(cube2);
 	    
 	    cube1->no = no;
-	    cp1.no = no;
 	    no++;
 	    
 	    cube2->no = no;
-	    cp2.no = no;
 	    no++;
 	    
+	    Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::MINE);
 	    int1 = (bool)cube1->overlap(&bc, cube2);
-	    int2 = (bool)cp1.overlap(&bc, &cp2);
+	    
+	    Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::SAT);
+	    int2 = (bool)cube1->overlap(&bc, cube2);
+	    
 	    if (int1 != int2) {
 	        missed++;
 	    } else {
@@ -307,8 +241,11 @@ void CuboidIntTimeTest_run()
 	system_clock::time_point time_before, time_after;
 	nanoseconds     overlap_time, polyh_time, sat_time;
 	
-	std::cout << ">> Performing Cuboid::overlap and intersection::polyh_polyh time comparison..." << std::endl;
+	std::cout << ">> Performing Cuboid::overlap strategy time comparison..." << std::endl;
+	
+	Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::MINE);
 	time_before = system_clock::now();
+	
 	for (int i = 0; i < tries; i++) {
 	    cube1 = random_cuboid(&rnd);
 	    cube2 = random_cuboid(&rnd);
@@ -322,14 +259,13 @@ void CuboidIntTimeTest_run()
 	overlap_time = duration_cast<std::chrono::nanoseconds>(time_after - time_before);
 	overlap_time /= tries;
 	
+	Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::TRI_TRI);
 	time_before = system_clock::now();
 	for (int i = 0; i < tries; i++) {
 	    cube1 = random_cuboid(&rnd);
 	    cube2 = random_cuboid(&rnd);
-	    obtain_tris(cube1, cuboid1_tris);
-	    obtain_tris(cube2, cuboid2_tris);
 	    
-	    intersection::polyh_polyh(cuboid1_tris, 12, cuboid2_tris, 12);
+	    cube1->overlap(&bc, cube2);
 	    
 	    delete cube1;
 	    delete cube2;
@@ -337,15 +273,14 @@ void CuboidIntTimeTest_run()
 	time_after = system_clock::now();
 	polyh_time = duration_cast<std::chrono::nanoseconds>(time_after - time_before);
 	polyh_time /= tries;
-	
+
+	Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::SAT);
 	time_before = system_clock::now();
 	for (int i = 0; i < tries; i++) {
 	    cube1 = random_cuboid(&rnd);
 	    cube2 = random_cuboid(&rnd);
-	    ConvexPolyhedron cp1(cube1);
-	    ConvexPolyhedron cp2(cube2);
 	    
-	    cp1.overlap(&bc, &cp2);
+	    cube1->overlap(&bc, cube2);
 	    
 	    delete cube1;
 	    delete cube2;
@@ -354,7 +289,7 @@ void CuboidIntTimeTest_run()
 	sat_time = duration_cast<std::chrono::nanoseconds>(time_after - time_before);
 	sat_time /= tries;
 	
-	std::cout << ">> Average Cuboid::overlap time: " << overlap_time.count() << " ns" << std::endl;
-	std::cout << ">> Average intersection::polyh_polyh time: " << polyh_time.count() << " ns" << std::endl;
-	std::cout << ">> Average ConvexPolyhedron::overlap (SAT) time: " << sat_time.count() << " ns" << std::endl;
+	std::cout << ">> Average custom algorithm time: " << overlap_time.count() << " ns" << std::endl;
+	std::cout << ">> Average triangle algorithm time: " << polyh_time.count() << " ns" << std::endl;
+	std::cout << ">> Average SAT time: " << sat_time.count() << " ns" << std::endl;
 }

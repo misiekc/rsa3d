@@ -147,15 +147,15 @@ int ConvexPolyhedron::overlap(BoundaryConditions *bc, Shape *s)
     
     // Check all possible separating axes - normals ...
     for (auto f : this->faces)
-        if (!checkAxis (f->getOrthogonal(), sPolyh))
+        if (!checkSeparatingAxis (f->getOrthogonal(), sPolyh))
             goto ret_false;
     for (auto f : sPolyh->faces)
-        if (!checkAxis (f->getOrthogonal(), sPolyh))
+        if (!checkSeparatingAxis (f->getOrthogonal(), sPolyh))
             goto ret_false;
     // ... and normals cross products
     for (auto f1 : this->faces)
         for (auto f2 : sPolyh->faces)
-            if (!checkAxis (f1->getOrthogonal() ^ f2->getOrthogonal(), sPolyh))
+            if (!checkSeparatingAxis (f1->getOrthogonal() ^ f2->getOrthogonal(), sPolyh))
                 goto ret_false;
    
     // Translate back before return
@@ -171,7 +171,7 @@ int ConvexPolyhedron::overlap(BoundaryConditions *bc, Shape *s)
 // Checks whether this and _second projections on axis _axis overlap. If so,
 // returns true
 //----------------------------------------------------------------------------
-bool ConvexPolyhedron::checkAxis(const Vector<3> & _axis, const ConvexPolyhedron * _second) const
+bool ConvexPolyhedron::checkSeparatingAxis(const Vector<3> & _axis, const ConvexPolyhedron * _second) const
 {
     interval this_int = this->getProjection(_axis, this);
     interval second_int = this->getProjection(_axis, _second);

@@ -6,6 +6,8 @@
 
 #include "Cuboid.h"
 #include "../Vector.h"
+#include "../Intersection.h"
+#include "ConvexPolyhedron.h"
 
 #include <iostream>
 #include <string>
@@ -18,6 +20,14 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+
+
+namespace 
+{
+    // Helper arrays
+    Vector<3>       cuboid1_tris[12][3];
+    Vector<3>       cuboid2_tris[12][3];
+}
 
 
 // Static atributes declaration
@@ -57,12 +67,15 @@ inline bool checkSegmentFace(double plane_pos, double bound1, double bound2,
                              double p2p, double p2b1, double p2b2);
 
 
+Cuboid::OverlapStrategy Cuboid::strategy = Cuboid::OverlapStrategy::MINE;
+
+
 // Default constructor creating new Cuboid in (0, 0, 0) with size set in
 // Cuboid::initClass
 //----------------------------------------------------------------------------
 Cuboid::Cuboid(const Matrix<3, 3> & orientation) : Shape(Cuboid::staticDimension), orientation(orientation)
 {
-
+        
 }
 
 // Destructor (does nothing)
@@ -149,6 +162,81 @@ Shape * Cuboid::create(RND *rnd)
     return cuboid;
 }
 
+
+// Set which overlap algorithm to use
+//----------------------------------------------------------------------------
+void Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy _strategy)
+{
+    strategy = _strategy;
+}
+
+// Helper method. Obtains and saves triangles from cuboid's faces
+//--------------------------------------------------------------------------------------------
+void Cuboid::obtainTris(Vector<3> (&arr)[12][3], const Vector<3> & translation)
+{
+    Vector<3> pos(this->getPosition()); 
+    Matrix<3, 3> orientation = this->getOrientation();   
+    Vector<3> vert[] = {
+        pos + translation + orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}},
+        pos + translation + orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}},
+        pos + translation + orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}},
+        pos + translation + orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}},
+        pos + translation + orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}},
+        pos + translation + orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}},
+        pos + translation + orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}},
+        pos + translation + orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} 
+    };
+    
+    arr[0][0] = vert[0];
+    arr[0][1] = vert[1];
+    arr[0][2] = vert[2];
+
+    arr[1][0] = vert[2];
+    arr[1][1] = vert[1];
+    arr[1][2] = vert[6];
+
+    arr[2][0] = vert[0];
+    arr[2][1] = vert[2];
+    arr[2][2] = vert[3];
+
+    arr[3][0] = vert[3];
+    arr[3][1] = vert[2];
+    arr[3][2] = vert[4];
+
+    arr[4][0] = vert[7];
+    arr[4][1] = vert[2];
+    arr[4][2] = vert[6];
+
+    arr[5][0] = vert[7];
+    arr[5][1] = vert[4];
+    arr[5][2] = vert[2];
+
+    arr[6][0] = vert[1];
+    arr[6][1] = vert[0];
+    arr[6][2] = vert[3];
+
+    arr[7][0] = vert[5];
+    arr[7][1] = vert[1];
+    arr[7][2] = vert[3];
+
+    arr[8][0] = vert[7];
+    arr[8][1] = vert[1];
+    arr[8][2] = vert[5];
+
+    arr[9][0] = vert[7];
+    arr[9][1] = vert[6];
+    arr[9][2] = vert[1];
+
+    arr[10][0] = vert[7];
+    arr[10][1] = vert[5];
+    arr[10][2] = vert[3];
+
+    arr[11][0] = vert[7];
+    arr[11][1] = vert[3];
+    arr[11][2] = vert[4];
+}
+
+
 // Returns neighbour list cell size determined during class initialization
 //----------------------------------------------------------------------------
 double Cuboid::getNeighbourListCellSize()
@@ -163,10 +251,25 @@ double Cuboid::getVoxelSize()
     return Cuboid::voxelSize;
 }
 
-// Checks whether there is an overlap between this and *s
+// Checks whether there is an overlap between this and *s using chosen
+// stategy
 //----------------------------------------------------------------------------
 int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
 {
+    switch (strategy) {
+        case TRI_TRI:
+            return overlapTri(bc, s);
+        case SAT:
+            return overlapSAT(bc, s);
+        default:
+            return overlapMine(bc, s);
+    }
+}
+
+// My overlap algorithm
+//----------------------------------------------------------------------------
+int Cuboid::overlapMine(BoundaryConditions *bc, Shape *s)
+{    
     // Prepare matrices of translations for operations on shapes
     Cuboid *sCuboid = (Cuboid*)s;
     Vector<3> thisTranslation(this->position);
@@ -223,6 +326,62 @@ int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
     
     return false;
 }
+
+// Triangle overlap algorithm
+//----------------------------------------------------------------------------
+int Cuboid::overlapTri(BoundaryConditions *bc, Shape *s)
+{    
+    Cuboid * second = (Cuboid *)s;
+    double trans_arr[3];
+    Vector<3> translation(bc->getTranslation(trans_arr, this->position, second->position));
+
+    this->obtainTris(cuboid1_tris, Vector<3>());
+    second->obtainTris(cuboid2_tris, translation);
+    
+    return intersection::polyh_polyh(cuboid1_tris, 12, cuboid2_tris, 12);
+}
+
+
+// SAT overlap algorithm
+//----------------------------------------------------------------------------
+int Cuboid::overlapSAT(BoundaryConditions *bc, Shape *s)
+{
+    Cuboid * second = (Cuboid *)s;
+    double trans_arr[3];
+    Vector<3> translation(bc->getTranslation(trans_arr, this->position, second->position));
+
+    ConvexPolyhedron c1(this);
+    ConvexPolyhedron c2(second);
+    
+    Vector<3> axes1[] = {
+        this->orientation * Vector<3>{{1, 0, 0}},
+        this->orientation * Vector<3>{{0, 1, 0}},
+        this->orientation * Vector<3>{{0, 0, 1}}
+    };
+    Vector<3> axes2[] = {
+        second->orientation * Vector<3>{{1, 0, 0}},
+        second->orientation * Vector<3>{{0, 1, 0}},
+        second->orientation * Vector<3>{{0, 0, 1}}
+    };
+    
+    // Translate shape s for PBC
+    c2.translate(translation);
+    
+    // Check all possible separating axes - edge lines ...
+    for (int i = 0; i < 3; i++)
+        if (!c1.checkSeparatingAxis (axes1[i], &c2))
+            return false;
+    for (int i = 0; i < 3; i++)
+        if (!c1.checkSeparatingAxis (axes2[i], &c2))
+            return false;
+    // ... and their cross products
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            if (!c1.checkSeparatingAxis (axes1[i] ^ axes2[j], &c2))
+                return false;
+    return true;
+}
+
 
 // Checks whether given vertex (in this coordinates) lies in Cuboid
 //----------------------------------------------------------------------------
@@ -352,7 +511,8 @@ double * Cuboid::getSize(double * arr)
     return arr;
 }
 
-std::string Cuboid::toPovray() const{
+std::string Cuboid::toPovray() const
+{
 	std::string s = "";
 	if (this->dimension==2){
 		double factor = 0.5;
@@ -427,7 +587,8 @@ std::string Cuboid::toWolfram() const
     return out.str();
 }
 
-void Cuboid::store(std::ostream &f) const{
+void Cuboid::store(std::ostream &f) const
+{
 	Shape::store(f);
 	double d;
 	for (unsigned char i=0; i<this->dimension; i++){
@@ -438,7 +599,8 @@ void Cuboid::store(std::ostream &f) const{
 	}
 }
 
-void Cuboid::restore(std::istream &f){
+void Cuboid::restore(std::istream &f)
+{
 	Shape::restore(f);
 	double d;
 	for (unsigned char i=0; i<this->dimension; i++){
@@ -448,6 +610,4 @@ void Cuboid::restore(std::istream &f){
 		}
 	}
 }
-
-
 

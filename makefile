@@ -20,7 +20,7 @@
 CC = g++
 
 # Compiler flags
-CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -g
+CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -O3
 
 # Linker flags 
 LFLAGS =
@@ -56,6 +56,7 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/analizator/Analyzer \
        rsa3d/shapes/ConvexPolyhedron \
        rsa3d/shapes/Cuboid \
+       rsa3d/shapes/Ellipse \
        rsa3d/shapes/OrientedCuboid \
        rsa3d/shapes/Sphere \
        rsa3d/surfaces/NBoxFBC \

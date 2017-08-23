@@ -29,7 +29,6 @@ private:
     std::vector<fptr>       faces;              // All faces of polyhedron
     //std::map<vptr, std::vector<fptr>>    vert_faces_map;     // Map of faces containing vertex
     
-    bool checkAxis(const Vector<3> & _axis, const ConvexPolyhedron * _second) const;
     static interval getProjection(const Vector<3> & _axis, const ConvexPolyhedron * _polyh);
     void wolframFaceToStream(fptr _face, std::stringstream & _stream) const;
 
@@ -50,6 +49,7 @@ public:
     int overlap(BoundaryConditions *bc, Shape *s);
     double getVolume();
     int pointInside(BoundaryConditions *bc, double* da);
+    bool checkSeparatingAxis(const Vector<3> & _axis, const ConvexPolyhedron * _second) const;
     
     std::string toWolfram() const;
 };
