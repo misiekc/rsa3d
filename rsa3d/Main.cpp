@@ -5,10 +5,19 @@
 #include "ShapeFactory.h"
 #include "RND.h"
 #include "analizator/Analyzer.h"
+#include "tests/CuboidSpeedTest.h"
 
 #include <string.h>
 #include <fstream>
 #include <iostream>
+#include <cstdlib>
+
+
+void die(const std::string & reason)
+{
+    std::cerr << reason << std::endl;
+    exit(EXIT_FAILURE);
+}
 
 void toFile(std::string filename, std::vector<Shape *> *packing) {
 	std::ofstream file(filename, std::ios::binary);
@@ -90,6 +99,19 @@ void boundaries(Parameters *params) {
 }
 
 int main(int argc, char **argv) {
+    if (argc < 2)
+        die("No mode param. Aborting.");
+
+    // Modes with custom environment
+    if (strcmp(argv[1], "cube_speedtest") == 0) {
+	    
+	    return EXIT_SUCCESS;
+	}
+	
+    // Modes with standard environment
+    if (argc < 3)
+        die("No input file given. Aborting.");
+    
 	Parameters params(argv[2]);
 	ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
 
