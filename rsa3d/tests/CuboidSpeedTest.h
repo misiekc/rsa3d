@@ -9,28 +9,33 @@
 
 #include <vector>
 #include <fstream>
+#include <ostream>
 
 
 namespace cube_speedtest 
 {   
     // Struct representing quantity with uncertainity
-    template
-    <typename NUM>
     struct Quantity {
-        NUM value;
-        NUM error;
+        double value = 0;
+        double error = 0;
         
-        Quantity fromSamples(const std::vector<NUM> & _samples);
+        Quantity()
+        { }
+        
+        Quantity(double _value, double _error) : value(_value), error(_error)
+        { }
+        
+        static Quantity fromSamples(const std::vector<double> & _samples);
+        friend std::ostream & operator<<(std::ostream & _stream, const Quantity & _quantity);
     };
 
     // Struct representing analysis results
     struct CuboidTestData {
-        std::size_t     numOverlapped;
+        Quantity        numOverlapped;
         std::size_t     numAll;
-        float           overlapProb;
-        Quantity<float> mineNs;
-        Quantity<float> triNs;
-        Quantity<float> SATNs;
+        Quantity        mineNs;
+        Quantity        triNs;
+        Quantity        SATNs;
     };
 
     CuboidTestData perform(CuboidPairFactory * _factory, std::size_t _pairs_to_test, std::size_t _repeats);

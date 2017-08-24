@@ -13,8 +13,16 @@ private:
     double halfsizeX = 0.5;
     double halfsizeY = 0.5;
     double halfsizeZ = 0.5;
+    unsigned int no = 0;
+    RND rnd;
+  
+    static BoxFactory * instance;
+    
+    BoxFactory();
+    Cuboid * randomCuboid();
 
 public:
-    void setSize(double _halfsize_x, double _halfsize_y, double _halfsize_z);
+    static BoxFactory * getInstance();
+    void setBoxSize(double _halfsize_x, double _halfsize_y, double _halfsize_z);
     CuboidPair generate();
 };

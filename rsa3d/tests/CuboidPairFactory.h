@@ -16,6 +16,19 @@ public:
     {
         Cuboid * first;
         Cuboid * second;
+        
+        CuboidPair()
+        { }
+        
+        CuboidPair(Cuboid * first, Cuboid * second) : first(first), second(second)
+        { }
+        
+        // Self-cleaning utility
+        inline void free()
+        {
+            delete first;
+            delete second;
+        }
     };
     
     // Generates random cuboid pair for intersection checks
