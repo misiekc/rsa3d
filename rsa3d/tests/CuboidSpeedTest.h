@@ -4,6 +4,9 @@
 // (C)PKua 2017
 //--------------------------------------------------------------------------------------------
 
+#ifndef _CUBOID_SPEED_TEST_H
+    #define _CUBOID_SPEED_TEST_H
+    
 
 #include "CuboidPairFactory.h"
 
@@ -30,15 +33,20 @@ namespace cube_speedtest
     };
 
     // Struct representing analysis results
-    struct CuboidTestData {
+    struct TestData {
         Quantity        numOverlapped;
         std::size_t     numAll;
+        Quantity        overlapProb;
         Quantity        mineNs;
         Quantity        triNs;
         Quantity        SATNs;
+        std::string     factoryDesc;
     };
 
-    CuboidTestData perform(CuboidPairFactory * _factory, std::size_t _pairs_to_test, std::size_t _repeats);
-    void print_results(CuboidTestData _data);
-    void to_csv(const std::fstream & _file, const std::vector<CuboidTestData> & _data);   
+    void warmUp(CuboidPairFactory * _factor);
+    TestData perform(CuboidPairFactory * _factory, std::size_t _pairs_to_test, std::size_t _repeats);
+    void print_results(TestData _data);
+    void to_csv(std::ofstream & _file, const std::vector<TestData> & _data);   
 }
+
+#endif // _CUBOID_SPEED_TEST_H

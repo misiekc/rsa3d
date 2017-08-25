@@ -163,12 +163,21 @@ Shape * Cuboid::create(RND *rnd)
 }
 
 
-// Set which overlap algorithm to use
+// Sets which overlap algorithm to use
 //----------------------------------------------------------------------------
 void Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy _strategy)
 {
     strategy = _strategy;
 }
+
+
+// Returns overlap algorithm used
+//----------------------------------------------------------------------------
+Cuboid::OverlapStrategy Cuboid::getOverlapStrategy()
+{
+    return Cuboid::strategy;
+}
+
 
 // Helper method. Obtains and saves triangles from cuboid's faces
 //--------------------------------------------------------------------------------------------

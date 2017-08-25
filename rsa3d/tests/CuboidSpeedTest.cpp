@@ -19,7 +19,7 @@ using namespace std::chrono;
 
 namespace
 {
-    // Struct from single algorithm test
+    // Struct for single algorithm test
     struct SingleTestResult
     {
         unsigned int overlapped = 0;
@@ -51,6 +51,12 @@ namespace
         MockBC bc;
         system_clock::time_point time_before, time_after;
         nanoseconds dur;
+        std::string strategies[] = {
+            "mine test...    ",
+            "tri-tri test... ",
+            "SAT test...     "};
+        
+        std::cout << strategies[Cuboid::getOverlapStrategy()] << std::flush;
         
         time_before = system_clock::now();
 	    for (std::size_t i = 0; i < _pairs_to_test; i++) {
@@ -64,6 +70,8 @@ namespace
 	    dur = duration_cast<std::chrono::nanoseconds>(time_after - time_before);
 	    dur /= _pairs_to_test;
 	    result.nanos = dur.count();
+	    
+	    std::cout << result.nanos << " ns, " << result.overlapped << " overlapped" << std::endl;
 	    return result;
     }
 }
@@ -100,21 +108,31 @@ namespace cube_speedtest
     //----------------------------------------------------------------------------------------
     std::ostream & operator<<(std::ostream & _stream, const Quantity & _quantity)
     {
-        _stream << _quantity.value << "+-" << _quantity.error;
+        _stream << _quantity.value << " +- " << _quantity.error;
         return _stream;
+    }
+
+    
+    // Perforsm one warm up test for consistent results. The first one seems to give slower
+    // result regardless of chosen algorithm.
+    //----------------------------------------------------------------------------------------
+    void warmUp(CuboidPairFactory * _factory)
+    {
+        std::cout << "Warm up test..." << std::endl;
+        test_single_alg(_factory, 500000);
     }
 
 
     // Performs test for given Cuboid factory and returns results
     //----------------------------------------------------------------------------------------
-    CuboidTestData perform(CuboidPairFactory * _factory, std::size_t _pairs_to_test, std::size_t _repeats)
+    TestData perform(CuboidPairFactory * _factory, std::size_t _pairs_to_test, std::size_t _repeats)
     {
         if (_pairs_to_test == 0)
             throw std::runtime_error("_pairs_to_test == 0");
         if (_repeats == 0)
             throw std::runtime_error("_repeats == 0");
           
-        CuboidTestData result;
+        TestData result;
         SingleTestResult single_result;
         std::vector<double> mine_times, tri_times, SAT_times;
         std::vector<double> num_overlapped;
@@ -126,6 +144,8 @@ namespace cube_speedtest
         num_overlapped.reserve(_repeats);
         
         result.numAll = _pairs_to_test;
+        result.factoryDesc = _factory->getDescription();
+        std::cout << "Starting..." << std::endl;
         
         // Test
         for (std::size_t i = 0; i < _repeats; i++)
@@ -154,6 +174,8 @@ namespace cube_speedtest
         result.mineNs = Quantity::fromSamples(mine_times);
         result.triNs = Quantity::fromSamples(tri_times);
         result.SATNs = Quantity::fromSamples(SAT_times);
+        result.overlapProb = Quantity(result.numOverlapped.value / _pairs_to_test, 
+            result.numOverlapped.error / _pairs_to_test);
          
         return result;
     }
@@ -161,16 +183,39 @@ namespace cube_speedtest
 
     // Prints results saved in _data onto the standard output
     //----------------------------------------------------------------------------------------
-    void print_results(CuboidTestData _data)
+    void print_results(TestData _data)
     {
-         
+        std::cout << "(" << _data.numOverlapped << ")/" << _data.numAll << " overlapped. Overlap probability: "
+            << _data.overlapProb << std::endl;
+        std::cout << "Mine avg. time    : " << _data.mineNs << std::endl;
+        std::cout << "Tri-tri avg. time : " << _data.triNs << std::endl;
+        std::cout << "SAT avg. time     : " << _data.SATNs << std::endl;
+        std::cout << "Factory used      : " << _data.factoryDesc << std::endl;
     }
 
 
     // Stores all results in vector to csv file _file
     //----------------------------------------------------------------------------------------
-    void to_csv(const std::fstream & _file, const std::vector<CuboidTestData> & _data)
+    void to_csv(std::ofstream & _file, const std::vector<TestData> & _data)
     {
-
+        _file << "probability,error,my alg time,error,tri-tri alg time,error,SAT alg time,error,"
+            "num of overlapped,error,num of all,factory desc" << std::endl;
+            
+        for (auto d : _data) {
+            _file << d.overlapProb.value << ",";
+            _file << d.overlapProb.error << ",";
+            _file << d.mineNs.value << ",";
+            _file << d.mineNs.error << ",";
+            _file << d.triNs.value << ",";
+            _file << d.triNs.error << ",";
+            _file << d.SATNs.value << ",";
+            _file << d.SATNs.error << ",";
+            _file << d.numOverlapped.value << ",";
+            _file << d.numOverlapped.error << ",";
+            _file << d.numAll << ",";
+            _file << d.factoryDesc << std::endl;
+        }
+        
+        _file.flush();
     }
 }

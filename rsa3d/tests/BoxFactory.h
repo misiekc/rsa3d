@@ -4,6 +4,9 @@
 // (C)PKua 2017
 //--------------------------------------------------------------------------------------------
 
+#ifndef _BOX_FACTORY_H
+    #define _BOX_FACTORY_H
+
 #include "CuboidPairFactory.h"
 
 
@@ -25,4 +28,7 @@ public:
     static BoxFactory * getInstance();
     void setBoxSize(double _halfsize_x, double _halfsize_y, double _halfsize_z);
     CuboidPair generate();
+    std::string getDescription();
 };
+
+#endif // _BOX_FACTORY_H

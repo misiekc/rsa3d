@@ -58,6 +58,7 @@ public:
 	static void initClass(const std::string &args);
 	static Shape * create(RND *rnd);
 	static void setOverlapStrategy(OverlapStrategy strategy);
+	static OverlapStrategy getOverlapStrategy();
 
     double getNeighbourListCellSize();
     double getVoxelSize();

@@ -6,6 +6,7 @@
 
 #include "BoxFactory.h"
 #include "../ShapeFactory.h"
+#include <sstream>
 
 
 typedef CuboidPairFactory::CuboidPair pair;
@@ -63,3 +64,16 @@ pair BoxFactory::generate()
         this->randomCuboid(),
         this->randomCuboid());
 }
+
+
+// Prints description of the factory on the standard output
+//--------------------------------------------------------------------------------------------
+std::string BoxFactory::getDescription()
+{
+    std::stringstream stream;
+    stream << "BoxFactory of size " << this->halfsizeX * 2 << " x " << this->halfsizeY * 2 
+        << " x " << this->halfsizeZ * 2;
+    return stream.str();
+}
+
+
