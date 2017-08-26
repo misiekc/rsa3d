@@ -11,6 +11,7 @@
 #include <string.h>
 #include <fstream>
 #include <iostream>
+#include <iomanip>
 #include <cstdlib>
 
 
@@ -99,48 +100,66 @@ void boundaries(Parameters *params) {
 	file.close();
 }
 
+
+// Performs cuboid speedtests with parameters passed to process
+//--------------------------------------------------------------------------------------------
+int cube_speedtest_main(int argc, char **argv)
+{    
+    if (argc < 5)
+        die("Usage: ./rsa cube_speedtest [pairs to test] [repeats] [1+ box sizes]");
+    
+    BoxFactory * factory = BoxFactory::getInstance();
+    std::size_t pairs = std::stoul(argv[2]);
+    std::size_t repeats = std::stoul(argv[3]);
+    double size;
+    std::vector<cube_speedtest::TestData> dataVector;
+    
+    dataVector.reserve(argc - 4);
+    
+    // Warm up and perform tests
+    cube_speedtest::warmUp(factory);
+    for (int i = 4; i < argc; i++) {
+        size = std::stod(argv[i]) / 2;
+        factory->setBoxSize(size, size, size);
+        cube_speedtest::TestData data = cube_speedtest::perform(factory, pairs, repeats);
+        dataVector.push_back(data);
+    }
+    
+    // Print results
+    std::cout << std::endl;
+    std::cout << ">> Obtained results:" << std::endl << std::endl;
+    for (auto d : dataVector) {
+        cube_speedtest::print_results(d);
+        std::cout << std::endl;
+    }
+    
+    // Print aquired probabilities
+    std::cout << ">> Probabilities for box sizes" << std::endl;
+    std::cout << std::left;
+    for (auto d : dataVector) {
+        std::cout << std::setw(15) << d.overlapProb.value << " : " << d.factoryDesc << std::endl;
+    }
+    std::cout << std::endl;
+    
+    // Store to file
+    std::cout << ">> Storing to file cube_speedtest.csv..." << std::endl;
+    std::ofstream file("cube_speedtest.csv");
+    cube_speedtest::to_csv(file, dataVector);
+    file.close();
+    
+    return EXIT_SUCCESS;
+}
+
+
 int main(int argc, char **argv) {
     if (argc < 2)
         die("No mode param. Aborting.");
 
     // Modes with custom environment
     if (strcmp(argv[1], "cube_speedtest") == 0) {
-        if (argc < 5)
-            die("Usage: ./rsa cube_speedtest [pairs to test] [repeats] [1+ box sizes]");
-    
-        BoxFactory * factory = BoxFactory::getInstance();
-        std::size_t pairs = std::stoul(argv[2]);
-        std::size_t repeats = std::stoul(argv[3]);
-        double size;
-        std::vector<cube_speedtest::TestData> dataVector;
-        
-        dataVector.reserve(argc - 4);
-        
-        // Warm up and perform tests
-        cube_speedtest::warmUp(factory);
-        for (int i = 4; i < argc; i++) {
-            size = std::stod(argv[i]) / 2;
-            factory->setBoxSize(size, size, size);
-	        cube_speedtest::TestData data = cube_speedtest::perform(factory, pairs, repeats);
-	        dataVector.push_back(data);
-	    }
-	    
-	    // Print results
-	    std::cout << std::endl;
-	    std::cout << ">> Obtained results:" << std::endl << std::endl;
-	    for (auto d : dataVector) {
-	        cube_speedtest::print_results(d);
-	        std::cout << std::endl;
-	    }
-	    
-	    // Store to file
-	    std::cout << "Storing to file cube_speedtest.csv..." << std::endl;
-	    std::ofstream file("cube_speedtest.csv");
-	    cube_speedtest::to_csv(file, dataVector);
-	    file.close();
-	    
-	    return EXIT_SUCCESS;
-	}
+        cube_speedtest_main(argc, argv);
+        return EXIT_SUCCESS;
+    }
 	
     // Modes with standard environment
     if (argc < 3)
