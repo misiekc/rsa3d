@@ -17,6 +17,7 @@
 #include <functional>
 #include <algorithm>
 #include <iterator>
+#include <limits>
 
 #define _USE_MATH_DEFINES
 #include <cmath>
@@ -75,7 +76,7 @@ Cuboid::OverlapStrategy Cuboid::strategy = Cuboid::OverlapStrategy::MINE;
 //----------------------------------------------------------------------------
 Cuboid::Cuboid(const Matrix<3, 3> & orientation) : Shape(Cuboid::staticDimension), orientation(orientation)
 {
-        
+    
 }
 
 // Destructor (does nothing)
@@ -358,37 +359,93 @@ int Cuboid::overlapSAT(BoundaryConditions *bc, Shape *s)
     Cuboid * second = (Cuboid *)s;
     double trans_arr[3];
     Vector<3> translation(bc->getTranslation(trans_arr, this->position, second->position));
-
-    ConvexPolyhedron c1(this);
-    ConvexPolyhedron c2(second);
+    Vector<3> pos1(this->position); 
+    Vector<3> pos2(second->position);
+    Matrix<3, 3> orientation1 = this->orientation;
+    Matrix<3, 3> orientation2 = second->orientation;
+    Vector<3> vertices1[8];
+    Vector<3> vertices2[8];
+    double size[3];
     
+    Cuboid::getSize(size);
+    
+    // Calculate axes orthogonal to separating plane
     Vector<3> axes1[] = {
-        this->orientation * Vector<3>{{1, 0, 0}},
-        this->orientation * Vector<3>{{0, 1, 0}},
-        this->orientation * Vector<3>{{0, 0, 1}}
+        orientation1 * Vector<3>{{1, 0, 0}},
+        orientation1 * Vector<3>{{0, 1, 0}},
+        orientation1 * Vector<3>{{0, 0, 1}}
     };
     Vector<3> axes2[] = {
-        second->orientation * Vector<3>{{1, 0, 0}},
-        second->orientation * Vector<3>{{0, 1, 0}},
-        second->orientation * Vector<3>{{0, 0, 1}}
+        orientation2 * Vector<3>{{1, 0, 0}},
+        orientation2 * Vector<3>{{0, 1, 0}},
+        orientation2 * Vector<3>{{0, 0, 1}}
     };
     
-    // Translate shape s for PBC
-    c2.translate(translation);
+    
+    // Calculate verties
+    vertices1[0] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2,  size[1] / 2,  size[2] / 2}});
+    vertices1[1] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2,  size[1] / 2,  size[2] / 2}});
+    vertices1[2] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2, -size[1] / 2,  size[2] / 2}});
+    vertices1[3] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2,  size[1] / 2, -size[2] / 2}});
+    vertices1[4] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2, -size[1] / 2, -size[2] / 2}});
+    vertices1[5] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2,  size[1] / 2, -size[2] / 2}});
+    vertices1[6] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2, -size[1] / 2,  size[2] / 2}});
+    vertices1[7] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2, -size[1] / 2, -size[2] / 2}});
+    
+    vertices2[0] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2,  size[1] / 2,  size[2] / 2}});
+    vertices2[1] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2,  size[1] / 2,  size[2] / 2}});
+    vertices2[2] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2, -size[1] / 2,  size[2] / 2}});
+    vertices2[3] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2,  size[1] / 2, -size[2] / 2}});
+    vertices2[4] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2, -size[1] / 2, -size[2] / 2}});
+    vertices2[5] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2,  size[1] / 2, -size[2] / 2}});
+    vertices2[6] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2, -size[1] / 2,  size[2] / 2}});
+    vertices2[7] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2, -size[1] / 2, -size[2] / 2}});
     
     // Check all possible separating axes - edge lines ...
     for (int i = 0; i < 3; i++)
-        if (!c1.checkSeparatingAxis (axes1[i], &c2))
+        if (!this->checkSeparatingAxis (axes1[i], vertices1, vertices2))
             return false;
     for (int i = 0; i < 3; i++)
-        if (!c1.checkSeparatingAxis (axes2[i], &c2))
+        if (!this->checkSeparatingAxis (axes2[i], vertices1, vertices2))
             return false;
     // ... and their cross products
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
-            if (!c1.checkSeparatingAxis (axes1[i] ^ axes2[j], &c2))
+            if (!this->checkSeparatingAxis (axes1[i] ^ axes2[j], vertices1, vertices2))
                 return false;
     return true;
+}
+
+// Checks whether this and _second projections on axis _axis overlap. If so,
+// returns true
+//----------------------------------------------------------------------------
+bool Cuboid::checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Vector<3> * _vert2) const
+{
+    interval this_int = this->getProjection(_axis, _vert1);
+    interval second_int = this->getProjection(_axis, _vert2);
+    
+    return std::min(this_int.second, second_int.second) >= std::max(this_int.first, second_int.first);
+}
+
+
+// Projects polyhedron _polyh on axis _axis and returns interval given by
+// the projection
+//----------------------------------------------------------------------------
+Cuboid::interval Cuboid::getProjection(const Vector<3> & _axis, Vector<3> * _vert) const
+{
+    interval proj_int = {std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
+    
+    // Find enpoints of polyhedron projection (multiplied by unknown but const for _axit factor)
+    double proj;
+    for (std::size_t i = 0; i < 8; i++)
+    {
+        proj = _vert[i] * _axis;
+        if (proj < proj_int.first)
+            proj_int.first = proj;
+        if (proj > proj_int.second)
+            proj_int.second = proj; 
+    }
+    return proj_int;
 }
 
 

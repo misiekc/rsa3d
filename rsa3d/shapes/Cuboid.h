@@ -13,6 +13,8 @@
 #include "../Shape.h"
 #include "../Matrix.h"
 
+#include <utility>
+
 
 class Cuboid : public Shape
 {
@@ -24,13 +26,14 @@ public:
         SAT
     };
 
-private:
+private:    
+    typedef std::pair<double, double>   interval;
+
     static double           volume;
     static double           *auxDoubleArray;        // Auxiliary double array of dimension size
     static double           *auxDoubleArray2;       // Second aux array
     Matrix<3, 3>            orientation;
     static double           minDimension;
-    
     static OverlapStrategy  strategy;
     
     bool        checkPoint(const Vector<3> & vertex);
@@ -41,6 +44,8 @@ private:
     int overlapSAT(BoundaryConditions *bc, Shape *s);
     
     void obtainTris(Vector<3> (&arr)[12][3], const Vector<3> & translation);
+    bool checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Vector<3> * _vert2) const;
+    interval getProjection(const Vector<3> & _axis, Vector<3> * _vert) const;
 
 protected:
     static double           *size;
