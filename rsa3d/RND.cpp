@@ -25,3 +25,8 @@ RND::~RND() {
 double RND::nextValue(){
 	return (*this->distribution)(*this->mt);
 }
+
+double RND::nextValue(std::uniform_real_distribution<double> *distr){
+
+	return (*distr)(*this->mt);
+}

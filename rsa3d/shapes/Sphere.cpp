@@ -96,10 +96,19 @@ int Sphere::pointInside(BoundaryConditions *bc, double* da) {
 }
 
 std::string Sphere::toPovray() const{
-	std::string s = "  sphere { < ";
-	for(unsigned char i=0; i<this->dimension; i++)
-		s += std::to_string(this->position[i]) + ", ";
-	s += "0.0>, " + std::to_string(this->r) +"\n    texture { pigment { color Red } }\n  }\n";
+	std::string s;
+
+	if (this->dimension==2){
+		std::string s = "  disc { < ";
+		for(unsigned char i=0; i<this->dimension; i++)
+			s += std::to_string(this->position[i]) + ", ";
+		s += "0.0001>, <0.0, 0.0, 1.0>, " + std::to_string(this->r) +"\n    texture { pigment { color Red } }\n  }\n";
+	}else{
+		std::string s = "  sphere { < ";
+		for(unsigned char i=0; i<this->dimension; i++)
+			s += std::to_string(this->position[i]) + ", ";
+		s += "0.0>, " + std::to_string(this->r) +"\n    texture { pigment { color Red } }\n  }\n";
+	}
 	return s;
 }
 

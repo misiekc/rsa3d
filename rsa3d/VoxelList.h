@@ -20,18 +20,24 @@ class VoxelList {
 
 private:
 
-	const double dxFactor = 1.0000000001;
+	const double dxFactor = 1.0; // 1.0000000001;
 	NeighbourGrid* voxelNeighbourGrid;
+	bool* activeTopLevelVoxels;
 
 	void fillNeighbourGrid();
 	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Positioned *> *neighbours, BoundaryConditions *bc);
 	bool disabled;
 
+	std::uniform_real_distribution<double> *distribution;
+
 
 protected:
 	Voxel** voxels;
 	int last;
+
+	double initialVoxelSize;
 	double voxelSize;
+
 	double size;
 	int beginningVoxelNumber;
 	unsigned char dimension;

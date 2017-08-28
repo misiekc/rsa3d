@@ -22,6 +22,7 @@ public:
 	virtual ~RND();
 
 	double nextValue();
+	double nextValue(std::uniform_real_distribution<double> *distr);
 };
 
 #endif /* RND_H_ */

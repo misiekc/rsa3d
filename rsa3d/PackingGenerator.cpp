@@ -72,7 +72,7 @@ void PackingGenerator::createPacking(){
 
 	std::cout << "[" << this->seed << " PackingGenerator::createPacking] started" << std::endl;
 
-	int missCount = 0;
+	int missCounter = 0;
 	RND rnd(this->seed);
 	ShapeFactory::initShapeClass(this->params->particleType, this->params->particleAttributes);
 	Shape *s = ShapeFactory::createShape(&rnd);
@@ -89,9 +89,8 @@ void PackingGenerator::createPacking(){
 	int l = 0;
 	double t = 0;
 	int tmpSplit = this->params->split;
-	double missCounter = 0;
 
-	while (!this->isSaturated() && t<params->maxTime && missCount<params->maxTriesWithoutSuccess) {
+	while (!this->isSaturated() && t<params->maxTime && missCounter<params->maxTriesWithoutSuccess) {
 		t += this->getFactor() * dt;
 		s = ShapeFactory::createShape(&rnd);
 
@@ -113,16 +112,17 @@ void PackingGenerator::createPacking(){
 			}else{
 				this->voxels->remove(v);
 			}
-			missCounter = 0;
-
+#ifdef DEBUG
 			if (t>0.1*params->maxTime){
 				std::cout << "[" << this->seed << " PackingGenerator::createPacking] " << t << "\t" << s->toString() << this->getFactor()
 				<< "\t" << l << "\t" << this->voxels->length()
-				<< "\t" << missCount << std::endl;
+				<< "\t" << missCounter << std::endl;
 			}else{
 				std::cout << "[" << this->seed << " PackingGenerator::createPacking] " << t << "\t" << s->toString()
-				<< "\t" << l << "\t" << "\t" << missCount << std::endl;
+				<< "\t" << l << "\t" << "\t" << missCounter << std::endl;
 			}
+#endif
+			missCounter = 0;
 		}else{ // overlap detected
 			v->miss();
 			missCounter++;
@@ -130,20 +130,20 @@ void PackingGenerator::createPacking(){
 			if(this->getFactor()>FACTOR_LIMIT && this->voxels->analyzeVoxel(v, sTmp, this->surface))
 				this->voxels->remove(v);
 			else if (v->getMissCounter() % this->params->analyze == 0) {
-				if(this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface) && this->getFactor()>FACTOR_LIMIT)
-					this->analyzeRegion(v);
+//				if(this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface) && this->getFactor()>FACTOR_LIMIT)
+//					this->analyzeRegion(v);
 			}
 			if (missCounter > tmpSplit) { // v.getMissCounter() % iSplit == 0){ //
 				missCounter = 0;
 				int v0 = this->voxels->length();
 
-				std::cout << "[" << this->seed << " Surface::doIteration] splitting voxels ";
+				std::cout << "[" << this->seed << " Surface::doIteration] splitting " << v0 << " voxels ";
 				std::cout.flush();
 
 				bool b = voxels->splitVoxels(this->params->minDx, this->params->maxVoxels, this->surface->getNeighbourGrid(), this->surface);
 				int v1 = this->voxels->length();
 
-				std::cout << " done: " << this->packing.size() << " shapes, " << this->voxels->length() << " voxels, new voxel size " << voxels->getVoxelSize() << ", factor " << this->getFactor() << std::endl;
+				std::cout << " done: " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size " << voxels->getVoxelSize() << ", factor " << this->getFactor() << std::endl;
 
 				if (b) {
 					tmpSplit *=  ((double)v1 / v0);

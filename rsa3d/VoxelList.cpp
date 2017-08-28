@@ -19,19 +19,28 @@
 
 #include "Utils.h"
 
+/**
+dim - packing dimension
+s - packing size (linear)
+d - requested initial size of a voxel
+**/
 VoxelList::VoxelList(unsigned char dim, double s, double d){
 	this->dimension = dim;
 	this->size = s;
 	int n = (int)(s/d)+1;
-	this->voxelSize = (s/n);
+	this->voxelSize = (s/n); // actual initial size of a voxel (should be not greater than d)
+	this->initialVoxelSize = this->voxelSize;
+
+	this->distribution = new std::uniform_real_distribution<double>(0.0, this->voxelSize);
 	this->disabled = false;
 
 	n = (int)(this->size/this->voxelSize + 0.5);
 	int voxelsLength = (int)(pow(n, dim)+0.5);
 	this->voxels = new Voxel*[voxelsLength];
+	this->activeTopLevelVoxels = new bool[voxelsLength];
 	this->voxelNeighbourGrid = new NeighbourGrid(dim, s, this->voxelSize);
 
-	counter = new double*[(1 << this->dimension)];
+	counter = new double*[(1 << this->dimension)]; // matrix of d-dimensional offsets to 2^d voxel vertices
 
 	int *in = new int[this->dimension];
 	for(unsigned char i=0; i<this->dimension; i++){
@@ -46,8 +55,8 @@ VoxelList::VoxelList(unsigned char dim, double s, double d){
 		}
 		index++;
 	}while(increment(in, this->dimension, 1));
-
 	delete[] in;
+
 
 	this->initVoxels(dim);
 	this->voxelSize *= this->dxFactor;
@@ -59,11 +68,15 @@ VoxelList::VoxelList(unsigned char dim, double s, double d){
 	}
 
 VoxelList::~VoxelList() {
+	delete this->distribution;
+
 	for(int i=0; i<=this->last; i++){
 		delete this->voxels[i];
 	}
 	delete[] this->voxels;
+	delete[] this->activeTopLevelVoxels;
 	delete this->voxelNeighbourGrid;
+
 	int counterSize = 1 << this->dimension;
 	for(int i=0; i<counterSize; i++){
 		delete[] counter[i];
@@ -97,16 +110,18 @@ void VoxelList::initVoxels(unsigned char dim){
 		in[i] = 0;
 	}
 
-	int index = 0;
+	int i, index = 0;
 	do{
 		for(unsigned char i=0; i<dim; i++){
-			da[i] = this->voxelSize*(in[i] + 0.5);
+			da[i] = this->voxelSize*in[i]; // da point to the "left bottom" corner of a voxel
 		}
-		if(index!=position2i(da, dim, this->size, this->voxelSize, n)){
-			std::cout << "VoxelList::initVoxels: Problem" << std::endl;
+		i = position2i(da, dim, this->size, this->voxelSize, n);
+		if(index!=i){
+			std::cout << "VoxelList::initVoxels: Problem: " << index << " != " << i << std::endl;
 		}
 
 		this->voxels[index] = this->createVoxel(da, this->voxelSize*this->dxFactor, index);
+		this->activeTopLevelVoxels[index] = true;
 		index++;
 	}while(increment(in, dim, n-1));
 	delete[] da;
@@ -138,7 +153,11 @@ void VoxelList::remove(Voxel *v){
 	if (this->disabled)
 		return;
 
-	int index = v->index;
+	double* vpos = v->getPosition();
+	int index = position2i(vpos, this->dimension, this->size, this->initialVoxelSize, (int)(this->size/this->initialVoxelSize + 0.5));
+	this->activeTopLevelVoxels[index]=false;
+
+	index = v->index;
 
 	if (index!=last){
 		Voxel *vl = this->voxels[last];
@@ -155,14 +174,17 @@ void VoxelList::remove(Voxel *v){
 
 bool VoxelList::analyzeVoxel(Voxel *v, Shape *s, BoundaryConditions *bc){
 
-	double *da = new double[this->dimension];
 	double* vpos = v->getPosition();
+	int index = position2i(vpos, this->dimension, this->size, this->initialVoxelSize, (int)(this->size/this->initialVoxelSize + 0.5));
+	if(this->activeTopLevelVoxels[index]==false)
+		return true;
 
 
+	double *da = new double[this->dimension];
 	int counterSize = 1 << this->dimension;
 	for(int i=0; i<counterSize; i++){
 		for(unsigned char j=0; j<this->dimension; j++){
-			da[j] = vpos[j] + (this->counter[i][j]-0.5)*this->voxelSize;
+			da[j] = vpos[j] + this->counter[i][j]*this->voxelSize;
 
 			if( !(s->pointInside(bc, da)) ){
 				delete[] da;
@@ -179,17 +201,22 @@ bool VoxelList::analyzeVoxel(Voxel *v, Shape *s, BoundaryConditions *bc){
 // returns true when the whole voxel is inside an exclusion area of one shape, thus, should be removed
 bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Positioned *> *neighbours, BoundaryConditions *bc){
 
+	double* vpos = v->getPosition();
+
+	// checking if initial voxel containing v is active (do not have a shape inside)
+	int index = position2i(vpos, this->dimension, this->size, this->initialVoxelSize, (int)(this->size/this->initialVoxelSize + 0.5));
+	if(this->activeTopLevelVoxels[index]==false)
+		return true;
+
 	std::unordered_set<Positioned *> vAll;
 	std::unordered_set<Positioned *>::iterator itN, itA;
 
 	double *da = new double[this->dimension];
-	double* vpos = v->getPosition();
-
 
 	int counterSize = 1 << this->dimension;
 	for(int i=0; i<counterSize; i++){
 		for(unsigned char j=0; j<this->dimension; j++){
-			da[j] = vpos[j] + (this->counter[i][j]-0.5)*this->voxelSize;
+			da[j] = vpos[j] + this->counter[i][j]*this->voxelSize;
 		}
 		std::unordered_set<Positioned *> *vNeighbours = (neighbours==NULL) ? nl->getNeighbours(da) : neighbours;
 		// at the beginning we add all neighbouring shapes
@@ -246,6 +273,8 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 
 	Voxel** newList = new Voxel*[ ((int)round( pow(2, this->dimension)))*(this->last+1) ];
 	this->voxelSize = (this->voxelSize/2.0)*this->dxFactor;
+	delete this->distribution;
+	this->distribution = new std::uniform_real_distribution<double>(0.0, this->voxelSize);
 
 	int index = 0;
 
@@ -261,7 +290,7 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 		}
 		do{
 			for(unsigned char j=0; j < this->dimension; j++){
-				da[j] = vpos[j] + (in[j]-0.5)*this->voxelSize;
+				da[j] = vpos[j] + in[j]*this->voxelSize;
 			}
 			Voxel *vTmp = this->createVoxel(da, this->voxelSize, index);
 			if (nl==NULL || bc==NULL || !this->analyzeVoxel(vTmp, nl, NULL, bc)){
@@ -296,7 +325,7 @@ Voxel * VoxelList::getRandomVoxel(RND *rnd){
 double * VoxelList::getRandomPosition(double *result, Voxel *v, RND *rnd){
 	double *vpos = v->getPosition();
 	for (int i=0; i < this->dimension; i++)
-		result[i] = vpos[i] + (rnd->nextValue()-0.5)*this->voxelSize;
+		result[i] = vpos[i] + rnd->nextValue(this->distribution);
 	return result;
 }
 
@@ -317,12 +346,11 @@ double VoxelList::getVoxelsSurface(){
 }
 
 std::string VoxelList::toPovray(){
-	double d = 0.5*this->voxelSize;
 	std::string sRes = "";
 	for(int i=0; i<=this->last; i++){
 		double *da = this->voxels[i]->getPosition();
-		double x1 = da[0] - d, x2 = da[0] + d;
-		double y1 = da[1] - d, y2 = da[1] + d;
+		double x1 = da[0], x2 = da[0] + this->voxelSize;
+		double y1 = da[1], y2 = da[1] + this->voxelSize;
 
 		sRes += "  polygon {4, < " + std::to_string(x1) + ", " + std::to_string(y1) + ", 1.0>, "
 				+ "< " + std::to_string(x1) + ", " + std::to_string(y2) + ", 1.0>, "

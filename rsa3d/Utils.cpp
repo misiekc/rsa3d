@@ -34,6 +34,8 @@ int position2i(double* da, int dalength, double size, double dx, int n){
 	for(int i=dalength-1; i>=0; i--){
 		if (da[i]<0) da[i] += size;
 		int ix = (int)(da[i]/dx);
+		if ( (ix+1)*dx == da[i])
+			ix++;
 		if (ix>=n) ix -= n;
 		result = n*result + ix;
 	}
