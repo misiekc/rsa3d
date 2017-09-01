@@ -18,18 +18,20 @@
 
 class NeighbourGrid {
 
-public:
-
+private:
 	unsigned char dimension;
 	double linearSize;
 	int n;
 	double dx;
+
 	// contains vectors of cells (vectors with Positioned* inside)
 	std::vector<std::vector<Positioned* > * > lists;
 	std::vector<std::vector<int> * > neighbouringCells;
 
 
 	std::unordered_set<Positioned *> neighbours;
+public:
+
 
 
 
@@ -39,7 +41,7 @@ public:
 	void add(Positioned* s);
 	void remove(Positioned* s);
 
-	std::unordered_set<Positioned*> * getNeighbours(double* da, unsigned char radius);
+//	std::unordered_set<Positioned*> * getNeighbours(double* da, unsigned char radius);
 	void clear();
 	std::vector<Positioned*> * getCell(double* da);
 	std::unordered_set<Positioned*> * getNeighbours(double* da);

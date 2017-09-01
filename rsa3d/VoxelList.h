@@ -41,7 +41,7 @@ protected:
 	double size;
 	int beginningVoxelNumber;
 	unsigned char dimension;
-	double **counter;
+	double **offset;
 
 	Voxel* createVoxel(double* center, double vs, int index);
 	void initVoxels(unsigned char dim);

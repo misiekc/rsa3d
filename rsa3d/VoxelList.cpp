@@ -40,7 +40,7 @@ VoxelList::VoxelList(unsigned char dim, double s, double d){
 	this->activeTopLevelVoxels = new bool[voxelsLength];
 	this->voxelNeighbourGrid = new NeighbourGrid(dim, s, this->voxelSize);
 
-	counter = new double*[(1 << this->dimension)]; // matrix of d-dimensional offsets to 2^d voxel vertices
+	offset = new double*[(1 << this->dimension)]; // matrix of d-dimensional offsets to 2^d voxel vertices
 
 	int *in = new int[this->dimension];
 	for(unsigned char i=0; i<this->dimension; i++){
@@ -48,10 +48,10 @@ VoxelList::VoxelList(unsigned char dim, double s, double d){
 	}
 	int index = 0;
 	do{
-		counter[index] = new double[this->dimension];
+		offset[index] = new double[this->dimension];
 
 		for(unsigned char i=0; i<this->dimension; i++){
-			counter[index][i] = in[i];
+			offset[index][i] = in[i];
 		}
 		index++;
 	}while(increment(in, this->dimension, 1));
@@ -79,9 +79,9 @@ VoxelList::~VoxelList() {
 
 	int counterSize = 1 << this->dimension;
 	for(int i=0; i<counterSize; i++){
-		delete[] counter[i];
+		delete[] offset[i];
 	}
-	delete[] this->counter;
+	delete[] this->offset;
 }
 
 void VoxelList::disable(){
@@ -194,7 +194,7 @@ bool VoxelList::analyzeVoxel(Voxel *v, Shape *s, BoundaryConditions *bc){
 	int counterSize = 1 << this->dimension;
 	for(int i=0; i<counterSize; i++){
 		for(unsigned char j=0; j<this->dimension; j++){
-			da[j] = vpos[j] + this->counter[i][j]*this->voxelSize;
+			da[j] = vpos[j] + this->offset[i][j]*this->voxelSize;
 
 			if( !(s->pointInside(bc, da)) ){
 				delete[] da;
@@ -226,7 +226,7 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Pos
 	int counterSize = 1 << this->dimension;
 	for(int i=0; i<counterSize; i++){
 		for(unsigned char j=0; j<this->dimension; j++){
-			da[j] = vpos[j] + this->counter[i][j]*this->voxelSize;
+			da[j] = vpos[j] + this->offset[i][j]*this->voxelSize;
 		}
 		std::unordered_set<Positioned *> *vNeighbours = (neighbours==NULL) ? nl->getNeighbours(da) : neighbours;
 		// at the beginning we add all neighbouring shapes

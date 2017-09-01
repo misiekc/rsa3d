@@ -24,6 +24,7 @@ NeighbourGrid::NeighbourGrid(int dim, double size, double dx) {
 	this->dx = size/this->n;
 	int length = (int) round(pow(this->n, dim));
 	this->lists.reserve(length);
+	this->neighbouringCells.reserve(length);
 
 	int *in = new int[this->dimension];
 	double *da = new double[this->dimension];
@@ -32,6 +33,7 @@ NeighbourGrid::NeighbourGrid(int dim, double size, double dx) {
 	for(int i=0; i<length; i++){
 		this->lists.push_back(new std::vector<Positioned *>);
 		this->neighbouringCells.push_back(new std::vector<int>);
+		this->neighbouringCells[i]->reserve((1 << this->dimension));
 
 		i2position(da, this->dimension, i, this->dx, this->n);
 		for(unsigned char i=0; i<this->dimension; i++){
@@ -77,7 +79,6 @@ void NeighbourGrid::add(Positioned* s){
 	}
 */
 
-
 void NeighbourGrid::remove(Positioned* s){
 	double* da = s->getPosition();
 	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
@@ -85,6 +86,12 @@ void NeighbourGrid::remove(Positioned* s){
 	if ( (it = std::find(this->lists[i]->begin(), this->lists[i]->end(), s)) != this->lists[i]->end())
 		this->lists[i]->erase(it);
 }
+
+std::vector<Positioned*> * NeighbourGrid::getCell(double* da){
+	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+	return this->lists[i];
+}
+
 
 std::vector<Positioned*> * NeighbourGrid::getCell(double* da){
 	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
@@ -104,6 +111,7 @@ std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da){
 	return &this->neighbours;
 }
 
+/*
 std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da, unsigned char radius){
 	this->neighbours.clear();
 	std::vector<Positioned *> *vTmp;
@@ -124,6 +132,45 @@ std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da, unsig
 	delete[] coords;
 	delete[] in;
 	return &this->neighbours;
+}
+*/
+
+Positioned* NeighbourGrid::getClosestNeighbour(double *da, BoundaryConditions *bc){
+	std::vector<Positioned *> *vTmp;
+
+	double d, dmin = std::numeric_limits<double>::max();
+	Positioned *pmin = NULL;
+	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+	for(int iCell : *(this->neighbouringCells[i])){
+		vTmp = (this->lists[iCell]);
+		for(Positioned *p : *vTmp){
+			d = bc->distance2(da, p->getPosition());
+			if (d<dmin){
+				pmin = p;
+				dmin = d;
+			}
+		}
+	}
+	return pmin;
+}
+
+Positioned* NeighbourGrid::getClosestNeighbour(double *da, BoundaryConditions *bc){
+	std::vector<Positioned *> *vTmp;
+
+	double d, dmin = std::numeric_limits<double>::max();
+	Positioned *pmin = NULL;
+	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+	for(int iCell : *(this->neighbouringCells[i])){
+		vTmp = (this->lists[iCell]);
+		for(Positioned *p : *vTmp){
+			d = bc->distance2(da, p->getPosition());
+			if (d<dmin){
+				pmin = p;
+				dmin = d;
+			}
+		}
+	}
+	return pmin;
 }
 
 Positioned* NeighbourGrid::getClosestNeighbour(double *da, BoundaryConditions *bc){
