@@ -35,6 +35,9 @@ Shape* Surface::check(Shape *s){
 	return NULL;
 }
 
+Positioned * Surface::getClosestNeighbour(double *da){
+	return this->list->getClosestNeighbour(da, this);
+}
 
 std::unordered_set<Positioned *> * Surface::getNeighbours(double* da) {
 	return this->list->getNeighbours(da);

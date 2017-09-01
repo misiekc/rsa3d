@@ -120,6 +120,25 @@ std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da, unsig
 	return &this->neighbours;
 }
 
+Positioned* NeighbourGrid::getClosestNeighbour(double *da, BoundaryConditions *bc){
+	std::vector<Positioned *> *vTmp;
+
+	double d, dmin = std::numeric_limits<double>::max();
+	Positioned *pmin = NULL;
+	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+	for(int iCell : *(this->neighbouringCells[i])){
+		vTmp = (this->lists[iCell]);
+		for(Positioned *p : vTmp){
+			d = bc->distance2(da, p->getPosition());
+			if (d<dmin){
+				pmin = p;
+				dmin = d;
+			}
+		}
+	}
+	return pmin;
+}
+
 void NeighbourGrid::clear(){
 	for(unsigned int i=0; i<this->lists.size(); i++){
 		this->lists[i]->clear();

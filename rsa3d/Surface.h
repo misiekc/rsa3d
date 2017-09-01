@@ -36,6 +36,7 @@ public:
 	void add(Shape *s);
 	Shape* check(Shape *s);
 	std::unordered_set<Positioned *> * getNeighbours(double *da);
+	Positioned * getClosestNeighbour(double *da);
 	NeighbourGrid * getNeighbourGrid();
 	double distance2(double *a1, double *a2);
 

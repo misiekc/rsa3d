@@ -12,6 +12,7 @@
 #include <set>
 
 #include "Positioned.h"
+#include "BoundaryConditions.h"
 #include <vector>
 #include <unordered_set>
 
@@ -41,6 +42,7 @@ public:
 	std::unordered_set<Positioned*> * getNeighbours(double* da, unsigned char radius);
 	void clear();
 	std::unordered_set<Positioned*> * getNeighbours(double* da);
+	Positioned* getClosestNeighbour(double *da, BoundaryConditions *bc);
 };
 
 #endif /* NEIGHBOURGRID_H_ */

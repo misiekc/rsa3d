@@ -97,12 +97,32 @@ void PackingGenerator::createPacking(){
 		Voxel *v = this->voxels->getRandomVoxel(&rnd);
 		double *da = new double[this->params->dimension];
 		s->translate(this->voxels->getRandomPosition(da, v, &rnd));
+
 		delete[] da;
+
 		Shape *sTmp = this->surface->check(s);
 		if (sTmp==NULL) { // if no overlap detected
 			l++;
 			s->no = l;
 			s->time = t;
+
+/*
+			Shape *sn = (Shape*)this->surface->getClosestNeighbour(s->getPosition());
+			if (sn!=NULL){
+				double d = std::this->surface->distance2(s->getPosition(), sn->getPosition());
+				if (d2 < this->params->distanceThreshold){
+
+					for(int i=0; i<this->params->dimension; i++){
+						da[i] = sn[i] - s[i];
+					}
+					this->surface->vector(da);
+					s->moveTowards(sn, da)
+				}
+			}
+
+*/
+
+
 
 			this->surface->add(s);
 			this->packing.push_back(s);
