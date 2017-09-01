@@ -44,3 +44,12 @@ void Voxel::resetMissCounter(){
 	this->missCounter = 0;
 }
 
+bool Voxel::isInside(double *da, double size){
+	for(int i=0; i<this->dimension; i++){
+		if (da[i]<this->position[i])
+			return false;
+		if (da[i]>=(this->position[i]+size))
+			return false;
+	}
+	return true;
+}

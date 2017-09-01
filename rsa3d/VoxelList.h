@@ -62,6 +62,7 @@ public:
 	bool splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, BoundaryConditions *bc);
 
 	Voxel *getRandomVoxel(RND *rnd);
+	Voxel * getVoxel(double* da);
 	double* getRandomPosition(double *result, Voxel *v, RND *rnd);
 	double getVoxelSize();
 	Voxel* get(int i);

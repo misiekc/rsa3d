@@ -47,6 +47,9 @@ public:
 	// checks if a given point is within excluded volume
 	virtual int pointInside(BoundaryConditions *bc, double* da) = 0;
 
+	// moves the shape towards given shape s
+	virtual double minDistance(Shape *s);
+
 	// returns string representation of the shape
 	virtual std::string toString();
 

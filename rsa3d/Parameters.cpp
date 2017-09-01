@@ -23,6 +23,9 @@ Parameters::Parameters() {
 	surfaceSize = pow(1000.0, 1.0/this->dimension);
 	storePackings = true;
 
+	modifiedRSA = false;
+	thresholdDistance = 1.0;
+
 	boundaryConditions = "periodic";
 	particleType = "Sphere";
 	particleAttributes = "2";
@@ -53,6 +56,8 @@ Parameters::Parameters(const std::string& sFile){
 		else if (sKey.compare("split")==0) 						this->split = std::stoi(sValue);
 		else if (sKey.compare("surfaceVolume")==0) 				this->surfaceSize = pow(std::stod(sValue), 1.0/this->dimension);
 		else if (sKey.compare("storePackings")==0)	 			this->storePackings = (sValue.compare("false")==0)?false:true;
+		else if (sKey.compare("modifiedRSA")==0)		 		this->modifiedRSA = (sValue.compare("false")==0)?false:true;
+		else if (sKey.compare("thresholdDistance")==0) 			this->thresholdDistance = std::stod(sValue);
 		else if (sKey.compare("boundaryConditions")==0) 		this->boundaryConditions = sValue;
 		else if (sKey.compare("particleType")==0) 				this->particleType = sValue;
 		else if (sKey.compare("particleAttributes")==0)			this->particleAttributes = sValue;

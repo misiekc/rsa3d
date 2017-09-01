@@ -106,23 +106,28 @@ void PackingGenerator::createPacking(){
 			s->no = l;
 			s->time = t;
 
-/*
-			Shape *sn = (Shape*)this->surface->getClosestNeighbour(s->getPosition());
-			if (sn!=NULL){
-				double d = std::this->surface->distance2(s->getPosition(), sn->getPosition());
-				if (d2 < this->params->distanceThreshold){
+			if (this->params->modifiedRSA){
+				Shape *sn = (Shape*)this->surface->getClosestNeighbour(s->getPosition());
+				if (sn!=NULL){
+					double *spos = s->getPosition();
+					double *snpos = sn->getPosition();
 
-					for(int i=0; i<this->params->dimension; i++){
-						da[i] = sn[i] - s[i];
+					double d = sqrt(this->surface->distance2(spos, snpos));
+					if (d < this->params->thresholdDistance){
+
+						for(int i=0; i<this->params->dimension; i++){
+							da[i] = (snpos[i] - spos[i]);
+						}
+						this->surface->vector(da);
+						double mindist = s->minDistance(sn);
+						for(int i=0; i<this->params->dimension; i++){
+							da[i] = da[i]/d;
+							spos[i] = snpos[i] - da[i]*mindist;
+						}
+						v = this->voxels->getVoxel(spos);
 					}
-					this->surface->vector(da);
-					s->moveTowards(sn, da)
 				}
 			}
-
-*/
-
-
 
 			this->surface->add(s);
 			this->packing.push_back(s);

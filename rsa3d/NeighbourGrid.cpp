@@ -86,6 +86,12 @@ void NeighbourGrid::remove(Positioned* s){
 		this->lists[i]->erase(it);
 }
 
+std::vector<Positioned*> * NeighbourGrid::getCell(double* da){
+	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+	return this->lists[i];
+}
+
+
 std::unordered_set<Positioned*> * NeighbourGrid::getNeighbours(double* da){
 	this->neighbours.clear();
 	std::vector<Positioned *> *vTmp;
@@ -128,7 +134,7 @@ Positioned* NeighbourGrid::getClosestNeighbour(double *da, BoundaryConditions *b
 	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
 	for(int iCell : *(this->neighbouringCells[i])){
 		vTmp = (this->lists[iCell]);
-		for(Positioned *p : vTmp){
+		for(Positioned *p : *vTmp){
 			d = bc->distance2(da, p->getPosition());
 			if (d<dmin){
 				pmin = p;

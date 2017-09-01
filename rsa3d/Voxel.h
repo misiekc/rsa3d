@@ -31,6 +31,8 @@ public:
 
 	void resetMissCounter();
 
+	bool isInside(double *da, double size);
+
 
 };
 

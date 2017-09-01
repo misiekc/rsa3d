@@ -42,7 +42,3 @@ Positioned & Positioned::operator=(const Positioned & other){
 double* Positioned::getPosition(){
 	return this->position;
 }
-
-double Positioned::operator[](int i){
-	return this->position[i];
-}

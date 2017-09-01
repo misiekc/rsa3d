@@ -28,6 +28,9 @@ public:
 	double surfaceSize = pow(100000.0, 1.0/2.0);
 	bool storePackings = true;
 
+	bool modifiedRSA = false;
+	double thresholdDistance = 1;
+
 	std::string boundaryConditions;
 	std::string particleType;
 	std::string particleAttributes;

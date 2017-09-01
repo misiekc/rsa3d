@@ -41,6 +41,7 @@ public:
 
 	std::unordered_set<Positioned*> * getNeighbours(double* da, unsigned char radius);
 	void clear();
+	std::vector<Positioned*> * getCell(double* da);
 	std::unordered_set<Positioned*> * getNeighbours(double* da);
 	Positioned* getClosestNeighbour(double *da, BoundaryConditions *bc);
 };

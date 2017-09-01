@@ -172,6 +172,16 @@ void VoxelList::remove(Voxel *v){
 //		this.checkIndexes();
 	}
 
+Voxel * VoxelList::getVoxel(double* da){
+	std::vector<Positioned *> *vTmp = this->voxelNeighbourGrid->getCell(da);
+	for(Positioned *v : *vTmp){
+		if (((Voxel *)v)->isInside(da, this->voxelSize)){
+			return (Voxel *)v;
+		}
+	}
+	return NULL;
+}
+
 bool VoxelList::analyzeVoxel(Voxel *v, Shape *s, BoundaryConditions *bc){
 
 	double* vpos = v->getPosition();

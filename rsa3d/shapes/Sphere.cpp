@@ -95,6 +95,10 @@ int Sphere::pointInside(BoundaryConditions *bc, double* da) {
 	return (d2<4.0*this->r*this->r);
 }
 
+double Sphere::minDistance(Shape *s){
+	return 2.0*this->radius;
+}
+
 std::string Sphere::toPovray() const{
 	std::string s;
 

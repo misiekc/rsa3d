@@ -23,7 +23,6 @@ public:
 
 	// returns position of the shape's center
 	double* getPosition();
-	double operator [](int i);
 };
 
 #endif /* POSITIONED_H_ */

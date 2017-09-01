@@ -29,6 +29,10 @@ void Shape::translate(double* v){
 	}
 }
 
+double Shape::minDistance(Shape *s){
+	return 0.0;
+}
+
 std::string Shape::toString(){
 	return "";
 }
