@@ -7,6 +7,7 @@
 #include "analizator/Analyzer.h"
 #include "tests/CuboidSpeedTest.h"
 #include "tests/BoxFactory.h"
+#include "tests/CuboidIntTest.h"
 
 #include <string.h>
 #include <fstream>
@@ -158,6 +159,10 @@ int main(int argc, char **argv) {
     // Modes with custom environment
     if (strcmp(argv[1], "cube_speedtest") == 0) {
         cube_speedtest_main(argc, argv);
+        return EXIT_SUCCESS;
+    } else if (strcmp(argv[1], "cube_inttest") == 0) {
+        CuboidIntTest_run();
+        CuboidIntSATTest_run();
         return EXIT_SUCCESS;
     }
 	
