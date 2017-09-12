@@ -11,16 +11,13 @@
 #include <cstring>
 #include <sstream>
 #include <vector>
-#include <chrono>
 
 #include "../Vector.h"
 #include "../Intersection.h"
 #include "../shapes/Cuboid.h"
-#include "../shapes/ConvexPolyhedron.h"
 #include "../BoundaryConditions.h"
 #include "../ShapeFactory.h"
 
-using namespace std::chrono;
 
 // Helper methods
 //--------------------------------------------------------------------------------------------
