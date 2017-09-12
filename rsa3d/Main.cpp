@@ -161,8 +161,7 @@ int main(int argc, char **argv) {
         cube_speedtest_main(argc, argv);
         return EXIT_SUCCESS;
     } else if (strcmp(argv[1], "cube_inttest") == 0) {
-        CuboidIntTest_run();
-        CuboidIntSATTest_run();
+        cube_inttest::perform();
         return EXIT_SUCCESS;
     }
 	
