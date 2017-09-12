@@ -20,7 +20,7 @@
 CC = g++
 
 # Compiler flags
-CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -O3
+CFLAGS = -Wall -pedantic -std=c++14 -I"$(CURDIR)/statistics" -O3
 
 # Linker flags 
 LFLAGS =
@@ -37,6 +37,7 @@ LIBSTAT = libstat.a
 
 # Source files list (withous extensions)
 OBJS = rsa3d/BoundaryConditions \
+       rsa3d/Config \
        rsa3d/DynamicMatrix \
        rsa3d/DynamicVector \
        rsa3d/Intersection \
