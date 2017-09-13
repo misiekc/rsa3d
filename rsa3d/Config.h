@@ -10,7 +10,7 @@
 
 #include <map>
 #include <string>    
-#include <fstream>
+#include <istream>
 #include <stdexcept>
 #include <memory>
 #include <vector>
@@ -37,18 +37,20 @@ public:
 class Config
 {
 private:
-    typedef std::pair<std::string, std::string> map_entry;
     typedef std::unique_ptr<Config> ptr;
     
     std::map<std::string, std::string>  fieldMap;
     std::vector<std::string>            keys;
     
 public:
-    static ptr parse(std::ifstream & _file, char _delim = '=');
+    static ptr  parse(std::istream & _file, char _delim = '=');
     
-    std::string getParam(const std::string & _field) const;
-    bool        hasParam(const std::string & _field) const;
-    std::string operator[](const std::string & _field) const;
+    std::string getString(const std::string & _field) const;
+    int getInt(const std::string & _field) const;
+    unsigned int getUnsignedInt(const std::string & _field) const;
+    double getDouble(const std::string & _field) const;
+    float getFloat(const std::string & _field) const;
+    bool hasParam(const std::string & _field) const;
     std::vector<std::string> getKeys() const;
 };
 
