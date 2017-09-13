@@ -161,7 +161,7 @@ int cube_speedtest_main(int argc, char **argv)
 }
 
 
-/*int main(int argc, char **argv) {
+int main(int argc, char **argv) {
     if (argc < 2)
         die("No mode param. Aborting.");
 
@@ -195,45 +195,4 @@ int cube_speedtest_main(int argc, char **argv)
 		delete packing;
 	}
 	return 1;
-}*/
-
-
-using namespace std;
-
-#include <typeinfo>
-
-class Student
-{
-    float srednia;
-    char kierunek[30];
-    char wydzial[40];
-    
-public:
-    Student() :
-        srednia{4.0},
-        kierunek{"debilny"},
-        wydzial{"jeszcze gorszy"}
-    {
-        //puste cialo konstruktora
-    }
-    
-    void show()
-    {
-        cout << "srednia: " << srednia << "\nkierunek: " << kierunek << "\nwydzial: " << wydzial << endl;
-    }
-
-};
-
-int main()
-{
-
-
-    Student* p=(Student*)malloc(10*sizeof(Student));
-
-    Student dupa();
-
-
-    free(p);
-    cout << "Hura, kompiluje sie"<< endl;
-    return 0;
 }
