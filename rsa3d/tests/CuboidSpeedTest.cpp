@@ -194,28 +194,28 @@ namespace cube_speedtest
     }
 
 
-    // Stores all results in vector to csv file _file
+    // Stores all results in vector to csv output stream _out
     //----------------------------------------------------------------------------------------
-    void to_csv(std::ofstream & _file, const std::vector<TestData> & _data)
+    void to_csv(std::ostream & _out, const std::vector<TestData> & _data)
     {
-        _file << "probability,error,my alg time,error,tri-tri alg time,error,SAT alg time,error,"
+        _out << "probability,error,my alg time,error,tri-tri alg time,error,SAT alg time,error,"
             "num of overlapped,error,num of all,factory desc" << std::endl;
             
         for (auto d : _data) {
-            _file << d.overlapProb.value << ",";
-            _file << d.overlapProb.error << ",";
-            _file << d.mineNs.value << ",";
-            _file << d.mineNs.error << ",";
-            _file << d.triNs.value << ",";
-            _file << d.triNs.error << ",";
-            _file << d.SATNs.value << ",";
-            _file << d.SATNs.error << ",";
-            _file << d.numOverlapped.value << ",";
-            _file << d.numOverlapped.error << ",";
-            _file << d.numAll << ",";
-            _file << d.factoryDesc << std::endl;
+            _out << d.overlapProb.value << ",";
+            _out << d.overlapProb.error << ",";
+            _out << d.mineNs.value << ",";
+            _out << d.mineNs.error << ",";
+            _out << d.triNs.value << ",";
+            _out << d.triNs.error << ",";
+            _out << d.SATNs.value << ",";
+            _out << d.SATNs.error << ",";
+            _out << d.numOverlapped.value << ",";
+            _out << d.numOverlapped.error << ",";
+            _out << d.numAll << ",";
+            _out << d.factoryDesc << std::endl;
         }
         
-        _file.flush();
+        _out.flush();
     }
 }

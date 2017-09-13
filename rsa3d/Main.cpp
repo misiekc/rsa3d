@@ -8,6 +8,7 @@
 #include "tests/CuboidSpeedTest.h"
 #include "tests/BoxFactory.h"
 #include "tests/CuboidIntTest.h"
+#include "Config.h"
 
 #include <string.h>
 #include <fstream>
@@ -106,21 +107,29 @@ void boundaries(Parameters *params) {
 //--------------------------------------------------------------------------------------------
 int cube_speedtest_main(int argc, char **argv)
 {    
-    if (argc < 5)
-        die("Usage: ./rsa cube_speedtest [pairs to test] [repeats] [1+ box sizes]");
+    if (argc < 3)
+        die("Usage: ./rsa cube_speedtest [input] [output = cube_speedtest.csv]");
+
+    std::ifstream input(argv[2]);
+    auto config = Config::parse(input);
+    input.close();    
+    
+    std::string output = "cube_speedtest.csv";
+    if (argc == 4)
+        output = argv[3];
+    
+    std::size_t pairs = config->getUnsignedInt("pairs");
+    std::size_t repeats = config->getUnsignedInt("repeats");
+    std::istringstream sizes(config->getString("box_sizes"));
     
     BoxFactory * factory = BoxFactory::getInstance();
-    std::size_t pairs = std::stoul(argv[2]);
-    std::size_t repeats = std::stoul(argv[3]);
-    double size;
     std::vector<cube_speedtest::TestData> dataVector;
-    
-    dataVector.reserve(argc - 4);
+    double size;
     
     // Warm up and perform tests
     cube_speedtest::warmUp(factory);
-    for (int i = 4; i < argc; i++) {
-        size = std::stod(argv[i]) / 2;
+    while (sizes >> size) {
+        size /= 2;
         factory->setBoxSize(size, size, size);
         cube_speedtest::TestData data = cube_speedtest::perform(factory, pairs, repeats);
         dataVector.push_back(data);
@@ -143,8 +152,8 @@ int cube_speedtest_main(int argc, char **argv)
     std::cout << std::endl;
     
     // Store to file
-    std::cout << ">> Storing to file cube_speedtest.csv..." << std::endl;
-    std::ofstream file("cube_speedtest.csv");
+    std::cout << ">> Storing to file " << output << "..." << std::endl;
+    std::ofstream file(output);
     cube_speedtest::to_csv(file, dataVector);
     file.close();
     
@@ -152,7 +161,7 @@ int cube_speedtest_main(int argc, char **argv)
 }
 
 
-int main(int argc, char **argv) {
+/*int main(int argc, char **argv) {
     if (argc < 2)
         die("No mode param. Aborting.");
 
@@ -186,4 +195,45 @@ int main(int argc, char **argv) {
 		delete packing;
 	}
 	return 1;
+}*/
+
+
+using namespace std;
+
+#include <typeinfo>
+
+class Student
+{
+    float srednia;
+    char kierunek[30];
+    char wydzial[40];
+    
+public:
+    Student() :
+        srednia{4.0},
+        kierunek{"debilny"},
+        wydzial{"jeszcze gorszy"}
+    {
+        //puste cialo konstruktora
+    }
+    
+    void show()
+    {
+        cout << "srednia: " << srednia << "\nkierunek: " << kierunek << "\nwydzial: " << wydzial << endl;
+    }
+
+};
+
+int main()
+{
+
+
+    Student* p=(Student*)malloc(10*sizeof(Student));
+
+    Student dupa();
+
+
+    free(p);
+    cout << "Hura, kompiluje sie"<< endl;
+    return 0;
 }

@@ -11,7 +11,6 @@
 #include "CuboidPairFactory.h"
 
 #include <vector>
-#include <fstream>
 #include <ostream>
 
 
@@ -46,7 +45,7 @@ namespace cube_speedtest
     void warmUp(CuboidPairFactory * _factor);
     TestData perform(CuboidPairFactory * _factory, std::size_t _pairs_to_test, std::size_t _repeats);
     void print_results(TestData _data);
-    void to_csv(std::ofstream & _file, const std::vector<TestData> & _data);   
+    void to_csv(std::ostream & _out, const std::vector<TestData> & _data);   
 }
 
 #endif // _CUBOID_SPEED_TEST_H
