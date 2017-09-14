@@ -145,25 +145,35 @@ namespace cube_speedtest
         
         result.numAll = _pairs_to_test;
         result.factoryDesc = _factory->getDescription();
-        std::cout << "Starting..." << std::endl;
+        std::cout << std::endl;
+        std::cout << "Starting (" << result.factoryDesc << ", pairs: " << _pairs_to_test
+            << ", repeats: " << _repeats << ")..." << std::endl;
         
         // Test
         for (std::size_t i = 0; i < _repeats; i++)
         {
+            std::stringstream tryNoInfoStream;
+            tryNoInfoStream << "(" << (i + 1) << "/" << _repeats << ") ";
+            std::string tryNoInfo = tryNoInfoStream.str();
+            std::string tryNoInfoSpace(tryNoInfo.length(), ' ');
+            
             // Test my algorithm
             Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::MINE);
+            std::cout << tryNoInfo;
             single_result = test_single_alg(_factory, _pairs_to_test);
             num_overlapped.push_back(single_result.overlapped);
             mine_times.push_back(single_result.nanos);
             
             // Test triangle algorithm
             Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::TRI_TRI);
+            std::cout << tryNoInfoSpace;
             single_result = test_single_alg(_factory, _pairs_to_test);
             num_overlapped.push_back(single_result.overlapped);
             tri_times.push_back(single_result.nanos);
             
             // Test SAT algorithm
             Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::SAT);
+            std::cout << tryNoInfoSpace;
             single_result = test_single_alg(_factory, _pairs_to_test);
             num_overlapped.push_back(single_result.overlapped);
             SAT_times.push_back(single_result.nanos);
@@ -183,20 +193,20 @@ namespace cube_speedtest
 
     // Prints results saved in _data onto the standard output
     //----------------------------------------------------------------------------------------
-    void print_results(TestData _data)
+    void TestData::printResults()
     {
-        std::cout << "(" << _data.numOverlapped << ")/" << _data.numAll << " overlapped. Overlap probability: "
-            << _data.overlapProb << std::endl;
-        std::cout << "Mine avg. time    : " << _data.mineNs << std::endl;
-        std::cout << "Tri-tri avg. time : " << _data.triNs << std::endl;
-        std::cout << "SAT avg. time     : " << _data.SATNs << std::endl;
-        std::cout << "Factory used      : " << _data.factoryDesc << std::endl;
+        std::cout << "(" << this->numOverlapped << ")/" << this->numAll << " overlapped. Overlap probability: "
+            << this->overlapProb << std::endl;
+        std::cout << "Mine avg. time    : " << this->mineNs << std::endl;
+        std::cout << "Tri-tri avg. time : " << this->triNs << std::endl;
+        std::cout << "SAT avg. time     : " << this->SATNs << std::endl;
+        std::cout << "Factory used      : " << this->factoryDesc << std::endl;
     }
 
 
     // Stores all results in vector to csv output stream _out
     //----------------------------------------------------------------------------------------
-    void to_csv(std::ostream & _out, const std::vector<TestData> & _data)
+    void TestData::toCsv(std::ostream & _out, const std::vector<TestData> & _data)
     {
         _out << "probability,error,my alg time,error,tri-tri alg time,error,SAT alg time,error,"
             "num of overlapped,error,num of all,factory desc" << std::endl;

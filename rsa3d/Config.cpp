@@ -10,14 +10,14 @@
 
 // Parses configuration parameters from given istream
 //--------------------------------------------------------------------------------------------
-Config::ptr Config::parse(std::istream & _file, char _delim)
+Config * Config::parse(std::istream & _file, char _delim)
 {
     std::string line;
     std::string field, value;
     std::size_t line_num = 0;
     std::size_t pos;
     
-    ptr result = std::make_unique<Config>();
+    Config * result = new Config();
     
     // Parse line by line
     while (std::getline(_file, line)) {

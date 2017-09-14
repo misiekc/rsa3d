@@ -12,7 +12,6 @@
 #include <string>    
 #include <istream>
 #include <stdexcept>
-#include <memory>
 #include <vector>
 
 
@@ -37,13 +36,11 @@ public:
 class Config
 {
 private:
-    typedef std::unique_ptr<Config> ptr;
-    
     std::map<std::string, std::string>  fieldMap;
     std::vector<std::string>            keys;
     
 public:
-    static ptr  parse(std::istream & _file, char _delim = '=');
+    static Config * parse(std::istream & _file, char _delim = '=');
     
     std::string getString(const std::string & _field) const;
     int getInt(const std::string & _field) const;

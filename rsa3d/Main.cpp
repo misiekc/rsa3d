@@ -15,6 +15,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
+#include <memory>
 
 
 void die(const std::string & reason)
@@ -111,7 +112,7 @@ int cube_speedtest_main(int argc, char **argv)
         die("Usage: ./rsa cube_speedtest [input] [output = cube_speedtest.csv]");
 
     std::ifstream input(argv[2]);
-    auto config = Config::parse(input);
+    auto config = std::unique_ptr<Config> (Config::parse(input));
     input.close();    
     
     std::string output = "cube_speedtest.csv";
@@ -122,6 +123,7 @@ int cube_speedtest_main(int argc, char **argv)
     std::size_t repeats = config->getUnsignedInt("repeats");
     std::istringstream sizes(config->getString("box_sizes"));
     
+	ShapeFactory::initShapeClass("Cuboid", "3 " + config->getString("cuboid_size"));
     BoxFactory * factory = BoxFactory::getInstance();
     std::vector<cube_speedtest::TestData> dataVector;
     double size;
@@ -138,23 +140,23 @@ int cube_speedtest_main(int argc, char **argv)
     // Print results
     std::cout << std::endl;
     std::cout << ">> Obtained results:" << std::endl << std::endl;
-    for (auto d : dataVector) {
-        cube_speedtest::print_results(d);
+    for (auto data : dataVector) {
+        data.printResults();
         std::cout << std::endl;
     }
     
     // Print aquired probabilities
     std::cout << ">> Probabilities for box sizes" << std::endl;
     std::cout << std::left;
-    for (auto d : dataVector) {
-        std::cout << std::setw(15) << d.overlapProb.value << " : " << d.factoryDesc << std::endl;
+    for (auto data : dataVector) {
+        std::cout << std::setw(15) << data.overlapProb.value << " : " << data.factoryDesc << std::endl;
     }
     std::cout << std::endl;
     
     // Store to file
     std::cout << ">> Storing to file " << output << "..." << std::endl;
     std::ofstream file(output);
-    cube_speedtest::to_csv(file, dataVector);
+    cube_speedtest::TestData::toCsv(file, dataVector);
     file.close();
     
     return EXIT_SUCCESS;
