@@ -8,9 +8,10 @@
 #ifndef _INTTEST_H
     #define _INTTEST_H
 
-void CuboidIntTest_run();
-void CuboidIntSATTest_run();
-void CuboidIntTimeTest_run();
-void TriTriInt_selftest_run();
+namespace cube_inttest
+{
+    void perform();
+    void TriTriInt_selftest_run();
+}
 
 #endif  // _INTTEST_H

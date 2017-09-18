@@ -7,12 +7,15 @@
 #include "analizator/Analyzer.h"
 #include "tests/CuboidSpeedTest.h"
 #include "tests/BoxFactory.h"
+#include "tests/CuboidIntTest.h"
+#include "Config.h"
 
 #include <string.h>
 #include <fstream>
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
+#include <memory>
 
 
 void die(const std::string & reason)
@@ -105,21 +108,30 @@ void boundaries(Parameters *params) {
 //--------------------------------------------------------------------------------------------
 int cube_speedtest_main(int argc, char **argv)
 {    
-    if (argc < 5)
-        die("Usage: ./rsa cube_speedtest [pairs to test] [repeats] [1+ box sizes]");
+    if (argc < 3)
+        die("Usage: ./rsa cube_speedtest [input] [output = cube_speedtest.csv]");
+
+    std::ifstream input(argv[2]);
+    auto config = std::unique_ptr<Config> (Config::parse(input));
+    input.close();    
     
+    std::string output = "cube_speedtest.csv";
+    if (argc == 4)
+        output = argv[3];
+    
+    std::size_t pairs = config->getUnsignedInt("pairs");
+    std::size_t repeats = config->getUnsignedInt("repeats");
+    std::istringstream sizes(config->getString("box_sizes"));
+    
+	ShapeFactory::initShapeClass("Cuboid", "3 " + config->getString("cuboid_size"));
     BoxFactory * factory = BoxFactory::getInstance();
-    std::size_t pairs = std::stoul(argv[2]);
-    std::size_t repeats = std::stoul(argv[3]);
-    double size;
     std::vector<cube_speedtest::TestData> dataVector;
-    
-    dataVector.reserve(argc - 4);
+    double size;
     
     // Warm up and perform tests
     cube_speedtest::warmUp(factory);
-    for (int i = 4; i < argc; i++) {
-        size = std::stod(argv[i]) / 2;
+    while (sizes >> size) {
+        size /= 2;
         factory->setBoxSize(size, size, size);
         cube_speedtest::TestData data = cube_speedtest::perform(factory, pairs, repeats);
         dataVector.push_back(data);
@@ -128,23 +140,23 @@ int cube_speedtest_main(int argc, char **argv)
     // Print results
     std::cout << std::endl;
     std::cout << ">> Obtained results:" << std::endl << std::endl;
-    for (auto d : dataVector) {
-        cube_speedtest::print_results(d);
+    for (auto data : dataVector) {
+        data.printResults();
         std::cout << std::endl;
     }
     
     // Print aquired probabilities
     std::cout << ">> Probabilities for box sizes" << std::endl;
     std::cout << std::left;
-    for (auto d : dataVector) {
-        std::cout << std::setw(15) << d.overlapProb.value << " : " << d.factoryDesc << std::endl;
+    for (auto data : dataVector) {
+        std::cout << std::setw(15) << data.overlapProb.value << " : " << data.factoryDesc << std::endl;
     }
     std::cout << std::endl;
     
     // Store to file
-    std::cout << ">> Storing to file cube_speedtest.csv..." << std::endl;
-    std::ofstream file("cube_speedtest.csv");
-    cube_speedtest::to_csv(file, dataVector);
+    std::cout << ">> Storing to file " << output << "..." << std::endl;
+    std::ofstream file(output);
+    cube_speedtest::TestData::toCsv(file, dataVector);
     file.close();
     
     return EXIT_SUCCESS;
@@ -158,6 +170,9 @@ int main(int argc, char **argv) {
     // Modes with custom environment
     if (strcmp(argv[1], "cube_speedtest") == 0) {
         cube_speedtest_main(argc, argv);
+        return EXIT_SUCCESS;
+    } else if (strcmp(argv[1], "cube_inttest") == 0) {
+        cube_inttest::perform();
         return EXIT_SUCCESS;
     }
 	

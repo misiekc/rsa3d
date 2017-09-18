@@ -17,7 +17,7 @@ BoxFactory * BoxFactory::instance = nullptr;
 //--------------------------------------------------------------------------------------------  
 BoxFactory::BoxFactory()
 {
-	ShapeFactory::initShapeClass("Cuboid", "3 1 1 1");
+    
 }
 
 // Returns singleton instance
