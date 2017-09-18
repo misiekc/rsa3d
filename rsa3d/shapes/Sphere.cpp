@@ -103,15 +103,28 @@ std::string Sphere::toPovray() const{
 	std::string s;
 
 	if (this->dimension==2){
-		std::string s = "  disc { < ";
+		s = "  disc { < ";
 		for(unsigned char i=0; i<this->dimension; i++)
 			s += std::to_string(this->position[i]) + ", ";
-		s += "0.0001>, <0.0, 0.0, 1.0>, " + std::to_string(this->r) +"\n    texture { pigment { color Red } }\n  }\n";
+		s += "0.0002>, <0.0, 0.0, 1.0>, " + std::to_string(this->r) +"\r\n    texture { pigment { color Red } }\r\n  }\r\n";
+
+		s += "  disc { < ";
+		for(unsigned char i=0; i<this->dimension; i++)
+			s += std::to_string(this->position[i]) + ", ";
+		s += "0.0001>, <0.0, 0.0, 1.0>, " + std::to_string(2*this->r) +"\r\n    texture { pigment { color Coral } }\r\n  }\r\n";
+
+
+/*
+		s += "  text { ttf \"timrom.ttf\" \"" + std::to_string(this->no) + "\" 1, 0 pigment { color Black } scale 0.5 translate < ";
+		for(unsigned char i=0; i<this->dimension; i++)
+			s += std::to_string(this->position[i]) + ", ";
+		s +=  "0.0003> }\r\n";
+*/
 	}else{
-		std::string s = "  sphere { < ";
+		s = "  sphere { < ";
 		for(unsigned char i=0; i<this->dimension; i++)
 			s += std::to_string(this->position[i]) + ", ";
-		s += "0.0>, " + std::to_string(this->r) +"\n    texture { pigment { color Red } }\n  }\n";
+		s += "0.0>, " + std::to_string(this->r) +"\n    texture { pigment { color Red } }\r\n  }\r\n";
 	}
 	return s;
 }

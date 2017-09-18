@@ -10,9 +10,9 @@
 #define UTILS_C_
 
 bool increment(int* in, int inlength, int max);
-int position2i(double* da, int dalength, double size, double dx, int n);
+int position2i(const double* da, int dalength, double size, double dx, int n);
 void i2position(double* da, int dalength, int index, double dx, int n);
-void coordinates(int* result, double* da, int dalength, double size, double dx, int n);
+void coordinates(int* result, const double* da, int dalength, double size, double dx, int n);
 int neighbour2i(int* coordinates, int* neighbour, int clength, int offset, int n);
 
 // trim from start

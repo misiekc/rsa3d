@@ -20,6 +20,22 @@
 #include "Utils.h"
 
 /**
+ * d - requested initial size of a voxel
+ */
+double VoxelList::findInitialVoxelSize(double d){
+	double dRes = 1.0;
+	while (dRes > d)
+		dRes /= 2;
+	while (2*dRes < d)
+		dRes *= 2;
+	return dRes;
+}
+
+inline int VoxelList::getLinearNumberOfVoxels(double vs){
+	return (int)(this->size/vs) + 1;
+}
+
+/**
 dim - packing dimension
 s - packing size (linear)
 d - requested initial size of a voxel
@@ -27,32 +43,25 @@ d - requested initial size of a voxel
 VoxelList::VoxelList(unsigned char dim, double s, double d){
 	this->dimension = dim;
 	this->size = s;
-	int n = (int)(s/d)+1;
-	this->voxelSize = (s/n); // actual initial size of a voxel (should be not greater than d)
+	this->voxelSize = this->findInitialVoxelSize(d);
 	this->initialVoxelSize = this->voxelSize;
 
 	this->distribution = new std::uniform_real_distribution<double>(0.0, this->voxelSize);
 	this->disabled = false;
 
-	n = (int)(this->size/this->voxelSize + 0.5);
+	int n = this->getLinearNumberOfVoxels(this->voxelSize);
 	int voxelsLength = (int)(pow(n, dim)+0.5);
 	this->voxels = new Voxel*[voxelsLength];
 	this->activeTopLevelVoxels = new bool[voxelsLength];
-	this->voxelNeighbourGrid = new NeighbourGrid(dim, s, this->voxelSize);
+	this->voxelNeighbourGrid = new NeighbourGrid(dim, s, n);
 
-	offset = new double*[(1 << this->dimension)]; // matrix of d-dimensional offsets to 2^d voxel vertices
+	offset = new int*[(1 << this->dimension)]; // matrix of d-dimensional offsets to 2^d voxel vertices
 
-	int *in = new int[this->dimension];
-	for(unsigned char i=0; i<this->dimension; i++){
-		in[i] = 0;
-	}
+	int *in = new int[this->dimension]();
 	int index = 0;
 	do{
-		offset[index] = new double[this->dimension];
-
-		for(unsigned char i=0; i<this->dimension; i++){
-			offset[index][i] = in[i];
-		}
+		offset[index] = new int[this->dimension];
+		std::copy(in, in+this->dimension, offset[index]);
 		index++;
 	}while(increment(in, this->dimension, 1));
 	delete[] in;
@@ -88,34 +97,31 @@ void VoxelList::disable(){
 	this->disabled = true;
 }
 
-Voxel* VoxelList::createVoxel(double* center, double vs, int index){
-	double d = 0.5*vs;
-	for(unsigned char i=0; i< this->dimension; i++){
-		if (center[i] - d < 0.0){
-			center[i] = d;
-		}else if (center[i] + d > this->size){
-			center[i] = this->size - d;
+Voxel* VoxelList::createVoxel(double* leftbottom, double vs, int index){
+/*
+	for(int i=0; i< this->dimension; i++){
+		if (leftbottom[i] < 0.0){
+			leftbottom[i] = 0.0;
+		}else if (leftbottom[i] + vs > this->size){
+			leftbottom[i] = this->size - vs;
 		}
 	}
-	return new Voxel(this->dimension, center, vs, index);
+*/
+	return new Voxel(this->dimension, leftbottom, vs, index);
 }
 
 
 void VoxelList::initVoxels(unsigned char dim){
-	int n = (int)(this->size/this->voxelSize + 0.5);
+	int n = this->getLinearNumberOfVoxels(this->voxelSize);
 	double *da = new double[dim];
-	int *in = new int[dim];
-
-	for(unsigned char i=0; i<dim; i++){
-		in[i] = 0;
-	}
+	int *in = new int[dim]();
 
 	int i, index = 0;
 	do{
 		for(unsigned char i=0; i<dim; i++){
 			da[i] = this->voxelSize*in[i]; // da point to the "left bottom" corner of a voxel
 		}
-		i = position2i(da, dim, this->size, this->voxelSize, n);
+		i = position2i(da, dim, n*this->voxelSize, this->voxelSize, n);
 		if(index!=i){
 			std::cout << "VoxelList::initVoxels: Problem: " << index << " != " << i << std::endl;
 		}
@@ -136,8 +142,8 @@ void VoxelList::fillNeighbourGrid(){
 	}
 }
 
-std::unordered_set<Positioned *> * VoxelList::getNeighbours(Voxel *v){
-	return this->voxelNeighbourGrid->getNeighbours(v->getPosition());
+void VoxelList::getNeighbours(std::unordered_set<Positioned *> *result, Voxel *v){
+	return this->voxelNeighbourGrid->getNeighbours(result, v->getPosition());
 }
 
 
@@ -153,11 +159,7 @@ void VoxelList::remove(Voxel *v){
 	if (this->disabled)
 		return;
 
-	double* vpos = v->getPosition();
-	int index = position2i(vpos, this->dimension, this->size, this->initialVoxelSize, (int)(this->size/this->initialVoxelSize + 0.5));
-	this->activeTopLevelVoxels[index]=false;
-
-	index = v->index;
+	int index = v->index;
 
 	if (index!=last){
 		Voxel *vl = this->voxels[last];
@@ -170,7 +172,19 @@ void VoxelList::remove(Voxel *v){
 	delete v;
 
 //		this.checkIndexes();
-	}
+}
+
+void VoxelList::removeTopLevelVoxel(Voxel *v){
+	if (this->disabled)
+		return;
+
+	double* vpos = v->getPosition();
+	int n = (int)(this->size/this->initialVoxelSize) + 1;
+	int index = position2i(vpos, this->dimension, n*this->initialVoxelSize, this->initialVoxelSize, n);
+	this->activeTopLevelVoxels[index]=false;
+}
+
+
 
 Voxel * VoxelList::getVoxel(double* da){
 	std::vector<Positioned *> *vTmp = this->voxelNeighbourGrid->getCell(da);
@@ -185,7 +199,8 @@ Voxel * VoxelList::getVoxel(double* da){
 bool VoxelList::analyzeVoxel(Voxel *v, Shape *s, BoundaryConditions *bc){
 
 	double* vpos = v->getPosition();
-	int index = position2i(vpos, this->dimension, this->size, this->initialVoxelSize, (int)(this->size/this->initialVoxelSize + 0.5));
+	int n = (int)(this->size/this->initialVoxelSize) + 1;
+	int index = position2i(vpos, this->dimension, n*this->initialVoxelSize, this->initialVoxelSize, n);
 	if(this->activeTopLevelVoxels[index]==false)
 		return true;
 
@@ -214,12 +229,20 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Pos
 	double* vpos = v->getPosition();
 
 	// checking if initial voxel containing v is active (do not have a shape inside)
-	int index = position2i(vpos, this->dimension, this->size, this->initialVoxelSize, (int)(this->size/this->initialVoxelSize + 0.5));
+	int n = this->getLinearNumberOfVoxels(this->initialVoxelSize);
+	int index = position2i(vpos, this->dimension, n*this->initialVoxelSize, this->initialVoxelSize, n);
 	if(this->activeTopLevelVoxels[index]==false)
 		return true;
 
 	std::unordered_set<Positioned *> vAll;
 	std::unordered_set<Positioned *>::iterator itN, itA;
+	std::unordered_set<Positioned *> *vNeighbours;
+
+	if(neighbours==NULL){
+		vNeighbours = new std::unordered_set<Positioned *>();
+	}else{
+		vNeighbours = neighbours;
+	}
 
 	double *da = new double[this->dimension];
 
@@ -228,7 +251,10 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Pos
 		for(unsigned char j=0; j<this->dimension; j++){
 			da[j] = vpos[j] + this->offset[i][j]*this->voxelSize;
 		}
-		std::unordered_set<Positioned *> *vNeighbours = (neighbours==NULL) ? nl->getNeighbours(da) : neighbours;
+
+		if (neighbours==NULL){
+			nl->getNeighbours(vNeighbours, da);
+		}
 		// at the beginning we add all neighbouring shapes
 		if (vAll.size()==0){
 			vAll.insert(vNeighbours->begin(), vNeighbours->end());
@@ -250,11 +276,15 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Pos
 		}
 		if (vAll.size()==0){
 			delete[] da;
+			if (neighbours==NULL)
+				delete vNeighbours;
 			return false;
 		}
 	}
 //	v.analyzed = true;
 	delete[] da;
+	if (neighbours==NULL)
+		delete vNeighbours;
 	return true;
 }
 
@@ -299,15 +329,20 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, Boun
 			da[j] = vpos[j];
 		}
 		do{
+			bool doCreate = true;
 			for(unsigned char j=0; j < this->dimension; j++){
 				da[j] = vpos[j] + in[j]*this->voxelSize;
+				if (da[j]>this->size)
+					doCreate = false;
 			}
-			Voxel *vTmp = this->createVoxel(da, this->voxelSize, index);
-			if (nl==NULL || bc==NULL || !this->analyzeVoxel(vTmp, nl, NULL, bc)){
-				newList[index] = vTmp;
-				index++;
-			}else{
-				delete vTmp;
+			if (doCreate){
+				Voxel *vTmp = this->createVoxel(da, this->voxelSize, index);
+				if (nl==NULL || bc==NULL || !this->analyzeVoxel(vTmp, nl, NULL, bc)){
+					newList[index] = vTmp;
+					index++;
+				}else{
+					delete vTmp;
+				}
 			}
 		}while(increment(in, this->dimension, (unsigned char)1));
 		delete this->voxels[i];
@@ -357,6 +392,7 @@ double VoxelList::getVoxelsSurface(){
 
 std::string VoxelList::toPovray(){
 	std::string sRes = "";
+
 	for(int i=0; i<=this->last; i++){
 		double *da = this->voxels[i]->getPosition();
 		double x1 = da[0], x2 = da[0] + this->voxelSize;
@@ -367,6 +403,12 @@ std::string VoxelList::toPovray(){
 				+ "< " + std::to_string(x2) + ", " + std::to_string(y2) + ", 1.0>, "
 				+ "< " + std::to_string(x2) + ", " + std::to_string(y1) + ", 1.0> "
 				+ " texture { finish { ambient 1 diffuse 0 } pigment { color Black} } }\r\n";
+/*
+		sRes += "  text { ttf \"timrom.ttf\" \"" + std::to_string(i) + "\" 1, 0 pigment { color White } scale 0.1 translate < ";
+		for(unsigned char j=0; j<this->dimension; j++)
+			sRes += std::to_string(da[j]+0.5*this->voxelSize) + ", ";
+		sRes +=  "1.0003> }\r\n";
+*/
 	}
 	return sRes;
 }

@@ -33,10 +33,3 @@ double * NBoxFBC::getTranslation(double *result, double *p1, double *p2) {
 void NBoxFBC::vector(double* v) {
 	this->vectorFreeBC(v);
 }
-
-double * NBoxFBC::getRandomPosition(double *result, RND *rnd) {
-	for(int i=0; i<this->dimension; i++)
-		result[i] = rnd->nextValue()*this->size;
-	return result;
-}
-

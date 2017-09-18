@@ -60,8 +60,9 @@ int PackingGenerator::analyzeVoxels() {
 // analyzes all voxels inside a region around v
 int PackingGenerator::analyzeRegion(Voxel *v){
 	int begin = this->voxels->length();
-	std::unordered_set<Positioned *> *region = this->voxels->getNeighbours(v);
-	for(Positioned *v1: *region){
+	std::unordered_set<Positioned *> region;
+	this->voxels->getNeighbours(&region, v);
+	for(Positioned *v1: region){
 		if (this->voxels->analyzeVoxel((Voxel *)v1, this->surface->getNeighbourGrid(), this->surface))
 			this->voxels->remove((Voxel *)v1);
 	}
@@ -79,6 +80,11 @@ void PackingGenerator::createPacking(){
 
 	this->voxels = new VoxelList(this->params->dimension, this->params->surfaceSize, s->getVoxelSize());
 
+	double gridSize = s->getNeighbourListCellSize();
+	if (gridSize < this->params->thresholdDistance)
+		gridSize = this->params->thresholdDistance;
+
+
 	if(params->boundaryConditions.compare("free")==0)
 		this->surface = new NBoxFBC(this->params->dimension, this->params->surfaceSize, s->getNeighbourListCellSize(), s->getVoxelSize());
 	else
@@ -89,16 +95,20 @@ void PackingGenerator::createPacking(){
 	int l = 0;
 	double t = 0;
 	int tmpSplit = this->params->split;
+//	int snapshotCounter = 0;
+
 
 	while (!this->isSaturated() && t<params->maxTime && missCounter<params->maxTriesWithoutSuccess) {
 		t += this->getFactor() * dt;
 		s = ShapeFactory::createShape(&rnd);
 
-		Voxel *v = this->voxels->getRandomVoxel(&rnd);
+		Voxel *v;
 		double *da = new double[this->params->dimension];
+		do{
+			v = this->voxels->getRandomVoxel(&rnd);
+			this->voxels->getRandomPosition(da, v, &rnd);
+		}while(!this->surface->isInside(da));
 		s->translate(this->voxels->getRandomPosition(da, v, &rnd));
-
-		delete[] da;
 
 		Shape *sTmp = this->surface->check(s);
 		if (sTmp==NULL) { // if no overlap detected
@@ -122,11 +132,25 @@ void PackingGenerator::createPacking(){
 						double mindist = s->minDistance(sn);
 						for(int i=0; i<this->params->dimension; i++){
 							da[i] = da[i]/d;
-							spos[i] = snpos[i] - da[i]*mindist;
+							spos[i] += (d-mindist)*da[i];
 						}
+						this->surface->checkPosition(spos);
 						v = this->voxels->getVoxel(spos);
+						if (v==NULL){
+							std::cout << "Problem: PackingGenerator - no voxel found" << std::endl;
+						}
 					}
 				}
+			}
+
+			delete[] da;
+
+			if (v!=this->voxels->getVoxel(v->getPosition())){
+				Voxel *v1 = this->voxels->getVoxel(v->getPosition());
+				std::cout << "Problem: PackingGenerator - inconsistent voxels positions: " <<
+						" (" << v->getPosition()[0] << ", " << v->getPosition()[1] << ")" <<
+						", (" << v1->getPosition()[0] << ", " << v1->getPosition()[1] << ")" <<
+						std::endl;
 			}
 
 			this->surface->add(s);
@@ -136,6 +160,7 @@ void PackingGenerator::createPacking(){
 				this->analyzeRegion(v);
 			}else{
 				this->voxels->remove(v);
+				this->voxels->removeTopLevelVoxel(v);
 			}
 #ifdef DEBUG
 			if (t>0.1*params->maxTime){
@@ -164,10 +189,12 @@ void PackingGenerator::createPacking(){
 
 				std::cout << "[" << this->seed << " Surface::doIteration] splitting " << v0 << " voxels ";
 				std::cout.flush();
+//				this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
 
 				bool b = voxels->splitVoxels(this->params->minDx, this->params->maxVoxels, this->surface->getNeighbourGrid(), this->surface);
 				int v1 = this->voxels->length();
 
+//				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
 				std::cout << " done: " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size " << voxels->getVoxelSize() << ", factor " << this->getFactor() << std::endl;
 
 				if (b) {
@@ -209,7 +236,10 @@ void PackingGenerator::toPovray(std::vector<Shape *> * packing, double size, Vox
 	file << "#declare layer=union{" << std::endl;
 
 	file << "  polygon {4, <0, 0, 0.0>, <0, " << size << ", 0.0>, <" << size << ", " << size << ", 0.0>, <" << size << ", 0, 0.0>  texture { finish { ambient 1 diffuse 0 } pigment { color Gray} } }" << std::endl;
+	file << "  text { ttf \"timrom.ttf\" \"0\" 1, 0 pigment { color Black } scale 1.0 translate < 0, 0, 0.0002> }" << std::endl;
+
 	for (Shape *s : *packing) {
+		double *da = s->getPosition();
 		file << s->toPovray();
 	}
 

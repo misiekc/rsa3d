@@ -22,8 +22,6 @@ public:
 	double getArea();
 	double * getTranslation(double *result, double *p1, double *p2);
 	void vector(double *v);
-	double * getRandomPosition(double * result, RND *rnd);
-
 };
 
 #endif /* SURFACES_NBOXFBC_H_ */

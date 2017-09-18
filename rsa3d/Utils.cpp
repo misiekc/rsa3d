@@ -29,14 +29,19 @@ bool increment(int* in, int inlength, int max){
 }
 
 
-int position2i(double* da, int dalength, double size, double dx, int n){
+int position2i(const double* da, int dalength, double size, double dx, int n){
 	int result = 0;
+	int ix;
 	for(int i=dalength-1; i>=0; i--){
-		if (da[i]<0) da[i] += size;
-		int ix = (int)(da[i]/dx);
+		if (da[i]<0)
+			ix = (int)((da[i] + size)/dx);
+		else if (da[i]>=size)
+			ix = (int)((da[i] - size)/dx);
+		else
+			ix = (int)(da[i]/dx);
+
 		if ( (ix+1)*dx == da[i])
 			ix++;
-		if (ix>=n) ix -= n;
 		result = n*result + ix;
 	}
 	return result;
@@ -50,12 +55,14 @@ void i2position(double* da, int dalength, int index, double dx, int n){
 	}
 }
 
-void coordinates(int* result, double* da, int dalength, double size, double dx, int n){
+void coordinates(int* result, const double* da, int dalength, double size, double dx, int n){
 	for(int i=dalength-1; i>=0; i--){
-		if (da[i]<0) da[i] += size;
-		result[i] = (int)(da[i]/dx);
-		if (result[i]>=n)
-			result[i] -= n;
+		if (da[i]<0)
+			result[i] = (int)((da[i] + size)/dx);
+		else if (da[i]>=size)
+			result[i] = (int)((da[i] - size)/dx);
+		else
+			result[i] = (int)(da[i]/dx);
 	}
 }
 

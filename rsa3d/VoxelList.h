@@ -24,6 +24,8 @@ private:
 	NeighbourGrid* voxelNeighbourGrid;
 	bool* activeTopLevelVoxels;
 
+	double findInitialVoxelSize(double d);
+	int getLinearNumberOfVoxels(double vs);
 	void fillNeighbourGrid();
 	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Positioned *> *neighbours, BoundaryConditions *bc);
 	bool disabled;
@@ -41,7 +43,7 @@ protected:
 	double size;
 	int beginningVoxelNumber;
 	unsigned char dimension;
-	double **offset;
+	int **offset;
 
 	Voxel* createVoxel(double* center, double vs, int index);
 	void initVoxels(unsigned char dim);
@@ -53,8 +55,9 @@ public:
 
 	virtual ~VoxelList();
 
-	std::unordered_set<Positioned *> * getNeighbours(Voxel *v);
+	void getNeighbours(std::unordered_set<Positioned *> *result, Voxel *v);
 	void remove(Voxel *v);
+	void removeTopLevelVoxel(Voxel *v);
 	bool analyzeVoxel(Voxel *v, Shape *s, BoundaryConditions *bc);
 	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc, int timestamp);
 	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc);

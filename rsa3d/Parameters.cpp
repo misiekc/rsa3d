@@ -24,7 +24,7 @@ Parameters::Parameters() {
 	storePackings = true;
 
 	modifiedRSA = false;
-	thresholdDistance = 1.0;
+	thresholdDistance = 0.0;
 
 	boundaryConditions = "periodic";
 	particleType = "Sphere";

@@ -28,14 +28,15 @@ private:
 	std::vector<std::vector<Positioned* > * > lists;
 	std::vector<std::vector<int> * > neighbouringCells;
 
+	void init(int dim, double size, int n);
 
-	std::unordered_set<Positioned *> neighbours;
 public:
 
 
 
 
 	NeighbourGrid(int dim, double size, double dx);
+	NeighbourGrid(int dim, double size, int n);
 	virtual ~NeighbourGrid();
 
 	void add(Positioned* s);
@@ -44,7 +45,7 @@ public:
 //	std::unordered_set<Positioned*> * getNeighbours(double* da, unsigned char radius);
 	void clear();
 	std::vector<Positioned*> * getCell(double* da);
-	std::unordered_set<Positioned*> * getNeighbours(double* da);
+	void getNeighbours(std::unordered_set<Positioned*> *result, double* da);
 	Positioned* getClosestNeighbour(double *da, BoundaryConditions *bc);
 };
 

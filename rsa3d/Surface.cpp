@@ -24,10 +24,10 @@ void Surface::add(Shape *s) {
 	}
 
 Shape* Surface::check(Shape *s){
-	std::unordered_set<Positioned *> * neighbours;
-	neighbours = this->list->getNeighbours(s->getPosition());
+	std::unordered_set<Positioned *> neighbours;
+	this->list->getNeighbours(&neighbours, s->getPosition());
 
-	for(Positioned *shape: *neighbours) {
+	for(Positioned *shape: neighbours) {
 		if (((Shape *)shape)->overlap(this, s)){
 			return (Shape *)shape;
 		}
@@ -39,12 +39,23 @@ Positioned * Surface::getClosestNeighbour(double *da){
 	return this->list->getClosestNeighbour(da, this);
 }
 
-std::unordered_set<Positioned *> * Surface::getNeighbours(double* da) {
-	return this->list->getNeighbours(da);
+void Surface::getNeighbours(std::unordered_set<Positioned *> *result, double* da) {
+	this->list->getNeighbours(result, da);
 }
 
 NeighbourGrid * Surface::getNeighbourGrid(){
 	return this->list;
+}
+
+void Surface::checkPosition(double *da){
+	// do nothing
+}
+
+bool Surface::isInside(double *da){
+	for (int i = 0; i < this->dimension; i++)
+		if (da[i] < 0 || da[i] > this->size)
+			return false;
+	return true;
 }
 
 double Surface::distance2(double *a1, double *a2) {

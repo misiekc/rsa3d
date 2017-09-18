@@ -29,7 +29,7 @@ public:
 	bool storePackings = true;
 
 	bool modifiedRSA = false;
-	double thresholdDistance = 1;
+	double thresholdDistance = 0.0;
 
 	std::string boundaryConditions;
 	std::string particleType;

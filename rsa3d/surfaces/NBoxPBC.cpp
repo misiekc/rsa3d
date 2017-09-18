@@ -39,9 +39,10 @@ void NBoxPBC::vector(double* v) {
 	this->vectorPeriodicBC(v);
 }
 
-double * NBoxPBC::getRandomPosition(double *result, RND *rnd) {
+void NBoxPBC::checkPosition(double *da) {
 	for(int i=0; i<this->dimension; i++)
-		result[i] = rnd->nextValue()*this->size;
-	return result;
+		if (da[i] < 0.0)
+			da[i] += this->size;
+		else if (da[i] >= this->size)
+			da[i] -= this->size;
 }
-
