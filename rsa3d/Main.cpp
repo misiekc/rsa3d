@@ -10,6 +10,8 @@
 #include "tests/CuboidIntTest.h"
 #include "Config.h"
 
+#include <unistd.h>
+#include <sys/wait.h>
 #include <string.h>
 #include <fstream>
 #include <iostream>
@@ -51,6 +53,7 @@ std::vector<Shape *> * fromFile(unsigned char dim, std::string filename) {
 int simulate(Parameters *params) {
 	PackingGenerator *pg;
 	char buf[20];
+	int pid = 0;
 	std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->dimension));
 	std::string size(buf);
 
@@ -61,6 +64,17 @@ int simulate(Parameters *params) {
 	std::vector<Shape *> *packing;
 
 	for (int i = params->from; i < params->from + params->collectors; i++) {
+
+		if (params->multiProcess){
+			pid = fork();
+			if (pid < 0){
+				std::cout << "fork problem" << std::endl;
+				i--;
+				continue;
+			}
+			if (pid > 0)
+				continue;
+		}
 		pg = new PackingGenerator(i, params);
 		pg->run();
 		packing = pg->getPacking();
@@ -72,7 +86,12 @@ int simulate(Parameters *params) {
 				<< (*packing)[packing->size() - 1]->time << std::endl;
 		file.flush();
 		delete pg;
-
+		if (params->multiProcess && pid == 0)
+			return 1;
+	}
+	if (params->multiProcess){
+		for (int i = params->from; i < params->from + params->collectors; i++)
+			wait(NULL);
 	}
 	file.close();
 	return 1;

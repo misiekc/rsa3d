@@ -239,7 +239,7 @@ void PackingGenerator::toPovray(std::vector<Shape *> * packing, double size, Vox
 	file << "  text { ttf \"timrom.ttf\" \"0\" 1, 0 pigment { color Black } scale 1.0 translate < 0, 0, 0.0002> }" << std::endl;
 
 	for (Shape *s : *packing) {
-		double *da = s->getPosition();
+//		double *da = s->getPosition();
 		file << s->toPovray();
 	}
 

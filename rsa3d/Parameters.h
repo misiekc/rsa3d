@@ -35,6 +35,8 @@ public:
 	std::string particleType;
 	std::string particleAttributes;
 
+	bool multiProcess = false;
+
 
 	Parameters();
 	Parameters(const std::string & sFile);
