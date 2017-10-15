@@ -23,11 +23,11 @@
 //--------------------------------------------------------------------------------------------
 namespace
 {
-    const double    sizex = 1;
+    const double    sizex = 0.5;
     const double    sizey = 1;
-    const double    sizez = 1;
-    const double    box_halfsize = 1;
-    const int       MAX_TRIES = 10000;
+    const double    sizez = 2;
+    const double    box_halfsize = 1.5;
+    const int       MAX_TRIES = 100000;
     
 	int             no = 0;
     

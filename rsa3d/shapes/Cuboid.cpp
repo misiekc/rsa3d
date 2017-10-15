@@ -292,6 +292,7 @@ int Cuboid::overlapMine(BoundaryConditions *bc, Shape *s)
     sTranslation = backwards_rot * (sTranslation - thisTranslation);
     
     Vector<3> v_trans[V::SIZE];    // Calculated vertices coordinates
+    Vector<3> v_trans_bis[V::SIZE];    // Calculated vertices coordinates in swapped cuboid order
     
     // Check whether vertices of s lie in this. TO OPTIMIZE
     if (checkPoint( (v_trans[V::PPP] = new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||      
@@ -311,14 +312,14 @@ int Cuboid::overlapMine(BoundaryConditions *bc, Shape *s)
     sTranslation = -(new_orientation * sTranslation);
     
     // Check whether vertices of this lie in s
-    if (sCuboid->checkPoint( new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ||      
-        sCuboid->checkPoint( new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ||
-        sCuboid->checkPoint( new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ||
-        sCuboid->checkPoint( new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ||
-        sCuboid->checkPoint( new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ||
-        sCuboid->checkPoint( new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ||
-        sCuboid->checkPoint( new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ||
-        sCuboid->checkPoint( new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation))
+    if (sCuboid->checkPoint( (v_trans_bis[V::PPP] = new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||      
+        sCuboid->checkPoint( (v_trans_bis[V::NPP] = new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
+        sCuboid->checkPoint( (v_trans_bis[V::PNP] = new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
+        sCuboid->checkPoint( (v_trans_bis[V::PPN] = new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
+        sCuboid->checkPoint( (v_trans_bis[V::PNN] = new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
+        sCuboid->checkPoint( (v_trans_bis[V::NPN] = new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
+        sCuboid->checkPoint( (v_trans_bis[V::NNP] = new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
+        sCuboid->checkPoint( (v_trans_bis[V::NNN] = new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ))
     {
         return true;    
     }
@@ -330,6 +331,17 @@ int Cuboid::overlapMine(BoundaryConditions *bc, Shape *s)
         checkSegment(v_trans[V::NPP], v_trans[V::NPN]) || checkSegment(v_trans[V::NPN], v_trans[V::NNN]) ||
         checkSegment(v_trans[V::PPP], v_trans[V::NPP]) || checkSegment(v_trans[V::PPN], v_trans[V::NPN]) ||
         checkSegment(v_trans[V::PNN], v_trans[V::NNN]) || checkSegment(v_trans[V::PNP], v_trans[V::NNP]))
+    {
+        return true;
+    }
+    
+    // Check whether edges of this lie in s. TO OPTIMIZE
+    if (sCuboid->checkSegment(v_trans_bis[V::PPP], v_trans_bis[V::PPN]) || sCuboid->checkSegment(v_trans_bis[V::PPN], v_trans_bis[V::PNN]) ||
+        sCuboid->checkSegment(v_trans_bis[V::PNN], v_trans_bis[V::PNP]) || sCuboid->checkSegment(v_trans_bis[V::PNP], v_trans_bis[V::PPP]) ||
+        sCuboid->checkSegment(v_trans_bis[V::NNN], v_trans_bis[V::NNP]) || sCuboid->checkSegment(v_trans_bis[V::NNP], v_trans_bis[V::NPP]) ||
+        sCuboid->checkSegment(v_trans_bis[V::NPP], v_trans_bis[V::NPN]) || sCuboid->checkSegment(v_trans_bis[V::NPN], v_trans_bis[V::NNN]) ||
+        sCuboid->checkSegment(v_trans_bis[V::PPP], v_trans_bis[V::NPP]) || sCuboid->checkSegment(v_trans_bis[V::PPN], v_trans_bis[V::NPN]) ||
+        sCuboid->checkSegment(v_trans_bis[V::PNN], v_trans_bis[V::NNN]) || sCuboid->checkSegment(v_trans_bis[V::PNP], v_trans_bis[V::NNP]))
     {
         return true;
     }
