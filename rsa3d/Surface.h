@@ -20,7 +20,7 @@ class Surface : public BoundaryConditions{
 
 protected:
 
-	NeighbourGrid *list;
+	NeighbourGrid<Shape> *list;
 
 	double size;
 	int dimension;
@@ -35,9 +35,9 @@ public:
 
 	void add(Shape *s);
 	Shape* check(Shape *s);
-	void getNeighbours(std::unordered_set<Positioned *> *result, double *da);
-	Positioned * getClosestNeighbour(double *da);
-	NeighbourGrid * getNeighbourGrid();
+	void getNeighbours(std::unordered_set<Shape *> *result, double *da);
+	Shape * getClosestNeighbour(double *da);
+	NeighbourGrid<Shape> * getNeighbourGrid();
 	double distance2(double *a1, double *a2);
 
 	virtual bool isInside(double * da);

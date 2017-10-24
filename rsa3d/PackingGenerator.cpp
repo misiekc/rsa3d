@@ -60,11 +60,11 @@ int PackingGenerator::analyzeVoxels() {
 // analyzes all voxels inside a region around v
 int PackingGenerator::analyzeRegion(Voxel *v){
 	int begin = this->voxels->length();
-	std::unordered_set<Positioned *> region;
+	std::unordered_set<Voxel *> region;
 	this->voxels->getNeighbours(&region, v);
-	for(Positioned *v1: region){
-		if (this->voxels->analyzeVoxel((Voxel *)v1, this->surface->getNeighbourGrid(), this->surface))
-			this->voxels->remove((Voxel *)v1);
+	for(Voxel *v1: region){
+		if (this->voxels->analyzeVoxel(v1, this->surface->getNeighbourGrid(), this->surface))
+			this->voxels->remove(v1);
 	}
 	return begin - this->voxels->length();
 }
@@ -78,6 +78,7 @@ void PackingGenerator::createPacking(){
 	ShapeFactory::initShapeClass(this->params->particleType, this->params->particleAttributes);
 	Shape *s = ShapeFactory::createShape(&rnd);
 
+	VoxelList::dimension = this->params->dimension;
 	this->voxels = new VoxelList(this->params->dimension, this->params->surfaceSize, s->getVoxelSize());
 
 	double gridSize = s->getNeighbourListCellSize();
@@ -116,6 +117,7 @@ void PackingGenerator::createPacking(){
 			s->no = l;
 			s->time = t;
 
+/*
 			if (this->params->modifiedRSA){
 				Shape *sn = (Shape*)this->surface->getClosestNeighbour(s->getPosition());
 				if (sn!=NULL){
@@ -142,6 +144,7 @@ void PackingGenerator::createPacking(){
 					}
 				}
 			}
+*/
 
 			delete[] da;
 

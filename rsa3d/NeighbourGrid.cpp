@@ -17,11 +17,11 @@
  * @param size linear size of the structure
  * @param dx linear size of one cell
  */
-NeighbourGrid::NeighbourGrid(int dim, double size, double dx) {
+NeighbourGrid<E>::NeighbourGrid(int dim, double size, double dx) {
 	this->init(dim, size, (int)(size/dx));
 }
 
-NeighbourGrid::NeighbourGrid(int dim, double size, int n) {
+NeighbourGrid<E>::NeighbourGrid(int dim, double size, int n) {
 	this->init(dim, size, n);
 }
 
@@ -31,7 +31,7 @@ NeighbourGrid::NeighbourGrid(int dim, double size, int n) {
  * @param size linear size of the structure
  * @param dx linear size of one cell
  */
-void NeighbourGrid::init(int dim, double size, int n) {
+void NeighbourGrid<E>::init(int dim, double size, int n) {
 	this->dimension = dim;
 	this->linearSize = size;
 	this->n = n;
@@ -71,8 +71,7 @@ NeighbourGrid::~NeighbourGrid() {
 	}
 }
 
-void NeighbourGrid::add(Positioned* s){
-	double* da = s->getPosition();
+void NeighbourGrid::add(Positioned* s, double *da){
 	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
 	this->lists[i]->push_back(s);
 }
@@ -90,8 +89,7 @@ void NeighbourGrid::add(Positioned* s){
 	}
 */
 
-void NeighbourGrid::remove(Positioned* s){
-	double* da = s->getPosition();
+void NeighbourGrid::remove(Positioned* s, double *da){
 	int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
 	std::vector<Positioned *>::iterator it;
 	if ( (it = std::find(this->lists[i]->begin(), this->lists[i]->end(), s)) != this->lists[i]->end())

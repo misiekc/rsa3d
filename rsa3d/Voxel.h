@@ -10,17 +10,18 @@
 
 #include "Positioned.h"
 
-class Voxel : public Positioned{
+class Voxel{
 
 private:
+	double *position;
 	short missCounter;
 
 public:
 	int index;
 	int lastAnalyzed;
 
-	Voxel(unsigned char dim);
-	Voxel(unsigned char dim, double* da, double s, int i);
+	Voxel();
+	Voxel(double* da, double s, int i);
 	Voxel(const Voxel & other);
 
 	virtual ~Voxel();
@@ -32,6 +33,8 @@ public:
 	void resetMissCounter();
 
 	bool isInside(double *da, double size);
+
+	double *getPosition();
 
 
 };

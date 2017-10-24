@@ -21,13 +21,13 @@ class VoxelList {
 private:
 
 	const double dxFactor = 1.0; // 1.0000000001;
-	NeighbourGrid* voxelNeighbourGrid;
+	NeighbourGrid<Voxel>* voxelNeighbourGrid;
 	bool* activeTopLevelVoxels;
 
 	double findInitialVoxelSize(double d);
 	int getLinearNumberOfVoxels(double vs);
 	void fillNeighbourGrid();
-	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Positioned *> *neighbours, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel *v, NeighbourGrid<Shape> *nl, std::unordered_set<Shape *> *neighbours, BoundaryConditions *bc);
 	bool disabled;
 
 	std::uniform_real_distribution<double> *distribution;
@@ -42,7 +42,6 @@ protected:
 
 	double size;
 	int beginningVoxelNumber;
-	unsigned char dimension;
 	int **offset;
 
 	Voxel* createVoxel(double* center, double vs, int index);
@@ -50,19 +49,22 @@ protected:
 	void checkIndexes();
 
 public:
+
+	static unsigned char dimension;
+
 	VoxelList(unsigned char dim, double s, double d);
 	void disable();
 
 	virtual ~VoxelList();
 
-	void getNeighbours(std::unordered_set<Positioned *> *result, Voxel *v);
+	void getNeighbours(std::unordered_set<Voxel *> *result, Voxel *v);
 	void remove(Voxel *v);
 	void removeTopLevelVoxel(Voxel *v);
 	bool analyzeVoxel(Voxel *v, Shape *s, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc, int timestamp);
-	bool analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel *v, std::unordered_set<Positioned *> *neighbours, BoundaryConditions *bc);
-	bool splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel *v, NeighbourGrid<Shape> *nl, BoundaryConditions *bc, int timestamp);
+	bool analyzeVoxel(Voxel *v, NeighbourGrid<Shape> *nl, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel *v, std::unordered_set<Shape *> *neighbours, BoundaryConditions *bc);
+	bool splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape> *nl, BoundaryConditions *bc);
 
 	Voxel *getRandomVoxel(RND *rnd);
 	Voxel * getVoxel(double* da);

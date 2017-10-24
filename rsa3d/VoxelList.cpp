@@ -19,6 +19,8 @@
 
 #include "Utils.h"
 
+unsigned char VoxelList::dimension = 0;
+
 /**
  * d - requested initial size of a voxel
  */
@@ -53,7 +55,7 @@ VoxelList::VoxelList(unsigned char dim, double s, double d){
 	int voxelsLength = (int)(pow(n, dim)+0.5);
 	this->voxels = new Voxel*[voxelsLength];
 	this->activeTopLevelVoxels = new bool[voxelsLength];
-	this->voxelNeighbourGrid = new NeighbourGrid(dim, s, n);
+	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(dim, s, n);
 
 	offset = new int*[(1 << this->dimension)]; // matrix of d-dimensional offsets to 2^d voxel vertices
 
@@ -107,7 +109,7 @@ Voxel* VoxelList::createVoxel(double* leftbottom, double vs, int index){
 		}
 	}
 */
-	return new Voxel(this->dimension, leftbottom, vs, index);
+	return new Voxel(leftbottom, vs, index);
 }
 
 
@@ -138,11 +140,11 @@ void VoxelList::initVoxels(unsigned char dim){
 void VoxelList::fillNeighbourGrid(){
 	this->voxelNeighbourGrid->clear();
 	for(int i=0; i<=this->last; i++){
-		this->voxelNeighbourGrid->add(this->voxels[i]);
+		this->voxelNeighbourGrid->add(this->voxels[i], this->voxels[i]->getPosition());
 	}
 }
 
-void VoxelList::getNeighbours(std::unordered_set<Positioned *> *result, Voxel *v){
+void VoxelList::getNeighbours(std::unordered_set<Voxel *> *result, Voxel *v){
 	return this->voxelNeighbourGrid->getNeighbours(result, v->getPosition());
 }
 
@@ -168,7 +170,7 @@ void VoxelList::remove(Voxel *v){
 	}
 	this->voxels[last] = NULL;
 	this->last--;
-	this->voxelNeighbourGrid->remove(v);
+	this->voxelNeighbourGrid->remove(v, v->getPosition());
 	delete v;
 
 //		this.checkIndexes();
@@ -187,10 +189,10 @@ void VoxelList::removeTopLevelVoxel(Voxel *v){
 
 
 Voxel * VoxelList::getVoxel(double* da){
-	std::vector<Positioned *> *vTmp = this->voxelNeighbourGrid->getCell(da);
-	for(Positioned *v : *vTmp){
-		if (((Voxel *)v)->isInside(da, this->voxelSize)){
-			return (Voxel *)v;
+	std::vector<Voxel *> *vTmp = this->voxelNeighbourGrid->getCell(da);
+	for(Voxel *v : *vTmp){
+		if (v->isInside(da, this->voxelSize)){
+			return v;
 		}
 	}
 	return NULL;
@@ -224,7 +226,7 @@ bool VoxelList::analyzeVoxel(Voxel *v, Shape *s, BoundaryConditions *bc){
 }
 
 // returns true when the whole voxel is inside an exclusion area of one shape, thus, should be removed
-bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Positioned *> *neighbours, BoundaryConditions *bc){
+bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<Shape> *nl, std::unordered_set<Shape *> *neighbours, BoundaryConditions *bc){
 
 	double* vpos = v->getPosition();
 
@@ -234,12 +236,12 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Pos
 	if(this->activeTopLevelVoxels[index]==false)
 		return true;
 
-	std::unordered_set<Positioned *> vAll;
-	std::unordered_set<Positioned *>::iterator itN, itA;
-	std::unordered_set<Positioned *> *vNeighbours;
+	std::unordered_set<Shape *> vAll;
+	std::unordered_set<Shape *>::iterator itN, itA;
+	std::unordered_set<Shape *> *vNeighbours;
 
 	if(neighbours==NULL){
-		vNeighbours = new std::unordered_set<Positioned *>();
+		vNeighbours = new std::unordered_set<Shape *>();
 	}else{
 		vNeighbours = neighbours;
 	}
@@ -268,7 +270,7 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Pos
 			}
 		}
 		for(itA = vAll.begin(); itA != vAll.end(); ){
-			if(! ((Shape*)(*itA))->pointInside(bc, da)){
+			if(! (*itA)->pointInside(bc, da)){
 				itA = vAll.erase(itA);
 			}else{
 				itA++;
@@ -288,21 +290,21 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, std::unordered_set<Pos
 	return true;
 }
 
-bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc, int timestamp){
+bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<Shape> *nl, BoundaryConditions *bc, int timestamp){
 	if (v->lastAnalyzed < timestamp && !this->disabled)
 		return this->analyzeVoxel(v, nl, NULL, bc);
 	return false;
 }
 
-bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid *nl, BoundaryConditions *bc){
+bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<Shape> *nl, BoundaryConditions *bc){
 	return this->analyzeVoxel(v, nl, NULL, bc);
 }
 
-bool VoxelList::analyzeVoxel(Voxel *v, std::unordered_set<Positioned *> *neighbours, BoundaryConditions *bc){
+bool VoxelList::analyzeVoxel(Voxel *v, std::unordered_set<Shape *> *neighbours, BoundaryConditions *bc){
 	return this->analyzeVoxel(v, NULL, neighbours, bc);
 }
 
-bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid *nl, BoundaryConditions *bc){
+bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape> *nl, BoundaryConditions *bc){
 	if (this->disabled)
 		return false;
 	if ((this->voxelSize<2*minDx && pow(2, this->dimension)*this->last > this->beginningVoxelNumber) || pow(2, this->dimension)*this->last > maxVoxels){

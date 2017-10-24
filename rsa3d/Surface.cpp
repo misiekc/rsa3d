@@ -11,7 +11,7 @@
 Surface::Surface(int dim, double s, double ndx, double vdx) : BoundaryConditions() {
 	this->dimension = dim;
 	this->size = s;
-	this->list = new NeighbourGrid(dim, s, ndx);
+	this->list = new NeighbourGrid<Shape>(dim, s, ndx);
 }
 
 Surface::~Surface() {
@@ -20,11 +20,11 @@ Surface::~Surface() {
 
 
 void Surface::add(Shape *s) {
-		this->list->add(s);
+		this->list->add(s, s->getPosition());
 	}
 
 Shape* Surface::check(Shape *s){
-	std::unordered_set<Positioned *> neighbours;
+	std::unordered_set<Shape *> neighbours;
 	this->list->getNeighbours(&neighbours, s->getPosition());
 
 	for(Positioned *shape: neighbours) {
@@ -35,15 +35,18 @@ Shape* Surface::check(Shape *s){
 	return NULL;
 }
 
-Positioned * Surface::getClosestNeighbour(double *da){
+/*
+Shape * Surface::getClosestNeighbour(double *da){
 	return this->list->getClosestNeighbour(da, this);
 }
+*/
 
-void Surface::getNeighbours(std::unordered_set<Positioned *> *result, double* da) {
+
+void Surface::getNeighbours(std::unordered_set<Shape *> *result, double* da) {
 	this->list->getNeighbours(result, da);
 }
 
-NeighbourGrid * Surface::getNeighbourGrid(){
+NeighbourGrid<Shape> * Surface::getNeighbourGrid(){
 	return this->list;
 }
 

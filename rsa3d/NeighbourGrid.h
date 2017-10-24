@@ -10,13 +10,16 @@
 
 #include <vector>
 #include <set>
-
-#include "Positioned.h"
-#include "BoundaryConditions.h"
-#include <vector>
 #include <unordered_set>
+#include <cmath>
+#include <algorithm>
 
-class NeighbourGrid {
+#include "BoundaryConditions.h"
+#include "Utils.h"
+
+
+template <typename E>
+class NeighbourGrid{
 
 private:
 	unsigned char dimension;
@@ -25,28 +28,114 @@ private:
 	double dx;
 
 	// contains vectors of cells (vectors with Positioned* inside)
-	std::vector<std::vector<Positioned* > * > lists;
+	std::vector<std::vector<E * > * > lists;
 	std::vector<std::vector<int> * > neighbouringCells;
 
-	void init(int dim, double size, int n);
+	void init(int dim, double size, int n){
+		this->dimension = dim;
+		this->linearSize = size;
+		this->n = n;
+		this->dx = size/this->n;
+		int length = (int) round(pow(this->n, dim));
+		this->lists.reserve(length);
+		this->neighbouringCells.reserve(length);
+
+		int *in = new int[this->dimension];
+		double *da = new double[this->dimension];
+		int *coords = new int[this->dimension];
+
+		for(int i=0; i<length; i++){
+			this->lists.push_back(new std::vector<E *>);
+			this->neighbouringCells.push_back(new std::vector<int>);
+			this->neighbouringCells[i]->reserve((1 << this->dimension));
+
+			i2position(da, this->dimension, i, this->dx, this->n);
+			for(unsigned char i=0; i<this->dimension; i++){
+				in[i] = 0;
+			}
+			coordinates(coords, da, this->dimension, this->linearSize, this->dx, this->n);
+			do{
+				int iCell = neighbour2i(coords, in, this->dimension, 1, this->n);
+				this->neighbouringCells[i]->push_back(iCell);
+			}while(increment(in, this->dimension, 2));
+		}
+		delete[] coords;
+		delete[] da;
+		delete[] in;
+	}
 
 public:
 
+	NeighbourGrid(int dim, double size, double dx){
+		this->init(dim, size, (int)(size/dx));
+	}
 
 
+	NeighbourGrid(int dim, double size, int n){
+		this->init(dim, size, n);
+	}
 
-	NeighbourGrid(int dim, double size, double dx);
-	NeighbourGrid(int dim, double size, int n);
-	virtual ~NeighbourGrid();
+	virtual ~NeighbourGrid(){
+		for(unsigned int i=0; i<this->lists.size(); i++){
+				delete this->lists[i];
+				delete this->neighbouringCells[i];
+			}
+	}
 
-	void add(Positioned* s);
-	void remove(Positioned* s);
+	void add(E* s, double *da){
+		int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+		this->lists[i]->push_back(s);
+	}
 
-//	std::unordered_set<Positioned*> * getNeighbours(double* da, unsigned char radius);
-	void clear();
-	std::vector<Positioned*> * getCell(double* da);
-	void getNeighbours(std::unordered_set<Positioned*> *result, double* da);
-	Positioned* getClosestNeighbour(double *da, BoundaryConditions *bc);
+	void remove(E* s, double *da){
+		int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+		typename std::vector<E *>::iterator it;
+		if ( (it = std::find(this->lists[i]->begin(), this->lists[i]->end(), s)) != this->lists[i]->end())
+			this->lists[i]->erase(it);
+	}
+
+	void clear(){
+		for(unsigned int i=0; i<this->lists.size(); i++){
+			this->lists[i]->clear();
+		}
+	}
+
+	std::vector<E*> * getCell(double* da){
+		int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+		return this->lists[i];
+	}
+
+	void getNeighbours(std::unordered_set<E *> *result, double* da){
+		result->clear();
+		std::vector<E *> *vTmp;
+
+		int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+		for(int iCell : *(this->neighbouringCells[i])){
+			vTmp = (this->lists[iCell]);
+			result->insert(vTmp->begin(), vTmp->end());
+		}
+	}
+
+/*
+	E * getClosestNeighbour(double *da, BoundaryConditions *bc){
+		std::vector<E *> *vTmp;
+
+		double d, dmin = std::numeric_limits<double>::max();
+		E *pmin = NULL;
+		int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+		for(int iCell : *(this->neighbouringCells[i])){
+			vTmp = (this->lists[iCell]);
+			for(Positioned *p : *vTmp){
+				d = bc->distance2(da, p->getPosition());
+				if (d<dmin){
+					pmin = p;
+					dmin = d;
+				}
+			}
+		}
+		return pmin;
+	}
+*/
 };
 
 #endif /* NEIGHBOURGRID_H_ */
