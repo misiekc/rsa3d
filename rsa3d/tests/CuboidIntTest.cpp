@@ -22,13 +22,7 @@
 // Helper methods
 //--------------------------------------------------------------------------------------------
 namespace
-{
-    const double    sizex = 0.5;
-    const double    sizey = 1;
-    const double    sizez = 2;
-    const double    box_halfsize = 1.5;
-    const int       MAX_TRIES = 100000;
-    
+{   
 	int             no = 0;
     
     // Dummy BoundaryConditions
@@ -61,7 +55,7 @@ namespace
     
     // Helper method. Creates random Cuboid based on global parameters
     //--------------------------------------------------------------------------------------------
-    Cuboid * random_cuboid(RND * rnd)
+    Cuboid * random_cuboid(RND * rnd, double box_halfsize)
     {
 	    double trans[3];
 	    Cuboid * cube = (Cuboid*)ShapeFactory::createShape(rnd);
@@ -84,7 +78,7 @@ namespace
     // Helper method. Performs comparison of Cuboid::OverlapStrategy::MINE and the second from
     // parameter
     //--------------------------------------------------------------------------------------------
-    TestResult perform_strategy_comparison(Cuboid::OverlapStrategy _second)
+    TestResult perform_strategy_comparison(Cuboid::OverlapStrategy _second, double box_halfsize, int max_tries)
     {
         Cuboid  *cube1, *cube2;
         TestResult result;
@@ -92,11 +86,11 @@ namespace
 	    MockBC  bc;
         RND     rnd;
 	
-        result.tries = MAX_TRIES;
+        result.tries = max_tries;
 	
-	    for (int i = 0; i < MAX_TRIES; i++) {
-	        cube1 = random_cuboid(&rnd);
-	        cube2 = random_cuboid(&rnd);
+	    for (int i = 0; i < max_tries; i++) {
+	        cube1 = random_cuboid(&rnd, box_halfsize);
+	        cube2 = random_cuboid(&rnd, box_halfsize);
 	        
 	        Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::MINE);
 	        mine_intersected = (bool)cube1->overlap(&bc, cube2);
@@ -181,7 +175,7 @@ namespace cube_inttest
     // Performs Cuboid::overlap algorithm check. It generates some random pairs of cuboids
     // and compares result given by different overlap strategies
     //--------------------------------------------------------------------------------------------
-    void perform()
+    void perform(double sizex, double sizey, double sizez, double box_halfsize, int max_tries)
     {
         // Test intersection::tri_tri3D
         TriTriInt_selftest_run();       
@@ -193,13 +187,13 @@ namespace cube_inttest
 	    TestResult result;
 	
 	    std::cout << ">> Performing ::MINE and ::TRI_TRI for Cuboid::OverlapStrategy comparison..." << std::endl;
-	    result = perform_strategy_comparison(Cuboid::OverlapStrategy::TRI_TRI);
+	    result = perform_strategy_comparison(Cuboid::OverlapStrategy::TRI_TRI, box_halfsize, max_tries);
 	    print_test_result(result);
 	    
 	    std::cout << std::endl;
 	    
 	    std::cout << ">> Performing ::MINE and ::SAT for Cuboid::OverlapStrategy comparison..." << std::endl;
-        result = perform_strategy_comparison(Cuboid::OverlapStrategy::SAT);
+        result = perform_strategy_comparison(Cuboid::OverlapStrategy::SAT, box_halfsize, max_tries);
 	    print_test_result(result);
     }
 }
