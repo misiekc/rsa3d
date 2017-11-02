@@ -23,6 +23,9 @@
 #include <cmath>
 
 
+// Define this to disable edge-intersection fix in Cuboid::OverlapStrategy::MINE
+//#define DISABLE_OVERLAP_FIX
+
 namespace 
 {
     // Helper arrays
@@ -335,6 +338,7 @@ int Cuboid::overlapMine(BoundaryConditions *bc, Shape *s)
         return true;
     }
     
+#ifndef DISABLE_OVERLAP_FIX
     // Check whether edges of this lie in s. TO OPTIMIZE
     if (sCuboid->checkSegment(v_trans_bis[V::PPP], v_trans_bis[V::PPN]) || sCuboid->checkSegment(v_trans_bis[V::PPN], v_trans_bis[V::PNN]) ||
         sCuboid->checkSegment(v_trans_bis[V::PNN], v_trans_bis[V::PNP]) || sCuboid->checkSegment(v_trans_bis[V::PNP], v_trans_bis[V::PPP]) ||
@@ -345,6 +349,7 @@ int Cuboid::overlapMine(BoundaryConditions *bc, Shape *s)
     {
         return true;
     }
+#endif
     
     return false;
 }
