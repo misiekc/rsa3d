@@ -181,6 +181,24 @@ int cube_speedtest_main(int argc, char **argv)
     return EXIT_SUCCESS;
 }
 
+// Performs cuboid intersection test with parameters passed to process
+//--------------------------------------------------------------------------------------------
+void cube_inttest_main(int argc, char ** argv)
+{
+    if (argc < 7)
+        die("Usage: ./rsa cube_inttest [size_x] [size_y] [size_z] [box_halfsize] [max_tries]");
+    
+    double size_x = std::stod(argv[2]);
+    double size_y = std::stod(argv[3]);
+    double size_z = std::stod(argv[4]);
+    double box_halfsize = std::stod(argv[5]);
+    int max_tries = std::stoi(argv[6]);
+    
+    if (size_x <= 0 || size_y <= 0 || size_z <= 0 || box_halfsize <= 0 || max_tries <= 0)
+        die("Wrong input. Aborting.");
+    
+    cube_inttest::perform(size_x, size_y, size_z, box_halfsize, max_tries);
+}
 
 int main(int argc, char **argv) {
     if (argc < 2)
@@ -191,7 +209,7 @@ int main(int argc, char **argv) {
         cube_speedtest_main(argc, argv);
         return EXIT_SUCCESS;
     } else if (strcmp(argv[1], "cube_inttest") == 0) {
-        cube_inttest::perform();
+        cube_inttest_main(argc, argv);
         return EXIT_SUCCESS;
     }
 	
