@@ -11,6 +11,7 @@
 #include <cstring>
 #include <sstream>
 #include <vector>
+#include <fstream>
 
 #include "../Vector.h"
 #include "../Intersection.h"
@@ -85,6 +86,7 @@ namespace
 	    bool    mine_intersected, second_intersected;
 	    MockBC  bc;
         RND     rnd;
+        std::stringstream missed_dump_stream;
 	
         result.tries = max_tries;
 	
@@ -99,6 +101,11 @@ namespace
 	        
 	        if (mine_intersected != second_intersected) {
 	            result.missed++;
+	            missed_dump_stream << cube1->toWolfram() << std::endl;
+	            missed_dump_stream << cube2->toWolfram() << std::endl;
+	            missed_dump_stream << "pair" << result.missed << " = {cube" << cube1->no << ", cube" << cube2->no << "};" << std::endl;  
+	            missed_dump_stream << "Graphics3D[pair" << result.missed << "]";
+	            missed_dump_stream << std::endl;
 	        } else {
 	            if (mine_intersected)
 	                result.intersected++;
@@ -113,6 +120,19 @@ namespace
 	        delete cube2;
 	    }
 	    
+	    // Dump missed test to stdout and file
+	    if (result.missed > 0) {
+	        if (result.missed < 10)
+	            std::cout << missed_dump_stream.str();
+	        std::ofstream dump_file("inttest_dump.nb");
+	        if (dump_file) {
+	            dump_file << missed_dump_stream.str();
+	            dump_file.close();
+	            std::cout << ">> Missed pairs dumped to inttest_dump.txt" << std::endl;
+	        } else {
+	            std::cout << ">> Could not write to inttest_dump.txt";
+	        }
+	    }
 	    return result;
     }
 } 
@@ -186,11 +206,11 @@ namespace cube_inttest
 	
 	    TestResult result;
 	
-	    std::cout << ">> Performing ::MINE and ::TRI_TRI for Cuboid::OverlapStrategy comparison..." << std::endl;
+	    /*std::cout << ">> Performing ::MINE and ::TRI_TRI for Cuboid::OverlapStrategy comparison..." << std::endl;
 	    result = perform_strategy_comparison(Cuboid::OverlapStrategy::TRI_TRI, box_halfsize, max_tries);
 	    print_test_result(result);
 	    
-	    std::cout << std::endl;
+	    std::cout << std::endl;*/
 	    
 	    std::cout << ">> Performing ::MINE and ::SAT for Cuboid::OverlapStrategy comparison..." << std::endl;
         result = perform_strategy_comparison(Cuboid::OverlapStrategy::SAT, box_halfsize, max_tries);
