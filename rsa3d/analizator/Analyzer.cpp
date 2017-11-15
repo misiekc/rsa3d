@@ -8,6 +8,7 @@
 #include "Analyzer.h"
 #include "../Shape.h"
 #include "../ShapeFactory.h"
+#include "../shapes/Cuboid.h"
 #include <Plot.h>
 #include <LogPlot.h>
 #include <LinearRegression.h>
@@ -80,6 +81,37 @@ void Analyzer::analyzePacking(std::vector<Shape *> *packing, LogPlot *nvt, Plot 
 		delete[] da;
 	}
 }
+
+void Analyzer::analyzeCuboidOrientationalOrder(std::vector<Shape *> *packing, Plot *corr){
+	double *posi, *posj, *da = new double[this->params->dimension];
+	Cuboid *ci, *cj;
+	for(unsigned int i=0; i<packing->size(); i++){
+		ci = (Cuboid *)(*packing)[i];
+		posi = (*packing)[i]->getPosition();
+		for(unsigned int j=i+1; j<packing->size(); j++){
+			cj = (Cuboid *)(*packing)[j];
+			posj = (*packing)[j]->getPosition();
+			double dist = 0.0;
+			for(unsigned char k=0; k<this->params->dimension; k++){
+				da[k] = fabs(posi[k] - posj[k]);
+				if (da[k]>0.5*this->params->surfaceSize)
+					da[k] = this->params->surfaceSize - da[k];
+				dist += da[k]*da[k];
+			}
+			Matrix<3, 3> product = (ci->getOrientation()) * (cj->getOrientation());
+			double sum = 0.0;
+			for (int k1=0; k1<3; k1++){
+				for (int k2=0; k2<3; k2++){
+					double p2 = product(k1, k2)*product(k1, k2);
+					sum += p2*(35*p2 - 30) + 3;
+				}
+			}
+			corr->add(sqrt(dist), sum/(8*9));
+		}
+	}
+	delete[] da;
+}
+
 
 double * Analyzer::printNvT(LogPlot &nvt, std::string filename, double surfaceFactor, double *res){
 	double **points = new double*[nvt.size()];
@@ -206,6 +238,7 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 	LogPlot *nvt = new LogPlot(mintime, this->params->maxTime, 200);
 	Plot *asf = new Plot(0.0, 0.6, 200);
 	Plot *corr = new Plot(0.0, 10.0, 200);
+	Plot *order = new Plot(0.0, 10.0, 200);
 	double n = 0.0, n2 = 0.0;
 	int counter = 0;
 	double packingSize = pow(params->surfaceSize, params->dimension);
@@ -219,6 +252,9 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 			n2 += packing->size()*packing->size();
 			counter++;
 			this->analyzePacking(packing, nvt, asf, corr, particleSize/packingSize);
+			if (this->params->particleType.compare("Cuboid")==0){
+				this->analyzeCuboidOrientationalOrder(packing, order);
+			}
 			delete packing;
 			std::cout << ".";
 			std::cout.flush();
@@ -241,4 +277,9 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 
 	this->printCorr(*corr, dirname + "_cor.txt", counter, particleSize, packingFraction);
 	delete corr;
+
+	if (this->params->particleType.compare("Cuboid")==0){
+		this->printCorr(*order, dirname + "_cor.txt", counter, particleSize, packingFraction);
+		delete order;
+	}
 }

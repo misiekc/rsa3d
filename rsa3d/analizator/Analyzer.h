@@ -29,6 +29,7 @@ private:
 
 	std::vector<Shape *> * fromFile(std::string filename);
 	void analyzePacking(std::vector<Shape *> *packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor);
+	void analyzeCuboidOrientationalOrder(std::vector<Shape *> *packing, Plot *corr);
 	double * printNvT(LogPlot &nvt, std::string filename, double surfaceFactor, double *res);
 	double * printASF(Plot &asf, std::string filename, int counter, double packingFraction, double *res);
 	void printCorr(Plot &corr, std::string filename, int counter, double particleSize, double packingFraction);
