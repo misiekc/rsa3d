@@ -8,6 +8,7 @@
 #include "tests/CuboidSpeedTest.h"
 #include "tests/BoxFactory.h"
 #include "tests/CuboidIntTest.h"
+#include "tests/CuboidPointInsideTest.h"
 #include "Config.h"
 
 #include <unistd.h>
@@ -200,6 +201,28 @@ void cube_inttest_main(int argc, char ** argv)
     cube_inttest::perform(size_x, size_y, size_z, box_halfsize, max_tries);
 }
 
+// Performs Cuboid::pointInside test
+//--------------------------------------------------------------------------------------------
+void cube_pitest_main(int argc, char ** argv)
+{
+    if (argc < 7)
+        die("Usage: ./rsa cube_pi_test [size_x] [size_y] [size_z] [box_halfsize] [max_tries]");
+    
+    double box_halfsize = std::stod(argv[5]);
+    int max_tries = std::stoi(argv[6]);
+   
+    if (box_halfsize <= 0 || max_tries <= 0)
+        die("Wrong input. Aborting.");
+        
+	ShapeFactory::initShapeClass("Cuboid", std::string("3 ") + argv[2] + " " + argv[3] + " " + argv[4]);
+    BoxFactory * factory = BoxFactory::getInstance();
+    factory->setBoxSize(box_halfsize, box_halfsize, box_halfsize);
+        
+    cube_pitest::Results results = cube_pitest::perform(factory, max_tries);
+    std::cout << std::endl;
+    cube_pitest::printResults(results);
+}
+
 int main(int argc, char **argv) {
     if (argc < 2)
         die("No mode param. Aborting.");
@@ -210,6 +233,9 @@ int main(int argc, char **argv) {
         return EXIT_SUCCESS;
     } else if (strcmp(argv[1], "cube_inttest") == 0) {
         cube_inttest_main(argc, argv);
+        return EXIT_SUCCESS;
+    } else if (strcmp(argv[1], "cube_pitest") == 0) {
+        cube_pitest_main(argc, argv);
         return EXIT_SUCCESS;
     }
 	
