@@ -16,8 +16,8 @@
 #include "../Vector.h"
 #include "../Intersection.h"
 #include "../shapes/Cuboid.h"
-#include "../BoundaryConditions.h"
 #include "../ShapeFactory.h"
+#include "MockBC.h"
 
 
 // Helper methods
@@ -25,24 +25,6 @@
 namespace
 {   
 	int             no = 0;
-    
-    // Dummy BoundaryConditions
-    class MockBC : public BoundaryConditions
-    {
-        double distance2(double *p1, double *p2)
-        {
-            return 0;
-        }
-        
-	    double * getTranslation(double *result, double* p1, double* p2)
-	    {
-	        result[0] = 0;
-	        result[1] = 0;
-	        result[2] = 0;
-	        return result;
-	    }
-    };
-    
     
     // Struct representing intersection test results
     //--------------------------------------------------------------------------------------------

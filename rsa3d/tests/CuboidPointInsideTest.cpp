@@ -5,28 +5,9 @@
 //--------------------------------------------------------------------------------------------
 
 #include "CuboidPointInsideTest.h"
+#include "MockBC.h"
 
 #include <iostream>
-
-namespace
-{
-    // Dummy BoundaryConditions
-    class MockBC : public BoundaryConditions
-    {
-        double distance2(double *p1, double *p2)
-        {
-            return 0;
-        }
-        
-	    double * getTranslation(double *result, double* p1, double* p2)
-	    {
-	        result[0] = 0;
-	        result[1] = 0;
-	        result[2] = 0;
-	        return result;
-	    }
-    };
-}
 
 namespace cube_pitest
 {   

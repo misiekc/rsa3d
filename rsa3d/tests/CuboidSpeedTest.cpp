@@ -13,6 +13,7 @@
 #include <iomanip>
 
 #include "CuboidSpeedTest.h"
+#include "MockBC.h"
 
 
 using namespace std::chrono;
@@ -24,23 +25,6 @@ namespace
     {
         unsigned int overlapped = 0;
         unsigned int nanos = 0;
-    };
-
-    // Dummy BoundaryConditions
-    class MockBC : public BoundaryConditions
-    {
-        double distance2(double *p1, double *p2)
-        {
-            return 0;
-        }
-        
-	    double * getTranslation(double *result, double* p1, double* p2)
-	    {
-	        result[0] = 0;
-	        result[1] = 0;
-	        result[2] = 0;
-	        return result;
-	    }
     };
     
     // Helper method. Performs single test of overlap algorithm (set from the outside)
