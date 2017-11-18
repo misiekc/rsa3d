@@ -52,7 +52,7 @@ namespace cube_pitest
     
     // Print pointInside test results
     //----------------------------------------------------------------------------------------
-    void printResults(Results results) {
+    void print_results(Results results) {
         std::cout << ">> Test results:" << std::endl;
         std::cout << "factory           : " << results.factoryDesc << std::endl;
         std::cout << "pairs tested      : " << results.tested << std::endl;

@@ -10,122 +10,26 @@
 #include <cassert>
 #include <cstring>
 #include <sstream>
-#include <vector>
-#include <fstream>
 
 #include "../Vector.h"
 #include "../Intersection.h"
 #include "../shapes/Cuboid.h"
 #include "../ShapeFactory.h"
 #include "MockBC.h"
+#include "CuboidPairFactory.h"
+#include "CuboidIntTest.h" 
 
-
-// Helper methods
-//--------------------------------------------------------------------------------------------
 namespace
-{   
-	int             no = 0;
-    
-    // Struct representing intersection test results
-    //--------------------------------------------------------------------------------------------
-    struct TestResult {
-        int tries = 0;
-        int missed = 0;
-        int intersected = 0;
-        int disjunct = 0;
-    };
-    
-    
-    // Helper method. Creates random Cuboid based on global parameters
-    //--------------------------------------------------------------------------------------------
-    Cuboid * random_cuboid(RND * rnd, double box_halfsize)
-    {
-	    double trans[3];
-	    Cuboid * cube = (Cuboid*)ShapeFactory::createShape(rnd);
-	    cube->no = no++;
-	    trans[0] = (rnd->nextValue() * 2 - 1) * box_halfsize;
-	    trans[1] = (rnd->nextValue() * 2 - 1) * box_halfsize;
-	    trans[2] = (rnd->nextValue() * 2 - 1) * box_halfsize;
-	    cube->translate(trans);
-	    return cube;
-    } 
-    
-    // Helper method. Prints intersection test results onto the standard output
-    //--------------------------------------------------------------------------------------------
-    void print_test_result(TestResult result)
-    {
-	    std::cout << ">> " << result.missed << " from " << result.tries << " intersection results missed" << std::endl;
-	    std::cout << ">> " << result.intersected << " cuboids overlapped, " << result.disjunct << " cuboids were disjunctive" << std::endl;
-    }
-    
-    // Helper method. Performs comparison of Cuboid::OverlapStrategy::MINE and the second from
-    // parameter
-    //--------------------------------------------------------------------------------------------
-    TestResult perform_strategy_comparison(Cuboid::OverlapStrategy _second, double box_halfsize, int max_tries)
-    {
-        Cuboid  *cube1, *cube2;
-        TestResult result;
-	    bool    mine_intersected, second_intersected;
-	    MockBC  bc;
-        RND     rnd;
-        std::stringstream missed_dump_stream;
-	
-        result.tries = max_tries;
-	
-	    for (int i = 0; i < max_tries; i++) {
-	        cube1 = random_cuboid(&rnd, box_halfsize);
-	        cube2 = random_cuboid(&rnd, box_halfsize);
-	        
-	        Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::MINE);
-	        mine_intersected = (bool)cube1->overlap(&bc, cube2);
-	        Cuboid::setOverlapStrategy(_second);
-	        second_intersected = (bool)cube1->overlap(&bc, cube2);
-	        
-	        if (mine_intersected != second_intersected) {
-	            result.missed++;
-	            missed_dump_stream << cube1->toWolfram() << std::endl;
-	            missed_dump_stream << cube2->toWolfram() << std::endl;
-	            missed_dump_stream << "pair" << result.missed << " = {cube" << cube1->no << ", cube" << cube2->no << "};" << std::endl;  
-	            missed_dump_stream << "Graphics3D[pair" << result.missed << "]";
-	            missed_dump_stream << std::endl;
-	        } else {
-	            if (mine_intersected)
-	                result.intersected++;
-	            else
-	                result.disjunct++;
-	        }
-	        
-	        if ((i % 10000) == 9999)
-	            std::cout << (i + 1) << " pairs tested..." << std::endl;
-	        
-	        delete cube1;
-	        delete cube2;
-	    }
-	    
-	    // Dump missed test to stdout and file
-	    if (result.missed > 0) {
-	        if (result.missed < 10)
-	            std::cout << missed_dump_stream.str();
-	        std::ofstream dump_file("inttest_dump.nb");
-	        if (dump_file) {
-	            dump_file << missed_dump_stream.str();
-	            dump_file.close();
-	            std::cout << ">> Missed pairs dumped to inttest_dump.txt" << std::endl;
-	        } else {
-	            std::cout << ">> Could not write to inttest_dump.txt";
-	        }
-	    }
-	    return result;
-    }
-} 
-
+{
+    const std::string overlap_strategy_name [] = {"MINE", "TRI_TRI", "SAT"}; 
+}
 
 namespace cube_inttest
 {
 
     // Runs intersection::tri_tri3D selftest. Two simple almoast-intersecting and 
     // almoast-not-intersecting cases are checked
-    //--------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------
     void TriTriInt_selftest_run()
     {
         Vector<3> triangle1[] = {
@@ -175,27 +79,65 @@ namespace cube_inttest
 
 
     // Performs Cuboid::overlap algorithm check. It generates some random pairs of cuboids
-    // and compares result given by different overlap strategies
+    // and compares result given by ::MINE strategy and _strategy strategy
     //--------------------------------------------------------------------------------------------
-    void perform(double sizex, double sizey, double sizez, double box_halfsize, int max_tries)
+    Results perform(CuboidPairFactory * _factory, Cuboid::OverlapStrategy _strategy, int _max_tries)
     {
-        // Test intersection::tri_tri3D
-        TriTriInt_selftest_run();       
-        
-        std::stringstream stream;
-        stream << "3 " << sizex << " " <<  sizey << " " << sizez;
-	    ShapeFactory::initShapeClass("Cuboid", stream.str());
+        cube_inttest::Results result;
+	    bool    mine_intersected, second_intersected;
+	    MockBC  bc;
+        RND     rnd;
 	
-	    TestResult result;
+        result.tries = _max_tries;
 	
-	    /*std::cout << ">> Performing ::MINE and ::TRI_TRI for Cuboid::OverlapStrategy comparison..." << std::endl;
-	    result = perform_strategy_comparison(Cuboid::OverlapStrategy::TRI_TRI, box_halfsize, max_tries);
-	    print_test_result(result);
+	    std::cout << ">> Performing ::MINE and ::" << overlap_strategy_name[_strategy]
+	        << " for Cuboid::OverlapStrategy comparison..." << std::endl;
+	    for (int i = 0; i < _max_tries; i++) {
+	        CuboidPairFactory::CuboidPair pair = _factory->generate();
+	        
+	        Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::MINE);
+	        mine_intersected = (bool)pair.first->overlap(&bc, pair.second);
+	        Cuboid::setOverlapStrategy(_strategy);
+	        second_intersected = (bool)pair.first->overlap(&bc, pair.second);
+	        
+	        if (mine_intersected != second_intersected) {  // Missed overlap return value, dump
+	            result.missed++;
+	            result.missed_dump.push_back(pair);
+	        } else {  // Otherwise, update statistics and delete pair
+	            if (mine_intersected)
+	                result.intersected++;
+	            else
+	                result.disjunct++;
+	            pair.free();
+	        }
+	        
+	        if ((i % 10000) == 9999)
+	            std::cout << (i + 1) << " pairs tested..." << std::endl;  
+	    }
 	    
-	    std::cout << std::endl;*/
-	    
-	    std::cout << ">> Performing ::MINE and ::SAT for Cuboid::OverlapStrategy comparison..." << std::endl;
-        result = perform_strategy_comparison(Cuboid::OverlapStrategy::SAT, box_halfsize, max_tries);
-	    print_test_result(result);
+	    return result;
+    }
+    
+    // Prints intersection test results onto the standard output
+    //--------------------------------------------------------------------------------------------
+    void print_results(Results _results)
+    {
+	    std::cout << ">> " << _results.missed << " from " << _results.tries << " intersection results missed" << std::endl;
+	    std::cout << ">> " << _results.intersected << " cuboids overlapped, " << _results.disjunct << " cuboids were disjunctive" << std::endl;
+    }
+    
+    // Dumps missed pair onto the stream in the form of Wolfram code to display 3d view
+    //--------------------------------------------------------------------------------------------
+    void dump_missed_pairs(Results _results, std::ostream & _ostr)
+    {
+        std::size_t pair_no = 0;
+        for (auto pair : _results.missed_dump) {
+            _ostr << pair.first->toWolfram() << std::endl;
+            _ostr << pair.second->toWolfram() << std::endl;
+            _ostr << "pair" << pair_no << " = {cube" << pair.first->no << ", cube" << pair.second->no << "};" << std::endl;  
+            _ostr << "Graphics3D[pair" << pair_no << "]" << std::endl;
+            _ostr << std::endl;
+            pair_no++;
+	    }
     }
 }

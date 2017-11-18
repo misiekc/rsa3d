@@ -189,16 +189,40 @@ void cube_inttest_main(int argc, char ** argv)
     if (argc < 7)
         die("Usage: ./rsa cube_inttest [size_x] [size_y] [size_z] [box_halfsize] [max_tries]");
     
-    double size_x = std::stod(argv[2]);
-    double size_y = std::stod(argv[3]);
-    double size_z = std::stod(argv[4]);
     double box_halfsize = std::stod(argv[5]);
     int max_tries = std::stoi(argv[6]);
-    
-    if (size_x <= 0 || size_y <= 0 || size_z <= 0 || box_halfsize <= 0 || max_tries <= 0)
+    if (box_halfsize <= 0 || max_tries <= 0)
         die("Wrong input. Aborting.");
+        
+    std::stringstream init_stream;
+    init_stream << "3 " << argv[2] << " " << argv[3] << " " << argv[4];
+	ShapeFactory::initShapeClass("Cuboid", init_stream.str());
+    BoxFactory * factory = BoxFactory::getInstance();
+    factory->setBoxSize(box_halfsize, box_halfsize, box_halfsize);
     
-    cube_inttest::perform(size_x, size_y, size_z, box_halfsize, max_tries);
+    // Test SAT
+    cube_inttest::Results results = cube_inttest::perform(factory, Cuboid::OverlapStrategy::SAT, max_tries);
+    cube_inttest::print_results(results);
+    std::cout << std::endl;
+    results.free_missed_pairs();
+    
+    // Test TRI_TRI
+    results = cube_inttest::perform(factory, Cuboid::OverlapStrategy::TRI_TRI, max_tries);
+    cube_inttest::print_results(results);
+    std::cout << std::endl;
+    
+    // Dump missed test to file
+    if (results.missed > 0) {
+        std::ofstream dump_file("inttest_dump.nb");
+        if (dump_file) {
+            cube_inttest::dump_missed_pairs(results, dump_file);
+            results.free_missed_pairs();
+            dump_file.close();
+            std::cout << ">> Missed pairs dumped to inttest_dump.nb" << std::endl;
+        } else {
+            std::cout << ">> Could not write to inttest_dump.nb";
+        }
+    }
 }
 
 // Performs Cuboid::pointInside test
@@ -220,7 +244,7 @@ void cube_pitest_main(int argc, char ** argv)
         
     cube_pitest::Results results = cube_pitest::perform(factory, max_tries);
     std::cout << std::endl;
-    cube_pitest::printResults(results);
+    cube_pitest::print_results(results);
 }
 
 int main(int argc, char **argv) {

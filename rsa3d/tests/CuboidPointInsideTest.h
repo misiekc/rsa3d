@@ -24,7 +24,7 @@ namespace cube_pitest
     };
     
     Results perform(CuboidPairFactory * _factory, std::size_t _pairs_to_test);
-    void printResults(Results results);
+    void print_results(Results results);
 }
 
 void ble();

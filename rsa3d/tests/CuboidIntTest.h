@@ -7,10 +7,33 @@
 
 #ifndef _INTTEST_H
     #define _INTTEST_H
+    
+#include <ostream> 
+#include <vector>  
+#include "../shapes/Cuboid.h" 
 
 namespace cube_inttest
 {
-    void perform(double sizex, double sizey, double sizez, double box_halfsize, int max_tries);
+    // Struct representing intersection test results
+    //--------------------------------------------------------------------------------------------
+    struct Results {
+        int tries = 0;
+        int missed = 0;
+        int intersected = 0;
+        int disjunct = 0;
+        std::vector<CuboidPairFactory::CuboidPair> missed_dump;
+        
+        void free_missed_pairs() {
+            // Delete missed pairs memory
+            for (auto pair : missed_dump)
+                pair.free();
+        }
+    };
+
+    Results perform(CuboidPairFactory * _factory, Cuboid::OverlapStrategy _strategy, int _max_tries);
+    void print_results(Results _results);
+    void dump_missed_pairs(Results _results, std::ostream & _ostr);
+    
     void TriTriInt_selftest_run();
 }
 
