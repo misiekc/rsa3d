@@ -6,6 +6,7 @@
 #include "RND.h"
 #include "analizator/Analyzer.h"
 #include "tests/CuboidSpeedTest.h"
+#include "tests/BallFactory.h"
 #include "tests/BoxFactory.h"
 #include "tests/CuboidIntTest.h"
 #include "tests/CuboidPointInsideTest.h"
@@ -187,18 +188,18 @@ int cube_speedtest_main(int argc, char **argv)
 void cube_inttest_main(int argc, char ** argv)
 {
     if (argc < 7)
-        die("Usage: ./rsa cube_inttest [size_x] [size_y] [size_z] [box_halfsize] [max_tries]");
+        die("Usage: ./rsa cube_inttest [size_x] [size_y] [size_z] [ball_radius] [max_tries]");
     
-    double box_halfsize = std::stod(argv[5]);
+    double ball_radius = std::stod(argv[5]);
     int max_tries = std::stoi(argv[6]);
-    if (box_halfsize <= 0 || max_tries <= 0)
+    if (ball_radius <= 0 || max_tries <= 0)
         die("Wrong input. Aborting.");
         
     std::stringstream init_stream;
     init_stream << "3 " << argv[2] << " " << argv[3] << " " << argv[4];
 	ShapeFactory::initShapeClass("Cuboid", init_stream.str());
-    BoxFactory * factory = BoxFactory::getInstance();
-    factory->setBoxSize(box_halfsize, box_halfsize, box_halfsize);
+    BallFactory * factory = BallFactory::getInstance();
+    factory->setRadius(ball_radius);
     
     // Test SAT
     cube_inttest::Results results = cube_inttest::perform(factory, Cuboid::OverlapStrategy::SAT, max_tries);
@@ -230,17 +231,17 @@ void cube_inttest_main(int argc, char ** argv)
 void cube_pitest_main(int argc, char ** argv)
 {
     if (argc < 7)
-        die("Usage: ./rsa cube_pi_test [size_x] [size_y] [size_z] [box_halfsize] [max_tries]");
+        die("Usage: ./rsa cube_pi_test [size_x] [size_y] [size_z] [ball_radius] [max_tries]");
     
-    double box_halfsize = std::stod(argv[5]);
+    double ball_radius = std::stod(argv[5]);
     int max_tries = std::stoi(argv[6]);
    
-    if (box_halfsize <= 0 || max_tries <= 0)
+    if (ball_radius <= 0 || max_tries <= 0)
         die("Wrong input. Aborting.");
         
 	ShapeFactory::initShapeClass("Cuboid", std::string("3 ") + argv[2] + " " + argv[3] + " " + argv[4]);
-    BoxFactory * factory = BoxFactory::getInstance();
-    factory->setBoxSize(box_halfsize, box_halfsize, box_halfsize);
+    BallFactory * factory = BallFactory::getInstance();
+    factory->setRadius(ball_radius);
         
     cube_pitest::Results results = cube_pitest::perform(factory, max_tries);
     std::cout << std::endl;

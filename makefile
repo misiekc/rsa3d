@@ -61,6 +61,7 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/shapes/Sphere \
        rsa3d/surfaces/NBoxFBC \
        rsa3d/surfaces/NBoxPBC \
+       rsa3d/tests/BallFactory \
        rsa3d/tests/BoxFactory \
        rsa3d/tests/CuboidIntTest \
        rsa3d/tests/CuboidPointInsideTest \
