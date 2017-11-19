@@ -17,6 +17,7 @@
 #include <vector>
 #include <map>
 
+template <ushort DIMENSION>
 class PackingGenerator {
 private:
 	static double FACTOR_LIMIT;
@@ -24,11 +25,11 @@ private:
 	int seed;
 	Parameters *params;
 	std::vector<Shape *> packing;
-	VoxelList *voxels;
+	VoxelList<DIMENSION> *voxels;
 	Surface *surface;
 
 	int analyzeVoxels();
-	int analyzeRegion(Voxel *v);
+	int analyzeRegion(Voxel<DIMENSION> *v);
 	bool isSaturated();
 	double getFactor();
 	void createPacking();
@@ -40,7 +41,9 @@ public:
 	void run();
 	std::vector<Shape *> * getPacking();
 	void toPovray(std::string filename);
-	static void toPovray(std::vector<Shape *> * packing, double size, VoxelList *voxels, std::string filename);
+	static void toPovray(std::vector<Shape *> * packing, double size, VoxelList<DIMENSION> *voxels, std::string filename);
 };
+
+#include "PackingGenerator.tpp"
 
 #endif /* PACKINGGENERATOR_H_ */

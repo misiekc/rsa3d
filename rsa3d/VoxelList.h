@@ -16,25 +16,26 @@
 #include "Positioned.h"
 #include <unordered_set>
 
+template <ushort DIMENSION>
 class VoxelList {
 
 private:
 
 	const double dxFactor = 1.0; // 1.0000000001;
-	NeighbourGrid<Voxel>* voxelNeighbourGrid;
+	NeighbourGrid<Voxel<DIMENSION>>* voxelNeighbourGrid;
 	bool* activeTopLevelVoxels;
 
 	double findInitialVoxelSize(double d);
 	int getLinearNumberOfVoxels(double vs);
 	void fillNeighbourGrid();
-	bool analyzeVoxel(Voxel *v, NeighbourGrid<Shape> *nl, std::unordered_set<Shape *> *neighbours, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape> *nl, std::unordered_set<Shape *> *neighbours, BoundaryConditions *bc);
 	bool disabled;
 
 	std::uniform_real_distribution<double> *distribution;
 
 
 protected:
-	Voxel** voxels;
+	Voxel<DIMENSION>** voxels;
 	int last;
 
 	double initialVoxelSize;
@@ -42,38 +43,39 @@ protected:
 
 	double size;
 	int beginningVoxelNumber;
-	int **offset;
+	int offset[(1 << DIMENSION)][DIMENSION]; // matrix of d-dimensional offsets to 2^d voxel vertices
 
-	Voxel* createVoxel(double* center, double vs, int index);
-	void initVoxels(unsigned char dim);
+
+	Voxel<DIMENSION>* createVoxel(double* center, double vs, int index);
+	void initVoxels();
 	void checkIndexes();
 
 public:
 
-	static unsigned char dimension;
-
-	VoxelList(unsigned char dim, double s, double d);
+	VoxelList(double s, double d);
 	void disable();
 
 	virtual ~VoxelList();
 
-	void getNeighbours(std::unordered_set<Voxel *> *result, Voxel *v);
-	void remove(Voxel *v);
-	void removeTopLevelVoxel(Voxel *v);
-	bool analyzeVoxel(Voxel *v, Shape *s, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel *v, NeighbourGrid<Shape> *nl, BoundaryConditions *bc, int timestamp);
-	bool analyzeVoxel(Voxel *v, NeighbourGrid<Shape> *nl, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel *v, std::unordered_set<Shape *> *neighbours, BoundaryConditions *bc);
+	void getNeighbours(std::unordered_set<Voxel<DIMENSION> *> *result, Voxel<DIMENSION> *v);
+	void remove(Voxel<DIMENSION> *v);
+	void removeTopLevelVoxel(Voxel<DIMENSION> *v);
+	bool analyzeVoxel(Voxel<DIMENSION> *v, Shape *s, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape> *nl, BoundaryConditions *bc, int timestamp);
+	bool analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape> *nl, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel<DIMENSION> *v, std::unordered_set<Shape *> *neighbours, BoundaryConditions *bc);
 	bool splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape> *nl, BoundaryConditions *bc);
 
-	Voxel *getRandomVoxel(RND *rnd);
-	Voxel * getVoxel(double* da);
-	double* getRandomPosition(double *result, Voxel *v, RND *rnd);
+	Voxel<DIMENSION> *getRandomVoxel(RND *rnd);
+	Voxel<DIMENSION> * getVoxel(double* da);
+	double* getRandomPosition(double *result, Voxel<DIMENSION> *v, RND *rnd);
 	double getVoxelSize();
-	Voxel* get(int i);
+	Voxel<DIMENSION>* get(int i);
 	int length();
 	double getVoxelsSurface();
 	std::string toPovray();
 };
+
+#include "VoxelList.tpp"
 
 #endif /* VOXELLIST_H_ */

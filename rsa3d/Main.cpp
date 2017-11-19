@@ -53,7 +53,7 @@ std::vector<Shape *> * fromFile(unsigned char dim, std::string filename) {
 }
 
 int simulate(Parameters *params) {
-	PackingGenerator *pg;
+	PackingGenerator<RSA_DIMENSION> *pg;
 	char buf[20];
 	int pid = 0;
 	std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->dimension));
@@ -77,7 +77,7 @@ int simulate(Parameters *params) {
 			if (pid > 0)
 				continue;
 		}
-		pg = new PackingGenerator(i, params);
+		pg = new PackingGenerator<RSA_DIMENSION>(i, params);
 		pg->run();
 		packing = pg->getPacking();
 		if (params->storePackings) {
@@ -100,7 +100,7 @@ int simulate(Parameters *params) {
 }
 
 void boundaries(Parameters *params) {
-	PackingGenerator *pg;
+	PackingGenerator<RSA_DIMENSION> *pg;
 	char buf[20];
 	unsigned long counter = 0UL, max = 200000000UL;
 	int seed = 0;
@@ -111,7 +111,7 @@ void boundaries(Parameters *params) {
 	file.precision(std::numeric_limits<double>::digits10 + 1);
 	std::vector<Shape *> *packing;
 	do {
-		pg = new PackingGenerator(seed, params);
+		pg = new PackingGenerator<RSA_DIMENSION>(seed, params);
 		pg->run();
 		packing = pg->getPacking();
 		file << seed << "\t" << packing->size() << "\t" << (*packing)[packing->size() - 1]->time << std::endl;
@@ -281,7 +281,7 @@ int main(int argc, char **argv) {
 	} else if (strcmp(argv[1], "povray")==0) {
 		std::string file(argv[3]);
 		std::vector<Shape *> *packing = fromFile(params.dimension, file);
-		PackingGenerator::toPovray(packing, params.surfaceSize, NULL, file + ".pov");
+		PackingGenerator<RSA_DIMENSION>::toPovray(packing, params.surfaceSize, NULL, file + ".pov");
 		delete packing;
 	}
 	return 1;

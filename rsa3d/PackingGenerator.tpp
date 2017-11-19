@@ -5,7 +5,6 @@
  *      Author: ciesla
  */
 
-#include "PackingGenerator.h"
 #include "RND.h"
 #include "surfaces/NBoxPBC.h"
 #include "surfaces/NBoxFBC.h"
@@ -13,9 +12,11 @@
 #include <iostream>
 #include <fstream>
 
-double PackingGenerator::FACTOR_LIMIT = 5.0;
+template <ushort DIMENSION>
+double PackingGenerator<DIMENSION>::FACTOR_LIMIT = 5.0;
 
-PackingGenerator::PackingGenerator(int s, Parameters *p) {
+template <ushort DIMENSION>
+PackingGenerator<DIMENSION>::PackingGenerator(int s, Parameters *p) {
 	this->params = p;
 	this->seed = s;
 	this->voxels = NULL;
@@ -23,29 +24,33 @@ PackingGenerator::PackingGenerator(int s, Parameters *p) {
 
 }
 
-PackingGenerator::~PackingGenerator() {
+template <ushort DIMENSION>
+PackingGenerator<DIMENSION>::~PackingGenerator() {
 	for(Shape *s : this->packing)
 		delete s;
 	if (this->voxels!=NULL)
 		delete this->voxels;
 }
 
-bool PackingGenerator::isSaturated() {
+template <ushort DIMENSION>
+bool PackingGenerator<DIMENSION>::isSaturated() {
 	return (this->voxels->length() == 0);
 }
 
-double PackingGenerator::getFactor() {
+template <ushort DIMENSION>
+double PackingGenerator<DIMENSION>::getFactor() {
 	return this->surface->getArea() / this->voxels->getVoxelsSurface();
 }
 
-int PackingGenerator::analyzeVoxels() {
+template <ushort DIMENSION>
+int PackingGenerator<DIMENSION>::analyzeVoxels() {
 
 	std::cout << "[" << this->seed << " PackingGenerator::analyzeVoxels] " << this->voxels->length() << " voxels, " << this->packing.size() << " shapes, factor = " << this->getFactor() << std::endl;
 
 	int begin = this->voxels->length();
 	int timestamp = this->packing.size();
 	for (int i = 0; i < this->voxels->length(); i++) {
-		Voxel *v = this->voxels->get(i);
+		Voxel<DIMENSION> *v = this->voxels->get(i);
 		if (this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, timestamp)) {
 			this->voxels->remove(v);
 			i--;
@@ -58,18 +63,20 @@ int PackingGenerator::analyzeVoxels() {
 }
 
 // analyzes all voxels inside a region around v
-int PackingGenerator::analyzeRegion(Voxel *v){
+template <ushort DIMENSION>
+int PackingGenerator<DIMENSION>::analyzeRegion(Voxel<DIMENSION> *v){
 	int begin = this->voxels->length();
-	std::unordered_set<Voxel *> region;
+	std::unordered_set<Voxel<DIMENSION> *> region;
 	this->voxels->getNeighbours(&region, v);
-	for(Voxel *v1: region){
+	for(Voxel<DIMENSION> *v1: region){
 		if (this->voxels->analyzeVoxel(v1, this->surface->getNeighbourGrid(), this->surface))
 			this->voxels->remove(v1);
 	}
 	return begin - this->voxels->length();
 }
 
-void PackingGenerator::createPacking(){
+template <ushort DIMENSION>
+void PackingGenerator<DIMENSION>::createPacking(){
 
 	std::cout << "[" << this->seed << " PackingGenerator::createPacking] started" << std::endl;
 
@@ -78,8 +85,7 @@ void PackingGenerator::createPacking(){
 	ShapeFactory::initShapeClass(this->params->particleType, this->params->particleAttributes);
 	Shape *s = ShapeFactory::createShape(&rnd);
 
-	VoxelList::dimension = this->params->dimension;
-	this->voxels = new VoxelList(this->params->dimension, this->params->surfaceSize, s->getVoxelSize());
+	this->voxels = new VoxelList<DIMENSION>(this->params->surfaceSize, s->getVoxelSize());
 
 	double gridSize = s->getNeighbourListCellSize();
 	if (gridSize < this->params->thresholdDistance)
@@ -103,8 +109,8 @@ void PackingGenerator::createPacking(){
 		t += this->getFactor() * dt;
 		s = ShapeFactory::createShape(&rnd);
 
-		Voxel *v;
-		double *da = new double[this->params->dimension];
+		Voxel<DIMENSION> *v;
+		double da[DIMENSION];
 		do{
 			v = this->voxels->getRandomVoxel(&rnd);
 			this->voxels->getRandomPosition(da, v, &rnd);
@@ -146,10 +152,8 @@ void PackingGenerator::createPacking(){
 			}
 */
 
-			delete[] da;
-
 			if (v!=this->voxels->getVoxel(v->getPosition())){
-				Voxel *v1 = this->voxels->getVoxel(v->getPosition());
+				Voxel<DIMENSION> *v1 = this->voxels->getVoxel(v->getPosition());
 				std::cout << "Problem: PackingGenerator - inconsistent voxels positions: " <<
 						" (" << v->getPosition()[0] << ", " << v->getPosition()[1] << ")" <<
 						", (" << v1->getPosition()[0] << ", " << v1->getPosition()[1] << ")" <<
@@ -220,16 +224,18 @@ void PackingGenerator::createPacking(){
 
 }
 
-void PackingGenerator::run(){
+template <ushort DIMENSION>
+void PackingGenerator<DIMENSION>::run(){
 	this->createPacking();
 }
 
-std::vector<Shape *> * PackingGenerator::getPacking(){
+template <ushort DIMENSION>
+std::vector<Shape *> * PackingGenerator<DIMENSION>::getPacking(){
 	return &this->packing;
 }
 
-
-void PackingGenerator::toPovray(std::vector<Shape *> * packing, double size, VoxelList *voxels, std::string filename){
+template <ushort DIMENSION>
+void PackingGenerator<DIMENSION>::toPovray(std::vector<Shape *> * packing, double size, VoxelList<DIMENSION> *voxels, std::string filename){
 	std::ofstream file(filename);
 
 	file << "#include \"colors.inc\"" << std::endl;
@@ -264,7 +270,8 @@ void PackingGenerator::toPovray(std::vector<Shape *> * packing, double size, Vox
 	file.close();
 }
 
-void PackingGenerator::toPovray(std::string filename){
+template <ushort DIMENSION>
+void PackingGenerator<DIMENSION>::toPovray(std::string filename){
 	PackingGenerator::toPovray(&(this->packing), this->params->surfaceSize, this->voxels, filename);
 }
 

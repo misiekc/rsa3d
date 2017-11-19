@@ -8,12 +8,13 @@
 #ifndef VOXEL_H_
 #define VOXEL_H_
 
-#include "Positioned.h"
+#include <algorithm>
 
+template <ushort DIMENSION>
 class Voxel{
 
 private:
-	double *position;
+	double position[DIMENSION];
 	short missCounter;
 
 public:
@@ -38,5 +39,7 @@ public:
 
 
 };
+
+#include "Voxel.tpp"
 
 #endif /* VOXEL_H_ */
