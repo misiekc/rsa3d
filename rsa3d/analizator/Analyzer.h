@@ -10,6 +10,7 @@
 
 #include "../Shape.h"
 #include "../Parameters.h"
+#include "../shapes/Cuboid.h"
 
 #include <Plot.h>
 #include <LogPlot.h>
@@ -29,10 +30,12 @@ private:
 
 	std::vector<Shape *> * fromFile(std::string filename);
 	void analyzePacking(std::vector<Shape *> *packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor);
-	void analyzeCuboidOrientationalOrder(std::vector<Shape *> *packing, Plot *corr);
+	void analyzeOrder(std::vector<Shape *> *packing, Plot **order);
+	void calculateOrderParameters(double *result, Cuboid *c1, Cuboid *c2);
 	double * printNvT(LogPlot &nvt, std::string filename, double surfaceFactor, double *res);
 	double * printASF(Plot &asf, std::string filename, int counter, double packingFraction, double *res);
-	void printCorr(Plot &corr, std::string filename, int counter, double particleSize, double packingFraction);
+	void printCorrelations(Plot &corr, std::string filename, int counter, double particleSize, double packingFraction);
+	void printOrder(Plot **order, std::string filename);
 };
 
 #endif /* ANALIZATOR_ANALYZER_H_ */

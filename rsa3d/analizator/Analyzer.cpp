@@ -45,9 +45,95 @@ std::vector<Shape *> * Analyzer::fromFile(std::string filename){
 	return v;
 }
 
+double P2(double x){
+	return 0.5*(3*x*x - 1);
+}
+
+double P4(double x){
+	return 0.125*(x*x*(35*x*x-30)+3);
+}
+
+void Analyzer::calculateOrderParameters(double *result, Cuboid *c1, Cuboid *c2){
+	double axisAlignment[3];
+	Matrix<3,3> product = (c1->getOrientation().transpose()) * (c2->getOrientation());
+
+	double tmp = 0, row[2], column[2], prod4 = 0;
+	axisAlignment[0] = 0.0; row[0] = 0; column[0] = 0;
+	for(size_t i = 0; i<3; i++){
+		for(size_t j = 0; j<3; j++){
+			tmp = fabs(product(i, j));
+			prod4 += tmp*tmp*tmp*tmp;
+			if (axisAlignment[0] < tmp){
+				axisAlignment[0] = tmp;
+				row[0] = i;
+				column[0] = j;
+			}
+		}
+	}
+	axisAlignment[1] = 0.0; row[1] = 0; column[1] = 0;
+	for(size_t i = 0; i<3; i++){
+		if (i==row[0])
+			continue;
+		for(size_t j = 0; j<3; j++){
+			if (j==column[0])
+				continue;
+			tmp = fabs(product(i, j));
+			if (axisAlignment[1] < tmp){
+				axisAlignment[1] = tmp;
+				row[1] = i;
+				column[1] = j;
+			}
+		}
+	}
+	axisAlignment[2] = fabs(product(3 - row[0] - row[1], 3 - column[0] - column[1]));
+
+	result[0] = P2(axisAlignment[0]);
+	result[1] = ( P2(axisAlignment[0]) + P2(axisAlignment[1]) + P2(axisAlignment[2]) )/3.0;
+	result[2] = P4(axisAlignment[0]);
+	result[3] = ( P4(axisAlignment[0]) + P4(axisAlignment[1]) + P4(axisAlignment[2]) )/3.0;
+	result[4] = (5.0*prod4 - 9.0)/6.0;
+}
+
+void Analyzer::analyzeOrder(std::vector<Shape *> *packing, Plot **order){
+	double *posi, *posj, *da = new double[this->params->dimension];
+	double orderParameters[5];
+	for(uint i=0; i<packing->size(); i++){
+		posi = (*packing)[i]->getPosition();
+		for(uint j=i+1; j<packing->size(); j++){
+			posj = (*packing)[j]->getPosition();
+			double dist = 0.0;
+			for(unsigned char k=0; k<this->params->dimension; k++){
+				da[k] = fabs(posi[k] - posj[k]);
+				if (da[k]>0.5*this->params->surfaceSize)
+					da[k] = this->params->surfaceSize - da[k];
+				dist += da[k]*da[k];
+			}
+			dist = sqrt(dist);
+			if (dist > order[0]->getMax())
+				continue;
+//			if(dist < 1.05)
+//				std::cout << "(" << i << ", " << j << "): " << dist;
+			this->calculateOrderParameters(orderParameters, (Cuboid *)((*packing)[i]), (Cuboid *)((*packing)[j]) );
+			for(ushort k = 0; k<5; k++){
+				order[k]->add(dist, orderParameters[k]);
+//				if (dist < 1.05)
+//					std::cout << "\t" << orderParameters[k];
+			}
+//			if(dist < 1.05)
+//				std::cout << std::endl;
+//			if (dist < 1.05 && i==1096 && j==3162){
+//				std::cout << (*packing)[i]->toPovray() << std::endl;
+//				std::cout << (*packing)[j]->toPovray() << std::endl;
+
+//			}
+		}
+	}
+	delete[] da;
+}
+
 void Analyzer::analyzePacking(std::vector<Shape *> *packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor){
 	double lastt = 0.0;
-	for(unsigned int i=0; i<packing->size(); i++){
+	for(uint i=0; i<packing->size(); i++){
 		double t = (*packing)[i]->time;
 		if (nvt != NULL)
 			nvt->addBetween(lastt, t, i);
@@ -64,9 +150,9 @@ void Analyzer::analyzePacking(std::vector<Shape *> *packing, LogPlot *nvt, Plot 
 		nvt->addBetween(lastt, nvt->getMax()+1.0, packing->size());
 	if (corr!=NULL){
 		double *posi, *posj, *da = new double[this->params->dimension];
-		for(unsigned int i=0; i<packing->size(); i++){
+		for(uint i=0; i<packing->size(); i++){
 			posi = (*packing)[i]->getPosition();
-			for(unsigned int j=i+1; j<packing->size(); j++){
+			for(uint j=i+1; j<packing->size(); j++){
 				posj = (*packing)[j]->getPosition();
 				double dist = 0.0;
 				for(unsigned char k=0; k<this->params->dimension; k++){
@@ -81,37 +167,6 @@ void Analyzer::analyzePacking(std::vector<Shape *> *packing, LogPlot *nvt, Plot 
 		delete[] da;
 	}
 }
-
-void Analyzer::analyzeCuboidOrientationalOrder(std::vector<Shape *> *packing, Plot *corr){
-	double *posi, *posj, *da = new double[this->params->dimension];
-	Cuboid *ci, *cj;
-	for(unsigned int i=0; i<packing->size(); i++){
-		ci = (Cuboid *)(*packing)[i];
-		posi = (*packing)[i]->getPosition();
-		for(unsigned int j=i+1; j<packing->size(); j++){
-			cj = (Cuboid *)(*packing)[j];
-			posj = (*packing)[j]->getPosition();
-			double dist = 0.0;
-			for(unsigned char k=0; k<this->params->dimension; k++){
-				da[k] = fabs(posi[k] - posj[k]);
-				if (da[k]>0.5*this->params->surfaceSize)
-					da[k] = this->params->surfaceSize - da[k];
-				dist += da[k]*da[k];
-			}
-			Matrix<3, 3> product = (ci->getOrientation()) * (cj->getOrientation());
-			double sum = 0.0;
-			for (int k1=0; k1<3; k1++){
-				for (int k2=0; k2<3; k2++){
-					double p2 = product(k1, k2)*product(k1, k2);
-					sum += p2*(35*p2 - 30) + 3;
-				}
-			}
-			corr->add(sqrt(dist), sum/(8*9));
-		}
-	}
-	delete[] da;
-}
-
 
 double * Analyzer::printNvT(LogPlot &nvt, std::string filename, double surfaceFactor, double *res){
 	double **points = new double*[nvt.size()];
@@ -190,46 +245,77 @@ double * Analyzer::printASF(Plot &asf, std::string filename, int counter, double
 	return res;
 }
 
-void Analyzer::printCorr(Plot& corr, std::string filename, int counter, double particleSize, double packingFraction){
-	double **points = new double*[corr.size()];
-	for(int i=0; i<corr.size(); i++)
-		points[i] = new double[2];
-	corr.getAsHistogramPoints(points);
+void Analyzer::printCorrelations(Plot& correlations, std::string filename, int counter, double particleSize, double packingFraction){
+	double **correlationPoints = new double*[correlations.size()];
+	for(int i=0; i<correlations.size(); i++){
+		correlationPoints[i] = new double[2];
+	}
+	correlations.getAsHistogramPoints(correlationPoints);
 
 	double r = 0.0, volume, expectedNumberOfParticles, packingVolume;
 
 	if (this->params->dimension==2)
-		packingVolume = M_PI * pow(corr.getMax(), 2.0);
+		packingVolume = M_PI * pow(correlations.getMax(), 2.0);
 	else if (this->params->dimension==3)
-		packingVolume = 4.0/3.0 * M_PI * pow(corr.getMax(), 3.0);
+		packingVolume = 4.0/3.0 * M_PI * pow(correlations.getMax(), 3.0);
 	else
 		return;
 
-	int totalPoints = corr.getTotalNumberOfPoints();
+	int totalPoints = correlations.getTotalNumberOfPoints();
 
 	std::ofstream file(filename);
 
 	volume = 0.0;
-	for (int i = 0; i < corr.size()-1; i++) {
+	for (int i = 0; i < correlations.size()-1; i++) {
 		if (i>0){
 			if (this->params->dimension==2)
 				volume = -M_PI * r*r;
 			else if (this->params->dimension==3)
 				volume = -4.0/3.0* M_PI * r*r*r;
 		}
-		r = 0.5*(points[i][0]+points[i+1][0]);
+		r = 0.5*(correlationPoints[i][0]+correlationPoints[i+1][0]);
 		if (this->params->dimension==2)
 			volume += M_PI * r*r;
 		else if (this->params->dimension==3)
 			volume += 4.0/3.0* M_PI * r*r*r;
 
 		expectedNumberOfParticles = totalPoints * volume / packingVolume;
-		file << points[i][0] << "\t" << points[i][1] / expectedNumberOfParticles << std::endl;
+		file << correlationPoints[i][0] << "\t" << correlationPoints[i][1] / expectedNumberOfParticles;
+		file << std::endl;
 	}
 	file.close();
-	for(int i=0; i<corr.size(); i++)
-		delete[] points[i];
-	delete[] points;
+
+	for(int i=0; i<correlations.size(); i++){
+		delete[] correlationPoints[i];
+	}
+	delete[] correlationPoints;
+}
+void Analyzer::printOrder(Plot **order, std::string filename){
+	double **orderPoints[5];
+	for (ushort i=0; i<5; i++){
+		orderPoints[i] = new double*[order[i]->size()];
+		for(ushort j=0; j<order[i]->size(); j++){
+			orderPoints[i][j] = new double[2];
+		}
+		order[i]->getAsPoints(orderPoints[i]);
+	}
+
+	std::ofstream file(filename);
+
+	for (int i = 0; i < order[0]->size()-1; i++) {
+		file << orderPoints[0][i][0];
+		for (ushort j=0; j<5; j++)
+			file << "\t" << orderPoints[j][i][1];
+		file << std::endl;
+	}
+	file.close();
+
+	for(ushort i=0; i<5; i++){
+		for(int j=0; j<order[i]->size(); j++){
+			delete[] orderPoints[i][j];
+		}
+		delete[] orderPoints[i];
+	}
 }
 
 void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double particleSize){
@@ -237,8 +323,11 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 	char prefix[] = "packing";
 	LogPlot *nvt = new LogPlot(mintime, this->params->maxTime, 200);
 	Plot *asf = new Plot(0.0, 0.6, 200);
-	Plot *corr = new Plot(0.0, 10.0, 200);
-	Plot *order = new Plot(0.0, 10.0, 200);
+	Plot *correlations = new Plot(0.0, 10.0, 200);
+	Plot *order[5];
+	for(ushort i=0; i<5; i++)
+		order[i] = new Plot(0.0, 10.0, 200);
+
 	double n = 0.0, n2 = 0.0;
 	int counter = 0;
 	double packingSize = pow(params->surfaceSize, params->dimension);
@@ -251,10 +340,11 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 			n += packing->size();
 			n2 += packing->size()*packing->size();
 			counter++;
-			this->analyzePacking(packing, nvt, asf, corr, particleSize/packingSize);
-			if (this->params->particleType.compare("Cuboid")==0){
-				this->analyzeCuboidOrientationalOrder(packing, order);
-			}
+			this->analyzePacking(packing, nvt, asf, correlations, particleSize/packingSize);
+			if (this->params->particleType.compare("Cuboid")==0)
+				this->analyzeOrder(packing, order);
+			else
+
 			delete packing;
 			std::cout << ".";
 			std::cout.flush();
@@ -275,11 +365,10 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 
 	delete asf;
 
-	this->printCorr(*corr, dirname + "_cor.txt", counter, particleSize, packingFraction);
-	delete corr;
+	this->printCorrelations(*correlations, dirname + "_cor.txt", counter, particleSize, packingFraction);
+	delete correlations;
 
-	if (this->params->particleType.compare("Cuboid")==0){
-		this->printCorr(*order, dirname + "_cor.txt", counter, particleSize, packingFraction);
-		delete order;
-	}
+	this->printOrder(order, dirname + "_order.txt");
+	for(ushort i=0; i<5; i++)
+		delete order[i];
 }
