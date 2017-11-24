@@ -92,23 +92,6 @@ public:
     Vector()        // Default
     { }
     
-    Vector(const Vector & other) : v(other.v)       // Copy
-    { }
-    
-    Vector(const Vector && other) : v(std::move(other.v))       // Move
-    { }
-    
-    Vector & operator=(const Vector & other)        // Copy assignment
-    {
-        this->v = other.v;
-        return *this;
-    }
-    
-    Vector & operator=(Vector && other)         // Move assignment
-    {
-        this->v = std::move(other.v);
-        return *this;
-    }
     
     // Other ctors
     //---------------------------------------------------------------------------------------

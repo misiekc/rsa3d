@@ -43,7 +43,6 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/Intersection \
        rsa3d/Main \
        rsa3d/OrientedFace \
-       rsa3d/PackingGenerator \
        rsa3d/Parameters \
        rsa3d/Positioned \
        rsa3d/RND \
@@ -51,8 +50,6 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/ShapeFactory \
        rsa3d/Surface \
        rsa3d/Utils \
-       rsa3d/Voxel \
-       rsa3d/VoxelList \
        rsa3d/analizator/Analyzer \
        rsa3d/shapes/ConvexPolyhedron \
        rsa3d/shapes/Cuboid \

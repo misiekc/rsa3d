@@ -52,7 +52,7 @@ class Matrix
     friend class Vector;
 
 private:
-    E * arr;
+    E arr[ROWS * COLS];
     
     E & _get(std::size_t row, std::size_t column);
     const E & _get(std::size_t row, std::size_t column) const;
@@ -61,11 +61,6 @@ public:
     // Default, copy and move ctor, copy and move assingment operation, dtor
     //----------------------------------------------------------------------------------------
     Matrix();
-    Matrix(const Matrix<ROWS, COLS, E> & _other);
-    Matrix(Matrix<ROWS, COLS, E> && _other);
-    Matrix & operator=(const Matrix<ROWS, COLS, E> & _other);
-    Matrix & operator=(Matrix<ROWS, COLS, E> && _other);
-    ~Matrix();
     
     // Other ctors
     //----------------------------------------------------------------------------------------

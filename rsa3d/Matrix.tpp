@@ -14,67 +14,6 @@ Matrix<ROWS, COLS, E>::Matrix() : Matrix<ROWS, COLS, E>(E(0))
 }
 
 
-// Copy ctor
-//--------------------------------------------------------------------------------------------
-template <std::size_t ROWS, std::size_t COLS, typename E>
-Matrix<ROWS, COLS, E>::Matrix(const Matrix<ROWS, COLS, E> & _other)
-{
-    // Alloc an array and copy data
-    arr = new E[ROWS * COLS];
-    std::copy(_other.arr, _other.arr + (ROWS * COLS), arr);
-}
-
-
-// Move ctor
-//--------------------------------------------------------------------------------------------
-template <std::size_t ROWS, std::size_t COLS, typename E>
-Matrix<ROWS, COLS, E>::Matrix(Matrix<ROWS, COLS, E> && _other) :
-    arr(_other.arr)
-{
-    _other.arr = nullptr;
-}
-
-
-// Copy assingment operator. Returns this reference for operations such as
-// (matrix = getmatrix()).getWidth()
-//--------------------------------------------------------------------------------------------
-template <std::size_t ROWS, std::size_t COLS, typename E>
-Matrix<ROWS, COLS, E> & Matrix<ROWS, COLS, E>::operator=(const Matrix<ROWS, COLS, E> & _other)
-{
-    // Self assingment, skip
-    if (this == &_other)
-        return *this;
-
-    // Copy data
-    std::copy(_other.arr, _other.arr + (ROWS * COLS), arr);
-
-    return *this;
-}
-
-
-// Move assignment operator. Returns this reference for operations such as
-// (matrix = getmatrix()).getWidth()
-//--------------------------------------------------------------------------------------------
-template <std::size_t ROWS, std::size_t COLS, typename E>
-Matrix<ROWS, COLS, E> & Matrix<ROWS, COLS, E>::operator=(Matrix<ROWS, COLS, E> && _other)
-{
-    delete[] arr;
-    arr = _other.arr;
-    _other.arr = nullptr;
-
-    return *this;
-}
-
-
-// Dtor
-//--------------------------------------------------------------------------------------------
-template <std::size_t ROWS, std::size_t COLS, typename E>
-Matrix<ROWS, COLS, E>::~Matrix()
-{
-    delete[] arr;
-}
-
-
 // Ctor creating matrix of given size. Fills it with given value
 //--------------------------------------------------------------------------------------------
 // _fill - value to be filled with
@@ -83,7 +22,6 @@ template <std::size_t ROWS, std::size_t COLS, typename E>
 Matrix<ROWS, COLS, E>::Matrix(E _fill)
 {
     // Alloc an array and fill
-    arr = new E[ROWS * COLS];
     std::fill(arr, arr + (ROWS * COLS), _fill);
 }
 
@@ -97,7 +35,6 @@ template <std::size_t ROWS, std::size_t COLS, typename E>
 Matrix<ROWS, COLS, E>::Matrix(E **_arr)
 {
     // Alloc an array and copy elements from given
-    arr = new E[ROWS * COLS];
     std::size_t arr_index = 0;
     for (std::size_t i = 0; i < ROWS; i++)
         for (std::size_t j = 0; j < COLS; j++)
@@ -116,8 +53,7 @@ Matrix<ROWS, COLS, E>::Matrix(E **_arr)
 template <std::size_t ROWS, std::size_t COLS, typename E>
 Matrix<ROWS, COLS, E>::Matrix(E *_arr)
 {
-    // Alloc an array and copy elements from given
-    arr = new E[ROWS * COLS];
+    // Alloc an array and copy elements from given;
     std::copy(_arr, _arr + (ROWS * COLS), arr);
 }
 
@@ -133,8 +69,7 @@ Matrix<ROWS, COLS, E>::Matrix(E *_arr)
 template <std::size_t ROWS, std::size_t COLS, typename E>
 Matrix<ROWS, COLS, E>::Matrix(const std::array<E, ROWS * COLS> & _arr)
 {
-    // Alloc an array and copy elements from given
-    arr = new E[ROWS * COLS];
+    // Alloc an array and copy elements from given;
     std::copy(_arr.begin(), _arr.begin() + (ROWS * COLS), arr);
 }
 
