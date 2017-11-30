@@ -8,21 +8,23 @@
 #ifndef POSITIONED_H_
 #define POSITIONED_H_
 
+template <unsigned short DIMENSION>
 class Positioned {
 
 protected:
-	double *position;
-	unsigned char dimension;
+	double position[DIMENSION];
 
 public:
-	Positioned(unsigned char dimension);
-	Positioned(const Positioned & other);
+	Positioned();
+	Positioned(const Positioned<DIMENSION> & other);
 	virtual ~Positioned();
 
-	virtual Positioned & operator=(const Positioned & other);
+	virtual Positioned<DIMENSION> & operator=(const Positioned<DIMENSION> & other);
 
 	// returns position of the shape's center
 	double* getPosition();
 };
+
+#include "Positioned.tpp"
 
 #endif /* POSITIONED_H_ */

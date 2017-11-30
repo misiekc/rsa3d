@@ -16,7 +16,7 @@
 #include <utility>
 
 
-class Cuboid : public Shape
+class Cuboid : public Shape<3>
 {
 public:
     // Overlap stategy
@@ -39,17 +39,17 @@ private:
     bool        checkPoint(const Vector<3> & vertex);
     bool        checkSegment(const Vector<3> & point1, const Vector<3> & point2);
     
-    int overlapMine(BoundaryConditions *bc, Shape *s);
-    int overlapTri(BoundaryConditions *bc, Shape *s);
-    int overlapSAT(BoundaryConditions *bc, Shape *s);
+    int overlapMine(BoundaryConditions *bc, Shape<3> *s);
+    int overlapTri(BoundaryConditions *bc, Shape<3> *s);
+    int overlapSAT(BoundaryConditions *bc, Shape<3> *s);
     
     void obtainTris(Vector<3> (&arr)[12][3], const Vector<3> & translation);
     bool checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Vector<3> * _vert2) const;
     interval getProjection(const Vector<3> & _axis, Vector<3> * _vert) const;
 
 protected:
+    static unsigned short 	staticDimension;
     static double           *size;
-    static unsigned char    staticDimension;
     
     static double           neighbourListCellSize;
     static double           voxelSize;
@@ -61,13 +61,13 @@ public:
     ~Cuboid();
 
 	static void initClass(const std::string &args);
-	static Shape * create(RND *rnd);
+	static Shape<3> * create(RND *rnd);
 	static void setOverlapStrategy(OverlapStrategy strategy);
 	static OverlapStrategy getOverlapStrategy();
 
     double getNeighbourListCellSize();
     double getVoxelSize();
-    int overlap(BoundaryConditions *bc, Shape *s);
+    int overlap(BoundaryConditions *bc, Shape<3> *s);
     double getVolume();
     int pointInside(BoundaryConditions *bc, double* da);
     

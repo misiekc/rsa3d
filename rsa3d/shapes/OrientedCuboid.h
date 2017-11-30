@@ -8,21 +8,32 @@
 #ifndef SHAPES_ORIENTEDCUBOID_H_
 #define SHAPES_ORIENTEDCUBOID_H_
 
-#include "Cuboid.h"
 
-class OrientedCuboid: public Cuboid {
+template <unsigned short DIMENSION>
+class OrientedCuboid : public Shape<DIMENSION>{
 private:
-	static bool do2Drotation;
+//	static bool do2Drotation;
+    static double           neighbourListCellSize;
+    static double           voxelSize;
+
+    static double 			size[DIMENSION];
 
 public:
-	OrientedCuboid(const Matrix<3, 3> & rotation);
+	OrientedCuboid();
 	virtual ~OrientedCuboid();
 
 	static void initClass(const std::string &args);
-	static Shape * create(RND *rnd);
+	static Shape<DIMENSION> * create(RND *rnd);
 
-    int overlap(BoundaryConditions *bc, Shape *s);
+    int overlap(BoundaryConditions *bc, Shape<DIMENSION> *s);
     int pointInside(BoundaryConditions *bc, double* da);
+    double getNeighbourListCellSize();
+    double getVoxelSize();
+    double getVolume();
+
+    std::string toPovray() const;
 };
+
+#include "OrientedCuboid.tpp"
 
 #endif /* SHAPES_ORIENTEDCUBOID_H_ */

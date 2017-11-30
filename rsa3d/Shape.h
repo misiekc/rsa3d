@@ -15,17 +15,17 @@
 #include <ostream>
 #include <istream>
 
-
-class Shape : public Positioned{
+template <unsigned short DIMENSION>
+class Shape : public Positioned<DIMENSION>{
 
 public:
-	static Shape* (*createShape)(RND *rnd);
+	static Shape<DIMENSION>* (*createShape)(RND *rnd);
 
 	int no;
 	double time;
 
-	Shape(const unsigned short dimension);
-	Shape(const Shape & other);
+	Shape();
+	Shape(const Shape<DIMENSION> & other);
 
 	virtual ~Shape();
 
@@ -48,7 +48,7 @@ public:
 	virtual int pointInside(BoundaryConditions *bc, double* da) = 0;
 
 	// moves the shape towards given shape s
-	virtual double minDistance(Shape *s);
+	virtual double minDistance(Shape<DIMENSION> *s);
 
 	// returns string representation of the shape
 	virtual std::string toString();
@@ -65,6 +65,8 @@ public:
 	// draws the shape
 	// virtual void draw()
 };
+
+#include "Shape.tpp"
 
 
 #endif /* SHAPE_H_ */

@@ -29,13 +29,13 @@ Analyzer::Analyzer(Parameters *params) {
 Analyzer::~Analyzer() {
 }
 
-std::vector<Shape *> * Analyzer::fromFile(std::string filename){
+std::vector<Shape<RSA_DIMENSION> *> * Analyzer::fromFile(std::string filename){
 	std::ifstream file(filename, std::ios::binary);
-	std::vector<Shape *> * v = new std::vector<Shape *>;
+	std::vector<Shape<RSA_DIMENSION> *> * v = new std::vector<Shape<RSA_DIMENSION> *>;
 	RND rnd(1);
 
 	while(!file.eof()){
-		Shape *s = ShapeFactory::createShape(&rnd);
+		Shape<RSA_DIMENSION> *s = ShapeFactory::createShape(&rnd);
 		s->restore(file);
 		v->push_back(s);
 	}
@@ -94,7 +94,7 @@ void Analyzer::calculateOrderParameters(double *result, Cuboid *c1, Cuboid *c2){
 	result[4] = (5.0*prod4 - 9.0)/6.0;
 }
 
-void Analyzer::analyzeOrder(std::vector<Shape *> *packing, Plot **order){
+void Analyzer::analyzeOrder(std::vector<Shape<RSA_DIMENSION> *> *packing, Plot **order){
 	double *posi, *posj, *da = new double[this->params->dimension];
 	double orderParameters[5];
 	for(uint i=0; i<packing->size(); i++){
@@ -131,7 +131,7 @@ void Analyzer::analyzeOrder(std::vector<Shape *> *packing, Plot **order){
 	delete[] da;
 }
 
-void Analyzer::analyzePacking(std::vector<Shape *> *packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor){
+void Analyzer::analyzePacking(std::vector<Shape<RSA_DIMENSION> *> *packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor){
 	double lastt = 0.0;
 	for(uint i=0; i<packing->size(); i++){
 		double t = (*packing)[i]->time;
@@ -336,15 +336,13 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 	while ((de = readdir(dir)) != NULL){
 		if (strncmp(prefix, de->d_name, strlen(prefix))==0){
 			std::string filename(de->d_name);
- 			std::vector<Shape *> * packing = this->fromFile(dirname + "/" + filename);
+ 			std::vector<Shape<RSA_DIMENSION> *> * packing = this->fromFile(dirname + "/" + filename);
 			n += packing->size();
 			n2 += packing->size()*packing->size();
 			counter++;
 			this->analyzePacking(packing, nvt, asf, correlations, particleSize/packingSize);
 			if (this->params->particleType.compare("Cuboid")==0)
 				this->analyzeOrder(packing, order);
-			else
-
 			delete packing;
 			std::cout << ".";
 			std::cout.flush();

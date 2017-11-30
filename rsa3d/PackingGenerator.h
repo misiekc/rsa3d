@@ -24,7 +24,7 @@ private:
 
 	int seed;
 	Parameters *params;
-	std::vector<Shape *> packing;
+	std::vector<Shape<DIMENSION> *> packing;
 	VoxelList<DIMENSION> *voxels;
 	Surface *surface;
 
@@ -39,9 +39,9 @@ public:
 	virtual ~PackingGenerator();
 
 	void run();
-	std::vector<Shape *> * getPacking();
+	std::vector<Shape<DIMENSION> *> * getPacking();
 	void toPovray(std::string filename);
-	static void toPovray(std::vector<Shape *> * packing, double size, VoxelList<DIMENSION> *voxels, std::string filename);
+	static void toPovray(std::vector<Shape<DIMENSION> *> * packing, double size, VoxelList<DIMENSION> *voxels, std::string filename);
 };
 
 #include "PackingGenerator.tpp"

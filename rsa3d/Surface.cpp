@@ -11,7 +11,7 @@
 Surface::Surface(int dim, double s, double ndx, double vdx) : BoundaryConditions() {
 	this->dimension = dim;
 	this->size = s;
-	this->list = new NeighbourGrid<Shape>(dim, s, ndx);
+	this->list = new NeighbourGrid<Shape<RSA_DIMENSION>>(dim, s, ndx);
 }
 
 Surface::~Surface() {
@@ -19,17 +19,17 @@ Surface::~Surface() {
 }
 
 
-void Surface::add(Shape *s) {
+void Surface::add(Shape<RSA_DIMENSION> *s) {
 		this->list->add(s, s->getPosition());
 	}
 
-Shape* Surface::check(Shape *s){
-	std::unordered_set<Shape *> neighbours;
+Shape<RSA_DIMENSION>* Surface::check(Shape<RSA_DIMENSION> *s){
+	std::unordered_set<Shape<RSA_DIMENSION> *> neighbours;
 	this->list->getNeighbours(&neighbours, s->getPosition());
 
-	for(Positioned *shape: neighbours) {
-		if (((Shape *)shape)->overlap(this, s)){
-			return (Shape *)shape;
+	for(Positioned<RSA_DIMENSION> *shape: neighbours) {
+		if (((Shape<RSA_DIMENSION> *)shape)->overlap(this, s)){
+			return (Shape<RSA_DIMENSION> *)shape;
 		}
 	}
 	return NULL;
@@ -42,11 +42,11 @@ Shape * Surface::getClosestNeighbour(double *da){
 */
 
 
-void Surface::getNeighbours(std::unordered_set<Shape *> *result, double* da) {
+void Surface::getNeighbours(std::unordered_set<Shape<RSA_DIMENSION> *> *result, double* da) {
 	this->list->getNeighbours(result, da);
 }
 
-NeighbourGrid<Shape> * Surface::getNeighbourGrid(){
+NeighbourGrid<Shape<RSA_DIMENSION>> * Surface::getNeighbourGrid(){
 	return this->list;
 }
 

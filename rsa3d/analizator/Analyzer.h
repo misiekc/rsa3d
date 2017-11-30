@@ -28,9 +28,9 @@ public:
 private:
 	Parameters *params;
 
-	std::vector<Shape *> * fromFile(std::string filename);
-	void analyzePacking(std::vector<Shape *> *packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor);
-	void analyzeOrder(std::vector<Shape *> *packing, Plot **order);
+	std::vector<Shape<RSA_DIMENSION> *> * fromFile(std::string filename);
+	void analyzePacking(std::vector<Shape<RSA_DIMENSION> *> *packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor);
+	void analyzeOrder(std::vector<Shape<RSA_DIMENSION> *> *packing, Plot **order);
 	void calculateOrderParameters(double *result, Cuboid *c1, Cuboid *c2);
 	double * printNvT(LogPlot &nvt, std::string filename, double surfaceFactor, double *res);
 	double * printASF(Plot &asf, std::string filename, int counter, double packingFraction, double *res);

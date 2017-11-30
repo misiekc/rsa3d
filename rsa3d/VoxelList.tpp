@@ -195,7 +195,7 @@ Voxel<DIMENSION> * VoxelList<DIMENSION>::getVoxel(double* da){
 }
 
 template <ushort DIMENSION>
-bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, Shape *s, BoundaryConditions *bc){
+bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, Shape<DIMENSION> *s, BoundaryConditions *bc){
 
 	double* vpos = v->getPosition();
 	int n = (int)(this->size/this->initialVoxelSize) + 1;
@@ -220,7 +220,7 @@ bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, Shape *s, BoundaryC
 
 // returns true when the whole voxel is inside an exclusion area of one shape, thus, should be removed
 template <ushort DIMENSION>
-bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape> *nl, std::unordered_set<Shape *> *neighbours, BoundaryConditions *bc){
+bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc){
 
 	double* vpos = v->getPosition();
 
@@ -230,12 +230,12 @@ bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape
 	if(this->activeTopLevelVoxels[index]==false)
 		return true;
 
-	std::unordered_set<Shape *> vAll;
-	std::unordered_set<Shape *>::iterator itN, itA;
-	std::unordered_set<Shape *> *vNeighbours;
+	std::unordered_set<Shape<DIMENSION> *> vAll;
+	typename std::unordered_set<Shape<DIMENSION> *>::iterator itN, itA;
+	std::unordered_set<Shape<DIMENSION> *> *vNeighbours;
 
 	if(neighbours==NULL){
-		vNeighbours = new std::unordered_set<Shape *>();
+		vNeighbours = new std::unordered_set<Shape<DIMENSION> *>();
 	}else{
 		vNeighbours = neighbours;
 	}
@@ -283,24 +283,24 @@ bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape
 }
 
 template <ushort DIMENSION>
-bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape> *nl, BoundaryConditions *bc, int timestamp){
+bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, BoundaryConditions *bc, int timestamp){
 	if (v->lastAnalyzed < timestamp && !this->disabled)
 		return this->analyzeVoxel(v, nl, NULL, bc);
 	return false;
 }
 
 template <ushort DIMENSION>
-bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape> *nl, BoundaryConditions *bc){
+bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, BoundaryConditions *bc){
 	return this->analyzeVoxel(v, nl, NULL, bc);
 }
 
 template <ushort DIMENSION>
-bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, std::unordered_set<Shape *> *neighbours, BoundaryConditions *bc){
+bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc){
 	return this->analyzeVoxel(v, NULL, neighbours, bc);
 }
 
 template <ushort DIMENSION>
-bool VoxelList<DIMENSION>::splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape> *nl, BoundaryConditions *bc){
+bool VoxelList<DIMENSION>::splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<DIMENSION>> *nl, BoundaryConditions *bc){
 	if (this->disabled)
 		return false;
 	if ((this->voxelSize<2*minDx && pow(2, DIMENSION)*this->last > this->beginningVoxelNumber) || pow(2, DIMENSION)*this->last > maxVoxels){

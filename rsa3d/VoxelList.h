@@ -28,7 +28,7 @@ private:
 	double findInitialVoxelSize(double d);
 	int getLinearNumberOfVoxels(double vs);
 	void fillNeighbourGrid();
-	bool analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape> *nl, std::unordered_set<Shape *> *neighbours, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc);
 	bool disabled;
 
 	std::uniform_real_distribution<double> *distribution;
@@ -60,11 +60,11 @@ public:
 	void getNeighbours(std::unordered_set<Voxel<DIMENSION> *> *result, Voxel<DIMENSION> *v);
 	void remove(Voxel<DIMENSION> *v);
 	void removeTopLevelVoxel(Voxel<DIMENSION> *v);
-	bool analyzeVoxel(Voxel<DIMENSION> *v, Shape *s, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape> *nl, BoundaryConditions *bc, int timestamp);
-	bool analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape> *nl, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel<DIMENSION> *v, std::unordered_set<Shape *> *neighbours, BoundaryConditions *bc);
-	bool splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape> *nl, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel<DIMENSION> *v, Shape<DIMENSION> *s, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, BoundaryConditions *bc, int timestamp);
+	bool analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel<DIMENSION> *v, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc);
+	bool splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<DIMENSION>> *nl, BoundaryConditions *bc);
 
 	Voxel<DIMENSION> *getRandomVoxel(RND *rnd);
 	Voxel<DIMENSION> * getVoxel(double* da);

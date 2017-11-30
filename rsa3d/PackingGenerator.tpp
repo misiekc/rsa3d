@@ -26,7 +26,7 @@ PackingGenerator<DIMENSION>::PackingGenerator(int s, Parameters *p) {
 
 template <ushort DIMENSION>
 PackingGenerator<DIMENSION>::~PackingGenerator() {
-	for(Shape *s : this->packing)
+	for(Shape<DIMENSION> *s : this->packing)
 		delete s;
 	if (this->voxels!=NULL)
 		delete this->voxels;
@@ -83,7 +83,7 @@ void PackingGenerator<DIMENSION>::createPacking(){
 	int missCounter = 0;
 	RND rnd(this->seed);
 	ShapeFactory::initShapeClass(this->params->particleType, this->params->particleAttributes);
-	Shape *s = ShapeFactory::createShape(&rnd);
+	Shape<DIMENSION> *s = ShapeFactory::createShape(&rnd);
 
 	this->voxels = new VoxelList<DIMENSION>(this->params->surfaceSize, s->getVoxelSize());
 
@@ -117,7 +117,7 @@ void PackingGenerator<DIMENSION>::createPacking(){
 		}while(!this->surface->isInside(da));
 		s->translate(this->voxels->getRandomPosition(da, v, &rnd));
 
-		Shape *sTmp = this->surface->check(s);
+		Shape<DIMENSION> *sTmp = this->surface->check(s);
 		if (sTmp==NULL) { // if no overlap detected
 			l++;
 			s->no = l;
@@ -230,12 +230,12 @@ void PackingGenerator<DIMENSION>::run(){
 }
 
 template <ushort DIMENSION>
-std::vector<Shape *> * PackingGenerator<DIMENSION>::getPacking(){
+std::vector<Shape<DIMENSION> *> * PackingGenerator<DIMENSION>::getPacking(){
 	return &this->packing;
 }
 
 template <ushort DIMENSION>
-void PackingGenerator<DIMENSION>::toPovray(std::vector<Shape *> * packing, double size, VoxelList<DIMENSION> *voxels, std::string filename){
+void PackingGenerator<DIMENSION>::toPovray(std::vector<Shape<DIMENSION> *> * packing, double size, VoxelList<DIMENSION> *voxels, std::string filename){
 	std::ofstream file(filename);
 
 	file << "#include \"colors.inc\"" << std::endl;
@@ -247,7 +247,7 @@ void PackingGenerator<DIMENSION>::toPovray(std::vector<Shape *> * packing, doubl
 	file << "  polygon {4, <0, 0, 0.0>, <0, " << size << ", 0.0>, <" << size << ", " << size << ", 0.0>, <" << size << ", 0, 0.0>  texture { finish { ambient 1 diffuse 0 } pigment { color Gray} } }" << std::endl;
 	file << "  text { ttf \"timrom.ttf\" \"0\" 1, 0 pigment { color Black } scale 1.0 translate < 0, 0, 0.0002> }" << std::endl;
 
-	for (Shape *s : *packing) {
+	for (Shape<DIMENSION> *s : *packing) {
 //		double *da = s->getPosition();
 		file << s->toPovray();
 	}

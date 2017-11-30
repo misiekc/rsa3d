@@ -28,21 +28,21 @@ void die(const std::string & reason)
     exit(EXIT_FAILURE);
 }
 
-void toFile(std::string filename, std::vector<Shape *> *packing) {
+void toFile(std::string filename, std::vector<Shape<RSA_DIMENSION> *> *packing) {
 	std::ofstream file(filename, std::ios::binary);
-	for (Shape *s : *packing) {
+	for (Shape<RSA_DIMENSION> *s : *packing) {
 		s->store(file);
 	}
 	file.close();
 }
 
-std::vector<Shape *> * fromFile(unsigned char dim, std::string filename) {
+std::vector<Shape<RSA_DIMENSION> *> * fromFile(unsigned char dim, std::string filename) {
 	std::ifstream file(filename, std::ios::binary);
-	std::vector<Shape *> * v = new std::vector<Shape *>;
+	std::vector<Shape<RSA_DIMENSION> *> * v = new std::vector<Shape<RSA_DIMENSION> *>;
 	RND rnd(1);
 
 	while (!file.eof()) {
-		Shape *s = ShapeFactory::createShape(&rnd);
+		Shape<RSA_DIMENSION> *s = ShapeFactory::createShape(&rnd);
 		s->restore(file);
 		v->push_back(s);
 	}
@@ -63,7 +63,7 @@ int simulate(Parameters *params) {
 			+ params->particleAttributes + "_" + size + ".dat";
 	std::ofstream file(sFile);
 	file.precision(std::numeric_limits<double>::digits10 + 1);
-	std::vector<Shape *> *packing;
+	std::vector<Shape<RSA_DIMENSION> *> *packing;
 
 	for (int i = params->from; i < params->from + params->collectors; i++) {
 
@@ -109,7 +109,7 @@ void boundaries(Parameters *params) {
 	std::string filename = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + ".dat";
 	std::ofstream file(filename);
 	file.precision(std::numeric_limits<double>::digits10 + 1);
-	std::vector<Shape *> *packing;
+	std::vector<Shape<RSA_DIMENSION> *> *packing;
 	do {
 		pg = new PackingGenerator<RSA_DIMENSION>(seed, params);
 		pg->run();
@@ -280,7 +280,7 @@ int main(int argc, char **argv) {
 		an.analyzePackingsInDirectory(argv[3], 0.01, 1.0);
 	} else if (strcmp(argv[1], "povray")==0) {
 		std::string file(argv[3]);
-		std::vector<Shape *> *packing = fromFile(params.dimension, file);
+		std::vector<Shape<RSA_DIMENSION> *> *packing = fromFile(params.dimension, file);
 		PackingGenerator<RSA_DIMENSION>::toPovray(packing, params.surfaceSize, NULL, file + ".pov");
 		delete packing;
 	}

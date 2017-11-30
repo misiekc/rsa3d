@@ -13,40 +13,41 @@
 #include "../RND.h"
 #include "../Shape.h"
 
-class Sphere : public Shape{
+template <unsigned short DIMENSION>
+class Sphere : public Shape<DIMENSION>{
 
 private:
 	static double radius;
 	static double neighbourListCellSize;
 	static double voxelSize;
-	static unsigned char staticDimension;
 
 	static constexpr double g20 = 1.0; // Gamma(2.0)
 	static constexpr double g15 = 0.5*sqrt(M_PI); // Gamma(1.5)
 
 	double r;
 
-	static double gamma(unsigned char d);
-	static double volume(unsigned char d);
+	static double gamma();
+	static double volume();
 
 public:
 	Sphere();
-	Sphere(unsigned char dim);
 	virtual ~Sphere();
 
 	static void initClass(const std::string &args);
-	static Shape * create(RND *rnd);
+	static Shape<DIMENSION> * create(RND *rnd);
 
 	double getNeighbourListCellSize();
 	double getVoxelSize();
-	int overlap(BoundaryConditions *bc, Shape *s);
+	int overlap(BoundaryConditions *bc, Shape<DIMENSION> *s);
 	double getVolume();
 	int pointInside(BoundaryConditions *bc, double* da);
-	double minDistance(Shape *s);
+	double minDistance(Shape<DIMENSION> *s);
 
 	std::string toPovray() const;
 	void store(std::ostream &f) const;
 	void restore(std::istream &f);
 };
+
+#include "Sphere.tpp"
 
 #endif /* SHAPES_SPHERE_H_ */

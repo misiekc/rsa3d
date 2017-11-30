@@ -8,6 +8,7 @@
 #ifndef SURFACE_H_
 #define SURFACE_H_
 
+#include "Parameters.h"
 #include "Shape.h"
 #include <vector>
 #include <unordered_set>
@@ -20,7 +21,7 @@ class Surface : public BoundaryConditions{
 
 protected:
 
-	NeighbourGrid<Shape> *list;
+	NeighbourGrid<Shape<RSA_DIMENSION>> *list;
 
 	double size;
 	int dimension;
@@ -33,11 +34,11 @@ public:
 	Surface(int dim, double s, double ndx, double vdx);
 	virtual ~Surface();
 
-	void add(Shape *s);
-	Shape* check(Shape *s);
-	void getNeighbours(std::unordered_set<Shape *> *result, double *da);
-	Shape * getClosestNeighbour(double *da);
-	NeighbourGrid<Shape> * getNeighbourGrid();
+	void add(Shape<RSA_DIMENSION> *s);
+	Shape<RSA_DIMENSION>* check(Shape<RSA_DIMENSION> *s);
+	void getNeighbours(std::unordered_set<Shape<RSA_DIMENSION> *> *result, double *da);
+	Shape<RSA_DIMENSION> * getClosestNeighbour(double *da);
+	NeighbourGrid<Shape<RSA_DIMENSION>> * getNeighbourGrid();
 	double distance2(double *a1, double *a2);
 
 	virtual bool isInside(double * da);

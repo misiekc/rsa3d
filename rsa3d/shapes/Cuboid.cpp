@@ -7,7 +7,6 @@
 #include "Cuboid.h"
 #include "../Vector.h"
 #include "../Intersection.h"
-#include "ConvexPolyhedron.h"
 
 #include <iostream>
 #include <string>
@@ -40,10 +39,10 @@ namespace
 double          *Cuboid::size;
 double          *Cuboid::auxDoubleArray;
 double          Cuboid::volume;
-unsigned char   Cuboid::staticDimension;    
 double          Cuboid::neighbourListCellSize;
 double          Cuboid::voxelSize;
 double          Cuboid::minDimension;
+unsigned short 	Cuboid::staticDimension = 3;
 
 // Vertex recognition helper. P states positive, N - negative. First position
 // corresponds to positive/negative X, second for Y, etc.
@@ -77,7 +76,7 @@ Cuboid::OverlapStrategy Cuboid::strategy = Cuboid::OverlapStrategy::MINE;
 // Default constructor creating new Cuboid in (0, 0, 0) with size set in
 // Cuboid::initClass
 //----------------------------------------------------------------------------
-Cuboid::Cuboid(const Matrix<3, 3> & orientation) : Shape(Cuboid::staticDimension), orientation(orientation)
+Cuboid::Cuboid(const Matrix<3, 3> & orientation) : Shape<3>(), orientation(orientation)
 {
     
 }
@@ -100,13 +99,13 @@ void Cuboid::initClass(const std::string &args)
     
     // Parse parameters
     args_stream >> temp;
-    staticDimension = (unsigned char)temp;
+    staticDimension = (unsigned short)temp;
     if (!args_stream)               throw std::runtime_error("Cuboid::initClass: invalid arguments. Usage: <dimension> <size 1> ... <size dimension>");
     else if (staticDimension == 0)  throw std::runtime_error("Cuboid::initClass: 0 dimension");
         
     size = new double[staticDimension];
     auxDoubleArray = new double[staticDimension];
-    for (unsigned char i = 0; i < staticDimension; i++) {
+    for (unsigned short i = 0; i < staticDimension; i++) {
         args_stream >> size[i];
         if (!args_stream)           throw std::runtime_error("Cuboid::initClass: invalid or missing dimensions");
         else if (size[i] <= 0.0)    throw std::runtime_error("Cuboid::initClass: non-positive size: " + std::to_string(size[i]));
@@ -115,7 +114,7 @@ void Cuboid::initClass(const std::string &args)
     // renormailze sizes to obtain unit volume
     double v = std::accumulate(size, size + staticDimension, 1.0, std::multiplies<double>());
     double factor = 1.0/pow(v, 1.0/staticDimension);
-    for (unsigned char i = 0; i < staticDimension; i++) {
+    for (unsigned short i = 0; i < staticDimension; i++) {
         size[i] *= factor;
     }
         
@@ -151,7 +150,7 @@ void Cuboid::initClass(const std::string &args)
 // Method creating (dynamically alocated) cuboid with random orientation.
 // Used by ShapeFactory for shape generating
 //----------------------------------------------------------------------------
-Shape * Cuboid::create(RND *rnd)
+Shape<3> * Cuboid::create(RND *rnd)
 {
     Cuboid * cuboid = new Cuboid(Matrix<3, 3>::rotation(
         rnd->nextValue() * 2 * M_PI,
@@ -470,7 +469,7 @@ Cuboid::interval Cuboid::getProjection(const Vector<3> & _axis, Vector<3> * _ver
 //----------------------------------------------------------------------------
 bool Cuboid::checkPoint(const Vector<3> & vertex)
 {
-    for (unsigned char i = 0; i < this->dimension; i++)
+    for (unsigned short i = 0; i < 3; i++)
         if (std::abs(vertex[i]) > this->size[i] / 2)
             return false;
     return true;
@@ -544,13 +543,13 @@ int Cuboid::pointInside(BoundaryConditions *bc, double* da)
     pointTranslation = this->orientation.transpose() * (pointTranslation - cuboidTranslation);
     
     // Save absolute values of point coords
-    for (unsigned char i = 0; i < 3; i++)
+    for (unsigned short i = 0; i < 3; i++)
         auxDoubleArray[i] = std::abs(pointTranslation[i]);
     
     // Map which coords lie in this and which lie in this + minDimension
     bool liesInSmaller[3];
     bool liesInBigger[3];
-    for (unsigned char i = 0; i < 3; i++) {
+    for (unsigned short i = 0; i < 3; i++) {
         liesInSmaller[i] = (auxDoubleArray[i] <= this->size[i] / 2);
         liesInBigger[i] = (auxDoubleArray[i] <= this->size[i] / 2 + minDimension);
     }
@@ -597,56 +596,35 @@ double * Cuboid::getSize(double * arr)
 std::string Cuboid::toPovray() const
 {
 	std::string s = "";
-	if (this->dimension==2){
-		double factor = 0.5;
-		s += "  polygon {4, ";
-
-		s += "< " + std::to_string(this->position[0] - factor*size[0]) + ", ";
-		s += 		std::to_string(this->position[1] - factor*size[1]) + ", 0.1>, ";
-
-		s += "< " + std::to_string(this->position[0] - factor*size[0]) + ", ";
-		s += 		std::to_string(this->position[1] + factor*size[1]) + ", 0.1>, ";
-
-		s += "< " + std::to_string(this->position[0] + factor*size[0]) + ", ";
-		s += 		std::to_string(this->position[1] + factor*size[1]) + ", 0.1>, ";
-
-		s += "< " + std::to_string(this->position[0] + factor*size[0]) + ", ";
-		s += 		std::to_string(this->position[1] - factor*size[1]) + ", 0.1> ";
-
-		s += "\n    texture { pigment { color Red } }\n  }\n";
+	s += "  box { < ";
+	for(unsigned short i=0; i<3; i++){
+		s += std::to_string(-this->size[i]/2);
+		if (i<2)
+			s+= ", ";
 	}
-	else if (this->dimension==3){
-		s += "  box { < ";
-		for(unsigned char i=0; i<this->dimension; i++){
-			s += std::to_string(-this->size[i]/2);
-			if (i<this->dimension-1)
-				s+= ", ";
-		}
-		s += ">, <";
-		for(unsigned char i=0; i<this->dimension; i++){
-			s += std::to_string(this->size[i]/2);
-			if (i<this->dimension-1)
-				s+= ", ";
-		}
-		s += ">\n";
-		s += "    matrix < \n    ";
-		for (unsigned char i=0; i<this->dimension; i++){
-			for (unsigned char j=0; j<this->dimension; j++){
-				s += std::to_string(this->orientation(i, j));
-				if (j<this->dimension-1)
-					s+= ", ";
-			}
-			s+= ",\n    ";
-		}
-
-		for(unsigned char i=0; i<this->dimension; i++){
-			s += std::to_string(this->position[i]);
-			if (i<this->dimension-1)
-				s+= ", ";
-		}
-		s += "\n    >\n";
-		s += "    texture { pigment { color Red } }\n  }\n";
+	s += ">, <";
+	for(unsigned short i=0; i<3; i++){
+		s += std::to_string(this->size[i]/2);
+		if (i<2)
+			s+= ", ";
 	}
+	s += ">\n";
+	s += "    matrix < \n    ";
+	for (unsigned short i=0; i<3; i++){
+		for (unsigned short j=0; j<3; j++){
+			s += std::to_string(this->orientation(i, j));
+			if (j<2)
+				s+= ", ";
+		}
+		s+= ",\n    ";
+	}
+	for(unsigned short i=0; i<3; i++){
+		s += std::to_string(this->position[i]);
+		if (i<2)
+			s+= ", ";
+	}
+	s += "\n    >\n";
+	s += "    texture { pigment { color Red } }\n  }\n";
 	return s;
 }
 
@@ -672,10 +650,10 @@ std::string Cuboid::toWolfram() const
 
 void Cuboid::store(std::ostream &f) const
 {
-	Shape::store(f);
+	Shape<3>::store(f);
 	double d;
-	for (unsigned char i=0; i<this->dimension; i++){
-		for (unsigned char j=0; j<this->dimension; j++){
+	for (unsigned short i=0; i<3; i++){
+		for (unsigned short j=0; j<3; j++){
 			d = this->orientation(i, j);
 			f.write((char *)(&d), sizeof(double));
 		}
@@ -684,10 +662,10 @@ void Cuboid::store(std::ostream &f) const
 
 void Cuboid::restore(std::istream &f)
 {
-	Shape::restore(f);
+	Shape<3>::restore(f);
 	double d;
-	for (unsigned char i=0; i<this->dimension; i++){
-		for (unsigned char j=0; j<this->dimension; j++){
+	for (unsigned short i=0; i<3; i++){
+		for (unsigned short j=0; j<3; j++){
 			f.read((char *)&d, sizeof(double));
 			this->orientation(i, j) = d;
 		}

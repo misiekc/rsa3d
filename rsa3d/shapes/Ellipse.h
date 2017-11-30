@@ -12,7 +12,7 @@
 #include "../RND.h"
 #include "../BoundaryConditions.h"
 
-class Ellipse: public Shape {
+class Ellipse: public Shape<2> {
 private:
 	static double longSemiAxis;
 	static double shortSemiAxis;
@@ -36,9 +36,9 @@ public:
 	virtual ~Ellipse();
 
 	static void initClass(const std::string &args);
-	static Shape * create(RND *rnd);
+	static Shape<2> * create(RND *rnd);
 
-	int overlap(BoundaryConditions *bc, Shape *s);
+	int overlap(BoundaryConditions *bc, Shape<2> *s);
 	double getVolume();
 	int pointInside(BoundaryConditions *bc, double* da);
 	int pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo);

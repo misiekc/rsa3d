@@ -19,7 +19,7 @@ void Ellipse::calculateU(){
 	this->uT[0] = sin(this->orientation); this->uT[1] =  cos(this->orientation);
 }
 
-Ellipse::Ellipse() : Shape(2){
+Ellipse::Ellipse() : Shape<2>(){
 	this->a = Ellipse::longSemiAxis;
 	this->b = Ellipse::shortSemiAxis;
 	this->orientation = 0.0;
@@ -48,7 +48,7 @@ void Ellipse::initClass(const std::string &args){
 	Ellipse::voxelSize = 1.4*shortSemiAxis;
 }
 
-Shape * Ellipse::create(RND *rnd){
+Shape<2> * Ellipse::create(RND *rnd){
 	Ellipse *el = new Ellipse();
 	el->a = Ellipse::longSemiAxis;
 	el->b = Ellipse::shortSemiAxis;
