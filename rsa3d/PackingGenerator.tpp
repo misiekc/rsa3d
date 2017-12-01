@@ -93,9 +93,9 @@ void PackingGenerator<DIMENSION>::createPacking(){
 
 
 	if(params->boundaryConditions.compare("free")==0)
-		this->surface = new NBoxFBC(this->params->dimension, this->params->surfaceSize, s->getNeighbourListCellSize(), s->getVoxelSize());
+		this->surface = new NBoxFBC(DIMENSION, this->params->surfaceSize, s->getNeighbourListCellSize(), s->getVoxelSize());
 	else
-		this->surface = new NBoxPBC(this->params->dimension, this->params->surfaceSize, s->getNeighbourListCellSize(), s->getVoxelSize());
+		this->surface = new NBoxPBC(DIMENSION, this->params->surfaceSize, s->getNeighbourListCellSize(), s->getVoxelSize());
 
 	double dt = s->getVolume() / this->surface->getArea();
 	delete s;

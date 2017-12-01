@@ -95,14 +95,14 @@ void Analyzer::calculateOrderParameters(double *result, Cuboid *c1, Cuboid *c2){
 }
 
 void Analyzer::analyzeOrder(std::vector<Shape<RSA_DIMENSION> *> *packing, Plot **order){
-	double *posi, *posj, *da = new double[this->params->dimension];
+	double *posi, *posj, da[RSA_DIMENSION];
 	double orderParameters[5];
 	for(uint i=0; i<packing->size(); i++){
 		posi = (*packing)[i]->getPosition();
 		for(uint j=i+1; j<packing->size(); j++){
 			posj = (*packing)[j]->getPosition();
 			double dist = 0.0;
-			for(unsigned char k=0; k<this->params->dimension; k++){
+			for(unsigned short k=0; k<RSA_DIMENSION; k++){
 				da[k] = fabs(posi[k] - posj[k]);
 				if (da[k]>0.5*this->params->surfaceSize)
 					da[k] = this->params->surfaceSize - da[k];
@@ -111,24 +111,12 @@ void Analyzer::analyzeOrder(std::vector<Shape<RSA_DIMENSION> *> *packing, Plot *
 			dist = sqrt(dist);
 			if (dist > order[0]->getMax())
 				continue;
-//			if(dist < 1.05)
-//				std::cout << "(" << i << ", " << j << "): " << dist;
 			this->calculateOrderParameters(orderParameters, (Cuboid *)((*packing)[i]), (Cuboid *)((*packing)[j]) );
 			for(ushort k = 0; k<5; k++){
 				order[k]->add(dist, orderParameters[k]);
-//				if (dist < 1.05)
-//					std::cout << "\t" << orderParameters[k];
 			}
-//			if(dist < 1.05)
-//				std::cout << std::endl;
-//			if (dist < 1.05 && i==1096 && j==3162){
-//				std::cout << (*packing)[i]->toPovray() << std::endl;
-//				std::cout << (*packing)[j]->toPovray() << std::endl;
-
-//			}
 		}
 	}
-	delete[] da;
 }
 
 void Analyzer::analyzePacking(std::vector<Shape<RSA_DIMENSION> *> *packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor){
@@ -149,13 +137,13 @@ void Analyzer::analyzePacking(std::vector<Shape<RSA_DIMENSION> *> *packing, LogP
 	if (nvt != NULL)
 		nvt->addBetween(lastt, nvt->getMax()+1.0, packing->size());
 	if (corr!=NULL){
-		double *posi, *posj, *da = new double[this->params->dimension];
+		double *posi, *posj, da[RSA_DIMENSION];
 		for(uint i=0; i<packing->size(); i++){
 			posi = (*packing)[i]->getPosition();
 			for(uint j=i+1; j<packing->size(); j++){
 				posj = (*packing)[j]->getPosition();
 				double dist = 0.0;
-				for(unsigned char k=0; k<this->params->dimension; k++){
+				for(unsigned short k=0; k<RSA_DIMENSION; k++){
 					da[k] = fabs(posi[k] - posj[k]);
 					if (da[k]>0.5*this->params->surfaceSize)
 						da[k] = this->params->surfaceSize - da[k];
@@ -164,7 +152,6 @@ void Analyzer::analyzePacking(std::vector<Shape<RSA_DIMENSION> *> *packing, LogP
 				corr->add(sqrt(dist), 1.0);
 			}
 		}
-		delete[] da;
 	}
 }
 
@@ -254,9 +241,9 @@ void Analyzer::printCorrelations(Plot& correlations, std::string filename, int c
 
 	double r = 0.0, volume, expectedNumberOfParticles, packingVolume;
 
-	if (this->params->dimension==2)
+	if (RSA_DIMENSION==2)
 		packingVolume = M_PI * pow(correlations.getMax(), 2.0);
-	else if (this->params->dimension==3)
+	else if (RSA_DIMENSION==3)
 		packingVolume = 4.0/3.0 * M_PI * pow(correlations.getMax(), 3.0);
 	else
 		return;
@@ -268,15 +255,15 @@ void Analyzer::printCorrelations(Plot& correlations, std::string filename, int c
 	volume = 0.0;
 	for (int i = 0; i < correlations.size()-1; i++) {
 		if (i>0){
-			if (this->params->dimension==2)
+			if (RSA_DIMENSION==2)
 				volume = -M_PI * r*r;
-			else if (this->params->dimension==3)
+			else if (RSA_DIMENSION==3)
 				volume = -4.0/3.0* M_PI * r*r*r;
 		}
 		r = 0.5*(correlationPoints[i][0]+correlationPoints[i+1][0]);
-		if (this->params->dimension==2)
+		if (RSA_DIMENSION==2)
 			volume += M_PI * r*r;
-		else if (this->params->dimension==3)
+		else if (RSA_DIMENSION==3)
 			volume += 4.0/3.0* M_PI * r*r*r;
 
 		expectedNumberOfParticles = totalPoints * volume / packingVolume;
@@ -330,7 +317,7 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 
 	double n = 0.0, n2 = 0.0;
 	int counter = 0;
-	double packingSize = pow(params->surfaceSize, params->dimension);
+	double packingSize = pow(params->surfaceSize, RSA_DIMENSION);
 	DIR *dir = opendir(sdir);
 	std::string dirname(sdir);
 	while ((de = readdir(dir)) != NULL){

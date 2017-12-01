@@ -8,7 +8,7 @@
 #ifndef PARAMETERS_H_
 #define PARAMETERS_H_
 
-#define RSA_DIMENSION 2
+#define RSA_DIMENSION 3
 
 #include <climits>
 #include <limits>
@@ -18,7 +18,6 @@
 class Parameters {
 
 public:
-	int dimension = 2;
 	int maxTriesWithoutSuccess = std::numeric_limits<int>::max();
 	int maxVoxels = 100000000;
 	double minDx = 0.0;

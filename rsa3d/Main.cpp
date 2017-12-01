@@ -56,7 +56,7 @@ int simulate(Parameters *params) {
 	PackingGenerator<RSA_DIMENSION> *pg;
 	char buf[20];
 	int pid = 0;
-	std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->dimension));
+	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_DIMENSION));
 	std::string size(buf);
 
 	std::string sFile = "packing_" + params->particleType + "_"
@@ -104,7 +104,7 @@ void boundaries(Parameters *params) {
 	char buf[20];
 	unsigned long counter = 0UL, max = 200000000UL;
 	int seed = 0;
-	std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->dimension));
+	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_DIMENSION));
 	std::string size(buf);
 	std::string filename = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + ".dat";
 	std::ofstream file(filename);
@@ -280,7 +280,7 @@ int main(int argc, char **argv) {
 		an.analyzePackingsInDirectory(argv[3], 0.01, 1.0);
 	} else if (strcmp(argv[1], "povray")==0) {
 		std::string file(argv[3]);
-		std::vector<Shape<RSA_DIMENSION> *> *packing = fromFile(params.dimension, file);
+		std::vector<Shape<RSA_DIMENSION> *> *packing = fromFile(RSA_DIMENSION, file);
 		PackingGenerator<RSA_DIMENSION>::toPovray(packing, params.surfaceSize, NULL, file + ".pov");
 		delete packing;
 	}
