@@ -44,18 +44,12 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/Main \
        rsa3d/OrientedFace \
        rsa3d/Parameters \
-       rsa3d/Positioned \
        rsa3d/RND \
-       rsa3d/Shape \
        rsa3d/ShapeFactory \
        rsa3d/Surface \
        rsa3d/Utils \
        rsa3d/analizator/Analyzer \
-       rsa3d/shapes/ConvexPolyhedron \
        rsa3d/shapes/Cuboid \
-       rsa3d/shapes/Ellipse \
-       rsa3d/shapes/OrientedCuboid \
-       rsa3d/shapes/Sphere \
        rsa3d/surfaces/NBoxFBC \
        rsa3d/surfaces/NBoxPBC \
        rsa3d/tests/BallFactory \

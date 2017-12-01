@@ -24,14 +24,14 @@ namespace
     struct SingleTestResult
     {
         unsigned int overlapped = 0;
-        unsigned int nanos = 0;
+        long nanos = 0;
     };
     
     // Helper method. Performs single test of overlap algorithm (set from the outside)
     //----------------------------------------------------------------------------------------
     SingleTestResult test_single_alg(CuboidPairFactory * _factory, std::size_t _pairs_to_test)
     {
-        SingleTestResult result;
+        SingleTestResult result{};
         MockBC bc;
         system_clock::time_point time_before, time_after;
         nanoseconds dur;
@@ -67,7 +67,7 @@ namespace cube_speedtest
     //----------------------------------------------------------------------------------------
     Quantity Quantity::fromSamples(const std::vector<double> & _samples)
     {
-        if (_samples.size() == 0)
+        if (_samples.empty())
             return Quantity();
         else if (_samples.size() == 1)
             return Quantity(_samples[0], 0);
@@ -103,7 +103,7 @@ namespace cube_speedtest
     void warmUp(CuboidPairFactory * _factory)
     {
         std::cout << "Warm up test..." << std::endl;
-        test_single_alg(_factory, 500000);
+        test_single_alg(_factory, 2000000);
     }
 
 
