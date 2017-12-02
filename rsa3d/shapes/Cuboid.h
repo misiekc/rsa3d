@@ -61,7 +61,8 @@ public:
     ~Cuboid();
 
 	static void initClass(const std::string &args);
-	static Shape<3> * create(RND *rnd);
+	static Shape<3> * create2D(RND *rnd);
+	static Shape<3> * create3D(RND *rnd);
 	static void setOverlapStrategy(OverlapStrategy strategy);
 	static OverlapStrategy getOverlapStrategy();
 

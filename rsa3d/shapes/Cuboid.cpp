@@ -150,17 +150,25 @@ void Cuboid::initClass(const std::string &args)
 // Method creating (dynamically alocated) cuboid with random orientation.
 // Used by ShapeFactory for shape generating
 //----------------------------------------------------------------------------
-Shape<3> * Cuboid::create(RND *rnd)
+Shape<3> * Cuboid::create3D(RND *rnd)
 {
     Cuboid * cuboid = new Cuboid(Matrix<3, 3>::rotation(
         rnd->nextValue() * 2 * M_PI,
         std::asin(rnd->nextValue() * 2 - 1),
         rnd->nextValue() * 2 * M_PI));
-        
-#ifdef CUBOID_DEBUG
-    std::cout << "Creating Cuboid:" << std::endl;
-    std::cout << cuboid->orientation;
-#endif
+
+    return cuboid;
+}
+
+// Method creating (dynamically alocated) cuboid with random orientation with
+// 2 degrees of freedom
+//----------------------------------------------------------------------------
+Shape<3> * Cuboid::create2D(RND *rnd)
+{
+    Cuboid * cuboid = new Cuboid(Matrix<3, 3>::rotation(
+        0,
+        std::asin(rnd->nextValue() * 2 - 1),
+        rnd->nextValue() * 2 * M_PI));
 
     return cuboid;
 }

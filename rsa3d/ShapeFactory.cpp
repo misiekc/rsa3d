@@ -23,8 +23,11 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
 #if RSA_DIMENSION == 3
 	else if (sClass.compare("Cuboid")==0){
 		Cuboid::initClass(attr);
-		ShapeFactory::createShape = Cuboid::create;
+		ShapeFactory::createShape = Cuboid::create3D;
 
+	} else if (sClass.compare("Cuboid2D")==0){
+		Cuboid::initClass(attr);
+		ShapeFactory::createShape = Cuboid::create2D;
 	}
 #endif
 
