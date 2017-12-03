@@ -8,7 +8,6 @@
 #include "../ShapeFactory.h"
 #include <sstream>
 
-#define _USE_MATH_DEFINES
 #include <cmath>
 
 typedef CuboidPairFactory::CuboidPair pair;

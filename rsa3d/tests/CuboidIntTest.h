@@ -10,7 +10,8 @@
     
 #include <ostream> 
 #include <vector>  
-#include "../shapes/Cuboid.h" 
+#include "../shapes/Cuboid.h"
+#include "../shapes/cube_strategies/OverlapStrategy.h"
 
 namespace cube_inttest
 {

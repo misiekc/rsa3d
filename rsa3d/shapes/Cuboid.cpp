@@ -5,53 +5,9 @@
 //----------------------------------------------------------------------------
 
 #include "Cuboid.h"
-#include "../Vector.h"
-#include "../Intersection.h"
+#include "cube_strategies/MineOverlap.h"
 
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <stdexcept>
-#include <numeric>
-#include <functional>
-#include <algorithm>
 #include <iterator>
-#include <limits>
-
-#define _USE_MATH_DEFINES
-#include <cmath>
-
-
-// Define this to disable edge-intersection fix in Cuboid::OverlapStrategy::MINE
-//#define DISABLE_OVERLAP_FIX
-
-namespace 
-{
-    // Vertex recognition helper. P states positive, N - negative. First position
-    // corresponds to positive/negative X, second for Y, etc.
-    enum VERTEX {
-        PPP = 0,
-        NPP,
-        PNP,
-        PPN,
-        PNN,
-        NPN,
-        NNP,
-        NNN,
-        SIZE
-    };
-
-    // Coord recognition helper
-    enum COORD {
-        X = 0,
-        Y,
-        Z
-    };
-
-    // Helper arrays
-    Vector<3>       cuboid1_tris[12][3];
-    Vector<3>       cuboid2_tris[12][3];
-}
 
 
 // Static atributes declaration
@@ -64,12 +20,7 @@ double          Cuboid::neighbourListCellSize;
 double          Cuboid::voxelSize;
 double          Cuboid::minDimension;
 unsigned short 	Cuboid::staticDimension = 3;
-Vector<3>       Cuboid::relativeVertices[8];
-
-
-inline bool checkSegmentFace(double plane_pos, double bound1, double bound2, 
-                             double p1p, double p1b1, double p1b2,
-                             double p2p, double p2b1, double p2b2);
+Vector<3>       Cuboid::relativeVertices[VERTEX::NUM_OF];
 
 
 OverlapStrategy * Cuboid::strategy = new MineOverlap;
@@ -81,13 +32,6 @@ OverlapStrategy * Cuboid::strategy = new MineOverlap;
 Cuboid::Cuboid(const Matrix<3, 3> & orientation) : Shape<3>(), orientation(orientation)
 {
     
-}
-
-// Destructor (does nothing)
-//----------------------------------------------------------------------------
-Cuboid::~Cuboid()
-{
-
 }
 
 // Static method for class initialization
@@ -228,7 +172,7 @@ int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
 
 // Checks whether given vertex (in this coordinates) lies in Cuboid
 //----------------------------------------------------------------------------
-bool Cuboid::checkPoint(const Vector<3> & vertex)
+bool Cuboid::pointInsideCuboid(const Vector<3> &vertex)
 {
     for (unsigned short i = 0; i < 3; i++)
         if (std::abs(vertex[i]) > this->size[i] / 2)
@@ -389,9 +333,9 @@ void Cuboid::restore(std::istream &f)
 	}
 }
 
-void Cuboid::obtainVertices(Vector<3> (&vertices)[8], const Vector<3> &translation) {
+void Cuboid::obtainVertices(Vector<3> (&vertices)[VERTEX::NUM_OF], const Vector<3> &translation) {
     Vector<3> pos(this->position);
-    for (std::size_t i = 0; i < 8; i++)
+    for (std::size_t i = 0; i < VERTEX::NUM_OF; i++)
         vertices[i] = pos + translation + orientation * Cuboid::getRelativeVertex(i);
 }
 
@@ -399,231 +343,3 @@ const Vector<3>  Cuboid::getRelativeVertex(std::size_t index) {
     return relativeVertices[index];
 }
 
-bool MineOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) {
-    // Prepare matrices of translations for operations on shapes;
-    Vector<3> thisTranslation(cube1->getPosition());
-    Vector<3> sTranslation(cube2->getPosition());
-    double transArray[3];
-    sTranslation += Vector<3>(bc->getTranslation(transArray, cube1->getPosition(), cube2->getPosition()));
-    Matrix<3, 3> backwards_rot = cube1->getOrientation().transpose();
-
-    // Transform s coordinates to this coordinate system
-    Matrix<3, 3> new_orientation = backwards_rot * cube2->getOrientation();
-    sTranslation = backwards_rot * (sTranslation - thisTranslation);
-
-    Vector<3> v_trans[VERTEX::SIZE];    // Calculated vertices coordinates
-    Vector<3> v_trans_bis[VERTEX::SIZE];    // Calculated vertices coordinates in swapped cuboid order
-
-    double size[3];
-    cube1->getSize(size);
-
-    // Check whether vertices of s lie in this. TO OPTIMIZE
-    for (size_t i = 0; i < 8; i++) {
-        v_trans[i] = new_orientation * Cuboid::getRelativeVertex(i) + sTranslation;
-        if (cube1->checkPoint(v_trans[i]))
-            return true;
-    }
-
-    // Transform this coordinates to s coordinate system
-    new_orientation = new_orientation.transpose();
-    sTranslation = -(new_orientation * sTranslation);
-
-    // Check whether vertices of this lie in s
-    for (size_t i = 0; i < 8; i++) {
-        v_trans_bis[i] = new_orientation * Cuboid::getRelativeVertex(i) + sTranslation;
-        if (cube2->checkPoint(v_trans_bis[i]))
-            return true;
-    }
-
-    // Check whether edges of s lie in this. TO OPTIMIZE
-    if (checkSegment(cube1, v_trans[VERTEX::PPP], v_trans[VERTEX::PPN]) || checkSegment(cube1, v_trans[VERTEX::PPN], v_trans[VERTEX::PNN]) ||
-        checkSegment(cube1, v_trans[VERTEX::PNN], v_trans[VERTEX::PNP]) || checkSegment(cube1, v_trans[VERTEX::PNP], v_trans[VERTEX::PPP]) ||
-        checkSegment(cube1, v_trans[VERTEX::NNN], v_trans[VERTEX::NNP]) || checkSegment(cube1, v_trans[VERTEX::NNP], v_trans[VERTEX::NPP]) ||
-        checkSegment(cube1, v_trans[VERTEX::NPP], v_trans[VERTEX::NPN]) || checkSegment(cube1, v_trans[VERTEX::NPN], v_trans[VERTEX::NNN]) ||
-        checkSegment(cube1, v_trans[VERTEX::PPP], v_trans[VERTEX::NPP]) || checkSegment(cube1, v_trans[VERTEX::PPN], v_trans[VERTEX::NPN]) ||
-        checkSegment(cube1, v_trans[VERTEX::PNN], v_trans[VERTEX::NNN]) || checkSegment(cube1, v_trans[VERTEX::PNP], v_trans[VERTEX::NNP]))
-    {
-        return true;
-    }
-
-#ifndef DISABLE_OVERLAP_FIX
-    // Check whether edges of this lie in s. TO OPTIMIZE
-    if (checkSegment(cube2, v_trans_bis[VERTEX::PPP], v_trans_bis[VERTEX::PPN]) || checkSegment(cube2, v_trans_bis[VERTEX::PPN], v_trans_bis[VERTEX::PNN]) ||
-        checkSegment(cube2, v_trans_bis[VERTEX::PNN], v_trans_bis[VERTEX::PNP]) || checkSegment(cube2, v_trans_bis[VERTEX::PNP], v_trans_bis[VERTEX::PPP]) ||
-        checkSegment(cube2, v_trans_bis[VERTEX::NNN], v_trans_bis[VERTEX::NNP]) || checkSegment(cube2, v_trans_bis[VERTEX::NNP], v_trans_bis[VERTEX::NPP]) ||
-        checkSegment(cube2, v_trans_bis[VERTEX::NPP], v_trans_bis[VERTEX::NPN]) || checkSegment(cube2, v_trans_bis[VERTEX::NPN], v_trans_bis[VERTEX::NNN]) ||
-        checkSegment(cube2, v_trans_bis[VERTEX::PPP], v_trans_bis[VERTEX::NPP]) || checkSegment(cube2, v_trans_bis[VERTEX::PPN], v_trans_bis[VERTEX::NPN]) ||
-        checkSegment(cube2, v_trans_bis[VERTEX::PNN], v_trans_bis[VERTEX::NNN]) || checkSegment(cube2, v_trans_bis[VERTEX::PNP], v_trans_bis[VERTEX::NNP]))
-    {
-        return true;
-    }
-#endif
-
-    return false;
-}
-
-// Checks whether a segment determined by point1 and point2 intersects with
-// Cuboid
-//----------------------------------------------------------------------------
-bool MineOverlap::checkSegment(Cuboid *cube, const Vector<3> & point1, const Vector<3> & point2)
-{
-    double size[3];
-    cube->getSize(size);
-    double hsize_x = size[COORD::X] / 2;
-    double hsize_y = size[COORD::Y] / 2;
-    double hsize_z = size[COORD::Z] / 2;
-
-    // Check intersections with all faces
-    return checkSegmentFace( hsize_x, hsize_y, hsize_z, point1[COORD::X], point1[COORD::Y], point1[COORD::Z], point2[COORD::X], point2[COORD::Y], point2[COORD::Z]) ||
-           checkSegmentFace(-hsize_x, hsize_y, hsize_z, point1[COORD::X], point1[COORD::Y], point1[COORD::Z], point2[COORD::X], point2[COORD::Y], point2[COORD::Z]) ||
-           checkSegmentFace( hsize_y, hsize_z, hsize_x, point1[COORD::Y], point1[COORD::Z], point1[COORD::X], point2[COORD::Y], point2[COORD::Z], point2[COORD::X]) ||
-           checkSegmentFace(-hsize_y, hsize_z, hsize_x, point1[COORD::Y], point1[COORD::Z], point1[COORD::X], point2[COORD::Y], point2[COORD::Z], point2[COORD::X]) ||
-           checkSegmentFace( hsize_z, hsize_x, hsize_y, point1[COORD::Z], point1[COORD::X], point1[COORD::Y], point2[COORD::Z], point2[COORD::X], point2[COORD::Y]) ||
-           checkSegmentFace(-hsize_z, hsize_x, hsize_y, point1[COORD::Z], point1[COORD::X], point1[COORD::Y], point2[COORD::Z], point2[COORD::X], point2[COORD::Y]);
-}
-
-std::string MineOverlap::getName() {
-    return "MineOverlap";
-}
-
-// Checks whether given segment intersects with axis-oriented rectangular face
-// with middle on the perpendicular axis (OP)
-//----------------------------------------------------------------------------
-// plane_pos - face-determined plane coordinate on OP
-// bound1 - positive face edge coordinate on the 1st axis perpendicular to OP (OB1)
-// bound2 - positive face edge coordinate on the 2nd axis perpendicular to OP (OB2)
-// p1p, p1b1, p1b2 - 1st segment point coordinates respectively on OP, OB1, OB2
-// p2p, p2b1, p2b2 - 2nd segment point coordinates respectively on OP, OB1, OB2
-//----------------------------------------------------------------------------
-inline bool checkSegmentFace(double plane_pos, double bound1, double bound2,
-                             double p1p, double p1b1, double p1b2,
-                             double p2p, double p2b1, double p2b2)
-{
-    // Check weather a plane determined by face lies between segment points
-    if ((plane_pos > p1p && plane_pos > p2p) || (plane_pos < p1p && plane_pos < p2p))
-        return false;
-
-    // Intersect plane's face with segment's line
-    double b1i = ((p1b1 - p2b1) * plane_pos + p1p * p2b1 - p2p * p1b1) / (p1p - p2p);
-    double b2i = ((p1b2 - p2b2) * plane_pos + p1p * p2b2 - p2p * p1b2) / (p1p - p2p);
-
-    // Check whether intersection point lies on face
-    if (std::abs(b1i) > bound1 || std::abs(b2i) > bound2)
-        return false;
-    else
-        return true;
-}
-
-bool SATOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) {
-    double trans_arr[3];
-    Vector<3> translation(bc->getTranslation(trans_arr, cube1->getPosition(), cube2->getPosition()));
-    Matrix<3, 3> orientation1 = cube1->getOrientation();
-    Matrix<3, 3> orientation2 = cube2->getOrientation();
-    Vector<3> vertices1[8];
-    Vector<3> vertices2[8];
-
-    double size[3];
-    Cuboid::getSize(size);
-
-    // Calculate axes orthogonal to separating plane
-    Vector<3> axes1[] = {
-            orientation1 * Vector<3>{{1, 0, 0}},
-            orientation1 * Vector<3>{{0, 1, 0}},
-            orientation1 * Vector<3>{{0, 0, 1}}
-    };
-    Vector<3> axes2[] = {
-            orientation2 * Vector<3>{{1, 0, 0}},
-            orientation2 * Vector<3>{{0, 1, 0}},
-            orientation2 * Vector<3>{{0, 0, 1}}
-    };
-
-    cube1->obtainVertices(vertices1, Vector<3>());
-    cube2->obtainVertices(vertices2, translation);
-
-    // Check all possible separating axes - edge lines ...
-    for (int i = 0; i < 3; i++)
-        if (!this->checkSeparatingAxis (axes1[i], vertices1, vertices2))
-            return false;
-    for (int i = 0; i < 3; i++)
-        if (!this->checkSeparatingAxis (axes2[i], vertices1, vertices2))
-            return false;
-    // ... and their cross products
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-            if (!this->checkSeparatingAxis (axes1[i] ^ axes2[j], vertices1, vertices2))
-                return false;
-    return true;
-}
-
-// Checks whether this and _second projections on axis _axis overlap. If so,
-// returns true
-//----------------------------------------------------------------------------
-bool SATOverlap::checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Vector<3> * _vert2) const
-{
-    interval this_int = this->getProjection(_axis, _vert1);
-    interval second_int = this->getProjection(_axis, _vert2);
-
-    return std::min(this_int.second, second_int.second) >= std::max(this_int.first, second_int.first);
-}
-
-// Projects polyhedron _polyh on axis _axis and returns interval given by
-// the projection
-//----------------------------------------------------------------------------
-SATOverlap::interval SATOverlap::getProjection(const Vector<3> & _axis, Vector<3> * _vert) const
-{
-    interval proj_int = {std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
-
-    // Find enpoints of polyhedron projection (multiplied by unknown but const for _axit factor)
-    double proj;
-    for (std::size_t i = 0; i < 8; i++)
-    {
-        proj = _vert[i] * _axis;
-        if (proj < proj_int.first)
-            proj_int.first = proj;
-        if (proj > proj_int.second)
-            proj_int.second = proj;
-    }
-    return proj_int;
-}
-
-
-std::string SATOverlap::getName() {
-    return "SATOverlap";
-}
-
-bool TriTriOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) {
-    double trans_arr[3];
-    Vector<3> translation(bc->getTranslation(trans_arr, cube1->getPosition(), cube2->getPosition()));
-
-    obtainTris(cube1, cuboid1_tris, Vector<3>());
-    obtainTris(cube2, cuboid2_tris, translation);
-
-    return intersection::polyh_polyh(cuboid1_tris, 12, cuboid2_tris, 12);
-}
-
-// Helper method. Obtains and saves triangles from cuboid's faces
-//--------------------------------------------------------------------------------------------
-void TriTriOverlap::obtainTris(Cuboid * cube, Vector<3> (&arr)[12][3], const Vector<3> & translation)
-{
-    double size[3];
-    cube->getSize(size);
-    Vector<3> vert[8];
-    cube->obtainVertices(vert, translation);
-
-    arr[0][0] = vert[0];    arr[0][1] = vert[1];    arr[0][2] = vert[2];
-    arr[1][0] = vert[2];    arr[1][1] = vert[1];    arr[1][2] = vert[6];
-    arr[2][0] = vert[0];    arr[2][1] = vert[2];    arr[2][2] = vert[3];
-    arr[3][0] = vert[3];    arr[3][1] = vert[2];    arr[3][2] = vert[4];
-    arr[4][0] = vert[7];    arr[4][1] = vert[2];    arr[4][2] = vert[6];
-    arr[5][0] = vert[7];    arr[5][1] = vert[4];    arr[5][2] = vert[2];
-    arr[6][0] = vert[1];    arr[6][1] = vert[0];    arr[6][2] = vert[3];
-    arr[7][0] = vert[5];    arr[7][1] = vert[1];    arr[7][2] = vert[3];
-    arr[8][0] = vert[7];    arr[8][1] = vert[1];    arr[8][2] = vert[5];
-    arr[9][0] = vert[7];    arr[9][1] = vert[6];    arr[9][2] = vert[1];
-    arr[10][0] = vert[7];   arr[10][1] = vert[5];   arr[10][2] = vert[3];
-    arr[11][0] = vert[7];   arr[11][1] = vert[3];   arr[11][2] = vert[4];
-}
-
-std::string TriTriOverlap::getName() {
-    return "TriTriOverlap";
-}

@@ -14,16 +14,11 @@
 #include "../Matrix.h"
 #include "../Vector.h"
 
-#include <utility>
-
 
 class OverlapStrategy;
 
 class Cuboid : public Shape<3>
 {
-public:
-
-
 private:
     static double           volume;
     static double           *auxDoubleArray;        // Auxiliary double array of dimension size
@@ -41,9 +36,30 @@ protected:
 
 public:
 
+    // Vertex recognition helper. P states positive, N - negative. First position
+    // corresponds to positive/negative X, second for Y, etc.
+    enum VERTEX {
+        PPP = 0,
+        NPP,
+        PNP,
+        PPN,
+        PNN,
+        NPN,
+        NNP,
+        NNN,
+        NUM_OF
+    };
+
+    // Coord recognition helper
+    enum COORD {
+        X = 0,
+        Y,
+        Z
+    };
+
     // Implicit copy ctor and copy assignment operator - trivial destructor
     explicit Cuboid(const Matrix<3, 3> & rotation);
-    ~Cuboid() override;
+    ~Cuboid() override = default;
 
 	static void initClass(const std::string &args);
 	static Shape<3> * create2D(RND *rnd);
@@ -58,7 +74,7 @@ public:
     double getVolume() override;
     int pointInside(BoundaryConditions *bc, double* da) override;
 
-    bool checkPoint(const Vector<3> & vertex);
+    bool pointInsideCuboid(const Vector<3> &vertex);
     void obtainVertices(Vector<3> (&vertices)[8], const Vector<3> &translation);
     
     Matrix<3, 3> getOrientation() const;
@@ -69,45 +85,5 @@ public:
 	void restore(std::istream &f) override;
 };
 
-
-// Overlap stategies
-class OverlapStrategy {
-public:
-    virtual bool overlap(Cuboid * cube1, Cuboid * cube2, BoundaryConditions *bc) = 0;
-    virtual std::string getName() = 0;
-};
-
-class MineOverlap : public OverlapStrategy {
-private:
-    bool checkSegment(Cuboid *cube, const Vector<3> & point1, const Vector<3> & point2);
-
-public:
-    bool overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) override;
-    std::string getName() override;
-};
-
-class SATOverlap : public OverlapStrategy {
-private:
-    typedef std::pair<double, double>   interval;
-
-    bool checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Vector<3> * _vert2) const;
-    interval getProjection(const Vector<3> & _axis, Vector<3> * _vert) const;
-
-public:
-    bool overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) override;
-    std::string getName() override;
-
-    void obtainVertices(const Vector<3> *vertices, const double *size, const Vector<3> &position,
-                        const Matrix<3, 3> &orientation) const;
-};
-
-class TriTriOverlap : public OverlapStrategy {
-private:
-    void obtainTris(Cuboid * cube, Vector<3> (&arr)[12][3], const Vector<3> & translation);
-
-public:
-    bool overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) override;
-    std::string getName() override;
-};
 
 #endif      // _CUBOID_H

@@ -50,6 +50,9 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/Utils \
        rsa3d/analizator/Analyzer \
        rsa3d/shapes/Cuboid \
+       rsa3d/shapes/cube_strategies/MineOverlap \
+       rsa3d/shapes/cube_strategies/SATOverlap \
+       rsa3d/shapes/cube_strategies/TriTriOverlap \
        rsa3d/surfaces/NBoxFBC \
        rsa3d/surfaces/NBoxPBC \
        rsa3d/tests/BallFactory \
@@ -70,6 +73,7 @@ OBJS_STAT = statistics/ASFRegression \
 # are created automaticly, they don't have to be listed explicitly)
 SUBDIRS = rsa3d/analizator/ \
           rsa3d/shapes/ \
+          rsa3d/shapes/cube_strategies \
           rsa3d/surfaces/ \
           rsa3d/tests/ \
           statistics/

@@ -11,14 +11,13 @@
 #include "tests/CuboidIntTest.h"
 #include "tests/CuboidPointInsideTest.h"
 #include "Config.h"
+#include "shapes/cube_strategies/SATOverlap.h"
+#include "shapes/cube_strategies/TriTriOverlap.h"
 
 #include <unistd.h>
 #include <sys/wait.h>
 #include <string.h>
-#include <fstream>
-#include <iostream>
 #include <iomanip>
-#include <cstdlib>
 #include <memory>
 
 

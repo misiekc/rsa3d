@@ -7,13 +7,12 @@
 #include <chrono>
 #include <stdexcept>
 #include <algorithm>
-#include <numeric>
-#include <cmath>
 #include <iostream>
 #include <iomanip>
 
 #include "CuboidSpeedTest.h"
 #include "MockBC.h"
+#include "../shapes/cube_strategies/MineOverlap.h"
 
 
 using namespace std::chrono;
@@ -35,11 +34,7 @@ namespace
         MockBC bc;
         system_clock::time_point time_before, time_after;
         nanoseconds dur;
-        std::string strategies[] = {
-            "mine test...    ",
-            "tri-tri test... ",
-            "SAT test...     "};
-        
+
         std::cout << std::setw(15) << std::left << Cuboid::getOverlapStrategy()->getName()
                   << " test... " << std::flush;
 
