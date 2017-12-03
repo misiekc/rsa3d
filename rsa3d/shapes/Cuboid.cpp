@@ -496,7 +496,7 @@ bool MineOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) 
     Matrix<3, 3> backwards_rot = cube1->getOrientation().transpose();
 
     // Transform s coordinates to this coordinate system
-    Matrix<3, 3> new_orientation = backwards_rot * cube1->getOrientation();
+    Matrix<3, 3> new_orientation = backwards_rot * cube2->getOrientation();
     sTranslation = backwards_rot * (sTranslation - thisTranslation);
 
     Vector<3> v_trans[V::SIZE];    // Calculated vertices coordinates

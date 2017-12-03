@@ -202,11 +202,11 @@ void cube_inttest_main(int argc, char ** argv)
     factory->setRadius(ball_radius);
     
     // Test SAT
-	MineOverlap satOverlap;
+	SATOverlap satOverlap;
     cube_inttest::Results results = cube_inttest::perform(factory, &satOverlap, max_tries);
     cube_inttest::print_results(results);
     std::cout << std::endl;
-    results.free_missed_pairs();
+    //results.free_missed_pairs();
     
     // Test TRI_TRI
     /*results = cube_inttest::perform(factory, Cuboid::OverlapStrategy::TRI_TRI, max_tries);
