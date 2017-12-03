@@ -206,12 +206,13 @@ void cube_inttest_main(int argc, char ** argv)
     cube_inttest::Results results = cube_inttest::perform(factory, &satOverlap, max_tries);
     cube_inttest::print_results(results);
     std::cout << std::endl;
-    //results.free_missed_pairs();
+    results.free_missed_pairs();
     
     // Test TRI_TRI
-    /*results = cube_inttest::perform(factory, Cuboid::OverlapStrategy::TRI_TRI, max_tries);
+    TriTriOverlap triTriOverlap;
+    results = cube_inttest::perform(factory, &triTriOverlap, max_tries);
     cube_inttest::print_results(results);
-    std::cout << std::endl;*/
+    std::cout << std::endl;
     
     // Dump missed test to file
     if (results.missed > 0) {

@@ -32,9 +32,6 @@ private:
     static OverlapStrategy  *strategy;
 
     int overlapTri(BoundaryConditions *bc, Shape<3> *s);
-    int overlapSAT(BoundaryConditions *bc, Shape<3> *s);
-    
-    void obtainTris(Vector<3> (&arr)[12][3], const Vector<3> & translation);
 
 protected:
     static unsigned short 	staticDimension;
@@ -94,6 +91,15 @@ private:
 
     bool checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Vector<3> * _vert2) const;
     interval getProjection(const Vector<3> & _axis, Vector<3> * _vert) const;
+
+public:
+    bool overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) override;
+    std::string getName() override;
+};
+
+class TriTriOverlap : public OverlapStrategy {
+private:
+    void obtainTris(Cuboid * cube, Vector<3> (&arr)[12][3], const Vector<3> & translation);
 
 public:
     bool overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) override;

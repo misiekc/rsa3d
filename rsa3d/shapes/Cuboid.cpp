@@ -190,79 +190,13 @@ OverlapStrategy * Cuboid::getOverlapStrategy()
 }
 
 
-// Helper method. Obtains and saves triangles from cuboid's faces
-//--------------------------------------------------------------------------------------------
-void Cuboid::obtainTris(Vector<3> (&arr)[12][3], const Vector<3> & translation)
-{
-    Vector<3> pos(this->getPosition()); 
-    Matrix<3, 3> orientation = this->getOrientation();   
-    Vector<3> vert[] = {
-        pos + translation + orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}},
-        pos + translation + orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}},
-        pos + translation + orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}},
-        pos + translation + orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}},
-        pos + translation + orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}},
-        pos + translation + orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}},
-        pos + translation + orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}},
-        pos + translation + orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} 
-    };
-    
-    arr[0][0] = vert[0];
-    arr[0][1] = vert[1];
-    arr[0][2] = vert[2];
-
-    arr[1][0] = vert[2];
-    arr[1][1] = vert[1];
-    arr[1][2] = vert[6];
-
-    arr[2][0] = vert[0];
-    arr[2][1] = vert[2];
-    arr[2][2] = vert[3];
-
-    arr[3][0] = vert[3];
-    arr[3][1] = vert[2];
-    arr[3][2] = vert[4];
-
-    arr[4][0] = vert[7];
-    arr[4][1] = vert[2];
-    arr[4][2] = vert[6];
-
-    arr[5][0] = vert[7];
-    arr[5][1] = vert[4];
-    arr[5][2] = vert[2];
-
-    arr[6][0] = vert[1];
-    arr[6][1] = vert[0];
-    arr[6][2] = vert[3];
-
-    arr[7][0] = vert[5];
-    arr[7][1] = vert[1];
-    arr[7][2] = vert[3];
-
-    arr[8][0] = vert[7];
-    arr[8][1] = vert[1];
-    arr[8][2] = vert[5];
-
-    arr[9][0] = vert[7];
-    arr[9][1] = vert[6];
-    arr[9][2] = vert[1];
-
-    arr[10][0] = vert[7];
-    arr[10][1] = vert[5];
-    arr[10][2] = vert[3];
-
-    arr[11][0] = vert[7];
-    arr[11][1] = vert[3];
-    arr[11][2] = vert[4];
-}
-
-
 // Returns neighbour list cell size determined during class initialization
 //----------------------------------------------------------------------------
 double Cuboid::getNeighbourListCellSize()
 {
     return Cuboid::neighbourListCellSize;
 }
+
 
 // Returns initial voxel size determined during class initialization
 //----------------------------------------------------------------------------
@@ -271,58 +205,13 @@ double Cuboid::getVoxelSize()
     return Cuboid::voxelSize;
 }
 
+
 // Checks whether there is an overlap between this and *s using chosen
 // stategy
 //----------------------------------------------------------------------------
 int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
 {
     return strategy->overlap(this, (Cuboid*)s, bc);
-}
-
-// Triangle overlap algorithm
-//----------------------------------------------------------------------------
-int Cuboid::overlapTri(BoundaryConditions *bc, Shape *s)
-{    
-    Cuboid * second = (Cuboid *)s;
-    double trans_arr[3];
-    Vector<3> translation(bc->getTranslation(trans_arr, this->position, second->position));
-
-    this->obtainTris(cuboid1_tris, Vector<3>());
-    second->obtainTris(cuboid2_tris, translation);
-    
-    return intersection::polyh_polyh(cuboid1_tris, 12, cuboid2_tris, 12);
-}
-
-// Checks whether this and _second projections on axis _axis overlap. If so,
-// returns true
-//----------------------------------------------------------------------------
-bool SATOverlap::checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Vector<3> * _vert2) const
-{
-    interval this_int = this->getProjection(_axis, _vert1);
-    interval second_int = this->getProjection(_axis, _vert2);
-    
-    return std::min(this_int.second, second_int.second) >= std::max(this_int.first, second_int.first);
-}
-
-
-// Projects polyhedron _polyh on axis _axis and returns interval given by
-// the projection
-//----------------------------------------------------------------------------
-SATOverlap::interval SATOverlap::getProjection(const Vector<3> & _axis, Vector<3> * _vert) const
-{
-    interval proj_int = {std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
-    
-    // Find enpoints of polyhedron projection (multiplied by unknown but const for _axit factor)
-    double proj;
-    for (std::size_t i = 0; i < 8; i++)
-    {
-        proj = _vert[i] * _axis;
-        if (proj < proj_int.first)
-            proj_int.first = proj;
-        if (proj > proj_int.second)
-            proj_int.second = proj; 
-    }
-    return proj_int;
 }
 
 
@@ -344,6 +233,7 @@ double Cuboid::getVolume()
     return Cuboid::volume;
 }
 
+
 // Checks whether the point with coordinates da lies inside excluded volume.
 // It is an interior of a set of point which distanse from
 //----------------------------------------------------------------------------
@@ -352,15 +242,15 @@ int Cuboid::pointInside(BoundaryConditions *bc, double* da)
     // Prepare matrices of translations for operations on the point
     Vector<3> cuboidTranslation(this->position);
     Vector<3> pointTranslation(da);
-    
+
     // Transform point coordinates to Cuboid coordinate system
     cuboidTranslation += Vector<3>(bc->getTranslation(auxDoubleArray, this->position, da));
     pointTranslation = this->orientation.transpose() * (pointTranslation - cuboidTranslation);
-    
+
     // Save absolute values of point coords
     for (unsigned short i = 0; i < 3; i++)
         auxDoubleArray[i] = std::abs(pointTranslation[i]);
-    
+
     // Map which coords lie in this and which lie in this + minDimension
     bool liesInSmaller[3];
     bool liesInBigger[3];
@@ -368,15 +258,15 @@ int Cuboid::pointInside(BoundaryConditions *bc, double* da)
         liesInSmaller[i] = (auxDoubleArray[i] <= this->size[i] / 2);
         liesInBigger[i] = (auxDoubleArray[i] <= this->size[i] / 2 + minDimension);
     }
-    
-    // Check optimistic cases - "lies in this" and "doesn't lie in this + minDimension" 
+
+    // Check optimistic cases - "lies in this" and "doesn't lie in this + minDimension"
     if (!liesInBigger[0] || !liesInBigger[1] || !liesInBigger[2])       return false;
     if (liesInSmaller[0] && liesInSmaller[1] && liesInSmaller[2])       return true;
-    
+
     // Check "pushed rectangles"
-    if ((liesInSmaller[0] && liesInSmaller[1]) || (liesInSmaller[1] && liesInSmaller[2]) || (liesInSmaller[2] && liesInSmaller[0]))    
+    if ((liesInSmaller[0] && liesInSmaller[1]) || (liesInSmaller[1] && liesInSmaller[2]) || (liesInSmaller[2] && liesInSmaller[0]))
         return true;
-        
+
     // Check cylinders on edges
     if (liesInSmaller[0] && std::pow(auxDoubleArray[1] - this->size[1] / 2, 2) + std::pow(auxDoubleArray[2] - this->size[2] / 2, 2) <= std::pow(minDimension, 2))
         return true;
@@ -384,7 +274,7 @@ int Cuboid::pointInside(BoundaryConditions *bc, double* da)
         return true;
     if (liesInSmaller[2] && std::pow(auxDoubleArray[0] - this->size[0] / 2, 2) + std::pow(auxDoubleArray[1] - this->size[1] / 2, 2) <= std::pow(minDimension, 2))
         return true;
-    
+
     // Check spheres in vertices
     if (std::pow(auxDoubleArray[0] - this->size[0] / 2, 2) + std::pow(auxDoubleArray[1] - this->size[1] / 2, 2) +
         std::pow(auxDoubleArray[2] - this->size[2] / 2, 2) <= std::pow(minDimension, 2))
@@ -392,6 +282,7 @@ int Cuboid::pointInside(BoundaryConditions *bc, double* da)
 
     return false;
 }
+
 
 // Returns Cuboid orientation
 //----------------------------------------------------------------------------
@@ -449,7 +340,7 @@ std::string Cuboid::toWolfram() const
 {
     if (staticDimension != 3)
         throw std::runtime_error("Cuboid::toWolfram supports only 3D Cuboids");
-    
+
     std::stringstream out;
     out << "cube" << this->no << " = " << std::endl;
     out << "    GeometricTransformation[" << std::endl;
@@ -674,6 +565,120 @@ bool SATOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) {
     return true;
 }
 
+// Checks whether this and _second projections on axis _axis overlap. If so,
+// returns true
+//----------------------------------------------------------------------------
+bool SATOverlap::checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Vector<3> * _vert2) const
+{
+    interval this_int = this->getProjection(_axis, _vert1);
+    interval second_int = this->getProjection(_axis, _vert2);
+
+    return std::min(this_int.second, second_int.second) >= std::max(this_int.first, second_int.first);
+}
+
+// Projects polyhedron _polyh on axis _axis and returns interval given by
+// the projection
+//----------------------------------------------------------------------------
+SATOverlap::interval SATOverlap::getProjection(const Vector<3> & _axis, Vector<3> * _vert) const
+{
+    interval proj_int = {std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
+
+    // Find enpoints of polyhedron projection (multiplied by unknown but const for _axit factor)
+    double proj;
+    for (std::size_t i = 0; i < 8; i++)
+    {
+        proj = _vert[i] * _axis;
+        if (proj < proj_int.first)
+            proj_int.first = proj;
+        if (proj > proj_int.second)
+            proj_int.second = proj;
+    }
+    return proj_int;
+}
+
+
 std::string SATOverlap::getName() {
     return "SATOverlap";
+}
+
+bool TriTriOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) {
+    double trans_arr[3];
+    Vector<3> translation(bc->getTranslation(trans_arr, cube1->getPosition(), cube2->getPosition()));
+
+    obtainTris(cube1, cuboid1_tris, Vector<3>());
+    obtainTris(cube2, cuboid2_tris, translation);
+
+    return intersection::polyh_polyh(cuboid1_tris, 12, cuboid2_tris, 12);
+}
+
+// Helper method. Obtains and saves triangles from cuboid's faces
+//--------------------------------------------------------------------------------------------
+void TriTriOverlap::obtainTris(Cuboid * cube, Vector<3> (&arr)[12][3], const Vector<3> & translation)
+{
+    Vector<3> pos(cube->getPosition());
+    Matrix<3, 3> orientation = cube->getOrientation();
+    double size[3];
+    cube->getSize(size);
+    Vector<3> vert[] = {
+            pos + translation + orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}},
+            pos + translation + orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}},
+            pos + translation + orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}},
+            pos + translation + orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}},
+            pos + translation + orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}},
+            pos + translation + orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}},
+            pos + translation + orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}},
+            pos + translation + orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}}
+    };
+
+    arr[0][0] = vert[0];
+    arr[0][1] = vert[1];
+    arr[0][2] = vert[2];
+
+    arr[1][0] = vert[2];
+    arr[1][1] = vert[1];
+    arr[1][2] = vert[6];
+
+    arr[2][0] = vert[0];
+    arr[2][1] = vert[2];
+    arr[2][2] = vert[3];
+
+    arr[3][0] = vert[3];
+    arr[3][1] = vert[2];
+    arr[3][2] = vert[4];
+
+    arr[4][0] = vert[7];
+    arr[4][1] = vert[2];
+    arr[4][2] = vert[6];
+
+    arr[5][0] = vert[7];
+    arr[5][1] = vert[4];
+    arr[5][2] = vert[2];
+
+    arr[6][0] = vert[1];
+    arr[6][1] = vert[0];
+    arr[6][2] = vert[3];
+
+    arr[7][0] = vert[5];
+    arr[7][1] = vert[1];
+    arr[7][2] = vert[3];
+
+    arr[8][0] = vert[7];
+    arr[8][1] = vert[1];
+    arr[8][2] = vert[5];
+
+    arr[9][0] = vert[7];
+    arr[9][1] = vert[6];
+    arr[9][2] = vert[1];
+
+    arr[10][0] = vert[7];
+    arr[10][1] = vert[5];
+    arr[10][2] = vert[3];
+
+    arr[11][0] = vert[7];
+    arr[11][1] = vert[3];
+    arr[11][2] = vert[4];
+}
+
+std::string TriTriOverlap::getName() {
+    return "TriTriOverlap";
 }
