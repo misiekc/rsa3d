@@ -70,7 +70,7 @@ inline bool checkSegmentFace(double plane_pos, double bound1, double bound2,
                              double p2p, double p2b1, double p2b2);
 
 
-Cuboid::OverlapStrategy Cuboid::strategy = Cuboid::OverlapStrategy::MINE;
+OverlapStrategy * Cuboid::strategy = new MineOverlap;
 
 
 // Default constructor creating new Cuboid in (0, 0, 0) with size set in
@@ -176,7 +176,7 @@ Shape<3> * Cuboid::create2D(RND *rnd)
 
 // Sets which overlap algorithm to use
 //----------------------------------------------------------------------------
-void Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy _strategy)
+void Cuboid::setOverlapStrategy(OverlapStrategy * _strategy)
 {
     strategy = _strategy;
 }
@@ -184,7 +184,7 @@ void Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy _strategy)
 
 // Returns overlap algorithm used
 //----------------------------------------------------------------------------
-Cuboid::OverlapStrategy Cuboid::getOverlapStrategy()
+OverlapStrategy * Cuboid::getOverlapStrategy()
 {
     return Cuboid::strategy;
 }
@@ -276,89 +276,7 @@ double Cuboid::getVoxelSize()
 //----------------------------------------------------------------------------
 int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
 {
-    switch (strategy) {
-        case TRI_TRI:
-            return overlapTri(bc, s);
-        case SAT:
-            return overlapSAT(bc, s);
-        default:
-            return overlapMine(bc, s);
-    }
-}
-
-// My overlap algorithm
-//----------------------------------------------------------------------------
-int Cuboid::overlapMine(BoundaryConditions *bc, Shape *s)
-{    
-    // Prepare matrices of translations for operations on shapes
-    Cuboid *sCuboid = (Cuboid*)s;
-    Vector<3> thisTranslation(this->position);
-    Vector<3> sTranslation(sCuboid->position);
-    sTranslation += Vector<3>(bc->getTranslation(auxDoubleArray, this->position, sCuboid->position));
-    Matrix<3, 3> backwards_rot = this->orientation.transpose();
-    
-    // Transform s coordinates to this coordinate system
-    Matrix<3, 3> new_orientation = backwards_rot * sCuboid->orientation;
-    sTranslation = backwards_rot * (sTranslation - thisTranslation);
-    
-    Vector<3> v_trans[V::SIZE];    // Calculated vertices coordinates
-    Vector<3> v_trans_bis[V::SIZE];    // Calculated vertices coordinates in swapped cuboid order
-    
-    // Check whether vertices of s lie in this. TO OPTIMIZE
-    if (checkPoint( (v_trans[V::PPP] = new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||      
-        checkPoint( (v_trans[V::NPP] = new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
-        checkPoint( (v_trans[V::PNP] = new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
-        checkPoint( (v_trans[V::PPN] = new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
-        checkPoint( (v_trans[V::PNN] = new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
-        checkPoint( (v_trans[V::NPN] = new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
-        checkPoint( (v_trans[V::NNP] = new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
-        checkPoint( (v_trans[V::NNN] = new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ))
-    {    
-        return true;    
-    }
-    
-    // Transform this coordinates to s coordinate system
-    new_orientation = new_orientation.transpose();
-    sTranslation = -(new_orientation * sTranslation);
-    
-    // Check whether vertices of this lie in s
-    if (sCuboid->checkPoint( (v_trans_bis[V::PPP] = new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||      
-        sCuboid->checkPoint( (v_trans_bis[V::NPP] = new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
-        sCuboid->checkPoint( (v_trans_bis[V::PNP] = new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
-        sCuboid->checkPoint( (v_trans_bis[V::PPN] = new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
-        sCuboid->checkPoint( (v_trans_bis[V::PNN] = new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
-        sCuboid->checkPoint( (v_trans_bis[V::NPN] = new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
-        sCuboid->checkPoint( (v_trans_bis[V::NNP] = new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
-        sCuboid->checkPoint( (v_trans_bis[V::NNN] = new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ))
-    {
-        return true;    
-    }
-    
-    // Check whether edges of s lie in this. TO OPTIMIZE
-    if (checkSegment(v_trans[V::PPP], v_trans[V::PPN]) || checkSegment(v_trans[V::PPN], v_trans[V::PNN]) ||
-        checkSegment(v_trans[V::PNN], v_trans[V::PNP]) || checkSegment(v_trans[V::PNP], v_trans[V::PPP]) ||
-        checkSegment(v_trans[V::NNN], v_trans[V::NNP]) || checkSegment(v_trans[V::NNP], v_trans[V::NPP]) ||
-        checkSegment(v_trans[V::NPP], v_trans[V::NPN]) || checkSegment(v_trans[V::NPN], v_trans[V::NNN]) ||
-        checkSegment(v_trans[V::PPP], v_trans[V::NPP]) || checkSegment(v_trans[V::PPN], v_trans[V::NPN]) ||
-        checkSegment(v_trans[V::PNN], v_trans[V::NNN]) || checkSegment(v_trans[V::PNP], v_trans[V::NNP]))
-    {
-        return true;
-    }
-    
-#ifndef DISABLE_OVERLAP_FIX
-    // Check whether edges of this lie in s. TO OPTIMIZE
-    if (sCuboid->checkSegment(v_trans_bis[V::PPP], v_trans_bis[V::PPN]) || sCuboid->checkSegment(v_trans_bis[V::PPN], v_trans_bis[V::PNN]) ||
-        sCuboid->checkSegment(v_trans_bis[V::PNN], v_trans_bis[V::PNP]) || sCuboid->checkSegment(v_trans_bis[V::PNP], v_trans_bis[V::PPP]) ||
-        sCuboid->checkSegment(v_trans_bis[V::NNN], v_trans_bis[V::NNP]) || sCuboid->checkSegment(v_trans_bis[V::NNP], v_trans_bis[V::NPP]) ||
-        sCuboid->checkSegment(v_trans_bis[V::NPP], v_trans_bis[V::NPN]) || sCuboid->checkSegment(v_trans_bis[V::NPN], v_trans_bis[V::NNN]) ||
-        sCuboid->checkSegment(v_trans_bis[V::PPP], v_trans_bis[V::NPP]) || sCuboid->checkSegment(v_trans_bis[V::PPN], v_trans_bis[V::NPN]) ||
-        sCuboid->checkSegment(v_trans_bis[V::PNN], v_trans_bis[V::NNN]) || sCuboid->checkSegment(v_trans_bis[V::PNP], v_trans_bis[V::NNP]))
-    {
-        return true;
-    }
-#endif
-    
-    return false;
+    return strategy->overlap(this, (Cuboid*)s, bc);
 }
 
 // Triangle overlap algorithm
@@ -375,75 +293,10 @@ int Cuboid::overlapTri(BoundaryConditions *bc, Shape *s)
     return intersection::polyh_polyh(cuboid1_tris, 12, cuboid2_tris, 12);
 }
 
-
-// SAT overlap algorithm
-//----------------------------------------------------------------------------
-int Cuboid::overlapSAT(BoundaryConditions *bc, Shape *s)
-{
-    Cuboid * second = (Cuboid *)s;
-    double trans_arr[3];
-    Vector<3> translation(bc->getTranslation(trans_arr, this->position, second->position));
-    Vector<3> pos1(this->position); 
-    Vector<3> pos2(second->position);
-    Matrix<3, 3> orientation1 = this->orientation;
-    Matrix<3, 3> orientation2 = second->orientation;
-    Vector<3> vertices1[8];
-    Vector<3> vertices2[8];
-    double size[3];
-    
-    Cuboid::getSize(size);
-    
-    // Calculate axes orthogonal to separating plane
-    Vector<3> axes1[] = {
-        orientation1 * Vector<3>{{1, 0, 0}},
-        orientation1 * Vector<3>{{0, 1, 0}},
-        orientation1 * Vector<3>{{0, 0, 1}}
-    };
-    Vector<3> axes2[] = {
-        orientation2 * Vector<3>{{1, 0, 0}},
-        orientation2 * Vector<3>{{0, 1, 0}},
-        orientation2 * Vector<3>{{0, 0, 1}}
-    };
-    
-    
-    // Calculate verties
-    vertices1[0] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2,  size[1] / 2,  size[2] / 2}});
-    vertices1[1] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2,  size[1] / 2,  size[2] / 2}});
-    vertices1[2] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2, -size[1] / 2,  size[2] / 2}});
-    vertices1[3] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2,  size[1] / 2, -size[2] / 2}});
-    vertices1[4] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2, -size[1] / 2, -size[2] / 2}});
-    vertices1[5] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2,  size[1] / 2, -size[2] / 2}});
-    vertices1[6] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2, -size[1] / 2,  size[2] / 2}});
-    vertices1[7] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2, -size[1] / 2, -size[2] / 2}});
-    
-    vertices2[0] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2,  size[1] / 2,  size[2] / 2}});
-    vertices2[1] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2,  size[1] / 2,  size[2] / 2}});
-    vertices2[2] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2, -size[1] / 2,  size[2] / 2}});
-    vertices2[3] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2,  size[1] / 2, -size[2] / 2}});
-    vertices2[4] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2, -size[1] / 2, -size[2] / 2}});
-    vertices2[5] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2,  size[1] / 2, -size[2] / 2}});
-    vertices2[6] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2, -size[1] / 2,  size[2] / 2}});
-    vertices2[7] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2, -size[1] / 2, -size[2] / 2}});
-    
-    // Check all possible separating axes - edge lines ...
-    for (int i = 0; i < 3; i++)
-        if (!this->checkSeparatingAxis (axes1[i], vertices1, vertices2))
-            return false;
-    for (int i = 0; i < 3; i++)
-        if (!this->checkSeparatingAxis (axes2[i], vertices1, vertices2))
-            return false;
-    // ... and their cross products
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-            if (!this->checkSeparatingAxis (axes1[i] ^ axes2[j], vertices1, vertices2))
-                return false;
-    return true;
-}
-
 // Checks whether this and _second projections on axis _axis overlap. If so,
 // returns true
 //----------------------------------------------------------------------------
-bool Cuboid::checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Vector<3> * _vert2) const
+bool SATOverlap::checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Vector<3> * _vert2) const
 {
     interval this_int = this->getProjection(_axis, _vert1);
     interval second_int = this->getProjection(_axis, _vert2);
@@ -455,7 +308,7 @@ bool Cuboid::checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Ve
 // Projects polyhedron _polyh on axis _axis and returns interval given by
 // the projection
 //----------------------------------------------------------------------------
-Cuboid::interval Cuboid::getProjection(const Vector<3> & _axis, Vector<3> * _vert) const
+SATOverlap::interval SATOverlap::getProjection(const Vector<3> & _axis, Vector<3> * _vert) const
 {
     interval proj_int = {std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
     
@@ -481,52 +334,6 @@ bool Cuboid::checkPoint(const Vector<3> & vertex)
         if (std::abs(vertex[i]) > this->size[i] / 2)
             return false;
     return true;
-}
-
-// Checks whether a segment determined by point1 and point2 intersects with
-// Cuboid
-//----------------------------------------------------------------------------
-bool Cuboid::checkSegment(const Vector<3> & point1, const Vector<3> & point2)
-{
-    double hsize_x = size[C::X] / 2;
-    double hsize_y = size[C::Y] / 2;
-    double hsize_z = size[C::Z] / 2;
-
-    // Check intersections with all faces
-    return checkSegmentFace( hsize_x, hsize_y, hsize_z, point1[C::X], point1[C::Y], point1[C::Z], point2[C::X], point2[C::Y], point2[C::Z]) ||
-           checkSegmentFace(-hsize_x, hsize_y, hsize_z, point1[C::X], point1[C::Y], point1[C::Z], point2[C::X], point2[C::Y], point2[C::Z]) ||
-           checkSegmentFace( hsize_y, hsize_z, hsize_x, point1[C::Y], point1[C::Z], point1[C::X], point2[C::Y], point2[C::Z], point2[C::X]) ||
-           checkSegmentFace(-hsize_y, hsize_z, hsize_x, point1[C::Y], point1[C::Z], point1[C::X], point2[C::Y], point2[C::Z], point2[C::X]) ||
-           checkSegmentFace( hsize_z, hsize_x, hsize_y, point1[C::Z], point1[C::X], point1[C::Y], point2[C::Z], point2[C::X], point2[C::Y]) ||
-           checkSegmentFace(-hsize_z, hsize_x, hsize_y, point1[C::Z], point1[C::X], point1[C::Y], point2[C::Z], point2[C::X], point2[C::Y]);          
-}
-
-// Checks whether given segment intersects with axis-oriented rectangular face
-// with middle on the perpendicular axis (OP)
-//----------------------------------------------------------------------------
-// plane_pos - face-determined plane coordinate on OP
-// bound1 - positive face edge coordinate on the 1st axis perpendicular to OP (OB1)
-// bound2 - positive face edge coordinate on the 2nd axis perpendicular to OP (OB2)
-// p1p, p1b1, p1b2 - 1st segment point coordinates respectively on OP, OB1, OB2
-// p2p, p2b1, p2b2 - 2nd segment point coordinates respectively on OP, OB1, OB2
-//----------------------------------------------------------------------------
-inline bool checkSegmentFace(double plane_pos, double bound1, double bound2, 
-                             double p1p, double p1b1, double p1b2,
-                             double p2p, double p2b1, double p2b2)
-{
-    // Check weather a plane determined by face lies between segment points
-    if ((plane_pos > p1p && plane_pos > p2p) || (plane_pos < p1p && plane_pos < p2p))
-        return false;
-    
-    // Intersect plane's face with segment's line
-    double b1i = ((p1b1 - p2b1) * plane_pos + p1p * p2b1 - p2p * p1b1) / (p1p - p2p);
-    double b2i = ((p1b2 - p2b2) * plane_pos + p1p * p2b2 - p2p * p1b2) / (p1p - p2p);
-    
-    // Check whether intersection point lies on face
-    if (std::abs(b1i) > bound1 || std::abs(b2i) > bound2)
-        return false;
-    else
-        return true;
 }
 
 
@@ -582,7 +389,7 @@ int Cuboid::pointInside(BoundaryConditions *bc, double* da)
     if (std::pow(auxDoubleArray[0] - this->size[0] / 2, 2) + std::pow(auxDoubleArray[1] - this->size[1] / 2, 2) +
         std::pow(auxDoubleArray[2] - this->size[2] / 2, 2) <= std::pow(minDimension, 2))
         return true;
-        
+
     return false;
 }
 
@@ -680,3 +487,193 @@ void Cuboid::restore(std::istream &f)
 	}
 }
 
+bool MineOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) {
+    // Prepare matrices of translations for operations on shapes;
+    Vector<3> thisTranslation(cube1->getPosition());
+    Vector<3> sTranslation(cube2->getPosition());
+    double transArray[3];
+    sTranslation += Vector<3>(bc->getTranslation(transArray, cube1->getPosition(), cube2->getPosition()));
+    Matrix<3, 3> backwards_rot = cube1->getOrientation().transpose();
+
+    // Transform s coordinates to this coordinate system
+    Matrix<3, 3> new_orientation = backwards_rot * cube1->getOrientation();
+    sTranslation = backwards_rot * (sTranslation - thisTranslation);
+
+    Vector<3> v_trans[V::SIZE];    // Calculated vertices coordinates
+    Vector<3> v_trans_bis[V::SIZE];    // Calculated vertices coordinates in swapped cuboid order
+
+    double size[3];
+    cube1->getSize(size);
+
+    // Check whether vertices of s lie in this. TO OPTIMIZE
+    if (cube1->checkPoint( (v_trans[V::PPP] = new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
+        cube1->checkPoint( (v_trans[V::NPP] = new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
+        cube1->checkPoint( (v_trans[V::PNP] = new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
+        cube1->checkPoint( (v_trans[V::PPN] = new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
+        cube1->checkPoint( (v_trans[V::PNN] = new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
+        cube1->checkPoint( (v_trans[V::NPN] = new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
+        cube1->checkPoint( (v_trans[V::NNP] = new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
+        cube1->checkPoint( (v_trans[V::NNN] = new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ))
+    {
+        return true;
+    }
+
+    // Transform this coordinates to s coordinate system
+    new_orientation = new_orientation.transpose();
+    sTranslation = -(new_orientation * sTranslation);
+
+    // Check whether vertices of this lie in s
+    if (cube2->checkPoint( (v_trans_bis[V::PPP] = new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
+        cube2->checkPoint( (v_trans_bis[V::NPP] = new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
+        cube2->checkPoint( (v_trans_bis[V::PNP] = new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
+        cube2->checkPoint( (v_trans_bis[V::PPN] = new_orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
+        cube2->checkPoint( (v_trans_bis[V::PNN] = new_orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
+        cube2->checkPoint( (v_trans_bis[V::NPN] = new_orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ) ||
+        cube2->checkPoint( (v_trans_bis[V::NNP] = new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}} + sTranslation) ) ||
+        cube2->checkPoint( (v_trans_bis[V::NNN] = new_orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}} + sTranslation) ))
+    {
+        return true;
+    }
+
+    // Check whether edges of s lie in this. TO OPTIMIZE
+    if (checkSegment(cube1, v_trans[V::PPP], v_trans[V::PPN]) || checkSegment(cube1, v_trans[V::PPN], v_trans[V::PNN]) ||
+        checkSegment(cube1, v_trans[V::PNN], v_trans[V::PNP]) || checkSegment(cube1, v_trans[V::PNP], v_trans[V::PPP]) ||
+        checkSegment(cube1, v_trans[V::NNN], v_trans[V::NNP]) || checkSegment(cube1, v_trans[V::NNP], v_trans[V::NPP]) ||
+        checkSegment(cube1, v_trans[V::NPP], v_trans[V::NPN]) || checkSegment(cube1, v_trans[V::NPN], v_trans[V::NNN]) ||
+        checkSegment(cube1, v_trans[V::PPP], v_trans[V::NPP]) || checkSegment(cube1, v_trans[V::PPN], v_trans[V::NPN]) ||
+        checkSegment(cube1, v_trans[V::PNN], v_trans[V::NNN]) || checkSegment(cube1, v_trans[V::PNP], v_trans[V::NNP]))
+    {
+        return true;
+    }
+
+#ifndef DISABLE_OVERLAP_FIX
+    // Check whether edges of this lie in s. TO OPTIMIZE
+    if (checkSegment(cube2, v_trans_bis[V::PPP], v_trans_bis[V::PPN]) || checkSegment(cube2, v_trans_bis[V::PPN], v_trans_bis[V::PNN]) ||
+        checkSegment(cube2, v_trans_bis[V::PNN], v_trans_bis[V::PNP]) || checkSegment(cube2, v_trans_bis[V::PNP], v_trans_bis[V::PPP]) ||
+        checkSegment(cube2, v_trans_bis[V::NNN], v_trans_bis[V::NNP]) || checkSegment(cube2, v_trans_bis[V::NNP], v_trans_bis[V::NPP]) ||
+        checkSegment(cube2, v_trans_bis[V::NPP], v_trans_bis[V::NPN]) || checkSegment(cube2, v_trans_bis[V::NPN], v_trans_bis[V::NNN]) ||
+        checkSegment(cube2, v_trans_bis[V::PPP], v_trans_bis[V::NPP]) || checkSegment(cube2, v_trans_bis[V::PPN], v_trans_bis[V::NPN]) ||
+        checkSegment(cube2, v_trans_bis[V::PNN], v_trans_bis[V::NNN]) || checkSegment(cube2, v_trans_bis[V::PNP], v_trans_bis[V::NNP]))
+    {
+        return true;
+    }
+#endif
+
+    return false;
+}
+
+// Checks whether a segment determined by point1 and point2 intersects with
+// Cuboid
+//----------------------------------------------------------------------------
+bool MineOverlap::checkSegment(Cuboid *cube, const Vector<3> & point1, const Vector<3> & point2)
+{
+    double size[3];
+    cube->getSize(size);
+    double hsize_x = size[C::X] / 2;
+    double hsize_y = size[C::Y] / 2;
+    double hsize_z = size[C::Z] / 2;
+
+    // Check intersections with all faces
+    return checkSegmentFace( hsize_x, hsize_y, hsize_z, point1[C::X], point1[C::Y], point1[C::Z], point2[C::X], point2[C::Y], point2[C::Z]) ||
+           checkSegmentFace(-hsize_x, hsize_y, hsize_z, point1[C::X], point1[C::Y], point1[C::Z], point2[C::X], point2[C::Y], point2[C::Z]) ||
+           checkSegmentFace( hsize_y, hsize_z, hsize_x, point1[C::Y], point1[C::Z], point1[C::X], point2[C::Y], point2[C::Z], point2[C::X]) ||
+           checkSegmentFace(-hsize_y, hsize_z, hsize_x, point1[C::Y], point1[C::Z], point1[C::X], point2[C::Y], point2[C::Z], point2[C::X]) ||
+           checkSegmentFace( hsize_z, hsize_x, hsize_y, point1[C::Z], point1[C::X], point1[C::Y], point2[C::Z], point2[C::X], point2[C::Y]) ||
+           checkSegmentFace(-hsize_z, hsize_x, hsize_y, point1[C::Z], point1[C::X], point1[C::Y], point2[C::Z], point2[C::X], point2[C::Y]);
+}
+
+std::string MineOverlap::getName() {
+    return "MineOverlap";
+}
+
+// Checks whether given segment intersects with axis-oriented rectangular face
+// with middle on the perpendicular axis (OP)
+//----------------------------------------------------------------------------
+// plane_pos - face-determined plane coordinate on OP
+// bound1 - positive face edge coordinate on the 1st axis perpendicular to OP (OB1)
+// bound2 - positive face edge coordinate on the 2nd axis perpendicular to OP (OB2)
+// p1p, p1b1, p1b2 - 1st segment point coordinates respectively on OP, OB1, OB2
+// p2p, p2b1, p2b2 - 2nd segment point coordinates respectively on OP, OB1, OB2
+//----------------------------------------------------------------------------
+inline bool checkSegmentFace(double plane_pos, double bound1, double bound2,
+                             double p1p, double p1b1, double p1b2,
+                             double p2p, double p2b1, double p2b2)
+{
+    // Check weather a plane determined by face lies between segment points
+    if ((plane_pos > p1p && plane_pos > p2p) || (plane_pos < p1p && plane_pos < p2p))
+        return false;
+
+    // Intersect plane's face with segment's line
+    double b1i = ((p1b1 - p2b1) * plane_pos + p1p * p2b1 - p2p * p1b1) / (p1p - p2p);
+    double b2i = ((p1b2 - p2b2) * plane_pos + p1p * p2b2 - p2p * p1b2) / (p1p - p2p);
+
+    // Check whether intersection point lies on face
+    if (std::abs(b1i) > bound1 || std::abs(b2i) > bound2)
+        return false;
+    else
+        return true;
+}
+
+bool SATOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) {
+    double trans_arr[3];
+    Vector<3> translation(bc->getTranslation(trans_arr, cube1->getPosition(), cube2->getPosition()));
+    Vector<3> pos1(cube1->getPosition());
+    Vector<3> pos2(cube2->getPosition());
+    Matrix<3, 3> orientation1 = cube1->getOrientation();
+    Matrix<3, 3> orientation2 = cube2->getOrientation();
+    Vector<3> vertices1[8];
+    Vector<3> vertices2[8];
+
+    double size[3];
+    Cuboid::getSize(size);
+
+    // Calculate axes orthogonal to separating plane
+    Vector<3> axes1[] = {
+            orientation1 * Vector<3>{{1, 0, 0}},
+            orientation1 * Vector<3>{{0, 1, 0}},
+            orientation1 * Vector<3>{{0, 0, 1}}
+    };
+    Vector<3> axes2[] = {
+            orientation2 * Vector<3>{{1, 0, 0}},
+            orientation2 * Vector<3>{{0, 1, 0}},
+            orientation2 * Vector<3>{{0, 0, 1}}
+    };
+
+
+    // Calculate verties
+    vertices1[0] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2,  size[1] / 2,  size[2] / 2}});
+    vertices1[1] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2,  size[1] / 2,  size[2] / 2}});
+    vertices1[2] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2, -size[1] / 2,  size[2] / 2}});
+    vertices1[3] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2,  size[1] / 2, -size[2] / 2}});
+    vertices1[4] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2, -size[1] / 2, -size[2] / 2}});
+    vertices1[5] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2,  size[1] / 2, -size[2] / 2}});
+    vertices1[6] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2, -size[1] / 2,  size[2] / 2}});
+    vertices1[7] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2, -size[1] / 2, -size[2] / 2}});
+
+    vertices2[0] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2,  size[1] / 2,  size[2] / 2}});
+    vertices2[1] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2,  size[1] / 2,  size[2] / 2}});
+    vertices2[2] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2, -size[1] / 2,  size[2] / 2}});
+    vertices2[3] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2,  size[1] / 2, -size[2] / 2}});
+    vertices2[4] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2, -size[1] / 2, -size[2] / 2}});
+    vertices2[5] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2,  size[1] / 2, -size[2] / 2}});
+    vertices2[6] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2, -size[1] / 2,  size[2] / 2}});
+    vertices2[7] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2, -size[1] / 2, -size[2] / 2}});
+
+    // Check all possible separating axes - edge lines ...
+    for (int i = 0; i < 3; i++)
+        if (!this->checkSeparatingAxis (axes1[i], vertices1, vertices2))
+            return false;
+    for (int i = 0; i < 3; i++)
+        if (!this->checkSeparatingAxis (axes2[i], vertices1, vertices2))
+            return false;
+    // ... and their cross products
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            if (!this->checkSeparatingAxis (axes1[i] ^ axes2[j], vertices1, vertices2))
+                return false;
+    return true;
+}
+
+std::string SATOverlap::getName() {
+    return "SATOverlap";
+}

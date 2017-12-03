@@ -40,8 +40,9 @@ namespace
             "tri-tri test... ",
             "SAT test...     "};
         
-        std::cout << strategies[Cuboid::getOverlapStrategy()] << std::flush;
-        
+        std::cout << std::setw(15) << std::left << Cuboid::getOverlapStrategy()->getName()
+                  << " test... " << std::flush;
+
         time_before = system_clock::now();
 	    for (std::size_t i = 0; i < _pairs_to_test; i++) {
 	        CuboidPairFactory::CuboidPair pair;
@@ -132,7 +133,9 @@ namespace cube_speedtest
         std::cout << std::endl;
         std::cout << "Starting (" << result.factoryDesc << ", pairs: " << _pairs_to_test
             << ", repeats: " << _repeats << ")..." << std::endl;
-        
+
+        MineOverlap mineOverlap;
+
         // Test
         for (std::size_t i = 0; i < _repeats; i++)
         {
@@ -142,21 +145,21 @@ namespace cube_speedtest
             std::string tryNoInfoSpace(tryNoInfo.length(), ' ');
             
             // Test my algorithm
-            Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::MINE);
+            Cuboid::setOverlapStrategy(&mineOverlap);
             std::cout << tryNoInfo;
             single_result = test_single_alg(_factory, _pairs_to_test);
             num_overlapped.push_back(single_result.overlapped);
             mine_times.push_back(single_result.nanos);
             
             // Test triangle algorithm
-            Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::TRI_TRI);
+            Cuboid::setOverlapStrategy(&mineOverlap);
             std::cout << tryNoInfoSpace;
             single_result = test_single_alg(_factory, _pairs_to_test);
             num_overlapped.push_back(single_result.overlapped);
             tri_times.push_back(single_result.nanos);
             
             // Test SAT algorithm
-            Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::SAT);
+            Cuboid::setOverlapStrategy(&mineOverlap);
             std::cout << tryNoInfoSpace;
             single_result = test_single_alg(_factory, _pairs_to_test);
             num_overlapped.push_back(single_result.overlapped);

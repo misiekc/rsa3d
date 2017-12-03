@@ -21,7 +21,7 @@
 
 namespace
 {
-    const std::string overlap_strategy_name [] = {"MINE", "TRI_TRI", "SAT"}; 
+    MineOverlap mineOverlap;
 }
 
 namespace cube_inttest
@@ -81,7 +81,7 @@ namespace cube_inttest
     // Performs Cuboid::overlap algorithm check. It generates some random pairs of cuboids
     // and compares result given by ::MINE strategy and _strategy strategy
     //--------------------------------------------------------------------------------------------
-    Results perform(CuboidPairFactory * _factory, Cuboid::OverlapStrategy _strategy, int _max_tries)
+    Results perform(CuboidPairFactory * _factory, OverlapStrategy * _strategy, int _max_tries)
     {
         cube_inttest::Results result;
 	    bool    mine_intersected, second_intersected;
@@ -90,12 +90,12 @@ namespace cube_inttest
 	
         result.tries = _max_tries;
 	
-	    std::cout << ">> Performing ::MINE and ::" << overlap_strategy_name[_strategy]
-	        << " for Cuboid::OverlapStrategy comparison..." << std::endl;
+	    std::cout << ">> Performing " << mineOverlap.getName() << " and " << _strategy->getName()
+	        << " for OverlapStrategy comparison..." << std::endl;
 	    for (int i = 0; i < _max_tries; i++) {
 	        CuboidPairFactory::CuboidPair pair = _factory->generate();
 	        
-	        Cuboid::setOverlapStrategy(Cuboid::OverlapStrategy::MINE);
+	        Cuboid::setOverlapStrategy(&mineOverlap);
 	        mine_intersected = (bool)pair.first->overlap(&bc, pair.second);
 	        Cuboid::setOverlapStrategy(_strategy);
 	        second_intersected = (bool)pair.first->overlap(&bc, pair.second);

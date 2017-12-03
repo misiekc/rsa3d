@@ -16,36 +16,25 @@
 #include <utility>
 
 
+class OverlapStrategy;
+
 class Cuboid : public Shape<3>
 {
 public:
-    // Overlap stategy
-    enum OverlapStrategy {
-        MINE,
-        TRI_TRI,
-        SAT
-    };
 
-private:    
-    typedef std::pair<double, double>   interval;
 
+private:
     static double           volume;
     static double           *auxDoubleArray;        // Auxiliary double array of dimension size
     static double           *auxDoubleArray2;       // Second aux array
     Matrix<3, 3>            orientation;
     static double           minDimension;
-    static OverlapStrategy  strategy;
-    
-    bool        checkPoint(const Vector<3> & vertex);
-    bool        checkSegment(const Vector<3> & point1, const Vector<3> & point2);
-    
-    int overlapMine(BoundaryConditions *bc, Shape<3> *s);
+    static OverlapStrategy  *strategy;
+
     int overlapTri(BoundaryConditions *bc, Shape<3> *s);
     int overlapSAT(BoundaryConditions *bc, Shape<3> *s);
     
     void obtainTris(Vector<3> (&arr)[12][3], const Vector<3> & translation);
-    bool checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Vector<3> * _vert2) const;
-    interval getProjection(const Vector<3> & _axis, Vector<3> * _vert) const;
 
 protected:
     static unsigned short 	staticDimension;
@@ -57,27 +46,58 @@ protected:
 public:
 
     // Implicit copy ctor and copy assignment operator - trivial destructor
-    Cuboid(const Matrix<3, 3> & rotation);
-    ~Cuboid();
+    explicit Cuboid(const Matrix<3, 3> & rotation);
+    ~Cuboid() override;
 
 	static void initClass(const std::string &args);
 	static Shape<3> * create2D(RND *rnd);
 	static Shape<3> * create3D(RND *rnd);
-	static void setOverlapStrategy(OverlapStrategy strategy);
-	static OverlapStrategy getOverlapStrategy();
+	static void setOverlapStrategy(OverlapStrategy *strategy);
+	static OverlapStrategy * getOverlapStrategy();
 
-    double getNeighbourListCellSize();
-    double getVoxelSize();
-    int overlap(BoundaryConditions *bc, Shape<3> *s);
-    double getVolume();
-    int pointInside(BoundaryConditions *bc, double* da);
+    double getNeighbourListCellSize() override;
+    double getVoxelSize() override;
+    int overlap(BoundaryConditions *bc, Shape<3> *s) override;
+    double getVolume() override;
+    int pointInside(BoundaryConditions *bc, double* da) override;
+
+    bool checkPoint(const Vector<3> & vertex);
     
     Matrix<3, 3> getOrientation() const;
     static double * getSize(double * arr);
-    std::string toPovray() const;
+    std::string toPovray() const override;
     std::string toWolfram() const;
-	void store(std::ostream &f) const;
-	void restore(std::istream &f);
+	void store(std::ostream &f) const override;
+	void restore(std::istream &f) override;
+};
+
+
+// Overlap stategies
+class OverlapStrategy {
+public:
+    virtual bool overlap(Cuboid * cube1, Cuboid * cube2, BoundaryConditions *bc) = 0;
+    virtual std::string getName() = 0;
+};
+
+class MineOverlap : public OverlapStrategy {
+private:
+    bool checkSegment(Cuboid *cube, const Vector<3> & point1, const Vector<3> & point2);
+
+public:
+    bool overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) override;
+    std::string getName() override;
+};
+
+class SATOverlap : public OverlapStrategy {
+private:
+    typedef std::pair<double, double>   interval;
+
+    bool checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Vector<3> * _vert2) const;
+    interval getProjection(const Vector<3> & _axis, Vector<3> * _vert) const;
+
+public:
+    bool overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) override;
+    std::string getName() override;
 };
 
 #endif      // _CUBOID_H
