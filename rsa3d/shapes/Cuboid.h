@@ -31,8 +31,6 @@ private:
     static double           minDimension;
     static OverlapStrategy  *strategy;
 
-    int overlapTri(BoundaryConditions *bc, Shape<3> *s);
-
 protected:
     static unsigned short 	staticDimension;
     static double           *size;
@@ -59,6 +57,7 @@ public:
     int pointInside(BoundaryConditions *bc, double* da) override;
 
     bool checkPoint(const Vector<3> & vertex);
+    void obtainVertices(Vector<3> (&vertices)[8], const Vector<3> &translation);
     
     Matrix<3, 3> getOrientation() const;
     static double * getSize(double * arr);
@@ -95,6 +94,9 @@ private:
 public:
     bool overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) override;
     std::string getName() override;
+
+    void obtainVertices(const Vector<3> *vertices, const double *size, const Vector<3> &position,
+                        const Matrix<3, 3> &orientation) const;
 };
 
 class TriTriOverlap : public OverlapStrategy {

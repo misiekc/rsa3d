@@ -27,6 +27,27 @@
 
 namespace 
 {
+    // Vertex recognition helper. P states positive, N - negative. First position
+    // corresponds to positive/negative X, second for Y, etc.
+    enum V {
+        PPP = 0,
+        NPP,
+        PNP,
+        PPN,
+        PNN,
+        NPN,
+        NNP,
+        NNN,
+        SIZE
+    };
+
+    // Coord recognition helper
+    enum C {
+        X = 0,
+        Y,
+        Z
+    };
+
     // Helper arrays
     Vector<3>       cuboid1_tris[12][3];
     Vector<3>       cuboid2_tris[12][3];
@@ -44,26 +65,6 @@ double          Cuboid::voxelSize;
 double          Cuboid::minDimension;
 unsigned short 	Cuboid::staticDimension = 3;
 
-// Vertex recognition helper. P states positive, N - negative. First position
-// corresponds to positive/negative X, second for Y, etc.
-enum V {
-    PPP = 0,
-    NPP,
-    PNP,
-    PPN,
-    PNN,
-    NPN,
-    NNP,
-    NNN,
-    SIZE
-};
-
-// Coord recognition helper
-enum C {
-    X = 0,
-    Y,
-    Z
-};
 
 inline bool checkSegmentFace(double plane_pos, double bound1, double bound2, 
                              double p1p, double p1b1, double p1b2,
@@ -378,6 +379,18 @@ void Cuboid::restore(std::istream &f)
 	}
 }
 
+void Cuboid::obtainVertices(Vector<3> (&vertices)[8], const Vector<3> &translation) {
+    Vector<3> pos(this->position);
+    vertices[0] = Vector<3>(pos + translation + orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}});
+    vertices[1] = Vector<3>(pos + translation + orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}});
+    vertices[2] = Vector<3>(pos + translation + orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}});
+    vertices[3] = Vector<3>(pos + translation + orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}});
+    vertices[4] = Vector<3>(pos + translation + orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}});
+    vertices[5] = Vector<3>(pos + translation + orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}});
+    vertices[6] = Vector<3>(pos + translation + orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}});
+    vertices[7] = Vector<3>(pos + translation + orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}});
+}
+
 bool MineOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) {
     // Prepare matrices of translations for operations on shapes;
     Vector<3> thisTranslation(cube1->getPosition());
@@ -530,25 +543,8 @@ bool SATOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) {
             orientation2 * Vector<3>{{0, 0, 1}}
     };
 
-
-    // Calculate verties
-    vertices1[0] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2,  size[1] / 2,  size[2] / 2}});
-    vertices1[1] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2,  size[1] / 2,  size[2] / 2}});
-    vertices1[2] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2, -size[1] / 2,  size[2] / 2}});
-    vertices1[3] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2,  size[1] / 2, -size[2] / 2}});
-    vertices1[4] = Vector<3>(pos1 + orientation1 * Vector<3>{{ size[0] / 2, -size[1] / 2, -size[2] / 2}});
-    vertices1[5] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2,  size[1] / 2, -size[2] / 2}});
-    vertices1[6] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2, -size[1] / 2,  size[2] / 2}});
-    vertices1[7] = Vector<3>(pos1 + orientation1 * Vector<3>{{-size[0] / 2, -size[1] / 2, -size[2] / 2}});
-
-    vertices2[0] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2,  size[1] / 2,  size[2] / 2}});
-    vertices2[1] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2,  size[1] / 2,  size[2] / 2}});
-    vertices2[2] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2, -size[1] / 2,  size[2] / 2}});
-    vertices2[3] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2,  size[1] / 2, -size[2] / 2}});
-    vertices2[4] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{ size[0] / 2, -size[1] / 2, -size[2] / 2}});
-    vertices2[5] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2,  size[1] / 2, -size[2] / 2}});
-    vertices2[6] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2, -size[1] / 2,  size[2] / 2}});
-    vertices2[7] = Vector<3>(pos2 + translation + orientation2 * Vector<3>{{-size[0] / 2, -size[1] / 2, -size[2] / 2}});
+    cube1->obtainVertices(vertices1, Vector<3>());
+    cube2->obtainVertices(vertices2, translation);
 
     // Check all possible separating axes - edge lines ...
     for (int i = 0; i < 3; i++)
@@ -615,68 +611,23 @@ bool TriTriOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc
 //--------------------------------------------------------------------------------------------
 void TriTriOverlap::obtainTris(Cuboid * cube, Vector<3> (&arr)[12][3], const Vector<3> & translation)
 {
-    Vector<3> pos(cube->getPosition());
-    Matrix<3, 3> orientation = cube->getOrientation();
     double size[3];
     cube->getSize(size);
-    Vector<3> vert[] = {
-            pos + translation + orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}},
-            pos + translation + orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2,  size[C::Z] / 2}},
-            pos + translation + orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}},
-            pos + translation + orientation * Vector<3>{{ size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}},
-            pos + translation + orientation * Vector<3>{{ size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}},
-            pos + translation + orientation * Vector<3>{{-size[C::X] / 2,  size[C::Y] / 2, -size[C::Z] / 2}},
-            pos + translation + orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2,  size[C::Z] / 2}},
-            pos + translation + orientation * Vector<3>{{-size[C::X] / 2, -size[C::Y] / 2, -size[C::Z] / 2}}
-    };
+    Vector<3> vert[8];
+    cube->obtainVertices(vert, translation);
 
-    arr[0][0] = vert[0];
-    arr[0][1] = vert[1];
-    arr[0][2] = vert[2];
-
-    arr[1][0] = vert[2];
-    arr[1][1] = vert[1];
-    arr[1][2] = vert[6];
-
-    arr[2][0] = vert[0];
-    arr[2][1] = vert[2];
-    arr[2][2] = vert[3];
-
-    arr[3][0] = vert[3];
-    arr[3][1] = vert[2];
-    arr[3][2] = vert[4];
-
-    arr[4][0] = vert[7];
-    arr[4][1] = vert[2];
-    arr[4][2] = vert[6];
-
-    arr[5][0] = vert[7];
-    arr[5][1] = vert[4];
-    arr[5][2] = vert[2];
-
-    arr[6][0] = vert[1];
-    arr[6][1] = vert[0];
-    arr[6][2] = vert[3];
-
-    arr[7][0] = vert[5];
-    arr[7][1] = vert[1];
-    arr[7][2] = vert[3];
-
-    arr[8][0] = vert[7];
-    arr[8][1] = vert[1];
-    arr[8][2] = vert[5];
-
-    arr[9][0] = vert[7];
-    arr[9][1] = vert[6];
-    arr[9][2] = vert[1];
-
-    arr[10][0] = vert[7];
-    arr[10][1] = vert[5];
-    arr[10][2] = vert[3];
-
-    arr[11][0] = vert[7];
-    arr[11][1] = vert[3];
-    arr[11][2] = vert[4];
+    arr[0][0] = vert[0];    arr[0][1] = vert[1];    arr[0][2] = vert[2];
+    arr[1][0] = vert[2];    arr[1][1] = vert[1];    arr[1][2] = vert[6];
+    arr[2][0] = vert[0];    arr[2][1] = vert[2];    arr[2][2] = vert[3];
+    arr[3][0] = vert[3];    arr[3][1] = vert[2];    arr[3][2] = vert[4];
+    arr[4][0] = vert[7];    arr[4][1] = vert[2];    arr[4][2] = vert[6];
+    arr[5][0] = vert[7];    arr[5][1] = vert[4];    arr[5][2] = vert[2];
+    arr[6][0] = vert[1];    arr[6][1] = vert[0];    arr[6][2] = vert[3];
+    arr[7][0] = vert[5];    arr[7][1] = vert[1];    arr[7][2] = vert[3];
+    arr[8][0] = vert[7];    arr[8][1] = vert[1];    arr[8][2] = vert[5];
+    arr[9][0] = vert[7];    arr[9][1] = vert[6];    arr[9][2] = vert[1];
+    arr[10][0] = vert[7];   arr[10][1] = vert[5];   arr[10][2] = vert[3];
+    arr[11][0] = vert[7];   arr[11][1] = vert[3];   arr[11][2] = vert[4];
 }
 
 std::string TriTriOverlap::getName() {
