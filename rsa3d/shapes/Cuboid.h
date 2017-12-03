@@ -12,6 +12,7 @@
 
 #include "../Shape.h"
 #include "../Matrix.h"
+#include "../Vector.h"
 
 #include <utility>
 
@@ -26,10 +27,10 @@ public:
 private:
     static double           volume;
     static double           *auxDoubleArray;        // Auxiliary double array of dimension size
-    static double           *auxDoubleArray2;       // Second aux array
     Matrix<3, 3>            orientation;
     static double           minDimension;
     static OverlapStrategy  *strategy;
+    static Vector<3>        relativeVertices[8];
 
 protected:
     static unsigned short 	staticDimension;
@@ -49,6 +50,7 @@ public:
 	static Shape<3> * create3D(RND *rnd);
 	static void setOverlapStrategy(OverlapStrategy *strategy);
 	static OverlapStrategy * getOverlapStrategy();
+    static const Vector<3> getRelativeVertex(std::size_t index);
 
     double getNeighbourListCellSize() override;
     double getVoxelSize() override;
