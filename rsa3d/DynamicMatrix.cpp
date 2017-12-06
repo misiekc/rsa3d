@@ -137,7 +137,7 @@ DynamicMatrix::DynamicMatrix(mxsize_t _rows, mxsize_t _cols, double _fill = 0) :
     std::fill(arr, arr + max, _fill);
 }
 
-// Ctor creating matrix from given two-dimentional array, where the element from the i-th row
+// Ctor creating matrix from given two-dimensional array, where the element from the i-th row
 // and the j-th column is in arr[i-1][j-1]. Data from array are copied
 //--------------------------------------------------------------------------------------------
 // _rows, _cols - matrix dimensions
@@ -161,7 +161,7 @@ DynamicMatrix::DynamicMatrix(mxsize_t _rows, mxsize_t _cols, double **_arr) :
             arr[arr_index++] = _arr[i][j];
 }
 
-// Ctor creating matrix from given one-dimentional array. When desired matrix is
+// Ctor creating matrix from given one-dimensional array. When desired matrix is
 // / 1 2 3 |
 // | 4 5 6 |
 // \ 7 8 9 |
@@ -223,7 +223,7 @@ DynamicMatrix DynamicMatrix::identity(mxsize_t _size)
     return matrix;
 }
 
-// Generates two-dimentional rotate matrix
+// Generates two-dimensional rotate matrix
 //--------------------------------------------------------------------------------------------
 // _a - rotate angle
 //--------------------------------------------------------------------------------------------
@@ -239,7 +239,7 @@ DynamicMatrix DynamicMatrix::rotation2D(double _a)
     return matrix;
 }
 
-// Generates three-dimentional rotate matrix. The rotations are performed about X, Y and Z 
+// Generates three-dimensional rotate matrix. The rotations are performed about X, Y and Z
 // axis in mentioned order
 //--------------------------------------------------------------------------------------------
 // _ax - counter-clockwise rotation angle about X axis

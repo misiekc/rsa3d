@@ -26,7 +26,7 @@ Matrix<ROWS, COLS, E>::Matrix(E _fill)
 }
 
 
-// Ctor creating matrix from given two-dimentional array, where the element from the i-th row
+// Ctor creating matrix from given two-dimensional array, where the element from the i-th row
 // and the j-th column is in arr[i-1][j-1]. Data from array are copied
 //--------------------------------------------------------------------------------------------
 // _arr - array with matrix elements
@@ -42,7 +42,7 @@ Matrix<ROWS, COLS, E>::Matrix(E **_arr)
 }
 
 
-// Ctor creating matrix from given one-dimentional array. When desired matrix is
+// Ctor creating matrix from given one-dimensional array. When desired matrix is
 // / 1 2 3 |
 // | 4 5 6 |
 // \ 7 8 9 |
@@ -449,7 +449,7 @@ Matrix<ROWS, COLS, E>::det() const
 }
 
 
-// Generates two-dimentional rotate matrix
+// Generates two-dimensional rotate matrix
 //--------------------------------------------------------------------------------------------
 // _a - counter-clockwise rotate angle
 //--------------------------------------------------------------------------------------------
@@ -469,7 +469,7 @@ Matrix<ROWS, COLS, E>::rotation(double _a)
 }
 
 
-// Generates three-dimentional rotate matrix. The rotations are performed about X, Y and Z 
+// Generates three-dimensional rotate matrix. The rotations are performed about X, Y and Z
 // axis in mentioned order
 //--------------------------------------------------------------------------------------------
 // _ax - counter-clockwise rotation angle about X axis
