@@ -13,6 +13,7 @@
 #include "Config.h"
 #include "shapes/cube_strategies/SATOverlap.h"
 #include "shapes/cube_strategies/TriTriOverlap.h"
+#include "shapes/cube_strategies/OptimizedSATOverlap.h"
 
 #include <unistd.h>
 #include <sys/wait.h>
@@ -199,19 +200,26 @@ void cube_inttest_main(int argc, char ** argv)
 	ShapeFactory::initShapeClass("Cuboid", init_stream.str());
     BallFactory * factory = BallFactory::getInstance();
     factory->setRadius(ball_radius);
-    
-    // Test SAT
+
+	// Test SAT
 	SATOverlap satOverlap;
-    cube_inttest::Results results = cube_inttest::perform(factory, &satOverlap, max_tries);
-    cube_inttest::print_results(results);
-    std::cout << std::endl;
-    results.free_missed_pairs();
+	cube_inttest::Results results = cube_inttest::perform(factory, &satOverlap, max_tries);
+	cube_inttest::print_results(results);
+	std::cout << std::endl;
+	results.free_missed_pairs();
     
     // Test TRI_TRI
     TriTriOverlap triTriOverlap;
     results = cube_inttest::perform(factory, &triTriOverlap, max_tries);
     cube_inttest::print_results(results);
     std::cout << std::endl;
+	results.free_missed_pairs();
+
+	// Test optimised SAT
+	OptimizedSATOverlap optimizedSATOverlap;
+	results = cube_inttest::perform(factory, &optimizedSATOverlap, max_tries);
+	cube_inttest::print_results(results);
+	std::cout << std::endl;
     
     // Dump missed test to file
     if (results.missed > 0) {

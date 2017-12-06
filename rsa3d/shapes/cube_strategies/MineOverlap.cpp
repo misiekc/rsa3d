@@ -55,9 +55,6 @@ bool MineOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) 
     Vector<3> v_trans[VERTEX::NUM_OF];    // Calculated vertices coordinates
     Vector<3> v_trans_bis[VERTEX::NUM_OF];    // Calculated vertices coordinates in swapped cuboid order
 
-    double size[3];
-    cube1->getSize(size);
-
     // Check whether vertices of s lie in this. TO OPTIMIZE
     for (size_t i = 0; i < VERTEX::NUM_OF; i++) {
         v_trans[i] = new_orientation * Cuboid::getRelativeVertex(i) + sTranslation;

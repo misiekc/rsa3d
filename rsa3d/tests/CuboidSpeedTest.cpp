@@ -13,6 +13,9 @@
 #include "CuboidSpeedTest.h"
 #include "MockBC.h"
 #include "../shapes/cube_strategies/MineOverlap.h"
+#include "../shapes/cube_strategies/TriTriOverlap.h"
+#include "../shapes/cube_strategies/SATOverlap.h"
+#include "../shapes/cube_strategies/OptimizedSATOverlap.h"
 
 
 using namespace std::chrono;
@@ -114,13 +117,14 @@ namespace cube_speedtest
           
         TestData result;
         SingleTestResult single_result;
-        std::vector<double> mine_times, tri_times, SAT_times;
+        std::vector<double> mine_times, tri_times, SAT_times, optSAT_times;
         std::vector<double> num_overlapped;
         
         // Reserve memory for vector of measured times and number of overlaps
         mine_times.reserve(_repeats);
         tri_times.reserve(_repeats);
         SAT_times.reserve(_repeats);
+        optSAT_times.reserve(_repeats);
         num_overlapped.reserve(_repeats);
         
         result.numAll = _pairs_to_test;
@@ -130,6 +134,9 @@ namespace cube_speedtest
             << ", repeats: " << _repeats << ")..." << std::endl;
 
         MineOverlap mineOverlap;
+        TriTriOverlap triTriOverlap;
+        SATOverlap satOverlap;
+        OptimizedSATOverlap optimizedSATOverlap;
 
         // Test
         for (std::size_t i = 0; i < _repeats; i++)
@@ -147,18 +154,25 @@ namespace cube_speedtest
             mine_times.push_back(single_result.nanos);
             
             // Test triangle algorithm
-            Cuboid::setOverlapStrategy(&mineOverlap);
+            Cuboid::setOverlapStrategy(&triTriOverlap);
             std::cout << tryNoInfoSpace;
             single_result = test_single_alg(_factory, _pairs_to_test);
             num_overlapped.push_back(single_result.overlapped);
             tri_times.push_back(single_result.nanos);
-            
+
             // Test SAT algorithm
-            Cuboid::setOverlapStrategy(&mineOverlap);
+            Cuboid::setOverlapStrategy(&satOverlap);
             std::cout << tryNoInfoSpace;
             single_result = test_single_alg(_factory, _pairs_to_test);
             num_overlapped.push_back(single_result.overlapped);
             SAT_times.push_back(single_result.nanos);
+
+            // Test optimised SAT algorithm
+            Cuboid::setOverlapStrategy(&optimizedSATOverlap);
+            std::cout << tryNoInfoSpace;
+            single_result = test_single_alg(_factory, _pairs_to_test);
+            num_overlapped.push_back(single_result.overlapped);
+            optSAT_times.push_back(single_result.nanos);
         }
         
         // Calculate and return results
@@ -166,6 +180,7 @@ namespace cube_speedtest
         result.mineNs = Quantity::fromSamples(mine_times);
         result.triNs = Quantity::fromSamples(tri_times);
         result.SATNs = Quantity::fromSamples(SAT_times);
+        result.optSATNs = Quantity::fromSamples(optSAT_times);
         result.overlapProb = Quantity(result.numOverlapped.value / _pairs_to_test, 
             result.numOverlapped.error / _pairs_to_test);
          
@@ -179,10 +194,11 @@ namespace cube_speedtest
     {
         std::cout << "(" << this->numOverlapped << ")/" << this->numAll << " overlapped. Overlap probability: "
             << this->overlapProb << std::endl;
-        std::cout << "Mine avg. time    : " << this->mineNs << std::endl;
-        std::cout << "Tri-tri avg. time : " << this->triNs << std::endl;
-        std::cout << "SAT avg. time     : " << this->SATNs << std::endl;
-        std::cout << "Factory used      : " << this->factoryDesc << std::endl;
+        std::cout << "Mine avg. time     : " << this->mineNs << std::endl;
+        std::cout << "Tri-tri avg. time  : " << this->triNs << std::endl;
+        std::cout << "SAT avg. time      : " << this->SATNs << std::endl;
+        std::cout << "Opt. SAT avg. time : " << this->optSATNs << std::endl;
+        std::cout << "Factory used       : " << this->factoryDesc << std::endl;
     }
 
 
@@ -190,7 +206,7 @@ namespace cube_speedtest
     //----------------------------------------------------------------------------------------
     void TestData::toCsv(std::ostream & _out, const std::vector<TestData> & _data)
     {
-        _out << "probability,error,my alg time,error,tri-tri alg time,error,SAT alg time,error,"
+        _out << "probability,error,my alg time,error,tri-tri alg time,error,SAT alg time,error,opt SAT alg time,error,"
             "num of overlapped,error,num of all,factory desc" << std::endl;
             
         for (auto d : _data) {
@@ -202,6 +218,8 @@ namespace cube_speedtest
             _out << d.triNs.error << ",";
             _out << d.SATNs.value << ",";
             _out << d.SATNs.error << ",";
+            _out << d.optSATNs.value << ",";
+            _out << d.optSATNs.error << ",";
             _out << d.numOverlapped.value << ",";
             _out << d.numOverlapped.error << ",";
             _out << d.numAll << ",";

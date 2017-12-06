@@ -39,6 +39,7 @@ namespace cube_speedtest
         Quantity        mineNs;
         Quantity        triNs;
         Quantity        SATNs;
+        Quantity        optSATNs;
         std::string     factoryDesc;
         
         void printResults();

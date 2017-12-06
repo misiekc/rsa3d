@@ -20,7 +20,7 @@
 CC = g++
 
 # Compiler flags
-CFLAGS = -Wall -pedantic -std=c++14 -I"$(CURDIR)/statistics" -g
+CFLAGS = -Wall -pedantic -std=c++14 -I"$(CURDIR)/statistics" -O3
 
 # Linker flags 
 LFLAGS =
@@ -51,6 +51,7 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/analizator/Analyzer \
        rsa3d/shapes/Cuboid \
        rsa3d/shapes/cube_strategies/MineOverlap \
+       rsa3d/shapes/cube_strategies/OptimizedSATOverlap \
        rsa3d/shapes/cube_strategies/SATOverlap \
        rsa3d/shapes/cube_strategies/TriTriOverlap \
        rsa3d/surfaces/NBoxFBC \
