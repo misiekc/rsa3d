@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------
 
 #include "BoxFactory.h"
-#include "../ShapeFactory.h"
+#include "../../ShapeFactory.h"
 #include <sstream>
 
 

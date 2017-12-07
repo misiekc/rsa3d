@@ -14,8 +14,8 @@
 #include "../Vector.h"
 #include "../Intersection.h"
 #include "../shapes/Cuboid.h"
-#include "MockBC.h"
-#include "CuboidPairFactory.h"
+#include "utility/MockBC.h"
+#include "utility/CuboidPairFactory.h"
 #include "CuboidIntTest.h"
 #include "../shapes/cube_strategies/MineOverlap.h"
 

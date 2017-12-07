@@ -56,8 +56,8 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/shapes/cube_strategies/TriTriOverlap \
        rsa3d/surfaces/NBoxFBC \
        rsa3d/surfaces/NBoxPBC \
-       rsa3d/tests/BallFactory \
-       rsa3d/tests/BoxFactory \
+       rsa3d/tests/utility/BallFactory \
+       rsa3d/tests/utility/BoxFactory \
        rsa3d/tests/CuboidIntTest \
        rsa3d/tests/CuboidPointInsideTest \
        rsa3d/tests/CuboidSpeedTest \
@@ -77,6 +77,7 @@ SUBDIRS = rsa3d/analizator/ \
           rsa3d/shapes/cube_strategies \
           rsa3d/surfaces/ \
           rsa3d/tests/ \
+          rsa3d/tests/utility \
           statistics/
 
 # OBJ files folder

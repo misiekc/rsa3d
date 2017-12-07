@@ -11,7 +11,7 @@
 #include <iomanip>
 
 #include "CuboidSpeedTest.h"
-#include "MockBC.h"
+#include "utility/MockBC.h"
 #include "../shapes/cube_strategies/MineOverlap.h"
 #include "../shapes/cube_strategies/TriTriOverlap.h"
 #include "../shapes/cube_strategies/SATOverlap.h"

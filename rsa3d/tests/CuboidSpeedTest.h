@@ -8,7 +8,7 @@
     #define _CUBOID_SPEED_TEST_H
     
 
-#include "CuboidPairFactory.h"
+#include "utility/CuboidPairFactory.h"
 
 #include <vector>
 #include <ostream>

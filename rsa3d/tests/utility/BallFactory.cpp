@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------
 
 #include "BallFactory.h"
-#include "../ShapeFactory.h"
+#include "../../ShapeFactory.h"
 #include <sstream>
 
 #include <cmath>

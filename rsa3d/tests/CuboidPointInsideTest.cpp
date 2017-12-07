@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------
 
 #include "CuboidPointInsideTest.h"
-#include "MockBC.h"
+#include "utility/MockBC.h"
 
 #include <iostream>
 

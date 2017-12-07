@@ -8,7 +8,7 @@
     #define _CUBOID_POINT_INSDE_TEST_H
     
 
-#include "CuboidPairFactory.h"
+#include "utility/CuboidPairFactory.h"
 
 #include <string>
 

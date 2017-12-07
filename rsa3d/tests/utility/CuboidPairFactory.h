@@ -9,7 +9,7 @@
 
 #include <string>
 
-#include "../shapes/Cuboid.h"
+#include "../../shapes/Cuboid.h"
 
 
 class CuboidPairFactory

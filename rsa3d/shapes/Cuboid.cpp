@@ -339,6 +339,10 @@ void Cuboid::obtainVertices(Vector<3> (&vertices)[VERTEX::NUM_OF], const Vector<
         vertices[i] = pos + translation + orientation * Cuboid::getRelativeVertex(i);
 }
 
+// Returns vertex position as if the cuboid centroid was in the origin of
+// coordinate system and was aligned with all axes. Check Cuboid::initClass
+// for vertices order
+//----------------------------------------------------------------------------
 const Vector<3>  Cuboid::getRelativeVertex(std::size_t index) {
     return relativeVertices[index];
 }
