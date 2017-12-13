@@ -5,7 +5,8 @@
 #include "MineOverlap.h"
 
 // Define this to disable edge-intersection fix in Cuboid::OverlapStrategy::MINE
-//#define DISABLE_OVERLAP_FIX
+//#define DISABLE_OVERLAP_FIX1
+//#define DISABLE_OVERLAP_FIX2
 
 
 namespace
@@ -73,6 +74,7 @@ bool MineOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) 
             return true;
     }
 
+#ifndef DISABLE_OVERLAP_FIX1
     // Check whether edges of s lie in this. TO OPTIMIZE
     if (checkSegment(cube1, v_trans[VERTEX::PPP], v_trans[VERTEX::PPN]) ||
         checkSegment(cube1, v_trans[VERTEX::PPN], v_trans[VERTEX::PNN]) ||
@@ -89,8 +91,9 @@ bool MineOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) 
     {
         return true;
     }
+#endif
 
-#ifndef DISABLE_OVERLAP_FIX
+#ifndef DISABLE_OVERLAP_FIX2
     // Check whether edges of this lie in s. TO OPTIMIZE
     if (checkSegment(cube2, v_trans_bis[VERTEX::PPP], v_trans_bis[VERTEX::PPN]) ||
         checkSegment(cube2, v_trans_bis[VERTEX::PPN], v_trans_bis[VERTEX::PNN]) ||
