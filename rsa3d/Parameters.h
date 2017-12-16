@@ -36,7 +36,7 @@ public:
 	std::string particleType;
 	std::string particleAttributes;
 
-	bool multiProcess = false;
+	int generatorProcesses = 1;
 
 
 	Parameters();

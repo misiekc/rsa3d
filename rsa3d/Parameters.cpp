@@ -29,7 +29,7 @@ Parameters::Parameters() {
 	boundaryConditions = "periodic";
 	particleType = "Sphere";
 	particleAttributes = "2";
-	multiProcess = false;
+	generatorProcesses = 1;
 
 }
 
@@ -65,8 +65,7 @@ Parameters::Parameters(const std::string& sFile){
 
 		else if (sKey.compare("from")==0) 						this->from = std::stoi(sValue);
 		else if (sKey.compare("collectors")==0) 				this->collectors = std::stoi(sValue);
-		else if (sKey.compare("multiProcess")==0) 				this->multiProcess = (sValue.compare("false")==0)?false:true;
-
+		else if (sKey.compare("generatorProcesses")==0) 		this->generatorProcesses = std::stoi(sValue);
 	}
 	file.close();
 }

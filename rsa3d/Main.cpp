@@ -52,48 +52,56 @@ std::vector<Shape<RSA_DIMENSION> *> * fromFile(unsigned char dim, std::string fi
 	return v;
 }
 
-int simulate(Parameters *params) {
-	PackingGenerator<RSA_DIMENSION> *pg;
+void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 	char buf[20];
-	int pid = 0;
 	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_DIMENSION));
 	std::string size(buf);
 
-	std::string sFile = "packing_" + params->particleType + "_"
-			+ params->particleAttributes + "_" + size + ".dat";
+	PackingGenerator<RSA_DIMENSION> *pg = new PackingGenerator<RSA_DIMENSION>(seed, params);
+	pg->run();
+	std::vector<Shape<RSA_DIMENSION> *> *packing = pg->getPacking();
+
+	if (params->storePackings) {
+		std::string sPackingFile = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + "_" + std::to_string(seed) + ".bin";
+		toFile(sPackingFile, packing);
+	}
+	dataFile << seed << "\t" << packing->size() << "\t"	<< (*packing)[packing->size() - 1]->time << std::endl;
+	dataFile.flush();
+	delete pg;
+}
+
+int simulate(Parameters *params) {
+	int pid = 0;
+	char buf[20];
+	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_DIMENSION));
+	std::string size(buf);
+
+	std::string sFile = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + ".dat";
 	std::ofstream file(sFile);
 	file.precision(std::numeric_limits<double>::digits10 + 1);
-	std::vector<Shape<RSA_DIMENSION> *> *packing;
 
-	for (int i = params->from; i < params->from + params->collectors; i++) {
-
-		if (params->multiProcess){
+	int seed = params->from;
+	while(seed < params->from + params->collectors){
+		int i;
+		for(i=0; ( (i < params->generatorProcesses) && ((seed+i) < (params->from + params->collectors)) ); i++){
 			pid = fork();
 			if (pid < 0){
 				std::cout << "fork problem" << std::endl;
 				i--;
 				continue;
 			}
-			if (pid > 0)
+			if (pid==0){
+				runSingleSimulation(seed + i, params, file);
+				return 1;
+			}
+			if (pid > 0){
 				continue;
+			}
 		}
-		pg = new PackingGenerator<RSA_DIMENSION>(i, params);
-		pg->run();
-		packing = pg->getPacking();
-		if (params->storePackings) {
-			std::string sPackingFile = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + "_" + std::to_string(i) + ".bin";
-			toFile(sPackingFile, packing);
-		}
-		file << i << "\t" << packing->size() << "\t"
-				<< (*packing)[packing->size() - 1]->time << std::endl;
-		file.flush();
-		delete pg;
-		if (params->multiProcess && pid == 0)
-			return 1;
-	}
-	if (params->multiProcess){
-		for (int i = params->from; i < params->from + params->collectors; i++)
+		for(int j=0; j<i; j++){
 			wait(NULL);
+			seed++;
+		}
 	}
 	file.close();
 	return 1;
