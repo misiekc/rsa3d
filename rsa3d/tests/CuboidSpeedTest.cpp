@@ -38,7 +38,7 @@ namespace
         system_clock::time_point time_before, time_after;
         nanoseconds dur;
 
-        std::cout << std::setw(15) << std::left << Cuboid::getOverlapStrategy()->getName()
+        std::cout << std::setw(20) << std::left << Cuboid::getOverlapStrategy()->getName()
                   << " test... " << std::flush;
 
         time_before = system_clock::now();

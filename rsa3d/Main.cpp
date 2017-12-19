@@ -153,18 +153,17 @@ int cube_speedtest_main(int argc, char **argv)
     
     std::size_t pairs = config->getUnsignedInt("pairs");
     std::size_t repeats = config->getUnsignedInt("repeats");
-    std::istringstream sizes(config->getString("box_sizes"));
+    std::istringstream ballRadia(config->getString("ball_radia"));
     
 	ShapeFactory::initShapeClass("Cuboid", "3 " + config->getString("cuboid_size"));
-    BoxFactory * factory = BoxFactory::getInstance();
+    BallFactory * factory = BallFactory::getInstance();
     std::vector<cube_speedtest::TestData> dataVector;
-    double size;
+    double ballRadius;
     
     // Warm up and perform tests
     cube_speedtest::warmUp(factory);
-    while (sizes >> size) {
-        size /= 2;
-        factory->setBoxSize(size, size, size);
+    while (ballRadia >> ballRadius) {
+        factory->setRadius(ballRadius);
         cube_speedtest::TestData data = cube_speedtest::perform(factory, pairs, repeats);
         dataVector.push_back(data);
     }
@@ -178,7 +177,7 @@ int cube_speedtest_main(int argc, char **argv)
     }
     
     // Print aquired probabilities
-    std::cout << ">> Probabilities for box sizes" << std::endl;
+    std::cout << ">> Probabilities for ball radia" << std::endl;
     std::cout << std::left;
     for (auto data : dataVector) {
         std::cout << std::setw(15) << data.overlapProb.value << " : " << data.factoryDesc << std::endl;
