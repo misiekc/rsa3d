@@ -31,15 +31,17 @@ namespace cube_speedtest
         friend std::ostream & operator<<(std::ostream & _stream, const Quantity & _quantity);
     };
 
+    struct StrategyData {
+        std::string     name;
+        Quantity        time;
+    };
+
     // Struct representing analysis results
     struct TestData {
         Quantity        numOverlapped;
         std::size_t     numAll;
         Quantity        overlapProb;
-        Quantity        mineNs;
-        Quantity        triNs;
-        Quantity        SATNs;
-        Quantity        optSATNs;
+        std::vector<StrategyData>   strategyDatas;
         std::string     factoryDesc;
         
         void printResults();

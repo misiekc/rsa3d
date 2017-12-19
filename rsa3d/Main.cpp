@@ -141,6 +141,9 @@ int cube_speedtest_main(int argc, char **argv)
         die("Usage: ./rsa cube_speedtest [input] [output = cube_speedtest.csv]");
 
     std::ifstream input(argv[2]);
+    if (!input)
+        die("Error opening file");
+
     auto config = std::unique_ptr<Config> (Config::parse(input));
     input.close();    
     

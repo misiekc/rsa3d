@@ -177,10 +177,10 @@ namespace cube_speedtest
         
         // Calculate and return results
         result.numOverlapped = Quantity::fromSamples(num_overlapped);
-        result.mineNs = Quantity::fromSamples(mine_times);
-        result.triNs = Quantity::fromSamples(tri_times);
-        result.SATNs = Quantity::fromSamples(SAT_times);
-        result.optSATNs = Quantity::fromSamples(optSAT_times);
+        result.strategyDatas.push_back(StrategyData{"Mine", Quantity::fromSamples(mine_times)});
+        result.strategyDatas.push_back(StrategyData{"Tri-tri", Quantity::fromSamples(tri_times)});
+        result.strategyDatas.push_back(StrategyData{"SAT", Quantity::fromSamples(SAT_times)});
+        result.strategyDatas.push_back(StrategyData{"Opt. SAT", Quantity::fromSamples(optSAT_times)});
         result.overlapProb = Quantity(result.numOverlapped.value / _pairs_to_test, 
             result.numOverlapped.error / _pairs_to_test);
          
@@ -194,11 +194,9 @@ namespace cube_speedtest
     {
         std::cout << "(" << this->numOverlapped << ")/" << this->numAll << " overlapped. Overlap probability: "
             << this->overlapProb << std::endl;
-        std::cout << "Mine avg. time     : " << this->mineNs << std::endl;
-        std::cout << "Tri-tri avg. time  : " << this->triNs << std::endl;
-        std::cout << "SAT avg. time      : " << this->SATNs << std::endl;
-        std::cout << "Opt. SAT avg. time : " << this->optSATNs << std::endl;
-        std::cout << "Factory used       : " << this->factoryDesc << std::endl;
+        for (auto strategyData : strategyDatas)
+            std::cout << std::left << std::setw(20) << (strategyData.name + " avg. time") << ": " << strategyData.time << std::endl;
+        std::cout << std::left << std::setw(20) << "Factory used" << ": " << this->factoryDesc << std::endl;
     }
 
 
@@ -206,20 +204,18 @@ namespace cube_speedtest
     //----------------------------------------------------------------------------------------
     void TestData::toCsv(std::ostream & _out, const std::vector<TestData> & _data)
     {
-        _out << "probability,error,my alg time,error,tri-tri alg time,error,SAT alg time,error,opt SAT alg time,error,"
-            "num of overlapped,error,num of all,factory desc" << std::endl;
+        _out << "probability,error";
+        for (auto strategyData : _data[0].strategyDatas)
+            _out << "," << strategyData.name << " time," << strategyData.name << " error";
+        _out << ",num of overlapped,error,num of all,factory desc" << std::endl;
             
         for (auto d : _data) {
             _out << d.overlapProb.value << ",";
             _out << d.overlapProb.error << ",";
-            _out << d.mineNs.value << ",";
-            _out << d.mineNs.error << ",";
-            _out << d.triNs.value << ",";
-            _out << d.triNs.error << ",";
-            _out << d.SATNs.value << ",";
-            _out << d.SATNs.error << ",";
-            _out << d.optSATNs.value << ",";
-            _out << d.optSATNs.error << ",";
+            for (auto strategyData : d.strategyDatas) {
+                _out << strategyData.time.value << ",";
+                _out << strategyData.time.error << ",";
+            }
             _out << d.numOverlapped.value << ",";
             _out << d.numOverlapped.error << ",";
             _out << d.numAll << ",";
