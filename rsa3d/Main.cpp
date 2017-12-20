@@ -14,6 +14,7 @@
 #include "shapes/cube_strategies/SATOverlap.h"
 #include "shapes/cube_strategies/TriTriOverlap.h"
 #include "shapes/cube_strategies/OptimizedSATOverlap.h"
+#include "shapes/cube_strategies/MineOverlap.h"
 
 #include <unistd.h>
 #include <sys/wait.h>
@@ -159,12 +160,18 @@ int cube_speedtest_main(int argc, char **argv)
     BallFactory * factory = BallFactory::getInstance();
     std::vector<cube_speedtest::TestData> dataVector;
     double ballRadius;
+
+    MineOverlap mineOverlap;
+    TriTriOverlap triOverlap;
+    SATOverlap satOverlap;
+    OptimizedSATOverlap optimizedSATOverlap;
+    std::vector<OverlapStrategy *> strategies = {&mineOverlap, &triOverlap, &satOverlap, &optimizedSATOverlap};
     
     // Warm up and perform tests
     cube_speedtest::warmUp(factory);
     while (ballRadia >> ballRadius) {
         factory->setRadius(ballRadius);
-        cube_speedtest::TestData data = cube_speedtest::perform(factory, pairs, repeats);
+        cube_speedtest::TestData data = cube_speedtest::perform(factory, strategies, pairs, repeats);
         dataVector.push_back(data);
     }
     

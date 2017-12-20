@@ -49,7 +49,8 @@ namespace cube_speedtest
     };
 
     void warmUp(CuboidPairFactory * _factor);
-    TestData perform(CuboidPairFactory * _factory, std::size_t _pairs_to_test, std::size_t _repeats);
+    TestData perform(CuboidPairFactory *_factory, const std::vector<OverlapStrategy *> & _strategies, std::size_t _pairs_to_test,
+                         std::size_t _repeats);
 }
 
 #endif // _CUBOID_SPEED_TEST_H

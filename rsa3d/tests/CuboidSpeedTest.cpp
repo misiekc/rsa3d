@@ -108,82 +108,52 @@ namespace cube_speedtest
 
     // Performs test for given Cuboid factory and returns results
     //----------------------------------------------------------------------------------------
-    TestData perform(CuboidPairFactory * _factory, std::size_t _pairs_to_test, std::size_t _repeats)
+    TestData perform(CuboidPairFactory *_factory, const std::vector<OverlapStrategy *> &_strategies, std::size_t _pairs_to_test,
+                     std::size_t _repeats)
     {
         if (_pairs_to_test == 0)
             throw std::runtime_error("_pairs_to_test == 0");
         if (_repeats == 0)
             throw std::runtime_error("_repeats == 0");
-          
-        TestData result;
-        SingleTestResult single_result;
-        std::vector<double> mine_times, tri_times, SAT_times, optSAT_times;
-        std::vector<double> num_overlapped;
-        
-        // Reserve memory for vector of measured times and number of overlaps
-        mine_times.reserve(_repeats);
-        tri_times.reserve(_repeats);
-        SAT_times.reserve(_repeats);
-        optSAT_times.reserve(_repeats);
-        num_overlapped.reserve(_repeats);
-        
-        result.numAll = _pairs_to_test;
-        result.factoryDesc = _factory->getDescription();
+
         std::cout << std::endl;
-        std::cout << "Starting (" << result.factoryDesc << ", pairs: " << _pairs_to_test
+        std::cout << "Starting (" << _factory->getDescription() << ", pairs: " << _pairs_to_test
             << ", repeats: " << _repeats << ")..." << std::endl;
 
-        MineOverlap mineOverlap;
-        TriTriOverlap triTriOverlap;
-        SATOverlap satOverlap;
-        OptimizedSATOverlap optimizedSATOverlap;
-
         // Test
+        std::vector<double> num_overlapped;
+        std::vector<std::vector<double>> times(_strategies.size());
         for (std::size_t i = 0; i < _repeats; i++)
         {
             std::stringstream tryNoInfoStream;
             tryNoInfoStream << "(" << (i + 1) << "/" << _repeats << ") ";
             std::string tryNoInfo = tryNoInfoStream.str();
             std::string tryNoInfoSpace(tryNoInfo.length(), ' ');
-            
-            // Test my algorithm
-            Cuboid::setOverlapStrategy(&mineOverlap);
-            std::cout << tryNoInfo;
-            single_result = test_single_alg(_factory, _pairs_to_test);
-            num_overlapped.push_back(single_result.overlapped);
-            mine_times.push_back(single_result.nanos);
-            
-            // Test triangle algorithm
-            Cuboid::setOverlapStrategy(&triTriOverlap);
-            std::cout << tryNoInfoSpace;
-            single_result = test_single_alg(_factory, _pairs_to_test);
-            num_overlapped.push_back(single_result.overlapped);
-            tri_times.push_back(single_result.nanos);
 
-            // Test SAT algorithm
-            Cuboid::setOverlapStrategy(&satOverlap);
-            std::cout << tryNoInfoSpace;
-            single_result = test_single_alg(_factory, _pairs_to_test);
-            num_overlapped.push_back(single_result.overlapped);
-            SAT_times.push_back(single_result.nanos);
-
-            // Test optimised SAT algorithm
-            Cuboid::setOverlapStrategy(&optimizedSATOverlap);
-            std::cout << tryNoInfoSpace;
-            single_result = test_single_alg(_factory, _pairs_to_test);
-            num_overlapped.push_back(single_result.overlapped);
-            optSAT_times.push_back(single_result.nanos);
+            // Test each strategy
+            for (std::size_t j = 0; j < _strategies.size(); j++) {
+                Cuboid::setOverlapStrategy(_strategies[j]);
+                std::cout << (j == 0 ? tryNoInfo : tryNoInfoSpace);
+                SingleTestResult single_result = test_single_alg(_factory, _pairs_to_test);
+                num_overlapped.push_back(single_result.overlapped);
+                times[j].push_back(single_result.nanos);
+            }
         }
-        
+
         // Calculate and return results
+        TestData result;
+        result.numAll = _pairs_to_test;
+        result.factoryDesc = _factory->getDescription();
         result.numOverlapped = Quantity::fromSamples(num_overlapped);
-        result.strategyDatas.push_back(StrategyData{"Mine", Quantity::fromSamples(mine_times)});
-        result.strategyDatas.push_back(StrategyData{"Tri-tri", Quantity::fromSamples(tri_times)});
-        result.strategyDatas.push_back(StrategyData{"SAT", Quantity::fromSamples(SAT_times)});
-        result.strategyDatas.push_back(StrategyData{"Opt. SAT", Quantity::fromSamples(optSAT_times)});
-        result.overlapProb = Quantity(result.numOverlapped.value / _pairs_to_test, 
-            result.numOverlapped.error / _pairs_to_test);
-         
+        result.overlapProb = Quantity(result.numOverlapped.value / _pairs_to_test,
+                                      result.numOverlapped.error / _pairs_to_test);
+
+        for (std::size_t i = 0; i < _strategies.size(); i++) {
+            result.strategyDatas.push_back(StrategyData {
+                    _strategies[i]->getName(),
+                    Quantity::fromSamples(times[i]) });
+        }
+
         return result;
     }
 
@@ -195,8 +165,8 @@ namespace cube_speedtest
         std::cout << "(" << this->numOverlapped << ")/" << this->numAll << " overlapped. Overlap probability: "
             << this->overlapProb << std::endl;
         for (auto strategyData : strategyDatas)
-            std::cout << std::left << std::setw(20) << (strategyData.name + " avg. time") << ": " << strategyData.time << std::endl;
-        std::cout << std::left << std::setw(20) << "Factory used" << ": " << this->factoryDesc << std::endl;
+            std::cout << std::left << std::setw(30) << (strategyData.name + " avg. time") << ": " << strategyData.time << std::endl;
+        std::cout << std::left << std::setw(30) << "Factory used" << ": " << this->factoryDesc << std::endl;
     }
 
 
