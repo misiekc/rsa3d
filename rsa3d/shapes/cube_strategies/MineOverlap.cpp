@@ -138,3 +138,7 @@ bool MineOverlap::checkSegment(Cuboid *cube, const Vector<3> & point1, const Vec
 std::string MineOverlap::getName() {
     return "MineOverlap";
 }
+
+void MineOverlap::runOverheadOperations(Cuboid *cube1, Cuboid *cube2) {
+
+}

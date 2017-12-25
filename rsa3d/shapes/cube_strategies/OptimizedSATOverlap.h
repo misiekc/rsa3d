@@ -13,6 +13,8 @@ public:
     bool overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) override;
 
     std::string getName() override;
+
+    void runOverheadOperations(Cuboid *cube1, Cuboid *cube2) override;
 };
 
 

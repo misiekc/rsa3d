@@ -85,3 +85,14 @@ bool OptimizedSATOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditio
 std::string OptimizedSATOverlap::getName() {
     return "OptimizedSATOverlap";
 }
+
+void OptimizedSATOverlap::runOverheadOperations(Cuboid *cube1, Cuboid *cube2) {
+    Matrix<3, 3> orientation1 = cube1->getOrientation();
+    Matrix<3, 3> orientation2 = cube2->getOrientation();
+    Vector<3> Ax = orientation1 * Vector<3>{{1, 0, 0}};
+    Vector<3> Ay = orientation1 * Vector<3>{{0, 1, 0}};
+    Vector<3> Az = orientation1 * Vector<3>{{0, 0, 1}};
+    Vector<3> Bx = orientation2 * Vector<3>{{1, 0, 0}};
+    Vector<3> By = orientation2 * Vector<3>{{0, 1, 0}};
+    Vector<3> Bz = orientation2 * Vector<3>{{0, 0, 1}};
+}

@@ -18,7 +18,6 @@
 #include "../shapes/cube_strategies/TriTriOverlap.h"
 #include "../shapes/cube_strategies/SATOverlap.h"
 #include "../shapes/cube_strategies/OptimizedSATOverlap.h"
-#include "utility/Quantity.h"
 
 
 using namespace std::chrono;
@@ -30,34 +29,64 @@ namespace
     {
         unsigned int overlapped = 0;
         long nanos = 0;
+        long overhead = 0;
     };
-    
+
+    class Timer
+    {
+        system_clock::time_point startTime;
+        system_clock::time_point endTime;
+
+    public:
+        void start() {
+            startTime = system_clock::now();
+        }
+
+        void stop() {
+            endTime = system_clock::now();
+        }
+
+        template <typename DUR>
+        long count() {
+            DUR duration = duration_cast<DUR>(endTime - startTime);
+            return duration.count();
+        }
+    };
+
     // Helper method. Performs single test of overlap algorithm (set from the outside)
     //----------------------------------------------------------------------------------------
     SingleTestResult test_single_alg(CuboidPairFactory * _factory, std::size_t _pairs_to_test)
     {
         SingleTestResult result{};
+        OverlapStrategy * strategy = Cuboid::getOverlapStrategy();
         MockBC bc;
-        system_clock::time_point time_before, time_after;
-        nanoseconds dur;
+        Timer timer;
 
-        std::cout << std::setw(20) << std::left << Cuboid::getOverlapStrategy()->getName()
-                  << " test... " << std::flush;
+        std::cout << std::setw(20) << std::left << Cuboid::getOverlapStrategy()->getName() << " test... " << std::flush;
 
-        time_before = system_clock::now();
-	    for (std::size_t i = 0; i < _pairs_to_test; i++) {
-	        CuboidPairFactory::CuboidPair pair;
-	        pair = _factory->generate();
-	        if (pair.first->overlap(&bc, pair.second))
-	            result.overlapped++;
-	        pair.free();
-	    }
-	    time_after = system_clock::now();
-	    dur = duration_cast<std::chrono::nanoseconds>(time_after - time_before);
-	    dur /= _pairs_to_test;
-	    result.nanos = dur.count();
+        timer.start();
+        for (std::size_t i = 0; i < _pairs_to_test; i++) {
+            CuboidPairFactory::CuboidPair pair;
+            pair = _factory->generate();
+            if (pair.first->overlap(&bc, pair.second))
+                result.overlapped++;
+            pair.free();
+        }
+        timer.stop();
+        result.nanos = timer.count<nanoseconds>();
+
+        timer.start();
+        for (std::size_t i = 0; i < _pairs_to_test; i++) {
+            CuboidPairFactory::CuboidPair pair;
+            pair = _factory->generate();
+            strategy->runOverheadOperations(pair.first, pair.second);
+            pair.free();
+        }
+        timer.stop();
+        result.overhead = timer.count<nanoseconds>();
+        result.nanos -= result.overhead;
 	    
-	    std::cout << result.nanos << " ns, " << result.overlapped << " overlapped" << std::endl;
+	    std::cout << result.nanos << " ns, " << result.overhead << " ns overhead, " << result.overlapped << " overlapped" << std::endl;
 	    return result;
     }
 
@@ -84,8 +113,6 @@ namespace
 
 namespace cube_speedtest
 {
-
-
     // Perforsm one warm up test for consistent results. The first one seems to give slower
     // result regardless of chosen algorithm.
     //----------------------------------------------------------------------------------------

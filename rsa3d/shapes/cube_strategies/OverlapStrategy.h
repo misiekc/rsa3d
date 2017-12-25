@@ -16,6 +16,7 @@ public:
     virtual ~OverlapStrategy() = default;
     virtual bool overlap(Cuboid * cube1, Cuboid * cube2, BoundaryConditions *bc) = 0;
     virtual std::string getName() = 0;
+    virtual void runOverheadOperations(Cuboid *cube1, Cuboid *cube2) = 0;
 };
 
 

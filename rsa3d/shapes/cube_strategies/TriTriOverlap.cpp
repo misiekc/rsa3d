@@ -49,3 +49,9 @@ void TriTriOverlap::obtainTris(Cuboid * cube, Vector<3> (&arr)[12][3], const Vec
 std::string TriTriOverlap::getName() {
     return "TriTriOverlap";
 }
+
+void TriTriOverlap::runOverheadOperations(Cuboid *cube1, Cuboid *cube2) {
+    Vector<3> vert[VERTEX::NUM_OF];
+    cube1->obtainVertices(vert, Vector<3>());
+    cube2->obtainVertices(vert, Vector<3>());
+}
