@@ -6,8 +6,17 @@
 
 #include "CuboidPointInsideTest.h"
 #include "utility/MockBC.h"
+#include "../ShapeFactory.h"
+#include "utility/BallFactory.h"
 
-#include <iostream>
+namespace
+{
+    void die(const std::string & reason)
+    {
+        std::cerr << reason << std::endl;
+        exit(EXIT_FAILURE);
+    }
+}
 
 namespace cube_pitest
 {   
@@ -60,6 +69,26 @@ namespace cube_pitest
         std::cout << "with point inside : " << results.withPointInside << std::endl;
         std::cout << "conflicts         : " << results.conflicts << std::endl;
     }
-}
 
-void ble(){}
+    // Performs Cuboid::pointInside test
+    //------------------------------------------------------------------------------------------
+    void main(int argc, char **argv)
+    {
+        if (argc < 7)
+            die("Usage: ./rsa cube_pi_test [size_x] [size_y] [size_z] [ball_radius] [max_tries]");
+
+        double ball_radius = std::stod(argv[5]);
+        int max_tries = std::stoi(argv[6]);
+
+        if (ball_radius <= 0 || max_tries <= 0)
+            die("Wrong input. Aborting.");
+
+        ShapeFactory::initShapeClass("Cuboid", std::string("3 ") + argv[2] + " " + argv[3] + " " + argv[4]);
+        BallFactory * factory = BallFactory::getInstance();
+        factory->setRadius(ball_radius);
+
+        cube_pitest::Results results = cube_pitest::perform(factory, max_tries);
+        std::cout << std::endl;
+        cube_pitest::print_results(results);
+    }
+}

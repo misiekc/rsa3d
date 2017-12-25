@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
+#include <bits/unique_ptr.h>
+#include <fstream>
 
 #include "CuboidSpeedTest.h"
 #include "utility/MockBC.h"
@@ -16,6 +18,7 @@
 #include "../shapes/cube_strategies/TriTriOverlap.h"
 #include "../shapes/cube_strategies/SATOverlap.h"
 #include "../shapes/cube_strategies/OptimizedSATOverlap.h"
+#include "utility/Quantity.h"
 
 
 using namespace std::chrono;
@@ -57,45 +60,32 @@ namespace
 	    std::cout << result.nanos << " ns, " << result.overlapped << " overlapped" << std::endl;
 	    return result;
     }
+
+    void die(const std::string & reason)
+    {
+        std::cerr << reason << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    OverlapStrategy * strategyFromString(const std::string &_name) {
+        if (_name == "mine")
+            return new MineOverlap;
+        else if (_name == "sat")
+            return new SATOverlap;
+        else if (_name == "optimised_sat")
+            return new OptimizedSATOverlap;
+        else if (_name == "tri_tri")
+            return new TriTriOverlap;
+        else
+            throw std::runtime_error("unknown strategy: " + _name);
+    }
 }
 
 
 namespace cube_speedtest
 {
-    // Returns Quantity computed from vector of samples
-    //----------------------------------------------------------------------------------------
-    Quantity Quantity::fromSamples(const std::vector<double> & _samples)
-    {
-        if (_samples.empty())
-            return Quantity();
-        else if (_samples.size() == 1)
-            return Quantity(_samples[0], 0);
-            
-        Quantity result;
-        double sum, dev_sum;
-        
-        sum = std::accumulate(_samples.begin(), _samples.end(), 0);
-        result.value = sum / _samples.size();
-        dev_sum = std::accumulate(_samples.begin(), _samples.end(), 0,
-            [&](double s, double next) {
-                s += pow(result.value - next, 2);
-                return s;
-            });
-       result.error = dev_sum / _samples.size() / (_samples.size() - 1);
-       result.error = sqrt(result.error);
-       return result;
-    }
-    
 
-    // Friend stream insertion operator
-    //----------------------------------------------------------------------------------------
-    std::ostream & operator<<(std::ostream & _stream, const Quantity & _quantity)
-    {
-        _stream << _quantity.value << " +- " << _quantity.error;
-        return _stream;
-    }
 
-    
     // Perforsm one warm up test for consistent results. The first one seems to give slower
     // result regardless of chosen algorithm.
     //----------------------------------------------------------------------------------------
@@ -193,5 +183,76 @@ namespace cube_speedtest
         }
         
         _out.flush();
+    }
+
+    // Performs cuboid speedtests with parameters passed to process
+    //----------------------------------------------------------------------------------------
+    int main(int argc, char **argv) {
+        if (argc < 3)
+            die("Usage: ./rsa cube_speedtest [input] [output = cube_speedtest.csv]");
+
+        std::ifstream input(argv[2]);
+        if (!input)
+            die("Error opening " + std::string(argv[2]) + " file to read");
+
+        auto config = std::unique_ptr<Config> (Config::parse(input));
+        input.close();
+
+        std::string output = "cube_speedtest.csv";
+        if (argc == 4)
+            output = argv[3];
+
+        std::size_t pairs = config->getUnsignedInt("pairs");
+        std::size_t repeats = config->getUnsignedInt("repeats");
+
+        ShapeFactory::initShapeClass("Cuboid", "3 " + config->getString("cuboid_size"));
+        BallFactory * factory = BallFactory::getInstance();
+        std::vector<cube_speedtest::TestData> dataVector;
+        double ballRadius;
+
+        std::istringstream strategiesStream(config->getString("strategies"));
+        std::string strategyName;
+        std::vector<OverlapStrategy *> strategies;
+        while (strategiesStream >> strategyName)
+            strategies.push_back(strategyFromString(strategyName));
+
+        // Warm up and perform tests
+        cube_speedtest::warmUp(factory);
+        std::istringstream ballRadia(config->getString("ball_radia"));
+        while (ballRadia >> ballRadius) {
+            factory->setRadius(ballRadius);
+            cube_speedtest::TestData data = cube_speedtest::perform(factory, strategies, pairs, repeats);
+            dataVector.push_back(data);
+        }
+
+        // Print results
+        std::cout << std::endl;
+        std::cout << ">> Obtained results:" << std::endl << std::endl;
+        for (auto data : dataVector) {
+            data.printResults();
+            std::cout << std::endl;
+        }
+
+        // Print aquired probabilities
+        std::cout << ">> Probabilities for ball radia" << std::endl;
+        std::cout << std::left;
+        for (auto data : dataVector) {
+            std::cout << std::setw(15) << data.overlapProb.value << " : " << data.factoryDesc << std::endl;
+        }
+        std::cout << std::endl;
+
+        // Store to file
+        std::cout << ">> Storing to file " << output << "..." << std::endl;
+        std::ofstream file(output);
+        if (!file)
+            die("Error opening " + output + " file to write");
+
+        cube_speedtest::TestData::toCsv(file, dataVector);
+        file.close();
+
+        for (auto strategy : strategies)
+            delete strategy;
+
+        return EXIT_SUCCESS;
     }
 }

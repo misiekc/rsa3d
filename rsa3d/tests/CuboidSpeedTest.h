@@ -6,30 +6,20 @@
 
 #ifndef _CUBOID_SPEED_TEST_H
     #define _CUBOID_SPEED_TEST_H
-    
 
+
+#include "../Config.h"
+#include "../ShapeFactory.h"
+#include "utility/BallFactory.h"
 #include "utility/CuboidPairFactory.h"
+#include "utility/Quantity.h"
 
 #include <vector>
 #include <ostream>
 
 
 namespace cube_speedtest 
-{   
-    // Struct representing quantity with uncertainity
-    struct Quantity {
-        double value = 0;
-        double error = 0;
-        
-        Quantity()
-        { }
-        
-        Quantity(double _value, double _error) : value(_value), error(_error)
-        { }
-        
-        static Quantity fromSamples(const std::vector<double> & _samples);
-        friend std::ostream & operator<<(std::ostream & _stream, const Quantity & _quantity);
-    };
+{
 
     struct StrategyData {
         std::string     name;
@@ -51,6 +41,8 @@ namespace cube_speedtest
     void warmUp(CuboidPairFactory * _factor);
     TestData perform(CuboidPairFactory *_factory, const std::vector<OverlapStrategy *> & _strategies, std::size_t _pairs_to_test,
                          std::size_t _repeats);
+
+    int main(int argc, char **argv);
 }
 
 #endif // _CUBOID_SPEED_TEST_H

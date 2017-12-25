@@ -10,6 +10,7 @@
 #include <cassert>
 #include <cstring>
 #include <sstream>
+#include <fstream>
 
 #include "../Vector.h"
 #include "../Intersection.h"
@@ -18,66 +19,27 @@
 #include "utility/CuboidPairFactory.h"
 #include "CuboidIntTest.h"
 #include "../shapes/cube_strategies/MineOverlap.h"
+#include "../ShapeFactory.h"
+#include "utility/BallFactory.h"
+#include "../shapes/cube_strategies/SATOverlap.h"
+#include "../shapes/cube_strategies/TriTriOverlap.h"
+#include "../shapes/cube_strategies/OptimizedSATOverlap.h"
+
+
 
 namespace
 {
     MineOverlap mineOverlap;
+
+    void die(const std::string & reason)
+    {
+        std::cerr << reason << std::endl;
+        exit(EXIT_FAILURE);
+    }
 }
 
 namespace cube_inttest
 {
-
-    // Runs intersection::tri_tri3D selftest. Two simple almoast-intersecting and 
-    // almoast-not-intersecting cases are checked
-    //----------------------------------------------------------------------------------------
-    void TriTriInt_selftest_run()
-    {
-        Vector<3> triangle1[] = {
-            Vector<3>{{0, -1, 0}},
-            Vector<3>{{0, 1, 0}},
-            Vector<3>{{0, 0, 1}}
-        };
-        
-        // Triangle on z = 1.00000001 plane containing x = 0, y = 0
-        Vector<3> triangle2[] = {
-            Vector<3>{{1.4, 0.8, 1.00000001}},
-            Vector<3>{{-1.3, 0, 1.00000001}},
-            Vector<3>{{0, -4.5, 1.00000001}}
-        };
-        
-        // Triangle on z = 0.99999999 plane containing x = 0, y = 0
-        Vector<3> triangle3[] = {
-            Vector<3>{{1.4, 0.8, 0.99999999}},
-            Vector<3>{{-1.3, 0, 0.99999999}},
-            Vector<3>{{0, -4.5, 0.99999999}}
-        };
-        
-        Vector<3> triangle4[] = {
-            Vector<3>{{-1, -1, 0}},
-            Vector<3>{{1, 0, 2.00000001}},
-            Vector<3>{{-1, 1, 0}}
-        };
-        
-        Vector<3> triangle5[] = {
-            Vector<3>{{-1, -1, 0}},
-            Vector<3>{{1, 0, 1.99999999}},
-            Vector<3>{{-1, 1, 0}}
-        };
-        
-        std::cout << std::boolalpha;
-        std::cout << ">> Performing intersection::tri_tri3D quick selftest..." << std::endl;
-        assert(intersection::tri_tri3D(triangle1, triangle2) == false);
-        assert(intersection::tri_tri3D(triangle1, triangle3) == true);
-        assert(intersection::tri_tri3D(triangle1, triangle4) == false);
-        assert(intersection::tri_tri3D(triangle1, triangle5) == true);
-        assert(intersection::tri_tri3D(triangle2, triangle1) == false);
-        assert(intersection::tri_tri3D(triangle3, triangle1) == true);
-        assert(intersection::tri_tri3D(triangle4, triangle1) == false);
-        assert(intersection::tri_tri3D(triangle5, triangle1) == true);
-        std::cout << "Passed." << std::endl;
-    }
-
-
     // Performs Cuboid::overlap algorithm check. It generates some random pairs of cuboids
     // and compares result given by ::MINE strategy and _strategy strategy
     //--------------------------------------------------------------------------------------------
@@ -139,5 +101,57 @@ namespace cube_inttest
             _ostr << std::endl;
             pair_no++;
 	    }
+    }
+
+    // Performs cuboid intersection test with parameters passed to process
+    //----------------------------------------------------------------------------------------
+    void main(int argc, char **argv)
+    {
+        if (argc < 7)
+            die("Usage: ./rsa cube_inttest [size_x] [size_y] [size_z] [ball_radius] [max_tries]");
+
+        double ball_radius = std::stod(argv[5]);
+        int max_tries = std::stoi(argv[6]);
+        if (ball_radius <= 0 || max_tries <= 0)
+            die("Wrong input. Aborting.");
+
+        std::stringstream init_stream;
+        init_stream << "3 " << argv[2] << " " << argv[3] << " " << argv[4];
+        ShapeFactory::initShapeClass("Cuboid", init_stream.str());
+        BallFactory * factory = BallFactory::getInstance();
+        factory->setRadius(ball_radius);
+
+        // Test SAT
+        SATOverlap satOverlap;
+        cube_inttest::Results results = cube_inttest::perform(factory, &satOverlap, max_tries);
+        print_results(results);
+        std::cout << std::endl;
+        results.free_missed_pairs();
+
+        // Test TRI_TRI
+        TriTriOverlap triTriOverlap;
+        results = cube_inttest::perform(factory, &triTriOverlap, max_tries);
+        print_results(results);
+        std::cout << std::endl;
+        results.free_missed_pairs();
+
+        // Test optimised SAT
+        OptimizedSATOverlap optimizedSATOverlap;
+        results = cube_inttest::perform(factory, &optimizedSATOverlap, max_tries);
+        print_results(results);
+        std::cout << std::endl;
+
+        // Dump missed test to file
+        if (results.missed > 0) {
+            std::ofstream dump_file("inttest_dump.nb");
+            if (dump_file) {
+                dump_missed_pairs(results, dump_file);
+                results.free_missed_pairs();
+                dump_file.close();
+                std::cout << ">> Missed pairs dumped to inttest_dump.nb" << std::endl;
+            } else {
+                std::cout << ">> Could not write to inttest_dump.nb";
+            }
+        }
     }
 }
