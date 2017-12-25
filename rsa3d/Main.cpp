@@ -134,6 +134,20 @@ void boundaries(Parameters *params) {
 }
 
 
+OverlapStrategy * strategyFromString(const std::string &_name) {
+    if (_name == "mine")
+        return new MineOverlap;
+    else if (_name == "sat")
+        return new SATOverlap;
+    else if (_name == "optimised_sat")
+        return new OptimizedSATOverlap;
+    else if (_name == "tri_tri")
+        return new TriTriOverlap;
+    else
+        throw std::runtime_error("unknown strategy: " + _name);
+}
+
+
 // Performs cuboid speedtests with parameters passed to process
 //--------------------------------------------------------------------------------------------
 int cube_speedtest_main(int argc, char **argv)
@@ -143,7 +157,7 @@ int cube_speedtest_main(int argc, char **argv)
 
     std::ifstream input(argv[2]);
     if (!input)
-        die("Error opening file");
+        die("Error opening " + std::string(argv[2]) + " file to read");
 
     auto config = std::unique_ptr<Config> (Config::parse(input));
     input.close();    
@@ -154,21 +168,21 @@ int cube_speedtest_main(int argc, char **argv)
     
     std::size_t pairs = config->getUnsignedInt("pairs");
     std::size_t repeats = config->getUnsignedInt("repeats");
-    std::istringstream ballRadia(config->getString("ball_radia"));
-    
-	ShapeFactory::initShapeClass("Cuboid", "3 " + config->getString("cuboid_size"));
+
+    ShapeFactory::initShapeClass("Cuboid", "3 " + config->getString("cuboid_size"));
     BallFactory * factory = BallFactory::getInstance();
     std::vector<cube_speedtest::TestData> dataVector;
     double ballRadius;
 
-    MineOverlap mineOverlap;
-    TriTriOverlap triOverlap;
-    SATOverlap satOverlap;
-    OptimizedSATOverlap optimizedSATOverlap;
-    std::vector<OverlapStrategy *> strategies = {&mineOverlap, &triOverlap, &satOverlap, &optimizedSATOverlap};
-    
+    std::istringstream strategiesStream(config->getString("strategies"));
+    std::string strategyName;
+    std::vector<OverlapStrategy *> strategies;
+    while (strategiesStream >> strategyName)
+        strategies.push_back(strategyFromString(strategyName));
+
     // Warm up and perform tests
     cube_speedtest::warmUp(factory);
+    std::istringstream ballRadia(config->getString("ball_radia"));
     while (ballRadia >> ballRadius) {
         factory->setRadius(ballRadius);
         cube_speedtest::TestData data = cube_speedtest::perform(factory, strategies, pairs, repeats);
@@ -194,9 +208,15 @@ int cube_speedtest_main(int argc, char **argv)
     // Store to file
     std::cout << ">> Storing to file " << output << "..." << std::endl;
     std::ofstream file(output);
+    if (!file)
+        die("Error opening " + output + " file to write");
+
     cube_speedtest::TestData::toCsv(file, dataVector);
     file.close();
-    
+
+    for (auto strategy : strategies)
+        delete strategy;
+
     return EXIT_SUCCESS;
 }
 
