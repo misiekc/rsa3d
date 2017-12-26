@@ -18,7 +18,7 @@
 #include <ostream>
 
 
-namespace cube_speedtest 
+namespace cube_speedtest
 {
 
     struct StrategyData {
@@ -27,7 +27,7 @@ namespace cube_speedtest
     };
 
     // Struct representing analysis results
-    struct TestData {
+    struct Result {
         Quantity        numOverlapped;
         std::size_t     numAll;
         Quantity        overlapProb;
@@ -35,11 +35,11 @@ namespace cube_speedtest
         std::string     factoryDesc;
         
         void printResults();
-        static void toCsv(std::ostream & _out, const std::vector<TestData> & _data);
+        static void toCsv(std::ostream & _out, const std::vector<Result> & _data);
     };
 
     void warmUp(CuboidPairFactory * _factor);
-    TestData perform(CuboidPairFactory *_factory, const std::vector<OverlapStrategy *> & _strategies, std::size_t _pairs_to_test,
+    Result perform(CuboidPairFactory *_factory, const std::vector<OverlapStrategy *> & _strategies, std::size_t _pairs_to_test,
                          std::size_t _repeats);
 
     int main(int argc, char **argv);

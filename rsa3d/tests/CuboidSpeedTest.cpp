@@ -125,7 +125,7 @@ namespace cube_speedtest
 
     // Performs test for given Cuboid factory and returns results
     //----------------------------------------------------------------------------------------
-    TestData perform(CuboidPairFactory *_factory, const std::vector<OverlapStrategy *> &_strategies, std::size_t _pairs_to_test,
+    Result perform(CuboidPairFactory *_factory, const std::vector<OverlapStrategy *> &_strategies, std::size_t _pairs_to_test,
                      std::size_t _repeats)
     {
         if (_pairs_to_test == 0)
@@ -158,7 +158,7 @@ namespace cube_speedtest
         }
 
         // Calculate and return results
-        TestData result;
+        Result result;
         result.numAll = _pairs_to_test;
         result.factoryDesc = _factory->getDescription();
         result.numOverlapped = Quantity::fromSamples(num_overlapped);
@@ -177,7 +177,7 @@ namespace cube_speedtest
 
     // Prints results saved in _data onto the standard output
     //----------------------------------------------------------------------------------------
-    void TestData::printResults()
+    void Result::printResults()
     {
         std::cout << "(" << this->numOverlapped << ")/" << this->numAll << " overlapped. Overlap probability: "
             << this->overlapProb << std::endl;
@@ -189,7 +189,7 @@ namespace cube_speedtest
 
     // Stores all results in vector to csv output stream _out
     //----------------------------------------------------------------------------------------
-    void TestData::toCsv(std::ostream & _out, const std::vector<TestData> & _data)
+    void Result::toCsv(std::ostream & _out, const std::vector<Result> & _data)
     {
         _out << "probability,error";
         for (auto strategyData : _data[0].strategyDatas)
@@ -234,7 +234,7 @@ namespace cube_speedtest
 
         ShapeFactory::initShapeClass("Cuboid", "3 " + config->getString("cuboid_size"));
         BallFactory * factory = BallFactory::getInstance();
-        std::vector<cube_speedtest::TestData> dataVector;
+        std::vector<cube_speedtest::Result> dataVector;
         double ballRadius;
 
         std::istringstream strategiesStream(config->getString("strategies"));
@@ -248,7 +248,7 @@ namespace cube_speedtest
         std::istringstream ballRadia(config->getString("ball_radia"));
         while (ballRadia >> ballRadius) {
             factory->setRadius(ballRadius);
-            cube_speedtest::TestData data = cube_speedtest::perform(factory, strategies, pairs, repeats);
+            cube_speedtest::Result data = cube_speedtest::perform(factory, strategies, pairs, repeats);
             dataVector.push_back(data);
         }
 
@@ -274,7 +274,7 @@ namespace cube_speedtest
         if (!file)
             die("Error opening " + output + " file to write");
 
-        cube_speedtest::TestData::toCsv(file, dataVector);
+        cube_speedtest::Result::toCsv(file, dataVector);
         file.close();
 
         for (auto strategy : strategies)
