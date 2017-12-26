@@ -73,7 +73,7 @@ namespace
             pair.free();
         }
         timer.stop();
-        result.nanos = timer.count<nanoseconds>();
+        result.nanos = timer.count<nanoseconds>() / _pairs_to_test;
 
         timer.start();
         for (std::size_t i = 0; i < _pairs_to_test; i++) {
@@ -83,7 +83,7 @@ namespace
             pair.free();
         }
         timer.stop();
-        result.overhead = timer.count<nanoseconds>();
+        result.overhead = timer.count<nanoseconds>() / _pairs_to_test;
         result.nanos -= result.overhead;
 	    
 	    std::cout << result.nanos << " ns, " << result.overhead << " ns overhead, " << result.overlapped << " overlapped" << std::endl;
