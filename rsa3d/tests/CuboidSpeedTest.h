@@ -53,12 +53,18 @@ namespace cube_speedtest
         std::vector<double>     numOverlapped;
         std::size_t             numAll;
 
+        AcquiredData(CuboidPairFactory * _factory, std::vector<OverlapStrategy *> _strategies, std::size_t _pairs_to_test) {
+            this->factoryDesc = _factory->getDescription();
+            this->numAll = _pairs_to_test;
+            for (auto strategy : _strategies)
+                this->strategyDatas.push_back(StrategyAcquiredData{strategy});
+        }
         Result generateResult();
     };
 
     void warmUp(CuboidPairFactory * _factor);
-    Result perform(CuboidPairFactory *_factory, const std::vector<OverlapStrategy *> & _strategies, std::size_t _pairs_to_test,
-                         std::size_t _repeats);
+    void test_single_repeat(CuboidPairFactory *_factory, AcquiredData &_acquired_data,
+                                const std::vector<OverlapStrategy *> &_strategies, std::size_t _pairs_to_test);
 
     int main(int argc, char **argv);
 }

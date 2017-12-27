@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <bits/unique_ptr.h>
 #include <fstream>
+#include <iterator>
 
 #include "CuboidSpeedTest.h"
 #include "utility/MockBC.h"
@@ -125,44 +126,30 @@ namespace cube_speedtest
 
     // Performs test for given Cuboid factory and returns results
     //----------------------------------------------------------------------------------------
-    Result perform(CuboidPairFactory *_factory, const std::vector<OverlapStrategy *> &_strategies, std::size_t _pairs_to_test,
-                     std::size_t _repeats)
+    void test_single_repeat(CuboidPairFactory *_factory, AcquiredData &_acquired_data,
+                            const std::vector<OverlapStrategy *> &_strategies, std::size_t _pairs_to_test)
     {
         if (_pairs_to_test == 0)
             throw std::runtime_error("_pairs_to_test == 0");
-        if (_repeats == 0)
-            throw std::runtime_error("_repeats == 0");
 
         std::cout << std::endl;
-        std::cout << "Starting (" << _factory->getDescription() << ", pairs: " << _pairs_to_test
-            << ", repeats: " << _repeats << ")..." << std::endl;
+//        std::cout << "Starting (" << _factory->getDescription() << ", pairs: " << _pairs_to_test
+//            << ", repeats: " << _repeats << ")..." << std::endl;
 
-        AcquiredData acquiredData;
-        acquiredData.factoryDesc = _factory->getDescription();
-        acquiredData.numAll = _pairs_to_test;
-        for (auto strategy : _strategies)
-            acquiredData.strategyDatas.push_back(StrategyAcquiredData{strategy});
+        /*std::stringstream tryNoInfoStream;
+        tryNoInfoStream << "(" << (i + 1) << "/" << _repeats << ") ";
+        std::string tryNoInfo = tryNoInfoStream.str();
+        std::string tryNoInfoSpace(tryNoInfo.length(), ' ');*/
 
-        for (std::size_t i = 0; i < _repeats; i++)
-        {
-            std::stringstream tryNoInfoStream;
-            tryNoInfoStream << "(" << (i + 1) << "/" << _repeats << ") ";
-            std::string tryNoInfo = tryNoInfoStream.str();
-            std::string tryNoInfoSpace(tryNoInfo.length(), ' ');
+        // Test each strategy
+        for (std::size_t j = 0; j < _strategies.size(); j++) {
+            Cuboid::setOverlapStrategy(_strategies[j]);
+//            std::cout << (j == 0 ? tryNoInfo : tryNoInfoSpace);
+            SingleTestResult single_result = test_single_alg(_factory, _pairs_to_test);
 
-            // Test each strategy
-            for (std::size_t j = 0; j < _strategies.size(); j++) {
-                Cuboid::setOverlapStrategy(_strategies[j]);
-                std::cout << (j == 0 ? tryNoInfo : tryNoInfoSpace);
-                SingleTestResult single_result = test_single_alg(_factory, _pairs_to_test);
-
-                acquiredData.strategyDatas[j].times.push_back(single_result.nanos);
-                acquiredData.numOverlapped.push_back(single_result.overlapped);
-            }
+            _acquired_data.strategyDatas[j].times.push_back(single_result.nanos);
+            _acquired_data.numOverlapped.push_back(single_result.overlapped);
         }
-
-        Result result1 = acquiredData.generateResult();
-        return result1;
     }
 
 
@@ -225,8 +212,6 @@ namespace cube_speedtest
 
         ShapeFactory::initShapeClass("Cuboid", "3 " + config->getString("cuboid_size"));
         BallFactory * factory = BallFactory::getInstance();
-        std::vector<cube_speedtest::Result> dataVector;
-        double ballRadius;
 
         std::istringstream strategiesStream(config->getString("strategies"));
         std::string strategyName;
@@ -234,19 +219,35 @@ namespace cube_speedtest
         while (strategiesStream >> strategyName)
             strategies.push_back(strategyFromString(strategyName));
 
+        std::istringstream ballRadiaStream(config->getString("ball_radia"));
+        std::vector<double> ballRadia{std::istream_iterator<double>(ballRadiaStream), std::istream_iterator<double>()};
+
+        std::vector<AcquiredData> acquiredDatas;
+        std::transform(ballRadia.begin(), ballRadia.end(), std::back_inserter(acquiredDatas),
+                       [&](double radius) {
+                           factory->setRadius(radius);
+                           return AcquiredData(factory, strategies, pairs);
+                       });
+
         // Warm up and perform tests
-        cube_speedtest::warmUp(factory);
-        std::istringstream ballRadia(config->getString("ball_radia"));
-        while (ballRadia >> ballRadius) {
-            factory->setRadius(ballRadius);
-            cube_speedtest::Result data = cube_speedtest::perform(factory, strategies, pairs, repeats);
-            dataVector.push_back(data);
+        warmUp(factory);
+        for (size_t i = 0; i < repeats; i++) {
+            for (size_t j = 0; j < acquiredDatas.size(); j++) {
+                factory->setRadius(ballRadia[j]);
+                test_single_repeat(factory, acquiredDatas[j], strategies, pairs);
+            }
         }
+
+        std::vector<Result> results{};
+        std::transform(acquiredDatas.begin(), acquiredDatas.end(), std::back_inserter(results),
+                       [](AcquiredData acquiredData) {
+                           return acquiredData.generateResult();
+                       });
 
         // Print results
         std::cout << std::endl;
         std::cout << ">> Obtained results:" << std::endl << std::endl;
-        for (auto data : dataVector) {
+        for (auto data : results) {
             data.printResults();
             std::cout << std::endl;
         }
@@ -254,7 +255,7 @@ namespace cube_speedtest
         // Print aquired probabilities
         std::cout << ">> Probabilities for ball radia" << std::endl;
         std::cout << std::left;
-        for (auto data : dataVector) {
+        for (auto data : results) {
             std::cout << std::setw(15) << data.overlapProb.value << " : " << data.factoryDesc << std::endl;
         }
         std::cout << std::endl;
@@ -265,7 +266,7 @@ namespace cube_speedtest
         if (!file)
             die("Error opening " + output + " file to write");
 
-        cube_speedtest::Result::toCsv(file, dataVector);
+        cube_speedtest::Result::toCsv(file, results);
         file.close();
 
         for (auto strategy : strategies)
