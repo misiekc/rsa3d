@@ -67,8 +67,7 @@ namespace
 
         timer.start();
         for (std::size_t i = 0; i < _pairs_to_test; i++) {
-            CuboidPairFactory::CuboidPair pair;
-            pair = _factory->generate();
+            CuboidPairFactory::CuboidPair pair = _factory->generate();
             if (pair.first->overlap(&bc, pair.second))
                 result.overlapped++;
             pair.free();
@@ -78,8 +77,7 @@ namespace
 
         timer.start();
         for (std::size_t i = 0; i < _pairs_to_test; i++) {
-            CuboidPairFactory::CuboidPair pair;
-            pair = _factory->generate();
+            CuboidPairFactory::CuboidPair pair = _factory->generate();
             strategy->runOverheadOperations(pair.first, pair.second);
             pair.free();
         }
@@ -132,19 +130,9 @@ namespace cube_speedtest
         if (_pairs_to_test == 0)
             throw std::runtime_error("_pairs_to_test == 0");
 
-        std::cout << std::endl;
-//        std::cout << "Starting (" << _factory->getDescription() << ", pairs: " << _pairs_to_test
-//            << ", repeats: " << _repeats << ")..." << std::endl;
-
-        /*std::stringstream tryNoInfoStream;
-        tryNoInfoStream << "(" << (i + 1) << "/" << _repeats << ") ";
-        std::string tryNoInfo = tryNoInfoStream.str();
-        std::string tryNoInfoSpace(tryNoInfo.length(), ' ');*/
-
         // Test each strategy
         for (std::size_t j = 0; j < _strategies.size(); j++) {
             Cuboid::setOverlapStrategy(_strategies[j]);
-//            std::cout << (j == 0 ? tryNoInfo : tryNoInfoSpace);
             SingleTestResult single_result = test_single_alg(_factory, _pairs_to_test);
 
             _acquired_data.strategyDatas[j].times.push_back(single_result.nanos);
@@ -231,11 +219,15 @@ namespace cube_speedtest
 
         // Warm up and perform tests
         warmUp(factory);
+        std::cout << std::endl;
         for (size_t i = 0; i < repeats; i++) {
             for (size_t j = 0; j < acquiredDatas.size(); j++) {
                 factory->setRadius(ballRadia[j]);
+                std::cout << std::endl << ">> Repeat " << (i + 1) << "/" << repeats
+                          << " for " << factory->getDescription() << "..." << std::endl;
                 test_single_repeat(factory, acquiredDatas[j], strategies, pairs);
             }
+            std::cout << std::endl;
         }
 
         std::vector<Result> results{};
