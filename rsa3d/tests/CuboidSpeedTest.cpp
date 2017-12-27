@@ -119,7 +119,7 @@ namespace cube_speedtest
     void warmUp(CuboidPairFactory * _factory)
     {
         std::cout << "Warm up test..." << std::endl;
-        test_single_alg(_factory, 2000000);
+        test_single_alg(_factory, 200000);
     }
 
 
@@ -137,9 +137,12 @@ namespace cube_speedtest
         std::cout << "Starting (" << _factory->getDescription() << ", pairs: " << _pairs_to_test
             << ", repeats: " << _repeats << ")..." << std::endl;
 
-        // Test
-        std::vector<double> num_overlapped;
-        std::vector<std::vector<double>> times(_strategies.size());
+        AcquiredData acquiredData;
+        acquiredData.factoryDesc = _factory->getDescription();
+        acquiredData.numAll = _pairs_to_test;
+        for (auto strategy : _strategies)
+            acquiredData.strategyDatas.push_back(StrategyAcquiredData{strategy});
+
         for (std::size_t i = 0; i < _repeats; i++)
         {
             std::stringstream tryNoInfoStream;
@@ -152,26 +155,14 @@ namespace cube_speedtest
                 Cuboid::setOverlapStrategy(_strategies[j]);
                 std::cout << (j == 0 ? tryNoInfo : tryNoInfoSpace);
                 SingleTestResult single_result = test_single_alg(_factory, _pairs_to_test);
-                num_overlapped.push_back(single_result.overlapped);
-                times[j].push_back(single_result.nanos);
+
+                acquiredData.strategyDatas[j].times.push_back(single_result.nanos);
+                acquiredData.numOverlapped.push_back(single_result.overlapped);
             }
         }
 
-        // Calculate and return results
-        Result result;
-        result.numAll = _pairs_to_test;
-        result.factoryDesc = _factory->getDescription();
-        result.numOverlapped = Quantity::fromSamples(num_overlapped);
-        result.overlapProb = Quantity(result.numOverlapped.value / _pairs_to_test,
-                                      result.numOverlapped.error / _pairs_to_test);
-
-        for (std::size_t i = 0; i < _strategies.size(); i++) {
-            result.strategyResults.push_back(StrategyResult {
-                    _strategies[i],
-                    Quantity::fromSamples(times[i]) });
-        }
-
-        return result;
+        Result result1 = acquiredData.generateResult();
+        return result1;
     }
 
 
@@ -281,5 +272,23 @@ namespace cube_speedtest
             delete strategy;
 
         return EXIT_SUCCESS;
+    }
+
+    StrategyResult StrategyAcquiredData::generateResult() {
+        return StrategyResult{strategy, Quantity::fromSamples(times)};
+    }
+
+    Result AcquiredData::generateResult() {
+        Result result;
+        result.numAll = this->numAll;
+        result.factoryDesc = this->factoryDesc;
+        result.numOverlapped = Quantity::fromSamples(this->numOverlapped);
+        result.overlapProb = Quantity(result.numOverlapped.value / this->numAll,
+                                      result.numOverlapped.error / this->numAll);
+
+        for (auto strategyAcquiredData : this->strategyDatas)
+            result.strategyResults.push_back(strategyAcquiredData.generateResult());
+
+        return result;
     }
 }

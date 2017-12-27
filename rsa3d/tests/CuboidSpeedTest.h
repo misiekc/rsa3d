@@ -20,19 +20,6 @@
 
 namespace cube_speedtest
 {
-    /* Times acquired from single strategy */
-    struct StrategyAcquiredData {
-        OverlapStrategy * strategy;
-        std::vector<double> time;
-    };
-
-    /* Data acquired from single pair factory size */
-    struct AcquiredData {
-        std::string factoryDesc;
-        std::vector<StrategyAcquiredData> strategyDatas;
-        std::vector<double> numOverlapped;
-    };
-
     /* End results for single strategy */
     struct StrategyResult {
         OverlapStrategy * strategy;
@@ -49,6 +36,24 @@ namespace cube_speedtest
         
         void printResults();
         static void toCsv(std::ostream & _out, const std::vector<Result> & _data);
+    };
+
+    /* Times acquired from single strategy */
+    struct StrategyAcquiredData {
+        OverlapStrategy * strategy;
+        std::vector<double> times;
+
+        StrategyResult generateResult();
+    };
+
+    /* Data acquired from single pair factory size */
+    struct AcquiredData {
+        std::string             factoryDesc;
+        std::vector<StrategyAcquiredData> strategyDatas;
+        std::vector<double>     numOverlapped;
+        std::size_t             numAll;
+
+        Result generateResult();
     };
 
     void warmUp(CuboidPairFactory * _factor);
