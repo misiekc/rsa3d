@@ -184,48 +184,29 @@ namespace cube_speedtest
         if (argc < 3)
             die("Usage: ./rsa cube_speedtest [input] [output = cube_speedtest.csv]");
 
+        Context context;
         std::ifstream input(argv[2]);
         if (!input)
             die("Error opening " + std::string(argv[2]) + " file to read");
-
-        auto config = std::unique_ptr<Config> (Config::parse(input));
+        context.load(input);
         input.close();
 
-        std::string output = "cube_speedtest.csv";
-        if (argc == 4)
-            output = argv[3];
-
-        std::size_t pairs = config->getUnsignedInt("pairs");
-        std::size_t repeats = config->getUnsignedInt("repeats");
-
-        ShapeFactory::initShapeClass("Cuboid", "3 " + config->getString("cuboid_size"));
-        BallFactory * factory = BallFactory::getInstance();
-
-        std::istringstream strategiesStream(config->getString("strategies"));
-        std::string strategyName;
-        std::vector<OverlapStrategy *> strategies;
-        while (strategiesStream >> strategyName)
-            strategies.push_back(strategyFromString(strategyName));
-
-        std::istringstream ballRadiaStream(config->getString("ball_radia"));
-        std::vector<double> ballRadia{std::istream_iterator<double>(ballRadiaStream), std::istream_iterator<double>()};
-
         std::vector<AcquiredData> acquiredDatas;
-        std::transform(ballRadia.begin(), ballRadia.end(), std::back_inserter(acquiredDatas),
+        std::transform(context.ballRadia.begin(), context.ballRadia.end(), std::back_inserter(acquiredDatas),
                        [&](double radius) {
-                           factory->setRadius(radius);
-                           return AcquiredData(factory, strategies, pairs);
+                           context.factory->setRadius(radius);
+                           return AcquiredData(context.factory, context.strategies, context.pairs);
                        });
 
         // Warm up and perform tests
-        warmUp(factory);
+        warmUp(context.factory);
         std::cout << std::endl;
-        for (size_t i = 0; i < repeats; i++) {
+        for (size_t i = 0; i < context.repeats; i++) {
             for (size_t j = 0; j < acquiredDatas.size(); j++) {
-                factory->setRadius(ballRadia[j]);
-                std::cout << std::endl << ">> Repeat " << (i + 1) << "/" << repeats
-                          << " for " << factory->getDescription() << "..." << std::endl;
-                test_single_repeat(factory, acquiredDatas[j], strategies, pairs);
+                context.factory->setRadius(context.ballRadia[j]);
+                std::cout << std::endl << ">> Repeat " << (i + 1) << "/" << context.repeats
+                          << " for " << context.factory->getDescription() << "..." << std::endl;
+                test_single_repeat(context.factory, acquiredDatas[j], context.strategies, context.pairs);
             }
             std::cout << std::endl;
         }
@@ -253,15 +234,19 @@ namespace cube_speedtest
         std::cout << std::endl;
 
         // Store to file
+        std::string output = "cube_speedtest.csv";
+        if (argc == 4)
+            output = argv[3];
         std::cout << ">> Storing to file " << output << "..." << std::endl;
         std::ofstream file(output);
-        if (!file)
+        if (!file) {
             die("Error opening " + output + " file to write");
+        }
 
         cube_speedtest::Result::toCsv(file, results);
         file.close();
 
-        for (auto strategy : strategies)
+        for (auto strategy : context.strategies)
             delete strategy;
 
         return EXIT_SUCCESS;
@@ -283,5 +268,28 @@ namespace cube_speedtest
             result.strategyResults.push_back(strategyAcquiredData.generateResult());
 
         return result;
+    }
+
+    void Context::load(std::istream & _input) {
+        auto config = Config::parse(_input);
+
+        this->pairs = config->getUnsignedInt("pairs");
+        this->repeats = config->getUnsignedInt("repeats");
+        this->factory = BallFactory::getInstance();
+
+        // Load strategies
+        std::istringstream strategiesStream(config->getString("strategies"));
+        std::string strategyName;
+        while (strategiesStream >> strategyName)
+            this->strategies.push_back(strategyFromString(strategyName));
+
+        // Load ball radia
+        std::istringstream ballRadiaStream(config->getString("ball_radia"));
+        std::copy(std::istream_iterator<double>(ballRadiaStream),
+                  std::istream_iterator<double>(),
+                  std::back_inserter(this->ballRadia));
+
+        ShapeFactory::initShapeClass("Cuboid", "3 " + config->getString("cuboid_size"));
+        delete config;
     }
 }

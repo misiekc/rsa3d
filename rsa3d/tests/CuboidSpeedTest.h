@@ -20,6 +20,17 @@
 
 namespace cube_speedtest
 {
+    /* Test context */
+    struct Context {
+        std::size_t pairs;
+        std::size_t repeats;
+        std::vector<OverlapStrategy *> strategies;
+        std::vector<double> ballRadia;
+        BallFactory * factory;
+
+        void load(std::istream & _input);
+    };
+
     /* End results for single strategy */
     struct StrategyResult {
         OverlapStrategy * strategy;
