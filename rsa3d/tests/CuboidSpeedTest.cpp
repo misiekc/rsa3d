@@ -166,8 +166,8 @@ namespace cube_speedtest
                                       result.numOverlapped.error / _pairs_to_test);
 
         for (std::size_t i = 0; i < _strategies.size(); i++) {
-            result.strategyDatas.push_back(StrategyData {
-                    _strategies[i]->getName(),
+            result.strategyResults.push_back(StrategyResult {
+                    _strategies[i],
                     Quantity::fromSamples(times[i]) });
         }
 
@@ -181,8 +181,8 @@ namespace cube_speedtest
     {
         std::cout << "(" << this->numOverlapped << ")/" << this->numAll << " overlapped. Overlap probability: "
             << this->overlapProb << std::endl;
-        for (auto strategyData : strategyDatas)
-            std::cout << std::left << std::setw(30) << (strategyData.name + " avg. time") << ": " << strategyData.time << std::endl;
+        for (auto strategyData : strategyResults)
+            std::cout << std::left << std::setw(30) << (strategyData.strategy->getName() + " avg. time") << ": " << strategyData.time << std::endl;
         std::cout << std::left << std::setw(30) << "Factory used" << ": " << this->factoryDesc << std::endl;
     }
 
@@ -192,14 +192,14 @@ namespace cube_speedtest
     void Result::toCsv(std::ostream & _out, const std::vector<Result> & _data)
     {
         _out << "probability,error";
-        for (auto strategyData : _data[0].strategyDatas)
-            _out << "," << strategyData.name << " time," << strategyData.name << " error";
+        for (auto strategyData : _data[0].strategyResults)
+            _out << "," << strategyData.strategy->getName() << " time," << strategyData.strategy->getName() << " error";
         _out << ",num of overlapped,error,num of all,factory desc" << std::endl;
             
         for (auto d : _data) {
             _out << d.overlapProb.value << ",";
             _out << d.overlapProb.error << ",";
-            for (auto strategyData : d.strategyDatas) {
+            for (auto strategyData : d.strategyResults) {
                 _out << strategyData.time.value << ",";
                 _out << strategyData.time.error << ",";
             }

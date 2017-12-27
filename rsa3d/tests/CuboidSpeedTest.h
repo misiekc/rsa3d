@@ -20,18 +20,31 @@
 
 namespace cube_speedtest
 {
+    /* Times acquired from single strategy */
+    struct StrategyAcquiredData {
+        OverlapStrategy * strategy;
+        std::vector<double> time;
+    };
 
-    struct StrategyData {
-        std::string     name;
+    /* Data acquired from single pair factory size */
+    struct AcquiredData {
+        std::string factoryDesc;
+        std::vector<StrategyAcquiredData> strategyDatas;
+        std::vector<double> numOverlapped;
+    };
+
+    /* End results for single strategy */
+    struct StrategyResult {
+        OverlapStrategy * strategy;
         Quantity        time;
     };
 
-    // Struct representing analysis results
+    /* End results for single pair factory size */
     struct Result {
         Quantity        numOverlapped;
         std::size_t     numAll;
         Quantity        overlapProb;
-        std::vector<StrategyData>   strategyDatas;
+        std::vector<StrategyResult>   strategyResults;
         std::string     factoryDesc;
         
         void printResults();
