@@ -4,7 +4,6 @@
 // (C)PKua 2017
 //--------------------------------------------------------------------------------------------
 
-#include <chrono>
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
@@ -19,46 +18,49 @@
 #include "../shapes/cube_strategies/TriTriOverlap.h"
 #include "../shapes/cube_strategies/SATOverlap.h"
 #include "../shapes/cube_strategies/OptimizedSATOverlap.h"
-
+#include "utility/Timer.h"
 
 using namespace std::chrono;
 
 namespace
 {
-    // Struct for single algorithm test
-    struct SingleTestResult
+    void die(const std::string & _reason)
     {
-        unsigned int overlapped = 0;
-        long nanos = 0;
-        long overhead = 0;
-    };
+        std::cerr << _reason << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
-    class Timer
-    {
-        system_clock::time_point startTime;
-        system_clock::time_point endTime;
+    OverlapStrategy * strategyFromString(const std::string &_name) {
+        if (_name == "mine")
+            return new MineOverlap;
+        else if (_name == "sat")
+            return new SATOverlap;
+        else if (_name == "optimised_sat")
+            return new OptimizedSATOverlap;
+        else if (_name == "tri_tri")
+            return new TriTriOverlap;
+        else
+            throw std::runtime_error("unknown strategy: " + _name);
+    }
+}
 
-    public:
-        void start() {
-            startTime = system_clock::now();
-        }
 
-        void stop() {
-            endTime = system_clock::now();
-        }
-
-        template <typename DUR>
-        long count() {
-            DUR duration = duration_cast<DUR>(endTime - startTime);
-            return duration.count();
-        }
-    };
-
-    // Helper method. Performs single test of overlap algorithm (set from the outside)
+namespace cube_speedtest
+{
+    // Performs one warm up test for consistent results. The first one seems to claim slower
+    // speed regardless of chosen algorithm.
     //----------------------------------------------------------------------------------------
-    SingleTestResult test_single_alg(CuboidPairFactory * _factory, std::size_t _pairs_to_test)
+    void warmUp(CuboidPairFactory * _factory)
     {
-        SingleTestResult result{};
+        std::cout << "Warm up test..." << std::endl;
+        test_single_alg(_factory, 2000000);
+    }
+
+    // Performs single test of overlap algorithm (set from the outside)
+    //----------------------------------------------------------------------------------------
+    SingleTestAcquiredData test_single_alg(CuboidPairFactory * _factory, std::size_t _pairs_to_test)
+    {
+        SingleTestAcquiredData result{};
         OverlapStrategy * strategy = Cuboid::getOverlapStrategy();
         MockBC bc;
         Timer timer;
@@ -84,99 +86,27 @@ namespace
         timer.stop();
         result.overhead = timer.count<nanoseconds>() / _pairs_to_test;
         result.nanos -= result.overhead;
-	    
-	    std::cout << result.nanos << " ns, " << result.overhead << " ns overhead, " << result.overlapped << " overlapped" << std::endl;
-	    return result;
+
+        std::cout << result.nanos << " ns, " << result.overhead << " ns overhead, " << result.overlapped << " overlapped" << std::endl;
+        return result;
     }
 
-    void die(const std::string & reason)
-    {
-        std::cerr << reason << std::endl;
-        exit(EXIT_FAILURE);
-    }
 
-    OverlapStrategy * strategyFromString(const std::string &_name) {
-        if (_name == "mine")
-            return new MineOverlap;
-        else if (_name == "sat")
-            return new SATOverlap;
-        else if (_name == "optimised_sat")
-            return new OptimizedSATOverlap;
-        else if (_name == "tri_tri")
-            return new TriTriOverlap;
-        else
-            throw std::runtime_error("unknown strategy: " + _name);
-    }
-}
-
-
-namespace cube_speedtest
-{
-    // Perforsm one warm up test for consistent results. The first one seems to give slower
-    // result regardless of chosen algorithm.
+    // Performs single repeat of _pairs_to_test test using given _factory for all passed
+    // _strategies and stored result in _acquired_data
     //----------------------------------------------------------------------------------------
-    void warmUp(CuboidPairFactory * _factory)
+    void test_single_repeat(const Context &_context, CuboidPairFactory *_factory, AcquiredData &_acquired_data)
     {
-        std::cout << "Warm up test..." << std::endl;
-        test_single_alg(_factory, 200000);
-    }
-
-
-    // Performs test for given Cuboid factory and returns results
-    //----------------------------------------------------------------------------------------
-    void test_single_repeat(CuboidPairFactory *_factory, AcquiredData &_acquired_data,
-                            const std::vector<OverlapStrategy *> &_strategies, std::size_t _pairs_to_test)
-    {
-        if (_pairs_to_test == 0)
-            throw std::runtime_error("_pairs_to_test == 0");
-
         // Test each strategy
-        for (std::size_t j = 0; j < _strategies.size(); j++) {
-            Cuboid::setOverlapStrategy(_strategies[j]);
-            SingleTestResult single_result = test_single_alg(_factory, _pairs_to_test);
+        for (std::size_t j = 0; j < _context.strategies.size(); j++) {
+            Cuboid::setOverlapStrategy(_context.strategies[j]);
+            SingleTestAcquiredData single_result = test_single_alg(_factory, _context.pairs);
 
             _acquired_data.strategyDatas[j].times.push_back(single_result.nanos);
             _acquired_data.numOverlapped.push_back(single_result.overlapped);
         }
     }
 
-
-    // Prints results saved in _data onto the standard output
-    //----------------------------------------------------------------------------------------
-    void Result::printResults()
-    {
-        std::cout << "(" << this->numOverlapped << ")/" << this->numAll << " overlapped. Overlap probability: "
-            << this->overlapProb << std::endl;
-        for (auto strategyData : strategyResults)
-            std::cout << std::left << std::setw(30) << (strategyData.strategy->getName() + " avg. time") << ": " << strategyData.time << std::endl;
-        std::cout << std::left << std::setw(30) << "Factory used" << ": " << this->factoryDesc << std::endl;
-    }
-
-
-    // Stores all results in vector to csv output stream _out
-    //----------------------------------------------------------------------------------------
-    void Result::toCsv(std::ostream & _out, const std::vector<Result> & _data)
-    {
-        _out << "probability,error";
-        for (auto strategyData : _data[0].strategyResults)
-            _out << "," << strategyData.strategy->getName() << " time," << strategyData.strategy->getName() << " error";
-        _out << ",num of overlapped,error,num of all,factory desc" << std::endl;
-            
-        for (auto d : _data) {
-            _out << d.overlapProb.value << ",";
-            _out << d.overlapProb.error << ",";
-            for (auto strategyData : d.strategyResults) {
-                _out << strategyData.time.value << ",";
-                _out << strategyData.time.error << ",";
-            }
-            _out << d.numOverlapped.value << ",";
-            _out << d.numOverlapped.error << ",";
-            _out << d.numAll << ",";
-            _out << d.factoryDesc << std::endl;
-        }
-        
-        _out.flush();
-    }
 
     // Performs cuboid speedtests with parameters passed to process
     //----------------------------------------------------------------------------------------
@@ -185,97 +115,46 @@ namespace cube_speedtest
             die("Usage: ./rsa cube_speedtest [input] [output = cube_speedtest.csv]");
 
         Context context;
-        std::ifstream input(argv[2]);
-        if (!input)
-            die("Error opening " + std::string(argv[2]) + " file to read");
-        context.load(input);
-        input.close();
-
-        std::vector<AcquiredData> acquiredDatas;
-        std::transform(context.ballRadia.begin(), context.ballRadia.end(), std::back_inserter(acquiredDatas),
-                       [&](double radius) {
-                           context.factory->setRadius(radius);
-                           return AcquiredData(context.factory, context.strategies, context.pairs);
-                       });
+        context.load(argv[2]);
+        BallFactory * factory = BallFactory::getInstance();
+        std::vector<AcquiredData> acquiredDatas = AcquiredData::initVector(context, factory);
 
         // Warm up and perform tests
-        warmUp(context.factory);
+        warmUp(factory);
         std::cout << std::endl;
         for (size_t i = 0; i < context.repeats; i++) {
             for (size_t j = 0; j < acquiredDatas.size(); j++) {
-                context.factory->setRadius(context.ballRadia[j]);
+                factory->setRadius(context.ballRadia[j]);
                 std::cout << std::endl << ">> Repeat " << (i + 1) << "/" << context.repeats
-                          << " for " << context.factory->getDescription() << "..." << std::endl;
-                test_single_repeat(context.factory, acquiredDatas[j], context.strategies, context.pairs);
+                          << " for " << factory->getDescription() << "..." << std::endl;
+                test_single_repeat(context, factory, acquiredDatas[j]);
             }
             std::cout << std::endl;
         }
 
-        std::vector<Result> results{};
-        std::transform(acquiredDatas.begin(), acquiredDatas.end(), std::back_inserter(results),
-                       [](AcquiredData acquiredData) {
-                           return acquiredData.generateResult();
-                       });
-
-        // Print results
-        std::cout << std::endl;
-        std::cout << ">> Obtained results:" << std::endl << std::endl;
-        for (auto data : results) {
-            data.printResults();
-            std::cout << std::endl;
-        }
-
-        // Print aquired probabilities
-        std::cout << ">> Probabilities for ball radia" << std::endl;
-        std::cout << std::left;
-        for (auto data : results) {
-            std::cout << std::setw(15) << data.overlapProb.value << " : " << data.factoryDesc << std::endl;
-        }
-        std::cout << std::endl;
+        // Print results on std out
+        std::vector<Result> results = AcquiredData::generateResultVector(acquiredDatas);
+        Result::printVector(results);
 
         // Store to file
-        std::string output = "cube_speedtest.csv";
         if (argc == 4)
-            output = argv[3];
-        std::cout << ">> Storing to file " << output << "..." << std::endl;
-        std::ofstream file(output);
-        if (!file) {
-            die("Error opening " + output + " file to write");
-        }
-
-        cube_speedtest::Result::toCsv(file, results);
-        file.close();
-
-        for (auto strategy : context.strategies)
-            delete strategy;
-
+            cube_speedtest::Result::vectorToCsv(argv[3], results);
+        else
+            cube_speedtest::Result::vectorToCsv("cube_speedtest.csv", results);
         return EXIT_SUCCESS;
     }
 
-    StrategyResult StrategyAcquiredData::generateResult() {
-        return StrategyResult{strategy, Quantity::fromSamples(times)};
-    }
 
-    Result AcquiredData::generateResult() {
-        Result result;
-        result.numAll = this->numAll;
-        result.factoryDesc = this->factoryDesc;
-        result.numOverlapped = Quantity::fromSamples(this->numOverlapped);
-        result.overlapProb = Quantity(result.numOverlapped.value / this->numAll,
-                                      result.numOverlapped.error / this->numAll);
-
-        for (auto strategyAcquiredData : this->strategyDatas)
-            result.strategyResults.push_back(strategyAcquiredData.generateResult());
-
-        return result;
-    }
-
-    void Context::load(std::istream & _input) {
-        auto config = Config::parse(_input);
+    // Load test context from file _filename
+    //----------------------------------------------------------------------------------------
+    void Context::load(const std::string &_filename) {
+        std::ifstream input(_filename);
+        if (!input)
+            die("Error opening " + std::string(_filename) + " file to read");
+        auto config = Config::parse(input);
 
         this->pairs = config->getUnsignedInt("pairs");
         this->repeats = config->getUnsignedInt("repeats");
-        this->factory = BallFactory::getInstance();
 
         // Load strategies
         std::istringstream strategiesStream(config->getString("strategies"));
@@ -291,5 +170,125 @@ namespace cube_speedtest
 
         ShapeFactory::initShapeClass("Cuboid", "3 " + config->getString("cuboid_size"));
         delete config;
+    }
+
+    Context::~Context() {
+        for (auto strategy : this->strategies)
+            delete strategy;
+    }
+
+
+    // Prints results saved in _data onto the standard output
+    //----------------------------------------------------------------------------------------
+    void Result::print() const
+    {
+        std::cout << "(" << this->numOverlapped << ")/" << this->numAll << " overlapped. Overlap probability: "
+            << this->overlapProb << std::endl;
+        for (auto strategyData : strategyResults)
+            std::cout << std::left << std::setw(30) << (strategyData.strategy->getName() + " avg. time") << ": " << strategyData.time << std::endl;
+        std::cout << std::left << std::setw(30) << "Factory used" << ": " << this->factoryDesc << std::endl;
+    }
+
+    // Prints whole vector of Result-s onto standard output
+    //----------------------------------------------------------------------------------------
+    void Result::printVector(const std::vector<Result> &_results) {
+        std::cout << std::endl;
+        std::cout << ">> Obtained results:" << std::endl << std::endl;
+        for (const auto &data : _results) {
+            data.print();
+            std::cout << std::endl;
+        }
+
+        // Print aquired probabilities
+        std::cout << ">> Probabilities for ball radia" << std::endl;
+        std::cout << std::left;
+        for (auto data : _results)
+            std::cout << std::setw(15) << data.overlapProb.value << " : " << data.factoryDesc << std::endl;
+        std::cout << std::endl;
+    }
+
+    // Stores all results in vector to csv output stream _out
+    //----------------------------------------------------------------------------------------
+    void Result::vectorToCsv(const std::string &_filename, const std::vector<Result> &_data)
+    {
+        std::ofstream file(_filename);
+        if (!file)
+            die("Error opening " + _filename + " file to write");
+        std::cout << ">> Storing to file " << _filename << "..." << std::endl;
+
+        file << "probability,error";
+        for (auto strategyData : _data[0].strategyResults)
+            file << "," << strategyData.strategy->getName() << " time," << strategyData.strategy->getName() << " error";
+        file << ",num of overlapped,error,num of all,factory desc" << std::endl;
+
+        for (auto d : _data) {
+            file << d.overlapProb.value << ",";
+            file << d.overlapProb.error << ",";
+            for (auto strategyData : d.strategyResults) {
+                file << strategyData.time.value << ",";
+                file << strategyData.time.error << ",";
+            }
+            file << d.numOverlapped.value << ",";
+            file << d.numOverlapped.error << ",";
+            file << d.numAll << ",";
+            file << d.factoryDesc << std::endl;
+        }
+
+        file.close();
+    }
+
+    // Inits and returnes a vector for storing data based on _context
+    //----------------------------------------------------------------------------------------
+    std::vector<AcquiredData> AcquiredData::initVector(const Context &_context, BallFactory *_factory) {
+        std::vector<AcquiredData> acquiredDatas{};
+        transform(_context.ballRadia.begin(), _context.ballRadia.end(), back_inserter(acquiredDatas),
+                  [&](double radius) {
+                      _factory->setRadius(radius);
+                      return AcquiredData(_context, _factory);
+                  });
+        return acquiredDatas;
+    }
+
+    // Constructs itself based on given _context
+    //----------------------------------------------------------------------------------------
+    AcquiredData::AcquiredData(const Context &_context, CuboidPairFactory *_factory) {
+        this->factoryDesc = _factory->getDescription();
+        this->numAll = _context.pairs;
+        for (auto strategy : _context.strategies)
+            this->strategyDatas.push_back(StrategyAcquiredData{strategy});
+    }
+
+    // Generates Result from collected data - calculates means and std devs of times and
+    // number of overlaps
+    //----------------------------------------------------------------------------------------
+    Result AcquiredData::generateResult() {
+        Result result;
+        result.numAll = this->numAll;
+        result.factoryDesc = this->factoryDesc;
+        result.numOverlapped = Quantity::fromSamples(this->numOverlapped);
+        result.overlapProb = Quantity(result.numOverlapped.value / this->numAll,
+                                      result.numOverlapped.error / this->numAll);
+
+        for (auto strategyAcquiredData : this->strategyDatas)
+            result.strategyResults.push_back(strategyAcquiredData.generateResult());
+
+        return result;
+    }
+
+    // Generate vector of Result-s from all passed _acquiredDatas
+    //----------------------------------------------------------------------------------------
+    std::vector<Result> AcquiredData::generateResultVector(std::vector<AcquiredData> &_acquiredDatas) {
+        std::vector<Result> results{};
+        transform(_acquiredDatas.begin(), _acquiredDatas.end(), back_inserter(results),
+                       [](AcquiredData acquiredData) {
+                           return acquiredData.generateResult();
+                       });
+        return results;
+    }
+
+    // Generates StrategyResult - it calculates mean and std dev of times
+    //----------------------------------------------------------------------------------------
+    StrategyResult StrategyAcquiredData::generateResult() {
+        return StrategyResult{strategy, Quantity::fromSamples(times)};
     }
 }
