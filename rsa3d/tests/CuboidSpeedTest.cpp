@@ -123,7 +123,7 @@ namespace cube_speedtest
         warmUp(factory);
         std::cout << std::endl;
         for (size_t i = 0; i < context.repeats; i++) {
-            for (size_t j = 0; j < acquiredDatas.size(); j++) {
+            for (size_t j = 0; j < context.ballRadia.size(); j++) {
                 factory->setRadius(context.ballRadia[j]);
                 std::cout << std::endl << ">> Repeat " << (i + 1) << "/" << context.repeats
                           << " for " << factory->getDescription() << "..." << std::endl;
