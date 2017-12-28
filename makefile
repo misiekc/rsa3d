@@ -59,6 +59,7 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/tests/utility/BallFactory \
        rsa3d/tests/utility/BoxFactory \
        rsa3d/tests/utility/Quantity \
+       rsa3d/tests/utility/Timer \
        rsa3d/tests/CuboidIntTest \
        rsa3d/tests/CuboidPointInsideTest \
        rsa3d/tests/CuboidSpeedTest \

@@ -85,16 +85,13 @@ void SATOverlap::runOverheadOperations(Cuboid *cube1, Cuboid *cube2) {
     Matrix<3, 3> orientation1 = cube1->getOrientation();
     Matrix<3, 3> orientation2 = cube2->getOrientation();
 
-    Vector<3> axes1[] = {
-            orientation1 * Vector<3>{{1, 0, 0}},
-            orientation1 * Vector<3>{{0, 1, 0}},
-            orientation1 * Vector<3>{{0, 0, 1}}
-    };
-    Vector<3> axes2[] = {
-            orientation2 * Vector<3>{{1, 0, 0}},
-            orientation2 * Vector<3>{{0, 1, 0}},
-            orientation2 * Vector<3>{{0, 0, 1}}
-    };
+    orientation1 * Vector<3>{{1, 0, 0}};
+    orientation1 * Vector<3>{{0, 1, 0}};
+    orientation1 * Vector<3>{{0, 0, 1}};
+
+    orientation2 * Vector<3>{{1, 0, 0}};
+    orientation2 * Vector<3>{{0, 1, 0}};
+    orientation2 * Vector<3>{{0, 0, 1}};
 
     Vector<3> vertices1[VERTEX::NUM_OF];
     Vector<3> vertices2[VERTEX::NUM_OF];
