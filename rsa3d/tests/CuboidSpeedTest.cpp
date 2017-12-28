@@ -241,7 +241,7 @@ namespace cube_speedtest
     //----------------------------------------------------------------------------------------
     std::vector<AcquiredData> AcquiredData::initVector(const Context &_context, BallFactory *_factory) {
         std::vector<AcquiredData> acquiredDatas{};
-        transform(_context.ballRadia.begin(), _context.ballRadia.end(), back_inserter(acquiredDatas),
+        std::transform(_context.ballRadia.begin(), _context.ballRadia.end(), std::back_inserter(acquiredDatas),
                   [&](double radius) {
                       _factory->setRadius(radius);
                       return AcquiredData(_context, _factory);
@@ -279,7 +279,7 @@ namespace cube_speedtest
     //----------------------------------------------------------------------------------------
     std::vector<Result> AcquiredData::generateResultVector(std::vector<AcquiredData> &_acquiredDatas) {
         std::vector<Result> results{};
-        transform(_acquiredDatas.begin(), _acquiredDatas.end(), back_inserter(results),
+        std::transform(_acquiredDatas.begin(), _acquiredDatas.end(), std::back_inserter(results),
                        [](AcquiredData acquiredData) {
                            return acquiredData.generateResult();
                        });
