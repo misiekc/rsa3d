@@ -6,6 +6,7 @@
 
 #include "Cuboid.h"
 #include "cube_strategies/MineOverlap.h"
+#include "cube_strategies/OptimizedSATOverlap.h"
 
 #include <iterator>
 
@@ -23,7 +24,8 @@ unsigned short 	Cuboid::staticDimension = 3;
 Vector<3>       Cuboid::relativeVertices[VERTEX::NUM_OF];
 
 
-OverlapStrategy * Cuboid::strategy = new MineOverlap;
+OverlapStrategy * Cuboid::defaultStrategy = new OptimizedSATOverlap;
+OverlapStrategy * Cuboid::strategy = Cuboid::defaultStrategy;
 
 
 // Default constructor creating new Cuboid in (0, 0, 0) with size set in
@@ -145,6 +147,13 @@ OverlapStrategy * Cuboid::getOverlapStrategy()
 }
 
 
+// Restores default overlap algorithm
+//----------------------------------------------------------------------------
+void Cuboid::restoreDefaultStrategy() {
+    setOverlapStrategy(defaultStrategy);
+}
+
+
 // Returns neighbour list cell size determined during class initialization
 //----------------------------------------------------------------------------
 double Cuboid::getNeighbourListCellSize()
@@ -237,7 +246,6 @@ int Cuboid::pointInside(BoundaryConditions *bc, double* da)
 
     return false;
 }
-
 
 // Returns Cuboid orientation
 //----------------------------------------------------------------------------

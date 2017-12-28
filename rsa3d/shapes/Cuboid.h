@@ -24,6 +24,7 @@ private:
     static double           *auxDoubleArray;        // Auxiliary double array of dimension size
     Matrix<3, 3>            orientation;
     static double           minDimension;
+    static OverlapStrategy  *defaultStrategy;
     static OverlapStrategy  *strategy;
     static Vector<3>        relativeVertices[8];
 
@@ -64,6 +65,7 @@ public:
 	static void initClass(const std::string &args);
 	static Shape<3> * create2D(RND *rnd);
 	static Shape<3> * create3D(RND *rnd);
+	static void restoreDefaultStrategy();
 	static void setOverlapStrategy(OverlapStrategy *strategy);
 	static OverlapStrategy * getOverlapStrategy();
     static const Vector<3> getRelativeVertex(std::size_t index);
