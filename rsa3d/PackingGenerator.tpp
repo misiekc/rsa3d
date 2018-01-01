@@ -249,6 +249,7 @@ void PackingGenerator<DIMENSION>::toPovray(std::vector<Shape<DIMENSION> *> * pac
 
 	for (Shape<DIMENSION> *s : *packing) {
 //		double *da = s->getPosition();
+//		file << "  text { ttf \"timrom.ttf\" \"" << s->no << "\" 1, 0 pigment { color White } scale 0.2 translate < " << da[0] << ", " << da[1] << ", 5> }" << std::endl;
 		file << s->toPovray();
 	}
 

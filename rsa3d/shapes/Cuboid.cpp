@@ -281,7 +281,7 @@ std::string Cuboid::toPovray() const
 	s += "    matrix < \n    ";
 	for (unsigned short i=0; i<3; i++){
 		for (unsigned short j=0; j<3; j++){
-			s += std::to_string(this->orientation(i, j));
+			s += std::to_string(this->orientation(j, i));
 			if (j<2)
 				s+= ", ";
 		}
