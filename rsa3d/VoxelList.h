@@ -28,6 +28,8 @@ private:
 	double findInitialVoxelSize(double d);
 	int getLinearNumberOfVoxels(double vs);
 	void fillNeighbourGrid();
+//	bool analyzeVoxelOLD(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc);
+//	bool analyzeVoxelNEW(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc);
 	bool analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc);
 	bool disabled;
 

@@ -218,9 +218,20 @@ bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, Shape<DIMENSION> *s
 	return true;
 }
 
-// returns true when the whole voxel is inside an exclusion area of one shape, thus, should be removed
+/*
 template <ushort DIMENSION>
 bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc){
+	bool b1 = analyzeVoxelOLD(v, nl, neighbours, bc);
+	bool b2 = analyzeVoxelNEW(v, nl, neighbours, bc);
+	if (b1!=b2){
+		double *vPos = v->getPosition();
+		std::cout << "PROBLEM: (" << vPos[0] << ", " << vPos[1] << ", " << vPos[2] << ")" << std::endl;
+	}
+	return b1;
+}
+// returns true when the whole voxel is inside an exclusion area of one shape, thus, should be removed
+template <ushort DIMENSION>
+bool VoxelList<DIMENSION>::analyzeVoxelOLD(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc){
 
 	double* vpos = v->getPosition();
 
@@ -281,6 +292,54 @@ bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape
 		delete vNeighbours;
 	return true;
 }
+*/
+
+// returns true when the whole voxel is inside an exclusion area of one shape, thus, should be removed
+template <ushort DIMENSION>
+bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc){
+
+	double* vpos = v->getPosition();
+
+	// checking if initial voxel containing v is active (do not have a shape inside)
+	int n = this->getLinearNumberOfVoxels(this->initialVoxelSize);
+	int index = position2i(vpos, DIMENSION, n*this->initialVoxelSize, this->initialVoxelSize, n);
+	if(this->activeTopLevelVoxels[index]==false)
+		return true;
+
+//	std::unordered_set<Shape<DIMENSION> *> vAll;
+//	typename std::unordered_set<Shape<DIMENSION> *>::iterator itN, itA;
+	std::unordered_set<Shape<DIMENSION> *> *vNeighbours;
+
+	if(neighbours==NULL){
+		vNeighbours = new std::unordered_set<Shape<DIMENSION> *>();
+		nl->getNeighbours(vNeighbours, vpos);
+	}else{
+		vNeighbours = neighbours;
+	}
+
+	double da[DIMENSION];
+	int counterSize = 1 << DIMENSION;
+	bool shapeCoversVertices = false;
+
+	for(Shape<DIMENSION> *s : *vNeighbours){
+		shapeCoversVertices = true;
+		for(int i=0; i<counterSize; i++){
+			for(ushort j=0; j<DIMENSION; j++){
+				da[j] = vpos[j] + this->offset[i][j]*this->voxelSize;
+			}
+			if(!s->pointInside(bc, da)){
+				shapeCoversVertices = false;
+				break;
+			}
+		}
+		if (shapeCoversVertices)
+			break;
+	}
+	if (neighbours==NULL)
+		delete vNeighbours;
+	return shapeCoversVertices;
+}
+
 
 template <ushort DIMENSION>
 bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, BoundaryConditions *bc, int timestamp){
