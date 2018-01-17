@@ -32,7 +32,7 @@ private:
 	void analyzePacking(std::vector<Shape<RSA_DIMENSION> *> *packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor);
 	void analyzeOrder(std::vector<Shape<RSA_DIMENSION> *> *packing, Plot **order);
 	void calculateOrderParameters(double *result, Cuboid *c1, Cuboid *c2);
-	double * printNvT(LogPlot &nvt, std::string filename, double surfaceFactor, double *res);
+	double * printNvT(LogPlot &nvt, std::string filename, double *fixedA, double surfaceFactor, double *res);
 	double * printASF(Plot &asf, std::string filename, int counter, double packingFraction, double *res);
 	void printCorrelations(Plot &corr, std::string filename, int counter, double particleSize, double packingFraction);
 	void printOrder(Plot **order, std::string filename);

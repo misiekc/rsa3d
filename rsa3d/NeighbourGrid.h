@@ -9,8 +9,6 @@
 #define NEIGHBOURGRID_H_
 
 #include <vector>
-#include <set>
-#include <unordered_set>
 #include <cmath>
 #include <algorithm>
 
@@ -105,37 +103,16 @@ public:
 		return this->lists[i];
 	}
 
-	void getNeighbours(std::unordered_set<E *> *result, double* da){
+	void getNeighbours(std::vector<E *> *result, double* da){
 		result->clear();
 		std::vector<E *> *vTmp;
 
 		int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
 		for(int iCell : *(this->neighbouringCells[i])){
 			vTmp = (this->lists[iCell]);
-			result->insert(vTmp->begin(), vTmp->end());
+			result->insert(result->end(), vTmp->begin(), vTmp->end());
 		}
 	}
-
-/*
-	E * getClosestNeighbour(double *da, BoundaryConditions *bc){
-		std::vector<E *> *vTmp;
-
-		double d, dmin = std::numeric_limits<double>::max();
-		E *pmin = NULL;
-		int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
-		for(int iCell : *(this->neighbouringCells[i])){
-			vTmp = (this->lists[iCell]);
-			for(Positioned *p : *vTmp){
-				d = bc->distance2(da, p->getPosition());
-				if (d<dmin){
-					pmin = p;
-					dmin = d;
-				}
-			}
-		}
-		return pmin;
-	}
-*/
 };
 
 #endif /* NEIGHBOURGRID_H_ */

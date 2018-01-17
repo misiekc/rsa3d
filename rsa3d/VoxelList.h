@@ -14,7 +14,7 @@
 #include "NeighbourGrid.h"
 #include "BoundaryConditions.h"
 #include "Positioned.h"
-#include <unordered_set>
+#include <vector>
 
 template <ushort DIMENSION>
 class VoxelList {
@@ -30,7 +30,7 @@ private:
 	void fillNeighbourGrid();
 //	bool analyzeVoxelOLD(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc);
 //	bool analyzeVoxelNEW(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::vector<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc);
 	bool disabled;
 
 	std::uniform_real_distribution<double> *distribution;
@@ -59,13 +59,13 @@ public:
 
 	virtual ~VoxelList();
 
-	void getNeighbours(std::unordered_set<Voxel<DIMENSION> *> *result, Voxel<DIMENSION> *v);
+	void getNeighbours(std::vector<Voxel<DIMENSION> *> *result, Voxel<DIMENSION> *v);
 	void remove(Voxel<DIMENSION> *v);
 	void removeTopLevelVoxel(Voxel<DIMENSION> *v);
 	bool analyzeVoxel(Voxel<DIMENSION> *v, Shape<DIMENSION> *s, BoundaryConditions *bc);
 	bool analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, BoundaryConditions *bc, int timestamp);
 	bool analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel<DIMENSION> *v, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel<DIMENSION> *v, std::vector<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc);
 	bool splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<DIMENSION>> *nl, BoundaryConditions *bc);
 
 	Voxel<DIMENSION> *getRandomVoxel(RND *rnd);

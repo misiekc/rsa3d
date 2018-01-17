@@ -66,7 +66,7 @@ int PackingGenerator<DIMENSION>::analyzeVoxels() {
 template <ushort DIMENSION>
 int PackingGenerator<DIMENSION>::analyzeRegion(Voxel<DIMENSION> *v){
 	int begin = this->voxels->length();
-	std::unordered_set<Voxel<DIMENSION> *> region;
+	std::vector<Voxel<DIMENSION> *> region;
 	this->voxels->getNeighbours(&region, v);
 	for(Voxel<DIMENSION> *v1: region){
 		if (this->voxels->analyzeVoxel(v1, this->surface->getNeighbourGrid(), this->surface))
@@ -123,9 +123,11 @@ void PackingGenerator<DIMENSION>::createPacking(){
 			s->no = l;
 			s->time = t;
 
-/*
+
 			if (this->params->modifiedRSA){
-				Shape *sn = (Shape*)this->surface->getClosestNeighbour(s->getPosition());
+				Shape<DIMENSION> *sn = (Shape<DIMENSION> *)this->surface->getClosestNeighbour(s->getPosition(), NULL);
+				if (sn==NULL)
+					sn = (Shape<DIMENSION> *)this->surface->getClosestNeighbour(s->getPosition(), &(this->packing));
 				if (sn!=NULL){
 					double *spos = s->getPosition();
 					double *snpos = sn->getPosition();
@@ -133,24 +135,26 @@ void PackingGenerator<DIMENSION>::createPacking(){
 					double d = sqrt(this->surface->distance2(spos, snpos));
 					if (d < this->params->thresholdDistance){
 
-						for(int i=0; i<this->params->dimension; i++){
+						for(ushort i=0; i<DIMENSION; i++){
 							da[i] = (snpos[i] - spos[i]);
 						}
 						this->surface->vector(da);
 						double mindist = s->minDistance(sn);
-						for(int i=0; i<this->params->dimension; i++){
+						for(ushort i=0; i<DIMENSION; i++){
 							da[i] = da[i]/d;
 							spos[i] += (d-mindist)*da[i];
 						}
 						this->surface->checkPosition(spos);
 						v = this->voxels->getVoxel(spos);
 						if (v==NULL){
-							std::cout << "Problem: PackingGenerator - no voxel found" << std::endl;
+							std::cout << "Problem: PackingGenerator - voxel not found: " <<
+							" (" << spos[0] << ", " << spos[1] << ")" << std::endl;
+							exit(0);
 						}
 					}
 				}
 			}
-*/
+
 
 			if (v!=this->voxels->getVoxel(v->getPosition())){
 				Voxel<DIMENSION> *v1 = this->voxels->getVoxel(v->getPosition());

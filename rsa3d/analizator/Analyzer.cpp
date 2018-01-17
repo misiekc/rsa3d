@@ -155,7 +155,7 @@ void Analyzer::analyzePacking(std::vector<Shape<RSA_DIMENSION> *> *packing, LogP
 	}
 }
 
-double * Analyzer::printNvT(LogPlot &nvt, std::string filename, double surfaceFactor, double *res){
+double * Analyzer::printNvT(LogPlot &nvt, std::string filename, double* fixedA, double surfaceFactor, double *res){
 	double **points = new double*[nvt.size()];
 	for(int i=0; i<nvt.size(); i++)
 		points[i] = new double[2];
@@ -180,8 +180,13 @@ double * Analyzer::printNvT(LogPlot &nvt, std::string filename, double surfaceFa
 	LinearRegression lr2;
 	for(int i=0; i<nvt.size(); i++){
 		if (points[i][0] > maxX/100.0){
-			lr1.addXY(pow(points[i][0], pr.getA()+1+pr.getSA()), points[i][1]);
-			lr2.addXY(pow(points[i][0], pr.getA()+1-pr.getSA()), points[i][1]);
+			if (fixedA==NULL){
+				lr1.addXY(pow(points[i][0], pr.getA()+1 + pr.getSA()), points[i][1]);
+				lr2.addXY(pow(points[i][0], pr.getA()+1 - pr.getSA()), points[i][1]);
+			}else{
+				lr1.addXY(pow(points[i][0], fixedA[0] + fixedA[1]), points[i][1]);
+				lr2.addXY(pow(points[i][0], fixedA[0] - fixedA[1]), points[i][1]);
+			}
 		}
 	}
 
@@ -339,7 +344,9 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 	std::cout << std::endl;
 	double res[4];
 
-	this->printNvT(*nvt, (dirname + "_nvt.txt"), particleSize/packingSize, res);
+	//	double fixedA[] = {1.0, 0.0};
+
+	this->printNvT(*nvt, (dirname + "_nvt.txt"), NULL, particleSize/packingSize, res);
 	std::cout << sdir << "\t" << n/counter << "\t" << sqrt( (n2/counter - n*n/(counter*counter)) / counter) << "\t" <<
 			 	 res[0] << "\t" << res[1] << "\t" << res[2] << "\t" << res[3] << "\t";
 	delete nvt;

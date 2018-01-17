@@ -36,8 +36,8 @@ public:
 
 	void add(Shape<RSA_DIMENSION> *s);
 	Shape<RSA_DIMENSION>* check(Shape<RSA_DIMENSION> *s);
-	void getNeighbours(std::unordered_set<Shape<RSA_DIMENSION> *> *result, double *da);
-	Shape<RSA_DIMENSION> * getClosestNeighbour(double *da);
+	void getNeighbours(std::vector<Shape<RSA_DIMENSION> *> *result, double *da);
+	Shape<RSA_DIMENSION> * getClosestNeighbour(double *da, std::vector<Shape<RSA_DIMENSION> *> *neighbours);
 	NeighbourGrid<Shape<RSA_DIMENSION>> * getNeighbourGrid();
 	double distance2(double *a1, double *a2);
 

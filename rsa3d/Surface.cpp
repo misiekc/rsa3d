@@ -24,7 +24,7 @@ void Surface::add(Shape<RSA_DIMENSION> *s) {
 	}
 
 Shape<RSA_DIMENSION>* Surface::check(Shape<RSA_DIMENSION> *s){
-	std::unordered_set<Shape<RSA_DIMENSION> *> neighbours;
+	std::vector<Shape<RSA_DIMENSION> *> neighbours;
 	this->list->getNeighbours(&neighbours, s->getPosition());
 
 	for(Positioned<RSA_DIMENSION> *shape: neighbours) {
@@ -35,14 +35,29 @@ Shape<RSA_DIMENSION>* Surface::check(Shape<RSA_DIMENSION> *s){
 	return NULL;
 }
 
-/*
-Shape * Surface::getClosestNeighbour(double *da){
-	return this->list->getClosestNeighbour(da, this);
+
+Shape<RSA_DIMENSION> * Surface::getClosestNeighbour(double *da, std::vector<Shape<RSA_DIMENSION> *> *neighbours){
+
+	std::vector<Shape<RSA_DIMENSION> *> result;
+	if(neighbours==NULL){
+		this->list->getNeighbours(&result, da);
+		neighbours = &result;
+	}
+	double d, dmin = std::numeric_limits<double>::max();
+	Shape<RSA_DIMENSION> *pmin = NULL;
+	for(Shape<RSA_DIMENSION> *p : *neighbours){
+		d = this->distance2(da, p->getPosition());
+		if (d<dmin){
+			pmin = p;
+			dmin = d;
+		}
+	}
+	return pmin;
 }
-*/
 
 
-void Surface::getNeighbours(std::unordered_set<Shape<RSA_DIMENSION> *> *result, double* da) {
+
+void Surface::getNeighbours(std::vector<Shape<RSA_DIMENSION> *> *result, double* da) {
 	this->list->getNeighbours(result, da);
 }
 
