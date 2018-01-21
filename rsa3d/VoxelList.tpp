@@ -340,7 +340,6 @@ bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape
 	return shapeCoversVertices;
 }
 
-
 template <ushort DIMENSION>
 bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, BoundaryConditions *bc, int timestamp){
 	if (v->lastAnalyzed < timestamp && !this->disabled)
@@ -357,6 +356,92 @@ template <ushort DIMENSION>
 bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, std::vector<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc){
 	return this->analyzeVoxel(v, NULL, neighbours, bc);
 }
+
+#ifdef _OPENMP
+
+template <ushort DIMENSION>
+bool VoxelList<DIMENSION>::splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<DIMENSION>> *nl, BoundaryConditions *bc){
+	if (this->disabled)
+		return false;
+	if ((this->voxelSize<2*minDx && pow(2, DIMENSION)*this->last > this->beginningVoxelNumber) || pow(2, DIMENSION)*this->last > maxVoxels){
+//		for(int i=0; i<this.last; i++)
+//			this.voxels[i].missCounter = 0;
+		return false;
+	}
+
+	Voxel<DIMENSION>** newList = new Voxel<DIMENSION>*[ ((int)round( pow(2, DIMENSION)))*(this->last+1) ];
+	this->voxelSize = (this->voxelSize/2.0)*this->dxFactor;
+	delete this->distribution;
+	this->distribution = new std::uniform_real_distribution<double>(0.0, this->voxelSize);
+
+	ushort counterSize = 1 << DIMENSION;
+
+	#pragma omp parallel for
+	for(int i=0; i<=this->last; i++){
+		int in[DIMENSION];
+		double da[DIMENSION];
+		Voxel<DIMENSION> *v = this->voxels[i];
+		double* vpos = v->getPosition();
+
+		for(ushort j=0; j < DIMENSION; j++){
+			in[j] = 0;
+			da[j] = vpos[j];
+		}
+		for(int j=0; j<counterSize; j++){
+			bool doCreate = true;
+			// checking if a new voxel will be inside a packing
+			for(ushort j=0; j < DIMENSION; j++){
+				da[j] = vpos[j] + in[j]*this->voxelSize;
+				if (da[j]>this->size)
+					doCreate = false;
+			}
+			if (doCreate){
+				Voxel<DIMENSION> *vTmp = this->createVoxel(da, this->voxelSize, i*counterSize + j);
+				if (nl==NULL || bc==NULL || !this->analyzeVoxel(vTmp, nl, NULL, bc)){
+					newList[i*counterSize + j] = vTmp;
+				}else{
+					delete vTmp;
+					newList[i*counterSize + j] = NULL;
+				}
+			}else{
+				newList[i*counterSize + j] = NULL;
+			}
+			increment(in, DIMENSION, (unsigned char)1);
+		}
+		delete this->voxels[i];
+
+		if (i%10000 == 0){ std::cout << "."; std::cout.flush(); }
+	}
+
+	delete[] this->voxels;
+
+	int endIndex = this->last*counterSize - 1;
+	int beginIndex = 0;
+
+	while(newList[endIndex]==NULL)
+		endIndex--;
+
+	while (beginIndex<endIndex){
+		if(newList[beginIndex]==NULL){
+			newList[beginIndex] = newList[endIndex];
+			newList[beginIndex]->index = beginIndex;
+			newList[endIndex] = NULL;
+		}
+		beginIndex++;
+		while(newList[endIndex]==NULL)
+			endIndex--;
+	}
+
+	this->voxelNeighbourGrid->clear();
+
+	this->last = endIndex;
+	this->voxels = newList;
+	this->fillNeighbourGrid();
+	this->checkIndexes();
+	return true;
+}
+
+#else
 
 template <ushort DIMENSION>
 bool VoxelList<DIMENSION>::splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<DIMENSION>> *nl, BoundaryConditions *bc){
@@ -387,6 +472,7 @@ bool VoxelList<DIMENSION>::splitVoxels(double minDx, int maxVoxels, NeighbourGri
 		}
 		do{
 			bool doCreate = true;
+			// checking if a new voxel will be inside a packing
 			for(ushort j=0; j < DIMENSION; j++){
 				da[j] = vpos[j] + in[j]*this->voxelSize;
 				if (da[j]>this->size)
@@ -416,6 +502,9 @@ bool VoxelList<DIMENSION>::splitVoxels(double minDx, int maxVoxels, NeighbourGri
 //	this->checkIndexes();
 	return true;
 }
+
+#endif
+
 
 template <ushort DIMENSION>
 Voxel<DIMENSION> * VoxelList<DIMENSION>::getRandomVoxel(RND *rnd){

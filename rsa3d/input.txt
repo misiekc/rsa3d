@@ -7,11 +7,11 @@ collectors = 1
 # maxTime = std::numeric_limits<double>::infinity()
 analyze = 100
 split = 500
-surfaceVolume = 10000.0
+surfaceVolume = 1000000.0
 storePackings = true
 
-modifiedRSA = true
-thresholdDistance = 100.0
+#modifiedRSA = true
+#thresholdDistance = 100.0
 boundaryConditions = periodic
 
 particleType = Sphere
