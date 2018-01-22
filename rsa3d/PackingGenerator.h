@@ -30,6 +30,7 @@ private:
 
 	int analyzeVoxels();
 	int analyzeRegion(Voxel<DIMENSION> *v);
+	void modifiedRSA(Shape<DIMENSION> *s, Voxel<DIMENSION> *v);
 	bool isSaturated();
 	double getFactor();
 	void createPacking();

@@ -218,82 +218,6 @@ bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, Shape<DIMENSION> *s
 	return true;
 }
 
-/*
-template <ushort DIMENSION>
-bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc){
-	bool b1 = analyzeVoxelOLD(v, nl, neighbours, bc);
-	bool b2 = analyzeVoxelNEW(v, nl, neighbours, bc);
-	if (b1!=b2){
-		double *vPos = v->getPosition();
-		std::cout << "PROBLEM: (" << vPos[0] << ", " << vPos[1] << ", " << vPos[2] << ")" << std::endl;
-	}
-	return b1;
-}
-// returns true when the whole voxel is inside an exclusion area of one shape, thus, should be removed
-template <ushort DIMENSION>
-bool VoxelList<DIMENSION>::analyzeVoxelOLD(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc){
-
-	double* vpos = v->getPosition();
-
-	// checking if initial voxel containing v is active (do not have a shape inside)
-	int n = this->getLinearNumberOfVoxels(this->initialVoxelSize);
-	int index = position2i(vpos, DIMENSION, n*this->initialVoxelSize, this->initialVoxelSize, n);
-	if(this->activeTopLevelVoxels[index]==false)
-		return true;
-
-	std::unordered_set<Shape<DIMENSION> *> vAll;
-	typename std::unordered_set<Shape<DIMENSION> *>::iterator itN, itA;
-	std::unordered_set<Shape<DIMENSION> *> *vNeighbours;
-
-	if(neighbours==NULL){
-		vNeighbours = new std::unordered_set<Shape<DIMENSION> *>();
-	}else{
-		vNeighbours = neighbours;
-	}
-
-	double da[DIMENSION];
-
-	int counterSize = 1 << DIMENSION;
-	for(int i=0; i<counterSize; i++){
-		for(ushort j=0; j<DIMENSION; j++){
-			da[j] = vpos[j] + this->offset[i][j]*this->voxelSize;
-		}
-
-		if (neighbours==NULL){
-			nl->getNeighbours(vNeighbours, da);
-		}
-		// at the beginning we add all neighbouring shapes
-		if (vAll.size()==0){
-			vAll.insert(vNeighbours->begin(), vNeighbours->end());
-		}else{
-			for(itA = vAll.begin(); itA != vAll.end(); ){
-				if( vNeighbours->find(*itA) == vNeighbours->end() ){
-					itA = vAll.erase(itA);
-				}else{
-					itA++;
-				}
-			}
-		}
-		for(itA = vAll.begin(); itA != vAll.end(); ){
-			if(! (*itA)->pointInside(bc, da)){
-				itA = vAll.erase(itA);
-			}else{
-				itA++;
-			}
-		}
-		if (vAll.size()==0){
-			if (neighbours==NULL)
-				delete vNeighbours;
-			return false;
-		}
-	}
-//	v.analyzed = true;
-	if (neighbours==NULL)
-		delete vNeighbours;
-	return true;
-}
-*/
-
 // returns true when the whole voxel is inside an exclusion area of one shape, thus, should be removed
 template <ushort DIMENSION>
 bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::vector<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc){
@@ -306,8 +230,6 @@ bool VoxelList<DIMENSION>::analyzeVoxel(Voxel<DIMENSION> *v, NeighbourGrid<Shape
 	if(this->activeTopLevelVoxels[index]==false)
 		return true;
 
-//	std::unordered_set<Shape<DIMENSION> *> vAll;
-//	typename std::unordered_set<Shape<DIMENSION> *>::iterator itN, itA;
 	std::vector<Shape<DIMENSION> *> *vNeighbours;
 
 	if(neighbours==NULL){
