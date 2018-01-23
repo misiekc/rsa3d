@@ -150,7 +150,6 @@ void PackingGenerator<DIMENSION>::createPacking(){
 		Shape<DIMENSION> **sVirtual = new Shape<DIMENSION> *[tmpSplit];
 		Voxel<DIMENSION> **aVoxels = new Voxel<DIMENSION> *[tmpSplit];
 
-		#pragma omp parallel for
 		for(int i = 0; i<tmpSplit; i++){
 			sVirtual[i] = ShapeFactory::createShape(&rnd);
 
@@ -159,21 +158,23 @@ void PackingGenerator<DIMENSION>::createPacking(){
 				aVoxels[i] = this->voxels->getRandomVoxel(&rnd);
 				this->voxels->getRandomPosition(da, aVoxels[i], &rnd);
 			}while(!this->surface->isInside(da));
-			sVirtual[i]->translate(this->voxels->getRandomPosition(da, aVoxels[i], &rnd));
-
-			sOverlapped[i] = this->surface->check(sVirtual[i]);
-			if (sOverlapped[i]!=NULL)
-				delete sVirtual[i];
+			sVirtual[i]->translate(da);
 		}
 
-		// processing overlapping shapes
-		for(int i=0; i<tmpSplit; i++){
+		#pragma omp parallel for
+		for(int i = 0; i<tmpSplit; i++){
+			sOverlapped[i] = this->surface->check(sVirtual[i]);
 			if (sOverlapped[i]!=NULL){
+				delete sVirtual[i];
 				aVoxels[i]->miss();
+
+				#pragma omp atomic
 				missCounter++;
 
-				if(this->getFactor()>FACTOR_LIMIT && this->voxels->analyzeVoxel(aVoxels[i], sOverlapped[i], this->surface))
+				if(this->getFactor()>FACTOR_LIMIT && this->voxels->analyzeVoxel(aVoxels[i], sOverlapped[i], this->surface)){
+					#pragma omp critical
 					this->voxels->remove(aVoxels[i]);
+				}
 			}
 		}
 
