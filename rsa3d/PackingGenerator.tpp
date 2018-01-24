@@ -11,6 +11,9 @@
 #include "ShapeFactory.h"
 #include <iostream>
 #include <fstream>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 template <ushort DIMENSION>
 double PackingGenerator<DIMENSION>::FACTOR_LIMIT = 5.0;
@@ -112,7 +115,7 @@ void PackingGenerator<DIMENSION>::modifiedRSA(Shape<DIMENSION> *s, Voxel<DIMENSI
 
 
 
-//#ifdef _OPENMP
+#ifdef _OPENMP
 template <ushort DIMENSION>
 void PackingGenerator<DIMENSION>::createPacking(){
 
@@ -141,42 +144,69 @@ void PackingGenerator<DIMENSION>::createPacking(){
 	double t = 0;
 	int tmpSplit = this->params->split;
 //	int snapshotCounter = 0;
-
+	RND **aRND = NULL;
+	int aRNDSize = 0;
+	Shape<DIMENSION> **sOverlapped = new Shape<DIMENSION> *[tmpSplit];
+	Shape<DIMENSION> **sVirtual = new Shape<DIMENSION> *[tmpSplit];
+	Voxel<DIMENSION> **aVoxels = new Voxel<DIMENSION> *[tmpSplit];
 
 	while (!this->isSaturated() && t<params->maxTime && missCounter<params->maxTriesWithoutSuccess) {
 
+		#pragma omp parallel
+		{
 
-		Shape<DIMENSION> **sOverlapped = new Shape<DIMENSION> *[tmpSplit];
-		Shape<DIMENSION> **sVirtual = new Shape<DIMENSION> *[tmpSplit];
-		Voxel<DIMENSION> **aVoxels = new Voxel<DIMENSION> *[tmpSplit];
+			#pragma omp master
+			{
+//				std::cout << "[master] init aRND[" << omp_get_num_threads() << "]" << std::endl << std::flush;
 
-		for(int i = 0; i<tmpSplit; i++){
-			sVirtual[i] = ShapeFactory::createShape(&rnd);
+				if (aRND==NULL){ // if there are no random number generators
+					aRND = new RND*[omp_get_num_threads()];
+					for(int i=0; i<omp_get_num_threads(); i++){
+						aRND[i] = new RND((int)(1000*rnd.nextValue()));
+					}
+				}else if(omp_get_num_threads() > aRNDSize){ // if the number of allocated random number generators is smaller than the number of threads
+					for(int i=aRNDSize; i<omp_get_num_threads(); i++){
+						aRND[i] = new RND((int)(1000*rnd.nextValue()));
+					}
+				}
+				aRNDSize = omp_get_num_threads();
+			}
 
-			double da[DIMENSION];
-			do{
-				aVoxels[i] = this->voxels->getRandomVoxel(&rnd);
-				this->voxels->getRandomPosition(da, aVoxels[i], &rnd);
-			}while(!this->surface->isInside(da));
-			sVirtual[i]->translate(da);
-		}
+			#pragma omp barrier
 
-		#pragma omp parallel for
-		for(int i = 0; i<tmpSplit; i++){
-			sOverlapped[i] = this->surface->check(sVirtual[i]);
-			if (sOverlapped[i]!=NULL){
-				delete sVirtual[i];
-				aVoxels[i]->miss();
+//			#pragma omp critical
+//			std::cout << "[" << omp_get_thread_num() << "] looping" << std::endl << std::flush;
 
-				#pragma omp atomic
-				missCounter++;
+			#pragma omp for
+			for(int i = 0; i<tmpSplit; i++){
+				int tid = omp_get_thread_num();
 
-				if(this->getFactor()>FACTOR_LIMIT && this->voxels->analyzeVoxel(aVoxels[i], sOverlapped[i], this->surface)){
-					#pragma omp critical
-					this->voxels->remove(aVoxels[i]);
+				sVirtual[i] = ShapeFactory::createShape(aRND[tid]);
+				double da[DIMENSION];
+				do{
+					aVoxels[i] = this->voxels->getRandomVoxel(aRND[tid]);
+					this->voxels->getRandomPosition(da, aVoxels[i], aRND[tid]);
+				}while(!this->surface->isInside(da));
+				sVirtual[i]->translate(da);
+				sOverlapped[i] = this->surface->check(sVirtual[i]);
+				if (sOverlapped[i]!=NULL){
+					delete sVirtual[i];
+					aVoxels[i]->miss();
+
+					#pragma omp atomic
+					missCounter++;
+
+					if(this->getFactor()>FACTOR_LIMIT && this->voxels->analyzeVoxel(aVoxels[i], sOverlapped[i], this->surface)){
+						#pragma omp critical
+						this->voxels->remove(aVoxels[i]);
+					}
 				}
 			}
-		}
+
+//			#pragma omp critical
+//			std::cout << "[" << omp_get_thread_num() << "] end looping" << std::endl << std::flush;
+
+		}// parallel
 
 		// processing potentially non overlaping shapes
 		for(int i=0; i<tmpSplit; i++){
@@ -199,9 +229,9 @@ void PackingGenerator<DIMENSION>::createPacking(){
 					if (aVoxels[i]!=this->voxels->getVoxel(aVoxels[i]->getPosition())){
 						Voxel<DIMENSION> *v1 = this->voxels->getVoxel(aVoxels[i]->getPosition());
 						std::cout << "Problem: PackingGenerator - inconsistent voxels positions: " <<
-							" (" << aVoxels[i]->getPosition()[0] << ", " << aVoxels[i]->getPosition()[1] << ")" <<
-							", (" << v1->getPosition()[0] << ", " << v1->getPosition()[1] << ")" <<
-							std::endl;
+								" (" << aVoxels[i]->getPosition()[0] << ", " << aVoxels[i]->getPosition()[1] << ")" <<
+								", (" << v1->getPosition()[0] << ", " << v1->getPosition()[1] << ")" <<
+								std::endl;
 					}
 
 					this->surface->add(sVirtual[i]);
@@ -219,10 +249,6 @@ void PackingGenerator<DIMENSION>::createPacking(){
 				}
 			}
 		}
-
-		delete[] sOverlapped;
-		delete[] sVirtual;
-		delete[] aVoxels;
 
 		//whether splitting voxels
 		if (missCounter > 0) { // v.getMissCounter() % iSplit == 0){ //
@@ -245,18 +271,32 @@ void PackingGenerator<DIMENSION>::createPacking(){
 					tmpSplit = 0.5 * std::numeric_limits<int>::max();
 				if(voxels->length()<1000 && tmpSplit>100)
 					tmpSplit /= 10.0;
+
+				delete[] sOverlapped;
+				delete[] sVirtual;
+				delete[] aVoxels;
+				sOverlapped = new Shape<DIMENSION> *[tmpSplit];
+				sVirtual = new Shape<DIMENSION> *[tmpSplit];
+				aVoxels = new Voxel<DIMENSION> *[tmpSplit];
+
 			} else {
 				this->analyzeVoxels();
 			}
 		}
+
 //					this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
 	} // while
+
+	for(int i=0; i<aRNDSize; i++){
+		delete aRND[i];
+	}
+	delete[] aRND;
+
 	delete this->surface;
 
 	std::cout << "[" << seed << " PackingGenerator::createPacking] finished after generating " << l << " shapes" << std::endl;
 }
 
-/*
 #else
 
 template <ushort DIMENSION>
@@ -374,7 +414,6 @@ void PackingGenerator<DIMENSION>::createPacking(){
 	std::cout << "[" << seed << " PackingGenerator::createPacking] finished after generating " << l << " shapes" << std::endl;
 }
 #endif
-*/
 
 template <ushort DIMENSION>
 void PackingGenerator<DIMENSION>::run(){
