@@ -32,7 +32,7 @@ Matrix<ROWS, COLS, E>::Matrix(E _fill)
 // _arr - array with matrix elements
 //--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
-Matrix<ROWS, COLS, E>::Matrix(E **_arr)
+Matrix<ROWS, COLS, E>::Matrix(const E **_arr)
 {
     // Alloc an array and copy elements from given
     std::size_t arr_index = 0;
@@ -51,7 +51,7 @@ Matrix<ROWS, COLS, E>::Matrix(E **_arr)
 // _arr - array with matrix elements
 //--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
-Matrix<ROWS, COLS, E>::Matrix(E *_arr)
+Matrix<ROWS, COLS, E>::Matrix(const E *_arr)
 {
     // Alloc an array and copy elements from given;
     std::copy(_arr, _arr + (ROWS * COLS), arr);

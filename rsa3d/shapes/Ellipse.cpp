@@ -6,8 +6,6 @@
  */
 
 #include "Ellipse.h"
-#include <math.h>
-#include <iostream>
 
 double Ellipse::longSemiAxis;
 double Ellipse::shortSemiAxis;
@@ -19,7 +17,7 @@ void Ellipse::calculateU(){
 	this->uT[0] = sin(this->orientation); this->uT[1] =  cos(this->orientation);
 }
 
-Ellipse::Ellipse() : Shape<2>(){
+Ellipse::Ellipse() : AnisotropicShape2D(){
 	this->a = Ellipse::longSemiAxis;
 	this->b = Ellipse::shortSemiAxis;
 	this->orientation = 0.0;

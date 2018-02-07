@@ -98,7 +98,7 @@ public:
     Vector(std::array<E, DIM> _coords) : v(Matrix<DIM, 1, E>(_coords))      // std::array initialization
     { }
     
-    explicit Vector(E *_arr) : v(Matrix<DIM, 1, E>(_arr))       // C array initialization
+    explicit Vector(const E *_arr) : v(Matrix<DIM, 1, E>(_arr))       // C array initialization
     { }
     
     explicit Vector(E _fill) : v(Matrix<DIM, 1, E>(_fill))      // Fill initialization

@@ -64,9 +64,9 @@ public:
     
     // Other ctors
     //----------------------------------------------------------------------------------------
-    Matrix(E _fill);
-    Matrix(E **_arr);
-    Matrix(E *_arr);
+    explicit Matrix(E _fill);
+    Matrix(const E **_arr);
+    Matrix(const E *_arr);
     Matrix(const std::array<E, ROWS * COLS> & _arr);
 
     // Friend * operator

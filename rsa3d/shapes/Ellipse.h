@@ -11,8 +11,9 @@
 #include "../Shape.h"
 #include "../RND.h"
 #include "../BoundaryConditions.h"
+#include "../AnisotropicShape2D.h"
 
-class Ellipse: public Shape<2> {
+class Ellipse: public AnisotropicShape2D {
 private:
 	static double longSemiAxis;
 	static double shortSemiAxis;
