@@ -123,7 +123,6 @@ void PackingGenerator<DIMENSION>::createPacking(){
 
 	int missCounter = 0;
 	RND rnd(this->seed);
-	ShapeFactory::initShapeClass(this->params->particleType, this->params->particleAttributes);
 	Shape<DIMENSION> *s = ShapeFactory::createShape(&rnd);
 
 	this->voxels = new VoxelList<DIMENSION>(this->params->surfaceSize, s->getVoxelSize());

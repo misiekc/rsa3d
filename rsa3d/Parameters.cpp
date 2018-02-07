@@ -33,9 +33,12 @@ Parameters::Parameters() {
 
 }
 
-Parameters::Parameters(const std::string& sFile){
-	Parameters();
+Parameters::Parameters(const std::string& sFile) : Parameters(){
 	std::ifstream file(sFile, std::ios::in);
+	if (!file) {
+        std::cerr << "Cannot open configuration file: " + sFile << std::endl;
+        exit(1);
+    }
 
 	std::string sLine;
 	while( std::getline(file, sLine) ){
