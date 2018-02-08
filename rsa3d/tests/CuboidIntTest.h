@@ -35,7 +35,7 @@ namespace cube_inttest
     void print_results(Results _results);
     void dump_missed_pairs(Results _results, std::ostream & _ostr);
 
-    void main(int argc, char **argv);
+    int main(int argc, char **argv);
 }
 
 #endif  // _INTTEST_H

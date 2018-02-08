@@ -8,7 +8,7 @@
 #ifndef PARAMETERS_H_
 #define PARAMETERS_H_
 
-#define RSA_DIMENSION 3
+#define RSA_DIMENSION 2
 
 #include <climits>
 #include <limits>

@@ -34,10 +34,10 @@ BallFactory * BallFactory::getInstance()
 // Helper method. Creates random Cuboid based on objects parameters. Delegate cuboid creation
 // to standard ShapeFactory
 //--------------------------------------------------------------------------------------------    
-Shape * BallFactory::randomShape()
+Shape<RSA_DIMENSION> * BallFactory::randomShape()
 {
     double trans[3];
-    Shape * shape = ShapeFactory::createShape(&this->rnd);
+    Shape<RSA_DIMENSION> * shape = ShapeFactory::createShape(&this->rnd);
     shape->no = this->no++;
     
     double cos_theta = 2 * rnd.nextValue() - 1;

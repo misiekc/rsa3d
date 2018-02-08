@@ -10,6 +10,7 @@
 #include <string>
 
 #include "../../shapes/Cuboid.h"
+#include "../../Parameters.h"
 
 
 class ShapePairFactory
@@ -18,13 +19,13 @@ public:
 
     struct ShapePair
     {
-        Shape * first;
-        Shape * second;
+        Shape<RSA_DIMENSION> * first;
+        Shape<RSA_DIMENSION> * second;
         
         ShapePair()
         { }
         
-        ShapePair(Shape * first, Shape * second) : first(first), second(second)
+        ShapePair(Shape<RSA_DIMENSION> * first, Shape<RSA_DIMENSION> * second) : first(first), second(second)
         { }
         
         // Self-cleaning utility

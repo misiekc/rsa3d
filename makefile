@@ -36,7 +36,8 @@ EXEC = rsa
 LIBSTAT = libstat.a
 
 # Source files list (withous extensions)
-OBJS = rsa3d/BoundaryConditions \
+OBJS = rsa3d/AnisotropicShape2D \
+       rsa3d/BoundaryConditions \
        rsa3d/Config \
        rsa3d/DynamicMatrix \
        rsa3d/DynamicVector \
@@ -54,6 +55,7 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/shapes/cube_strategies/OptimizedSATOverlap \
        rsa3d/shapes/cube_strategies/SATOverlap \
        rsa3d/shapes/cube_strategies/TriTriOverlap \
+       rsa3d/shapes/SpheroCylinder2D \
        rsa3d/surfaces/NBoxFBC \
        rsa3d/surfaces/NBoxPBC \
        rsa3d/tests/utility/BallFactory \
@@ -63,6 +65,7 @@ OBJS = rsa3d/BoundaryConditions \
        rsa3d/tests/CuboidIntTest \
        rsa3d/tests/CuboidPointInsideTest \
        rsa3d/tests/CuboidSpeedTest \
+       rsa3d/tests/SpheroCylinder2DIntTest \
        rsa3d/tests/TriangleIntTest
        
 # Source files list (withous extensions) for statistics lib

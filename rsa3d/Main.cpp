@@ -4,6 +4,7 @@
 #include "tests/CuboidSpeedTest.h"
 #include "tests/CuboidPointInsideTest.h"
 #include "tests/CuboidIntTest.h"
+#include "tests/SpheroCylinder2DIntTest.h"
 
 #include <unistd.h>
 #include <sys/wait.h>
@@ -128,16 +129,14 @@ int main(int argc, char **argv) {
         die("No mode param. Aborting.");
 
     // Modes with custom environment
-    if (strcmp(argv[1], "cube_speedtest") == 0) {
-		cube_speedtest::main(argc, argv);
-        return EXIT_SUCCESS;
-    } else if (strcmp(argv[1], "cube_inttest") == 0) {
-		cube_inttest::main(argc, argv);
-        return EXIT_SUCCESS;
-    } else if (strcmp(argv[1], "cube_pitest") == 0) {
-		cube_pitest::main(argc, argv);
-        return EXIT_SUCCESS;
-    }
+    if (strcmp(argv[1], "cube_speedtest") == 0)
+		return cube_speedtest::main(argc, argv);
+    else if (strcmp(argv[1], "cube_inttest") == 0)
+		return cube_inttest::main(argc, argv);
+    else if (strcmp(argv[1], "cube_pitest") == 0)
+		return cube_pitest::main(argc, argv);
+    else if (strcmp(argv[1], "spheroc_inttest") == 0)
+        return spheroc_inttest::main(argc, argv);
 	
     // Modes with standard environment
     if (argc < 3)
@@ -159,5 +158,6 @@ int main(int argc, char **argv) {
 		PackingGenerator<RSA_DIMENSION>::toPovray(packing, params.surfaceSize, NULL, file + ".pov");
 		delete packing;
 	}
+	std::cerr << "Unknown mode: " << argv[1] << std::endl;
 	return 1;
 }

@@ -33,10 +33,10 @@ BoxFactory * BoxFactory::getInstance()
 // Helper method. Creates random Cuboid based on objects parameters. Delegate cuboid creation
 // to standard ShapeFactory
 //--------------------------------------------------------------------------------------------    
-Shape * BoxFactory::randomShape()
+Shape<RSA_DIMENSION> * BoxFactory::randomShape()
 {
     double trans[3];
-    Shape * shape = ShapeFactory::createShape(&this->rnd);
+    Shape<RSA_DIMENSION> * shape = ShapeFactory::createShape(&this->rnd);
     shape->no = this->no++;
     trans[0] = (rnd.nextValue() * 2 - 1) * this->halfsizeX;
     trans[1] = (rnd.nextValue() * 2 - 1) * this->halfsizeY;

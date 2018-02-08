@@ -22,7 +22,7 @@ private:
     static BoxFactory * instance;
     
     BoxFactory();
-    Shape * randomShape();
+    Shape<RSA_DIMENSION> * randomShape();
 
 public:
     static BoxFactory * getInstance();

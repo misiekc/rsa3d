@@ -105,7 +105,7 @@ namespace cube_inttest
 
     // Performs cuboid intersection test with parameters passed to process
     //----------------------------------------------------------------------------------------
-    void main(int argc, char **argv)
+    int main(int argc, char **argv)
     {
         if (argc < 7)
             die("Usage: ./rsa cube_inttest [size_x] [size_y] [size_z] [ball_radius] [max_tries]");
@@ -153,5 +153,7 @@ namespace cube_inttest
                 std::cout << ">> Could not write to inttest_dump.nb";
             }
         }
+
+        return EXIT_SUCCESS;
     }
 }

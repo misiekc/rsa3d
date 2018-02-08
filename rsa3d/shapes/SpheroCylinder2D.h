@@ -14,7 +14,9 @@ private:
     static double voxelSize;
     static double neighbourListCellSize;
     static double radius;
-    static double centerDistance;
+    static double halfDistance;
+    static Vector<2> centerVector;
+
     double angle;
 
     double pointDistance2(const Vector<2> &p) const;
@@ -26,7 +28,7 @@ public:
     ~SpheroCylinder2D() override = default;
 
     static void initClass(const std::string & attr);
-    Shape<2> * create(RND * rnd);
+    static Shape<2> * create(RND * rnd);
 
     double getNeighbourListCellSize() override;
     double getVoxelSize() override;
@@ -37,7 +39,9 @@ public:
     std::string toString() override;
     std::string toPovray() const override;
     void store(std::ostream &f) const override;
-    void restore(std::istream &f) override;;
+    void restore(std::istream &f) override;
+
+    std::string toWolfram() const;
 };
 
 

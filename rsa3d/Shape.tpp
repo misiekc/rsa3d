@@ -75,7 +75,7 @@ void Shape<DIMENSION>::restore(std::istream &f){
 template <unsigned short DIMENSION>
 void Shape<DIMENSION>::vectorTranslate(const Vector<DIMENSION> &translation) {
 	double arr[DIMENSION];
-
+	translation.copyToArray(arr);
 	translate(arr);
 }
 

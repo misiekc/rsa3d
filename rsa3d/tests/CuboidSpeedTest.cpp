@@ -80,7 +80,7 @@ namespace cube_speedtest
         timer.start();
         for (std::size_t i = 0; i < _pairs_to_test; i++) {
             ShapePairFactory::ShapePair pair = _factory->generate();
-            strategy->runOverheadOperations(pair.first, pair.second);
+            strategy->runOverheadOperations((Cuboid *)pair.first, (Cuboid *)pair.second);
             pair.free();
         }
         timer.stop();

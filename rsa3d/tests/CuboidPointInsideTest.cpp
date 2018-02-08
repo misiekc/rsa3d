@@ -72,7 +72,7 @@ namespace cube_pitest
 
     // Performs Cuboid::pointInside test
     //------------------------------------------------------------------------------------------
-    void main(int argc, char **argv)
+    int main(int argc, char **argv)
     {
         if (argc < 7)
             die("Usage: ./rsa cube_pi_test [size_x] [size_y] [size_z] [ball_radius] [max_tries]");
@@ -90,5 +90,7 @@ namespace cube_pitest
         cube_pitest::Results results = cube_pitest::perform(factory, max_tries);
         std::cout << std::endl;
         cube_pitest::print_results(results);
+
+        return EXIT_SUCCESS;
     }
 }
