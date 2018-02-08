@@ -11,7 +11,7 @@
 #include "../Config.h"
 #include "../ShapeFactory.h"
 #include "utility/BallFactory.h"
-#include "utility/CuboidPairFactory.h"
+#include "utility/ShapePairFactory.h"
 #include "utility/Quantity.h"
 
 #include <vector>
@@ -73,15 +73,15 @@ namespace cube_speedtest
         std::vector<double>     numOverlapped;
         std::size_t             numAll{};
 
-        AcquiredData(const Context &_context, CuboidPairFactory *_factory);
+        AcquiredData(const Context &_context, ShapePairFactory *_factory);
         static std::vector<AcquiredData> initVector(const Context &_context, BallFactory *_factory);
         Result generateResult();
         static std::vector<Result> generateResultVector(std::vector<AcquiredData> &_acquiredDatas);
     };
 
-    void warmUp(CuboidPairFactory * _factor);
-    SingleTestAcquiredData test_single_alg(CuboidPairFactory * _factory, std::size_t _pairs_to_test);
-    void test_single_repeat(const Context &_context, CuboidPairFactory *_factory, AcquiredData &_acquired_data);
+    void warmUp(ShapePairFactory * _factor);
+    SingleTestAcquiredData test_single_alg(ShapePairFactory * _factory, std::size_t _pairs_to_test);
+    void test_single_repeat(const Context &_context, ShapePairFactory *_factory, AcquiredData &_acquired_data);
 
     int main(int argc, char **argv);
 }

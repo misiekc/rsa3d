@@ -50,7 +50,7 @@ namespace cube_speedtest
     // Performs one warm up test for consistent results. The first one seems to claim slower
     // speed regardless of chosen algorithm.
     //----------------------------------------------------------------------------------------
-    void warmUp(CuboidPairFactory * _factory)
+    void warmUp(ShapePairFactory * _factory)
     {
         std::cout << "Warm up test..." << std::endl;
         test_single_alg(_factory, 2000000);
@@ -58,7 +58,7 @@ namespace cube_speedtest
 
     // Performs single test of overlap algorithm (set from the outside)
     //----------------------------------------------------------------------------------------
-    SingleTestAcquiredData test_single_alg(CuboidPairFactory * _factory, std::size_t _pairs_to_test)
+    SingleTestAcquiredData test_single_alg(ShapePairFactory * _factory, std::size_t _pairs_to_test)
     {
         SingleTestAcquiredData result{};
         OverlapStrategy * strategy = Cuboid::getOverlapStrategy();
@@ -69,7 +69,7 @@ namespace cube_speedtest
 
         timer.start();
         for (std::size_t i = 0; i < _pairs_to_test; i++) {
-            CuboidPairFactory::CuboidPair pair = _factory->generate();
+            ShapePairFactory::ShapePair pair = _factory->generate();
             if (pair.first->overlap(&bc, pair.second))
                 result.overlapped++;
             pair.free();
@@ -79,7 +79,7 @@ namespace cube_speedtest
 
         timer.start();
         for (std::size_t i = 0; i < _pairs_to_test; i++) {
-            CuboidPairFactory::CuboidPair pair = _factory->generate();
+            ShapePairFactory::ShapePair pair = _factory->generate();
             strategy->runOverheadOperations(pair.first, pair.second);
             pair.free();
         }
@@ -95,7 +95,7 @@ namespace cube_speedtest
     // Performs single repeat of _pairs_to_test test using given _factory for all passed
     // _strategies and stored result in _acquired_data
     //----------------------------------------------------------------------------------------
-    void test_single_repeat(const Context &_context, CuboidPairFactory *_factory, AcquiredData &_acquired_data)
+    void test_single_repeat(const Context &_context, ShapePairFactory *_factory, AcquiredData &_acquired_data)
     {
         // Test each strategy
         for (std::size_t j = 0; j < _context.strategies.size(); j++) {
@@ -251,7 +251,7 @@ namespace cube_speedtest
 
     // Constructs itself based on given _context
     //----------------------------------------------------------------------------------------
-    AcquiredData::AcquiredData(const Context &_context, CuboidPairFactory *_factory) {
+    AcquiredData::AcquiredData(const Context &_context, ShapePairFactory *_factory) {
         this->factoryDesc = _factory->getDescription();
         this->numAll = _context.pairs;
         for (auto strategy : _context.strategies)

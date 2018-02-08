@@ -7,10 +7,10 @@
 #ifndef _BOX_FACTORY_H
     #define _BOX_FACTORY_H
 
-#include "CuboidPairFactory.h"
+#include "ShapePairFactory.h"
 
 
-class BoxFactory : public CuboidPairFactory
+class BoxFactory : public ShapePairFactory
 {
 private:
     double halfsizeX = 0.5;
@@ -22,12 +22,12 @@ private:
     static BoxFactory * instance;
     
     BoxFactory();
-    Cuboid * randomCuboid();
+    Shape * randomShape();
 
 public:
     static BoxFactory * getInstance();
     void setBoxSize(double _halfsize_x, double _halfsize_y, double _halfsize_z);
-    CuboidPair generate();
+    ShapePair generate();
     std::string getDescription();
 };
 

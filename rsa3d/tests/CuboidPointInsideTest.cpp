@@ -24,7 +24,7 @@ namespace cube_pitest
     // given by Cuboid::overlap and Cuboid::pointInside. If pointInside gives true, so should
     // overlap do
     //----------------------------------------------------------------------------------------
-    Results perform(CuboidPairFactory * _factory, std::size_t _pairs_to_test) {
+    Results perform(ShapePairFactory * _factory, std::size_t _pairs_to_test) {
         if (_pairs_to_test == 0)
             throw std::runtime_error("_pairs_to_test == 0");
         
@@ -35,7 +35,7 @@ namespace cube_pitest
         
         std::cout << ">> Starting..." << std::endl;
         for (std::size_t i = 0; i < _pairs_to_test; i++) {
-            CuboidPairFactory::CuboidPair pair;
+            ShapePairFactory::ShapePair pair;
 	        pair = _factory->generate();
 	        
 	        bool overlap = pair.first->overlap(&bc, pair.second);

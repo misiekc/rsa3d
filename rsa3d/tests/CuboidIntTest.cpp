@@ -16,7 +16,7 @@
 #include "../Intersection.h"
 #include "../shapes/Cuboid.h"
 #include "utility/MockBC.h"
-#include "utility/CuboidPairFactory.h"
+#include "utility/ShapePairFactory.h"
 #include "CuboidIntTest.h"
 #include "../shapes/cube_strategies/MineOverlap.h"
 #include "../ShapeFactory.h"
@@ -43,7 +43,7 @@ namespace cube_inttest
     // Performs Cuboid::overlap algorithm check. It generates some random pairs of cuboids
     // and compares result given by ::MINE strategy and _strategy strategy
     //--------------------------------------------------------------------------------------------
-    Results perform(CuboidPairFactory * _factory, OverlapStrategy * _strategy, int _max_tries)
+    Results perform(ShapePairFactory * _factory, OverlapStrategy * _strategy, int _max_tries)
     {
         cube_inttest::Results result;
 	    bool    mine_intersected, second_intersected;
@@ -55,7 +55,7 @@ namespace cube_inttest
 	    std::cout << ">> Performing " << mineOverlap.getName() << " and " << _strategy->getName()
 	        << " for OverlapStrategy comparison..." << std::endl;
 	    for (int i = 0; i < _max_tries; i++) {
-	        CuboidPairFactory::CuboidPair pair = _factory->generate();
+	        ShapePairFactory::ShapePair pair = _factory->generate();
 	        
 	        Cuboid::setOverlapStrategy(&mineOverlap);
 	        mine_intersected = (bool)pair.first->overlap(&bc, pair.second);
@@ -94,8 +94,8 @@ namespace cube_inttest
     {
         std::size_t pair_no = 0;
         for (auto pair : _results.missed_dump) {
-            _ostr << pair.first->toWolfram() << std::endl;
-            _ostr << pair.second->toWolfram() << std::endl;
+            _ostr << ((Cuboid*)(pair.first))->toWolfram() << std::endl;
+            _ostr << ((Cuboid*)(pair.second))->toWolfram() << std::endl;
             _ostr << "pair" << pair_no << " = {cube" << pair.first->no << ", cube" << pair.second->no << "};" << std::endl;  
             _ostr << "Graphics3D[pair" << pair_no << "]" << std::endl;
             _ostr << std::endl;

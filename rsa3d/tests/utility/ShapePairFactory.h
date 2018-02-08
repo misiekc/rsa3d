@@ -12,19 +12,19 @@
 #include "../../shapes/Cuboid.h"
 
 
-class CuboidPairFactory
+class ShapePairFactory
 {
 public:
 
-    struct CuboidPair
+    struct ShapePair
     {
-        Cuboid * first;
-        Cuboid * second;
+        Shape * first;
+        Shape * second;
         
-        CuboidPair()
+        ShapePair()
         { }
         
-        CuboidPair(Cuboid * first, Cuboid * second) : first(first), second(second)
+        ShapePair(Shape * first, Shape * second) : first(first), second(second)
         { }
         
         // Self-cleaning utility
@@ -36,7 +36,7 @@ public:
     };
     
     // Generates random cuboid pair for intersection checks
-    virtual CuboidPair generate() = 0;
+    virtual ShapePair generate() = 0;
     virtual std::string getDescription() = 0;
 };
 

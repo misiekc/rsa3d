@@ -7,10 +7,10 @@
 #ifndef _BALL_FACTORY_H
     #define _BALL_FACTORY_H
 
-#include "CuboidPairFactory.h"
+#include "ShapePairFactory.h"
 
 
-class BallFactory : public CuboidPairFactory
+class BallFactory : public ShapePairFactory
 {
 private:
     double radius = 0.5;
@@ -20,12 +20,12 @@ private:
     static BallFactory * instance;
     
     BallFactory();
-    Cuboid * randomCuboid();
+    Shape * randomShape();
 
 public:
     static BallFactory * getInstance();
     void setRadius(double _radius);
-    CuboidPair generate();
+    ShapePair generate();
     std::string getDescription();
 };
 

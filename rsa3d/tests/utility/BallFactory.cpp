@@ -10,7 +10,7 @@
 
 #include <cmath>
 
-typedef CuboidPairFactory::CuboidPair pair;
+typedef ShapePairFactory::ShapePair pair;
 BallFactory * BallFactory::instance = nullptr;
 
 
@@ -34,11 +34,11 @@ BallFactory * BallFactory::getInstance()
 // Helper method. Creates random Cuboid based on objects parameters. Delegate cuboid creation
 // to standard ShapeFactory
 //--------------------------------------------------------------------------------------------    
-Cuboid * BallFactory::randomCuboid()
+Shape * BallFactory::randomShape()
 {
     double trans[3];
-    Cuboid * cube = (Cuboid*)ShapeFactory::createShape(&this->rnd);
-    cube->no = this->no++;
+    Shape * shape = ShapeFactory::createShape(&this->rnd);
+    shape->no = this->no++;
     
     double cos_theta = 2 * rnd.nextValue() - 1;
     double sin_theta = sqrt(1 - cos_theta * cos_theta);
@@ -50,8 +50,8 @@ Cuboid * BallFactory::randomCuboid()
     trans[0] = radius * sin_theta * cos_phi;
     trans[1] = radius * sin_theta * sin_phi;
     trans[2] = radius * cos_theta;
-    cube->translate(trans);
-    return cube;
+    shape->translate(trans);
+    return shape;
 }
 
 
@@ -68,8 +68,8 @@ void BallFactory::setRadius(double _radius)
 pair BallFactory::generate()
 {
     return pair(
-        this->randomCuboid(),
-        this->randomCuboid());
+            this->randomShape(),
+        this->randomShape());
 }
 
 

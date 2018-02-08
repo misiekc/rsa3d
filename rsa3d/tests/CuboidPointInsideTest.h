@@ -8,7 +8,7 @@
     #define _CUBOID_POINT_INSDE_TEST_H
     
 
-#include "utility/CuboidPairFactory.h"
+#include "utility/ShapePairFactory.h"
 
 #include <string>
 
@@ -23,7 +23,7 @@ namespace cube_pitest
         std::string factoryDesc;
     };
     
-    Results perform(CuboidPairFactory * _factory, std::size_t _pairs_to_test);
+    Results perform(ShapePairFactory * _factory, std::size_t _pairs_to_test);
     void print_results(Results results);
     void main(int argc, char **argv);
 }

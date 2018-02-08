@@ -22,7 +22,7 @@ namespace cube_inttest
         int missed = 0;
         int intersected = 0;
         int disjunct = 0;
-        std::vector<CuboidPairFactory::CuboidPair> missed_dump;
+        std::vector<ShapePairFactory::ShapePair> missed_dump;
         
         void free_missed_pairs() {
             // Delete missed pairs memory
@@ -31,7 +31,7 @@ namespace cube_inttest
         }
     };
 
-    Results perform(CuboidPairFactory * _factory, OverlapStrategy * _strategy, int _max_tries);
+    Results perform(ShapePairFactory * _factory, OverlapStrategy * _strategy, int _max_tries);
     void print_results(Results _results);
     void dump_missed_pairs(Results _results, std::ostream & _ostr);
 

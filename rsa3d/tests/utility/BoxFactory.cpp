@@ -9,7 +9,7 @@
 #include <sstream>
 
 
-typedef CuboidPairFactory::CuboidPair pair;
+typedef ShapePairFactory::ShapePair pair;
 BoxFactory * BoxFactory::instance = nullptr;
 
 
@@ -33,16 +33,16 @@ BoxFactory * BoxFactory::getInstance()
 // Helper method. Creates random Cuboid based on objects parameters. Delegate cuboid creation
 // to standard ShapeFactory
 //--------------------------------------------------------------------------------------------    
-Cuboid * BoxFactory::randomCuboid()
+Shape * BoxFactory::randomShape()
 {
     double trans[3];
-    Cuboid * cube = (Cuboid*)ShapeFactory::createShape(&this->rnd);
-    cube->no = this->no++;
+    Shape * shape = ShapeFactory::createShape(&this->rnd);
+    shape->no = this->no++;
     trans[0] = (rnd.nextValue() * 2 - 1) * this->halfsizeX;
     trans[1] = (rnd.nextValue() * 2 - 1) * this->halfsizeY;
     trans[2] = (rnd.nextValue() * 2 - 1) * this->halfsizeZ;
-    cube->translate(trans);
-    return cube;
+    shape->translate(trans);
+    return shape;
 }
 
 
@@ -61,8 +61,8 @@ void BoxFactory::setBoxSize(double _halfsize_x, double _halfsize_y, double _half
 pair BoxFactory::generate()
 {
     return pair(
-        this->randomCuboid(),
-        this->randomCuboid());
+            this->randomShape(),
+        this->randomShape());
 }
 
 
