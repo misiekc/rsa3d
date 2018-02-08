@@ -167,14 +167,23 @@ public:
     enabled<_DIM == 3, Vector> &
     operator^=(const Vector<3, E> & other);      // Vector product assignemnt
 
-    
+
     // Norm of vector (for double)
     //---------------------------------------------------------------------------------------
     template <typename _E = E>
     enabled<std::is_same<_E, double>::value, double>
     norm() const
     {
-        return sqrt((*this) * (*this));
+        return sqrt(this->norm2());
+    }
+
+    // Norm square of vector (for double)
+    //---------------------------------------------------------------------------------------
+    template <typename _E = E>
+    enabled<std::is_same<_E, double>::value, double>
+    norm2() const
+    {
+        return (*this) * (*this);
     }
     
     // Returns projection on vector (for double)
@@ -199,12 +208,15 @@ public:
         return this->v(coord, 0);
     }
     
-    
     // Access operators
     //---------------------------------------------------------------------------------------
     std::size_t getDimension() const
     {
         return DIM;
+    }
+
+    void copyToArray(E * array) const {
+        v.copyToArray(array);
     }
 };
 

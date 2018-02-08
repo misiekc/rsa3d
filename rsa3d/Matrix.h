@@ -156,6 +156,10 @@ public:
     template <std::size_t _ROWS = ROWS, std::size_t _COLS = COLS, typename _E = E>
     static typename std::enable_if<_ROWS == 3 && _COLS == 3 && std::is_same<_E, double>::value, Matrix<ROWS, COLS, E>>::type
     rotation(double _ax, double _ay, double _az);
+
+    // Access
+    //----------------------------------------------------------------------------------------
+    inline void copyToArray(E * arr) const;
 };
 
 

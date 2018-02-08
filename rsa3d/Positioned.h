@@ -8,6 +8,8 @@
 #ifndef POSITIONED_H_
 #define POSITIONED_H_
 
+#include "Vector.h"
+
 template <unsigned short DIMENSION>
 class Positioned {
 
@@ -23,6 +25,7 @@ public:
 
 	// returns position of the shape's center
 	double* getPosition();
+	Vector<DIMENSION> getVectorPosition() const;
 };
 
 #include "Positioned.tpp"

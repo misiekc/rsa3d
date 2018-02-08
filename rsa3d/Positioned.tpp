@@ -38,3 +38,8 @@ template <unsigned short DIMENSION>
 double* Positioned<DIMENSION>::getPosition(){
 	return this->position;
 }
+
+template<unsigned short DIMENSION>
+Vector<DIMENSION> Positioned<DIMENSION>::getVectorPosition() const {
+    return Vector<DIMENSION>(position);
+}

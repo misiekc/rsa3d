@@ -38,6 +38,8 @@ public:
 	// translates the shape by the given vector v
 	virtual void translate(double* v);
 
+	void vectorTranslate(const Vector<DIMENSION> &translation);
+
 	// checks if there is overlap with the shape pointed by s.
 	virtual int overlap(BoundaryConditions *bc, Shape *s) = 0;
 

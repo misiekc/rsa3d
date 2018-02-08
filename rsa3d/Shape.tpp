@@ -72,4 +72,11 @@ void Shape<DIMENSION>::restore(std::istream &f){
 	f.read((char *)(this->position), d*sizeof(double));
 }
 
+template <unsigned short DIMENSION>
+void Shape<DIMENSION>::vectorTranslate(const Vector<DIMENSION> &translation) {
+	double arr[DIMENSION];
+
+	translate(arr);
+}
+
 

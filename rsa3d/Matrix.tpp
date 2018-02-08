@@ -548,3 +548,11 @@ inline const E & Matrix<ROWS, COLS, E>::_get(std::size_t _row, std::size_t _col)
 {
     return arr[_row * COLS + _col];
 }
+
+// Copies matrix to c array
+//-------------------------------------------------------------------------------------------------------
+template<size_t ROWS, size_t COLS, typename E>
+void Matrix<ROWS, COLS, E>::copyToArray(E *arr) const {
+    for (size_t i = 0; i < ROWS * COLS; i++)
+        arr[i] = this->arr[i];
+}
