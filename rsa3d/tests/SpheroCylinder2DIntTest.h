@@ -23,6 +23,7 @@ namespace spheroc_inttest
         double box_width{};
         double box_height{};
         double points{};
+        bool append{};
 
         void load(const std::string & _filename);
     };

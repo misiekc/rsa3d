@@ -3,6 +3,7 @@
 //
 
 #include <stdexcept>
+#include <iomanip>
 #include "SpheroCylinder2D.h"
 
 double SpheroCylinder2D::voxelSize;
@@ -58,9 +59,9 @@ int SpheroCylinder2D::overlap(BoundaryConditions *bc, Shape *s) {
     Matrix<2, 2> otherRot = Matrix<2, 2>::rotation(other.angle);
     Vector<2> otherPosThisAligned = thisRot.transpose() * (otherPos - thisPos);     // align x-axis to this capsule
     Vector<2> thisPosOtherAligned = otherRot.transpose() * (thisPos - otherPos);    // align x-axis to colliding capsule
-    /*if (fabs(otherPosThisAligned[1]) < fabs(halfDistance * sin(other.angle - this->angle)) &&
+    if (fabs(otherPosThisAligned[1]) < fabs(halfDistance * sin(other.angle - this->angle)) &&
         fabs(thisPosOtherAligned[1]) < fabs(halfDistance * sin(this->angle - other.angle)))
-        return true;*/
+        return true;
 
     // Check big pallerogram with round vertices
     return this->pointDistance2(thisPos + otherRot * centerVector, this->angle, otherPos) < 4 * radius * radius ||
@@ -94,7 +95,10 @@ int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da) {
 }
 
 std::string SpheroCylinder2D::toString() {
-    return Shape::toString();
+    std::stringstream out;
+    out << "SpheroCylinder2D{radius: " << radius << "; halfDistance: " << halfDistance;
+    out << "; pos: " << this->getVectorPosition() << "; angle: " << angle << "}";
+    return out.str();
 }
 
 std::string SpheroCylinder2D::toPovray() const {
@@ -115,9 +119,11 @@ SpheroCylinder2D::SpheroCylinder2D(double angle) : angle(angle) {
 std::string SpheroCylinder2D::toWolfram() const {
     std::stringstream out;
 
-    out << "GeometricTransformation[{Rectangle[{-" << halfDistance << ", -" << radius << "}, {" << halfDistance << ", " << radius << "}], ";
-    out << "Disk[{-" << halfDistance << ", 0}, " << radius << "], Disk[{" << halfDistance << ", 0}, " << radius << "]}, ";
-    out << "{RotationMatrix[" << this->angle << "], " << this->getVectorPosition() << "}]";
+    out << std::fixed;
+    out << "GeometricTransformation[{Rectangle[{-" << halfDistance << ", -" << radius << "}, {" << halfDistance << ", " << radius << "}]," << std::endl;
+    out << "    Disk[{-" << halfDistance << ", 0}, " << radius << "]," << std::endl;
+    out << "    Disk[{" << halfDistance << ", 0}, " << radius << "]}," << std::endl;
+    out << "    {RotationMatrix[" << this->angle << "], " << this->getVectorPosition() << "}]";
 
     return out.str();
 }
