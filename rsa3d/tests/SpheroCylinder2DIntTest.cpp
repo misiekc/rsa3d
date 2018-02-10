@@ -36,7 +36,7 @@ void spheroc_inttest::Context::load(const std::string &_filename) {
     delete config;
 }
 
-void spheroc_inttest::perform(const Context &_context, std::vector<Point> &_result) {
+void spheroc_inttest::perform(const Context &_context, std::vector<spheroc_inttest::Point> &_result) {
     RND rnd;
     MockBC mockBC;
 
@@ -64,8 +64,8 @@ void spheroc_inttest::perform(const Context &_context, std::vector<Point> &_resu
     }
 }
 
-void spheroc_inttest::print_results(const Context &_context, const std::vector<spheroc_inttest::Point> &_results,
-                                    std::ostream &_out) {
+void spheroc_inttest::results_to_wolfram(const Context &_context, const std::vector<Point> &_results,
+                                         std::ostream &_out) {
     // Find Red point with max X coordintate to place the second SC2D
     auto comparator = [](const Point & p1, const Point & p2) {
         if (p1.color == "Green" && p2.color == "Red")
@@ -107,7 +107,7 @@ int spheroc_inttest::main(int argc, char **argv) {
     std::ofstream output(filename, context.append ? std::ofstream::app : std::ofstream::out);
     if (!output)
         die("Cannot open file " + filename + " to write");
-    print_results(context, results, output);
+    results_to_wolfram(context, results, output);
     output.close();
     std::cout << "Stored to " + filename << std::endl << std::endl;
 

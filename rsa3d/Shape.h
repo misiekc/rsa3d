@@ -38,8 +38,6 @@ public:
 	// translates the shape by the given vector v
 	virtual void translate(double* v);
 
-	void vectorTranslate(const Vector<DIMENSION> &translation);
-
 	// checks if there is overlap with the shape pointed by s.
 	virtual int overlap(BoundaryConditions *bc, Shape *s) = 0;
 
@@ -65,7 +63,11 @@ public:
 	virtual void restore(std::istream &f);
 
 	// draws the shape
-	// virtual void draw()
+    // virtual void draw()
+
+    void vectorTranslate(const Vector<DIMENSION> &translation);
+	void applyBC(BoundaryConditions *bc, Shape<DIMENSION> *second);
+	Vector<2> applyBC(BoundaryConditions *bc, double *pointToTranslate);
 };
 
 #include "Shape.tpp"

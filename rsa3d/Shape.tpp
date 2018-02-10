@@ -79,4 +79,16 @@ void Shape<DIMENSION>::vectorTranslate(const Vector<DIMENSION> &translation) {
 	translate(arr);
 }
 
+template <unsigned short DIMENSION>
+void Shape<DIMENSION>::applyBC(BoundaryConditions *bc, Shape<DIMENSION> *second) {
+    double translation[DIMENSION];
+    bc->getTranslation(translation, this->getPosition(), second->getPosition());
+    second->translate(translation);
+}
 
+template<unsigned short DIMENSION>
+Vector<2> Shape<DIMENSION>::applyBC(BoundaryConditions *bc, double *pointToTranslate) {
+	double transArray[DIMENSION];
+	bc->getTranslation(transArray, this->getPosition(), pointToTranslate);
+	return Vector<2>(pointToTranslate) + Vector<2>(transArray);
+}

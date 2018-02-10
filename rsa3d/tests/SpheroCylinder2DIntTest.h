@@ -29,8 +29,8 @@ namespace spheroc_inttest
     };
 
     void perform(const Context &_context, std::vector<Point> &_result);
-    void print_results(const Context &_context, const std::vector<spheroc_inttest::Point> &_results,
-                           std::ostream &_out);
+    void results_to_wolfram(const Context &_context, const std::vector<spheroc_inttest::Point> &_results,
+                            std::ostream &_out);
     int main(int argc, char **argv);
 }
 
