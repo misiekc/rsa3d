@@ -8,7 +8,7 @@
 #include "../Vector.h"
 #include "utility/ShapePairFactory.h"
 
-namespace spheroc_inttest
+namespace spheroc_extest
 {
     struct Point {
         Vector<2> position;
@@ -18,7 +18,8 @@ namespace spheroc_inttest
     struct Context {
         Vector<2> firstPos;
         double firstAngle{};
-        double secondAngle{};
+        double fromAngle{};
+        double toAngle{};
         double ratio{};
         double box_width{};
         double box_height{};
@@ -28,8 +29,9 @@ namespace spheroc_inttest
         void load(const std::string & _filename);
     };
 
-    void perform(const Context &_context, std::vector<Point> &_result);
-    void results_to_wolfram(const Context &_context, const std::vector<spheroc_inttest::Point> &_results,
+    void perform_inttest(const Context &_context, std::vector<Point> &_result);
+    void perform_pitest(const Context &_context, std::vector<Point> &_result);
+    void results_to_wolfram(const Context &_context, const std::vector<spheroc_extest::Point> &_results,
                             std::ostream &_out);
     int main(int argc, char **argv);
 }

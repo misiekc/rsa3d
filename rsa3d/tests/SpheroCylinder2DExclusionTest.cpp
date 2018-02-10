@@ -4,7 +4,7 @@
 
 #include <fstream>
 #include "utility/ShapePairFactory.h"
-#include "SpheroCylinder2DIntTest.h"
+#include "SpheroCylinder2DExclusionTest.h"
 #include "../Config.h"
 #include "../shapes/SpheroCylinder2D.h"
 #include "utility/MockBC.h"
@@ -20,14 +20,15 @@ namespace
     }
 }
 
-void spheroc_inttest::Context::load(const std::string &_filename) {
+void spheroc_extest::Context::load(const std::string &_filename) {
     std::ifstream input(_filename);
     if (!input)
         die("Error opening " + std::string(_filename) + " file to read");
     auto config = Config::parse(input);
     this->firstPos = Vector<2>{{config->getDouble("first_x"), config->getDouble("first_y")}};
     this->firstAngle = config->getDouble("first_angle") * M_PI / 180;
-    this->secondAngle = config->getDouble("second_angle") * M_PI / 180;
+    this->fromAngle = config->getDouble("from_angle") * M_PI / 180;
+    this->toAngle = config->getDouble("to_angle") * M_PI / 180;
     this->ratio = config->getDouble("ratio");
     this->box_width = config->getDouble("box_width");
     this->box_height = config->getDouble("box_height");
@@ -36,13 +37,13 @@ void spheroc_inttest::Context::load(const std::string &_filename) {
     delete config;
 }
 
-void spheroc_inttest::perform(const Context &_context, std::vector<spheroc_inttest::Point> &_result) {
+void spheroc_extest::perform_inttest(const Context &_context, std::vector<spheroc_extest::Point> &_result) {
     RND rnd;
     MockBC mockBC;
 
     SpheroCylinder2D first(_context.firstAngle);
     first.vectorTranslate(_context.firstPos);
-    SpheroCylinder2D second(_context.secondAngle);
+    SpheroCylinder2D second(_context.fromAngle);
 
     std::cout << "Generating " << _context.points << " points from " << _context.box_width << " x ";
     std::cout << _context.box_height << " box for:" << std::endl;
@@ -54,7 +55,7 @@ void spheroc_inttest::perform(const Context &_context, std::vector<spheroc_intte
             (rnd.nextValue() - 0.5) * _context.box_height}};
         point.position = _context.firstPos + secondTranslation;
 
-        second = SpheroCylinder2D(_context.secondAngle);
+        second = SpheroCylinder2D(_context.fromAngle);
         second.vectorTranslate(point.position);
         if (first.overlap(&mockBC, &second))
             point.color = "Red";
@@ -64,13 +65,57 @@ void spheroc_inttest::perform(const Context &_context, std::vector<spheroc_intte
     }
 }
 
-void spheroc_inttest::results_to_wolfram(const Context &_context, const std::vector<Point> &_results,
+void spheroc_extest::perform_pitest(const Context &_context, std::vector<spheroc_extest::Point> &_result) {
+    RND rnd;
+    MockBC mockBC;
+
+    SpheroCylinder2D first(_context.firstAngle);
+    first.vectorTranslate(_context.firstPos);
+    SpheroCylinder2D second(_context.fromAngle);
+
+    std::cout << "Generating " << _context.points << " points from " << _context.box_width << " x ";
+    std::cout << _context.box_height << " box for:" << std::endl;
+    std::cout << first.toString() << std::endl << second.toString() << std::endl;
+    for (std::size_t i = 0; i < _context.points; i++) {
+        Point point;
+        Vector<2> secondTranslation{{
+            (rnd.nextValue() - 0.5) * _context.box_width,
+            (rnd.nextValue() - 0.5) * _context.box_height}};
+        point.position = _context.firstPos + secondTranslation;
+
+        double pointPosArray[2];
+        point.position.copyToArray(pointPosArray);
+
+        if (first.pointInside(&mockBC, pointPosArray, _context.fromAngle, _context.toAngle)) {
+            point.color = "Red";
+        } else {
+            SpheroCylinder2D angleFromSC(_context.fromAngle);
+            angleFromSC.vectorTranslate(point.position);
+            SpheroCylinder2D angleToSC(_context.toAngle);
+            angleToSC.vectorTranslate(point.position);
+            auto withinAngleFromZone = (bool)first.overlap(&mockBC, &angleFromSC);
+            auto withinAngleToZone = (bool)first.overlap(&mockBC, &angleToSC);
+
+            if (withinAngleFromZone && withinAngleToZone)
+                point.color = "Cyan";
+            else if (withinAngleFromZone)
+                point.color = "Orange";
+            else if (withinAngleToZone)
+                point.color = "Purple";
+            else
+                point.color = "Green";
+        }
+        _result.push_back(point);
+    }
+}
+
+void spheroc_extest::results_to_wolfram(const Context &_context, const std::vector<Point> &_results,
                                          std::ostream &_out) {
     // Find Red point with max X coordintate to place the second SC2D
     auto comparator = [](const Point & p1, const Point & p2) {
-        if (p1.color == "Green" && p2.color == "Red")
+        if (p1.color != "Red" && p2.color == "Red")
             return true;
-        else if (p1.color == "Red" && p2.color == "Green")
+        else if (p1.color == "Red" && p2.color != "Red")
             return false;
         else
             return p1.position[0] < p2.position[0];
@@ -79,7 +124,7 @@ void spheroc_inttest::results_to_wolfram(const Context &_context, const std::vec
 
     SpheroCylinder2D first(_context.firstAngle);
     first.vectorTranslate(_context.firstPos);
-    SpheroCylinder2D second(_context.secondAngle);
+    SpheroCylinder2D second(_context.fromAngle);
     second.vectorTranslate(maxX.position);
 
     _out << std::fixed;
@@ -93,15 +138,22 @@ void spheroc_inttest::results_to_wolfram(const Context &_context, const std::vec
     _out << "Graphics[Join[{{Blue, sc2}, {Black, sc1}}, points]]" << std::endl << std::endl;
 }
 
-int spheroc_inttest::main(int argc, char **argv) {
+int spheroc_extest::main(int argc, char **argv) {
     if (argc < 3)
-        die("Usage: ./rsa spheroc_inttest [input] [output = spheroc_inttest.nb]");
+        die("Usage: ./rsa spheroc_extest [input] [output = spheroc_extest.nb]");
 
     Context context;
     context.load(argv[2]);
-    ShapeFactory::initShapeClass("SpheroCylinder2D", std::to_string(context.ratio));
     std::vector<Point> results;
-    perform(context, results);
+
+    std::string mode(argv[1]);
+    if (mode == "spheroc_inttest") {
+        ShapeFactory::initShapeClass("SpheroCylinder2D", std::to_string(context.ratio));
+        perform_inttest(context, results);
+    } else if (mode == "spheroc_pitest") {
+        ShapeFactory::initShapeClass("SpheroCylinder2D", std::to_string(context.ratio));
+        perform_pitest(context, results);
+    }
 
     std::string filename = (argc == 4 ? argv[3] : "spheroc_inttest.nb");
     std::ofstream output(filename, context.append ? std::ofstream::app : std::ofstream::out);

@@ -4,7 +4,7 @@
 #include "tests/CuboidSpeedTest.h"
 #include "tests/CuboidPointInsideTest.h"
 #include "tests/CuboidIntTest.h"
-#include "tests/SpheroCylinder2DIntTest.h"
+#include "tests/SpheroCylinder2DExclusionTest.h"
 
 #include <unistd.h>
 #include <sys/wait.h>
@@ -135,8 +135,8 @@ int main(int argc, char **argv) {
 		return cube_inttest::main(argc, argv);
     else if (strcmp(argv[1], "cube_pitest") == 0)
 		return cube_pitest::main(argc, argv);
-    else if (strcmp(argv[1], "spheroc_inttest") == 0)
-        return spheroc_inttest::main(argc, argv);
+    else if (strcmp(argv[1], "spheroc_inttest") == 0 || strcmp(argv[1], "spheroc_pitest") == 0)
+        return spheroc_extest::main(argc, argv);
 	
     // Modes with standard environment
     if (argc < 3)
