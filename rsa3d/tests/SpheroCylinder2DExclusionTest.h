@@ -25,8 +25,10 @@ namespace spheroc_extest
         double box_height{};
         double points{};
         bool append{};
+        bool drawSecondShaped{};
 
         void load(const std::string & _filename);
+        Point randomPoint(RND * rnd) const;
     };
 
     void perform_inttest(const Context &_context, std::vector<Point> &_result);
@@ -34,6 +36,9 @@ namespace spheroc_extest
     void results_to_wolfram(const Context &_context, const std::vector<spheroc_extest::Point> &_results,
                             std::ostream &_out);
     int main(int argc, char **argv);
+
+    Point randomPoint(const Context &_context, RND &rnd);
+    Point findMaxXRedPoint(const std::vector<Point> &_results);
 }
 
 #endif //RSA3D_SPHEROCYLINDER2DINTTEST_H
