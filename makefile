@@ -65,7 +65,7 @@ OBJS = rsa3d/AnisotropicShape2D \
        rsa3d/tests/CuboidIntTest \
        rsa3d/tests/CuboidPointInsideTest \
        rsa3d/tests/CuboidSpeedTest \
-       rsa3d/tests/SpheroCylinder2DIntTest \
+       rsa3d/tests/SpheroCylinder2DExclusionTest \
        rsa3d/tests/TriangleIntTest
        
 # Source files list (withous extensions) for statistics lib

@@ -47,6 +47,10 @@ public:
     void restore(std::istream &f) override;
 
     std::string toWolfram() const;
+
+    bool angleInRange(double angle, double rangeStart, double rangeEnd) const;
+
+    void normalizeRange(double &angleFrom, double &angleTo) const;
 };
 
 

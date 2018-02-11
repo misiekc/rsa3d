@@ -74,42 +74,53 @@ double SpheroCylinder2D::pointDistance2(const Vector<2> &pos, double angle, cons
 }
 
 int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) {
-    while (angleFrom < this->angle) {
-        angleFrom += M_PI;
-        angleTo += M_PI;
-    }
-    while (angleFrom > this->angle + M_PI) {
-        angleFrom -= M_PI;
-        angleTo -= M_PI;
-    }
+    this->normalizeRange(angleFrom, angleTo);
 
+    // If angleTo not in normal range (see normalizeRange), divide it and check separately
     if (angleTo > this->angle + M_PI) {
         return pointInside(bc, da, angleFrom, this->angle + M_PI - EPSILON) &&
                pointInside(bc, da, this->angle, angleTo - M_PI);
     }
 
-    Vector<2> thisPos = this->getVectorPosition();
     Vector<2> pointPos = applyBC(bc, da);
-    Vector<2> pointPosThisAligned = getAntiRotationMatrix() * (pointPos - thisPos); //keep axis aligned and origin at midpoint
+    Vector<2> pointPosThisAligned = getAntiRotationMatrix() * (pointPos - this->getVectorPosition());
     double angleFromAligned = angleFrom - this->angle;
     double angleToAligned = angleTo - this->angle;
+    double pointAngleToOrigin = getAngleToOrigin(pointPosThisAligned);
+    double pointAngleToRDisk = getAngleToOrigin(pointPosThisAligned - centerVector);
+    double pointAngleToLDisk = getAngleToOrigin(pointPosThisAligned + centerVector);
 
-    double angle0 = getAngleToOrigin(pointPosThisAligned);
-    double angleA = getAngleToOrigin(pointPosThisAligned - centerVector);
-    double angleB = getAngleToOrigin(pointPosThisAligned + centerVector);
-
-    if (0 <= angle0 && angle0 <= M_PI / 2) {
-        if (angleFromAligned - M_PI / 2 < angleA && angleA < angleToAligned - M_PI / 2)
+    // Check "special areas" around disks
+    if (angleInRange(pointAngleToOrigin, 0, M_PI/2)) {      // first quarter (right disk)
+        if (angleInRange(pointAngleToRDisk, angleFromAligned - M_PI/2, angleToAligned - M_PI/2))
             return this->pointDistance2(pointPos) < 4 * radius * radius;
-    } else if (M_PI / 2 < angle0 && angle0 <= 3 * M_PI / 2) {
-        if (angleFromAligned + M_PI / 2 < angleB && angleB < angleToAligned + M_PI / 2)
+    } else if (angleInRange(pointAngleToOrigin, M_PI/2, 3*M_PI/2)) {    // second and third (left disk)
+        if (angleInRange(pointAngleToLDisk, angleFromAligned + M_PI/2, angleToAligned + M_PI/2))
             return this->pointDistance2(pointPos) < 4 * radius * radius;
-    } else if (3 * M_PI / 2 < angle0 && angle0 <= 2 * M_PI) {
-        if (angleFromAligned + 3 * M_PI / 2 < angleA && angleA < angleToAligned + 3 * M_PI / 2)
+    } else if (angleInRange(pointAngleToOrigin, 3*M_PI/2, 2*M_PI)) {    // fourth (right disk)
+        if (angleInRange(pointAngleToRDisk, angleFromAligned + 3*M_PI/2, angleToAligned + 3*M_PI/2))
             return this->pointDistance2(pointPos) < 4 * radius * radius;
     }
 
+    // Check "standard area"
     return this->withinExclusionZone(pointPos, angleFrom) && this->withinExclusionZone(pointPos, angleTo);
+}
+
+// Keep angleFrom in [this->angle; this->angle + pi] range
+//---------------------------------------------------------------------------------------------
+void SpheroCylinder2D::normalizeRange(double &angleFrom, double &angleTo) const {
+    while (angleFrom < angle) {
+        angleFrom += M_PI;
+        angleTo += M_PI;
+    }
+    while (angleFrom > angle + M_PI) {
+        angleFrom -= M_PI;
+        angleTo -= M_PI;
+    }
+}
+
+bool SpheroCylinder2D::angleInRange(double angle, double rangeStart, double rangeEnd) const {
+    return rangeStart < angle && angle <= rangeEnd;
 }
 
 int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da) {
