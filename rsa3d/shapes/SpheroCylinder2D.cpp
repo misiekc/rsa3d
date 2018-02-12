@@ -133,7 +133,7 @@ int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da) {
 std::string SpheroCylinder2D::toString() {
     std::stringstream out;
     out << "SpheroCylinder2D{radius: " << radius << "; halfDistance: " << halfDistance;
-    out << "; pos: " << this->getVectorPosition() << "; angle: " << angle << "}";
+    out << "; pos: " << this->getVectorPosition() << "; angle: " << angle * 180 / M_PI << "}";
     return out.str();
 }
 
@@ -149,7 +149,7 @@ void SpheroCylinder2D::restore(std::istream &f) {
     Shape::restore(f);
 }
 
-SpheroCylinder2D::SpheroCylinder2D(double angle) : angle(angle) {
+SpheroCylinder2D::SpheroCylinder2D(double angle) : AnisotropicShape2D(angle) {
 }
 
 std::string SpheroCylinder2D::toWolfram() const {

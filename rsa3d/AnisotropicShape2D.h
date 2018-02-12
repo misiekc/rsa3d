@@ -9,10 +9,17 @@
 #include "Shape.h"
 
 class AnisotropicShape2D : public Shape<2> {
+protected:
+    double angle{};
 public:
-    virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) = 0;
+    AnisotropicShape2D() = default;
+    AnisotropicShape2D(double angle);
 
+    virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) = 0;
     int pointInside(BoundaryConditions *bc, double *da) override;
+    virtual double getAngle() const;
+    virtual void setAngle(double angle);
+    virtual std::string toWolfram() const;
 };
 
 

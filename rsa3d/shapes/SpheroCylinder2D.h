@@ -17,8 +17,6 @@ private:
     static double halfDistance;
     static Vector<2> centerVector;
 
-    double angle;
-
     static double pointDistance2(const Vector<2> &pos, double angle, const Vector<2> &point);
     static double getAngleToOrigin(const Vector<2> &point);
 
@@ -28,6 +26,7 @@ private:
     Matrix<2, 2> getAntiRotationMatrix() const;
 
 public:
+    SpheroCylinder2D() = default;
     explicit SpheroCylinder2D(double angle);
     SpheroCylinder2D(const SpheroCylinder2D & other) = default;
     ~SpheroCylinder2D() override = default;

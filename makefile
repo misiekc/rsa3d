@@ -35,7 +35,7 @@ EXEC = rsa
 # Libraries
 LIBSTAT = libstat.a
 
-# Source files list (withous extensions)
+# Source files list (without extensions)
 OBJS = rsa3d/AnisotropicShape2D \
        rsa3d/BoundaryConditions \
        rsa3d/Config \
@@ -62,10 +62,10 @@ OBJS = rsa3d/AnisotropicShape2D \
        rsa3d/tests/utility/BoxFactory \
        rsa3d/tests/utility/Quantity \
        rsa3d/tests/utility/Timer \
+       rsa3d/tests/AnisotropicShape2DExclusionTest \
        rsa3d/tests/CuboidIntTest \
        rsa3d/tests/CuboidPointInsideTest \
        rsa3d/tests/CuboidSpeedTest \
-       rsa3d/tests/SpheroCylinder2DExclusionTest \
        rsa3d/tests/TriangleIntTest
        
 # Source files list (withous extensions) for statistics lib
