@@ -23,7 +23,6 @@ private:
 	static void rotate(double* point, double alpha);
 
 	double a, b;
-	double orientation;
 	double u[2], uT[2];
 
 	void calculateU();
@@ -45,6 +44,9 @@ public:
 	int pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo);
 	double getNeighbourListCellSize();
 	double getVoxelSize();
+
+    void setAngle(double angle);
+    std::string toWolfram() const;
 
 	std::string toPovray() const;
 	void store(std::ostream &f) const;

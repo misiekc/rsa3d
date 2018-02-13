@@ -13,14 +13,14 @@ double Ellipse::neighbourListCellSize;
 double Ellipse::voxelSize;
 
 void Ellipse::calculateU(){
-	this->u[0]  = cos(this->orientation); this->u[1]  = -sin(this->orientation);
-	this->uT[0] = sin(this->orientation); this->uT[1] =  cos(this->orientation);
+	this->u[0]  = cos(this->angle); this->u[1]  = -sin(this->angle);
+	this->uT[0] = sin(this->angle); this->uT[1] =  cos(this->angle);
 }
 
 Ellipse::Ellipse() : AnisotropicShape2D(){
 	this->a = Ellipse::longSemiAxis;
 	this->b = Ellipse::shortSemiAxis;
-	this->orientation = 0.0;
+	this->angle = 0.0;
 	this->calculateU();
 }
 
@@ -30,7 +30,7 @@ Ellipse::~Ellipse() {
 Ellipse & Ellipse::operator = (const Ellipse & el){
 	this->a = el.a;
 	this->b = el.b;
-	this->orientation = el.orientation;
+	this->angle = el.angle;
 	for(unsigned char i=0; i<2; i++){
 		this->u[i]  = el.u[i];
 		this->uT[i] = el.uT[i];
@@ -50,9 +50,8 @@ Shape<2> * Ellipse::create(RND *rnd){
 	Ellipse *el = new Ellipse();
 	el->a = Ellipse::longSemiAxis;
 	el->b = Ellipse::shortSemiAxis;
-	el->orientation = rnd->nextValue()*2*M_PI;
-	el->u[0]  = cos(el->orientation); el->u[1]  = sin(el->orientation);
-	el->uT[0] = -sin(el->orientation); el->uT[1] = cos(el->orientation);
+	el->angle = rnd->nextValue()*2*M_PI;
+	el->calculateU();
 	return el;
 }
 
@@ -78,7 +77,7 @@ int Ellipse::overlap(BoundaryConditions *bc, Shape *s) {
 	bc->getTranslation(da, this->position, es.position);
 	es.translate(da);
 	double d;
-	d = (this->a/this->b - this->b/this->a)*sin(this->orientation - es.orientation);
+	d = (this->a/this->b - this->b/this->a)*sin(this->angle - es.angle);
 	double g = 2 + d*d;
 	double r[] = {this->position[0] - es.position[0], this->position[1] - es.position[1]};
 	double f1 = this->calculateF(r, g);
@@ -106,7 +105,7 @@ int Ellipse::pointInside(BoundaryConditions *bc, double* da) {
 	da[0] -= this->position[0];
 	da[1] -= this->position[1];
 
-	Ellipse::rotate(da, -this->orientation);
+	Ellipse::rotate(da, -this->angle);
 
 	double dx = da[0]/(this->a+this->b);
 	double dy = da[1]/(2*this->b);
@@ -123,7 +122,7 @@ int Ellipse::pointInside(BoundaryConditions *bc, double* da, double angleFrom, d
 	ellTmp->position[0] = da[0]; ellTmp->position[1] = da[1];
 
 	// checking if the point is inside the exclusion zone for angleFrom
-	ellTmp->orientation = angleFrom;
+	ellTmp->angle = angleFrom;
 	ellTmp->calculateU();
 	if( !this->overlap(bc, ellTmp) ){
 		delete ellTmp;
@@ -131,7 +130,7 @@ int Ellipse::pointInside(BoundaryConditions *bc, double* da, double angleFrom, d
 	}
 
 	// checking if the point is inside the exclusion zone for angleTo
-	ellTmp->orientation = angleTo;
+	ellTmp->angle = angleTo;
 	ellTmp->calculateU();
 	if ( !this->overlap(bc, ellTmp)){
 		delete ellTmp;
@@ -142,8 +141,8 @@ int Ellipse::pointInside(BoundaryConditions *bc, double* da, double angleFrom, d
 	double point[2];
 	point[0] = da[0] - this->position[0];
 	point[1] = da[1] - this->position[1];
-	angleFrom -= this->orientation;
-	angleTo -= this->orientation;
+	angleFrom -= this->angle;
+	angleTo -= this->angle;
 
 	// TODO
 
@@ -151,7 +150,16 @@ int Ellipse::pointInside(BoundaryConditions *bc, double* da, double angleFrom, d
 
 	delete ellTmp;
 	return true;
+}
 
+
+void Ellipse::setAngle(double d){
+	this->angle = d;
+	this->calculateU();
+}
+
+std::string Ellipse::toWolfram() const {
+	return "";
 }
 
 
@@ -166,7 +174,7 @@ int Ellipse::pointInside(BoundaryConditions *bc, double* da, double angleFrom, d
 			double t = i*2*Math.PI/points;
 			da[0] = a*Math.cos(t);
 			da[1] = b*Math.sin(t);
-			Calculator.rotate(da, this.orientation);
+			Calculator.rotate(da, this.angle);
 			da[0] += this.position[0];
 			da[1] += this.position[1];
 			p.addPoint((int)(da[0]*scale), (int)(da[1]*scale));
@@ -189,7 +197,7 @@ int Ellipse::pointInside(BoundaryConditions *bc, double* da, double angleFrom, d
 			double t = i*2*Math.PI/points;
 			da[0] = (a+b)*Math.cos(t);
 			da[1] = 2*b*Math.sin(t);
-			Calculator.rotate(da, this.orientation);
+			Calculator.rotate(da, this.angle);
 			da[0] += this.position[0];
 			da[1] += this.position[1];
 			p.addPoint((int)(da[0]*scale), (int)(da[1]*scale));
@@ -232,14 +240,14 @@ void Ellipse::store(std::ostream &f) const{
 	Shape::store(f);
 	f.write((char *)(&this->a), sizeof(double));
 	f.write((char *)(&this->b), sizeof(double));
-	f.write((char *)(&this->orientation), sizeof(double));
+	f.write((char *)(&this->angle), sizeof(double));
 }
 
 void Ellipse::restore(std::istream &f){
 	Shape::restore(f);
 	f.read((char *)(&this->a), sizeof(double));
 	f.read((char *)(&this->b), sizeof(double));
-	f.read((char *)(&this->orientation), sizeof(double));
+	f.read((char *)(&this->angle), sizeof(double));
 	this->calculateU();
 
 }
