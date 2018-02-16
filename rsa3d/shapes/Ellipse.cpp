@@ -155,7 +155,7 @@ int Ellipse::pointInside(BoundaryConditions *bc, double *other, double angleFrom
 
     // checking if the point is inside the exclusion zone for angleFrom
     ellTmp.setAngle(angleFrom);
-    if(!this->overlap(bc, &ellTmp))
+    if (!this->overlap(bc, &ellTmp))
         return false;
 
     // checking if the point is inside the exclusion zone for angleTo
@@ -163,15 +163,26 @@ int Ellipse::pointInside(BoundaryConditions *bc, double *other, double angleFrom
     if (!this->overlap(bc, &ellTmp))
         return false;
 
-    // Check those "nonstandard" ugly circle-like areas
-    Vector<2> p = this->getAntiRotationMatrix() * (this->getVectorPosition() - this->applyBC(bc, other));
-	if (angleTo < this->angle)
-		return withinExclusionZoneUnrotated(p, angleFrom - this->angle + M_PI, angleTo - this->angle + M_PI);
-	else if (angleFrom < this->angle)
-		return withinExclusionZoneUnrotated(p, angleFrom - this->angle + M_PI, M_PI) &&
-			   withinExclusionZoneUnrotated(p, 0, angleTo - this->angle);
+	return pointInside0(bc, other, angleFrom, angleTo);
+}
+
+int Ellipse::pointInside0(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) {
+	this->normalizeAngleRange(angleFrom, angleTo, M_PI);
+
+    // If angleTo not in normal range (see normalizeAngleRange), divide it and check separately
+    if (angleTo > this->angle + M_PI) {
+        return pointInside0(bc, other, angleFrom, this->angle + M_PI - EPSILON) &&
+               pointInside0(bc, other, this->angle, angleTo - M_PI);
+    }
+	
+	Vector<2> p = getAntiRotationMatrix() * (this->getVectorPosition() - this->applyBC(bc, other));
+	if (angleTo < angle)
+		return withinExclusionZoneUnrotated(p, angleFrom - angle + M_PI, angleTo - angle + M_PI);
+	else if (angleFrom < angle)
+		return withinExclusionZoneUnrotated(p, angleFrom - angle + M_PI, M_PI) &&
+			   withinExclusionZoneUnrotated(p, 0, angleTo - angle);
 	else
-		return withinExclusionZoneUnrotated(p, angleFrom - this->angle, angleTo - this->angle);
+		return withinExclusionZoneUnrotated(p, angleFrom - angle, angleTo - angle);
 }
 
 bool Ellipse::withinExclusionZoneUnrotated(const Vector<2> &p, double lowerAngle, double upperAngle) const

@@ -37,3 +37,16 @@ Matrix<2, 2> AnisotropicShape2D::getRotationMatrix() const {
 Matrix<2, 2> AnisotropicShape2D::getAntiRotationMatrix() const {
     return Matrix<2, 2>::rotation(-angle);
 }
+
+// Keep angleFrom in [this->angle; this->angle + interval] range
+//---------------------------------------------------------------------------------------------
+void AnisotropicShape2D::normalizeAngleRange(double &angleFrom, double &angleTo, double interval) const {
+    while (angleFrom < angle) {
+        angleFrom += interval;
+        angleTo += interval;
+    }
+    while (angleFrom > angle + interval) {
+        angleFrom -= interval;
+        angleTo -= interval;
+    }
+}

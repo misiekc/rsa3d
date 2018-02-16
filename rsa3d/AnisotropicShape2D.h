@@ -26,6 +26,8 @@ public:
     virtual double getAngle() const;
     virtual void setAngle(double angle);
     virtual std::string toWolfram() const;
+
+    void normalizeAngleRange(double &angleFrom, double &angleTo, double interval) const;
 };
 
 

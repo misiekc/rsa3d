@@ -60,6 +60,8 @@ public:
 	bool withinAngleCheckCollision(const Vector<2> &p, double lowerAngle, double upperAngle) const;
 
 	bool testCircleEllipseCollision(const Vector<2> &p, double tMin, double tMax) const;
+
+	int pointInside0(BoundaryConditions *bc, double *other, double angleFrom, double angleTo);
 };
 
 #endif /* SHAPES_ELLIPSE_H_ */

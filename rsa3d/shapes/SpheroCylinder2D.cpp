@@ -67,9 +67,9 @@ double SpheroCylinder2D::pointDistance2(const Vector<2> &pos, double angle, cons
 }
 
 int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) {
-    this->normalizeRange(angleFrom, angleTo);
+    this->normalizeAngleRange(angleFrom, angleTo, M_PI);
 
-    // If angleTo not in normal range (see normalizeRange), divide it and check separately
+    // If angleTo not in normal range (see normalizeAngleRange), divide it and check separately
     if (angleTo > this->angle + M_PI) {
         return pointInside(bc, da, angleFrom, this->angle + M_PI - EPSILON) &&
                pointInside(bc, da, this->angle, angleTo - M_PI);
@@ -97,19 +97,6 @@ int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da, double ang
 
     // Check "standard area"
     return this->withinExclusionZone(pointPos, angleFrom) && this->withinExclusionZone(pointPos, angleTo);
-}
-
-// Keep angleFrom in [this->angle; this->angle + pi] range
-//---------------------------------------------------------------------------------------------
-void SpheroCylinder2D::normalizeRange(double &angleFrom, double &angleTo) const {
-    while (angleFrom < angle) {
-        angleFrom += M_PI;
-        angleTo += M_PI;
-    }
-    while (angleFrom > angle + M_PI) {
-        angleFrom -= M_PI;
-        angleTo -= M_PI;
-    }
 }
 
 bool SpheroCylinder2D::angleInRange(double angle, double rangeStart, double rangeEnd) const {

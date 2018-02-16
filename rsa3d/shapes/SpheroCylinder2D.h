@@ -42,11 +42,10 @@ public:
     void store(std::ostream &f) const override;
     void restore(std::istream &f) override;
 
-    std::string toWolfram() const;
+    std::string toWolfram() const override;
 
     bool angleInRange(double angle, double rangeStart, double rangeEnd) const;
 
-    void normalizeRange(double &angleFrom, double &angleTo) const;
 };
 
 
