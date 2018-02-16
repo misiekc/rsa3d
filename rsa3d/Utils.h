@@ -9,6 +9,8 @@
 #ifndef UTILS_C_
 #define UTILS_C_
 
+#include "Vector.h"
+
 bool increment(int* in, int inlength, int max);
 int position2i(const double* da, int dalength, double size, double dx, int n);
 void i2position(double* da, int dalength, int index, double dx, int n);
@@ -21,5 +23,8 @@ std::string &ltrim(std::string &s);
 std::string &rtrim(std::string &s);
 // trim from both ends
 std::string &trim(std::string &s);
+
+double getAngleToOrigin(const Vector<2> &point);
+void rotate(double* point, double alpha);
 
 #endif /* UTILS_C_ */

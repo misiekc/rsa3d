@@ -18,12 +18,9 @@ private:
     static Vector<2> centerVector;
 
     static double pointDistance2(const Vector<2> &pos, double angle, const Vector<2> &point);
-    static double getAngleToOrigin(const Vector<2> &point);
 
     double pointDistance2(const Vector<2> &p) const;
     bool withinExclusionZone(const Vector<2> &pointPos, double angle);
-    Matrix<2, 2> getRotationMatrix() const;
-    Matrix<2, 2> getAntiRotationMatrix() const;
 
 public:
     SpheroCylinder2D() = default;

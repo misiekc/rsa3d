@@ -29,3 +29,11 @@ void AnisotropicShape2D::setAngle(double angle) {
 std::string AnisotropicShape2D::toWolfram() const {
     return "";
 }
+
+Matrix<2, 2> AnisotropicShape2D::getRotationMatrix() const {
+    return Matrix<2, 2>::rotation(angle);
+}
+
+Matrix<2, 2> AnisotropicShape2D::getAntiRotationMatrix() const {
+    return Matrix<2, 2>::rotation(-angle);
+}

@@ -11,6 +11,7 @@
 #include <functional>
 #include <cctype>
 #include <locale>
+#include "Vector.h"
 
 bool increment(int* in, int inlength, int max){
 	int i=0;
@@ -153,3 +154,19 @@ std::string &trim(std::string &s) {
     return ltrim(rtrim(s));
 }
 
+double getAngleToOrigin(const Vector<2> & point) {
+	double angle = atan2(point[1], point[0]);
+	if(angle < 0)
+		return angle + 2 * M_PI;
+	else
+		return angle;
+}
+
+void rotate(double* point, double alpha) {
+	double cosa = cos(alpha);
+	double sina = sin(alpha);
+	double x = point[0];
+	double y = point[1];
+	point[0] = x*cosa - y*sina;
+	point[1] = x*sina + y*cosa;
+}

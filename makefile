@@ -50,11 +50,12 @@ OBJS = rsa3d/AnisotropicShape2D \
        rsa3d/Surface \
        rsa3d/Utils \
        rsa3d/analizator/Analyzer \
-       rsa3d/shapes/Cuboid \
        rsa3d/shapes/cube_strategies/MineOverlap \
        rsa3d/shapes/cube_strategies/OptimizedSATOverlap \
        rsa3d/shapes/cube_strategies/SATOverlap \
        rsa3d/shapes/cube_strategies/TriTriOverlap \
+       rsa3d/shapes/Cuboid \
+       rsa3d/shapes/Ellipse \
        rsa3d/shapes/SpheroCylinder2D \
        rsa3d/surfaces/NBoxFBC \
        rsa3d/surfaces/NBoxPBC \

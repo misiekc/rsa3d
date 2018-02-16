@@ -1,5 +1,5 @@
 //
-// parallelogramPKua on 08.02.18.
+// PKua on 08.02.18.
 //
 
 #include <fstream>
@@ -45,7 +45,7 @@ void as2d_extest::Context::load(const std::string &_filename) {
     else if (modeStr == "point_inside")
         this->mode = Mode::POINT_INSIDE;
     else
-        throw std::runtime_error("Unknown test modeStr: " + modeStr);
+        throw std::runtime_error("Unknown test mode: " + modeStr);
 
     if (this->mode == Mode::OVERLAP) {
         this->secondAngle = config->getDouble("second_angle") * M_PI / 180;
@@ -149,6 +149,9 @@ void as2d_extest::Context::printInfo() const {
 
 void as2d_extest::results_to_wolfram(const Context &_context, const std::vector<Point> &_results,
                                          std::ostream &_out) {
+    if (_context.append)
+        _out << std::endl << std::endl;
+
     _out << std::fixed;
     _out << "points = {" << std::endl;
     for (Point point : std::vector<Point>(_results.begin(), _results.end() - 1))
@@ -164,7 +167,6 @@ void as2d_extest::results_to_wolfram(const Context &_context, const std::vector<
     } else {  // Context::Mode::POINT_INSIDE
         _out << std::endl << "Graphics[Join[{{" << FIRST_SHAPE_COLOR << ", shape1}}, points]]";
     }
-    _out << std::endl << std::endl;
 }
 
 as2d_extest::Point as2d_extest::findMaxXRedPoint(const std::vector<as2d_extest::Point> &_results) {

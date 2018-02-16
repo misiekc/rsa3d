@@ -7,10 +7,16 @@
 
 
 #include "Shape.h"
+#include "AnisotropicShape2D.h"
 
 class AnisotropicShape2D : public Shape<2> {
+
 protected:
     double angle{};
+
+    Matrix<2, 2> getAntiRotationMatrix() const;
+    Matrix<2, 2> getRotationMatrix() const;
+
 public:
     AnisotropicShape2D() = default;
     AnisotropicShape2D(double angle);

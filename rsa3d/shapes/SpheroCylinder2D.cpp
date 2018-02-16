@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <iomanip>
 #include "SpheroCylinder2D.h"
+#include "../Utils.h"
 
 #define EPSILON 0.0000001
 
@@ -47,14 +48,6 @@ int SpheroCylinder2D::overlap(BoundaryConditions *bc, Shape *s) {
     SpheroCylinder2D other(*((SpheroCylinder2D*)s));
     this->applyBC(bc, &other);
     return withinExclusionZone(other.getVectorPosition(), other.angle);
-}
-
-Matrix<2, 2> SpheroCylinder2D::getRotationMatrix() const {
-    return Matrix<2, 2>::rotation(angle);
-}
-
-Matrix<2, 2> SpheroCylinder2D::getAntiRotationMatrix() const {
-    return Matrix<2, 2>::rotation(-angle);
 }
 
 double SpheroCylinder2D::pointDistance2(const Vector<2> &p) const
@@ -162,14 +155,6 @@ std::string SpheroCylinder2D::toWolfram() const {
     out << "    {RotationMatrix[" << this->angle << "], " << this->getVectorPosition() << "}]";
 
     return out.str();
-}
-
-double SpheroCylinder2D::getAngleToOrigin(const Vector<2> & point) {
-    double angle = atan2(point[1], point[0]);
-    if(angle < 0)
-        return angle + 2 * M_PI;
-    else
-        return angle;
 }
 
 bool SpheroCylinder2D::withinExclusionZone(const Vector<2> &pointPos, double angle) {

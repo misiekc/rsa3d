@@ -20,38 +20,46 @@ private:
 	static double neighbourListCellSize;
 	static double voxelSize;
 
-	static void rotate(double* point, double alpha);
-
 	double a, b;
 	double u[2], uT[2];
 
 	void calculateU();
-	Ellipse & operator = (const Ellipse & el);
 
 	double calculateF(double* r, double g);
 
 
 public:
 	Ellipse();
-	virtual ~Ellipse();
+	Ellipse(const Ellipse &other);
+	Ellipse & operator = (const Ellipse & el);
+	~Ellipse() override = default;
 
 	static void initClass(const std::string &args);
 	static Shape<2> * create(RND *rnd);
 
-	int overlap(BoundaryConditions *bc, Shape<2> *s);
-	double getVolume();
-	int pointInside(BoundaryConditions *bc, double* da);
-	int pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo);
-	double getNeighbourListCellSize();
-	double getVoxelSize();
+	int overlap(BoundaryConditions *bc, Shape<2> *s) override;
+	double getVolume() override;
+	int pointInside(BoundaryConditions *bc, double* da) override;
+	int pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) override;
+	double getNeighbourListCellSize() override;
+	double getVoxelSize() override;
 
-    void setAngle(double angle);
-    std::string toWolfram() const;
+    void setAngle(double angle) override;
+    std::string toWolfram() const override;
 
-	std::string toPovray() const;
-	void store(std::ostream &f) const;
-	void restore(std::istream &f);
+	std::string toPovray() const override;
+	void store(std::ostream &f) const override;
+	void restore(std::istream &f) override;
 
+    std::string toString() override;
+
+	bool withinExclusionZoneUnrotated(const Vector<2> &p, double lowerAngle, double upperAngle) const;
+
+    bool withinAngle(const Vector<2> &p, double lowerAngle, double upperAngle) const;
+
+	bool withinAngleCheckCollision(const Vector<2> &p, double lowerAngle, double upperAngle) const;
+
+	bool testCircleEllipseCollision(const Vector<2> &p, double tMin, double tMax) const;
 };
 
 #endif /* SHAPES_ELLIPSE_H_ */
