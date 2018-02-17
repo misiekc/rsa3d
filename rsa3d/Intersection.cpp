@@ -120,4 +120,38 @@ namespace intersection
         }
         return true;
     }
+
+    bool line_circle(const Vector<2> &center, double r, const Vector<2> &p1, const Vector<2> &p2)
+    {
+        double a = p2[0] - p1[0];
+        double b = p2[1] - p1[1];
+        double c = center[0] - p1[0];
+        double d = center[1] - p1[1];
+        if ((d*a - c*b) * (d*a - c*b) <= r*r * (a*a + b*b)) {
+            if (c*c + d*d <= r*r) // first end
+                return true;
+            else if ((a - c) * (a - c) + (b - d) * (b - d) <= r*r) // second end
+                return true;
+            else if ((c*a + d*b >= 0) && (c*a + d*b <= a*a + b*b))
+                return true;
+            else
+                return false;
+        } else {
+            return false;
+        }
+    }
+
+    Vector<2> line_line(const Vector<2> &line1, double line1Angle, const Vector<2> &line2, double line2Angle)
+    {
+        double a = tan(line1Angle);
+        double b = tan(line2Angle);
+        double c = line1[1] - a * line1[0];
+        double d = line2[1] - b * line2[0];
+
+        double a_b = a - b;
+        if (a_b == 0) // parallel lines
+            return Vector<2>{{line1[0], line1[1]}};
+        else
+            return Vector<2>{{(d - c) / a_b, (a * d - b * c) / a_b}};
+    }
 }

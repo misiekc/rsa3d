@@ -8,6 +8,7 @@
 #include "Ellipse.h"
 #include "../Utils.h"
 #include "../tests/utility/MockBC.h"
+#include "../Intersection.h"
 
 
 #define EPSILON 0.0000001
@@ -113,120 +114,86 @@ int Ellipse::pointInside(BoundaryConditions *bc, double* da) {
 	return (dx*dx+dy*dy < 1);
 }
 
-bool lineCircleCollision(const Vector<2> &center, double r, const Vector<2> &p1, const Vector<2> &p2)
-{
-    double a = p2[0] - p1[0];
-    double b = p2[1] - p1[1];
-    double c = center[0] - p1[0];
-    double d = center[1] - p1[1];
-    if ( (d*a - c*b)*(d*a - c*b) <= r*r * (a*a + b*b) ) {
-        if (c*c + d*d <= r*r) //first end
-            return true;
-        else if ( (a-c)*(a-c) + (b-d)*(b-d) <= r*r) //second end
-            return true;
-        else if ( (c*a + d*b >= 0) && (c*a + d*b <= a*a + b*b))
-            return true;
-        else
-            return false;
-    } else {
-        return false;
-    }
-}
-
-Vector<2> lineLineIntersection(const Vector<2> &line1, double line1Angle, const Vector<2> &line2, double line2Angle)
-{
-    double a = tan(line1Angle);
-    double b = tan(line2Angle);
-    double c = line1[1] - a * line1[0];
-    double d = line2[1] - b * line2[0];
-
-    double a_b = a - b;
-    if( a_b == 0 )//parallel lines
-        return Vector<2>{{line1[0], line1[1]}};
-    else
-        return Vector<2>{{(d - c) / a_b, (a * d - b * c) / a_b}};
-}
-
 int Ellipse::pointInside(BoundaryConditions *bc, double *other, double angleFrom, double angleTo)
 {
-    // to be inside an exclusion zone the point have to bee inside all exclusion zones between angleFrom and angleTo
+    // Check exlusion zones for angle interval endpoinds - angleFrom and angleTo
     Ellipse ellTmp;
     ellTmp.translate(other);
 
-    // checking if the point is inside the exclusion zone for angleFrom
     ellTmp.setAngle(angleFrom);
     if (!this->overlap(bc, &ellTmp))
         return false;
-
-    // checking if the point is inside the exclusion zone for angleTo
     ellTmp.setAngle(angleTo);
     if (!this->overlap(bc, &ellTmp))
         return false;
 
-	return pointInside0(bc, other, angleFrom, angleTo);
+    // Now check the "special areas"
+	return pointInsideSpecialArea(bc, other, angleFrom, angleTo);
 }
 
-int Ellipse::pointInside0(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) {
+int Ellipse::pointInsideSpecialArea(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) {
 	this->normalizeAngleRange(angleFrom, angleTo, M_PI);
 
     // If angleTo not in normal range (see normalizeAngleRange), divide it and check separately
     if (angleTo > this->angle + M_PI) {
-        return pointInside0(bc, other, angleFrom, this->angle + M_PI - EPSILON) &&
-               pointInside0(bc, other, this->angle, angleTo - M_PI);
+        return pointInsideSpecialArea(bc, other, angleFrom, this->angle + M_PI - EPSILON) &&
+               pointInsideSpecialArea(bc, other, this->angle, angleTo - M_PI);
     }
-	
-	Vector<2> p = getAntiRotationMatrix() * (this->getVectorPosition() - this->applyBC(bc, other));
+
+    // Now angleTo - angleFrom <= pi. Align ellipse with coordinate system. Transform angles' range
+    // (and divide if necessary) so that its fully contained in [0, pi] range
+	Vector<2> otherAligned = getAntiRotationMatrix() * (this->getVectorPosition() - this->applyBC(bc, other));
 	if (angleTo < angle)
-		return withinExclusionZoneUnrotated(p, angleFrom - angle + M_PI, angleTo - angle + M_PI);
+		return pointInsideUnrotated(otherAligned, angleFrom - angle + M_PI, angleTo - angle + M_PI);
 	else if (angleFrom < angle)
-		return withinExclusionZoneUnrotated(p, angleFrom - angle + M_PI, M_PI) &&
-			   withinExclusionZoneUnrotated(p, 0, angleTo - angle);
-	else
-		return withinExclusionZoneUnrotated(p, angleFrom - angle, angleTo - angle);
+		return pointInsideUnrotated(otherAligned, angleFrom - angle + M_PI, M_PI) &&
+               pointInsideUnrotated(otherAligned, 0, angleTo - angle);
+	else    // angleTo >= angle && angleFrom >= angle
+		return pointInsideUnrotated(otherAligned, angleFrom - angle, angleTo - angle);
 }
 
-bool Ellipse::withinExclusionZoneUnrotated(const Vector<2> &p, double lowerAngle, double upperAngle) const
+bool Ellipse::pointInsideUnrotated(const Vector<2> &p, double angleFrom, double angleTo) const
 {
-	if (lowerAngle <= M_PI/2 && upperAngle >= M_PI/2) 
+	if (angleFrom <= M_PI/2 && angleTo >= M_PI/2)
     {
-		if (p[0] <= 0 && p[1] >= 0 && withinAngle(p, lowerAngle + M_PI/2, M_PI))
-			return withinAngleCheckCollision(p, lowerAngle + M_PI/2, M_PI);
-		if (p[0] <= 0 && p[1] <= 0 && withinAngle(p, M_PI + EPSILON, upperAngle + M_PI/2))
-			return withinAngleCheckCollision(p, M_PI + EPSILON, upperAngle + M_PI/2);
-		if (p[0] >= 0 && p[1] <= 0 && withinAngle(-p, lowerAngle + M_PI/2, M_PI))
-			return withinAngleCheckCollision(-p, lowerAngle + M_PI/2, M_PI);
-		if (p[0] >= 0 && p[1] >= 0 && withinAngle(-p, M_PI + EPSILON, upperAngle + M_PI/2))
-			return withinAngleCheckCollision(-p, M_PI + EPSILON, upperAngle + M_PI/2);
+		if (p[0] <= 0 && p[1] >= 0 && withinAngle(p, angleFrom + M_PI/2, M_PI))
+			return withinAngleCheckCollision(p, angleFrom + M_PI/2, M_PI);
+		if (p[0] <= 0 && p[1] <= 0 && withinAngle(p, M_PI + EPSILON, angleTo + M_PI/2))
+			return withinAngleCheckCollision(p, M_PI + EPSILON, angleTo + M_PI/2);
+		if (p[0] >= 0 && p[1] <= 0 && withinAngle(-p, angleFrom + M_PI/2, M_PI))
+			return withinAngleCheckCollision(-p, angleFrom + M_PI/2, M_PI);
+		if (p[0] >= 0 && p[1] >= 0 && withinAngle(-p, M_PI + EPSILON, angleTo + M_PI/2))
+			return withinAngleCheckCollision(-p, M_PI + EPSILON, angleTo + M_PI/2);
 	} 
-    else if (lowerAngle <= M_PI/2 && upperAngle <= M_PI/2) 
+    else if (angleFrom <= M_PI/2 && angleTo <= M_PI/2)
     {
-		if (p[0] <= 0 && p[1] >= 0 && withinAngle(p, lowerAngle + M_PI/2, upperAngle + M_PI/2))
-			return withinAngleCheckCollision(p, lowerAngle + M_PI/2, upperAngle + M_PI/2);
-		if (p[0] >= 0 && p[1] <= 0 && withinAngle(-p, lowerAngle + M_PI/2, upperAngle + M_PI/2))
-			return withinAngleCheckCollision(-p, lowerAngle + M_PI/2, upperAngle + M_PI/2);
+		if (p[0] <= 0 && p[1] >= 0 && withinAngle(p, angleFrom + M_PI/2, angleTo + M_PI/2))
+			return withinAngleCheckCollision(p, angleFrom + M_PI/2, angleTo + M_PI/2);
+		if (p[0] >= 0 && p[1] <= 0 && withinAngle(-p, angleFrom + M_PI/2, angleTo + M_PI/2))
+			return withinAngleCheckCollision(-p, angleFrom + M_PI/2, angleTo + M_PI/2);
 	} 
-    else 
+    else // angleFrom >= M_PI/2 && angleTo >= M_PI/2
     {
-		if (p[0] <= 0 && p[1] <= 0 && withinAngle(p, lowerAngle + M_PI/2, upperAngle + M_PI/2))
-			return withinAngleCheckCollision(p, lowerAngle + M_PI/2, upperAngle + M_PI/2);
-		if (p[0] >= 0 && p[1] >= 0 && withinAngle(-p, lowerAngle + M_PI/2, upperAngle + M_PI/2))
-			return withinAngleCheckCollision(-p, lowerAngle + M_PI/2, upperAngle + M_PI/2);
+		if (p[0] <= 0 && p[1] <= 0 && withinAngle(p, angleFrom + M_PI/2, angleTo + M_PI/2))
+			return withinAngleCheckCollision(p, angleFrom + M_PI/2, angleTo + M_PI/2);
+		if (p[0] >= 0 && p[1] >= 0 && withinAngle(-p, angleFrom + M_PI/2, angleTo + M_PI/2))
+			return withinAngleCheckCollision(-p, angleFrom + M_PI/2, angleTo + M_PI/2);
 	}
 
 	return true;
 }
 
-bool Ellipse::withinAngle(const Vector<2> &p, double lowerAngle, double upperAngle) const
+bool Ellipse::withinAngle(const Vector<2> &p, double angleFrom, double angleTo) const
 {
-	double minT = atan2(b * sin(lowerAngle), a * cos(lowerAngle));
-	double maxT = atan2(b * sin(upperAngle), a * cos(upperAngle));
+	double minT = atan2(b * sin(angleFrom), a * cos(angleFrom));
+	double maxT = atan2(b * sin(angleTo), a * cos(angleTo));
 
 	Vector<2> edgeMin{{cos(minT) * a, sin(minT) * b}};
 	Vector<2> edgeMax{{cos(maxT) * a, sin(maxT) * b}};
-	Vector<2> edgeCross = lineLineIntersection(edgeMin, lowerAngle, edgeMax, upperAngle);
+	Vector<2> edgeCross = intersection::line_line(edgeMin, angleFrom, edgeMax, angleTo);
 	double zoneAngle = getAngleToOrigin(p - edgeCross);
     
-    return zoneAngle >= lowerAngle && zoneAngle <= upperAngle;
+    return zoneAngle >= angleFrom && zoneAngle <= angleTo;
 }
 
 bool Ellipse::withinAngleCheckCollision(const Vector<2> &p, double lowerAngle, double upperAngle) const
@@ -234,26 +201,26 @@ bool Ellipse::withinAngleCheckCollision(const Vector<2> &p, double lowerAngle, d
 	double minT = atan2(b * sin(lowerAngle), a * cos(lowerAngle));
 	double maxT = atan2(b * sin(upperAngle), a * cos(upperAngle));
 
-	return testCircleEllipseCollision(p, minT, maxT);
+	return circleCollision(p, minT, maxT);
 }
 
-bool Ellipse::testCircleEllipseCollision(const Vector<2> &p, double tMin, double tMax) const
+bool Ellipse::circleCollision(const Vector<2> &p, double tMin, double tMax) const
 {
     Vector<2> start{{cos(tMin) * a, sin(tMin) * b}};
     Vector<2> end{{cos(tMax) * a, sin(tMax) * b}};
-    if (lineCircleCollision(p, b, start, end))
+    if (intersection::line_circle(p, b, start, end))
         return true;
 
-    double kont1 = atan2(a * sin(tMin), b * cos(tMin)) + M_PI / 2;
-    double kont2 = atan2(a * sin(tMax), b * cos(tMax)) + M_PI / 2;
-    Vector<2>intersect = lineLineIntersection(start, kont1, end, kont2);
-	if (!lineCircleCollision(p, b, start, intersect) && !lineCircleCollision(p, b, intersect, end))
+    double slope1 = atan2(a * sin(tMin), b * cos(tMin)) + M_PI/2;
+    double slope2 = atan2(a * sin(tMax), b * cos(tMax)) + M_PI/2;
+    Vector<2> intersect = intersection::line_line(start, slope1, end, slope2);
+	if (!intersection::line_circle(p, b, start, intersect) && !intersection::line_circle(p, b, intersect, end))
 		return false;
-    
-	return testCircleEllipseCollision(p, tMin, (tMin + tMax) / 2) || testCircleEllipseCollision(p, (tMin + tMax) / 2, tMax);
+
+	return circleCollision(p, tMin, (tMin + tMax) / 2) || circleCollision(p, (tMin + tMax) / 2, tMax);
 }
 
-void Ellipse::setAngle(double d){
+void Ellipse::setAngle(double d) {
 	this->angle = d;
 	this->calculateU();
 }
