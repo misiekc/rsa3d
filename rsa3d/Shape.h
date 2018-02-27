@@ -47,6 +47,8 @@ public:
 	// checks if a given point is within excluded volume
 	virtual int pointInside(BoundaryConditions *bc, double* da) = 0;
 
+	virtual int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange);
+
 	// moves the shape towards given shape s
 	virtual double minDistance(Shape<DIMENSION> *s);
 

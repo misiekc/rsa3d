@@ -29,8 +29,8 @@ private:
 	Surface *surface;
 
 	int analyzeVoxels();
-	int analyzeRegion(Voxel<DIMENSION> *v);
-	void modifiedRSA(Shape<DIMENSION> *s, Voxel<DIMENSION> *v);
+	int analyzeRegion(Voxel<DIMENSION, ANGULAR_DIMENSION> *v);
+	void modifiedRSA(Shape<DIMENSION> *s, Voxel<DIMENSION, ANGULAR_DIMENSION> *v);
 	bool isSaturated();
 	double getFactor();
 	void createPacking();

@@ -53,7 +53,7 @@ int PackingGenerator<DIMENSION>::analyzeVoxels() {
 	int begin = this->voxels->length();
 	int timestamp = this->packing.size();
 	for (int i = 0; i < this->voxels->length(); i++) {
-		Voxel<DIMENSION> *v = this->voxels->get(i);
+		Voxel<DIMENSION, ANGULAR_DIMENSION> *v = this->voxels->get(i);
 		if (this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, timestamp)) {
 			this->voxels->remove(v);
 			i--;
@@ -67,11 +67,11 @@ int PackingGenerator<DIMENSION>::analyzeVoxels() {
 
 // analyzes all voxels inside a region around v
 template <ushort DIMENSION>
-int PackingGenerator<DIMENSION>::analyzeRegion(Voxel<DIMENSION> *v){
+int PackingGenerator<DIMENSION>::analyzeRegion(Voxel<DIMENSION, ANGULAR_DIMENSION> *v){
 	int begin = this->voxels->length();
-	std::vector<Voxel<DIMENSION> *> region;
+	std::vector<Voxel<DIMENSION, ANGULAR_DIMENSION> *> region;
 	this->voxels->getNeighbours(&region, v);
-	for(Voxel<DIMENSION> *v1: region){
+	for(Voxel<DIMENSION, ANGULAR_DIMENSION> *v1: region){
 		if (this->voxels->analyzeVoxel(v1, this->surface->getNeighbourGrid(), this->surface))
 			this->voxels->remove(v1);
 	}
@@ -79,7 +79,7 @@ int PackingGenerator<DIMENSION>::analyzeRegion(Voxel<DIMENSION> *v){
 }
 
 template <ushort DIMENSION>
-void PackingGenerator<DIMENSION>::modifiedRSA(Shape<DIMENSION> *s, Voxel<DIMENSION> *v){
+void PackingGenerator<DIMENSION>::modifiedRSA(Shape<DIMENSION> *s, Voxel<DIMENSION, ANGULAR_DIMENSION> *v){
 	double da[DIMENSION];
 
 	Shape<DIMENSION> *sn = (Shape<DIMENSION> *)this->surface->getClosestNeighbour(s->getPosition(), NULL);
@@ -147,7 +147,7 @@ void PackingGenerator<DIMENSION>::createPacking(){
 	int aRNDSize = 0;
 	Shape<DIMENSION> **sOverlapped = new Shape<DIMENSION> *[tmpSplit];
 	Shape<DIMENSION> **sVirtual = new Shape<DIMENSION> *[tmpSplit];
-	Voxel<DIMENSION> **aVoxels = new Voxel<DIMENSION> *[tmpSplit];
+	Voxel<DIMENSION, ANGULAR_DIMENSION> **aVoxels = new Voxel<DIMENSION, ANGULAR_DIMENSION> *[tmpSplit];
 
 	while (!this->isSaturated() && t<params->maxTime && missCounter<params->maxTriesWithoutSuccess) {
 
@@ -226,7 +226,7 @@ void PackingGenerator<DIMENSION>::createPacking(){
 
 
 					if (aVoxels[i]!=this->voxels->getVoxel(aVoxels[i]->getPosition())){
-						Voxel<DIMENSION> *v1 = this->voxels->getVoxel(aVoxels[i]->getPosition());
+						Voxel<DIMENSION, ANGULAR_DIMENSION> *v1 = this->voxels->getVoxel(aVoxels[i]->getPosition());
 						std::cout << "Problem: PackingGenerator - inconsistent voxels positions: " <<
 								" (" << aVoxels[i]->getPosition()[0] << ", " << aVoxels[i]->getPosition()[1] << ")" <<
 								", (" << v1->getPosition()[0] << ", " << v1->getPosition()[1] << ")" <<
@@ -276,7 +276,7 @@ void PackingGenerator<DIMENSION>::createPacking(){
 				delete[] aVoxels;
 				sOverlapped = new Shape<DIMENSION> *[tmpSplit];
 				sVirtual = new Shape<DIMENSION> *[tmpSplit];
-				aVoxels = new Voxel<DIMENSION> *[tmpSplit];
+				aVoxels = new Voxel<DIMENSION, ANGULAR_DIMENSION> *[tmpSplit];
 
 			} else {
 				this->analyzeVoxels();
@@ -332,7 +332,7 @@ void PackingGenerator<DIMENSION>::createPacking(){
 		t += this->getFactor() * dt;
 		s = ShapeFactory::createShape(&rnd);
 
-		Voxel<DIMENSION> *v;
+		Voxel<DIMENSION, ANGULAR_DIMENSION> *v;
 		double da[DIMENSION];
 		do{
 			v = this->voxels->getRandomVoxel(&rnd);
@@ -353,7 +353,7 @@ void PackingGenerator<DIMENSION>::createPacking(){
 
 
 			if (v!=this->voxels->getVoxel(v->getPosition())){
-				Voxel<DIMENSION> *v1 = this->voxels->getVoxel(v->getPosition());
+				Voxel<DIMENSION, ANGULAR_DIMENSION> *v1 = this->voxels->getVoxel(v->getPosition());
 				std::cout << "Problem: PackingGenerator - inconsistent voxels positions: " <<
 						" (" << v->getPosition()[0] << ", " << v->getPosition()[1] << ")" <<
 						", (" << v1->getPosition()[0] << ", " << v1->getPosition()[1] << ")" <<

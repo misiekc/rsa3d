@@ -14,6 +14,8 @@
 #include "Vector.h"
 
 bool increment(int* in, int inlength, int max){
+	if(inlength==0)
+		return false;
 	int i=0;
 	while(i<inlength){
 		in[i]++;

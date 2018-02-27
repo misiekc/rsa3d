@@ -10,11 +10,12 @@
 
 #include <algorithm>
 
-template <ushort DIMENSION>
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 class Voxel{
 
 private:
-	double position[DIMENSION];
+	double position[SPATIAL_DIMENSION];
+	double orientation[ANGULAR_DIMENSION];
 	short missCounter;
 
 public:
@@ -22,7 +23,7 @@ public:
 	int lastAnalyzed;
 
 	Voxel();
-	Voxel(double* da, double s, int i);
+	Voxel(double* pos, double *angle, int i);
 	Voxel(const Voxel & other);
 
 	virtual ~Voxel();
@@ -33,9 +34,13 @@ public:
 
 	void resetMissCounter();
 
-	bool isInside(double *da, double size);
+	bool isInside(double *pos, double size);
+
+	bool isInside(double *pos, double size, double* angle, double asize);
 
 	double *getPosition();
+
+	double *getOrientation();
 
 
 };

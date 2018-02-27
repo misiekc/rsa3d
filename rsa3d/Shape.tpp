@@ -32,6 +32,12 @@ void Shape<DIMENSION>::translate(double* v){
 }
 
 template <unsigned short DIMENSION>
+int Shape<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange){
+	return this->pointInside(bc, position);
+}
+
+
+template <unsigned short DIMENSION>
 double Shape<DIMENSION>::minDistance(Shape *s){
 	return 0.0;
 }

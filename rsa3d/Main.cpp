@@ -157,7 +157,8 @@ int main(int argc, char **argv) {
 		std::vector<Shape<RSA_DIMENSION> *> *packing = fromFile(RSA_DIMENSION, file);
 		PackingGenerator<RSA_DIMENSION>::toPovray(packing, params.surfaceSize, NULL, file + ".pov");
 		delete packing;
+	}else{
+		std::cerr << "Unknown mode: " << argv[1] << std::endl;
 	}
-	std::cerr << "Unknown mode: " << argv[1] << std::endl;
 	return 1;
 }
