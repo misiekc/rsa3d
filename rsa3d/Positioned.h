@@ -8,24 +8,25 @@
 #ifndef POSITIONED_H_
 #define POSITIONED_H_
 
-#include "Vector.h"
+// #include "Vector.h"
 
-template <unsigned short DIMENSION>
+template <unsigned short SPATIAL_DIMENSION>
 class Positioned {
 
 protected:
-	double position[DIMENSION];
+	double position[SPATIAL_DIMENSION];
 
 public:
 	Positioned();
-	Positioned(const Positioned<DIMENSION> & other);
+	Positioned(const Positioned<SPATIAL_DIMENSION> & other);
 	virtual ~Positioned();
 
-	virtual Positioned<DIMENSION> & operator=(const Positioned<DIMENSION> & other);
+	virtual Positioned<SPATIAL_DIMENSION> & operator=(const Positioned<SPATIAL_DIMENSION> & other);
 
 	// returns position of the shape's center
 	double* getPosition();
-	Vector<DIMENSION> getVectorPosition() const;
+
+	//	Vector<SPATIAL_DIMENSION> getVectorPosition() const;
 };
 
 #include "Positioned.tpp"

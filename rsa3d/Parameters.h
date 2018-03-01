@@ -8,7 +8,8 @@
 #ifndef PARAMETERS_H_
 #define PARAMETERS_H_
 
-#define RSA_DIMENSION 2
+#define RSA_SPATIAL_DIMENSION 2
+#define RSA_ANGULAR_DIMENSION 0
 
 #include <climits>
 #include <limits>

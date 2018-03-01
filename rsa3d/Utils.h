@@ -25,6 +25,6 @@ std::string &rtrim(std::string &s);
 std::string &trim(std::string &s);
 
 double getAngleToOrigin(const Vector<2> &point);
-void rotate(double* point, double alpha);
+void rotate2D(double* point, double alpha);
 
 #endif /* UTILS_C_ */

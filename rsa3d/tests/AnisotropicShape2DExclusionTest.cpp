@@ -82,10 +82,9 @@ void as2d_extest::perform_inttest(const Context &_context, std::vector<as2d_exte
 }
 
 std::unique_ptr<AnisotropicShape2D> as2d_extest::generateShape(double angle, const Vector<2> &position) {
-    RND rnd;
-    auto shape = (AnisotropicShape2D*)ShapeFactory::createShape(&rnd);
-    shape->setAngle(angle);
-    shape->vectorTranslate(position);
+    auto shape = (AnisotropicShape2D*)ShapeFactory::createShape(NULL);
+    double posangle[3] = {position[0], position[1], angle};
+    shape->translate(posangle);
     return std::unique_ptr<AnisotropicShape2D>(shape);
 }
 

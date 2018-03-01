@@ -28,8 +28,11 @@ void SpheroCylinder2D::initClass(const std::string &attr) {
     centerVector = Vector<2>{{halfDistance , 0}};
 }
 
-Shape<2> * SpheroCylinder2D::create(RND * rnd) {
-    return new SpheroCylinder2D(rnd->nextValue() * M_PI);
+SpheroCylinder2D::SpheroCylinder2D() : AnisotropicShape2D() {
+}
+
+Shape<2, 1> * SpheroCylinder2D::create(RND * rnd) {
+    return new SpheroCylinder2D();
 }
 
 double SpheroCylinder2D::getNeighbourListCellSize() {
@@ -44,15 +47,17 @@ double SpheroCylinder2D::getVolume() {
     return 1;
 }
 
-int SpheroCylinder2D::overlap(BoundaryConditions *bc, Shape *s) {
+int SpheroCylinder2D::overlap(BoundaryConditions *bc, Shape<2, 1> *s) {
     SpheroCylinder2D other(*((SpheroCylinder2D*)s));
-    this->applyBC(bc, &other);
-    return withinExclusionZone(other.getVectorPosition(), other.angle);
+    this->applyBC(bc, (Shape<2, 1> *)&other);
+    Vector<2> otherPos(other.position);
+    return withinExclusionZone(otherPos, other.getAngle());
 }
 
 double SpheroCylinder2D::pointDistance2(const Vector<2> &p) const
 {
-    return pointDistance2(this->getVectorPosition(), this->angle, p);
+	Vector<2> thisPos(this->position);
+    return pointDistance2(thisPos, this->getAngle(), p);
 }
 
 double SpheroCylinder2D::pointDistance2(const Vector<2> &pos, double angle, const Vector<2> &point) {
@@ -70,15 +75,18 @@ int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da, double ang
     this->normalizeAngleRange(angleFrom, angleTo, M_PI);
 
     // If angleTo not in normal range (see normalizeAngleRange), divide it and check separately
-    if (angleTo > this->angle + M_PI) {
-        return pointInside(bc, da, angleFrom, this->angle + M_PI - EPSILON) &&
-               pointInside(bc, da, this->angle, angleTo - M_PI);
+    if (angleTo > this->getAngle() + M_PI) {
+        return pointInside(bc, da, angleFrom, this->getAngle() + M_PI - EPSILON) &&
+               pointInside(bc, da, this->getAngle(), angleTo - M_PI);
     }
 
-    Vector<2> pointPos = applyBC(bc, da);
-    Vector<2> pointPosThisAligned = getAntiRotationMatrix() * (pointPos - this->getVectorPosition());
-    double angleFromAligned = angleFrom - this->angle;
-    double angleToAligned = angleTo - this->angle;
+    Vector<2> thisPos(this->position);
+    double point[2];
+    bc->getTranslation(point, this->position,  da);
+    Vector<2> pointPos(point);
+    Vector<2> pointPosThisAligned = getAntiRotationMatrix() * (pointPos - thisPos);
+    double angleFromAligned = angleFrom - this->getAngle();
+    double angleToAligned = angleTo - this->getAngle();
     double pointAngleToOrigin = getAngleToOrigin(pointPosThisAligned);
     double pointAngleToRDisk = getAngleToOrigin(pointPosThisAligned - centerVector);
     double pointAngleToLDisk = getAngleToOrigin(pointPosThisAligned + centerVector);
@@ -112,8 +120,9 @@ int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da) {
 
 std::string SpheroCylinder2D::toString() {
     std::stringstream out;
+    Vector<2> thisPos(this->position);
     out << "SpheroCylinder2D{radius: " << radius << "; halfDistance: " << halfDistance;
-    out << "; pos: " << this->getVectorPosition() << "; angle: " << angle * 180 / M_PI << "}";
+    out << "; pos: " << thisPos << "; angle: " << this->getAngle() * 180 / M_PI << "}";
     return out.str();
 }
 
@@ -129,23 +138,21 @@ void SpheroCylinder2D::restore(std::istream &f) {
     Shape::restore(f);
 }
 
-SpheroCylinder2D::SpheroCylinder2D(double angle) : AnisotropicShape2D(angle) {
-}
-
 std::string SpheroCylinder2D::toWolfram() const {
     std::stringstream out;
+    Vector<2> thisPos(this->position);
 
     out << std::fixed;
     out << "GeometricTransformation[{Rectangle[{-" << halfDistance << ", -" << radius << "}, {" << halfDistance << ", " << radius << "}]," << std::endl;
     out << "    Disk[{-" << halfDistance << ", 0}, " << radius << "]," << std::endl;
     out << "    Disk[{" << halfDistance << ", 0}, " << radius << "]}," << std::endl;
-    out << "    {RotationMatrix[" << this->angle << "], " << this->getVectorPosition() << "}]";
+    out << "    {RotationMatrix[" << this->getAngle() << "], " << thisPos << "}]";
 
     return out.str();
 }
 
-bool SpheroCylinder2D::withinExclusionZone(const Vector<2> &pointPos, double angle) {
-    Vector<2> thisPos = this->getVectorPosition();
+bool SpheroCylinder2D::withinExclusionZone(Vector<2> pointPos, double angle) {
+    Vector<2> thisPos(this->position);
 
     // Check bounding spherocylinder
     if (this->pointDistance2(pointPos) >= pow(2 * (radius + halfDistance), 2))
@@ -156,13 +163,13 @@ bool SpheroCylinder2D::withinExclusionZone(const Vector<2> &pointPos, double ang
     Matrix<2, 2> pointRot = Matrix<2, 2>::rotation(angle);
     Vector<2> pointPosThisAligned = thisRot.transpose() * (pointPos - thisPos);     // align x-axis to this capsule
     Vector<2> thisPosPointAligned = pointRot.transpose() * (thisPos - pointPos);    // align x-axis to colliding capsule
-    if (fabs(pointPosThisAligned[1]) < fabs(halfDistance * sin(angle - this->angle)) &&
-        fabs(thisPosPointAligned[1]) < fabs(halfDistance * sin(this->angle - angle)))
+    if (fabs(pointPosThisAligned[1]) < fabs(halfDistance * sin(angle - this->getAngle() )) &&
+        fabs(thisPosPointAligned[1]) < fabs(halfDistance * sin(this->getAngle() - angle)))
         return true;
 
     // Check big parallelogram with round vertices
-    return this->pointDistance2(thisPos + pointRot * centerVector, this->angle, pointPos) < 4 * radius * radius ||
-           this->pointDistance2(thisPos - pointRot * centerVector, this->angle, pointPos) < 4 * radius * radius ||
+    return this->pointDistance2(thisPos + pointRot * centerVector, this->getAngle(), pointPos) < 4 * radius * radius ||
+           this->pointDistance2(thisPos - pointRot * centerVector, this->getAngle(), pointPos) < 4 * radius * radius ||
            this->pointDistance2(thisPos + thisRot * centerVector, angle, pointPos) < 4 * radius * radius ||
            this->pointDistance2(thisPos - thisRot * centerVector, angle, pointPos) < 4 * radius * radius;
 }

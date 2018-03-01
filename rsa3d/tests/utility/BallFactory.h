@@ -20,7 +20,7 @@ private:
     static BallFactory * instance;
     
     BallFactory();
-    Shape<RSA_DIMENSION> * randomShape();
+    Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * randomShape();
 
 public:
     static BallFactory * getInstance();

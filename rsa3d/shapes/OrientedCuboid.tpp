@@ -22,7 +22,7 @@ double OrientedCuboid<DIMENSION>::voxelSize;
 
 
 template <unsigned short DIMENSION>
-OrientedCuboid<DIMENSION>::OrientedCuboid() : Shape<DIMENSION>(){
+OrientedCuboid<DIMENSION>::OrientedCuboid() : Shape<DIMENSION, 0>(){
 }
 
 template <unsigned short DIMENSION>
@@ -56,7 +56,7 @@ void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
 
 
 template <unsigned short DIMENSION>
-Shape<DIMENSION> * OrientedCuboid<DIMENSION>::create(RND *rnd){
+Shape<DIMENSION, 0> * OrientedCuboid<DIMENSION>::create(RND *rnd){
 	OrientedCuboid<DIMENSION> *cuboid;
 //	if (OrientedCuboid::do2Drotation)
 //	    cuboid = new OrientedCuboid(Matrix<3, 3>::rotation(
@@ -75,7 +75,7 @@ Shape<DIMENSION> * OrientedCuboid<DIMENSION>::create(RND *rnd){
 }
 
 template <unsigned short DIMENSION>
-int OrientedCuboid<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION> *s){
+int OrientedCuboid<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s){
     return this->pointInside(bc, s->getPosition());
 }
 

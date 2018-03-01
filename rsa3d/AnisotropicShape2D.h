@@ -7,18 +7,17 @@
 
 
 #include "Shape.h"
-#include "AnisotropicShape2D.h"
+#include "Matrix.h"
 
-class AnisotropicShape2D : public Shape<2> {
+class AnisotropicShape2D : public Shape<2, 1> {
 
 protected:
-    double angle{};
 
     Matrix<2, 2> getAntiRotationMatrix() const;
     Matrix<2, 2> getRotationMatrix() const;
 
 public:
-    AnisotropicShape2D() = default;
+    AnisotropicShape2D();
     AnisotropicShape2D(double angle);
 
     virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) = 0;

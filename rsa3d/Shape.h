@@ -15,17 +15,22 @@
 #include <ostream>
 #include <istream>
 
-template <unsigned short DIMENSION>
-class Shape : public Positioned<DIMENSION>{
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+class Shape : public Positioned<SPATIAL_DIMENSION>{
+
+protected:
+	double orientation[ANGULAR_DIMENSION];
+
+	void applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second);
 
 public:
-	static Shape<DIMENSION>* (*createShape)(RND *rnd);
+	static Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>* (*createShape)(RND *rnd);
 
 	int no;
 	double time;
 
 	Shape();
-	Shape(const Shape<DIMENSION> & other);
+	Shape(const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> & other);
 
 	virtual ~Shape();
 
@@ -35,22 +40,27 @@ public:
 	// returns initial linear size of a (cubic) voxel. This size should be as big as possible but shape with the center inside the voxel have to cover the whole voxel
 	virtual double getVoxelSize() = 0;
 
+	double * getOrientation();
+
 	// translates the shape by the given vector v
-	virtual void translate(double* v);
+	void translate(double* v);
+
+	void rotate(double *v);
 
 	// checks if there is overlap with the shape pointed by s.
-	virtual int overlap(BoundaryConditions *bc, Shape *s) = 0;
+	virtual int overlap(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) = 0;
 
 	// returns a volume of the shape
 	virtual double getVolume() = 0;
 
-	// checks if a given point is within excluded volume
+	// checks if a given point is within excluded volume for any orientation of a virtual shape
 	virtual int pointInside(BoundaryConditions *bc, double* da) = 0;
 
+	// checks if a given point is within excluded volume
 	virtual int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange);
 
 	// moves the shape towards given shape s
-	virtual double minDistance(Shape<DIMENSION> *s);
+	virtual double minDistance(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s);
 
 	// returns string representation of the shape
 	virtual std::string toString();
@@ -67,9 +77,8 @@ public:
 	// draws the shape
     // virtual void draw()
 
-    void vectorTranslate(const Vector<DIMENSION> &translation);
-	void applyBC(BoundaryConditions *bc, Shape<DIMENSION> *second);
-	Vector<2> applyBC(BoundaryConditions *bc, double *pointToTranslate);
+//    void vectorTranslate(const Vector<SPATIAL_DIMENSION, ANGULAR_DIMENSION> &translation);
+
 };
 
 #include "Shape.tpp"

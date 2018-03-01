@@ -31,7 +31,7 @@ OverlapStrategy * Cuboid::strategy = Cuboid::defaultStrategy;
 // Default constructor creating new Cuboid in (0, 0, 0) with size set in
 // Cuboid::initClass
 //----------------------------------------------------------------------------
-Cuboid::Cuboid(const Matrix<3, 3> & orientation) : Shape<3>(), orientation(orientation)
+Cuboid::Cuboid(const Matrix<3, 3> & orientation) : Shape<3, 0>(), orientation(orientation)
 {
     
 }
@@ -107,7 +107,7 @@ void Cuboid::initClass(const std::string &args)
 // Method creating (dynamically alocated) cuboid with random orientation.
 // Used by ShapeFactory for shape generating
 //----------------------------------------------------------------------------
-Shape<3> * Cuboid::create3D(RND *rnd)
+Shape<3, 0> * Cuboid::create3D(RND *rnd)
 {
     Cuboid * cuboid = new Cuboid(Matrix<3, 3>::rotation(
         rnd->nextValue() * 2 * M_PI,
@@ -120,7 +120,7 @@ Shape<3> * Cuboid::create3D(RND *rnd)
 // Method creating (dynamically alocated) cuboid with random orientation with
 // 2 degrees of freedom
 //----------------------------------------------------------------------------
-Shape<3> * Cuboid::create2D(RND *rnd)
+Shape<3, 0> * Cuboid::create2D(RND *rnd)
 {
     Cuboid * cuboid = new Cuboid(Matrix<3, 3>::rotation(
         0,
@@ -319,7 +319,7 @@ std::string Cuboid::toWolfram() const
 
 void Cuboid::store(std::ostream &f) const
 {
-	Shape<3>::store(f);
+	Shape<3, 0>::store(f);
 	double d;
 	for (unsigned short i=0; i<3; i++){
 		for (unsigned short j=0; j<3; j++){
@@ -331,7 +331,7 @@ void Cuboid::store(std::ostream &f) const
 
 void Cuboid::restore(std::istream &f)
 {
-	Shape<3>::restore(f);
+	Shape<3, 0>::restore(f);
 	double d;
 	for (unsigned short i=0; i<3; i++){
 		for (unsigned short j=0; j<3; j++){

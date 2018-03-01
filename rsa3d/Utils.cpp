@@ -164,7 +164,7 @@ double getAngleToOrigin(const Vector<2> & point) {
 		return angle;
 }
 
-void rotate(double* point, double alpha) {
+void rotate2D(double* point, double alpha) {
 	double cosa = cos(alpha);
 	double sina = sin(alpha);
 	double x = point[0];

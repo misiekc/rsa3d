@@ -19,13 +19,13 @@ public:
 
     struct ShapePair
     {
-        Shape<RSA_DIMENSION> * first;
-        Shape<RSA_DIMENSION> * second;
+        Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * first;
+        Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * second;
         
         ShapePair()
         { }
         
-        ShapePair(Shape<RSA_DIMENSION> * first, Shape<RSA_DIMENSION> * second) : first(first), second(second)
+        ShapePair(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * first, Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * second) : first(first), second(second)
         { }
         
         // Self-cleaning utility

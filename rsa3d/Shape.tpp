@@ -7,94 +7,119 @@
 
 #include <iostream>
 
-template <unsigned short DIMENSION>
-Shape<DIMENSION>::Shape() : Positioned<DIMENSION>(){
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape() : Positioned<SPATIAL_DIMENSION>(){
 	this->no = 0;
 	this->time = 0.0;
 }
 
-template <unsigned short DIMENSION>
-Shape<DIMENSION>::Shape(const Shape<DIMENSION> & other) : Positioned<DIMENSION>(other){
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape(const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> & other) : Positioned<SPATIAL_DIMENSION>(other){
+	std::copy(other.orientation, other.orientation + ANGULAR_DIMENSION, this->orientation);
 	this->no = 0;
 	this->time = 0.0;
-}
-
-template <unsigned short DIMENSION>
-Shape<DIMENSION>::~Shape() {
 
 }
 
-template <unsigned short DIMENSION>
-void Shape<DIMENSION>::translate(double* v){
-	for(unsigned short i=0; i<DIMENSION; i++){
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::~Shape() {
+
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+double* Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation(){
+	return this->orientation;
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::translate(double* v){
+	for(unsigned short i=0; i<SPATIAL_DIMENSION; i++){
 		this->position[i] += v[i];
 	}
 }
 
-template <unsigned short DIMENSION>
-int Shape<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange){
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::rotate(double* v){
+	for(unsigned short i=0; i<ANGULAR_DIMENSION; i++){
+		this->orientation[i] += v[i];
+	}
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+int Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange){
 	return this->pointInside(bc, position);
 }
 
 
-template <unsigned short DIMENSION>
-double Shape<DIMENSION>::minDistance(Shape *s){
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::minDistance(Shape *s){
 	return 0.0;
 }
 
-template <unsigned short DIMENSION>
-std::string Shape<DIMENSION>::toString(){
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+std::string Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toString(){
 	return "";
 }
 
-template <unsigned short DIMENSION>
-std::string Shape<DIMENSION>::toPovray() const{
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+std::string Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray() const{
 	return "";
 }
 
-template <unsigned short DIMENSION>
-void Shape<DIMENSION>::store(std::ostream &f) const{
-	unsigned short dim = DIMENSION;
-	f.write((char *)(&dim), sizeof(unsigned char));
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::store(std::ostream &f) const{
+	unsigned short sd = SPATIAL_DIMENSION;
+	unsigned short ad = ANGULAR_DIMENSION;
+	f.write((char *)(&sd), sizeof(unsigned char));
+	f.write((char *)(&ad), sizeof(unsigned char));
 	f.write((char *)(&this->no), sizeof(int));
 	f.write((char *)(&this->time), sizeof(double));
-	f.write((char *)(this->position), DIMENSION*sizeof(double));
+	f.write((char *)(this->position), SPATIAL_DIMENSION*sizeof(double));
+	f.write((char *)(this->orientation), ANGULAR_DIMENSION*sizeof(double));
 }
 
-template <unsigned short DIMENSION>
-void Shape<DIMENSION>::restore(std::istream &f){
-	unsigned char d;
-	f.read((char *)(&d), sizeof(unsigned char));
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
+	unsigned char sd, ad;
 
+	f.read((char *)(&sd), sizeof(unsigned char));
 	if (f.gcount()==0){ // end of file
 		return;
 	}
-	if (d!=DIMENSION){
+	f.read((char *)(&ad), sizeof(unsigned char));
+
+	if (sd!=SPATIAL_DIMENSION || ad!=ANGULAR_DIMENSION){
 		std::cout << "[ERROR] cannot restore: incompatible dimensions: read " << f.gcount() << " bytes." << std::endl;
 		return;
 	}
 	f.read((char *)(&this->no), sizeof(int));
 	f.read((char *)(&this->time), sizeof(double));
-	f.read((char *)(this->position), d*sizeof(double));
+	f.read((char *)(this->position), sd*sizeof(double));
+	f.read((char *)(this->orientation), ad*sizeof(double));
 }
 
-template <unsigned short DIMENSION>
-void Shape<DIMENSION>::vectorTranslate(const Vector<DIMENSION> &translation) {
-	double arr[DIMENSION];
+/*
+template <unsigned short SPATIAL_DIMENSION>
+void Shape<SPATIAL_DIMENSION>::vectorTranslate(const Vector<SPATIAL_DIMENSION> &translation) {
+	double arr[SPATIAL_DIMENSION];
 	translation.copyToArray(arr);
 	translate(arr);
 }
+*/
 
-template <unsigned short DIMENSION>
-void Shape<DIMENSION>::applyBC(BoundaryConditions *bc, Shape<DIMENSION> *second) {
-    double translation[DIMENSION];
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second) {
+    double translation[SPATIAL_DIMENSION];
     bc->getTranslation(translation, this->getPosition(), second->getPosition());
     second->translate(translation);
 }
 
-template<unsigned short DIMENSION>
-Vector<2> Shape<DIMENSION>::applyBC(BoundaryConditions *bc, double *pointToTranslate) {
-	double transArray[DIMENSION];
-	bc->getTranslation(transArray, this->getPosition(), pointToTranslate);
-	return Vector<2>(pointToTranslate) + Vector<2>(transArray);
+/*
+template <unsigned short SPATIAL_DIMENSION>
+double* Shape<SPATIAL_DIMENSION>::applyBC(double *res, BoundaryConditions *bc, double *pointToTranslate) {
+	double* Shape<SPATIAL_DIMENSION>::applyBC(double *res, BoundaryConditions *bc, double *pointToTranslate) {
+	bc->getTranslation(res, this->position, pointToTranslate);
+	return res;
 }
+*/

@@ -35,9 +35,9 @@ public:
 	~Ellipse() override = default;
 
 	static void initClass(const std::string &args);
-	static Shape<2> * create(RND *rnd);
+	static Shape<2, 1> * create(RND *rnd);
 
-	int overlap(BoundaryConditions *bc, Shape<2> *s) override;
+	int overlap(BoundaryConditions *bc, Shape<2, 1> *s) override;
 	double getVolume() override;
 	int pointInside(BoundaryConditions *bc, double* da) override;
 	int pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) override;

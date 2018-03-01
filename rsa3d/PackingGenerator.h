@@ -17,20 +17,20 @@
 #include <vector>
 #include <map>
 
-template <ushort DIMENSION>
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 class PackingGenerator {
 private:
 	static double FACTOR_LIMIT;
 
 	int seed;
 	Parameters *params;
-	std::vector<Shape<DIMENSION> *> packing;
-	VoxelList<DIMENSION> *voxels;
+	std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> packing;
+	VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels;
 	Surface *surface;
 
 	int analyzeVoxels();
-	int analyzeRegion(Voxel<DIMENSION, ANGULAR_DIMENSION> *v);
-	void modifiedRSA(Shape<DIMENSION> *s, Voxel<DIMENSION, ANGULAR_DIMENSION> *v);
+	int analyzeRegion(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
+	void modifiedRSA(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
 	bool isSaturated();
 	double getFactor();
 	void createPacking();
@@ -40,9 +40,9 @@ public:
 	virtual ~PackingGenerator();
 
 	void run();
-	std::vector<Shape<DIMENSION> *> * getPacking();
+	std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * getPacking();
 	void toPovray(std::string filename);
-	static void toPovray(std::vector<Shape<DIMENSION> *> * packing, double size, VoxelList<DIMENSION> *voxels, std::string filename);
+	static void toPovray(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * packing, double size, VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels, std::string filename);
 };
 
 #include "PackingGenerator.tpp"

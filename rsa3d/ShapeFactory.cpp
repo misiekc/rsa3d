@@ -13,15 +13,15 @@
 #include "shapes/SpheroCylinder2D.h"
 #include "shapes/Ellipse.h"
 
-Shape<RSA_DIMENSION>* (*ShapeFactory::createShape)(RND *rnd);
+Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>* (*ShapeFactory::createShape)(RND *rnd);
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
 	if (sClass == "Sphere") {
-		Sphere<RSA_DIMENSION>::initClass(attr);
-		ShapeFactory::createShape = Sphere<RSA_DIMENSION>::create;
+		Sphere<RSA_SPATIAL_DIMENSION>::initClass(attr);
+		ShapeFactory::createShape = Sphere<RSA_SPATIAL_DIMENSION>::create;
 	} else if (sClass == "OrientedCuboid") {
-        OrientedCuboid<RSA_DIMENSION>::initClass(attr);
-        ShapeFactory::createShape = OrientedCuboid<RSA_DIMENSION>::create;
+        OrientedCuboid<RSA_SPATIAL_DIMENSION>::initClass(attr);
+        ShapeFactory::createShape = OrientedCuboid<RSA_SPATIAL_DIMENSION>::create;
     }
 #if RSA_DIMENSION == 2
     else if (sClass == "SpheroCylinder2D") {
@@ -41,7 +41,7 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
 	}
 #endif
     else {
-        std::cerr << "Unknown shape: " << sClass << " or wrong RSA_DIMENTSION: " << RSA_DIMENSION << std::endl;
+        std::cerr << "Unknown shape: " << sClass << " or wrong dimensions: " << RSA_SPATIAL_DIMENSION << ", " << RSA_ANGULAR_DIMENSION << std::endl;
         exit(1);
     }
 

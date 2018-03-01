@@ -29,13 +29,13 @@ Analyzer::Analyzer(Parameters *params) {
 Analyzer::~Analyzer() {
 }
 
-std::vector<Shape<RSA_DIMENSION> *> * Analyzer::fromFile(std::string filename){
+std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * Analyzer::fromFile(std::string filename){
 	std::ifstream file(filename, std::ios::binary);
-	std::vector<Shape<RSA_DIMENSION> *> * v = new std::vector<Shape<RSA_DIMENSION> *>;
+	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * v = new std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *>;
 	RND rnd(1);
 
 	while(!file.eof()){
-		Shape<RSA_DIMENSION> *s = ShapeFactory::createShape(&rnd);
+		Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s = ShapeFactory::createShape(&rnd);
 		s->restore(file);
 		v->push_back(s);
 	}
@@ -94,15 +94,15 @@ void Analyzer::calculateOrderParameters(double *result, Cuboid *c1, Cuboid *c2){
 	result[4] = (5.0*prod4 - 9.0)/6.0;
 }
 
-void Analyzer::analyzeOrder(std::vector<Shape<RSA_DIMENSION> *> *packing, Plot **order){
-	double *posi, *posj, da[RSA_DIMENSION];
+void Analyzer::analyzeOrder(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing, Plot **order){
+	double *posi, *posj, da[RSA_SPATIAL_DIMENSION];
 	double orderParameters[5];
 	for(uint i=0; i<packing->size(); i++){
 		posi = (*packing)[i]->getPosition();
 		for(uint j=i+1; j<packing->size(); j++){
 			posj = (*packing)[j]->getPosition();
 			double dist = 0.0;
-			for(unsigned short k=0; k<RSA_DIMENSION; k++){
+			for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
 				da[k] = fabs(posi[k] - posj[k]);
 				if (da[k]>0.5*this->params->surfaceSize)
 					da[k] = this->params->surfaceSize - da[k];
@@ -119,7 +119,7 @@ void Analyzer::analyzeOrder(std::vector<Shape<RSA_DIMENSION> *> *packing, Plot *
 	}
 }
 
-void Analyzer::analyzePacking(std::vector<Shape<RSA_DIMENSION> *> *packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor){
+void Analyzer::analyzePacking(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor){
 	double lastt = 0.0;
 	for(uint i=0; i<packing->size(); i++){
 		double t = (*packing)[i]->time;
@@ -137,13 +137,13 @@ void Analyzer::analyzePacking(std::vector<Shape<RSA_DIMENSION> *> *packing, LogP
 	if (nvt != NULL)
 		nvt->addBetween(lastt, nvt->getMax()+1.0, packing->size());
 	if (corr!=NULL){
-		double *posi, *posj, da[RSA_DIMENSION];
+		double *posi, *posj, da[RSA_SPATIAL_DIMENSION];
 		for(uint i=0; i<packing->size(); i++){
 			posi = (*packing)[i]->getPosition();
 			for(uint j=i+1; j<packing->size(); j++){
 				posj = (*packing)[j]->getPosition();
 				double dist = 0.0;
-				for(unsigned short k=0; k<RSA_DIMENSION; k++){
+				for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
 					da[k] = fabs(posi[k] - posj[k]);
 					if (da[k]>0.5*this->params->surfaceSize)
 						da[k] = this->params->surfaceSize - da[k];
@@ -246,9 +246,9 @@ void Analyzer::printCorrelations(Plot& correlations, std::string filename, int c
 
 	double r = 0.0, volume, expectedNumberOfParticles, packingVolume;
 
-	if (RSA_DIMENSION==2)
+	if (RSA_SPATIAL_DIMENSION==2)
 		packingVolume = M_PI * pow(correlations.getMax(), 2.0);
-	else if (RSA_DIMENSION==3)
+	else if (RSA_SPATIAL_DIMENSION==3)
 		packingVolume = 4.0/3.0 * M_PI * pow(correlations.getMax(), 3.0);
 	else
 		return;
@@ -260,15 +260,15 @@ void Analyzer::printCorrelations(Plot& correlations, std::string filename, int c
 	volume = 0.0;
 	for (int i = 0; i < correlations.size()-1; i++) {
 		if (i>0){
-			if (RSA_DIMENSION==2)
+			if (RSA_SPATIAL_DIMENSION==2)
 				volume = -M_PI * r*r;
-			else if (RSA_DIMENSION==3)
+			else if (RSA_SPATIAL_DIMENSION==3)
 				volume = -4.0/3.0* M_PI * r*r*r;
 		}
 		r = 0.5*(correlationPoints[i][0]+correlationPoints[i+1][0]);
-		if (RSA_DIMENSION==2)
+		if (RSA_SPATIAL_DIMENSION==2)
 			volume += M_PI * r*r;
-		else if (RSA_DIMENSION==3)
+		else if (RSA_SPATIAL_DIMENSION==3)
 			volume += 4.0/3.0* M_PI * r*r*r;
 
 		expectedNumberOfParticles = totalPoints * volume / packingVolume;
@@ -322,13 +322,13 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 
 	double n = 0.0, n2 = 0.0;
 	int counter = 0;
-	double packingSize = pow(params->surfaceSize, RSA_DIMENSION);
+	double packingSize = pow(params->surfaceSize, RSA_SPATIAL_DIMENSION);
 	DIR *dir = opendir(sdir);
 	std::string dirname(sdir);
 	while ((de = readdir(dir)) != NULL){
 		if (strncmp(prefix, de->d_name, strlen(prefix))==0){
 			std::string filename(de->d_name);
- 			std::vector<Shape<RSA_DIMENSION> *> * packing = this->fromFile(dirname + "/" + filename);
+ 			std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * packing = this->fromFile(dirname + "/" + filename);
 			n += packing->size();
 			n2 += packing->size()*packing->size();
 			counter++;

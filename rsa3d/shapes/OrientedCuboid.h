@@ -10,7 +10,7 @@
 
 
 template <unsigned short DIMENSION>
-class OrientedCuboid : public Shape<DIMENSION>{
+class OrientedCuboid : public Shape<DIMENSION, 0>{
 private:
 //	static bool do2Drotation;
     static double           neighbourListCellSize;
@@ -23,9 +23,9 @@ public:
 	virtual ~OrientedCuboid();
 
 	static void initClass(const std::string &args);
-	static Shape<DIMENSION> * create(RND *rnd);
+	static Shape<DIMENSION, 0> * create(RND *rnd);
 
-    int overlap(BoundaryConditions *bc, Shape<DIMENSION> *s);
+    int overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s);
     int pointInside(BoundaryConditions *bc, double* da);
     double getNeighbourListCellSize();
     double getVoxelSize();

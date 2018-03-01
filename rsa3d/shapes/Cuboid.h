@@ -17,7 +17,7 @@
 
 class OverlapStrategy;
 
-class Cuboid : public Shape<3>
+class Cuboid : public Shape<3,0>
 {
 private:
     static double           volume;
@@ -63,8 +63,8 @@ public:
     ~Cuboid() override = default;
 
 	static void initClass(const std::string &args);
-	static Shape<3> * create2D(RND *rnd);
-	static Shape<3> * create3D(RND *rnd);
+	static Shape<3, 0> * create2D(RND *rnd);
+	static Shape<3, 0> * create3D(RND *rnd);
 	static void restoreDefaultStrategy();
 	static void setOverlapStrategy(OverlapStrategy *strategy);
 	static OverlapStrategy * getOverlapStrategy();
@@ -72,7 +72,7 @@ public:
 
     double getNeighbourListCellSize() override;
     double getVoxelSize() override;
-    int overlap(BoundaryConditions *bc, Shape<3> *s) override;
+    int overlap(BoundaryConditions *bc, Shape<3,0> *s) override;
     double getVolume() override;
     int pointInside(BoundaryConditions *bc, double* da) override;
 

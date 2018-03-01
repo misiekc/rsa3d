@@ -20,20 +20,19 @@ private:
     static double pointDistance2(const Vector<2> &pos, double angle, const Vector<2> &point);
 
     double pointDistance2(const Vector<2> &p) const;
-    bool withinExclusionZone(const Vector<2> &pointPos, double angle);
+    bool withinExclusionZone(const Vector<2> pointPos, double angle);
 
 public:
-    SpheroCylinder2D() = default;
-    explicit SpheroCylinder2D(double angle);
+    SpheroCylinder2D();
     SpheroCylinder2D(const SpheroCylinder2D & other) = default;
     ~SpheroCylinder2D() override = default;
 
     static void initClass(const std::string & attr);
-    static Shape<2> * create(RND * rnd);
+    static Shape<2, 1> * create(RND * rnd);
 
     double getNeighbourListCellSize() override;
     double getVoxelSize() override;
-    int overlap(BoundaryConditions *bc, Shape *s) override;
+    int overlap(BoundaryConditions *bc, Shape<2, 1> *s) override;
     double getVolume() override;
     int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) override;
     int pointInside(BoundaryConditions *bc, double *da) override;

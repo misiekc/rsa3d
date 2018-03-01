@@ -19,14 +19,14 @@ double Ellipse::neighbourListCellSize;
 double Ellipse::voxelSize;
 
 void Ellipse::calculateU(){
-	this->u[0]  = cos(this->angle); this->u[1]  = sin(this->angle);
-	this->uT[0] = -sin(this->angle); this->uT[1] =  cos(this->angle);
+	this->u[0]  = cos(this->getAngle()); this->u[1]  = sin(this->getAngle());
+	this->uT[0] = -sin(this->getAngle()); this->uT[1] =  cos(this->getAngle());
 }
 
 Ellipse::Ellipse() : AnisotropicShape2D(){
 	this->a = Ellipse::longSemiAxis;
 	this->b = Ellipse::shortSemiAxis;
-	this->angle = 0.0;
+	this->setAngle(0.0);
 	this->calculateU();
 }
 
@@ -40,7 +40,7 @@ Ellipse::Ellipse(const Ellipse &other) : AnisotropicShape2D(other), a(other.a), 
 Ellipse & Ellipse::operator = (const Ellipse & el){
 	this->a = el.a;
 	this->b = el.b;
-	this->angle = el.angle;
+	this->setAngle(el.getAngle());
 	for(unsigned char i=0; i<2; i++){
 		this->u[i]  = el.u[i];
 		this->uT[i] = el.uT[i];
@@ -56,13 +56,8 @@ void Ellipse::initClass(const std::string &args){
 	Ellipse::voxelSize = 1.4*shortSemiAxis;
 }
 
-Shape<2> * Ellipse::create(RND *rnd){
-	Ellipse *el = new Ellipse();
-	el->a = Ellipse::longSemiAxis;
-	el->b = Ellipse::shortSemiAxis;
-	el->angle = rnd->nextValue()*2*M_PI;
-	el->calculateU();
-	return el;
+Shape<2, 1> * Ellipse::create(RND *rnd){
+	return new Ellipse();
 }
 
 double Ellipse::calculateF(double* r, double g){
@@ -72,13 +67,13 @@ double Ellipse::calculateF(double* r, double g){
 	return 1 + g - d1*d1 - d2*d2;
 }
 
-int Ellipse::overlap(BoundaryConditions *bc, Shape *s) {
+int Ellipse::overlap(BoundaryConditions *bc, Shape<2, 1> *s) {
 	Ellipse es = *((Ellipse *)s);
 	double da[2];
 	bc->getTranslation(da, this->position, es.position);
 	es.translate(da);
 	double d;
-	d = (this->a/this->b - this->b/this->a)*sin(this->angle - es.angle);
+	d = (this->a/this->b - this->b/this->a)*sin(this->getAngle() - es.getAngle());
 	double g = 2 + d*d;
 	double r[] = {this->position[0] - es.position[0], this->position[1] - es.position[1]};
 	double f1 = this->calculateF(r, g);
@@ -107,7 +102,7 @@ int Ellipse::pointInside(BoundaryConditions *bc, double* da) {
 	da[0] -= this->position[0];
 	da[1] -= this->position[1];
 
-	rotate(da, -this->angle);
+	rotate2D(da, -this->getAngle());
 
 	double dx = da[0]/(this->a+this->b);
 	double dy = da[1]/(2*this->b);
@@ -135,21 +130,25 @@ int Ellipse::pointInsideSpecialArea(BoundaryConditions *bc, double *other, doubl
 	this->normalizeAngleRange(angleFrom, angleTo, M_PI);
 
     // If angleTo not in normal range (see normalizeAngleRange), divide it and check separately
-    if (angleTo > this->angle + M_PI) {
-        return pointInsideSpecialArea(bc, other, angleFrom, this->angle + M_PI - EPSILON) &&
-               pointInsideSpecialArea(bc, other, this->angle, angleTo - M_PI);
+    if (angleTo > this->getAngle() + M_PI) {
+        return pointInsideSpecialArea(bc, other, angleFrom, this->getAngle() + M_PI - EPSILON) &&
+               pointInsideSpecialArea(bc, other, this->getAngle(), angleTo - M_PI);
     }
 
     // Now angleTo - angleFrom <= pi. Align ellipse with coordinate system. Transform angles' range
     // (and divide if necessary) so that its fully contained in [0, pi] range
-	Vector<2> otherAligned = getAntiRotationMatrix() * (this->getVectorPosition() - this->applyBC(bc, other));
-	if (angleTo < angle)
-		return pointInsideUnrotated(otherAligned, angleFrom - angle + M_PI, angleTo - angle + M_PI);
-	else if (angleFrom < angle)
-		return pointInsideUnrotated(otherAligned, angleFrom - angle + M_PI, M_PI) &&
-               pointInsideUnrotated(otherAligned, 0, angleTo - angle);
+    Vector<2> thisPos(this->position);
+    double translation[2];
+    bc->getTranslation(translation, this->position, other);
+    Vector<2> vTranslation(translation);
+	Vector<2> otherAligned = getAntiRotationMatrix() * (thisPos - vTranslation);
+	if (angleTo < this->getAngle())
+		return pointInsideUnrotated(otherAligned, angleFrom - this->getAngle() + M_PI, angleTo - this->getAngle() + M_PI);
+	else if (angleFrom < this->getAngle())
+		return pointInsideUnrotated(otherAligned, angleFrom - this->getAngle() + M_PI, M_PI) &&
+               pointInsideUnrotated(otherAligned, 0, angleTo - this->getAngle());
 	else    // angleTo >= angle && angleFrom >= angle
-		return pointInsideUnrotated(otherAligned, angleFrom - angle, angleTo - angle);
+		return pointInsideUnrotated(otherAligned, angleFrom - this->getAngle(), angleTo - this->getAngle());
 }
 
 bool Ellipse::pointInsideUnrotated(const Vector<2> &p, double angleFrom, double angleTo) const
@@ -221,16 +220,17 @@ bool Ellipse::circleCollision(const Vector<2> &p, double tMin, double tMax) cons
 }
 
 void Ellipse::setAngle(double d) {
-	this->angle = d;
+	AnisotropicShape2D::setAngle(d);
 	this->calculateU();
 }
 
 std::string Ellipse::toWolfram() const {
 	std::stringstream out;
 
+	Vector<2> thisPos(this->position);
 	out << std::fixed;
 	out << "GeometricTransformation[Disk[{0, 0}, {" << this->a << ", " << this->b << "}]," << std::endl;
-	out << "    {RotationMatrix[" << this->angle << "], " << this->getVectorPosition() << "}]";
+	out << "    {RotationMatrix[" << this->getAngle() << "], " << thisPos << "}]";
 
 	return out.str();
 }
@@ -245,8 +245,10 @@ double Ellipse::getVoxelSize() {
 
 std::string Ellipse::toString() {
     std::stringstream out;
-    out << "Ellipse{position: " << this->getVectorPosition() << "; a: " << this->a;
-    out << "; b: " << this->b << "; angle: " << this->angle << "}";
+
+    Vector<2> thisPos(this->position);
+	out << "Ellipse{position: " << thisPos << "; a: " << this->a;
+    out << "; b: " << this->b << "; angle: " << this->getAngle() << "}";
     return out.str();
 }
 
@@ -259,14 +261,12 @@ void Ellipse::store(std::ostream &f) const{
 	Shape::store(f);
 	f.write((char *)(&this->a), sizeof(double));
 	f.write((char *)(&this->b), sizeof(double));
-	f.write((char *)(&this->angle), sizeof(double));
 }
 
 void Ellipse::restore(std::istream &f){
 	Shape::restore(f);
 	f.read((char *)(&this->a), sizeof(double));
 	f.read((char *)(&this->b), sizeof(double));
-	f.read((char *)(&this->angle), sizeof(double));
 	this->calculateU();
 
 }

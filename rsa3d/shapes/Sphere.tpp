@@ -54,12 +54,12 @@ void Sphere<DIMENSION>::initClass(const std::string &args){
 }
 
 template <unsigned short DIMENSION>
-Shape<DIMENSION> * Sphere<DIMENSION>::create(RND *rnd){
+Shape<DIMENSION, 0> * Sphere<DIMENSION>::create(RND *rnd){
 	return new Sphere<DIMENSION>();
 }
 
 template <unsigned short DIMENSION>
-Sphere<DIMENSION>::Sphere() : Shape<DIMENSION>(){
+Sphere<DIMENSION>::Sphere() : Shape<DIMENSION, 0>(){
 	this->r = Sphere<DIMENSION>::radius;
 }
 
@@ -74,7 +74,7 @@ double Sphere<DIMENSION>::getVoxelSize() {
 }
 
 template <unsigned short DIMENSION>
-int Sphere<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION> *s) {
+int Sphere<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) {
 	Sphere *sd = (Sphere<DIMENSION> *) s;
 	double d2 = bc->distance2(this->position, sd->position);
 	double r2 = this->r + sd->r;
@@ -102,7 +102,7 @@ int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) {
 }
 
 template <unsigned short DIMENSION>
-double Sphere<DIMENSION>::minDistance(Shape<DIMENSION> *s){
+double Sphere<DIMENSION>::minDistance(Shape<DIMENSION, 0> *s){
 	return 2.0*this->radius;
 }
 
@@ -139,13 +139,13 @@ std::string Sphere<DIMENSION>::toPovray() const{
 
 template <unsigned short DIMENSION>
 void Sphere<DIMENSION>::store(std::ostream &f) const{
-	Shape<DIMENSION>::store(f);
+	Shape<DIMENSION, 0>::store(f);
 	f.write((char *)(&this->r), sizeof(double));
 }
 
 template <unsigned short DIMENSION>
 void Sphere<DIMENSION>::restore(std::istream &f){
-	Shape<DIMENSION>::restore(f);
+	Shape<DIMENSION, 0>::restore(f);
 	f.read((char *)(&this->r), sizeof(double));
 }
 

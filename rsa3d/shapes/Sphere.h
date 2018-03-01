@@ -14,7 +14,7 @@
 #include "../Shape.h"
 
 template <unsigned short DIMENSION>
-class Sphere : public Shape<DIMENSION>{
+class Sphere : public Shape<DIMENSION, 0>{
 
 private:
 	static double radius;
@@ -34,14 +34,14 @@ public:
 	virtual ~Sphere();
 
 	static void initClass(const std::string &args);
-	static Shape<DIMENSION> * create(RND *rnd);
+	static Shape<DIMENSION, 0> * create(RND *rnd);
 
 	double getNeighbourListCellSize();
 	double getVoxelSize();
-	int overlap(BoundaryConditions *bc, Shape<DIMENSION> *s);
+	int overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s);
 	double getVolume();
 	int pointInside(BoundaryConditions *bc, double* da);
-	double minDistance(Shape<DIMENSION> *s);
+	double minDistance(Shape<DIMENSION, 0> *s);
 
 	std::string toPovray() const;
 	void store(std::ostream &f) const;
