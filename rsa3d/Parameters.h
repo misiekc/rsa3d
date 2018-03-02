@@ -9,7 +9,7 @@
 #define PARAMETERS_H_
 
 #define RSA_SPATIAL_DIMENSION 2
-#define RSA_ANGULAR_DIMENSION 0
+#define RSA_ANGULAR_DIMENSION 1
 
 #include <climits>
 #include <limits>

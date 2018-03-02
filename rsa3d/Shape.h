@@ -20,7 +20,6 @@ class Shape : public Positioned<SPATIAL_DIMENSION>{
 
 protected:
 	double orientation[ANGULAR_DIMENSION];
-
 	void applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second);
 
 public:

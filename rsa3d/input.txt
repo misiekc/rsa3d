@@ -5,15 +5,16 @@ from = 0
 collectors = 1
 # maxTime = 100000.0
 # maxTime = std::numeric_limits<double>::infinity()
+maxTime = 1000
 analyze = 100
 split = 500
-surfaceVolume = 1000000.0
+surfaceVolume = 10.0
 storePackings = true
 
 #modifiedRSA = true
 #thresholdDistance = 100.0
 boundaryConditions = periodic
 
-particleType = Sphere
+particleType = Ellipse
 particleAttributes = 2
 #generatorProcesses = 1
