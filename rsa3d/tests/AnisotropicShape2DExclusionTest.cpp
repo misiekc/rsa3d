@@ -68,10 +68,10 @@ void as2d_extest::perform_inttest(const Context &_context, std::vector<as2d_exte
     MockBC mockBC;
 
     _context.printInfo();
-    auto first = generateShape(_context.firstAngle, _context.firstPos);
+    auto first = generate_shape(_context.firstAngle, _context.firstPos);
     for (std::size_t i = 0; i < _context.points; i++) {
         Point point = _context.randomPoint(&rnd);
-        auto second = generateShape(_context.secondAngle, point.position);
+        auto second = generate_shape(_context.secondAngle, point.position);
 
         if (first->overlap(&mockBC, second.get()))
             point.color = INSIDE_COLOR;
@@ -81,10 +81,11 @@ void as2d_extest::perform_inttest(const Context &_context, std::vector<as2d_exte
     }
 }
 
-std::unique_ptr<AnisotropicShape2D> as2d_extest::generateShape(double angle, const Vector<2> &position) {
-    auto shape = (AnisotropicShape2D*)ShapeFactory::createShape(NULL);
-    double posangle[3] = {position[0], position[1], angle};
-    shape->translate(posangle);
+std::unique_ptr<AnisotropicShape2D> as2d_extest::generate_shape(double angle, const Vector<2> &position) {
+    auto shape = (AnisotropicShape2D*)ShapeFactory::createShape(nullptr);
+    double posAngle[3] = {position[0], position[1], angle};
+    shape->translate(posAngle);
+    shape->rotate(posAngle + 2);
     return std::unique_ptr<AnisotropicShape2D>(shape);
 }
 
@@ -93,7 +94,7 @@ void as2d_extest::perform_pitest(const Context &_context, std::vector<as2d_extes
     RND rnd;
 
     _context.printInfo();
-    auto first = generateShape(_context.firstAngle, _context.firstPos);
+    auto first = generate_shape(_context.firstAngle, _context.firstPos);
     for (std::size_t i = 0; i < _context.points; i++) {
         Point point = _context.randomPoint(&rnd);
         double pointPosArray[2];
@@ -102,8 +103,8 @@ void as2d_extest::perform_pitest(const Context &_context, std::vector<as2d_extes
         if (first->pointInside(&mockBC, pointPosArray, _context.fromAngle, _context.toAngle)) {
             point.color = INSIDE_COLOR;
         } else {
-            auto angleFromShape = generateShape(_context.fromAngle, point.position);
-            auto angleToShape = generateShape(_context.toAngle, point.position);
+            auto angleFromShape = generate_shape(_context.fromAngle, point.position);
+            auto angleToShape = generate_shape(_context.toAngle, point.position);
             auto withinAngleFromZone = (bool)first->overlap(&mockBC, angleFromShape.get());
             auto withinAngleToZone = (bool)first->overlap(&mockBC, angleToShape.get());
 
@@ -135,7 +136,7 @@ void as2d_extest::Context::printInfo() const {
     else    // Mode::POINT_INSIDE
         std::cout << "[POINT INSIDE TEST] ";
 
-    auto first = generateShape(this->firstAngle, this->firstPos);
+    auto first = generate_shape(this->firstAngle, this->firstPos);
     std::cout << "Generating " << this->points << " points from " << this->box_width << " x ";
     std::cout << this->box_height << " box for:" << std::endl;
     std::cout << first->toString() << std::endl;
@@ -157,10 +158,10 @@ void as2d_extest::results_to_wolfram(const Context &_context, const std::vector<
         _out << "    {" << point.color << ", Point[" << point.position << "]}," << std::endl;
     _out << "    {" << _results.back().color << ", Point[" << _results.back().position << "]}};" << std::endl;
 
-    auto first = generateShape(_context.firstAngle, _context.firstPos);
+    auto first = generate_shape(_context.firstAngle, _context.firstPos);
     _out << "shape1 = " << first->toWolfram() << ";" << std::endl;
     if (_context.mode == Context::Mode::OVERLAP) {
-       auto second = generateShape(_context.secondAngle, findMaxXRedPoint(_results).position);
+       auto second = generate_shape(_context.secondAngle, find_max_x_red_point(_results).position);
         _out << "shape2 = " << second->toWolfram() << ";" << std::endl << std::endl;
         _out << "Graphics[Join[{{" << SECOND_SHAPE_COLOR << ", shape2}, {" << FIRST_SHAPE_COLOR << ", shape1}}, points]]";
     } else {  // Context::Mode::POINT_INSIDE
@@ -168,7 +169,7 @@ void as2d_extest::results_to_wolfram(const Context &_context, const std::vector<
     }
 }
 
-as2d_extest::Point as2d_extest::findMaxXRedPoint(const std::vector<as2d_extest::Point> &_results) {
+as2d_extest::Point as2d_extest::find_max_x_red_point(const std::vector<as2d_extest::Point> &_results) {
     auto comparator = [](const Point & p1, const Point & p2) {
         if (p1.color != INSIDE_COLOR && p2.color == INSIDE_COLOR)
             return true;

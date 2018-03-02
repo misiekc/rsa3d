@@ -27,7 +27,7 @@ Ellipse::Ellipse() : AnisotropicShape2D(){
 	this->a = Ellipse::longSemiAxis;
 	this->b = Ellipse::shortSemiAxis;
 	this->setAngle(0.0);
-	this->calculateU();
+	//this->calculateU();
 }
 
 Ellipse::Ellipse(const Ellipse &other) : AnisotropicShape2D(other), a(other.a), b(other.b) {
@@ -41,10 +41,10 @@ Ellipse & Ellipse::operator = (const Ellipse & el){
 	this->a = el.a;
 	this->b = el.b;
 	this->setAngle(el.getAngle());
-	for(unsigned char i=0; i<2; i++){
+	/*for(unsigned char i=0; i<2; i++){
 		this->u[i]  = el.u[i];
 		this->uT[i] = el.uT[i];
-	}
+	}*/
 	return *this;
 }
 
@@ -69,9 +69,7 @@ double Ellipse::calculateF(double* r, double g){
 
 int Ellipse::overlap(BoundaryConditions *bc, Shape<2, 1> *s) {
 	Ellipse es = *((Ellipse *)s);
-	double da[2];
-	bc->getTranslation(da, this->position, es.position);
-	es.translate(da);
+    this->applyBC(bc, &es);
 	double d;
 	d = (this->a/this->b - this->b/this->a)*sin(this->getAngle() - es.getAngle());
 	double g = 2 + d*d;
@@ -137,11 +135,11 @@ int Ellipse::pointInsideSpecialArea(BoundaryConditions *bc, double *other, doubl
 
     // Now angleTo - angleFrom <= pi. Align ellipse with coordinate system. Transform angles' range
     // (and divide if necessary) so that its fully contained in [0, pi] range
+    double translationArr[2];
+    Vector<2> translationVector(bc->getTranslation(translationArr, this->position, other));
     Vector<2> thisPos(this->position);
-    double translation[2];
-    bc->getTranslation(translation, this->position, other);
-    Vector<2> vTranslation(translation);
-	Vector<2> otherAligned = getAntiRotationMatrix() * (thisPos - vTranslation);
+    Vector<2> otherPos = Vector<2>(other) + translationVector;
+	Vector<2> otherAligned = getAntiRotationMatrix() * (thisPos - otherPos);
 	if (angleTo < this->getAngle())
 		return pointInsideUnrotated(otherAligned, angleFrom - this->getAngle() + M_PI, angleTo - this->getAngle() + M_PI);
 	else if (angleFrom < this->getAngle())

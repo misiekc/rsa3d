@@ -14,9 +14,6 @@ int AnisotropicShape2D::pointInside(BoundaryConditions *bc, double *da) {
     return pointInside(bc, da, 0, 2 * M_PI);
 }
 
-AnisotropicShape2D::AnisotropicShape2D(): Shape<2, 1>(){
-}
-
 double AnisotropicShape2D::getAngle() const {
     return this->orientation[0];
 }
@@ -30,22 +27,26 @@ std::string AnisotropicShape2D::toWolfram() const {
 }
 
 Matrix<2, 2> AnisotropicShape2D::getRotationMatrix() const {
-    return Matrix<2, 2>::rotation(this->orientation[0]);
+    return Matrix<2, 2>::rotation(this->getAngle());
 }
 
 Matrix<2, 2> AnisotropicShape2D::getAntiRotationMatrix() const {
-    return Matrix<2, 2>::rotation(-this->orientation[0]);
+    return Matrix<2, 2>::rotation(-this->getAngle());
 }
 
 // Keep angleFrom in [this->angle; this->angle + interval] range
 //---------------------------------------------------------------------------------------------
 void AnisotropicShape2D::normalizeAngleRange(double &angleFrom, double &angleTo, double interval) const {
-    while (angleFrom < this->orientation[2]) {
+    while (angleFrom < this->getAngle()) {
         angleFrom += interval;
         angleTo += interval;
     }
-    while (angleFrom > this->orientation[0] + interval) {
+    while (angleFrom > this->getAngle() + interval) {
         angleFrom -= interval;
         angleTo -= interval;
     }
+}
+
+void AnisotropicShape2D::rotate(double *v) {
+    this->setAngle(this->getAngle() + v[0]);
 }

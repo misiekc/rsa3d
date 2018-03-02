@@ -48,8 +48,9 @@ double SpheroCylinder2D::getVolume() {
 }
 
 int SpheroCylinder2D::overlap(BoundaryConditions *bc, Shape<2, 1> *s) {
-    SpheroCylinder2D other(*((SpheroCylinder2D*)s));
-    this->applyBC(bc, (Shape<2, 1> *)&other);
+    SpheroCylinder2D *otherPtr = (SpheroCylinder2D*)s;
+    SpheroCylinder2D other(*otherPtr);
+    this->applyBC(bc, &other);
     Vector<2> otherPos(other.position);
     return withinExclusionZone(otherPos, other.getAngle());
 }
@@ -80,10 +81,10 @@ int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da, double ang
                pointInside(bc, da, this->getAngle(), angleTo - M_PI);
     }
 
+    double translationArr[2];
+    Vector<2> translationVector(bc->getTranslation(translationArr, this->position, da));
     Vector<2> thisPos(this->position);
-    double point[2];
-    bc->getTranslation(point, this->position,  da);
-    Vector<2> pointPos(point);
+    Vector<2> pointPos = Vector<2>(da) + translationVector;
     Vector<2> pointPosThisAligned = getAntiRotationMatrix() * (pointPos - thisPos);
     double angleFromAligned = angleFrom - this->getAngle();
     double angleToAligned = angleTo - this->getAngle();

@@ -17,11 +17,10 @@ protected:
     Matrix<2, 2> getRotationMatrix() const;
 
 public:
-    AnisotropicShape2D();
-    AnisotropicShape2D(double angle);
 
     virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) = 0;
     int pointInside(BoundaryConditions *bc, double *da) override;
+    void rotate(double *v) override;
     virtual double getAngle() const;
     virtual void setAngle(double angle);
     virtual std::string toWolfram() const;

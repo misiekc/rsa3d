@@ -9,6 +9,8 @@
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape() : Positioned<SPATIAL_DIMENSION>(){
+	for (unsigned short i = 0; i < ANGULAR_DIMENSION; i++)
+        this->orientation[i] = 0;
 	this->no = 0;
 	this->time = 0.0;
 }
@@ -18,7 +20,6 @@ Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape(const Shape<SPATIAL_DIMENSION
 	std::copy(other.orientation, other.orientation + ANGULAR_DIMENSION, this->orientation);
 	this->no = 0;
 	this->time = 0.0;
-
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>

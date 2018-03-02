@@ -44,7 +44,7 @@ public:
 	// translates the shape by the given vector v
 	void translate(double* v);
 
-	void rotate(double *v);
+	virtual void rotate(double *v);
 
 	// checks if there is overlap with the shape pointed by s.
 	virtual int overlap(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) = 0;

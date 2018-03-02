@@ -51,10 +51,9 @@ namespace as2d_extest
                             std::ostream &_out);
     int main(int argc, char **argv);
 
-    Point randomPoint(const Context &_context, RND &rnd);
-    Point findMaxXRedPoint(const std::vector<Point> &_results);
+    Point find_max_x_red_point(const std::vector<Point> &_results);
 
-    std::unique_ptr<AnisotropicShape2D> generateShape(double angle, const Vector<2> &position);
+    std::unique_ptr<AnisotropicShape2D> generate_shape(double angle, const Vector<2> &position);
 }
 
 #endif //RSA3D_SPHEROCYLINDER2DINTTEST_H
