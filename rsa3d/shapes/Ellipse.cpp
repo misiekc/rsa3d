@@ -251,8 +251,15 @@ std::string Ellipse::toString() {
 }
 
 std::string Ellipse::toPovray() const{
-	//TODO
-	return "";
+	std::string s = "  disc { <0.0, 0.0, 0.0002>, <0.0, 0.0, 1.0>, 1.0 \r\n";
+	s += "	scale <" + std::to_string(this->a) + ", " + std::to_string(this->b) + ", 1.0> \r\n";
+	s += "	rotate <0, 0, " + std::to_string(180*this->getAngle()/M_PI) + "> \r\n";
+	s += "	translate <";
+	for(unsigned short i=0; i<2; i++)
+		s += std::to_string(this->position[i]) + ", ";
+	s += "0.0> \r\n	texture { pigment { color Red } }\r\n  }\r\n";
+
+	return s;
 }
 
 void Ellipse::store(std::ostream &f) const{

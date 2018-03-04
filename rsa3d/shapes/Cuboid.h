@@ -74,7 +74,7 @@ public:
     double getVoxelSize() override;
     int overlap(BoundaryConditions *bc, Shape<3,0> *s) override;
     double getVolume() override;
-    int pointInside(BoundaryConditions *bc, double* da) override;
+    int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) override;
 
     bool pointInsideCuboid(const Vector<3> &vertex);
     void obtainVertices(Vector<3> (&vertices)[8], const Vector<3> &translation);

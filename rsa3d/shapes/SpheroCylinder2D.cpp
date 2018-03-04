@@ -112,12 +112,14 @@ bool SpheroCylinder2D::angleInRange(double angle, double rangeStart, double rang
     return rangeStart < angle && angle <= rangeEnd;
 }
 
+/*
 int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da) {
     double translationArr[2];
     Vector<2> translationVector(bc->getTranslation(translationArr, getPosition(), da));
     Vector<2> point = Vector<2>(da) + translationVector;
     return pointDistance2(point) < 4 * radius * radius;
 }
+*/
 
 std::string SpheroCylinder2D::toString() {
     std::stringstream out;

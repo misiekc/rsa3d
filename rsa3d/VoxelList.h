@@ -71,7 +71,7 @@ public:
 	bool splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc);
 
 	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *getRandomVoxel(RND *rnd);
-	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * getVoxel(double* da);
+	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * getVoxel(double* pos, double *angle);
 	double* getRandomPositionAndOrientation(double *result, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, RND *rnd);
 	double getVoxelSize();
 	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>* get(int i);

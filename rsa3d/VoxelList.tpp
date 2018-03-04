@@ -191,10 +191,10 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::removeTopLevelVoxel(Voxel<
 
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxel(double* da){
-	std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *vTmp = this->voxelNeighbourGrid->getCell(da);
+Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxel(double *pos, double *angle){
+	std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *vTmp = this->voxelNeighbourGrid->getCell(pos);
 	for(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v : *vTmp){
-		if (v->isInside(da, this->voxelSize)){
+		if (v->isInside(pos, this->voxelSize, angle, this->angularSize)){
 			return v;
 		}
 	}
@@ -517,7 +517,7 @@ int VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::length(){
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 double VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelsSurface(){
-	return (this->last+1)*pow(this->voxelSize, SPATIAL_DIMENSION);
+	return (this->last+1)*pow(this->voxelSize, SPATIAL_DIMENSION)*(this->angularSize/(2*M_PI));
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
@@ -529,11 +529,12 @@ std::string VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(){
 		double x1 = da[0], x2 = da[0] + this->voxelSize;
 		double y1 = da[1], y2 = da[1] + this->voxelSize;
 
-		sRes += "  polygon {4, < " + std::to_string(x1) + ", " + std::to_string(y1) + ", 1.0>, "
+		sRes += "  polygon {5, < " + std::to_string(x1) + ", " + std::to_string(y1) + ", 1.0>, "
 				+ "< " + std::to_string(x1) + ", " + std::to_string(y2) + ", 1.0>, "
 				+ "< " + std::to_string(x2) + ", " + std::to_string(y2) + ", 1.0>, "
-				+ "< " + std::to_string(x2) + ", " + std::to_string(y1) + ", 1.0> "
-				+ " texture { finish { ambient 1 diffuse 0 } pigment { color Black} } }\r\n";
+				+ "< " + std::to_string(x2) + ", " + std::to_string(y1) + ", 1.0>, "
+				+ "< " + std::to_string(x1) + ", " + std::to_string(y1) + ", 1.0>"
+				+ " texture { pigment { color Black} } }\r\n";
 /*
 		sRes += "  text { ttf \"timrom.ttf\" \"" + std::to_string(i) + "\" 1, 0 pigment { color White } scale 0.1 translate < ";
 		for(unsigned char j=0; j<this->dimension; j++)

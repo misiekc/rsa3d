@@ -52,11 +52,11 @@ public:
 	// returns a volume of the shape
 	virtual double getVolume() = 0;
 
-	// checks if a given point is within excluded volume for any orientation of a virtual shape
-	virtual int pointInside(BoundaryConditions *bc, double* da) = 0;
-
 	// checks if a given point is within excluded volume
-	virtual int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange);
+	virtual int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) = 0;
+
+	// checks if a given point is within excluded volume for any orientation of a virtual rotationally symmetric shape
+	virtual int pointInside(BoundaryConditions *bc, double* da);
 
 	// moves the shape towards given shape s
 	virtual double minDistance(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s);

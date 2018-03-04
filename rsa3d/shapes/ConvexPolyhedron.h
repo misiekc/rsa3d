@@ -18,7 +18,7 @@
 #include "Cuboid.h"
 
 
-class ConvexPolyhedron : public Shape<3>
+class ConvexPolyhedron : public Shape<3, 0>
 {
 private:
     typedef Vector<3> *                 vptr;
@@ -46,7 +46,7 @@ public:
     double getVoxelSize();
     void translate(double* _v);
     void translate(const Vector<3> & v);
-    int overlap(BoundaryConditions *bc, Shape<3> *s);
+    int overlap(BoundaryConditions *bc, Shape<3, 0> *s);
     double getVolume();
     int pointInside(BoundaryConditions *bc, double* da);
     bool checkSeparatingAxis(const Vector<3> & _axis, const ConvexPolyhedron * _second) const;

@@ -48,8 +48,8 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::rotate(double* v){
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-int Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange){
-	return this->pointInside(bc, position);
+int Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions *bc, double *position){
+	return this->pointInside(bc, position, 0, 2*M_PI);
 }
 
 

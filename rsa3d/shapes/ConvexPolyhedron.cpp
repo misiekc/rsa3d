@@ -18,7 +18,7 @@
 // Constructs polyhedron from given vertices. After construction no faces
 // are defined, so one have to use ConvexPolyhedron::makeFace
 //----------------------------------------------------------------------------
-ConvexPolyhedron::ConvexPolyhedron(const std::vector<Vector<3>> & _vertices) : Shape<3>()
+ConvexPolyhedron::ConvexPolyhedron(const std::vector<Vector<3>> & _vertices) : Shape<3, 0>()
 {
     this->vertices.reserve(_vertices.size());
     
@@ -33,7 +33,7 @@ ConvexPolyhedron::ConvexPolyhedron(const std::vector<Vector<3>> & _vertices) : S
 
 // Cunstructs polyhedron from given cuboid
 //----------------------------------------------------------------------------
-ConvexPolyhedron::ConvexPolyhedron(Cuboid * _cube) : Shape<3>()
+ConvexPolyhedron::ConvexPolyhedron(Cuboid * _cube) : Shape<3, 0>()
 {
     Vector<3> pos(_cube->getPosition()); 
     Matrix<3, 3> orientation = _cube->getOrientation();
@@ -114,7 +114,7 @@ double ConvexPolyhedron::getVoxelSize()
 //----------------------------------------------------------------------------
 void ConvexPolyhedron::translate(double* _v)
 {
-    Shape<3>::translate(_v);
+    Shape<3, 0>::translate(_v);
     Vector<3> translation(_v);
     for (auto vert : this->vertices)
         *vert += translation;
@@ -128,7 +128,7 @@ void ConvexPolyhedron::translate(const Vector<3> & _v)
     double v_arr[3];
     for (size_t i = 0; i < 3; i++)
         v_arr[i] = _v[i];
-    Shape<3>::translate(v_arr);
+    Shape<3, 0>::translate(v_arr);
     for (auto vert : this->vertices)
         *vert += _v;
 }
@@ -136,7 +136,7 @@ void ConvexPolyhedron::translate(const Vector<3> & _v)
     
 // Checks whether polyhedron overlaps with another one
 //----------------------------------------------------------------------------
-int ConvexPolyhedron::overlap(BoundaryConditions *bc, Shape<3> *s)
+int ConvexPolyhedron::overlap(BoundaryConditions *bc, Shape<3, 0> *s)
 {
     ConvexPolyhedron * sPolyh = (ConvexPolyhedron *)s;
     double trans_arr[3];

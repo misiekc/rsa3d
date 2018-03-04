@@ -106,7 +106,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::modifiedRSA(Shape<S
 				spos[i] += (d-mindist)*da[i];
 			}
 			this->surface->checkPosition(spos);
-			v = this->voxels->getVoxel(spos);
+			v = this->voxels->getVoxel(spos, s->getOrientation());
 			if (v==NULL){
 				std::cout << "Problem: PackingGenerator - voxel not found: " <<
 				" (" << spos[0] << ", " << spos[1] << ")" << std::endl;
@@ -115,9 +115,6 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::modifiedRSA(Shape<S
 		}
 	}
 }
-
-
-
 
 #ifdef _OPENMP
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
@@ -230,8 +227,8 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 					}
 
 
-					if (aVoxels[i]!=this->voxels->getVoxel(aVoxels[i]->getPosition())){
-						Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v1 = this->voxels->getVoxel(aVoxels[i]->getPosition());
+					if (aVoxels[i]!=this->voxels->getVoxel(aVoxels[i]->getPosition(), aVoxels[i]->getOrientation())){
+						Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v1 = this->voxels->getVoxel(aVoxels[i]->getPosition(), aVoxels[i]->getOrientation());
 						std::cout << "Problem: PackingGenerator - inconsistent voxels positions: " <<
 								" (" << aVoxels[i]->getPosition()[0] << ", " << aVoxels[i]->getPosition()[1] << ")" <<
 								", (" << v1->getPosition()[0] << ", " << v1->getPosition()[1] << ")" <<
@@ -358,8 +355,8 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 			}
 
 
-			if (v!=this->voxels->getVoxel(v->getPosition())){
-				Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v1 = this->voxels->getVoxel(v->getPosition());
+			if (v!=this->voxels->getVoxel(v->getPosition(), v->getOrientation())){
+				Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v1 = this->voxels->getVoxel(v->getPosition(), v->getOrientation());
 				std::cout << "Problem: PackingGenerator - inconsistent voxels positions: " <<
 						" (" << v->getPosition()[0] << ", " << v->getPosition()[1] << ")" <<
 						", (" << v1->getPosition()[0] << ", " << v1->getPosition()[1] << ")" <<
@@ -441,7 +438,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(std::vecto
 	file << "light_source { < 1000.0, 1000.0, 1000.0> color White shadowless parallel point_at <" << size / 2 << ", " << size / 2 << ",  0>}" << std::endl;
 	file << "#declare layer=union{" << std::endl;
 
-	file << "  polygon {4, <0, 0, 0.0>, <0, " << size << ", 0.0>, <" << size << ", " << size << ", 0.0>, <" << size << ", 0, 0.0>  texture { finish { ambient 1 diffuse 0 } pigment { color Gray} } }" << std::endl;
+	file << "  polygon {5, <0.0, 0.0, 0.0>, <0.0, " << size << ", 0.0>, <" << size << ", " << size << ", 0.0>, <" << size << ", 0.0, 0.0>, <0.0, 0.0, 0.0>  texture { finish { ambient 1 diffuse 0 } pigment { color Gray} } }" << std::endl;
 //	file << "  text { ttf \"timrom.ttf\" \"0\" 1, 0 pigment { color Black } scale 1.0 translate < 0, 0, 0.0002> }" << std::endl;
 
 	for (Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s : *packing) {

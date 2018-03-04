@@ -5,10 +5,10 @@ from = 0
 collectors = 1
 # maxTime = 100000.0
 # maxTime = std::numeric_limits<double>::infinity()
-maxTime = 1000
+# maxTime = 1000
 analyze = 100
 split = 500
-surfaceVolume = 10.0
+surfaceVolume = 25.0
 storePackings = true
 
 #modifiedRSA = true

@@ -201,14 +201,14 @@ double Cuboid::getVolume()
 // Checks whether the point with coordinates da lies inside excluded volume.
 // It is an interior of a set of point which distanse from
 //----------------------------------------------------------------------------
-int Cuboid::pointInside(BoundaryConditions *bc, double* da)
+int Cuboid::pointInside(BoundaryConditions *bc, double* pos, double *orientation, double orientationRange)
 {
     // Prepare matrices of translations for operations on the point
     Vector<3> cuboidTranslation(this->position);
-    Vector<3> pointTranslation(da);
+    Vector<3> pointTranslation(pos);
 
     // Transform point coordinates to Cuboid coordinate system
-    cuboidTranslation += Vector<3>(bc->getTranslation(auxDoubleArray, this->position, da));
+    cuboidTranslation += Vector<3>(bc->getTranslation(auxDoubleArray, this->position, pos));
     pointTranslation = this->orientation.transpose() * (pointTranslation - cuboidTranslation);
 
     // Save absolute values of point coords

@@ -4,14 +4,8 @@
 
 #include "AnisotropicShape2D.h"
 
-/**
- * Lazy pointInside - it uses angle-range pointInside with full angle
- * @param bc BoundaryConditions used
- * @param da point to check
- * @return 0 if not inside
- */
-int AnisotropicShape2D::pointInside(BoundaryConditions *bc, double *da) {
-    return pointInside(bc, da, 0, 2 * M_PI);
+int AnisotropicShape2D::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange){
+	return this->pointInside(bc, position, orientation[0], orientation[0]+orientationRange);
 }
 
 double AnisotropicShape2D::getAngle() const {
