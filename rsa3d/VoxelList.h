@@ -78,6 +78,7 @@ public:
 	int length();
 	double getVoxelsSurface();
 	std::string toPovray();
+	std::string toWolfram();
 };
 
 #include "VoxelList.tpp"

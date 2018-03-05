@@ -67,6 +67,9 @@ public:
 	// returns povray string representation of the shape
 	virtual std::string toPovray() const;
 
+	// returns Wolfram Mathematica string representation of the shape
+	virtual std::string toWolfram() const;
+
 	// serialize shape
 	virtual void store(std::ostream &f) const;
 

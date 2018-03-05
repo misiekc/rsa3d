@@ -157,13 +157,11 @@ int main(int argc, char **argv) {
 		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(file);
 		PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>::toPovray(packing, params.surfaceSize, NULL, file + ".pov");
 		delete packing;
-/*
 	} else if (strcmp(argv[1], "wolfram")==0) {
 		std::string file(argv[3]);
 		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(file);
 		PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>::toWolfram(packing, params.surfaceSize, NULL, file + ".pov");
 		delete packing;
-*/
 	}else{
 		std::cerr << "Unknown mode: " << argv[1] << std::endl;
 	}

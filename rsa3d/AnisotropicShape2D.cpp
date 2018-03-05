@@ -40,7 +40,3 @@ void AnisotropicShape2D::normalizeAngleRange(double &angleFrom, double &angleTo,
         angleTo -= interval;
     }
 }
-
-void AnisotropicShape2D::rotate(double *v) {
-    this->setAngle(this->getAngle() + v[0]);
-}

@@ -342,6 +342,8 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 			}
 			if (doCreate){
 				int k = 0;
+				for(ushort j=0; j < ANGULAR_DIMENSION; j++){
+					inangle[j] = 0;
 				do{
 					for(unsigned short j=0; j<ANGULAR_DIMENSION; j++){
 						orientation[j] = vangle[j] + inangle[j]*this->angularSize;
@@ -434,7 +436,6 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 
 		double* vangle = v->getOrientation();
 		for(ushort j=0; j < ANGULAR_DIMENSION; j++){
-			inangle[j] = 0;
 			orientation[j] = vangle[j];
 		}
 
@@ -447,6 +448,9 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 					doCreate = false;
 			}
 			if (doCreate){
+				for(ushort j=0; j < ANGULAR_DIMENSION; j++){
+					inangle[j] = 0;
+				}
 				do{
 					for(unsigned short j=0; j<ANGULAR_DIMENSION; j++){
 						orientation[j] = vangle[j] + inangle[j]*this->angularSize;
@@ -543,4 +547,27 @@ std::string VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(){
 */
 	}
 	return sRes;
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+std::string VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram(){
+	std::stringstream out;
+
+	for(int i=0; i<=this->last; i++){
+		double *da = this->voxels[i]->getPosition();
+		double x1 = da[0], x2 = da[0] + this->voxelSize;
+		double y1 = da[1], y2 = da[1] + this->voxelSize;
+
+		out << "Polygon[{ {" << x1 << ", " << y1 << "}, "
+				<< "{" << x1 << ", " << y2 << "}, "
+				<< "{" << x2 << ", " << y2 << "}, "
+				<< "{" << x2 << ", " << y1 << "} }]";
+		if (i!=this->last)
+			out << ", ";
+		out << std::endl;
+		if (ANGULAR_DIMENSION > 0){
+			out << "(* angles: [ " << this->voxels[i]->getOrientation()[0] << ", " << (this->voxels[i]->getOrientation()[0] + this->angularSize) << ") *)" << std::endl;
+		}
+	}
+	return out.str();
 }

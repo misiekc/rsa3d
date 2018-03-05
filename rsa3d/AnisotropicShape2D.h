@@ -19,7 +19,6 @@ protected:
 public:
     virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) = 0;
 	virtual int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange);
-    void rotate(double *v) override;
     virtual double getAngle() const;
     virtual void setAngle(double angle);
     virtual std::string toWolfram() const;

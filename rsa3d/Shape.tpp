@@ -69,26 +69,35 @@ std::string Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray() const{
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+std::string Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram() const{
+	return "";
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::store(std::ostream &f) const{
 	unsigned short sd = SPATIAL_DIMENSION;
 	unsigned short ad = ANGULAR_DIMENSION;
 	f.write((char *)(&sd), sizeof(unsigned char));
-	f.write((char *)(&ad), sizeof(unsigned char));
+	if (ad>0)
+		f.write((char *)(&ad), sizeof(unsigned char));
 	f.write((char *)(&this->no), sizeof(int));
 	f.write((char *)(&this->time), sizeof(double));
 	f.write((char *)(this->position), SPATIAL_DIMENSION*sizeof(double));
-	f.write((char *)(this->orientation), ANGULAR_DIMENSION*sizeof(double));
+	if (ad>0)
+		f.write((char *)(this->orientation), ANGULAR_DIMENSION*sizeof(double));
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
-	unsigned char sd, ad;
+	unsigned char sd = SPATIAL_DIMENSION;
+	unsigned char ad = ANGULAR_DIMENSION;
 
 	f.read((char *)(&sd), sizeof(unsigned char));
 	if (f.gcount()==0){ // end of file
 		return;
 	}
-	f.read((char *)(&ad), sizeof(unsigned char));
+	if (ad > 0)
+		f.read((char *)(&ad), sizeof(unsigned char));
 
 	if (sd!=SPATIAL_DIMENSION || ad!=ANGULAR_DIMENSION){
 		std::cout << "[ERROR] cannot restore: incompatible dimensions: read " << f.gcount() << " bytes." << std::endl;
@@ -97,7 +106,8 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
 	f.read((char *)(&this->no), sizeof(int));
 	f.read((char *)(&this->time), sizeof(double));
 	f.read((char *)(this->position), sd*sizeof(double));
-	f.read((char *)(this->orientation), ad*sizeof(double));
+	if (ad>0)
+		f.read((char *)(this->orientation), ad*sizeof(double));
 }
 
 /*
