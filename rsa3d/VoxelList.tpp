@@ -342,7 +342,7 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 			}
 			if (doCreate){
 				int k = 0;
-				for(ushort j=0; j < ANGULAR_DIMENSION; j++){
+				for(ushort j=0; j < ANGULAR_DIMENSION; j++)
 					inangle[j] = 0;
 				do{
 					for(unsigned short j=0; j<ANGULAR_DIMENSION; j++){

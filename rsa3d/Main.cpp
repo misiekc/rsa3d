@@ -5,6 +5,7 @@
 #include "tests/CuboidPointInsideTest.h"
 #include "tests/CuboidIntTest.h"
 #include "tests/AnisotropicShape2DExclusionTest.h"
+#include "tests/VectorSpeedTest.h"
 
 #include <unistd.h>
 #include <sys/wait.h>
@@ -137,6 +138,8 @@ int main(int argc, char **argv) {
 		return cube_pitest::main(argc, argv);
     else if (strcmp(argv[1], "as2d_extest") == 0)
         return as2d_extest::main(argc, argv);
+    else if (strcmp(argv[1], "vec_speedtest") == 0)
+        return vec_speedtest::main(argc, argv);
 	
     // Modes with standard environment
     if (argc < 3)
