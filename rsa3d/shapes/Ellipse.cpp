@@ -26,7 +26,7 @@ void Ellipse::calculateU(){
 Ellipse::Ellipse() : AnisotropicShape2D(){
 	this->a = Ellipse::longSemiAxis;
 	this->b = Ellipse::shortSemiAxis;
-	this->setAngle(0.0);
+	this->setAngle(0);
 	//this->calculateU();
 }
 
@@ -41,10 +41,6 @@ Ellipse & Ellipse::operator = (const Ellipse & el){
 	this->a = el.a;
 	this->b = el.b;
 	this->setAngle(el.getAngle());
-	/*for(unsigned char i=0; i<2; i++){
-		this->u[i]  = el.u[i];
-		this->uT[i] = el.uT[i];
-	}*/
 	return *this;
 }
 
@@ -65,6 +61,16 @@ double Ellipse::calculateF(double* r, double g){
 	double d2 = (r[0]*this->uT[0] + r[1]*this->uT[1]) /this->b;
 
 	return 1 + g - d1*d1 - d2*d2;
+}
+
+void Ellipse::setAngle(double angle){
+	this->orientation[0] = angle;
+	this->calculateU();
+}
+
+void Ellipse::rotate(double *v){
+	Shape::rotate(v);
+	this->calculateU();
 }
 
 int Ellipse::overlap(BoundaryConditions *bc, Shape<2, 1> *s) {
@@ -215,11 +221,6 @@ bool Ellipse::circleCollision(const Vector<2> &p, double tMin, double tMax) cons
 		return false;
 
 	return circleCollision(p, tMin, (tMin + tMax) / 2) || circleCollision(p, (tMin + tMax) / 2, tMax);
-}
-
-void Ellipse::setAngle(double d) {
-	AnisotropicShape2D::setAngle(d);
-	this->calculateU();
 }
 
 std::string Ellipse::toWolfram() const {

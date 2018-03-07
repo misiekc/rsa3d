@@ -29,29 +29,23 @@ private:
 
 
 public:
+	static void initClass(const std::string &args);
+	static Shape<2, 1> * create(RND *rnd);
+
 	Ellipse();
 	Ellipse(const Ellipse &other);
 	Ellipse & operator = (const Ellipse & el);
 	~Ellipse() override = default;
 
-	static void initClass(const std::string &args);
-	static Shape<2, 1> * create(RND *rnd);
+
+    void setAngle(double angle);
+
+	void rotate(double *v) override;
 
 	int overlap(BoundaryConditions *bc, Shape<2, 1> *s) override;
 	double getVolume() override;
 	int pointInside(BoundaryConditions *bc, double* da) override;
 	int pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) override;
-	double getNeighbourListCellSize() override;
-	double getVoxelSize() override;
-
-    void setAngle(double angle) override;
-    std::string toWolfram() const override;
-
-	std::string toPovray() const override;
-	void store(std::ostream &f) const override;
-	void restore(std::istream &f) override;
-
-    std::string toString() override;
 
 	bool pointInsideUnrotated(const Vector<2> &p, double angleFrom, double angleTo) const;
 
@@ -62,6 +56,19 @@ public:
 	bool circleCollision(const Vector<2> &p, double tMin, double tMax) const;
 
 	int pointInsideSpecialArea(BoundaryConditions *bc, double *other, double angleFrom, double angleTo);
+
+	double getNeighbourListCellSize() override;
+	double getVoxelSize() override;
+
+
+    std::string toWolfram() const override;
+	std::string toPovray() const override;
+    std::string toString() override;
+
+    void store(std::ostream &f) const override;
+	void restore(std::istream &f) override;
+
+
 };
 
 #endif /* SHAPES_ELLIPSE_H_ */

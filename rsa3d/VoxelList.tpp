@@ -344,6 +344,7 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 				int k = 0;
 				for(ushort j=0; j < ANGULAR_DIMENSION; j++){
 					inangle[j] = 0;
+				}
 				do{
 					for(unsigned short j=0; j<ANGULAR_DIMENSION; j++){
 						orientation[j] = vangle[j] + inangle[j]*this->angularSize;
@@ -492,16 +493,14 @@ Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * VoxelList<SPATIAL_DIMENSION, ANGUL
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double * VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getRandomPositionAndOrientation(double *result, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, RND *rnd){
+void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getRandomPositionAndOrientation(double *position, double *orientation, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, RND *rnd){
 	double *vpos = v->getPosition();
 	double *vangle = v->getOrientation();
 
 	for (ushort i=0; i < SPATIAL_DIMENSION; i++)
-		result[i] = vpos[i] + rnd->nextValue(this->spatialDistribution);
-	for (ushort i=SPATIAL_DIMENSION; i < SPATIAL_DIMENSION + ANGULAR_DIMENSION; i++)
-		result[i] = vangle[i] + rnd->nextValue(this->angularDistribution);
-
-	return result;
+		position[i] = vpos[i] + rnd->nextValue(this->spatialDistribution);
+	for (ushort i=0; i < ANGULAR_DIMENSION; i++)
+		orientation[i] = vangle[i] + rnd->nextValue(this->angularDistribution);
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>

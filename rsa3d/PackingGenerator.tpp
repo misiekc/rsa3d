@@ -49,6 +49,7 @@ double PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getFactor() {
 	return this->surface->getArea() / this->voxels->getVoxelsSurface();
 }
 
+#ifdef _OPENMP
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels() {
 
@@ -56,6 +57,36 @@ int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels() {
 
 	int begin = this->voxels->length();
 	int timestamp = this->packing.size();
+	std::vector< Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>* > toRemove;
+
+	#pragma omp parallel for
+	for (int i = 0; i < this->voxels->length(); i++) {
+		Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = this->voxels->get(i);
+		if (this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, timestamp)) {
+			#pragma omp critical
+			toRemove.push_back(v);
+		}
+	}
+
+	for(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v: toRemove){
+		this->voxels->remove(v);
+	}
+
+	std::cout << "[" << this->seed << " Surface::analyzeVoxels] " << this->voxels->length() << " voxels remained, factor = " << this->getFactor() << std::endl;
+
+	return begin - this->voxels->length();
+}
+
+#else
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels() {
+
+	std::cout << "[" << this->seed << " PackingGenerator::analyzeVoxels] " << this->voxels->length() << " voxels, " << this->packing.size() << " shapes, factor = " << this->getFactor() << std::endl;
+
+	int begin = this->voxels->length();
+	int timestamp = this->packing.size();
+
 	for (int i = 0; i < this->voxels->length(); i++) {
 		Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = this->voxels->get(i);
 		if (this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, timestamp)) {
@@ -68,6 +99,8 @@ int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels() {
 
 	return begin - this->voxels->length();
 }
+
+#endif
 
 // analyzes all voxels inside a region around v
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
@@ -182,13 +215,14 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 				int tid = omp_get_thread_num();
 
 				sVirtual[i] = ShapeFactory::createShape(aRND[tid]);
-				double da[(SPATIAL_DIMENSION + ANGULAR_DIMENSION)];
+				double pos[SPATIAL_DIMENSION];
+				double angle[ANGULAR_DIMENSION];
 				do{
 					aVoxels[i] = this->voxels->getRandomVoxel(aRND[tid]);
-					this->voxels->getRandomPositionAndOrientation(da, aVoxels[i], aRND[tid]);
-				}while(!this->surface->isInside(da));
-				sVirtual[i]->translate(da);
-				sVirtual[i]->rotate(da+SPATIAL_DIMENSION);
+					this->voxels->getRandomPositionAndOrientation(pos, angle, aVoxels[i], aRND[tid]);
+				}while(!this->surface->isInside(pos));
+				sVirtual[i]->translate(pos);
+				sVirtual[i]->rotate(angle);
 				sOverlapped[i] = this->surface->check(sVirtual[i]);
 				if (sOverlapped[i]!=NULL){
 					delete sVirtual[i];
@@ -335,13 +369,14 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 		s = ShapeFactory::createShape(&rnd);
 
 		Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v;
-		double da[(SPATIAL_DIMENSION + ANGULAR_DIMENSION)];
+		double pos[SPATIAL_DIMENSION];
+		double angle[ANGULAR_DIMENSION];
 		do{
 			v = this->voxels->getRandomVoxel(&rnd);
-			this->voxels->getRandomPositionAndOrientation(da, v, &rnd);
-		}while(!this->surface->isInside(da));
-		s->translate(da);
-		s->rotate(da+SPATIAL_DIMENSION);
+			this->voxels->getRandomPositionAndOrientation(pos, angle, v, &rnd);
+		}while(!this->surface->isInside(pos));
+		s->translate(pos);
+		s->rotate(angle);
 
 		Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *sTmp = this->surface->check(s);
 		if (sTmp==NULL) { // if no overlap detected

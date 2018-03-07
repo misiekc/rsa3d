@@ -72,7 +72,7 @@ public:
 
 	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *getRandomVoxel(RND *rnd);
 	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * getVoxel(double* pos, double *angle);
-	double* getRandomPositionAndOrientation(double *result, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, RND *rnd);
+	void getRandomPositionAndOrientation(double *position, double *orientation, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, RND *rnd);
 	double getVoxelSize();
 	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>* get(int i);
 	int length();
