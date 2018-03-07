@@ -67,7 +67,8 @@ OBJS = rsa3d/AnisotropicShape2D \
        rsa3d/tests/CuboidIntTest \
        rsa3d/tests/CuboidPointInsideTest \
        rsa3d/tests/CuboidSpeedTest \
-       rsa3d/tests/TriangleIntTest
+       rsa3d/tests/TriangleIntTest \
+       rsa3d/tests/VectorSpeedTest
        
 # Source files list (withous extensions) for statistics lib
 OBJS_STAT = statistics/ASFRegression \
