@@ -443,7 +443,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 					this->analyzeVoxels();
 				}
 //				this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
-//				this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
+				this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
 			}
 			delete s;
 		} // else
