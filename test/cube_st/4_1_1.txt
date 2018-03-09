@@ -1,0 +1,5 @@
+cuboid_size = 4 1 1
+pairs = 100000
+repeats = 10
+ball_radia = 6 4.5 3.3 2.8 2.2 1.80 1.55 1.35 1.21 1.07 0.90 0.74 0.55
+strategies = sat
