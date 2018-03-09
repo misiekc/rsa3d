@@ -1,0 +1,11 @@
+particle = SpheroCylinder2D
+attr = 2.5
+mode = overlap
+first_x = 30
+first_y = -15.6
+first_angle = 104
+second_angle = 165
+box_width = 4
+box_height = 4
+points = 5000
+append = true
