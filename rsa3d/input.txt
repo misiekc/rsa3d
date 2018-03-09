@@ -1,20 +1,21 @@
 # maxTriesWithoutSuccess = std::numeric_limits<int>::max()
-# maxVoxels = 40000000
+maxVoxels = 40000000
 minDx = 0.0
 from = 0
 collectors = 1
 # maxTime = 100000.0
 # maxTime = std::numeric_limits<double>::infinity()
 # maxTime = 1000
-analyze = 100
-split = 500
-surfaceVolume = 25.0
+analyze = 200
+split = 1000
+surfaceVolume = 10000.0
 storePackings = true
 
 #modifiedRSA = true
-#thresholdDistance = 100.0
+#thresholdDistance = 25.0
 boundaryConditions = periodic
 
 particleType = Ellipse
 particleAttributes = 2
 #generatorProcesses = 1
+#ompThreads = max

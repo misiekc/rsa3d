@@ -9,6 +9,9 @@
 #include "Utils.h"
 #include <iostream>
 #include <fstream>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 Parameters::Parameters() {
 //	dimension = 2;
@@ -30,6 +33,11 @@ Parameters::Parameters() {
 	particleType = "Sphere";
 	particleAttributes = "2";
 	generatorProcesses = 1;
+#ifdef _OPENMP
+	ompThreads =  omp_get_max_threads();
+#else
+	ompThreads = 1;
+#endif
 
 }
 
@@ -69,8 +77,14 @@ Parameters::Parameters(const std::string& sFile) : Parameters(){
 		else if (sKey.compare("from")==0) 						this->from = std::stoi(sValue);
 		else if (sKey.compare("collectors")==0) 				this->collectors = std::stoi(sValue);
 		else if (sKey.compare("generatorProcesses")==0) 		this->generatorProcesses = std::stoi(sValue);
+		else if (sKey.compare("ompThreads")==0) 				this->ompThreads = std::stoi(sValue);
 	}
 	file.close();
+
+	#ifdef _OPENMP
+	omp_set_num_threads(this->ompThreads);
+	#endif
+
 }
 
 Parameters::~Parameters() {

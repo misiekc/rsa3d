@@ -23,7 +23,7 @@ public:
     virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) = 0;
 	virtual int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange);
 
-    void normalizeAngleRange(double angleFrom, double angleTo, double interval) const;
+    void normalizeAngleRange(double *angleFrom, double *angleTo, double interval) const;
 };
 
 

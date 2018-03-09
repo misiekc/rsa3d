@@ -38,6 +38,7 @@ public:
 	std::string particleAttributes;
 
 	int generatorProcesses = 1;
+	int ompThreads = 1;
 
 
 	Parameters();

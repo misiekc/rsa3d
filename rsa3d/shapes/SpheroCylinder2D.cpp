@@ -73,7 +73,7 @@ double SpheroCylinder2D::pointDistance2(const Vector<2> &pos, double angle, cons
 }
 
 int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) {
-    this->normalizeAngleRange(angleFrom, angleTo, M_PI);
+    this->normalizeAngleRange(&angleFrom, &angleTo, M_PI);
 
     // If angleTo not in normal range (see normalizeAngleRange), divide it and check separately
     if (angleTo > this->getAngle() + M_PI) {

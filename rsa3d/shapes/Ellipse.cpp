@@ -64,12 +64,16 @@ double Ellipse::calculateF(double* r, double g){
 }
 
 void Ellipse::setAngle(double angle){
+	if (angle>M_PI)
+		angle -= M_PI;
 	this->orientation[0] = angle;
 	this->calculateU();
 }
 
 void Ellipse::rotate(double *v){
 	Shape::rotate(v);
+	if (this->orientation[0] > M_PI)
+		this->orientation[0] -= M_PI;
 	this->calculateU();
 }
 
@@ -131,10 +135,12 @@ int Ellipse::pointInside(BoundaryConditions *bc, double *other, double angleFrom
 }
 
 int Ellipse::pointInsideSpecialArea(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) {
-	this->normalizeAngleRange(angleFrom, angleTo, M_PI);
 
-    // If angleTo not in normal range (see normalizeAngleRange), divide it and check separately
-    if (angleTo > this->getAngle() + M_PI) {
+	this->normalizeAngleRange(&angleFrom, &angleTo, M_PI);
+	// now angleFrom is in [this->getAngle(), this->getAngle() + M_PI)
+
+    // If angleTo is not in not in [this->getAngle(), this->getAngle() + M_PI), then two checks are made separately
+	if (angleTo > this->getAngle() + M_PI) {
         return pointInsideSpecialArea(bc, other, angleFrom, this->getAngle() + M_PI - EPSILON) &&
                pointInsideSpecialArea(bc, other, this->getAngle(), angleTo - M_PI);
     }

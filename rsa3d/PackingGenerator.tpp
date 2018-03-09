@@ -338,7 +338,9 @@ template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 
 	std::cout << "[" << this->seed << " PackingGenerator::createPacking] started" << std::endl;
-
+	#ifdef _OPENMP
+	std::cout << "[" << this->seed << " PackingGenerator::createPacking] using up to " << omp_get_max_threads() << " concurent treads" << std::endl;
+	#endif
 	int missCounter = 0;
 	RND rnd(this->seed);
 	ShapeFactory::initShapeClass(this->params->particleType, this->params->particleAttributes);
@@ -443,7 +445,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 					this->analyzeVoxels();
 				}
 //				this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
-				this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
+//				this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
 			}
 			delete s;
 		} // else
