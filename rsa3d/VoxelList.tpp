@@ -520,7 +520,7 @@ int VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::length(){
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 double VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelsSurface(){
-	return (this->last+1)*pow(this->voxelSize, SPATIAL_DIMENSION)*(this->angularSize/(2*M_PI));
+	return (this->last+1)*pow(this->voxelSize, SPATIAL_DIMENSION)*pow((this->angularSize/(2*M_PI)), ANGULAR_DIMENSION);
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
