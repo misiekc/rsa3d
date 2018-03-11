@@ -88,10 +88,10 @@ SUBDIRS = rsa3d/analizator/ \
           statistics/
 
 # OBJ files folder
-OBJDIR = build/obj
+OBJDIR = make-build/obj
 
 # D files folder
-DEPSDIR = build/deps
+DEPSDIR = make-build/deps
 
 ###################################
 # MAKEFILE INTERNAL CONFIGURATION #
