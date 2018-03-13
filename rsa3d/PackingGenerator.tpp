@@ -153,9 +153,14 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::modifiedRSA(Shape<S
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 
+	int maxthreads = omp_get_max_threads();
+
 	std::cout << "[" << this->seed << " PackingGenerator::createPacking] using up to " << omp_get_max_threads() << " concurrent treads" << std::endl;
 
+	int checkedAgain = 0;
+	int added = 0;
 	int missCounter = 0;
+
 	RND rnd(this->seed);
 	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s = ShapeFactory::createShape(&rnd);
 
@@ -177,71 +182,52 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 	double t = 0;
 	int tmpSplit = this->params->split;
 //	int snapshotCounter = 0;
-	RND **aRND = NULL;
-	int aRNDSize = 0;
+	RND **aRND = new RND*[maxthreads];
+	for(int i=0; i<maxthreads; i++){
+		aRND[i] = new RND((int)(1000*rnd.nextValue()));
+	}
+
 	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> **sOverlapped = new Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *[tmpSplit];
 	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> **sVirtual = new Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *[tmpSplit];
-	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> **aVoxels = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *[tmpSplit];
+	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *vTmp;
 
 	while (!this->isSaturated() && t<params->maxTime && missCounter<params->maxTriesWithoutSuccess) {
 
-		#pragma omp parallel
-		{
+		std::cout << "[" << this->seed << " PackingGenerator::createPacking] parallel looping..." << std::flush;
 
-			#pragma omp master
-			{
-//				std::cout << "[master] init aRND[" << omp_get_num_threads() << "]" << std::endl << std::flush;
+		#pragma omp parallel for
+		for(int i = 0; i<tmpSplit; i++){
+			int tid = omp_get_thread_num();
 
-				if (aRND==NULL){ // if there are no random number generators
-					aRND = new RND*[omp_get_num_threads()];
-					for(int i=0; i<omp_get_num_threads(); i++){
-						aRND[i] = new RND((int)(1000*rnd.nextValue()));
-					}
-				}else if(omp_get_num_threads() > aRNDSize){ // if the number of allocated random number generators is smaller than the number of threads
-					for(int i=aRNDSize; i<omp_get_num_threads(); i++){
-						aRND[i] = new RND((int)(1000*rnd.nextValue()));
-					}
+			sVirtual[i] = ShapeFactory::createShape(aRND[tid]);
+			double pos[SPATIAL_DIMENSION];
+			double angle[ANGULAR_DIMENSION];
+			do{
+				vTmp = this->voxels->getRandomVoxel(aRND[tid]);
+				this->voxels->getRandomPositionAndOrientation(pos, angle, vTmp, aRND[tid]);
+			}while(!this->surface->isInside(pos));
+			sVirtual[i]->translate(pos);
+			sVirtual[i]->rotate(angle);
+			sOverlapped[i] = this->surface->check(sVirtual[i]);
+			if (sOverlapped[i]!=NULL){
+				delete sVirtual[i];
+				sVirtual[i] = NULL;
+				vTmp->miss();
+				if((vTmp->getMissCounter() > 0 &&  vTmp->getMissCounter() % this->params->analyze == 0) && this->voxels->analyzeVoxel(vTmp, sOverlapped[i], this->surface)){
+					#pragma omp critical
+					this->voxels->remove(vTmp);
 				}
-				aRNDSize = omp_get_num_threads();
+
 			}
+		} // parallel for
 
-			#pragma omp barrier
 
-//			#pragma omp critical
-//			std::cout << "[" << omp_get_thread_num() << "] looping" << std::endl << std::flush;
+		std::cout << "end, sequential processing..." << std::flush;
 
-			#pragma omp for
-			for(int i = 0; i<tmpSplit; i++){
-				int tid = omp_get_thread_num();
+		checkedAgain = 0;
+		added = 0;
 
-				sVirtual[i] = ShapeFactory::createShape(aRND[tid]);
-				double pos[SPATIAL_DIMENSION];
-				double angle[ANGULAR_DIMENSION];
-				do{
-					aVoxels[i] = this->voxels->getRandomVoxel(aRND[tid]);
-					this->voxels->getRandomPositionAndOrientation(pos, angle, aVoxels[i], aRND[tid]);
-				}while(!this->surface->isInside(pos));
-				sVirtual[i]->translate(pos);
-				sVirtual[i]->rotate(angle);
-				sOverlapped[i] = this->surface->check(sVirtual[i]);
-				if (sOverlapped[i]!=NULL){
-					delete sVirtual[i];
-					aVoxels[i]->miss();
 
-					#pragma omp atomic
-					missCounter++;
-
-					if(this->getFactor()>FACTOR_LIMIT && this->voxels->analyzeVoxel(aVoxels[i], sOverlapped[i], this->surface)){
-						#pragma omp critical
-						this->voxels->remove(aVoxels[i]);
-					}
-				}
-			}
-
-//			#pragma omp critical
-//			std::cout << "[" << omp_get_thread_num() << "] end looping" << std::endl << std::flush;
-
-		}// parallel
 
 		// processing potentially non overlaping shapes
 		for(int i=0; i<tmpSplit; i++){
@@ -249,48 +235,62 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 			t += this->getFactor() * dt;
 
 			if (sOverlapped[i]==NULL){
-				if(this->surface->check(sVirtual[i])==NULL){ // next checking of overlapping
+				vTmp = this->voxels->getVoxel(sVirtual[i]->getPosition(), sVirtual[i]->getOrientation());
+				if (vTmp != NULL){ // if voxel does not exist it is in an exclusion zone, thus the vistrual shape cannot be added
+					checkedAgain++;
+					sOverlapped[i] = this->surface->check(sVirtual[i]); // checking overlapping again
 
-					l++;
-					sVirtual[i]->no = l;
-					sVirtual[i]->time = t;
+					if(sOverlapped[i]==NULL){ // if non overlapping
+
+						added++;
+						l++;
+						sVirtual[i]->no = l;
+						sVirtual[i]->time = t;
 
 
-					if (this->params->modifiedRSA){
-						this->modifiedRSA(sVirtual[i], aVoxels[i]);
-					}
+						if (this->params->modifiedRSA){
+							this->modifiedRSA(sVirtual[i], vTmp);
+						}
 
 
-					if (aVoxels[i]!=this->voxels->getVoxel(aVoxels[i]->getPosition(), aVoxels[i]->getOrientation())){
-						Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v1 = this->voxels->getVoxel(aVoxels[i]->getPosition(), aVoxels[i]->getOrientation());
-						std::cout << "Problem: PackingGenerator - inconsistent voxels positions: " <<
-								" (" << aVoxels[i]->getPosition()[0] << ", " << aVoxels[i]->getPosition()[1] << ")" <<
-								", (" << v1->getPosition()[0] << ", " << v1->getPosition()[1] << ")" <<
+						if (vTmp!=this->voxels->getVoxel(vTmp->getPosition(), vTmp->getOrientation())){
+							Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = this->voxels->getVoxel(vTmp->getPosition(), vTmp->getOrientation());
+							std::cout << "Problem: PackingGenerator - inconsistent voxels positions: " <<
+								" (" << vTmp->getPosition()[0] << ", " << vTmp->getPosition()[1] << ")" <<
+								", (" << v->getPosition()[0] << ", " << v->getPosition()[1] << ")" <<
 								std::endl;
-					}
+						}
 
-					this->surface->add(sVirtual[i]);
-					this->packing.push_back(sVirtual[i]);
+						this->surface->add(sVirtual[i]);
+						this->packing.push_back(sVirtual[i]);
 
-					if(this->getFactor()>FACTOR_LIMIT){
-						this->analyzeRegion(aVoxels[i]);
-					}else{
-						this->voxels->remove(aVoxels[i]);
-						this->voxels->removeTopLevelVoxel(aVoxels[i]);
+						this->voxels->remove(vTmp);
+						this->voxels->removeTopLevelVoxel(vTmp);
+
+					}else{ // if overlapped (but voxel exists)
+						vTmp->miss();
+						delete sVirtual[i];
+						sVirtual[i] = NULL;
+						if((vTmp->getMissCounter() > 0 &&  vTmp->getMissCounter() % this->params->analyze == 0) && this->voxels->analyzeVoxel(vTmp, sOverlapped[i], this->surface)){
+							this->voxels->remove(vTmp);
+						}
+
 					}
-					missCounter = 0;
-				}else{
+				}else{ // if voxel does not extist
 					delete sVirtual[i];
+					sVirtual[i] = NULL;
 				}
 			}
-		}
+		} // for
+
+		std::cout << "end, double checked: " << checkedAgain << " added: " << added << ", time: " << t << ", shapes: " << l << std::endl << std::flush;
 
 		//whether splitting voxels
-		if (missCounter > 0) { // v.getMissCounter() % iSplit == 0){ //
-			missCounter = 0;
+		if (added == 0) { // v.getMissCounter() % iSplit == 0){ //
+			missCounter += tmpSplit;
 			int v0 = this->voxels->length();
 
-			std::cout << "[" << this->seed << " Surface::doIteration] splitting " << v0 << " voxels ";
+			std::cout << "[" << this->seed << " PackingGenerator::createPacking] splitting " << v0 << " voxels ";
 			std::cout.flush();
 //						this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
 
@@ -309,20 +309,23 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 
 				delete[] sOverlapped;
 				delete[] sVirtual;
-				delete[] aVoxels;
+
 				sOverlapped = new Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *[tmpSplit];
 				sVirtual = new Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *[tmpSplit];
-				aVoxels = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *[tmpSplit];
 
+
+				missCounter = 0;
 			} else {
 				this->analyzeVoxels();
 			}
+		}else{
+			missCounter = 0;
 		}
 
 //					this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
 	} // while
 
-	for(int i=0; i<aRNDSize; i++){
+	for(int i=0; i<maxthreads; i++){
 		delete aRND[i];
 	}
 	delete[] aRND;
@@ -411,17 +414,14 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 			v->miss();
 			missCounter++;
 
-			if(this->getFactor()>FACTOR_LIMIT && this->voxels->analyzeVoxel(v, sTmp, this->surface))
+			if(this->getFactor()>FACTOR_LIMIT && (v->getMissCounter() > 0 &&  v->getMissCounter() % this->params->analyze == 0) && this->voxels->analyzeVoxel(v, sTmp, this->surface)){
 				this->voxels->remove(v);
-			else if (v->getMissCounter() % this->params->analyze == 0) {
-//				if(this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface) && this->getFactor()>FACTOR_LIMIT)
-//					this->analyzeRegion(v);
 			}
 			if (missCounter > tmpSplit) { // v.getMissCounter() % iSplit == 0){ //
 				missCounter = 0;
 				int v0 = this->voxels->length();
 
-				std::cout << "[" << this->seed << " Surface::doIteration] splitting " << v0 << " voxels ";
+				std::cout << "[" << this->seed << " PackingGenerator::createPacking] splitting " << v0 << " voxels ";
 				std::cout.flush();
 //				this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
 

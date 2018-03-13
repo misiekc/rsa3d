@@ -73,7 +73,7 @@ bool Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isInside(double *pos, double s
 	for(int i=0; i<ANGULAR_DIMENSION; i++){
 		if (angle[i]<this->orientation[i])
 			return false;
-		if (angle[i]>=(this->orientation[i]+size))
+		if (angle[i]>=(this->orientation[i]+asize))
 			return false;
 	}
 
