@@ -4,7 +4,7 @@
 // (C)PKua 2017
 //----------------------------------------------------------------------------
 
-#ifndef _CONVEH_POLYHEDRON_H
+#ifndef _CONVEX_POLYHEDRON_H
     #define _CONVEX_POLYHEDRON_H
 
 #include <vector>
