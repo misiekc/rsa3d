@@ -12,7 +12,7 @@
 #include "shapes/OrientedCuboid.h"
 #include "shapes/SpheroCylinder2D.h"
 #include "shapes/Ellipse.h"
-#include "shapes/Rectangle.h"
+//#include "shapes/Rectangle.h"
 
 Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>* (*ShapeFactory::createShape)(RND *rnd);
 
@@ -43,11 +43,11 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
                 Ellipse::initClass(attr);
                 ShapeFactory::createShape = Ellipse::create;
                 return;
-            } else if (sClass == "Rectangle") {
+            }/* else if (sClass == "Rectangle") {
                 Rectangle::initClass(attr);
                 ShapeFactory::createShape = Rectangle::create;
                 return;
-            }
+            }*/
         #endif
 
     #elif RSA_SPATIAL_DIMENSION == 3
