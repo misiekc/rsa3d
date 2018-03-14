@@ -1,0 +1,12 @@
+particle = Rectangle
+attr = 4
+mode = point_inside
+first_x = 20
+first_y = -5.6
+first_angle = 190
+from_angle = 0
+to_angle = 360
+box_width = 5
+box_height = 4
+points = 15000
+append = true
