@@ -87,11 +87,14 @@ SUBDIRS = rsa3d/analizator/ \
           rsa3d/tests/utility \
           statistics/
 
+# build folder
+BUILD = make-build
+
 # OBJ files folder
-OBJDIR = make-build/obj
+OBJDIR = $(BUILD)/obj
 
 # D files folder
-DEPSDIR = make-build/deps
+DEPSDIR = $(BUILD)/deps
 
 ###################################
 # MAKEFILE INTERNAL CONFIGURATION #
@@ -144,8 +147,8 @@ $(OBJDIR)/%.o: %.cpp
 # cleaning compilation results
 #---------------------------------------------------------------
 clean_all:
-	rm -rf $(EXEC) $(LIBSTAT) build
+	rm -rf $(EXEC) $(LIBSTAT) $(BUILD)
 
 clean:
-	rm -rf build
+	rm -rf $(BUILD)
 
