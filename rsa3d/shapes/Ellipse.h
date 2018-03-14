@@ -38,6 +38,8 @@ public:
 	~Ellipse() override = default;
 
 
+	double getVoxelAngularSize() override;
+
     void setAngle(double angle);
 
 	void rotate(double *v) override;

@@ -18,11 +18,16 @@
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 class Shape : public Positioned<SPATIAL_DIMENSION>{
 
+private:
+	static double voxelAngularSize;
+
 protected:
 	double orientation[ANGULAR_DIMENSION];
+
 	void applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second);
 
 public:
+
 	static Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>* (*createShape)(RND *rnd);
 
 	int no;
@@ -38,6 +43,8 @@ public:
 
 	// returns initial linear size of a (cubic) voxel. This size should be as big as possible but shape with the center inside the voxel have to cover the whole voxel
 	virtual double getVoxelSize() = 0;
+
+	virtual double getVoxelAngularSize();
 
 	double * getOrientation();
 

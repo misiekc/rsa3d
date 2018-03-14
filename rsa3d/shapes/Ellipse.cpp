@@ -56,6 +56,10 @@ Shape<2, 1> * Ellipse::create(RND *rnd){
 	return new Ellipse();
 }
 
+double Ellipse::getVoxelAngularSize(){
+	return M_PI;
+}
+
 double Ellipse::calculateF(double* r, double g){
 	double d1 = (r[0]*this->u[0] + r[1]*this->u[1])  /this->a;
 	double d2 = (r[0]*this->uT[0] + r[1]*this->uT[1]) /this->b;

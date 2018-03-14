@@ -8,6 +8,11 @@
 #include <iostream>
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelAngularSize(){
+	return 2*M_PI;
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape() : Positioned<SPATIAL_DIMENSION>(){
 	for (unsigned short i = 0; i < ANGULAR_DIMENSION; i++)
         this->orientation[i] = 0;

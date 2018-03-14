@@ -40,11 +40,12 @@ s - packing size (linear)
 d - requested initial size of a voxel
 **/
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::VoxelList(double s, double d){
+VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::VoxelList(double s, double d, double ad){
 	this->size = s;
 	this->voxelSize = this->findInitialVoxelSize(d);
 	this->initialVoxelSize = this->voxelSize;
-	this->angularSize = 2*M_PI;
+	this->angularSize = ad;
+	this->initialAngularVoxelSize = this->angularSize;
 
 	this->spatialDistribution = new std::uniform_real_distribution<double>(0.0, this->voxelSize);
 	this->angularDistribution = new std::uniform_real_distribution<double>(0.0, this->angularSize);
@@ -520,7 +521,7 @@ int VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::length(){
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 double VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelsSurface(){
-	return (this->last+1)*pow(this->voxelSize, SPATIAL_DIMENSION)*pow((this->angularSize/(2*M_PI)), ANGULAR_DIMENSION);
+	return (this->last+1)*pow(this->voxelSize, SPATIAL_DIMENSION)*pow((this->angularSize/(this->initialAngularVoxelSize)), ANGULAR_DIMENSION);
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>

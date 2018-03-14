@@ -42,6 +42,7 @@ protected:
 	int last;
 
 	double initialVoxelSize;
+	double initialAngularVoxelSize;
 	double voxelSize;
 	double angularSize;
 
@@ -56,7 +57,7 @@ protected:
 
 public:
 
-	VoxelList(double s, double d);
+	VoxelList(double s, double d, double ad);
 	void disable();
 
 	virtual ~VoxelList();
