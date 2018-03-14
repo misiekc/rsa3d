@@ -7,7 +7,6 @@
 
 #include "Ellipse.h"
 #include "../Utils.h"
-#include "../tests/utility/MockBC.h"
 #include "../Intersection.h"
 
 
@@ -68,16 +67,13 @@ double Ellipse::calculateF(double* r, double g){
 }
 
 void Ellipse::setAngle(double angle){
-	if (angle>M_PI)
-		angle -= M_PI;
-	this->orientation[0] = angle;
+    this->orientation[0] = this->normalizeAngle(angle, M_PI);
 	this->calculateU();
 }
 
 void Ellipse::rotate(double *v){
 	Shape::rotate(v);
-	if (this->orientation[0] > M_PI)
-		this->orientation[0] -= M_PI;
+    this->orientation[0] = this->normalizeAngle(this->orientation[0], M_PI);
 	this->calculateU();
 }
 

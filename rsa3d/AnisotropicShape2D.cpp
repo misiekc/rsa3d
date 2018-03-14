@@ -32,3 +32,13 @@ void AnisotropicShape2D::normalizeAngleRange(double *angleFrom, double *angleTo,
         *angleTo -= interval;
     }
 }
+
+// Fix angle into [0; interval] range and return result
+//---------------------------------------------------------------------------------------------
+double AnisotropicShape2D::normalizeAngle(double angle, double interval) const {
+    while (angle < interval)
+        angle += interval;
+    while (angle > interval)
+        angle -= interval;
+    return angle;
+}

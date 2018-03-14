@@ -15,15 +15,14 @@ protected:
 
     Matrix<2, 2> getAntiRotationMatrix() const;
     Matrix<2, 2> getRotationMatrix() const;
+	void normalizeAngleRange(double *angleFrom, double *angleTo, double interval) const;
+	double normalizeAngle(double angle, double interval) const;
 
 public:
 
     double getAngle() const;
-
-    virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) = 0;
-	virtual int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange);
-
-    void normalizeAngleRange(double *angleFrom, double *angleTo, double interval) const;
+	virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) = 0;
+	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) override;
 };
 
 
