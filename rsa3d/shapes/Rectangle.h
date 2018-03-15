@@ -9,7 +9,7 @@
 #include "../RND.h"
 #include "../BoundaryConditions.h"
 #include "../AnisotropicShape2D.h"
-#include "Math.h"
+#include "math.h"
 #include "../Vector.h"
 
 class Rectangle: public AnisotropicShape2D {
@@ -32,7 +32,7 @@ private:
 
     Vector<2, double> rotatePoint(const Vector<2, double>& point, const Matrix<2, 2, double>& rotation, const Vector<2, double>& center);
 
-    Vector<2> Rectangle::rotatePoint(const Vector<2>& point, const Matrix<2,2>& rotation);
+    Vector<2> rotatePoint(const Vector<2>& point, const Matrix<2,2>& rotation);
 
     void getNewSize(const Matrix<2, 2, double> &rotationFrom, const double *p, const Vector<2, double> &newSizeFrom) const;
 
