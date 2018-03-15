@@ -14,6 +14,8 @@
 
 void toFile(const std::string &filename, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing) {
 	std::ofstream file(filename, std::ios::binary);
+    if (!file)
+        die("Cannot open file " + filename + " to store packing");
 	for (Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s : *packing) {
 		s->store(file);
 	}
@@ -65,6 +67,8 @@ int simulate(Parameters *params) {
 
 	std::string sFile = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + ".dat";
 	std::ofstream file(sFile);
+    if (!file)
+        die("Cannot open file " + sFile + " to store packing info");
 	file.precision(std::numeric_limits<double>::digits10 + 1);
 
 	int seed = params->from;
