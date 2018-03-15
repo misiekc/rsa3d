@@ -19,16 +19,12 @@
 #include "../shapes/cube_strategies/SATOverlap.h"
 #include "../shapes/cube_strategies/OptimizedSATOverlap.h"
 #include "utility/Timer.h"
+#include "../Utils.h"
 
 using namespace std::chrono;
 
 namespace
 {
-    void die(const std::string & _reason)
-    {
-        std::cerr << _reason << std::endl;
-        exit(EXIT_FAILURE);
-    }
 
     OverlapStrategy * strategyFromString(const std::string &_name) {
         if (_name == "mine")

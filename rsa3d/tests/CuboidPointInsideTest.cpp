@@ -8,14 +8,10 @@
 #include "utility/MockBC.h"
 #include "../ShapeFactory.h"
 #include "utility/BallFactory.h"
+#include "../Utils.h"
 
 namespace
 {
-    void die(const std::string & reason)
-    {
-        std::cerr << reason << std::endl;
-        exit(EXIT_FAILURE);
-    }
 }
 
 namespace cube_pitest

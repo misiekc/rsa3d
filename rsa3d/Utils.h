@@ -24,6 +24,8 @@ std::string &rtrim(std::string &s);
 // trim from both ends
 std::string &trim(std::string &s);
 
+void die(const std::string & reason);
+
 double getAngleToOrigin(const Vector<2> &point);
 void rotate2D(double* point, double alpha);
 

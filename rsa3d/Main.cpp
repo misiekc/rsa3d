@@ -1,5 +1,4 @@
 #include "PackingGenerator.h"
-#include "shapes/Cuboid.h"
 #include "analizator/Analyzer.h"
 #include "tests/CuboidSpeedTest.h"
 #include "tests/CuboidPointInsideTest.h"
@@ -9,18 +8,11 @@
 
 #include <unistd.h>
 #include <sys/wait.h>
-#include <string.h>
+#include <cstring>
 #include <iomanip>
-#include <memory>
 
 
-void die(const std::string & reason)
-{
-    std::cerr << reason << std::endl;
-    exit(EXIT_FAILURE);
-}
-
-void toFile(std::string filename, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing) {
+void toFile(const std::string &filename, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing) {
 	std::ofstream file(filename, std::ios::binary);
 	for (Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s : *packing) {
 		s->store(file);
@@ -28,9 +20,12 @@ void toFile(std::string filename, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_A
 	file.close();
 }
 
-std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * fromFile(std::string filename) {
+std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * fromFile(const std::string &filename) {
 	std::ifstream file(filename, std::ios::binary);
-	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * v = new std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *>;
+	if (!file)
+		die("Cannot open file " + filename + " to restore packing");
+
+	auto * v = new std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *>;
 	RND rnd(1);
 
 	while (!file.eof()) {
@@ -49,7 +44,7 @@ void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
 	std::string size(buf);
 
-	PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *pg = new PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>(seed, params);
+	auto *pg = new PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>(seed, params);
 	pg->run();
 	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = pg->getPacking();
 
@@ -158,12 +153,12 @@ int main(int argc, char **argv) {
 	} else if (strcmp(argv[1], "povray")==0) {
 		std::string file(argv[3]);
 		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(file);
-		PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>::toPovray(packing, params.surfaceSize, NULL, file + ".pov");
+		PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>::toPovray(packing, params.surfaceSize, nullptr, file + ".pov");
 		delete packing;
 	} else if (strcmp(argv[1], "wolfram")==0) {
 		std::string file(argv[3]);
 		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(file);
-		PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>::toWolfram(packing, params.surfaceSize, NULL, file + ".pov");
+		PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>::toWolfram(packing, params.surfaceSize, nullptr, file + ".nb");
 		delete packing;
 	}else{
 		std::cerr << "Unknown mode: " << argv[1] << std::endl;

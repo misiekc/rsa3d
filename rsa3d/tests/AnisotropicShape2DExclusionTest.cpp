@@ -11,6 +11,7 @@
 #include "../shapes/SpheroCylinder2D.h"
 #include "utility/MockBC.h"
 #include "../ShapeFactory.h"
+#include "../Utils.h"
 
 static const char *const FIRST_SHAPE_COLOR = "Black";
 static const char *const SECOND_SHAPE_COLOR = "Blue";
@@ -20,14 +21,6 @@ static const char *const CIRCLE_FIX_COLOR = "Purple";
 static const char *const FIRST_ZONE_COLOR = "Orange";
 static const char *const SECOND_ZONE_COLOR = "Cyan";
 
-namespace
-{
-    void die(const std::string & _reason)
-    {
-        std::cerr << _reason << std::endl;
-        exit(EXIT_FAILURE);
-    }
-}
 
 void as2d_extest::Context::load(const std::string &_filename) {
     std::ifstream input(_filename);

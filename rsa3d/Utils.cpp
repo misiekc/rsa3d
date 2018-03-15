@@ -6,12 +6,12 @@
  */
 
 
-#include <iostream>
-#include <algorithm>
-#include <functional>
-#include <cctype>
-#include <locale>
-#include "Vector.h"
+#include "tests/VectorSpeedTest.h"
+#include "tests/AnisotropicShape2DExclusionTest.h"
+#include "PackingGenerator.h"
+#include <cstring>
+#include <iterator>
+#include <iomanip>
 
 bool increment(int* in, int inlength, int max){
 	if(inlength==0)
@@ -171,4 +171,10 @@ void rotate2D(double* point, double alpha) {
 	double y = point[1];
 	point[0] = x*cosa - y*sina;
 	point[1] = x*sina + y*cosa;
+}
+
+void die(const std::string & reason)
+{
+    std::cerr << reason << std::endl;
+    exit(EXIT_FAILURE);
 }

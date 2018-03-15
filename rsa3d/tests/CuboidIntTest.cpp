@@ -24,18 +24,12 @@
 #include "../shapes/cube_strategies/SATOverlap.h"
 #include "../shapes/cube_strategies/TriTriOverlap.h"
 #include "../shapes/cube_strategies/OptimizedSATOverlap.h"
-
+#include "../Utils.h"
 
 
 namespace
 {
     MineOverlap mineOverlap;
-
-    void die(const std::string & reason)
-    {
-        std::cerr << reason << std::endl;
-        exit(EXIT_FAILURE);
-    }
 }
 
 namespace cube_inttest
