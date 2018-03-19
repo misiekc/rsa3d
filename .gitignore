@@ -1,0 +1,6 @@
+/rsa
+/make-build/
+/libstat.a
+*.nb
+*.dat
+*.bin
