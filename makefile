@@ -59,16 +59,16 @@ OBJS = rsa3d/AnisotropicShape2D \
        rsa3d/shapes/SpheroCylinder2D \
        rsa3d/surfaces/NBoxFBC \
        rsa3d/surfaces/NBoxPBC \
-       rsa3d/tests/utility/BallFactory \
-       rsa3d/tests/utility/BoxFactory \
-       rsa3d/tests/utility/Quantity \
-       rsa3d/tests/utility/Timer \
-       rsa3d/tests/AnisotropicShape2DExclusionTest \
-       rsa3d/tests/CuboidIntTest \
-       rsa3d/tests/CuboidPointInsideTest \
-       rsa3d/tests/CuboidSpeedTest \
-       rsa3d/tests/TriangleIntTest \
-       rsa3d/tests/VectorSpeedTest
+       test/utility/BallFactory \
+       test/utility/BoxFactory \
+       test/utility/Quantity \
+       test/utility/Timer \
+       test/AnisotropicShape2DExclusionTest \
+       test/CuboidIntTest \
+       test/CuboidPointInsideTest \
+       test/CuboidSpeedTest \
+       test/TriangleIntTest \
+       test/VectorSpeedTest
        
 # Source files list (withous extensions) for statistics lib
 OBJS_STAT = statistics/ASFRegression \
@@ -81,11 +81,11 @@ OBJS_STAT = statistics/ASFRegression \
 # are created automaticly, they don't have to be listed explicitly)
 SUBDIRS = rsa3d/analizator/ \
           rsa3d/shapes/ \
-          rsa3d/shapes/cube_strategies \
+          rsa3d/shapes/cube_strategies/ \
           rsa3d/surfaces/ \
-          rsa3d/tests/ \
-          rsa3d/tests/utility \
-          statistics/
+          statistics/ \
+          test/ \
+          test/utility/
 
 # build folder
 BUILD = make-build

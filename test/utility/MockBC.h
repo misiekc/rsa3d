@@ -7,7 +7,7 @@
 #ifndef _MOCK_BC_H
     #define _MOCK_BC_H
     
-#include "../../BoundaryConditions.h"
+#include "../../rsa3d/BoundaryConditions.h"
     
 class MockBC : public BoundaryConditions
 {

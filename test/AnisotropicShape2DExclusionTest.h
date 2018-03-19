@@ -5,9 +5,9 @@
 #ifndef RSA3D_SPHEROCYLINDER2DINTTEST_H
 #define RSA3D_SPHEROCYLINDER2DINTTEST_H
 
-#include "../Vector.h"
+#include "../rsa3d/Vector.h"
+#include "../rsa3d/AnisotropicShape2D.h"
 #include "utility/ShapePairFactory.h"
-#include "../AnisotropicShape2D.h"
 #include <memory>
 
 namespace as2d_extest

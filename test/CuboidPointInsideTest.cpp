@@ -6,9 +6,9 @@
 
 #include "CuboidPointInsideTest.h"
 #include "utility/MockBC.h"
-#include "../ShapeFactory.h"
+#include "../rsa3d/ShapeFactory.h"
 #include "utility/BallFactory.h"
-#include "../Utils.h"
+#include "../rsa3d/Utils.h"
 
 namespace
 {

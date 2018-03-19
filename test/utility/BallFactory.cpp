@@ -1,31 +1,29 @@
 //--------------------------------------------------------------------------------------------
-// Factory generating cuboids from box of given size
+// Factory generating cuboids from ball of given radius
 //--------------------------------------------------------------------------------------------
 // (C)PKua 2017
 //--------------------------------------------------------------------------------------------
 
-#include "BoxFactory.h"
-#include "../../ShapeFactory.h"
-#include <sstream>
-
+#include "BallFactory.h"
+#include "../../rsa3d/ShapeFactory.h"
 
 typedef ShapePairFactory::ShapePair pair;
-BoxFactory * BoxFactory::instance = nullptr;
+BallFactory * BallFactory::instance = nullptr;
 
 
 // Private singleton constructor
 //--------------------------------------------------------------------------------------------  
-BoxFactory::BoxFactory()
+BallFactory::BallFactory()
 {
     
 }
 
 // Returns singleton instance
 //--------------------------------------------------------------------------------------------  
-BoxFactory * BoxFactory::getInstance()
+BallFactory * BallFactory::getInstance()
 {
     if (instance == nullptr)
-        instance = new BoxFactory();
+        instance = new BallFactory();
     return instance;
 }
 
@@ -33,14 +31,22 @@ BoxFactory * BoxFactory::getInstance()
 // Helper method. Creates random Cuboid based on objects parameters. Delegate cuboid creation
 // to standard ShapeFactory
 //--------------------------------------------------------------------------------------------    
-Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * BoxFactory::randomShape()
+Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * BallFactory::randomShape()
 {
     double trans[3];
     Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * shape = ShapeFactory::createShape(&this->rnd);
     shape->no = this->no++;
-    trans[0] = (rnd.nextValue() * 2 - 1) * this->halfsizeX;
-    trans[1] = (rnd.nextValue() * 2 - 1) * this->halfsizeY;
-    trans[2] = (rnd.nextValue() * 2 - 1) * this->halfsizeZ;
+    
+    double cos_theta = 2 * rnd.nextValue() - 1;
+    double sin_theta = sqrt(1 - cos_theta * cos_theta);
+    double phi = rnd.nextValue() * 2 * M_PI;
+    double cos_phi = cos(phi);
+    double sin_phi = sin(phi);
+    double radius = pow(rnd.nextValue(), 1. / 3) * this->radius;
+    
+    trans[0] = radius * sin_theta * cos_phi;
+    trans[1] = radius * sin_theta * sin_phi;
+    trans[2] = radius * cos_theta;
     shape->translate(trans);
     return shape;
 }
@@ -48,17 +54,15 @@ Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * BoxFactory::randomShape()
 
 // Sets sizes of half lengths of intervals describing box
 //--------------------------------------------------------------------------------------------
-void BoxFactory::setBoxSize(double _halfsize_x, double _halfsize_y, double _halfsize_z)
+void BallFactory::setRadius(double _radius)
 {
-    this->halfsizeX = _halfsize_x;
-    this->halfsizeY = _halfsize_y;
-    this->halfsizeZ = _halfsize_z;
+    this->radius = _radius;
 }
 
 
 // Generates random pair of cuboids from the box of set size
 //--------------------------------------------------------------------------------------------
-pair BoxFactory::generate()
+pair BallFactory::generate()
 {
     return pair(
             this->randomShape(),
@@ -68,11 +72,10 @@ pair BoxFactory::generate()
 
 // Prints description of the factory on the standard output
 //--------------------------------------------------------------------------------------------
-std::string BoxFactory::getDescription()
+std::string BallFactory::getDescription()
 {
     std::stringstream stream;
-    stream << "BoxFactory of size " << this->halfsizeX * 2 << " x " << this->halfsizeY * 2 
-        << " x " << this->halfsizeZ * 2;
+    stream << "BallFactory of radius " << this->radius;
     return stream.str();
 }
 

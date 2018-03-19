@@ -9,8 +9,8 @@
 
 #include <string>
 
-#include "../../shapes/Cuboid.h"
-#include "../../Parameters.h"
+#include "../../rsa3d/shapes/Cuboid.h"
+#include "../../rsa3d/Parameters.h"
 
 
 class ShapePairFactory

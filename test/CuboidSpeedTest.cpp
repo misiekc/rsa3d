@@ -14,12 +14,12 @@
 
 #include "CuboidSpeedTest.h"
 #include "utility/MockBC.h"
-#include "../shapes/cube_strategies/MineOverlap.h"
-#include "../shapes/cube_strategies/TriTriOverlap.h"
-#include "../shapes/cube_strategies/SATOverlap.h"
-#include "../shapes/cube_strategies/OptimizedSATOverlap.h"
+#include "../rsa3d/shapes/cube_strategies/MineOverlap.h"
+#include "../rsa3d/shapes/cube_strategies/TriTriOverlap.h"
+#include "../rsa3d/shapes/cube_strategies/SATOverlap.h"
+#include "../rsa3d/shapes/cube_strategies/OptimizedSATOverlap.h"
 #include "utility/Timer.h"
-#include "../Utils.h"
+#include "../rsa3d/Utils.h"
 
 using namespace std::chrono;
 

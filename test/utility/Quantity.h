@@ -5,6 +5,9 @@
 #ifndef RSA3D_QUANTITY_H
 #define RSA3D_QUANTITY_H
 
+#include <vector>
+#include <iosfwd>
+
 // Struct representing quantity with uncertainity
 struct Quantity {
     double value = 0;
@@ -18,8 +21,5 @@ struct Quantity {
     static Quantity fromSamples(const std::vector<double> & _samples);
     friend std::ostream & operator<<(std::ostream & _stream, const Quantity & _quantity);
 };
-
-#include "../../Config.h"
-#include "BallFactory.h"
 
 #endif //RSA3D_QUANTITY_H

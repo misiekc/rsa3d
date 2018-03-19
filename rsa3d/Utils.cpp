@@ -6,8 +6,6 @@
  */
 
 
-#include "tests/VectorSpeedTest.h"
-#include "tests/AnisotropicShape2DExclusionTest.h"
 #include "PackingGenerator.h"
 #include <cstring>
 #include <iterator>

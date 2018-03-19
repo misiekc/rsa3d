@@ -7,24 +7,22 @@
 
 
 #include <iostream>
-#include <cassert>
 #include <cstring>
 #include <sstream>
 #include <fstream>
 
-#include "../Vector.h"
-#include "../Intersection.h"
-#include "../shapes/Cuboid.h"
+#include "../rsa3d/Vector.h"
+#include "../rsa3d/shapes/Cuboid.h"
 #include "utility/MockBC.h"
 #include "utility/ShapePairFactory.h"
 #include "CuboidIntTest.h"
-#include "../shapes/cube_strategies/MineOverlap.h"
-#include "../ShapeFactory.h"
+#include "../rsa3d/shapes/cube_strategies/MineOverlap.h"
+#include "../rsa3d/ShapeFactory.h"
 #include "utility/BallFactory.h"
-#include "../shapes/cube_strategies/SATOverlap.h"
-#include "../shapes/cube_strategies/TriTriOverlap.h"
-#include "../shapes/cube_strategies/OptimizedSATOverlap.h"
-#include "../Utils.h"
+#include "../rsa3d/shapes/cube_strategies/SATOverlap.h"
+#include "../rsa3d/shapes/cube_strategies/TriTriOverlap.h"
+#include "../rsa3d/shapes/cube_strategies/OptimizedSATOverlap.h"
+#include "../rsa3d/Utils.h"
 
 
 namespace

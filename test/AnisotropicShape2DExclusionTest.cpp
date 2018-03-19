@@ -7,11 +7,11 @@
 #include <memory>
 #include "utility/ShapePairFactory.h"
 #include "AnisotropicShape2DExclusionTest.h"
-#include "../Config.h"
-#include "../shapes/SpheroCylinder2D.h"
+#include "../rsa3d/Config.h"
+#include "../rsa3d/shapes/SpheroCylinder2D.h"
 #include "utility/MockBC.h"
-#include "../ShapeFactory.h"
-#include "../Utils.h"
+#include "../rsa3d/ShapeFactory.h"
+#include "../rsa3d/Utils.h"
 
 static const char *const FIRST_SHAPE_COLOR = "Black";
 static const char *const SECOND_SHAPE_COLOR = "Blue";

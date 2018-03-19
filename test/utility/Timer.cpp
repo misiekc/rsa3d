@@ -2,12 +2,8 @@
 // Created by PKua on 28.12.17.
 //
 
-#include "../CuboidSpeedTest.h"
-#include <bits/unique_ptr.h>
-#include <algorithm>
-#include <stdexcept>
-#include <chrono>
 #include "Timer.h"
+#include <bits/unique_ptr.h>
 
 using namespace std::chrono;
 

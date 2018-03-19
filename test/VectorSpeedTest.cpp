@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include "VectorSpeedTest.h"
-#include "../RND.h"
+#include "../rsa3d/RND.h"
 
 #define REPEATS 100000000
 

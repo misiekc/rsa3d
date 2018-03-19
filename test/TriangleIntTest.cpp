@@ -5,12 +5,9 @@
 // (C)PKua 2017
 //------------------------------------------------------------------------------------------
 
-#include "../Intersection.h"
-#include "../Vector.h"
-#include "../RND.h"
+#include "../rsa3d/Intersection.h"
+#include "../rsa3d/RND.h"
 
-#include <sstream>
-#include <string>
 #include <fstream>
 #include <iostream>
 

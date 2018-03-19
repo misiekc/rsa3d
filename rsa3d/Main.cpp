@@ -1,10 +1,10 @@
 #include "PackingGenerator.h"
 #include "analizator/Analyzer.h"
-#include "tests/CuboidSpeedTest.h"
-#include "tests/CuboidPointInsideTest.h"
-#include "tests/CuboidIntTest.h"
-#include "tests/AnisotropicShape2DExclusionTest.h"
-#include "tests/VectorSpeedTest.h"
+#include "../test/CuboidSpeedTest.h"
+#include "../test/CuboidPointInsideTest.h"
+#include "../test/CuboidIntTest.h"
+#include "../test/AnisotropicShape2DExclusionTest.h"
+#include "../test/VectorSpeedTest.h"
 
 #include <unistd.h>
 #include <sys/wait.h>

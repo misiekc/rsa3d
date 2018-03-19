@@ -2,11 +2,14 @@
 // Created by PKua on 25.12.17.
 //
 
-#include "../CuboidSpeedTest.h"
+#include "Quantity.h"
 #include <fstream>
 #include <bits/unique_ptr.h>
 #include <iomanip>
 #include <chrono>
+#include <vector>
+#include <numeric>
+#include <cmath>
 
 // Returns Quantity computed from vector of samples
 //----------------------------------------------------------------------------------------
@@ -20,15 +23,15 @@ Quantity Quantity::fromSamples(const std::vector<double> & _samples)
     Quantity result;
     double sum, dev_sum;
 
-    sum = accumulate(_samples.begin(), _samples.end(), 0);
+    sum = std::accumulate(_samples.begin(), _samples.end(), 0);
     result.value = sum / _samples.size();
-    dev_sum = accumulate(_samples.begin(), _samples.end(), 0,
+    dev_sum = std::accumulate(_samples.begin(), _samples.end(), 0,
         [&](double s, double next) {
-            s += pow(result.value - next, 2);
+            s += std::pow(result.value - next, 2);
             return s;
         });
    result.error = dev_sum / _samples.size() / (_samples.size() - 1);
-   result.error = sqrt(result.error);
+   result.error = std::sqrt(result.error);
    return result;
 }
 

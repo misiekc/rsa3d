@@ -8,8 +8,8 @@
     #define _CUBOID_SPEED_TEST_H
 
 
-#include "../Config.h"
-#include "../ShapeFactory.h"
+#include "../rsa3d/Config.h"
+#include "../rsa3d/ShapeFactory.h"
 #include "utility/BallFactory.h"
 #include "utility/ShapePairFactory.h"
 #include "utility/Quantity.h"
