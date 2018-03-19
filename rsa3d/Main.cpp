@@ -166,6 +166,7 @@ int main(int argc, char **argv) {
 		delete packing;
 	}else{
 		std::cerr << "Unknown mode: " << argv[1] << std::endl;
+        return EXIT_FAILURE;
 	}
-	return 1;
+	return EXIT_SUCCESS;
 }
