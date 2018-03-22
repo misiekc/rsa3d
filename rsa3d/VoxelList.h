@@ -26,6 +26,7 @@ private:
 	bool* activeTopLevelVoxels;
 
 	double findInitialVoxelSize(double d);
+	double findInitialVoxelAngularSize(double d);
 	int getLinearNumberOfVoxels(double vs);
 	void fillNeighbourGrid();
 //	bool analyzeVoxelOLD(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc);
@@ -44,6 +45,7 @@ protected:
 	double initialVoxelSize;
 	double initialAngularVoxelSize;
 	double voxelSize;
+	double requestedAngularSize;
 	double angularSize;
 
 	double size;
@@ -75,6 +77,7 @@ public:
 	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * getVoxel(double* pos, double *angle);
 	void getRandomPositionAndOrientation(double *position, double *orientation, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, RND *rnd);
 	double getVoxelSize();
+	double getVoxelAngularSize();
 	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>* get(int i);
 	int length();
 	double getVoxelsSurface();

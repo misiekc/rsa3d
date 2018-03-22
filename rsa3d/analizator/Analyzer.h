@@ -12,8 +12,8 @@
 #include "../Parameters.h"
 #include "../shapes/Cuboid.h"
 
-#include <Plot.h>
-#include <LogPlot.h>
+#include "../../statistics/Plot.h"
+#include "../../statistics/LogPlot.h"
 
 #include <string>
 #include <vector>

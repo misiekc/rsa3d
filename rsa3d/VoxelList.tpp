@@ -30,6 +30,17 @@ double VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::findInitialVoxelSize(dou
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+double VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::findInitialVoxelAngularSize(double d){
+	double dRes = 8.0;
+	while (dRes > d)
+		dRes /= 2;
+	while (2*dRes < d)
+		dRes *= 2;
+	return dRes;
+}
+
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 inline int VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getLinearNumberOfVoxels(double vs){
 	return (int)(this->size/vs) + 1;
 }
@@ -44,7 +55,8 @@ VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::VoxelList(double s, double d, d
 	this->size = s;
 	this->voxelSize = this->findInitialVoxelSize(d);
 	this->initialVoxelSize = this->voxelSize;
-	this->angularSize = ad;
+	this->requestedAngularSize = ad;
+	this->angularSize = this->findInitialVoxelAngularSize(ad);
 	this->initialAngularVoxelSize = this->angularSize;
 
 	this->spatialDistribution = new std::uniform_real_distribution<double>(0.0, this->voxelSize);
@@ -298,7 +310,7 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 		return false;
 	}
 
-	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>** newList = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>*[ ((int)round( pow(2, SPATIAL_DIMENSION+ANGULAR_DIMENSION)))*(this->last+1) ];
+	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>** newList = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>*[ ((int)round( pow(2, SPATIAL_DIMENSION+ANGULAR_DIMENSION)))*(this->last+1) ]();
 	this->voxelSize = (this->voxelSize/2.0)*this->dxFactor;
 	delete this->spatialDistribution;
 	this->spatialDistribution = new std::uniform_real_distribution<double>(0.0, this->voxelSize);
@@ -338,8 +350,10 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 			// checking if a new voxel will be inside a packing
 			for(ushort j=0; j < SPATIAL_DIMENSION; j++){
 				position[j] = vpos[j] + inpos[j]*this->voxelSize;
-				if (position[j]>this->size)
+				if (position[j]>this->size){
 					doCreate = false;
+					break;
+				}
 			}
 			if (doCreate){
 				int k = 0;
@@ -349,20 +363,22 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 				do{
 					for(unsigned short j=0; j<ANGULAR_DIMENSION; j++){
 						orientation[j] = vangle[j] + inangle[j]*this->angularSize;
+						if (orientation[j] > this->requestedAngularSize){
+							doCreate = false;
+							break;
+						}
 					}
 
-					Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *vTmp = this->createVoxel(position, orientation, i*spatialLoop*angularLoop + j*angularLoop + k);
-					if (nl==NULL || bc==NULL || !this->analyzeVoxel(vTmp, nl, NULL, bc)){
-						newList[i*spatialLoop*angularLoop + j*angularLoop + k] = vTmp;
-					}else{
-						delete vTmp;
-						newList[i*spatialLoop*angularLoop + j*angularLoop + k] = NULL;
+					if(doCreate){
+						Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *vTmp = this->createVoxel(position, orientation, i*spatialLoop*angularLoop + j*angularLoop + k);
+						if (nl==NULL || bc==NULL || !this->analyzeVoxel(vTmp, nl, NULL, bc)){
+							newList[i*spatialLoop*angularLoop + j*angularLoop + k] = vTmp;
+						}else{
+							delete vTmp;
+						}
+						k++;
 					}
-					k++;
 				}while(increment(inangle, ANGULAR_DIMENSION, (unsigned char)1));
-			}else{
-				for (int k=0; k<angularLoop; k++)
-					newList[i*spatialLoop*angularLoop + j*angularLoop + k] = NULL;
 			}
 			increment(inpos, SPATIAL_DIMENSION, (unsigned char)1);
 		}
@@ -446,8 +462,10 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 			// checking if a new voxel will be inside a packing. it is possible because at the beginning voxels covers more than a packing (due to initial size optimisation)
 			for(ushort j=0; j < SPATIAL_DIMENSION; j++){
 				position[j] = vpos[j] + inpos[j]*this->voxelSize;
-				if (position[j]>this->size)
+				if (position[j]>this->size){
 					doCreate = false;
+					break;
+				}
 			}
 			if (doCreate){
 				for(ushort j=0; j < ANGULAR_DIMENSION; j++){
@@ -456,14 +474,19 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 				do{
 					for(unsigned short j=0; j<ANGULAR_DIMENSION; j++){
 						orientation[j] = vangle[j] + inangle[j]*this->angularSize;
+						if (orientation[j]>this->requestedAngularSize){
+							doCreate = false;
+							break;
+						}
 					}
-
-					Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *vTmp = this->createVoxel(position, orientation, index);
-					if (nl==NULL || bc==NULL || !this->analyzeVoxel(vTmp, nl, NULL, bc)){
-						newList[index] = vTmp;
-						index++;
-					}else{
-						delete vTmp;
+					if (doCreate){
+						Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *vTmp = this->createVoxel(position, orientation, index);
+						if (nl==NULL || bc==NULL || !this->analyzeVoxel(vTmp, nl, NULL, bc)){
+							newList[index] = vTmp;
+							index++;
+						}else{
+							delete vTmp;
+						}
 					}
 
 				}while(increment(inangle, ANGULAR_DIMENSION, (unsigned char)1));
@@ -507,6 +530,11 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getRandomPositionAndOrient
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 double VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelSize(){
 	return this->voxelSize;
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+double VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelAngularSize(){
+	return this->angularSize;
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>

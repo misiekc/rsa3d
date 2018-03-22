@@ -248,10 +248,10 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 					// consistency check
 					if (aVoxels[i]!=this->voxels->getVoxel(aVoxels[i]->getPosition(), aVoxels[i]->getOrientation())){
 						Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = this->voxels->getVoxel(aVoxels[i]->getPosition(), aVoxels[i]->getOrientation());
-						std::cout << "Problem: PackingGenerator - inconsistent voxels positions: " <<
-							" (" << aVoxels[i]->getPosition()[0] << ", " << aVoxels[i]->getPosition()[1] << ")" <<
-							", (" << v->getPosition()[0] << ", " << v->getPosition()[1] << ")" <<
-							std::endl;
+						std::cout << std::endl << "Problem: PackingGenerator - inconsistent voxels positions: [" << aVoxels[i]->toString() << "], [" << v->toString() << "]" << std::endl;
+						std::cout << "size: " << this->voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << std::endl;
+						std::cout << "shape: " << sVirtual[i]->toString() << std::endl;
+
 					}
 
 					this->surface->add(sVirtual[i]);
@@ -354,7 +354,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 	ShapeFactory::initShapeClass(this->params->particleType, this->params->particleAttributes);
 	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s = ShapeFactory::createShape(&rnd);
 
-	this->voxels = new VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(this->params->surfaceSize, s->getVoxelSize());
+	this->voxels = new VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(this->params->surfaceSize, s->getVoxelSize(), s->getVoxelAngularSize());
 
 	double gridSize = s->getNeighbourListCellSize();
 	if (gridSize < this->params->thresholdDistance)
@@ -402,10 +402,9 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 
 			if (v!=this->voxels->getVoxel(v->getPosition(), v->getOrientation())){
 				Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v1 = this->voxels->getVoxel(v->getPosition(), v->getOrientation());
-				std::cout << "Problem: PackingGenerator - inconsistent voxels positions: " <<
-						" (" << v->getPosition()[0] << ", " << v->getPosition()[1] << ")" <<
-						", (" << v1->getPosition()[0] << ", " << v1->getPosition()[1] << ")" <<
-						std::endl;
+				std::cout << std::endl << "Problem: PackingGenerator - inconsistent voxels positions: [" << v->toString()<< "], [" << v1->toString() << "]" << std::endl;
+				std::cout << "size: " << this->voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << std::endl;
+				std::cout << "shape: " << s->toString() << std::endl;
 			}
 
 			this->surface->add(s);

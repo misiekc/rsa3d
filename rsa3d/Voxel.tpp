@@ -4,6 +4,7 @@
  *  Created on: 08.03.2017
  *      Author: ciesla
  */
+#include <sstream>
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Voxel(){
@@ -89,4 +90,23 @@ double* Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getPosition(){
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 double* Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation(){
 	return this->orientation;
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+std::string Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toString(){
+	std::stringstream out;
+	out << "index: " << this->index << " position: (";
+	for (unsigned short i=0; i<SPATIAL_DIMENSION; i++){
+		out << this->position[i];
+		if (i<SPATIAL_DIMENSION-1)
+			out << ", ";
+	}
+	out << ") orientation: (";
+	for (unsigned short i=0; i<ANGULAR_DIMENSION; i++){
+		out << this->orientation[i];
+		if (i<ANGULAR_DIMENSION-1)
+			out << ", ";
+	}
+	out << ")";
+	return out.str();
 }

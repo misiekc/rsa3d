@@ -42,6 +42,8 @@ public:
 
 	double *getOrientation();
 
+	std::string toString();
+
 
 };
 
