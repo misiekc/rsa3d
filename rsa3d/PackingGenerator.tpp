@@ -487,6 +487,81 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(std::vecto
 		double *da = s->getPosition();
 		file << "  text { ttf \"timrom.ttf\" \"" << s->no << "\" 1, 0 pigment { color White } scale 0.2 translate < " << da[0] << ", " << da[1] << ", 0.01> }" << std::endl;
 		file << s->toPovray();
+// periodic boundary check
+		double tr[2];
+
+		if (da[0]<0.1*size){
+			tr[0] = size;
+			tr[1] = 0;
+			s->translate(tr);
+			file << s->toPovray();
+			tr[0] = -tr[0];
+			tr[1] = -tr[1];
+			s->translate(tr);
+			if (da[1]<0.1*size){
+				tr[0] = size;
+				tr[1] = size;
+				s->translate(tr);
+				file << s->toPovray();
+				tr[0] = -tr[0];
+				tr[1] = -tr[1];
+				s->translate(tr);
+			}
+			if(da[1]>0.9*size){
+				tr[0] = size;
+				tr[1] = -size;
+				s->translate(tr);
+				file << s->toPovray();
+				tr[0] = -tr[0];
+				tr[1] = -tr[1];
+				s->translate(tr);
+			}
+		}
+		if (da[0]>0.9*size){
+			tr[0] = -size;
+			tr[1] = 0;
+			s->translate(tr);
+			file << s->toPovray();
+			tr[0] = -tr[0];
+			tr[1] = -tr[1];
+			s->translate(tr);
+			if (da[1]<0.1*size){
+				tr[0] = -size;
+				tr[1] = size;
+				s->translate(tr);
+				file << s->toPovray();
+				tr[0] = -tr[0];
+				tr[1] = -tr[1];
+				s->translate(tr);
+			}
+			if(da[1]>0.9*size){
+				tr[0] = -size;
+				tr[1] = -size;
+				s->translate(tr);
+				file << s->toPovray();
+				tr[0] = -tr[0];
+				tr[1] = -tr[1];
+				s->translate(tr);
+			}
+		}
+		if (da[1]<0.1*size){
+			tr[0] = 0;
+			tr[1] = size;
+			s->translate(tr);
+			file << s->toPovray();
+			tr[0] = -tr[0];
+			tr[1] = -tr[1];
+			s->translate(tr);
+		}
+		if (da[1]>0.9*size){
+			tr[0] = 0;
+			tr[1] = -size;
+			s->translate(tr);
+			file << s->toPovray();
+			tr[0] = -tr[0];
+			tr[1] = -tr[1];
+			s->translate(tr);
+		}
 	}
 
 	file << "}" << std::endl;
