@@ -7,7 +7,7 @@
 #include "SpheroCylinder2D.h"
 #include "../Utils.h"
 
-#define EPSILON 0.0000001
+#define EPSILON 0.0000000001
 
 double SpheroCylinder2D::voxelSize;
 double SpheroCylinder2D::neighbourListCellSize;

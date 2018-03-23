@@ -11,6 +11,7 @@
 #include "ShapeFactory.h"
 #include <iostream>
 #include <fstream>
+#include <limits>
 
 #include "shapes/Ellipse.h"
 
@@ -107,7 +108,7 @@ template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeRegion(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v){
 	int begin = this->voxels->length();
 	std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> region;
-	this->voxels->getNeighbours(&region, v);
+	this->voxels->getNeighbours(&region, v->getPosition());
 	for(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v1: region){
 		if (this->voxels->analyzeVoxel(v1, this->surface->getNeighbourGrid(), this->surface))
 			this->voxels->remove(v1);
@@ -154,6 +155,8 @@ template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 
 	int maxthreads = omp_get_max_threads();
+
+	std::cout.precision(std::numeric_limits< double >::max_digits10);
 
 	std::cout << "[" << this->seed << " PackingGenerator::createPacking] using up to " << omp_get_max_threads() << " concurrent treads" << std::endl;
 
@@ -305,7 +308,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 			int v1 = this->voxels->length();
 
 //					this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
-			std::cout << " done: " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size " << voxels->getVoxelSize() << ", factor " << this->getFactor() << std::endl;
+			std::cout << " done: " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << ", factor: " << this->getFactor() << std::endl;
 
 			if (b) {
 				tmpSplit *=  ((double)v1 / v0);
@@ -327,11 +330,12 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 			} else {
 				this->analyzeVoxels();
 			}
+//			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
+//			this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
+//			this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
 		}else{
 			missCounter = 0;
 		}
-
-//					this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
 	} // while
 
 	for(int i=0; i<maxthreads; i++){
@@ -348,6 +352,8 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
+	std::cout.precision(std::numeric_limits< double >::max_digits10);
+
 	std::cout << "[" << this->seed << " PackingGenerator::createPacking] started" << std::endl;
 	int missCounter = 0;
 	RND rnd(this->seed);
@@ -437,7 +443,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 				int v1 = this->voxels->length();
 
 //				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
-				std::cout << " done: " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size " << voxels->getVoxelSize() << ", factor " << this->getFactor() << std::endl;
+				std::cout << " done: " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << ", factor: " << this->getFactor() << std::endl;
 
 				if (b) {
 					tmpSplit *=  ((double)v1 / v0);
@@ -448,6 +454,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 				} else {
 					this->analyzeVoxels();
 				}
+//				this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
 //				this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
 //				this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
 			}
@@ -471,7 +478,7 @@ std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * PackingGenerator<SP
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * packing, double size, VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels, std::string filename){
+void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * packing, double size, VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels, const std::string &filename){
 	std::ofstream file(filename);
 
 	file << "#include \"colors.inc\"" << std::endl;
@@ -583,13 +590,47 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(std::vecto
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(std::string filename){
+void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(const std::string &filename){
 	PackingGenerator::toPovray(&(this->packing), this->params->surfaceSize, this->voxels, filename);
 }
 
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram(double *da, const std::string &filename){
+
+	std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> vShapes;
+	this->surface->getNeighbours(&vShapes, da);
+
+	std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> vVoxels;
+	this->voxels->getNeighbours(&vVoxels, da);
+
+	std::ofstream file(filename);
+	file << "Graphics[{Red";
+
+	for (Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s : vShapes) {
+		file << ", " << std::endl << s->toWolfram();
+	}
+	if (vVoxels.size()>0){
+		file << ", Black, " << std::endl;
+		for(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v: vVoxels){
+			file << v->toWolfram(this->voxels->getVoxelSize(), this->voxels->getVoxelAngularSize());
+		}
+	}
+	file << std::endl << "}]" << std::endl;
+	file.close();
+}
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * packing, double size, VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels, std::string filename){
+void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::printRemainingVoxels(const std::string &prefix){
+	if (this->voxels->length()>20)
+		return;
+	for(int i=0; i<this->voxels->length(); i++){
+		std::string filename(prefix + "_" + std::to_string(i) + ".nb");
+		this->toWolfram(this->voxels->getVoxel(i)->getPosition(), filename);
+	}
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * packing, double size, VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels, const std::string &filename){
 	std::ofstream file(filename);
 
 	file << "Graphics[{Red";
@@ -614,7 +655,38 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram(std::vect
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram(std::string filename){
+void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram(const std::string &filename){
 	PackingGenerator::toWolfram(&(this->packing), this->params->surfaceSize, this->voxels, filename);
 }
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toFile(const std::string &filename) {
+	std::ofstream file(filename, std::ios::binary);
+    if (!file)
+        die("Cannot open file " + filename + " to store packing");
+	for (Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s : this->packing) {
+		s->store(file);
+	}
+	file.close();
+}
+/*
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toFile(const std::string &filename, double *da) {
+	std::ofstream file(filename, std::ios::binary);
+    if (!file)
+        die("Cannot open file " + filename + " to store packing");
+    std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> sTmp;
+    this->surface->getNeighbours(&sTmp, da);
+
+
+
+
+
+
+	for (Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s : sTmp) {
+		s->store(file);
+	}
+	file.close();
+}
+*/
 

@@ -10,7 +10,7 @@
 #include "../Intersection.h"
 
 
-#define EPSILON 0.0000001
+#define EPSILON 0.0000000001
 
 double Ellipse::longSemiAxis;
 double Ellipse::shortSemiAxis;
@@ -231,7 +231,7 @@ bool Ellipse::circleCollision(const Vector<2> &p, double tMin, double tMax) cons
 
 std::string Ellipse::toWolfram() const {
 	std::stringstream out;
-
+	out.precision(std::numeric_limits< double >::max_digits10);
 	Vector<2> thisPos(this->position);
 	out << std::fixed;
 	out << "GeometricTransformation[Disk[{0, 0}, {" << this->a << ", " << this->b << "}]," << std::endl;
@@ -258,15 +258,17 @@ std::string Ellipse::toString() {
 }
 
 std::string Ellipse::toPovray() const{
-	std::string s = "  disc { <0.0, 0.0, 0.0002>, <0.0, 0.0, 1.0>, 1.0 \r\n";
-	s += "	scale <" + std::to_string(this->a) + ", " + std::to_string(this->b) + ", 1.0> \r\n";
-	s += "	rotate <0, 0, " + std::to_string(180*this->getAngle()/M_PI) + "> \r\n";
-	s += "	translate <";
+	std::stringstream out;
+	out.precision(std::numeric_limits< double >::max_digits10);
+	out << "  disc { <0.0, 0.0, 0.0002>, <0.0, 0.0, 1.0>, 1.0" << std::endl;;
+	out << "	scale <" << this->a << ", " << this->b << ", 1.0>" << std::endl;
+	out << "	rotate <0, 0, " << (180*this->getAngle()/M_PI) << ">" << std::endl;
+	out << "	translate <";
 	for(unsigned short i=0; i<2; i++)
-		s += std::to_string(this->position[i]) + ", ";
-	s += "0.0> \r\n	texture { pigment { color Red } }\r\n  }\r\n";
+		out << (this->position[i]) << ", ";
+	out << "0.0>" << std::endl << "	texture { pigment { color Red } }" << std::endl << "}" << std::endl;
 
-	return s;
+	return out.str();
 }
 
 void Ellipse::store(std::ostream &f) const{

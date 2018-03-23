@@ -11,17 +11,6 @@
 #include <cstring>
 #include <iomanip>
 
-
-void toFile(const std::string &filename, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing) {
-	std::ofstream file(filename, std::ios::binary);
-    if (!file)
-        die("Cannot open file " + filename + " to store packing");
-	for (Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s : *packing) {
-		s->store(file);
-	}
-	file.close();
-}
-
 std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * fromFile(const std::string &filename) {
 	std::ifstream file(filename, std::ios::binary);
 	if (!file)
@@ -52,7 +41,7 @@ void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 
 	if (params->storePackings) {
 		std::string sPackingFile = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + "_" + std::to_string(seed) + ".bin";
-		toFile(sPackingFile, packing);
+		pg->toFile(sPackingFile);
 	}
 	dataFile << seed << "\t" << packing->size() << "\t"	<< (*packing)[packing->size() - 1]->time << std::endl;
 	dataFile.flush();

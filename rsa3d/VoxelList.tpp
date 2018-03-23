@@ -158,8 +158,8 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::fillNeighbourGrid(){
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getNeighbours(std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *result, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v){
-	return this->voxelNeighbourGrid->getNeighbours(result, v->getPosition());
+void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getNeighbours(std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *result, double *da){
+	return this->voxelNeighbourGrid->getNeighbours(result, da);
 }
 
 
@@ -517,6 +517,11 @@ Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * VoxelList<SPATIAL_DIMENSION, ANGUL
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxel(int i){
+	return this->voxels[i];
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getRandomPositionAndOrientation(double *position, double *orientation, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, RND *rnd){
 	double *vpos = v->getPosition();
 	double *vangle = v->getOrientation();
@@ -557,22 +562,7 @@ std::string VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(){
 	std::string sRes = "";
 
 	for(int i=0; i<=this->last; i++){
-		double *da = this->voxels[i]->getPosition();
-		double x1 = da[0], x2 = da[0] + this->voxelSize;
-		double y1 = da[1], y2 = da[1] + this->voxelSize;
-
-		sRes += "  polygon {5, < " + std::to_string(x1) + ", " + std::to_string(y1) + ", 1.0>, "
-				+ "< " + std::to_string(x1) + ", " + std::to_string(y2) + ", 1.0>, "
-				+ "< " + std::to_string(x2) + ", " + std::to_string(y2) + ", 1.0>, "
-				+ "< " + std::to_string(x2) + ", " + std::to_string(y1) + ", 1.0>, "
-				+ "< " + std::to_string(x1) + ", " + std::to_string(y1) + ", 1.0>"
-				+ " texture { pigment { color Black} } }\r\n";
-/*
-		sRes += "  text { ttf \"timrom.ttf\" \"" + std::to_string(i) + "\" 1, 0 pigment { color White } scale 0.1 translate < ";
-		for(unsigned char j=0; j<this->dimension; j++)
-			sRes += std::to_string(da[j]+0.5*this->voxelSize) + ", ";
-		sRes +=  "1.0003> }\r\n";
-*/
+		sRes += this->voxels[i]->toPovray(this->voxelSize) + "\r\n";
 	}
 	return sRes;
 }
@@ -582,14 +572,7 @@ std::string VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram(){
 	std::stringstream out;
 
 	for(int i=0; i<=this->last; i++){
-		double *da = this->voxels[i]->getPosition();
-		double x1 = da[0], x2 = da[0] + this->voxelSize;
-		double y1 = da[1], y2 = da[1] + this->voxelSize;
-
-		out << "Polygon[{ {" << x1 << ", " << y1 << "}, "
-				<< "{" << x1 << ", " << y2 << "}, "
-				<< "{" << x2 << ", " << y2 << "}, "
-				<< "{" << x2 << ", " << y1 << "} }]";
+		out << this->voxels[i]->toWolfram(this->voxelSize, this->angularSize);
 		if (i!=this->last)
 			out << ", ";
 		out << std::endl;

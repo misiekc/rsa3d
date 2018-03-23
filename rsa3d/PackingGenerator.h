@@ -35,16 +35,22 @@ private:
 	double getFactor();
 	void createPacking();
 
+	void toPovray(const std::string &filename);
+	void toWolfram(const std::string &filename);
+	void toWolfram(double *da, const std::string &filename);
+
+	void printRemainingVoxels(const std::string &prefix);
+
+
 public:
 	PackingGenerator(int seed, Parameters *params);
 	virtual ~PackingGenerator();
 
 	void run();
 	std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * getPacking();
-	void toPovray(std::string filename);
-	void toWolfram(std::string filename);
-	static void toPovray(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * packing, double size, VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels, std::string filename);
-	static void toWolfram(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * packing, double size, VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels, std::string filename);
+	void toFile(const std::string &filename);
+	static void toPovray(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * packing, double size, VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels, const std::string &filename);
+	static void toWolfram(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * packing, double size, VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels, const std::string &filename);
 };
 
 #include "PackingGenerator.tpp"

@@ -93,8 +93,58 @@ double* Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation(){
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+std::string Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(double ssize){
+	std::stringstream out;
+
+	out.precision(std::numeric_limits< double >::max_digits10);
+
+	double *da = this->getPosition();
+	double x1 = da[0], x2 = da[0] + ssize;
+	double y1 = da[1], y2 = da[1] + ssize;
+
+	out << "polygon {5, < " + std::to_string(x1) + ", " + std::to_string(y1) + ", 1.0>, "
+					+ "< " + std::to_string(x1) + ", " + std::to_string(y2) + ", 1.0>, "
+					+ "< " + std::to_string(x2) + ", " + std::to_string(y2) + ", 1.0>, "
+					+ "< " + std::to_string(x2) + ", " + std::to_string(y1) + ", 1.0>, "
+					+ "< " + std::to_string(x1) + ", " + std::to_string(y1) + ", 1.0>"
+					+ " texture { pigment { color Black} } }";
+
+	/*
+			sRes += "\r\n  text { ttf \"timrom.ttf\" \"" + std::to_string(i) + "\" 1, 0 pigment { color White } scale 0.1 translate < ";
+			for(unsigned char j=0; j<this->dimension; j++)
+				sRes += std::to_string(da[j]+0.5*this->voxelSize) + ", ";
+			sRes +=  "1.0003> }";
+	*/
+
+	return out.str();
+}
+
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+std::string Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram(double ssize, double asize){
+	std::stringstream out;
+	out.precision(std::numeric_limits< double >::max_digits10);
+
+	double *da = this->getPosition();
+	double x1 = da[0], x2 = da[0] + ssize;
+	double y1 = da[1], y2 = da[1] + ssize;
+
+	out << "Polygon[{ {" << x1 << ", " << y1 << "}, "
+			<< "{" << x1 << ", " << y2 << "}, "
+			<< "{" << x2 << ", " << y2 << "}, "
+			<< "{" << x2 << ", " << y1 << "} }]";
+	if (ANGULAR_DIMENSION > 0){
+		out << "(* angles: [ " << this->getOrientation()[0] << ", " << (this->getOrientation()[0] + asize) << ") *)" << std::endl;
+	}
+	return out.str();
+}
+
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 std::string Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toString(){
 	std::stringstream out;
+	out.precision(std::numeric_limits< double >::max_digits10);
+
 	out << "index: " << this->index << " position: (";
 	for (unsigned short i=0; i<SPATIAL_DIMENSION; i++){
 		out << this->position[i];

@@ -42,6 +42,8 @@ public:
 
 	double *getOrientation();
 
+	std::string toPovray(double ssize);
+	std::string toWolfram(double ssize, double asize);
 	std::string toString();
 
 
