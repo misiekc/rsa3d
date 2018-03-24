@@ -1,10 +1,5 @@
 #include "PackingGenerator.h"
 #include "analizator/Analyzer.h"
-#include "../test/CuboidSpeedTest.h"
-#include "../test/CuboidPointInsideTest.h"
-#include "../test/CuboidIntTest.h"
-#include "../test/AnisotropicShape2DExclusionTest.h"
-#include "../test/VectorSpeedTest.h"
 
 #include <unistd.h>
 #include <sys/wait.h>
@@ -16,7 +11,7 @@ std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * fromFile(co
 	if (!file)
 		die("Cannot open file " + filename + " to restore packing");
 
-	auto * v = new std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *>;
+	auto v = new std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *>;
 	RND rnd(1);
 
 	while (!file.eof()) {
@@ -35,7 +30,7 @@ void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
 	std::string size(buf);
 
-	auto *pg = new PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>(seed, params);
+	auto pg = new PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>(seed, params);
 	pg->run();
 	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = pg->getPacking();
 
@@ -114,22 +109,6 @@ void boundaries(Parameters *params) {
 
 
 int main(int argc, char **argv) {
-    if (argc < 2)
-        die("No mode param. Aborting.");
-
-    // Modes with custom environment
-    if (strcmp(argv[1], "cube_speedtest") == 0)
-		return cube_speedtest::main(argc, argv);
-    else if (strcmp(argv[1], "cube_inttest") == 0)
-		return cube_inttest::main(argc, argv);
-    else if (strcmp(argv[1], "cube_pitest") == 0)
-		return cube_pitest::main(argc, argv);
-    else if (strcmp(argv[1], "as2d_extest") == 0)
-        return as2d_extest::main(argc, argv);
-    else if (strcmp(argv[1], "vec_speedtest") == 0)
-        return vec_speedtest::main(argc, argv);
-	
-    // Modes with standard environment
     if (argc < 3)
         die("No input file given. Aborting.");
     
@@ -145,12 +124,12 @@ int main(int argc, char **argv) {
 		an.analyzePackingsInDirectory(argv[3], 0.01, 1.0);
 	} else if (strcmp(argv[1], "povray")==0) {
 		std::string file(argv[3]);
-		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(file);
+		auto packing = fromFile(file);
 		PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>::toPovray(packing, params.surfaceSize, nullptr, file + ".pov");
 		delete packing;
 	} else if (strcmp(argv[1], "wolfram")==0) {
 		std::string file(argv[3]);
-		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(file);
+		auto packing = fromFile(file);
 		PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>::toWolfram(packing, params.surfaceSize, nullptr, file + ".nb");
 		delete packing;
 	}else{
