@@ -28,11 +28,15 @@ private:
 	VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels;
 	Surface *surface;
 
+	double spatialSize;
+	double angularSize;
+
 	int analyzeVoxels();
 	int analyzeRegion(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
 	void modifiedRSA(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
 	bool isSaturated();
 	double getFactor();
+	bool isInside(double *position, double *orientation);
 	void createPacking();
 
 	void toPovray(const std::string &filename);

@@ -47,10 +47,12 @@ protected:
 	double initialVoxelSize;
 	double initialAngularVoxelSize;
 	double voxelSize;
-	double requestedAngularSize;
-	double angularSize;
+	double angularVoxelSize;
 
+
+	double angularSize;
 	double size;
+
 	int beginningVoxelNumber;
 	int offset[(1 << SPATIAL_DIMENSION)][SPATIAL_DIMENSION]; // matrix of d-dimensional offsets to 2^d voxel vertices
 

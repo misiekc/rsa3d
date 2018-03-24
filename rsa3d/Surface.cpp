@@ -73,13 +73,6 @@ void Surface::checkPosition(double *da){
 	// do nothing
 }
 
-bool Surface::isInside(double *da){
-	for (int i = 0; i < this->dimension; i++)
-		if (da[i] < 0 || da[i] > this->size)
-			return false;
-	return true;
-}
-
 double Surface::distance2(double *a1, double *a2) {
 	double *v = new double[this->dimension];
 	for (int i = 0; i < this->dimension; i++)

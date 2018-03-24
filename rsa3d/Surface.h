@@ -42,7 +42,6 @@ public:
 	NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> * getNeighbourGrid();
 	double distance2(double *a1, double *a2);
 
-	virtual bool isInside(double * da);
 	virtual double * getTranslation(double *result, double *p1, double *p2) = 0;
 	virtual void vector(double *v) = 0;
 	virtual void checkPosition(double *da);

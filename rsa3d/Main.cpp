@@ -153,8 +153,7 @@ int main(int argc, char **argv) {
 	ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
 
 	if (strcmp(argv[1], "simulate")==0) {
-		if (argc<4)
-			simulate(&params);
+		simulate(&params);
 	} else if (strcmp(argv[1], "debug")==0){
 		debug(&params, argv[3]);
 	} else if (strcmp(argv[1], "boundaries")==0) {

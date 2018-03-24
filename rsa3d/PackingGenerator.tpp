@@ -30,7 +30,10 @@ PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::PackingGenerator(int see
 	RND rnd(this->seed);
 	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s = ShapeFactory::createShape(&rnd);
 
-	this->voxels = new VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(this->params->surfaceSize, s->getVoxelSize(), s->getVoxelAngularSize());
+	this->spatialSize = this->params->surfaceSize;
+	this->angularSize = s->getVoxelAngularSize();
+
+	this->voxels = new VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(this->spatialSize, s->getVoxelSize(), this->angularSize);
 
 	double gridSize = s->getNeighbourListCellSize();
 	if (gridSize < this->params->thresholdDistance)
@@ -164,6 +167,21 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::modifiedRSA(Shape<S
 	}
 }
 
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+bool PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isInside(double *position, double *orientation){
+	for(unsigned short i=0; i<SPATIAL_DIMENSION; i++){
+		if (position[i]>=this->spatialSize || position[i]<0)
+			return false;
+	}
+	for(unsigned short i=0; i<ANGULAR_DIMENSION; i++){
+		if (orientation[i]>=this->angularSize || orientation[i]<0)
+			return false;
+	}
+	return true;
+
+}
+
+
 #ifdef _OPENMP
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
@@ -211,7 +229,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 			do{
 				aVoxels[i] = this->voxels->getRandomVoxel(aRND[tid]);
 				this->voxels->getRandomPositionAndOrientation(pos, angle, aVoxels[i], aRND[tid]);
-			}while(!this->surface->isInside(pos));
+			}while(!this->isInside(pos, angle));
 			// setting shape position and orientation
 			sVirtual[i]->translate(pos);
 			sVirtual[i]->rotate(angle);
@@ -336,10 +354,10 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 //			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
 //			this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
 //			this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
-			std::string filename = "snapshot_" + std::to_string(this->voxels->length()) + ".dbg";
-			std::ofstream file(filename, std::ios::binary);
-			this->store(file);
-			file.close();
+//			std::string filename = "snapshot_" + std::to_string(this->voxels->length()) + ".dbg";
+//			std::ofstream file(filename, std::ios::binary);
+//			this->store(file);
+//			file.close();
 		}else{
 			missCounter = 0;
 		}
@@ -383,7 +401,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 		do{
 			v = this->voxels->getRandomVoxel(&rnd);
 			this->voxels->getRandomPositionAndOrientation(pos, angle, v, &rnd);
-		}while(!this->surface->isInside(pos));
+		}while(!this->isInside(pos, angle));
 		s->translate(pos);
 		s->rotate(angle);
 
