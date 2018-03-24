@@ -29,9 +29,11 @@ private:
 	double findInitialVoxelAngularSize(double d);
 	int getLinearNumberOfVoxels(double vs);
 	void fillNeighbourGrid();
+	int getIndexOfTopLevelVoxel(double *da);
 //	bool analyzeVoxelOLD(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc);
 //	bool analyzeVoxelNEW(Voxel<DIMENSION> *v, NeighbourGrid<Shape<DIMENSION>> *nl, std::unordered_set<Shape<DIMENSION> *> *neighbours, BoundaryConditions *bc);
 	bool analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *neighbours, BoundaryConditions *bc);
+	void checkTopLevelVoxels();
 	bool disabled;
 
 	std::uniform_real_distribution<double> *spatialDistribution;
@@ -80,10 +82,14 @@ public:
 	double getVoxelSize();
 	double getVoxelAngularSize();
 	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>* get(int i);
-	int length();
+	int length() const;
 	double getVoxelsSurface();
 	std::string toPovray();
 	std::string toWolfram();
+
+	void store(std::ostream &f) const;
+	void restore(std::istream &f);
+
 };
 
 #include "VoxelList.tpp"

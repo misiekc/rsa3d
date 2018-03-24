@@ -41,6 +41,7 @@ private:
 
 	void printRemainingVoxels(const std::string &prefix);
 
+	void store(std::ostream &f) const;
 
 public:
 	PackingGenerator(int seed, Parameters *params);
@@ -51,6 +52,8 @@ public:
 	void toFile(const std::string &filename);
 	static void toPovray(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * packing, double size, VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels, const std::string &filename);
 	static void toWolfram(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * packing, double size, VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels, const std::string &filename);
+
+	void restore(std::istream &f);
 };
 
 #include "PackingGenerator.tpp"

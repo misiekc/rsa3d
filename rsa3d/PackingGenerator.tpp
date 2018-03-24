@@ -24,12 +24,25 @@ template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 double PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::FACTOR_LIMIT = 5.0;
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::PackingGenerator(int s, Parameters *p) {
-	this->params = p;
-	this->seed = s;
-	this->voxels = NULL;
-	this->surface = NULL;
+PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::PackingGenerator(int seed, Parameters *params) {
+	this->params = params;
+	this->seed = seed;
+	RND rnd(this->seed);
+	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s = ShapeFactory::createShape(&rnd);
 
+	this->voxels = new VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(this->params->surfaceSize, s->getVoxelSize(), s->getVoxelAngularSize());
+
+	double gridSize = s->getNeighbourListCellSize();
+	if (gridSize < this->params->thresholdDistance)
+		gridSize = this->params->thresholdDistance;
+
+
+	if(this->params->boundaryConditions.compare("free")==0)
+		this->surface = new NBoxFBC(SPATIAL_DIMENSION, this->params->surfaceSize, gridSize, s->getVoxelSize());
+	else
+		this->surface = new NBoxPBC(SPATIAL_DIMENSION, this->params->surfaceSize, gridSize, s->getVoxelSize());
+
+	delete s;
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
@@ -38,6 +51,7 @@ PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::~PackingGenerator() {
 		delete s;
 	if (this->voxels!=NULL)
 		delete this->voxels;
+	delete this->surface;
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
@@ -164,23 +178,12 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 	int added = 0;
 	int missCounter = 0;
 
+
 	RND rnd(this->seed);
 	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s = ShapeFactory::createShape(&rnd);
-
-	this->voxels = new VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(this->params->surfaceSize, s->getVoxelSize(), s->getVoxelAngularSize());
-
-	double gridSize = s->getNeighbourListCellSize();
-	if (gridSize < this->params->thresholdDistance)
-		gridSize = this->params->thresholdDistance;
-
-
-	if(params->boundaryConditions.compare("free")==0)
-		this->surface = new NBoxFBC(SPATIAL_DIMENSION, this->params->surfaceSize, s->getNeighbourListCellSize(), s->getVoxelSize());
-	else
-		this->surface = new NBoxPBC(SPATIAL_DIMENSION, this->params->surfaceSize, s->getNeighbourListCellSize(), s->getVoxelSize());
-
 	double dt = s->getVolume() / this->surface->getArea();
 	delete s;
+
 	int l = 0;
 	double t = 0;
 	int tmpSplit = this->params->split;
@@ -333,6 +336,10 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 //			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
 //			this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
 //			this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
+			std::string filename = "snapshot_" + std::to_string(this->voxels->length()) + ".dbg";
+			std::ofstream file(filename, std::ios::binary);
+			this->store(file);
+			file.close();
 		}else{
 			missCounter = 0;
 		}
@@ -342,8 +349,6 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 		delete aRND[i];
 	}
 	delete[] aRND;
-
-	delete this->surface;
 
 	std::cout << "[" << seed << " PackingGenerator::createPacking] finished after generating " << l << " shapes" << std::endl;
 }
@@ -356,24 +361,12 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 
 	std::cout << "[" << this->seed << " PackingGenerator::createPacking] started" << std::endl;
 	int missCounter = 0;
+
 	RND rnd(this->seed);
-	ShapeFactory::initShapeClass(this->params->particleType, this->params->particleAttributes);
 	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s = ShapeFactory::createShape(&rnd);
-
-	this->voxels = new VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(this->params->surfaceSize, s->getVoxelSize(), s->getVoxelAngularSize());
-
-	double gridSize = s->getNeighbourListCellSize();
-	if (gridSize < this->params->thresholdDistance)
-		gridSize = this->params->thresholdDistance;
-
-
-	if(params->boundaryConditions.compare("free")==0)
-		this->surface = new NBoxFBC(SPATIAL_DIMENSION, this->params->surfaceSize, s->getNeighbourListCellSize(), s->getVoxelSize());
-	else
-		this->surface = new NBoxPBC(SPATIAL_DIMENSION, this->params->surfaceSize, s->getNeighbourListCellSize(), s->getVoxelSize());
-
 	double dt = s->getVolume() / this->surface->getArea();
 	delete s;
+
 	int l = 0;
 	double t = 0;
 	int tmpSplit = this->params->split;
@@ -669,24 +662,46 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toFile(const std::s
 	}
 	file.close();
 }
-/*
+
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toFile(const std::string &filename, double *da) {
-	std::ofstream file(filename, std::ios::binary);
-    if (!file)
-        die("Cannot open file " + filename + " to store packing");
-    std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> sTmp;
-    this->surface->getNeighbours(&sTmp, da);
+void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::store(std::ostream &f) const{
+	unsigned short sd = SPATIAL_DIMENSION;
+	unsigned short ad = ANGULAR_DIMENSION;
+	f.write((char *)(&sd), sizeof(unsigned char));
+	if (ad>0)
+		f.write((char *)(&ad), sizeof(unsigned char));
+	int size = this->packing.size();
+	f.write((char *)(&size), sizeof(int));
 
-
-
-
-
-
-	for (Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s : sTmp) {
-		s->store(file);
+	for(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s: this->packing){
+		s->store(f);
 	}
-	file.close();
+	this->voxels->store(f);
 }
-*/
 
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
+	unsigned char sd = SPATIAL_DIMENSION;
+	unsigned char ad = ANGULAR_DIMENSION;
+
+	f.read((char *)(&sd), sizeof(unsigned char));
+	if (ad > 0)
+		f.read((char *)(&ad), sizeof(unsigned char));
+
+	if (sd!=SPATIAL_DIMENSION || ad!=ANGULAR_DIMENSION){
+		std::cout << "[ERROR] cannot restore PackingGenerator: incompatible dimensions: read " << f.gcount() << " bytes." << std::endl;
+		return;
+	}
+	int size;
+	RND rnd;
+	f.read((char *)(&size), sizeof(int));
+	this->packing.clear();
+	this->surface->clear();
+	for(int i=0; i<size; i++){
+		Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s = ShapeFactory::createShape(&rnd);
+		s->restore(f);
+		this->surface->add(s);
+		this->packing.push_back(s);
+	}
+	this->voxels->restore(f);
+}
