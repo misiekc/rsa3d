@@ -143,12 +143,12 @@ int main(int argc, char **argv) {
 		an.analyzePackingsInDirectory(argv[3], 0.01, 1.0);
 	} else if (strcmp(argv[1], "povray")==0) {
 		std::string file(argv[3]);
-		auto packing = fromFile(file);
+		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(file);
 		PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>::toPovray(packing, params.surfaceSize, nullptr, file + ".pov");
 		delete packing;
 	} else if (strcmp(argv[1], "wolfram")==0) {
 		std::string file(argv[3]);
-		auto packing = fromFile(file);
+		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(file);
 		PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>::toWolfram(packing, params.surfaceSize, nullptr, file + ".nb");
 		delete packing;
 	}else{
