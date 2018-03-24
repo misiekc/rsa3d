@@ -18,6 +18,10 @@ Surface::~Surface() {
 	delete this->list;
 }
 
+void Surface::clear(){
+	this->list->clear();
+}
+
 
 void Surface::add(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s) {
 		this->list->add(s, s->getPosition());

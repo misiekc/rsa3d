@@ -30,7 +30,7 @@ void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
 	std::string size(buf);
 
-	auto pg = new PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>(seed, params);
+	PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *pg = new PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>(seed, params);
 	pg->run();
 	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = pg->getPacking();
 
@@ -40,6 +40,22 @@ void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 	}
 	dataFile << seed << "\t" << packing->size() << "\t"	<< (*packing)[packing->size() - 1]->time << std::endl;
 	dataFile.flush();
+	delete pg;
+}
+
+void debug(Parameters *params, char *cfile){
+	std::string filename(cfile);
+	char buf[20];
+	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
+	std::string size(buf);
+
+	std::ifstream file(filename, std::ios::binary);
+	if (!file)
+		die("Cannot open file " + filename + " to restore packing generator");
+
+	PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *pg = new PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>(0, params);
+	pg->restore(file);
+	pg->run();
 	delete pg;
 }
 
@@ -116,7 +132,10 @@ int main(int argc, char **argv) {
 	ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
 
 	if (strcmp(argv[1], "simulate")==0) {
-		simulate(&params);
+		if (argc<4)
+			simulate(&params);
+	} else if (strcmp(argv[1], "debug")==0){
+		debug(&params, argv[3]);
 	} else if (strcmp(argv[1], "boundaries")==0) {
 		boundaries(&params);
 	} else if (strcmp(argv[1], "analyze")==0) {

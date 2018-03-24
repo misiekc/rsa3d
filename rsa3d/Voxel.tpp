@@ -160,3 +160,34 @@ std::string Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toString(){
 	out << ")";
 	return out.str();
 }
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::store(std::ostream &f) const{
+	unsigned short sd = SPATIAL_DIMENSION;
+	unsigned short ad = ANGULAR_DIMENSION;
+	f.write((char *)(&sd), sizeof(unsigned char));
+	if (ad>0)
+		f.write((char *)(&ad), sizeof(unsigned char));
+	f.write((char *)(this->position), SPATIAL_DIMENSION*sizeof(double));
+	if (ad>0)
+		f.write((char *)(this->orientation), ANGULAR_DIMENSION*sizeof(double));
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
+	unsigned char sd = SPATIAL_DIMENSION;
+	unsigned char ad = ANGULAR_DIMENSION;
+
+	f.read((char *)(&sd), sizeof(unsigned char));
+	if (ad > 0)
+		f.read((char *)(&ad), sizeof(unsigned char));
+
+	if (sd!=SPATIAL_DIMENSION || ad!=ANGULAR_DIMENSION){
+		std::cout << "[ERROR] cannot restore Voxel: incompatible dimensions: read " << f.gcount() << " bytes." << std::endl;
+		return;
+	}
+	f.read((char *)(this->position), sd*sizeof(double));
+	if (ad>0)
+		f.read((char *)(this->orientation), ad*sizeof(double));
+}
+

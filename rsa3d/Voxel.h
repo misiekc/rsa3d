@@ -46,6 +46,10 @@ public:
 	std::string toWolfram(double ssize, double asize);
 	std::string toString();
 
+	void store(std::ostream &f) const;
+	void restore(std::istream &f);
+
+
 
 };
 

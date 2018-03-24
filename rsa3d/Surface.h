@@ -34,6 +34,7 @@ public:
 	Surface(int dim, double s, double ndx, double vdx);
 	virtual ~Surface();
 
+	void clear();
 	void add(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s);
 	Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>* check(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s);
 	void getNeighbours(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *result, double *da);
