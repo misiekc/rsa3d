@@ -203,7 +203,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 	delete s;
 
 	int l = 0;
-	double t = 0;
+	double t = 0, factor = 1;
 	int tmpSplit = this->params->split;
 //	int snapshotCounter = 0;
 	RND **aRND = new RND*[maxthreads];
@@ -218,6 +218,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 	while (!this->isSaturated() && t<params->maxTime && missCounter<params->maxTriesWithoutSuccess) {
 
 		std::cout << "[" << this->seed << " PackingGenerator::createPacking] choosing " << tmpSplit << " shapes..." << std::flush;
+		factor = this->getFactor();
 
 		#pragma omp parallel for
 		for(int i = 0; i<tmpSplit; i++){
@@ -259,7 +260,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 		// sequentially processing potentially non overlaping shapes
 		for(int i=0; i<tmpSplit; i++){
 
-			t += this->getFactor() * dt;
+			t += factor * dt;
 
 			// if there were no intersecting particles in the packing
 			if (sOverlapped[i]==NULL){
