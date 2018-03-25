@@ -217,7 +217,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 
 	while (!this->isSaturated() && t<params->maxTime && missCounter<params->maxTriesWithoutSuccess) {
 
-		std::cout << "[" << this->seed << " PackingGenerator::createPacking] choosing shapes..." << std::flush;
+		std::cout << "[" << this->seed << " PackingGenerator::createPacking] choosing " << tmpSplit << " shapes..." << std::flush;
 
 		#pragma omp parallel for
 		for(int i = 0; i<tmpSplit; i++){
@@ -243,7 +243,18 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 		checkedAgain = 0;
 		added = 0;
 
-
+/*
+		if(this->voxels->length()<20){
+			std::string filename = "shapes_" + std::to_string(this->voxels->length()) + ".dbg";
+			std::ofstream file(filename, std::ios::binary);
+			file.write((char *)(&tmpSplit), sizeof(int));
+			for(int i=0; i<tmpSplit; i++){
+				sVirtual[i]->store(file);
+			}
+			this->store(file);
+			file.close();
+		}
+*/
 
 		// sequentially processing potentially non overlaping shapes
 		for(int i=0; i<tmpSplit; i++){
@@ -337,6 +348,8 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 					tmpSplit = 0.5 * std::numeric_limits<int>::max();
 				if(voxels->length()<1000 && tmpSplit>100)
 					tmpSplit /= 10.0;
+				if(tmpSplit < omp_get_max_threads())
+					tmpSplit = omp_get_max_threads();
 
 				delete[] sOverlapped;
 				delete[] sVirtual;
@@ -349,12 +362,16 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 
 				missCounter = 0;
 			} else {
-				this->analyzeVoxels();
+				if (tmpSplit > this->params->split)
+					this->analyzeVoxels();
+				else{
+					tmpSplit = 2*tmpSplit + 1;
+				}
 			}
 //			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
 //			this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
 //			this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
-//			std::string filename = "snapshot_" + std::to_string(this->voxels->length()) + ".dbg";
+//			std::string filename = "snapshot_" + std:::to_string(this->packing.size()) + "_" + std::to_string(this->voxels->length()) + ".dbg";
 //			std::ofstream file(filename, std::ios::binary);
 //			this->store(file);
 //			file.close();
@@ -462,8 +479,14 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 						tmpSplit = 0.5 * std::numeric_limits<int>::max();
 					if(voxels->length()<1000 && tmpSplit>100)
 						tmpSplit /= 10.0;
+					if(tmpSplit<1)
+						tmpSplit = 1;
 				} else {
-					this->analyzeVoxels();
+					if (tmpSplit > this->params->split)
+						this->analyzeVoxels();
+					else{
+						tmpSplit = 2*tmpSplit + 1;
+					}
 				}
 //				this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
 //				this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
@@ -720,6 +743,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istrea
 		s->restore(f);
 		this->surface->add(s);
 		this->packing.push_back(s);
+//		std::cout << s->toString() << std::endl;
 	}
 	this->voxels->restore(f);
 }
