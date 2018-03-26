@@ -343,14 +343,26 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 //					this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
 			std::cout << " done: " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << ", factor: " << this->getFactor() << std::endl;
 
-			if (b) {
-				tmpSplit *=  ((double)v1 / v0);
-				if (tmpSplit > 0.5 * std::numeric_limits<int>::max())
-					tmpSplit = 0.5 * std::numeric_limits<int>::max();
-				if(voxels->length()<1000 && tmpSplit>100)
-					tmpSplit /= 10.0;
-				if(tmpSplit < omp_get_max_threads())
-					tmpSplit = omp_get_max_threads();
+			// if no split and tmpSplit large enough
+			if (!b && tmpSplit > this->params->split){
+				this->analyzeVoxels();
+			}else{
+				// if split
+				if (b) {
+					tmpSplit *=  ((double)v1 / v0);
+					if (tmpSplit > 0.5 * std::numeric_limits<int>::max())
+						tmpSplit = 0.5 * std::numeric_limits<int>::max();
+					if(voxels->length()<1000 && tmpSplit>100)
+						tmpSplit /= 10.0;
+					if(tmpSplit < omp_get_max_threads())
+						tmpSplit = omp_get_max_threads();
+
+					missCounter = 0;
+				}
+				// or tmpSplit small
+				else if(tmpSplit <= this->params->split){
+					tmpSplit = 2*tmpSplit + 1;
+				}
 
 				delete[] sOverlapped;
 				delete[] sVirtual;
@@ -359,15 +371,6 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 				sOverlapped = new Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *[tmpSplit];
 				sVirtual = new Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *[tmpSplit];
 				aVoxels = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *[tmpSplit];
-
-
-				missCounter = 0;
-			} else {
-				if (tmpSplit > this->params->split)
-					this->analyzeVoxels();
-				else{
-					tmpSplit = 2*tmpSplit + 1;
-				}
 			}
 //			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
 //			this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
