@@ -24,9 +24,12 @@ private:
 	double u[2], uT[2];
 
 	void calculateU();
-
 	double calculateF(double* r, double g);
-
+	bool pointInsideUnrotated(const Vector<2> &p, double angleFrom, double angleTo) const;
+	bool withinAngle(const Vector<2> &p, double angleFrom, double angleTo) const;
+	bool withinAngleCheckCollision(const Vector<2> &p, double lowerAngle, double upperAngle) const;
+	bool circleCollision(const Vector<2> &p, double tMin, double tMax) const;
+	int pointInsideSpecialArea(BoundaryConditions *bc, double *other, double angleFrom, double angleTo);
 
 public:
 	static void initClass(const std::string &args);
@@ -37,40 +40,20 @@ public:
 	Ellipse & operator = (const Ellipse & el);
 	~Ellipse() override = default;
 
-
-	double getVoxelAngularSize() override;
-
-    void setAngle(double angle);
-
-	void rotate(double *v) override;
-
-	int overlap(BoundaryConditions *bc, Shape<2, 1> *s) override;
-	double getVolume() override;
-	int pointInside(BoundaryConditions *bc, double* da) override;
-	int pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) override;
-
-	bool pointInsideUnrotated(const Vector<2> &p, double angleFrom, double angleTo) const;
-
-    bool withinAngle(const Vector<2> &p, double angleFrom, double angleTo) const;
-
-	bool withinAngleCheckCollision(const Vector<2> &p, double lowerAngle, double upperAngle) const;
-
-	bool circleCollision(const Vector<2> &p, double tMin, double tMax) const;
-
-	int pointInsideSpecialArea(BoundaryConditions *bc, double *other, double angleFrom, double angleTo);
-
-	double getNeighbourListCellSize() override;
-	double getVoxelSize() override;
-
-
+    double getNeighbourListCellSize() override;
+    double getVoxelSize() override;
+    double getVoxelAngularSize() override;
+    double getVolume() override;
+    void setAngle(double angle) override ;
+    void rotate(double *v) override;
+    int overlap(BoundaryConditions *bc, Shape<2, 1> *s) override;
+    int pointInside(BoundaryConditions *bc, double* da) override;
+    int pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) override;
     std::string toWolfram() const override;
 	std::string toPovray() const override;
     std::string toString() override;
-
     void store(std::ostream &f) const override;
 	void restore(std::istream &f) override;
-
-
 };
 
 #endif /* SHAPES_ELLIPSE_H_ */

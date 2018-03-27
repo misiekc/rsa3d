@@ -42,3 +42,18 @@ double AnisotropicShape2D::normalizeAngle(double angle, double interval) const {
         angle -= interval;
     return angle;
 }
+
+// Keep angle in [0; getVoxelAngularSize()] range when rotating
+//---------------------------------------------------------------------------------------------
+void AnisotropicShape2D::rotate(double *v) {
+    Shape::rotate(v);
+    double interval = getVoxelAngularSize();
+    this->orientation[0] = normalizeAngle(orientation[0], interval);
+}
+
+// Keep angle in [0; getVoxelAngularSize()] range when setting
+//---------------------------------------------------------------------------------------------
+void AnisotropicShape2D::setAngle(double angle) {
+    double interval = getVoxelAngularSize();
+    this->orientation[0] = normalizeAngle(angle, interval);
+}

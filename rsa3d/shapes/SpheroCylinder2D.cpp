@@ -7,7 +7,7 @@
 #include "SpheroCylinder2D.h"
 #include "../Utils.h"
 
-#define EPSILON 0.0000000001
+static const double EPSILON = 0.0000000001;
 
 double SpheroCylinder2D::voxelSize;
 double SpheroCylinder2D::neighbourListCellSize;
@@ -26,9 +26,6 @@ void SpheroCylinder2D::initClass(const std::string &attr) {
     neighbourListCellSize = (halfDistance + radius) * 2;
     voxelSize = radius / M_SQRT2;
     centerVector = Vector<2>{{halfDistance , 0}};
-}
-
-SpheroCylinder2D::SpheroCylinder2D() : AnisotropicShape2D() {
 }
 
 Shape<2, 1> * SpheroCylinder2D::create(RND * rnd) {
@@ -154,7 +151,7 @@ std::string SpheroCylinder2D::toWolfram() const {
     return out.str();
 }
 
-bool SpheroCylinder2D::withinExclusionZone(Vector<2> pointPos, double angle) {
+bool SpheroCylinder2D::withinExclusionZone(const Vector<2> &pointPos, double angle) {
     Vector<2> thisPos(this->position);
 
     // Check bounding spherocylinder

@@ -20,8 +20,11 @@ protected:
 
 public:
 
+    void rotate(double *v) override;
+
     double getAngle() const;
-	virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) = 0;
+    virtual void setAngle(double angle);
+    virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) = 0;
 	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) override;
 };
 

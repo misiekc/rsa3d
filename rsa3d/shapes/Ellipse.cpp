@@ -10,7 +10,7 @@
 #include "../Intersection.h"
 
 
-#define EPSILON 0.0000000001
+static const double EPSILON = 0.0000000001;
 
 double Ellipse::longSemiAxis;
 double Ellipse::shortSemiAxis;
@@ -26,7 +26,6 @@ Ellipse::Ellipse() : AnisotropicShape2D(){
 	this->a = Ellipse::longSemiAxis;
 	this->b = Ellipse::shortSemiAxis;
 	this->setAngle(0);
-	//this->calculateU();
 }
 
 Ellipse::Ellipse(const Ellipse &other) : AnisotropicShape2D(other), a(other.a), b(other.b) {
@@ -67,13 +66,12 @@ double Ellipse::calculateF(double* r, double g){
 }
 
 void Ellipse::setAngle(double angle){
-    this->orientation[0] = this->normalizeAngle(angle, M_PI);
+	AnisotropicShape2D::setAngle(angle);
 	this->calculateU();
 }
 
 void Ellipse::rotate(double *v){
-	Shape::rotate(v);
-    this->orientation[0] = this->normalizeAngle(this->orientation[0], M_PI);
+	AnisotropicShape2D::rotate(v);
 	this->calculateU();
 }
 
@@ -96,7 +94,6 @@ int Ellipse::overlap(BoundaryConditions *bc, Shape<2, 1> *s) {
 double Ellipse::getVolume() {
 	return M_PI*this->a*this->b;
 }
-
 
 int Ellipse::pointInside(BoundaryConditions *bc, double* da) {
 	double ta[2];
