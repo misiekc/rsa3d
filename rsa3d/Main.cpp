@@ -6,6 +6,61 @@
 #include <cstring>
 #include <iomanip>
 
+#include <chrono>
+
+#include <unistd.h>
+#include <ios>
+#include <iostream>
+#include <fstream>
+#include <string>
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// process_mem_usage(double &, double &) - takes two doubles by reference,
+// attempts to read the system-dependent data for a process' virtual memory
+// size and resident set size, and return the results in KB.
+//
+// On failure, returns 0.0, 0.0
+
+void process_mem_usage(double& vm_usage, double& resident_set)
+{
+   using std::ios_base;
+   using std::ifstream;
+   using std::string;
+
+   vm_usage     = 0.0;
+   resident_set = 0.0;
+
+   // 'file' stat seems to give the most reliable results
+   //
+   ifstream stat_stream("/proc/self/stat",ios_base::in);
+
+   // dummy vars for leading entries in stat that we don't care about
+   //
+   string pid, comm, state, ppid, pgrp, session, tty_nr;
+   string tpgid, flags, minflt, cminflt, majflt, cmajflt;
+   string utime, stime, cutime, cstime, priority, nice;
+   string O, itrealvalue, starttime;
+
+   // the two fields we want
+   //
+   unsigned long vsize;
+   long rss;
+
+   stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
+               >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
+               >> utime >> stime >> cutime >> cstime >> priority >> nice
+               >> O >> itrealvalue >> starttime >> vsize >> rss; // don't care about the rest
+
+   stat_stream.close();
+
+   long page_size_kb = sysconf(_SC_PAGE_SIZE); // in case x86-64 is configured to use 2MB pages
+   vm_usage     = vsize / 1024.0 / 1024.0;
+   resident_set = rss * page_size_kb / 1024.0 / 1024.0;
+}
+
+
+
 std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * fromFile(const std::string &filename) {
 	std::ifstream file(filename, std::ios::binary);
 	if (!file)
@@ -27,8 +82,11 @@ std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * fromFile(co
 
 void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 	char buf[20];
+	double vm, rss;
 	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
 	std::string size(buf);
+
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
 	PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *pg = new PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>(seed, params);
 	pg->run();
@@ -38,8 +96,11 @@ void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 		std::string sPackingFile = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + "_" + std::to_string(seed) + ".bin";
 		pg->toFile(sPackingFile);
 	}
+	std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
+	process_mem_usage(vm, rss);
 	dataFile << seed << "\t" << packing->size() << "\t"	<< (*packing)[packing->size() - 1]->time << std::endl;
 	dataFile.flush();
+	std::cout << "T:" << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "; VM: " << vm << "; RSS: " << rss << std::endl;
 	delete pg;
 }
 

@@ -32,6 +32,10 @@ Shape<2, 1> * SpheroCylinder2D::create(RND * rnd) {
     return new SpheroCylinder2D();
 }
 
+double SpheroCylinder2D::getVoxelAngularSize() {
+	return M_PI;
+}
+
 double SpheroCylinder2D::getNeighbourListCellSize() {
     return neighbourListCellSize;
 }

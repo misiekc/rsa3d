@@ -27,6 +27,7 @@ public:
     static void initClass(const std::string & attr);
     static Shape<2, 1> * create(RND * rnd);
 
+    double getVoxelAngularSize() override;
     double getNeighbourListCellSize() override;
     double getVoxelSize() override;
     double getVolume() override;
