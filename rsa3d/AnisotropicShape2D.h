@@ -12,20 +12,20 @@
 class AnisotropicShape2D : public Shape<2, 1> {
 
 protected:
-
     Matrix<2, 2> getAntiRotationMatrix() const;
     Matrix<2, 2> getRotationMatrix() const;
 	void normalizeAngleRange(double *angleFrom, double *angleTo, double interval) const;
 	double normalizeAngle(double angle, double interval) const;
 
 public:
-
-    void rotate(double *v) override;
+    // rotate(double*) is delegated to setAngle(double)
+    // pointInside(double* orientation, double orientationRange) -> pointInside(double angleFrom, double angleTo)
+    void rotate(double *v) final;
+    int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) final;
 
     double getAngle() const;
     virtual void setAngle(double angle);
     virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) = 0;
-	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) override;
 };
 
 

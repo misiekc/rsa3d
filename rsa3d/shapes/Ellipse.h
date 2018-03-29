@@ -44,8 +44,7 @@ public:
     double getVoxelSize() override;
     double getVoxelAngularSize() override;
     double getVolume() override;
-    void setAngle(double angle) override ;
-    void rotate(double *v) override;
+    void setAngle(double angle) override;
     int overlap(BoundaryConditions *bc, Shape<2, 1> *s) override;
     int pointInside(BoundaryConditions *bc, double* da) override;
     int pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) override;

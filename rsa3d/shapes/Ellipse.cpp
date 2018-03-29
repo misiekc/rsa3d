@@ -70,11 +70,6 @@ void Ellipse::setAngle(double angle){
 	this->calculateU();
 }
 
-void Ellipse::rotate(double *v){
-	AnisotropicShape2D::rotate(v);
-	this->calculateU();
-}
-
 int Ellipse::overlap(BoundaryConditions *bc, Shape<2, 1> *s) {
 	Ellipse es = *((Ellipse *)s);
     this->applyBC(bc, &es);
