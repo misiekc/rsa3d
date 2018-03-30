@@ -13,8 +13,6 @@
 #include <fstream>
 #include <limits>
 
-#include "shapes/Ellipse.h"
-
 
 #ifdef _OPENMP
 #include <omp.h>

@@ -1,15 +1,19 @@
-#############################################
-#         GENERAL PURPOSE MAKEFILE          #
-#############################################
-# COMPILATION AND CONSOLIDATION:            #
-#     make                                  #
-#                                           #
-# CLEANING HELPER FILES (OBJ & D):          #
-#     make clean                            #
-#                                           #
-# CLEANING ALL RESULT OF COMPILATION        #
-#     make clean_all                        #
-#############################################
+################################################
+# COMPILATION AND CONSOLIDATION OF EXECUTABLE: #
+#     make rsa                                 #
+# IT'S THE DEFAULT TARGET, SO ONE CAN USE      #
+#     make                                     #
+#                                              #
+# C & C OF CUSTOM TEST EXECUTABLE:             #
+#     make rsa_test                            #
+#                                              #
+# MAKING ALL BINARIES:                         #
+#     make all                                 #
+#                                              #
+# CLEANING ALL BUILD FILES (make-build EXEC):  #
+#     make clean                               #
+#                                              #
+################################################
 
 
 #####################
@@ -31,12 +35,24 @@ LFLAGS = -fopenmp
 
 # Executable name
 EXEC = rsa
+.DEFAULT_GOAL := $(EXEC)
 
-# Libraries
+# Statistics library name
 LIBSTAT = libstat.a
 
-# Source files list (without extensions)
-OBJS = rsa3d/AnisotropicShape2D \
+# All packages in the project
+PACKAGES = rsa3d/analizator/ \
+           rsa3d/shapes/ \
+           rsa3d/shapes/cube_strategies/ \
+           rsa3d/surfaces/ \
+           statistics/ \
+           test/ \
+           test/utility/
+
+# Source files list (without extensions) except of the Main.cpp file
+# These objects will be linked with both main executable and test
+# executables
+OBJS_COMMON = rsa3d/AnisotropicShape2D \
        rsa3d/BoundaryConditions \
        rsa3d/Config \
        rsa3d/DynamicMatrix \
@@ -59,9 +75,11 @@ OBJS = rsa3d/AnisotropicShape2D \
        rsa3d/surfaces/NBoxFBC \
        rsa3d/surfaces/NBoxPBC \
 
+# Objects to be linked only with main executable
 OBJS_MAIN = rsa3d/Main \
        		rsa3d/analizator/Analyzer \
 
+# Objects to be linked only with custom tests executable
 OBJS_TEST = test/utility/BallFactory \
        		test/utility/BoxFactory \
        		test/utility/Quantity \
@@ -80,16 +98,6 @@ OBJS_STAT = statistics/ASFRegression \
             statistics/Plot \
             statistics/PowerRegression
 
-# A list of all subfolders in the project (all dirs in path
-# are created automaticly, they don't have to be listed explicitly)
-SUBDIRS = rsa3d/analizator/ \
-          rsa3d/shapes/ \
-          rsa3d/shapes/cube_strategies/ \
-          rsa3d/surfaces/ \
-          statistics/ \
-          test/ \
-          test/utility/
-
 # build folder
 BUILD = make-build
 
@@ -99,61 +107,35 @@ OBJDIR = $(BUILD)/obj
 # D files folder
 DEPSDIR = $(BUILD)/deps
 
-###################################
-# MAKEFILE INTERNAL CONFIGURATION #
-###################################
-
-OBJSD = $(OBJS:%=$(OBJDIR)/%.o)
-OBJS_MAIND = $(OBJS_MAIN:%=$(OBJDIR)/%.o)
-OBJS_TESTD = $(OBJS_TEST:%=$(OBJDIR)/%.o)
-OBJS_STATD = $(OBJS_STAT:%=$(OBJDIR)/%.o)
-DEPS = $(OBJS:%=$(DEPSDIR)/%.d)
-DEPS_MAIN = $(OBJS_MAIN:%=$(DEPSDIR)/%.d)
-DEPS_TEST = $(OBJS_TEST:%=$(DEPSDIR)/%.d)
-DEPS_STAT = $(OBJS_STAT:%=$(DEPSDIR)/%.d)
+# Map all objects from source file lists to dependency files
+OBJS_COMMON_D = $(OBJS_COMMON:%=$(OBJDIR)/%.o)
+OBJS_MAIN_D = $(OBJS_MAIN:%=$(OBJDIR)/%.o)
+OBJS_TEST_D = $(OBJS_TEST:%=$(OBJDIR)/%.o)
+OBJS_STAT_D = $(OBJS_STAT:%=$(OBJDIR)/%.o)
 
 # creating folders
-#-----------------------------------
 define make_dirs
 @mkdir -p $(OBJDIR)
 @mkdir -p $(DEPSDIR)
-@for dir in $(SUBDIRS); \
+@for dir in $(PACKAGES); \
 do \
 mkdir -p $(OBJDIR)/$$dir && mkdir -p $(DEPSDIR)/$$dir; \
 done
 endef
 
 ####################
-# TARGETS          #
+# COMPILATION      #
 ####################
 
-# executable linking
-#-----------------------------------------------------------------
-$(EXEC): $(OBJSD) $(OBJS_MAIND) $(LIBSTAT)
-	@echo '## LINKING $(EXEC)'
-	$(CC) -o $@ $^ $(LFLAGS)
-
-$(EXEC)_test: $(OBJSD) $(OBJS_TESTD)
-	@echo '## LINKING $(EXEC)_test'
-	$(CC) -o $@ $^ $(LFLAGS)
-	
-$(LIBSTAT): $(OBJS_STATD)
-	@echo '## MAKING $(LIBSTAT)'
-	ar crf $@ $^
-
-all: $(EXEC) $(EXEC)_test
-
-
-# including dependencies - after $(EXEC) so make with no targets
-# refer to executable linking
-#----------------------------------------------------------------
--include $(DEPS)
--include $(DEPS_MAIN)
--include $(DEPS_TEST)
--include $(DEPS_STAT)
+# map all objects from sources lists to dependency folders and
+# include dependencies
+-include $(OBJS_COMMON:%=$(DEPSDIR)/%.d)
+-include $(OBJS_MAIN:%=$(DEPSDIR)/%.d)
+-include $(OBJS_TEST:%=$(DEPSDIR)/%.d)
+-include $(OBJS_STAT:%=$(DEPSDIR)/%.d)
 
 # *.c and *.cpp compilation, generating dependency files
-#----------------------------------------------------------------
+# make sure all necessary diractories are created before compilation
 $(OBJDIR)/%.o: %.c
 	$(make_dirs)
 	$(CC) $(CFLAGS) -c $*.c -o $@ -MMD -MF $(DEPSDIR)/$*.d -MT '$@'
@@ -162,7 +144,31 @@ $(OBJDIR)/%.o: %.cpp
 	$(make_dirs)
 	$(CC) $(CFLAGS) -c $*.cpp -o $@ -MMD -MF $(DEPSDIR)/$*.d -MT '$@'
 
+####################
+# TARGETS          #
+####################
+
+# main executable
+$(EXEC): $(OBJS_COMMON_D) $(OBJS_MAIN_D) $(LIBSTAT)
+	@echo '## LINKING $(EXEC)'
+	$(CC) -o $@ $^ $(LFLAGS)
+
+# custom test executable
+$(EXEC)_test: $(OBJS_COMMON_D) $(OBJS_TEST_D)
+	@echo '## LINKING $(EXEC)_test'
+	$(CC) -o $@ $^ $(LFLAGS)
+
+# statistics library
+$(LIBSTAT): $(OBJS_STAT_D)
+	@echo '## MAKING $(LIBSTAT)'
+	ar crf $@ $^
+
+.PHONY: all clean
+
+# all executables
+all: $(EXEC) $(EXEC)_test
+
 # cleaning compilation results
-#---------------------------------------------------------------
 clean:
 	rm -rf $(EXEC) $(EXEC)_test $(LIBSTAT) $(BUILD)
+
