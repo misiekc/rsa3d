@@ -344,7 +344,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 		//whether splitting voxels
 		if (added == 0) { // v.getMissCounter() % iSplit == 0){ //
 			missCounter += tmpSplit;
-			int v0 = this->voxels->length();
+			int v0 = this->voxels->length(), v1 = v0;
 
 			std::cout << "[" << this->seed << " PackingGenerator::createPacking] splitting " << v0 << " voxels ";
 			std::cout.flush();
@@ -368,7 +368,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 				tmpSplit *= ((double)v1 / v0);
 				if (tmpSplit > 0.5 * std::numeric_limits<int>::max())
 					tmpSplit = 0.5 * std::numeric_limits<int>::max();
-				if(voxels->length()<1000 && tmpSplit>100)
+				if(voxels->length()<0.001*this->params->maxVoxels && tmpSplit>100)
 					tmpSplit /= 10.0;
 				if(tmpSplit < 10*omp_get_max_threads())
 					tmpSplit = 10*omp_get_max_threads();
@@ -519,7 +519,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 					tmpSplit *=  ((double)v1 / v0);
 					if (tmpSplit > 0.5 * std::numeric_limits<int>::max())
 						tmpSplit = 0.5 * std::numeric_limits<int>::max();
-					if(voxels->length()<1000 && tmpSplit>100)
+					if(voxels->length()<0.001*this->params->maxVoxels && tmpSplit>100)
 						tmpSplit /= 10.0;
 					if(tmpSplit < 10)
 						tmpSplit = 10;
