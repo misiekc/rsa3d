@@ -47,6 +47,7 @@ OBJS = rsa3d/AnisotropicShape2D \
        rsa3d/RND \
        rsa3d/ShapeFactory \
        rsa3d/Surface \
+       rsa3d/Timer \
        rsa3d/Utils \
        rsa3d/shapes/cube_strategies/MineOverlap \
        rsa3d/shapes/cube_strategies/OptimizedSATOverlap \
@@ -64,7 +65,6 @@ OBJS_MAIN = rsa3d/Main \
 OBJS_TEST = test/utility/BallFactory \
        		test/utility/BoxFactory \
        		test/utility/Quantity \
-       		test/utility/Timer \
        		test/AnisotropicShape2DExclusionTest \
        		test/CuboidIntTest \
        		test/CuboidPointInsideTest \
