@@ -18,7 +18,7 @@
 #include "../rsa3d/shapes/cube_strategies/TriTriOverlap.h"
 #include "../rsa3d/shapes/cube_strategies/SATOverlap.h"
 #include "../rsa3d/shapes/cube_strategies/OptimizedSATOverlap.h"
-#include "utility/Timer.h"
+#include "../rsa3d/Timer.h"
 #include "../rsa3d/Utils.h"
 
 using namespace std::chrono;

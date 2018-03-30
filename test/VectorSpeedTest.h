@@ -5,7 +5,7 @@
 #ifndef RSA3D_VECTORSPEEDTEST_H
 #define RSA3D_VECTORSPEEDTEST_H
 
-#include "utility/Timer.h"
+#include "../rsa3d/Timer.h"
 #include "../rsa3d/Vector.h"
 
 namespace vec_speedtest {
