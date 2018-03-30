@@ -31,7 +31,7 @@ private:
 	double spatialSize;
 	double angularSize;
 
-	int analyzeVoxels();
+	int analyzeVoxels(unsigned short depth);
 	int analyzeRegion(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
 	void modifiedRSA(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
 	bool isSaturated();

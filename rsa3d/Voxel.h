@@ -21,6 +21,7 @@ private:
 public:
 	int index;
 	int lastAnalyzed;
+	unsigned short depth;
 
 	Voxel();
 	Voxel(double* pos, double *angle, int i);

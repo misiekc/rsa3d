@@ -69,9 +69,9 @@ double PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getFactor() {
 
 #ifdef _OPENMP
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels() {
+int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels(unsigned short depth) {
 
-	std::cout << "[" << this->seed << " PackingGenerator::analyzeVoxels] " << this->voxels->length() << " voxels, " << this->packing.size() << " shapes, factor = " << this->getFactor() << " ";
+	std::cout << "[" << this->seed << " PackingGenerator::analyzeVoxels] " << this->voxels->length() << " voxels, " << this->packing.size() << " shapes, factor = " << this->getFactor() << ", depth = " << depth << " ";
 
 	int begin = this->voxels->length();
 	int timestamp = this->packing.size();
@@ -80,7 +80,13 @@ int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels() {
 	#pragma omp parallel for
 	for (int i = 0; i < this->voxels->length(); i++) {
 		Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = this->voxels->get(i);
-		if (this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, timestamp)) {
+		bool bRemove;
+		if (depth==0){
+			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, timestamp);
+		}else{
+			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, timestamp, depth);
+		}
+		if (bRemove) {
 			#pragma omp critical
 			toRemove.push_back(v);
 		}
@@ -99,7 +105,7 @@ int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels() {
 #else
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels() {
+int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels(unsigned short depth) {
 
 	std::cout << "[" << this->seed << " PackingGenerator::analyzeVoxels] " << this->voxels->length() << " voxels, " << this->packing.size() << " shapes, factor = " << this->getFactor() << " ";
 
@@ -108,7 +114,13 @@ int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels() {
 
 	for (int i = 0; i < this->voxels->length(); i++) {
 		Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = this->voxels->get(i);
-		if (this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, timestamp)) {
+		bool bRemove;
+		if (depth==0){
+			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, timestamp);
+		}else{
+			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, timestamp, depth);
+		}
+		if (bRemove) {
 			this->voxels->remove(v);
 			i--;
 		}
@@ -197,6 +209,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 	int checkedAgain = 0;
 	int added = 0;
 	int missCounter = 0;
+	unsigned short depthAnalyze = 0;
 
 
 	RND rnd(this->seed);
@@ -333,7 +346,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 		//whether splitting voxels
 		if (added == 0) { // v.getMissCounter() % iSplit == 0){ //
 			missCounter += tmpSplit;
-			int v0 = this->voxels->length(), v1 = v0;
+			int v0 = this->voxels->length();
 
 			std::cout << "[" << this->seed << " PackingGenerator::createPacking] splitting " << v0 << " voxels ";
 			std::cout.flush();
@@ -345,9 +358,9 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 //				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
 				std::cout << " done: " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << ", factor: " << this->getFactor() << std::endl;
 			}else{
-				std::cout << " skipped" << std::endl;
+				std::cout << " skipped." << std::endl;
 				if (tmpSplit > 0.5*this->params->split){
-					this->analyzeVoxels();
+					this->analyzeVoxels(depthAnalyze);
 					tmpSplit *= 1.5;
 					v1 = this->voxels->length();
 				}
@@ -366,6 +379,13 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 			}else{
 				tmpSplit = 1.5*tmpSplit + omp_get_max_threads();
 			}
+			if (!b && v0==v1){ // if nothing changed with voxels
+				depthAnalyze++;
+			}else{
+				if (depthAnalyze>0)
+					depthAnalyze--;
+			}
+
 			if(tmpSplit != oldTmpSplit){
 
 				delete[] sOverlapped;
@@ -415,6 +435,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 	int l = 0;
 	double t = 0;
 	int tmpSplit = this->params->split;
+	int depthAnalyze = 0;
 //	int snapshotCounter = 0;
 
 
@@ -484,10 +505,16 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 				}else{
 					std::cout << " skipped" << std::endl;
 					if (tmpSplit > 0.5*this->params->split){
-						this->analyzeVoxels();
+						this->analyzeVoxels(depthAnalyze);
 						tmpSplit *= 1.5;
 						v1 = this->voxels->length();
 					}
+				}
+				if (!b && v0==v1){ // if nothing changed with voxels
+					depthAnalyze++;
+				}else{
+					if (depthAnalyze>0)
+						depthAnalyze--;
 				}
 				// if number of voxels has changed
 				if (v1!=v0){
