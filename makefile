@@ -55,8 +55,6 @@ PACKAGES = rsa3d/analizator/ \
 OBJS_COMMON = rsa3d/AnisotropicShape2D \
        rsa3d/BoundaryConditions \
        rsa3d/Config \
-       rsa3d/DynamicMatrix \
-       rsa3d/DynamicVector \
        rsa3d/Intersection \
        rsa3d/OrientedFace \
        rsa3d/Parameters \
@@ -88,7 +86,6 @@ OBJS_TEST = test/utility/BallFactory \
        		test/CuboidPointInsideTest \
        		test/CuboidSpeedTest \
        		test/Main \
-       		test/TriangleIntTest \
        		test/VectorSpeedTest
        
 # Source files list (withous extensions) for statistics lib
