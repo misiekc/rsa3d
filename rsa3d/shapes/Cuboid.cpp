@@ -9,18 +9,16 @@
 #include "cube_strategies/OptimizedSATOverlap.h"
 
 #include <iterator>
+#include <algorithm>
 
 
 // Static atributes declaration
 //----------------------------------------------------------------------------
 
-double          *Cuboid::size;
-double          *Cuboid::auxDoubleArray;
-double          Cuboid::volume;
+double          Cuboid::size[3];
 double          Cuboid::neighbourListCellSize;
 double          Cuboid::voxelSize;
 double          Cuboid::minDimension;
-unsigned short 	Cuboid::staticDimension = 3;
 Vector<3>       Cuboid::relativeVertices[VERTEX::NUM_OF];
 
 
@@ -33,8 +31,9 @@ OverlapStrategy * Cuboid::strategy = Cuboid::defaultStrategy;
 //----------------------------------------------------------------------------
 Cuboid::Cuboid(const Matrix<3, 3> & orientation) : Shape<3, 0>(), orientation(orientation)
 {
-    
+
 }
+
 
 // Static method for class initialization
 //----------------------------------------------------------------------------
@@ -43,47 +42,33 @@ Cuboid::Cuboid(const Matrix<3, 3> & orientation) : Shape<3, 0>(), orientation(or
 void Cuboid::initClass(const std::string &args)
 {
     std::stringstream args_stream (args);
-    int temp;
-    
-    // Parse parameters
-    args_stream >> temp;
-    staticDimension = (unsigned short)temp;
-    if (!args_stream)               throw std::runtime_error("Cuboid::initClass: invalid arguments. Usage: <dimension> <size 1> ... <size dimension>");
-    else if (staticDimension == 0)  throw std::runtime_error("Cuboid::initClass: 0 dimension");
-        
-    size = new double[staticDimension];
-    auxDoubleArray = new double[staticDimension];
-    for (unsigned short i = 0; i < staticDimension; i++) {
-        args_stream >> size[i];
-        if (!args_stream)           throw std::runtime_error("Cuboid::initClass: invalid or missing dimensions");
-        else if (size[i] <= 0.0)    throw std::runtime_error("Cuboid::initClass: non-positive size: " + std::to_string(size[i]));
-    }
+    int dimension;
+    args_stream >> dimension;   // fetch dimension for backward compatibility
+
+    // Fetch and assert dimensions
+    std::copy(std::istream_iterator<double>(args_stream), std::istream_iterator<double>(),
+              size);
+    if (size[0] <= 0.0 || size[1] <= 0.0 || size[2] <= 0.0)
+        throw std::runtime_error("Wrong Cuboid dimensions: " + args);
 
     // renormailze sizes to obtain unit volume
-    double v = std::accumulate(size, size + staticDimension, 1.0, std::multiplies<double>());
-    double factor = 1.0/pow(v, 1.0/staticDimension);
-    for (unsigned short i = 0; i < staticDimension; i++) {
-        size[i] *= factor;
-    }
-        
-    // Calculate static params
-    volume = std::accumulate(size, size + staticDimension, 1.0, std::multiplies<double>());
-    
-    // Neighbour list cell size - diagonal length. It satisfies conditions
-    // at the least favourable case - Cuboids with centers near opposite edges
-    // of a cell and with diagonals lying on the line connecting their centers
-    neighbourListCellSize = std::sqrt(
-        std::accumulate(size, size + staticDimension, 0.0, 
-            [](double sum, double x){
-                return sum + x * x;
-            }));
-            
-    // Voxel size. It satisfies conditions at the least favourable case
-    // - center of Cuboid lies in the corner of a voxel and voxel's diagonal
-    // is parallel to the smallest Cuboid edge
-    minDimension = *std::min_element(size, size + staticDimension) / 2;
-    voxelSize = minDimension / std::sqrt(staticDimension);
+    double volume = size[0] * size[1] * size[2];
+    double factor = 1.0 / pow(volume, 1./3.);
+    std::transform(size, size + 3, size, [factor](double d) { return d * factor; });
 
+    // Neighbour list cell size - diagonal length. It satisfies conditions at the least favourable case - Cuboids with
+    // centers near opposite edges of a cell and with diagonals lying on the line connecting their centers
+    neighbourListCellSize = std::sqrt(size[0] * size[0] + size[1] * size[1] + size[2] * size[2]);
+
+    // Voxel size. It satisfies conditions at the least favourable case - center of Cuboid lies in the corner of a voxel
+    // and voxel's diagonal is parallel to the smallest Cuboid edge
+    minDimension = *std::min_element(size, size + 3) / 2;
+    voxelSize = minDimension / std::sqrt(3);
+
+    calculateRelativeVerties();
+}
+
+void Cuboid::calculateRelativeVerties() {
     relativeVertices[VERTEX::PPP] = Vector<3>{{ size[COORD::X] / 2,  size[COORD::Y] / 2,  size[COORD::Z] / 2}};
     relativeVertices[VERTEX::NPP] = Vector<3>{{-size[COORD::X] / 2,  size[COORD::Y] / 2,  size[COORD::Z] / 2}};
     relativeVertices[VERTEX::PNP] = Vector<3>{{ size[COORD::X] / 2, -size[COORD::Y] / 2,  size[COORD::Z] / 2}};
@@ -93,15 +78,6 @@ void Cuboid::initClass(const std::string &args)
     relativeVertices[VERTEX::NNP] = Vector<3>{{-size[COORD::X] / 2, -size[COORD::Y] / 2,  size[COORD::Z] / 2}};
     relativeVertices[VERTEX::NNN] = Vector<3>{{-size[COORD::X] / 2, -size[COORD::Y] / 2, -size[COORD::Z] / 2}};
 
-#ifdef CUBOID_DEBUG
-    std::cout << "Initializing Cuboid class" << std::endl;
-    std::cout << "dimensions           : ";
-    // Implode dimensions with comma delimiter an write to standard output
-    std::copy(size, size + staticDimension, std::ostream_iterator<double>(std::cout, ", "));
-    std::cout << std::endl;
-    std::cout << "volume               : " << volume << std::endl;
-    std::cout << "cell size (diagonal) : " << neighbourListCellSize << std::endl;
-#endif
 }
 
 // Method creating (dynamically alocated) cuboid with random orientation.
@@ -116,6 +92,7 @@ Shape<3, 0> * Cuboid::create3D(RND *rnd)
 
     return cuboid;
 }
+
 
 // Method creating (dynamically alocated) cuboid with random orientation with
 // 2 degrees of freedom
@@ -194,33 +171,32 @@ bool Cuboid::pointInsideCuboid(const Vector<3> &vertex)
 //----------------------------------------------------------------------------
 double Cuboid::getVolume()
 {
-    return Cuboid::volume;
+    return 1.;
 }
-
 
 // Checks whether the point with coordinates da lies inside excluded volume.
 // It is an interior of a set of point which distanse from
 //----------------------------------------------------------------------------
 int Cuboid::pointInside(BoundaryConditions *bc, double* pos, double *orientation, double orientationRange)
 {
-    // Prepare matrices of translations for operations on the point
     Vector<3> cuboidTranslation(this->position);
     Vector<3> pointTranslation(pos);
 
     // Transform point coordinates to Cuboid coordinate system
-    cuboidTranslation += Vector<3>(bc->getTranslation(auxDoubleArray, this->position, pos));
+    double trans_arr[3];
+    cuboidTranslation += Vector<3>(bc->getTranslation(trans_arr, this->position, pos));
     pointTranslation = this->orientation.transpose() * (pointTranslation - cuboidTranslation);
 
-    // Save absolute values of point coords
+    double abs_point_coords[3];
     for (unsigned short i = 0; i < 3; i++)
-        auxDoubleArray[i] = std::abs(pointTranslation[i]);
+        abs_point_coords[i] = std::abs(pointTranslation[i]);
 
     // Map which coords lie in this and which lie in this + minDimension
     bool liesInSmaller[3];
     bool liesInBigger[3];
     for (unsigned short i = 0; i < 3; i++) {
-        liesInSmaller[i] = (auxDoubleArray[i] <= this->size[i] / 2);
-        liesInBigger[i] = (auxDoubleArray[i] <= this->size[i] / 2 + minDimension);
+        liesInSmaller[i] = (abs_point_coords[i] <= this->size[i] / 2);
+        liesInBigger[i] = (abs_point_coords[i] <= this->size[i] / 2 + minDimension);
     }
 
     // Check optimistic cases - "lies in this" and "doesn't lie in this + minDimension"
@@ -232,16 +208,16 @@ int Cuboid::pointInside(BoundaryConditions *bc, double* pos, double *orientation
         return true;
 
     // Check cylinders on edges
-    if (liesInSmaller[0] && std::pow(auxDoubleArray[1] - this->size[1] / 2, 2) + std::pow(auxDoubleArray[2] - this->size[2] / 2, 2) <= std::pow(minDimension, 2))
+    if (liesInSmaller[0] && std::pow(abs_point_coords[1] - this->size[1] / 2, 2) + std::pow(abs_point_coords[2] - this->size[2] / 2, 2) <= std::pow(minDimension, 2))
         return true;
-    if (liesInSmaller[1] && std::pow(auxDoubleArray[2] - this->size[2] / 2, 2) + std::pow(auxDoubleArray[0] - this->size[0] / 2, 2) <= std::pow(minDimension, 2))
+    if (liesInSmaller[1] && std::pow(abs_point_coords[2] - this->size[2] / 2, 2) + std::pow(abs_point_coords[0] - this->size[0] / 2, 2) <= std::pow(minDimension, 2))
         return true;
-    if (liesInSmaller[2] && std::pow(auxDoubleArray[0] - this->size[0] / 2, 2) + std::pow(auxDoubleArray[1] - this->size[1] / 2, 2) <= std::pow(minDimension, 2))
+    if (liesInSmaller[2] && std::pow(abs_point_coords[0] - this->size[0] / 2, 2) + std::pow(abs_point_coords[1] - this->size[1] / 2, 2) <= std::pow(minDimension, 2))
         return true;
 
     // Check spheres in vertices
-    if (std::pow(auxDoubleArray[0] - this->size[0] / 2, 2) + std::pow(auxDoubleArray[1] - this->size[1] / 2, 2) +
-        std::pow(auxDoubleArray[2] - this->size[2] / 2, 2) <= std::pow(minDimension, 2))
+    if (std::pow(abs_point_coords[0] - this->size[0] / 2, 2) + std::pow(abs_point_coords[1] - this->size[1] / 2, 2) +
+        std::pow(abs_point_coords[2] - this->size[2] / 2, 2) <= std::pow(minDimension, 2))
         return true;
 
     return false;
@@ -258,7 +234,7 @@ Matrix<3, 3> Cuboid::getOrientation() const
 //----------------------------------------------------------------------------
 double * Cuboid::getSize(double * arr)
 {
-    std::copy(size, size + staticDimension, arr);
+    std::copy(size, size + 3, arr);
     return arr;
 }
 
@@ -301,9 +277,6 @@ std::string Cuboid::toPovray() const
 //----------------------------------------------------------------------------
 std::string Cuboid::toWolfram() const
 {
-    if (staticDimension != 3)
-        throw std::runtime_error("Cuboid::toWolfram supports only 3D Cuboids");
-
     std::stringstream out;
     out << "cube" << this->no << " = " << std::endl;
     out << "    GeometricTransformation[" << std::endl;

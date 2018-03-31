@@ -20,20 +20,16 @@ class OverlapStrategy;
 class Cuboid : public Shape<3,0>
 {
 private:
-    static double           volume;
-    static double           *auxDoubleArray;        // Auxiliary double array of dimension size
     Matrix<3, 3>            orientation;
-    static double           minDimension;
-    static OverlapStrategy  *defaultStrategy;
-    static OverlapStrategy  *strategy;
-    static Vector<3>        relativeVertices[8];
+	static double           size[3];
+	static double           neighbourListCellSize;
+	static double           voxelSize;
+	static double           minDimension;
+	static Vector<3>        relativeVertices[8];
+	static OverlapStrategy  *defaultStrategy;
+	static OverlapStrategy  *strategy;
 
-protected:
-    static unsigned short 	staticDimension;
-    static double           *size;
-    
-    static double           neighbourListCellSize;
-    static double           voxelSize;
+	static void calculateRelativeVerties();
 
 public:
 
@@ -65,26 +61,26 @@ public:
 	static void initClass(const std::string &args);
 	static Shape<3, 0> * create2D(RND *rnd);
 	static Shape<3, 0> * create3D(RND *rnd);
+	static double * getSize(double * arr);
+	static const Vector<3> getRelativeVertex(std::size_t index);
+
 	static void restoreDefaultStrategy();
 	static void setOverlapStrategy(OverlapStrategy *strategy);
 	static OverlapStrategy * getOverlapStrategy();
-    static const Vector<3> getRelativeVertex(std::size_t index);
 
-    double getNeighbourListCellSize() override;
-    double getVoxelSize() override;
-    int overlap(BoundaryConditions *bc, Shape<3,0> *s) override;
-    double getVolume() override;
-    int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) override;
-
-    bool pointInsideCuboid(const Vector<3> &vertex);
-    void obtainVertices(Vector<3> (&vertices)[8], const Vector<3> &translation);
-    
-    Matrix<3, 3> getOrientation() const;
-    static double * getSize(double * arr);
-    std::string toPovray() const override;
-    std::string toWolfram() const;
+	double getNeighbourListCellSize() override;
+	double getVoxelSize() override;
+	int overlap(BoundaryConditions *bc, Shape<3,0> *s) override;
+	double getVolume() override;
+	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) override;
+	std::string toPovray() const override;
+	std::string toWolfram() const override;
 	void store(std::ostream &f) const override;
 	void restore(std::istream &f) override;
+
+	bool pointInsideCuboid(const Vector<3> &vertex);
+	void obtainVertices(Vector<3> (&vertices)[8], const Vector<3> &translation);
+	Matrix<3, 3> getOrientation() const;
 };
 
 
