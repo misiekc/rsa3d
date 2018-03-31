@@ -359,7 +359,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 				std::cout << " skipped." << std::endl;
 				if (tmpSplit > 0.5*this->params->split){
 					this->analyzeVoxels(depthAnalyze);
-					tmpSplit *= 1.5;
+					tmpSplit *= 1.2;
 					v1 = this->voxels->length();
 				}
 			}
@@ -375,7 +375,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 
 				missCounter = 0;
 			}else{
-				tmpSplit = 1.5*tmpSplit + omp_get_max_threads();
+				tmpSplit = 1.2*tmpSplit + omp_get_max_threads();
 			}
 			if (!b && v0==v1){ // if nothing changed with voxels
 				depthAnalyze++;

@@ -217,7 +217,7 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::checkTopLevelVoxels(){
 		if (this->getIndexOfTopLevelVoxel(v->getPosition())!=index){
 			std::cout << "checkTopVoxels problem" << std::endl;
 		}
-		for(int j=0; j<10000; j++){
+		for(int j=0; j<10; j++){
 			this->getRandomPositionAndOrientation(pos, angle, v, &rnd);
 			if (this->getIndexOfTopLevelVoxel(pos)!=index){
 				std::cout << "checkTopVoxels problem" << std::endl;
@@ -483,15 +483,16 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 		int tid = omp_get_thread_num();
 		this->splitVoxel(this->voxels[i], this->voxelSize, this->angularVoxelSize, aVoxels[tid]);
 		for(int j=0; j<voxelsFactor; j++){
-			if(this->isVoxelInsidePacking(aVoxels[tid][j]) && ( nl==NULL || bc==NULL || !this->analyzeVoxel(aVoxels[tid][j], nl, NULL, bc) ) ){
-					aVoxels[tid][j]->index = i*voxelsFactor + j;
-					newList[i*voxelsFactor + j] = aVoxels[tid][j];
+			Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = aVoxels[tid][j];
+			if(this->isVoxelInsidePacking(v) && ( nl==NULL || bc==NULL || !this->analyzeVoxel(v, nl, NULL, bc) ) ){
+					v->index = i*voxelsFactor + j;
+					newList[i*voxelsFactor + j] = v;
 			}else{
 				delete aVoxels[tid][j];
 			}
 		}
 		delete this->voxels[i];
-		if (i%10000 == 0){ std::cout << "."; std::cout.flush(); }
+		if (i%10000 == 0){ std::cout << "." << std::flush; }
 	}
 
 	for(int i=0; i<maxthreads; i++){
@@ -504,7 +505,9 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 	int endIndex = newListSize - 1;
 	int beginIndex = 0;
 
-	while(newList[endIndex]==NULL)
+	std::cout << " compacting" << std::flush;
+
+	while(newList[endIndex]==NULL && endIndex > -1)
 		endIndex--;
 
 	while (beginIndex<endIndex){
@@ -514,7 +517,7 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 			newList[endIndex] = NULL;
 		}
 		beginIndex++;
-		while(newList[endIndex]==NULL)
+		while(newList[endIndex]==NULL && endIndex > -1)
 			endIndex--;
 	}
 
@@ -523,8 +526,8 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 	this->last = endIndex;
 	this->voxels = newList;
 	this->fillNeighbourGrid();
-	this->checkIndexes();
-	this->checkTopLevelVoxels();
+//	this->checkIndexes();
+//	this->checkTopLevelVoxels();
 	return true;
 }
 
