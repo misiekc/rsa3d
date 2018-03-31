@@ -41,6 +41,7 @@ public:
 	int overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s);
 	double getVolume();
 	int pointInside(BoundaryConditions *bc, double* da);
+	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange);
 	double minDistance(Shape<DIMENSION, 0> *s);
 
 	std::string toPovray() const;

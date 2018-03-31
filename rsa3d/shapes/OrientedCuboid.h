@@ -27,6 +27,7 @@ public:
 
     int overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s);
     int pointInside(BoundaryConditions *bc, double* da);
+	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange);
     double getNeighbourListCellSize();
     double getVoxelSize();
     double getVolume();

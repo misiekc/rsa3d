@@ -96,6 +96,11 @@ int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* da){
 }
 
 template <unsigned short DIMENSION>
+int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) {
+	return 0;
+}
+
+template <unsigned short DIMENSION>
 double OrientedCuboid<DIMENSION>::getNeighbourListCellSize(){
 	return OrientedCuboid<DIMENSION>::neighbourListCellSize;
 }
