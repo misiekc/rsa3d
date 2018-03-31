@@ -8,7 +8,6 @@
 #include "cube_strategies/MineOverlap.h"
 #include "cube_strategies/OptimizedSATOverlap.h"
 
-#include <iterator>
 #include <algorithm>
 
 
@@ -42,12 +41,10 @@ Cuboid::Cuboid(const Matrix<3, 3> & orientation) : Shape<3, 0>(), orientation(or
 void Cuboid::initClass(const std::string &args)
 {
     std::stringstream args_stream (args);
-    int dimension;
-    args_stream >> dimension;   // fetch dimension for backward compatibility
+    int dimension;  // fetch dimension for backward compatibility
 
     // Fetch and assert dimensions
-    std::copy(std::istream_iterator<double>(args_stream), std::istream_iterator<double>(),
-              size);
+    args_stream >> dimension >> size[0] >> size[1] >> size[2];
     if (size[0] <= 0.0 || size[1] <= 0.0 || size[2] <= 0.0)
         throw std::runtime_error("Wrong Cuboid dimensions: " + args);
 
