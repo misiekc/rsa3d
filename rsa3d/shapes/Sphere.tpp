@@ -102,6 +102,11 @@ int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) {
 }
 
 template <unsigned short DIMENSION>
+int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) {
+    return 0;
+}
+
+template <unsigned short DIMENSION>
 double Sphere<DIMENSION>::minDistance(Shape<DIMENSION, 0> *s){
 	return 2.0*this->radius;
 }

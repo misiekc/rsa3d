@@ -5,13 +5,11 @@
 #include <fstream>
 #include <bits/unique_ptr.h>
 #include <memory>
-#include "utility/ShapePairFactory.h"
 #include "AnisotropicShape2DExclusionTest.h"
 #include "../rsa3d/Config.h"
-#include "../rsa3d/shapes/SpheroCylinder2D.h"
-#include "utility/MockBC.h"
 #include "../rsa3d/ShapeFactory.h"
 #include "../rsa3d/Utils.h"
+#include "utility/MockBC.h"
 
 static const char *const FIRST_SHAPE_COLOR = "Black";
 static const char *const SECOND_SHAPE_COLOR = "Blue";
