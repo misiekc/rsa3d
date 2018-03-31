@@ -9,6 +9,7 @@
 #include "CuboidPointInsideTest.h"
 #include "AnisotropicShape2DExclusionTest.h"
 #include "VectorSpeedTest.h"
+#include "AnisotropicShape2DExclusionDrawer.h"
 
 
 int main(int argc, char **argv) {
@@ -26,6 +27,8 @@ int main(int argc, char **argv) {
         return as2d_extest::main(argc, argv);
     else if (mode == "vec_speedtest")
         return vec_speedtest::main(argc, argv);
+    else if (mode == "as2d_exdrawer")
+        return as2d_exdrawer::main(argc, argv);
 
     std::cerr << "Unknown test mode: " << mode << std::endl;
     return EXIT_FAILURE;
