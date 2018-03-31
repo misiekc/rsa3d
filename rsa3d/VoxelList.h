@@ -61,6 +61,8 @@ private:
 	// checks consistency of indexes of root voxels
 	void checkTopLevelVoxels();
 
+	void compactVoxelArray(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> **list, int &endIndex);
+
 	// checks if a voxel can be removed
 	bool analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *neighbours, BoundaryConditions *bc);
 
@@ -99,6 +101,7 @@ public:
 
 	void getNeighbours(std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *result, double *da);
 	void remove(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
+	void remove(std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *vVoxels);
 	void removeTopLevelVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
 	bool analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s, BoundaryConditions *bc);
 	bool analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, int timestamp, unsigned short depth);

@@ -189,6 +189,47 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::remove(Voxel<SPATIAL_DIMEN
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::compactVoxelArray(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> **list, int &endIndex){
+	int beginIndex = 0;
+
+	while(list[endIndex]==NULL && endIndex > -1)
+		(endIndex)--;
+
+	while (beginIndex<endIndex){
+		if(list[beginIndex]==NULL){
+			list[beginIndex] = list[endIndex];
+			list[beginIndex]->index = beginIndex;
+			list[endIndex] = NULL;
+		}
+		beginIndex++;
+		while(list[endIndex]==NULL && endIndex > -1)
+			endIndex--;
+	}
+}
+
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::remove(std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *vVoxels){
+	if (this->disabled)
+		return;
+	for(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v : *vVoxels){
+		this->voxels[v->index] = NULL;
+		delete v;
+	}
+
+	int endIndex = this->last;
+	this->compactVoxelArray(this->voxels, endIndex);
+
+	this->voxelNeighbourGrid->clear();
+	this->last = endIndex;
+	this->fillNeighbourGrid();
+//	this->checkIndexes();
+
+}
+
+
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 int VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getIndexOfTopLevelVoxel(double *da){
 
 	int n = (int)(this->size/this->initialVoxelSize) + 1;
@@ -425,7 +466,7 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, int timestamp, unsigned short depth){
-	if (v->lastAnalyzed < timestamp && v->depth<depth && !this->disabled){
+	if (!this->disabled && (v->lastAnalyzed < timestamp || v->depth<depth)){
 		v->lastAnalyzed = timestamp;
 		v->depth = depth;
 		std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> shapes;
@@ -502,24 +543,11 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 
 	delete[] this->voxels;
 
-	int endIndex = newListSize - 1;
-	int beginIndex = 0;
+	int endIndex = newListSize - 1;;
 
 	std::cout << " compacting" << std::flush;
 
-	while(newList[endIndex]==NULL && endIndex > -1)
-		endIndex--;
-
-	while (beginIndex<endIndex){
-		if(newList[beginIndex]==NULL){
-			newList[beginIndex] = newList[endIndex];
-			newList[beginIndex]->index = beginIndex;
-			newList[endIndex] = NULL;
-		}
-		beginIndex++;
-		while(newList[endIndex]==NULL && endIndex > -1)
-			endIndex--;
-	}
+	this->compactVoxelArray(newList, endIndex);
 
 	this->voxelNeighbourGrid->clear();
 
@@ -584,8 +612,8 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 	this->last = index-1;
 	this->voxels = newList;
 	this->fillNeighbourGrid();
-	this->checkIndexes();
-	this->checkTopLevelVoxels();
+//	this->checkIndexes();
+//	this->checkTopLevelVoxels();
 	return true;
 }
 

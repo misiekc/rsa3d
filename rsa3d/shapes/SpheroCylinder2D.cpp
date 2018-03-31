@@ -131,7 +131,21 @@ std::string SpheroCylinder2D::toString() {
 }
 
 std::string SpheroCylinder2D::toPovray() const {
-    return Shape::toPovray();
+	std::stringstream out;
+	out.precision(std::numeric_limits< double >::max_digits10);
+	out << "  union {" << std::endl;;
+
+	out << "    disc { < " << -halfDistance << ", 0.0, 0.0002>, <0.0, 0.0, 1.0>, " << radius << " }" << std::endl;
+	out << "    disc { < " <<  halfDistance << ", 0.0, 0.0002>, <0.0, 0.0, 1.0>, " << radius << " }" << std::endl;
+	out << "    polygon { 5, < " << -halfDistance << ", " << -radius << ", 0.0002>, < " << -halfDistance << ", " << radius << ", 0.0002>, < " << halfDistance << ", " << radius << ", 0.0002>, < " << halfDistance << ", " << -radius << ", 0.0002> < " << -halfDistance << ", " << -radius << ", 0.0002> }" << std::endl;
+	out << "    rotate <0, 0, " << (180*this->getAngle()/M_PI) << ">" << std::endl;
+	out << "	translate <";
+	for(unsigned short i=0; i<2; i++)
+		out << (this->position[i]) << ", ";
+	out << "0.0>" << std::endl << "	texture { pigment { color Red } }" << std::endl << "}" << std::endl;
+
+	return out.str();
+
 }
 
 void SpheroCylinder2D::store(std::ostream &f) const {
