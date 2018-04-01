@@ -39,14 +39,18 @@ double AnisotropicShape2D::normalizeAngle(double angle, double interval) const {
     return angle;
 }
 
-// Keep angle in [0; getVoxelAngularSize()] range when rotating.
 // This method is final and delegates to setAngle(double), so all deriving classes should
 // override setAngle(double) method instead
 //---------------------------------------------------------------------------------------------
 void AnisotropicShape2D::rotate(double *v) {
-    Shape::rotate(v);
-    double interval = getVoxelAngularSize();
-    this->setAngle(normalizeAngle(this->getAngle(), interval));
+    this->setAngle(this->getAngle() + *v);
+}
+
+// This method is final and delegates to setAngle(double), so all deriving classes should
+// override setAngle(double) method instead
+//---------------------------------------------------------------------------------------------
+void AnisotropicShape2D::setOrientation(const double *orientation) {
+    this->setAngle(*orientation);
 }
 
 // Keep angle in [0; getVoxelAngularSize()] range when setting.
@@ -61,9 +65,10 @@ void AnisotropicShape2D::rotate(double *v) {
 //---------------------------------------------------------------------------------------------
 void AnisotropicShape2D::setAngle(double angle) {
     double interval = getVoxelAngularSize();
-    this->orientation[0] = normalizeAngle(angle, interval);
+    double orientation = normalizeAngle(angle, interval);
+    Shape::setOrientation(&orientation);  // Now use the original setter from Shape
 }
 
 double AnisotropicShape2D::getAngle() const{
-    return this->orientation[0];
+    return this->getOrientation()[0];
 }

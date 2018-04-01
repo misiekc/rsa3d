@@ -37,7 +37,7 @@ public:
 
 	bool isInside(double *pos, double size);
 
-	bool isInside(double *pos, double size, double* angle, double asize);
+	bool isInside(double *pos, double size, const double* angle, double asize);
 
 	double *getPosition();
 

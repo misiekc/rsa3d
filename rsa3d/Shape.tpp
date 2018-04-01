@@ -14,15 +14,14 @@ double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelAngularSize(){
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape() : Positioned<SPATIAL_DIMENSION>(){
-	for (unsigned short i = 0; i < ANGULAR_DIMENSION; i++)
-        this->orientation[i] = 0;
+    this->orientation.fill(0);
 	this->no = 0;
 	this->time = 0.0;
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape(const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> & other) : Positioned<SPATIAL_DIMENSION>(other){
-	std::copy(other.orientation, other.orientation + ANGULAR_DIMENSION, this->orientation);
+Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape(const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> & other) :
+        Positioned<SPATIAL_DIMENSION>(other), orientation(other.orientation) {
 	this->no = 0;
 	this->time = 0.0;
 }
@@ -32,9 +31,30 @@ Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::~Shape() {
 
 }
 
+// Version for shapes with non-zero angular dimension
+/*template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+template <unsigned short AD>
+typename std::enable_if<AD != 0, const double*>::type
+Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation() const{
+    return this->orientation;
+}
+
+// Version for shapes with no angular dimension
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double* Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation(){
-	return this->orientation;
+template <unsigned short AD>
+typename std::enable_if<AD == 0, const double*>::type
+Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation() const{
+    return nullptr;     // return nullptr so dereferencing will fail
+}*/
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+const double* Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation() const{
+    return this->orientation.data();
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setOrientation(const double *orientation) {
+    std::copy(orientation, orientation + ANGULAR_DIMENSION, this->orientation.begin());
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
@@ -89,7 +109,7 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::store(std::ostream &f) const{
 	f.write((char *)(&this->time), sizeof(double));
 	f.write((char *)(this->position), SPATIAL_DIMENSION*sizeof(double));
 	if (ad>0)
-		f.write((char *)(this->orientation), ANGULAR_DIMENSION*sizeof(double));
+		f.write((char *)(this->orientation.data()), ANGULAR_DIMENSION*sizeof(double));
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
@@ -112,7 +132,7 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
 	f.read((char *)(&this->time), sizeof(double));
 	f.read((char *)(this->position), sd*sizeof(double));
 	if (ad>0)
-		f.read((char *)(this->orientation), ad*sizeof(double));
+		f.read((char *)(this->orientation.data()), ad*sizeof(double));
 }
 
 /*

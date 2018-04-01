@@ -14,15 +14,18 @@
 #include <string>
 #include <ostream>
 #include <istream>
+#include <array>
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 class Shape : public Positioned<SPATIAL_DIMENSION>{
 
 private:
+
 	static double voxelAngularSize;
 
+    std::array<double, ANGULAR_DIMENSION> orientation;
+
 protected:
-	double orientation[ANGULAR_DIMENSION];
 
 	void applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second);
 
@@ -46,7 +49,8 @@ public:
 
 	virtual double getVoxelAngularSize();
 
-	double * getOrientation();
+    const double * getOrientation() const;
+    virtual void setOrientation(const double *orientation);
 
 	// translates the shape by the given vector v
 	void translate(double* v);

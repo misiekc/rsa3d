@@ -66,7 +66,7 @@ bool Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isInside(double *pos, double s
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isInside(double *pos, double size, double *angle, double asize){
+bool Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isInside(double *pos, double size, const double *angle, double asize){
 	for(int i=0; i<SPATIAL_DIMENSION; i++){
 		if (pos[i]<this->position[i])
 			return false;

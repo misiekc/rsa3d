@@ -18,13 +18,16 @@ protected:
 	double normalizeAngle(double angle, double interval) const;
 
 public:
+    // setOrientation(const double*) is delegated to setAngle(double)
     // rotate(double*) is delegated to setAngle(double)
     // pointInside(double* orientation, double orientationRange) -> pointInside(double angleFrom, double angleTo)
-    void rotate(double *v) final;
+	void setOrientation(const double *orientation) final;
+	void rotate(double *v) final;
     int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) final;
 
-    double getAngle() const;
-    virtual void setAngle(double angle);
+	double getAngle() const;
+	virtual void setAngle(double angle);
+
     virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) = 0;
 };
 
