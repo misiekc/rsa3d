@@ -10,17 +10,19 @@
 #include "utility/MockBC.h"
 
 
-// Helper stuff declarations
-//----------------------------------------------------------------------------------------------------------------------
-namespace as2d_exdrawer
+namespace
 {
-    using OverlapFunct = std::function<bool(const Vector<2> &)>;
+    using namespace as2d_exdrawer;
+
+    // Helper stuff declarations
+    //------------------------------------------------------------------------------------------------------------------
+    using overlap_funct = std::function<bool(const Vector<2> &)>;
     using shape_ptr = std::unique_ptr<AnisotropicShape2D>;
 
     // Helper functions
-    static Vector<2> bisect_ray(double initialRadius, double rayAngle, const OverlapFunct &overlaps);
+    static Vector<2> bisect_ray(double initialRadius, double rayAngle, const overlap_funct &overlaps);
     static shape_ptr generate_shape(const Vector<2> &pos, double angle);
-    static Polygon calculate_zone(double initialRadius, double resolution, const OverlapFunct &overlapFunct);
+    static Polygon calculate_zone(double initialRadius, double resolution, const overlap_funct &overlapFunct);
 
     // Class containing basic options load from command line
     struct Context {
@@ -35,13 +37,10 @@ namespace as2d_exdrawer
         void load(int argc, char **argv);
         shape_ptr generateMainShape();
     };
-}
 
 
-// All definitions
-//----------------------------------------------------------------------------------------------------------------------
-namespace as2d_exdrawer
-{
+    // Helper stuff definitions
+    //------------------------------------------------------------------------------------------------------------------
     void Context::load(int argc, char **argv) {
         if (argc != 9)
             die("Usage: rsa as2d_exdrawer <shape> <attr> <shape angle> <angle from> <angle to> <resolution> <output file>");
@@ -62,7 +61,9 @@ namespace as2d_exdrawer
         return generate_shape(Vector<2>(), this->shapeAngle);
     }
 
-    Vector<2> bisect_ray(double initialRadius, double rayAngle, const OverlapFunct &overlaps) {
+    // Assuming overlaps is the characteristic function of a convex set, find its intersection with ary of angle
+    // rayAngle by bisection starting from initialRadius
+    Vector<2> bisect_ray(double initialRadius, double rayAngle, const overlap_funct &overlaps) {
         double radiusBeg = 0;
         double radiusEnd = initialRadius;
         Vector<2> normal{{std::cos(rayAngle), std::sin(rayAngle)}};
@@ -91,7 +92,8 @@ namespace as2d_exdrawer
         return std::unique_ptr<AnisotropicShape2D>(shape);
     }
 
-    Polygon calculate_zone(double initialRadius, double resolution, const OverlapFunct &overlapFunct) {
+    // Return Polygon describing a boundary of convex set fo given characteristic function overlapFunct
+    Polygon calculate_zone(double initialRadius, double resolution, const overlap_funct &overlapFunct) {
         Polygon result;
 
         double step = 2 * M_PI / resolution;
@@ -103,7 +105,18 @@ namespace as2d_exdrawer
 
         return result;
     }
+}
 
+
+// Public interface definitions
+//----------------------------------------------------------------------------------------------------------------------
+namespace as2d_exdrawer
+{
+    /**
+     * Main function for exclusion drawind facility
+     *
+     * Usage: rsa as2d_exdrawer (shape) (attr) (shape angle) (angle from) (angle to) (resolution) (output file)
+     */
     int main(int argc, char **argv) {
         Context context;
         context.load(argc, argv);
@@ -124,9 +137,17 @@ namespace as2d_exdrawer
         return EXIT_SUCCESS;
     }
 
+    /**
+     * Returns a Polygon describing exclusion zone for given shape and angle, sampling resolution points and testing
+     * overlap function
+     * @param shape shape which exclusion zone to calculate
+     * @param angle angle of exclusion zone
+     * @param resolution number of vertices of resulting Polygon
+     * @return Polygon describing exclusion zone
+     */
     Polygon zone_for_angle(AnisotropicShape2D &shape, double angle, std::size_t resolution) {
         MockBC bc;
-        OverlapFunct overlapFunct = [&](const Vector<2> &pos) {
+        overlap_funct overlapFunct = [&](const Vector<2> &pos) {
             auto secondShape = generate_shape(pos, angle);
             return (bool) shape.overlap(&bc, secondShape.get());
         };
@@ -134,9 +155,12 @@ namespace as2d_exdrawer
         return calculate_zone(1.1 * shape.getNeighbourListCellSize(), resolution, overlapFunct);
     }
 
+    /**
+     * Same as zone_for_angle, but resulting Polygon is intersection of exclusion zones for angle1 and angle2
+     */
     Polygon zone_for_two_angles(AnisotropicShape2D &shape, double angle1, double angle2, std::size_t resolution) {
         MockBC bc;
-        OverlapFunct overlapFunct = [&](const Vector<2> &pos) {
+        overlap_funct overlapFunct = [&](const Vector<2> &pos) {
             auto secondShape1 = generate_shape(pos, angle1);
             auto secondShape2 = generate_shape(pos, angle2);
             return (bool)shape.overlap(&bc, secondShape1.get()) && (bool)shape.overlap(&bc, secondShape2.get());
@@ -145,10 +169,13 @@ namespace as2d_exdrawer
         return calculate_zone(1.1 * shape.getNeighbourListCellSize(), resolution, overlapFunct);
     }
 
+    /**
+     * Same as zone_for_angle, but resulting Polygon is exclusion zone for angle range, sampled using pointInside
+     */
     Polygon zone_for_angle_range(AnisotropicShape2D &shape, double angleFrom, double angleTo,
                                  std::size_t resolution) {
         MockBC bc;
-        as2d_exdrawer::OverlapFunct overlapFunct = [&](const Vector<2> &pos) {
+        overlap_funct overlapFunct = [&](const Vector<2> &pos) {
             double posArray[2];
             pos.copyToArray(posArray);
             return (bool) shape.pointInside(&bc, posArray, angleFrom, angleTo);
@@ -157,10 +184,13 @@ namespace as2d_exdrawer
         return calculate_zone(1.1 * shape.getNeighbourListCellSize(), resolution, overlapFunct);
     }
 
+    /**
+     * Converts given polygon to Wolfram format and prints it on stream
+     */
     void polygon_to_wolfram(const Polygon &polygon, std::ostream &stream) {
         stream << std::fixed;
         stream.precision(std::numeric_limits<double>::max_digits10);
-        stream << "{";
+        stream << "Polygon[{";
         for (auto vertex : Polygon(polygon.begin(), polygon.end() - 1)) {
             stream << vertex << "," << std::endl;
         }
@@ -168,28 +198,37 @@ namespace as2d_exdrawer
         stream << "}";
     }
 
+    /**
+     * Creates a whole Wolfram notebook visualizing exclusion zone for given shape and prints it on stream
+     * @param shape shape, drawn Black, which exclusion zone is visualized
+     * @param fromZone exclusion zone for fromAngle, drawn Red
+     * @param toZone exclusion zone for toAngle, drawn Yellow
+     * @param fromAndToZone intersection of from- and toZone, drawn Purple; it sticks from behind rangeZone
+     * @param rangeZone exclusion zone for angle range, drawn Orange
+     * @param stream stream to print on
+     */
     void print_notebook(AnisotropicShape2D &shape, const Polygon &fromZone, const Polygon &toZone,
                         const Polygon &fromAndToZone, const Polygon &rangeZone, std::ostream &stream) {
         stream << "(* Shape *)" << std::endl;
         stream << "shape = " << shape.toWolfram() << ";" << std::endl << std::endl;
 
         stream << "(* Angle from zone *)" << std::endl;
-        stream << "fromZone = Polygon[";
+        stream << "fromZone = ";
         polygon_to_wolfram(fromZone, stream);
         stream << "];" << std::endl << std::endl;
 
         stream << "(* Angle to zone *)" << std::endl;
-        stream << "toZone = Polygon[";
+        stream << "toZone = ";
         polygon_to_wolfram(toZone, stream);
         stream << "];" << std::endl << std::endl;
 
         stream << "(* Angle from and to zone intersection *)" << std::endl;
-        stream << "fromAndToZone = Polygon[";
+        stream << "fromAndToZone = ";
         polygon_to_wolfram(fromAndToZone, stream);
         stream << "];" << std::endl << std::endl;
 
         stream << "(* Angle range zone *)" << std::endl;
-        stream << "rangeZone = Polygon[";
+        stream << "rangeZone = ";
         polygon_to_wolfram(rangeZone, stream);
         stream << "];" << std::endl << std::endl;
 

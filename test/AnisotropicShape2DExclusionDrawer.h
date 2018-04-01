@@ -11,15 +11,18 @@
 #include "../rsa3d/Vector.h"
 
 
-// A simple program generating Wolfram Mathematica notebook presenting exclusion zone for AnisotropicShape2D.
-//
-// Usage: rsa as2d_exdrawer <shape> <attr> <shape angle> <angle from> <angle to> <resolution> <output file>
-//
-// output file contains:
-// - exclusion zones for angle from and angle to
-// - intersection on two above zones
-// - intersection of all ranges from given angle range (pointInside)
-//----------------------------------------------------------------------------------------------------------------------
+/**
+ * A simple program generating Wolfram Mathematica notebook presenting exclusion zone for AnisotropicShape2D.
+ *
+ * Usage: rsa as2d_exdrawer (shape) (attr) (shape angle) (angle from) (angle to) (resolution) (output file)
+ *
+ * The output file contains:
+ * <ul>
+ * <li> exclusion zones for angle from and angle to
+ * <li> intersection on two above zones
+ * <li> intersection of all ranges from given angle range (pointInside)
+ * </ul>
+ */
 namespace as2d_exdrawer
 {
     using Polygon = std::vector<Vector<2>>;
