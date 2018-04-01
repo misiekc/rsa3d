@@ -6,10 +6,12 @@
  */
 
 
-#include "PackingGenerator.h"
 #include <cstring>
+#include <iostream>
 #include <iterator>
 #include <iomanip>
+#include <algorithm>
+#include "Vector.h"
 
 bool increment(int* in, int inlength, int max){
 	if(inlength==0)
