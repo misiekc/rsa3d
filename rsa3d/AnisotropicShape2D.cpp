@@ -42,13 +42,6 @@ double AnisotropicShape2D::normalizeAngle(double angle, double interval) const {
 // This method is final and delegates to setAngle(double), so all deriving classes should
 // override setAngle(double) method instead
 //---------------------------------------------------------------------------------------------
-void AnisotropicShape2D::rotate(double *v) {
-    this->setAngle(this->getAngle() + *v);
-}
-
-// This method is final and delegates to setAngle(double), so all deriving classes should
-// override setAngle(double) method instead
-//---------------------------------------------------------------------------------------------
 void AnisotropicShape2D::setOrientation(const double *orientation) {
     this->setAngle(*orientation);
 }
