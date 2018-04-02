@@ -29,14 +29,16 @@ protected:
 
 	void applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second);
 
+    virtual void setOrientation(const double *orientation);
+
 public:
 
 	static Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>* (*createShape)(RND *rnd);
+    int no;
 
-	int no;
 	double time;
+    Shape();
 
-	Shape();
 	Shape(const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> & other);
 
 	virtual ~Shape();
@@ -48,9 +50,7 @@ public:
 	virtual double getVoxelSize() = 0;
 
 	virtual double getVoxelAngularSize();
-
     const double * getOrientation() const;
-    virtual void setOrientation(const double *orientation);
 
 	// translates the shape by the given vector v
 	void translate(double* v);

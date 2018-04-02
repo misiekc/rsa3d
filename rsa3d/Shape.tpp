@@ -31,22 +31,6 @@ Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::~Shape() {
 
 }
 
-// Version for shapes with non-zero angular dimension
-/*template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-template <unsigned short AD>
-typename std::enable_if<AD != 0, const double*>::type
-Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation() const{
-    return this->orientation;
-}
-
-// Version for shapes with no angular dimension
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-template <unsigned short AD>
-typename std::enable_if<AD == 0, const double*>::type
-Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation() const{
-    return nullptr;     // return nullptr so dereferencing will fail
-}*/
-
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 const double* Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation() const{
     return this->orientation.data();
@@ -67,9 +51,10 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::translate(double* v){
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::rotate(double* v){
-	for(unsigned short i=0; i<ANGULAR_DIMENSION; i++){
-		this->orientation[i] += v[i];
-	}
+    double orientation[3];
+	for(unsigned short i=0; i<ANGULAR_DIMENSION; i++)
+		orientation[i] = this->getOrientation()[i] + v[i];
+    this->setOrientation(orientation);
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
