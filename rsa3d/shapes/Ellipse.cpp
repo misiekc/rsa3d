@@ -76,7 +76,7 @@ int Ellipse::overlap(BoundaryConditions *bc, Shape<2, 1> *s) {
 	double d;
 	d = (this->a/this->b - this->b/this->a)*sin(this->getAngle() - es.getAngle());
 	double g = 2 + d*d;
-	double r[] = {this->position[0] - es.position[0], this->position[1] - es.position[1]};
+	double r[] = {this->getPosition()[0] - es.getPosition()[0], this->getPosition()[1] - es.getPosition()[1]};
 	double f1 = this->calculateF(r, g);
 	double f2 = es.calculateF(r, g);
 	double psi = 4*(f1*f1-3*f2)*(f2*f2-3*f1) - (9-f1*f2)*(9-f1*f2);
@@ -94,13 +94,16 @@ int Ellipse::pointInside(BoundaryConditions *bc, double* da) {
 	double ta[2];
 	double tmp[2];
 
+	// TODO const double
+	double *position = this->getPosition();
+
 	tmp[0] = da[0]; tmp[1] = da[1];
-	bc->getTranslation(ta, this->position, tmp);
+	bc->getTranslation(ta, position, tmp);
 	da[0] += ta[0];
 	da[1] += ta[1];
 
-	da[0] -= this->position[0];
-	da[1] -= this->position[1];
+	da[0] -= position[0];
+	da[1] -= position[1];
 
 	rotate2D(da, -this->getAngle());
 
@@ -140,8 +143,8 @@ int Ellipse::pointInsideSpecialArea(BoundaryConditions *bc, double *other, doubl
     // Now angleTo - angleFrom <= pi. Align ellipse with coordinate system. Transform angles' range
     // (and divide if necessary) so that its fully contained in [0, pi] range
     double translationArr[2];
-    Vector<2> translationVector(bc->getTranslation(translationArr, this->position, other));
-    Vector<2> thisPos(this->position);
+    Vector<2> translationVector(bc->getTranslation(translationArr, this->getPosition(), other));
+    Vector<2> thisPos(this->getPosition());
     Vector<2> otherPos = Vector<2>(other) + translationVector;
 	Vector<2> otherAligned = getAntiRotationMatrix() * (thisPos - otherPos);
 	if (angleTo < this->getAngle())
@@ -224,7 +227,8 @@ bool Ellipse::circleCollision(const Vector<2> &p, double tMin, double tMax) cons
 std::string Ellipse::toWolfram() const {
 	std::stringstream out;
 	out.precision(std::numeric_limits< double >::max_digits10);
-	Vector<2> thisPos(this->position);
+
+	Vector<2> thisPos(this->getPosition());
 	out << std::fixed;
 	out << "GeometricTransformation[Disk[{0, 0}, {" << this->a << ", " << this->b << "}]," << std::endl;
 	out << "    {RotationMatrix[" << this->getAngle() << "], " << thisPos << "}]";
@@ -244,7 +248,7 @@ std::string Ellipse::toString() {
     std::stringstream out;
 
 	out.precision(std::numeric_limits< double >::max_digits10);
-    Vector<2> thisPos(this->position);
+    Vector<2> thisPos(this->getPosition());
 	out << "Ellipse{position: " << thisPos << "; a: " << this->a;
     out << "; b: " << this->b << "; angle: " << this->getAngle() << "}";
     return out.str();
@@ -257,8 +261,10 @@ std::string Ellipse::toPovray() const{
 	out << "	scale <" << this->a << ", " << this->b << ", 1.0>" << std::endl;
 	out << "	rotate <0, 0, " << (180*this->getAngle()/M_PI) << ">" << std::endl;
 	out << "	translate <";
+
+	const double *position = this->getPosition();
 	for(unsigned short i=0; i<2; i++)
-		out << (this->position[i]) << ", ";
+		out << position[i] << ", ";
 	out << "0.0>" << std::endl << "	texture { pigment { color Red } }" << std::endl << "}" << std::endl;
 
 	return out.str();

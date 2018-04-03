@@ -35,7 +35,13 @@ Positioned<SPATIAL_DIMENSION> & Positioned<SPATIAL_DIMENSION>::operator=(const P
 }
 
 template <unsigned short SPATIAL_DIMENSION>
-double* Positioned<SPATIAL_DIMENSION>::getPosition(){
-	return this->position;
+double* Positioned<SPATIAL_DIMENSION>::getPosition() const {
+    // TODO const_cast
+	return (const_cast<Positioned*>(this))->position;
+}
+
+template<unsigned short SPATIAL_DIMENSION>
+void Positioned<SPATIAL_DIMENSION>::setPosition(const double *position) {
+    std::copy(position, position + SPATIAL_DIMENSION, this->position);
 }
 

@@ -12,9 +12,11 @@
 
 template <unsigned short SPATIAL_DIMENSION>
 class Positioned {
+private:
+    double position[SPATIAL_DIMENSION];
 
 protected:
-	double position[SPATIAL_DIMENSION];
+    virtual void setPosition(const double *position);
 
 public:
 	Positioned();
@@ -24,7 +26,7 @@ public:
 	virtual Positioned<SPATIAL_DIMENSION> & operator=(const Positioned<SPATIAL_DIMENSION> & other);
 
 	// returns position of the shape's center
-	double* getPosition();
+	double* getPosition() const;
 
 	//	Vector<SPATIAL_DIMENSION> getVectorPosition() const;
 };

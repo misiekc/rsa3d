@@ -42,16 +42,17 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setOrientation(const double *o
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::translate(double* v){
-	for(unsigned short i=0; i<SPATIAL_DIMENSION; i++){
-		this->position[i] += v[i];
-	}
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::translate(double* v) {
+    double position[SPATIAL_DIMENSION];
+	for(unsigned short i=0; i<SPATIAL_DIMENSION; i++)
+		position[i] = this->getPosition()[i] + v[i];
+    this->setPosition(position);
 }
 
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::rotate(double* v){
-    double orientation[3];
+    double orientation[ANGULAR_DIMENSION];
 	for(unsigned short i=0; i<ANGULAR_DIMENSION; i++)
 		orientation[i] = this->getOrientation()[i] + v[i];
     this->setOrientation(orientation);
@@ -92,7 +93,8 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::store(std::ostream &f) const{
 		f.write((char *)(&ad), sizeof(unsigned char));
 	f.write((char *)(&this->no), sizeof(int));
 	f.write((char *)(&this->time), sizeof(double));
-	f.write((char *)(this->position), SPATIAL_DIMENSION*sizeof(double));
+    // TODO move to Positioned::store?
+	f.write((char *)(this->getPosition()), SPATIAL_DIMENSION*sizeof(double));
 	if (ad>0)
 		f.write((char *)(this->orientation.data()), ANGULAR_DIMENSION*sizeof(double));
 }
@@ -115,7 +117,12 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
 	}
 	f.read((char *)(&this->no), sizeof(int));
 	f.read((char *)(&this->time), sizeof(double));
-	f.read((char *)(this->position), sd*sizeof(double));
+
+	// TODO move to Positioned::restore?
+	double position[SPATIAL_DIMENSION];
+	f.read((char *)(position), sd*sizeof(double));
+	this->setPosition(position);
+
 	if (ad>0)
 		f.read((char *)(this->orientation.data()), ad*sizeof(double));
 }

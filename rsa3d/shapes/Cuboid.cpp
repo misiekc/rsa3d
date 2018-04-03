@@ -176,12 +176,12 @@ double Cuboid::getVolume()
 //----------------------------------------------------------------------------
 int Cuboid::pointInside(BoundaryConditions *bc, double* pos, double *orientation, double orientationRange)
 {
-    Vector<3> cuboidTranslation(this->position);
+    Vector<3> cuboidTranslation(this->getPosition());
     Vector<3> pointTranslation(pos);
 
     // Transform point coordinates to Cuboid coordinate system
     double trans_arr[3];
-    cuboidTranslation += Vector<3>(bc->getTranslation(trans_arr, this->position, pos));
+    cuboidTranslation += Vector<3>(bc->getTranslation(trans_arr, this->getPosition(), pos));
     pointTranslation = this->orientation.transpose() * (pointTranslation - cuboidTranslation);
 
     double abs_point_coords[3];
@@ -260,8 +260,10 @@ std::string Cuboid::toPovray() const
 		}
 		s+= ",\n    ";
 	}
+
+    const double *position = this->getPosition();
 	for(unsigned short i=0; i<3; i++){
-		s += std::to_string(this->position[i]);
+		s += std::to_string(position[i]);
 		if (i<2)
 			s+= ", ";
 	}
@@ -274,6 +276,7 @@ std::string Cuboid::toPovray() const
 //----------------------------------------------------------------------------
 std::string Cuboid::toWolfram() const
 {
+    const double *position = this->getPosition();
     std::stringstream out;
     out << "cube" << this->no << " = " << std::endl;
     out << "    GeometricTransformation[" << std::endl;
@@ -283,7 +286,7 @@ std::string Cuboid::toWolfram() const
     out << "            {{{" << this->orientation(0, 0) << ", " << this->orientation(0, 1) << ", " << this->orientation(0, 2) << "}," << std::endl;
     out << "            {" << this->orientation(1, 0) << ", " << this->orientation(1, 1) << ", " << this->orientation(1, 2) << "}," << std::endl;
     out << "            {" << this->orientation(2, 0) << ", " << this->orientation(2, 1) << ", " << this->orientation(2, 2) << "}}," << std::endl;
-    out << "            {" << this->position[0] << ", " << this->position[1] << ", " << this->position[2] << "}}]];";
+    out << "            {" << position[0] << ", " << position[1] << ", " << position[2] << "}}]];";
     return out.str();
 }
 
@@ -312,7 +315,7 @@ void Cuboid::restore(std::istream &f)
 }
 
 void Cuboid::obtainVertices(Vector<3> (&vertices)[VERTEX::NUM_OF], const Vector<3> &translation) {
-    Vector<3> pos(this->position);
+    Vector<3> pos(this->getPosition());
     for (std::size_t i = 0; i < VERTEX::NUM_OF; i++)
         vertices[i] = pos + translation + orientation * Cuboid::getRelativeVertex(i);
 }

@@ -52,13 +52,13 @@ int SpheroCylinder2D::overlap(BoundaryConditions *bc, Shape<2, 1> *s) {
     SpheroCylinder2D *otherPtr = (SpheroCylinder2D*)s;
     SpheroCylinder2D other(*otherPtr);
     this->applyBC(bc, &other);
-    Vector<2> otherPos(other.position);
+    Vector<2> otherPos(other.getPosition());
     return withinExclusionZone(otherPos, other.getAngle());
 }
 
 double SpheroCylinder2D::pointDistance2(const Vector<2> &p) const
 {
-	Vector<2> thisPos(this->position);
+	Vector<2> thisPos(this->getPosition());
     return pointDistance2(thisPos, this->getAngle(), p);
 }
 
@@ -83,8 +83,8 @@ int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da, double ang
     }
 
     double translationArr[2];
-    Vector<2> translationVector(bc->getTranslation(translationArr, this->position, da));
-    Vector<2> thisPos(this->position);
+    Vector<2> translationVector(bc->getTranslation(translationArr, this->getPosition(), da));
+    Vector<2> thisPos(this->getPosition());
     Vector<2> pointPos = Vector<2>(da) + translationVector;
     Vector<2> pointPosThisAligned = getAntiRotationMatrix() * (pointPos - thisPos);
     double angleFromAligned = angleFrom - this->getAngle();
@@ -124,7 +124,7 @@ int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da) {
 
 std::string SpheroCylinder2D::toString() {
     std::stringstream out;
-    Vector<2> thisPos(this->position);
+    Vector<2> thisPos(this->getPosition());
     out << "SpheroCylinder2D{radius: " << radius << "; halfDistance: " << halfDistance;
     out << "; pos: " << thisPos << "; angle: " << this->getAngle() * 180 / M_PI << "}";
     return out.str();
@@ -140,8 +140,10 @@ std::string SpheroCylinder2D::toPovray() const {
 	out << "    polygon { 5, < " << -halfDistance << ", " << -radius << ", 0.0002>, < " << -halfDistance << ", " << radius << ", 0.0002>, < " << halfDistance << ", " << radius << ", 0.0002>, < " << halfDistance << ", " << -radius << ", 0.0002> < " << -halfDistance << ", " << -radius << ", 0.0002> }" << std::endl;
 	out << "    rotate <0, 0, " << (180*this->getAngle()/M_PI) << ">" << std::endl;
 	out << "	translate <";
+
+    const double *position = this->getPosition();
 	for(unsigned short i=0; i<2; i++)
-		out << (this->position[i]) << ", ";
+		out << (position[i]) << ", ";
 	out << "0.0>" << std::endl << "	texture { pigment { color Red } }" << std::endl << "}" << std::endl;
 
 	return out.str();
@@ -158,7 +160,7 @@ void SpheroCylinder2D::restore(std::istream &f) {
 
 std::string SpheroCylinder2D::toWolfram() const {
     std::stringstream out;
-    Vector<2> thisPos(this->position);
+    Vector<2> thisPos(this->getPosition());
 
     out << std::fixed;
     out << "GeometricTransformation[{Rectangle[{-" << halfDistance << ", -" << radius << "}, {" << halfDistance << ", " << radius << "}]," << std::endl;
@@ -170,7 +172,7 @@ std::string SpheroCylinder2D::toWolfram() const {
 }
 
 bool SpheroCylinder2D::withinExclusionZone(const Vector<2> &pointPos, double angle) {
-    Vector<2> thisPos(this->position);
+    Vector<2> thisPos(this->getPosition());
 
     // Check bounding spherocylinder
     if (this->pointDistance2(pointPos) >= pow(2 * (radius + halfDistance), 2))
