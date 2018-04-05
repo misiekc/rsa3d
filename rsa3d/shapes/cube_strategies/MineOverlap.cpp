@@ -41,7 +41,7 @@ namespace
 }
 
 
-bool MineOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) {
+bool MineOverlap::overlap(const Cuboid *cube1, const Cuboid *cube2, BoundaryConditions *bc) {
     // Prepare matrices of translations for operations on shapes;
     Vector<3> thisTranslation(cube1->getPosition());
     Vector<3> sTranslation(cube2->getPosition());
@@ -118,7 +118,7 @@ bool MineOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) 
 // Checks whether a segment determined by point1 and point2 intersects with
 // Cuboid
 //----------------------------------------------------------------------------
-bool MineOverlap::checkSegment(Cuboid *cube, const Vector<3> & point1, const Vector<3> & point2)
+bool MineOverlap::checkSegment(const Cuboid *cube, const Vector<3> &point1, const Vector<3> &point2)
 {
     double size[3];
     cube->getSize(size);
@@ -139,6 +139,6 @@ std::string MineOverlap::getName() {
     return "MineOverlap";
 }
 
-void MineOverlap::runOverheadOperations(Cuboid *cube1, Cuboid *cube2) {
+void MineOverlap::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) {
 
 }

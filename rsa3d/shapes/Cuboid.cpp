@@ -130,7 +130,7 @@ void Cuboid::restoreDefaultStrategy() {
 
 // Returns neighbour list cell size determined during class initialization
 //----------------------------------------------------------------------------
-double Cuboid::getNeighbourListCellSize()
+double Cuboid::getNeighbourListCellSize() const
 {
     return Cuboid::neighbourListCellSize;
 }
@@ -138,7 +138,7 @@ double Cuboid::getNeighbourListCellSize()
 
 // Returns initial voxel size determined during class initialization
 //----------------------------------------------------------------------------
-double Cuboid::getVoxelSize()
+double Cuboid::getVoxelSize() const
 {
     return Cuboid::voxelSize;
 }
@@ -147,7 +147,7 @@ double Cuboid::getVoxelSize()
 // Checks whether there is an overlap between this and *s using chosen
 // stategy
 //----------------------------------------------------------------------------
-int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
+int Cuboid::overlap(BoundaryConditions *bc, Shape *s) const
 {
     return strategy->overlap(this, (Cuboid*)s, bc);
 }
@@ -155,7 +155,7 @@ int Cuboid::overlap(BoundaryConditions *bc, Shape *s)
 
 // Checks whether given vertex (in this coordinates) lies in Cuboid
 //----------------------------------------------------------------------------
-bool Cuboid::pointInsideCuboid(const Vector<3> &vertex)
+bool Cuboid::pointInsideCuboid(const Vector<3> &vertex) const
 {
     for (unsigned short i = 0; i < 3; i++)
         if (std::abs(vertex[i]) > this->size[i] / 2)
@@ -166,7 +166,7 @@ bool Cuboid::pointInsideCuboid(const Vector<3> &vertex)
 
 // Returns volume of the Cuboid determined during class initialization
 //----------------------------------------------------------------------------
-double Cuboid::getVolume()
+double Cuboid::getVolume() const
 {
     return 1.;
 }
@@ -174,7 +174,7 @@ double Cuboid::getVolume()
 // Checks whether the point with coordinates da lies inside excluded volume.
 // It is an interior of a set of point which distanse from
 //----------------------------------------------------------------------------
-int Cuboid::pointInside(BoundaryConditions *bc, double* pos, double *orientation, double orientationRange)
+int Cuboid::pointInside(BoundaryConditions *bc, double* pos, double *orientation, double orientationRange) const
 {
     Vector<3> cuboidTranslation(this->getPosition());
     Vector<3> pointTranslation(pos);
@@ -314,7 +314,7 @@ void Cuboid::restore(std::istream &f)
 	}
 }
 
-void Cuboid::obtainVertices(Vector<3> (&vertices)[VERTEX::NUM_OF], const Vector<3> &translation) {
+void Cuboid::obtainVertices(Vector<3> (&vertices)[VERTEX::NUM_OF], const Vector<3> &translation) const {
     Vector<3> pos(this->getPosition());
     for (std::size_t i = 0; i < VERTEX::NUM_OF; i++)
         vertices[i] = pos + translation + orientation * Cuboid::getRelativeVertex(i);

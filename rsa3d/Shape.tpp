@@ -8,7 +8,7 @@
 #include <iostream>
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelAngularSize(){
+double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelAngularSize() const {
 	return 2*M_PI;
 }
 
@@ -59,18 +59,18 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::rotate(double* v){
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-int Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions *bc, double *position){
+int Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions *bc, double *position) const{
 	return this->pointInside(bc, position, 0, 2*M_PI);
 }
 
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::minDistance(Shape *s){
+double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::minDistance(Shape *s) const{
 	return 0.0;
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-std::string Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toString(){
+std::string Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toString() const{
 	return "";
 }
 
@@ -137,7 +137,8 @@ void Shape<SPATIAL_DIMENSION>::vectorTranslate(const Vector<SPATIAL_DIMENSION> &
 */
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second) {
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::applyBC(BoundaryConditions *bc,
+                                                          Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second) const {
     double translation[SPATIAL_DIMENSION];
     bc->getTranslation(translation, this->getPosition(), second->getPosition());
     second->translate(translation);

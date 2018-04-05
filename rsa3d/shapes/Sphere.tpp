@@ -42,7 +42,7 @@ double Sphere<DIMENSION>::gamma(){
 }
 
 template <unsigned short DIMENSION>
-double Sphere<DIMENSION>::volume(){
+double Sphere<DIMENSION>::volume() {
 	return pow(M_PI, DIMENSION/2.0) / gamma();
 }
 
@@ -64,19 +64,19 @@ Sphere<DIMENSION>::Sphere() : Shape<DIMENSION, 0>(){
 }
 
 template <unsigned short DIMENSION>
-double Sphere<DIMENSION>::getNeighbourListCellSize() {
+double Sphere<DIMENSION>::getNeighbourListCellSize() const {
 	return Sphere<DIMENSION>::neighbourListCellSize;
 }
 
 template <unsigned short DIMENSION>
-double Sphere<DIMENSION>::getVoxelSize() {
+double Sphere<DIMENSION>::getVoxelSize() const {
 	return Sphere<DIMENSION>::voxelSize;
 }
 
 template <unsigned short DIMENSION>
-int Sphere<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) {
+int Sphere<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const {
 	Sphere *sd = (Sphere<DIMENSION> *) s;
-	double d2 = bc->distance2(this->position, sd->position);
+	double d2 = bc->distance2(this->getPosition(), sd->getPosition());
 	double r2 = this->r + sd->r;
 	r2 *= r2;
 
@@ -84,46 +84,47 @@ int Sphere<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) {
 }
 
 template <unsigned short DIMENSION>
-double Sphere<DIMENSION>::getVolume() {
+double Sphere<DIMENSION>::getVolume() const {
 	return Sphere<DIMENSION>::volume()*pow(this->r, DIMENSION);
 }
 
 template <unsigned short DIMENSION>
-int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) {
+int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) const {
 	double d2;
 	if (bc!=NULL)
-		d2 = bc->distance2(da, this->position);
+		d2 = bc->distance2(da, this->getPosition());
 	else{
 		d2 = 0.0;
 		for(unsigned short i=0; i<DIMENSION; i++)
-			d2 += (da[i]-this->position[i])*(da[i]-this->position[i]);
+			d2 += (da[i]-this->getPosition()[i])*(da[i]-this->getPosition()[i]);
 	}
 	return (d2<4.0*this->r*this->r);
 }
 
 template <unsigned short DIMENSION>
-int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) {
+int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const {
     return 0;
 }
 
 template <unsigned short DIMENSION>
-double Sphere<DIMENSION>::minDistance(Shape<DIMENSION, 0> *s){
+double Sphere<DIMENSION>::minDistance(Shape<DIMENSION, 0> *s) const{
 	return 2.0*this->radius;
 }
 
 template <unsigned short DIMENSION>
 std::string Sphere<DIMENSION>::toPovray() const{
 	std::string s;
+    const double *position = this->getPosition();
 
 	if (DIMENSION==2){
 		s = "  disc { < ";
 		for(unsigned short i=0; i<DIMENSION; i++)
-			s += std::to_string(this->position[i]) + ", ";
+			s += std::to_string(position[i]) + ", ";
 		s += "0.0002>, <0.0, 0.0, 1.0>, " + std::to_string(this->r) +"\r\n    texture { pigment { color Red } }\r\n  }\r\n";
 
 		s += "  disc { < ";
 		for(unsigned short i=0; i<DIMENSION; i++)
-			s += std::to_string(this->position[i]) + ", ";
+			s += std::to_string(position[i]) + ", ";
 		s += "0.0001>, <0.0, 0.0, 1.0>, " + std::to_string(2*this->r) +"\r\n    texture { pigment { color Coral } }\r\n  }\r\n";
 
 
@@ -136,7 +137,7 @@ std::string Sphere<DIMENSION>::toPovray() const{
 	}else{
 		s = "  sphere { < ";
 		for(unsigned short i=0; i<DIMENSION; i++)
-			s += std::to_string(this->position[i]) + ", ";
+			s += std::to_string(position[i]) + ", ";
 		s += "0.0>, " + std::to_string(this->r) +"\n    texture { pigment { color Red } }\r\n  }\r\n";
 	}
 	return s;

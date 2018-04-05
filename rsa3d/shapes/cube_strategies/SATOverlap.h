@@ -15,10 +15,10 @@ private:
     interval getProjection(const Vector<3> & _axis, Vector<3> * _vert) const;
 
 public:
-    bool overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) override;
+    bool overlap(const Cuboid *cube1, const Cuboid *cube2, BoundaryConditions *bc) override;
     std::string getName() override;
 
-    void runOverheadOperations(Cuboid *cube1, Cuboid *cube2) override;
+    void runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) override;
 };
 
 

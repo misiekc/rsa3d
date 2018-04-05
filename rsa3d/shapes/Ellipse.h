@@ -24,12 +24,12 @@ private:
 	double u[2], uT[2];
 
 	void calculateU();
-	double calculateF(double* r, double g);
+	double calculateF(double* r, double g) const;
 	bool pointInsideUnrotated(const Vector<2> &p, double angleFrom, double angleTo) const;
 	bool withinAngle(const Vector<2> &p, double angleFrom, double angleTo) const;
 	bool withinAngleCheckCollision(const Vector<2> &p, double lowerAngle, double upperAngle) const;
 	bool circleCollision(const Vector<2> &p, double tMin, double tMax) const;
-	int pointInsideSpecialArea(BoundaryConditions *bc, double *other, double angleFrom, double angleTo);
+	int pointInsideSpecialArea(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) const;
 
 public:
 	static void initClass(const std::string &args);
@@ -40,17 +40,17 @@ public:
 	Ellipse & operator = (const Ellipse & el);
 	~Ellipse() override = default;
 
-    double getNeighbourListCellSize() override;
-    double getVoxelSize() override;
-    double getVoxelAngularSize() override;
-    double getVolume() override;
+    double getNeighbourListCellSize() const override;
+    double getVoxelSize() const override;
+    double getVoxelAngularSize() const override;
+    double getVolume() const override;
     void setAngle(double angle) override;
-    int overlap(BoundaryConditions *bc, Shape<2, 1> *s) override;
-    int pointInside(BoundaryConditions *bc, double* da) override;
-    int pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) override;
+    int overlap(BoundaryConditions *bc, Shape<2, 1> *s) const override;
+    int pointInside(BoundaryConditions *bc, double* da) const override;
+    int pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) const override;
     std::string toWolfram() const override;
 	std::string toPovray() const override;
-    std::string toString() override;
+    std::string toString() const override;
     void store(std::ostream &f) const override;
 	void restore(std::istream &f) override;
 };

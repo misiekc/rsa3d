@@ -68,18 +68,18 @@ public:
 	static void setOverlapStrategy(OverlapStrategy *strategy);
 	static OverlapStrategy * getOverlapStrategy();
 
-	double getNeighbourListCellSize() override;
-	double getVoxelSize() override;
-	int overlap(BoundaryConditions *bc, Shape<3,0> *s) override;
-	double getVolume() override;
-	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) override;
+	double getNeighbourListCellSize() const override;
+	double getVoxelSize() const override;
+	int overlap(BoundaryConditions *bc, Shape<3,0> *s) const override;
+	double getVolume() const override;
+	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const override;
 	std::string toPovray() const override;
 	std::string toWolfram() const override;
 	void store(std::ostream &f) const override;
 	void restore(std::istream &f) override;
 
-	bool pointInsideCuboid(const Vector<3> &vertex);
-	void obtainVertices(Vector<3> (&vertices)[8], const Vector<3> &translation);
+	bool pointInsideCuboid(const Vector<3> &vertex) const;
+	void obtainVertices(Vector<3> (&vertices)[8], const Vector<3> &translation) const;
 	Matrix<3, 3> getOrientation() const;
 };
 

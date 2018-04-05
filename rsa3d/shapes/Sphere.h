@@ -36,13 +36,13 @@ public:
 	static void initClass(const std::string &args);
 	static Shape<DIMENSION, 0> * create(RND *rnd);
 
-	double getNeighbourListCellSize();
-	double getVoxelSize();
-	int overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s);
-	double getVolume();
-	int pointInside(BoundaryConditions *bc, double* da);
-	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange);
-	double minDistance(Shape<DIMENSION, 0> *s);
+	double getNeighbourListCellSize() const;
+	double getVoxelSize() const;
+	int overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const;
+	double getVolume() const;
+	int pointInside(BoundaryConditions *bc, double* da) const;
+	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const;
+	double minDistance(Shape<DIMENSION, 0> *s) const;
 
 	std::string toPovray() const;
 	void store(std::ostream &f) const;

@@ -17,7 +17,7 @@ double Ellipse::shortSemiAxis;
 double Ellipse::neighbourListCellSize;
 double Ellipse::voxelSize;
 
-void Ellipse::calculateU(){
+void Ellipse::calculateU() {
 	this->u[0]  = cos(this->getAngle()); this->u[1]  = sin(this->getAngle());
 	this->uT[0] = -sin(this->getAngle()); this->uT[1] =  cos(this->getAngle());
 }
@@ -54,11 +54,11 @@ Shape<2, 1> * Ellipse::create(RND *rnd){
 	return new Ellipse();
 }
 
-double Ellipse::getVoxelAngularSize(){
+double Ellipse::getVoxelAngularSize() const{
 	return M_PI;
 }
 
-double Ellipse::calculateF(double* r, double g){
+double Ellipse::calculateF(double* r, double g) const {
 	double d1 = (r[0]*this->u[0] + r[1]*this->u[1])  /this->a;
 	double d2 = (r[0]*this->uT[0] + r[1]*this->uT[1]) /this->b;
 
@@ -70,7 +70,7 @@ void Ellipse::setAngle(double angle){
 	this->calculateU();
 }
 
-int Ellipse::overlap(BoundaryConditions *bc, Shape<2, 1> *s) {
+int Ellipse::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
 	Ellipse es = *((Ellipse *)s);
     this->applyBC(bc, &es);
 	double d;
@@ -86,11 +86,11 @@ int Ellipse::overlap(BoundaryConditions *bc, Shape<2, 1> *s) {
 	return true;
 }
 
-double Ellipse::getVolume() {
+double Ellipse::getVolume() const {
 	return M_PI*this->a*this->b;
 }
 
-int Ellipse::pointInside(BoundaryConditions *bc, double* da) {
+int Ellipse::pointInside(BoundaryConditions *bc, double* da) const {
 	double ta[2];
 	double tmp[2];
 
@@ -112,7 +112,7 @@ int Ellipse::pointInside(BoundaryConditions *bc, double* da) {
 	return (dx*dx+dy*dy < 1);
 }
 
-int Ellipse::pointInside(BoundaryConditions *bc, double *other, double angleFrom, double angleTo)
+int Ellipse::pointInside(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) const
 {
     // Check exlusion zones for angle interval endpoinds - angleFrom and angleTo
     Ellipse ellTmp;
@@ -129,7 +129,7 @@ int Ellipse::pointInside(BoundaryConditions *bc, double *other, double angleFrom
 	return pointInsideSpecialArea(bc, other, angleFrom, angleTo);
 }
 
-int Ellipse::pointInsideSpecialArea(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) {
+int Ellipse::pointInsideSpecialArea(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) const {
 
 	this->normalizeAngleRange(&angleFrom, &angleTo, M_PI);
 	// now angleFrom is in [this->getAngle(), this->getAngle() + M_PI)
@@ -236,15 +236,15 @@ std::string Ellipse::toWolfram() const {
 	return out.str();
 }
 
-double Ellipse::getNeighbourListCellSize() {
+double Ellipse::getNeighbourListCellSize() const {
 	return Ellipse::neighbourListCellSize;
 }
 
-double Ellipse::getVoxelSize() {
+double Ellipse::getVoxelSize() const {
 	return Ellipse::voxelSize;
 }
 
-std::string Ellipse::toString() {
+std::string Ellipse::toString() const {
     std::stringstream out;
 
 	out.precision(std::numeric_limits< double >::max_digits10);

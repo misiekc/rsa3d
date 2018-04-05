@@ -25,10 +25,10 @@ protected:
 public:
 
     // pointInside(double* orientation, double orientationRange) -> pointInside(double angleFrom, double angleTo)
-    int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) final;
+    int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const final;
     double getAngle() const;
 
-    virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) = 0;
+    virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const = 0;
 };
 
 

@@ -32,23 +32,23 @@ Shape<2, 1> * SpheroCylinder2D::create(RND * rnd) {
     return new SpheroCylinder2D();
 }
 
-double SpheroCylinder2D::getVoxelAngularSize() {
+double SpheroCylinder2D::getVoxelAngularSize() const {
 	return M_PI;
 }
 
-double SpheroCylinder2D::getNeighbourListCellSize() {
+double SpheroCylinder2D::getNeighbourListCellSize() const {
     return neighbourListCellSize;
 }
 
-double SpheroCylinder2D::getVoxelSize() {
+double SpheroCylinder2D::getVoxelSize() const {
     return voxelSize;
 }
 
-double SpheroCylinder2D::getVolume() {
+double SpheroCylinder2D::getVolume() const {
     return 1;
 }
 
-int SpheroCylinder2D::overlap(BoundaryConditions *bc, Shape<2, 1> *s) {
+int SpheroCylinder2D::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
     SpheroCylinder2D *otherPtr = (SpheroCylinder2D*)s;
     SpheroCylinder2D other(*otherPtr);
     this->applyBC(bc, &other);
@@ -73,7 +73,7 @@ double SpheroCylinder2D::pointDistance2(const Vector<2> &pos, double angle, cons
         return (diff - centerVector).norm2();
 }
 
-int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) {
+int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
     this->normalizeAngleRange(&angleFrom, &angleTo, M_PI);
 
     // If angleTo not in normal range (see normalizeAngleRange), divide it and check separately
@@ -122,7 +122,7 @@ int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da) {
 }
 */
 
-std::string SpheroCylinder2D::toString() {
+std::string SpheroCylinder2D::toString() const {
     std::stringstream out;
     Vector<2> thisPos(this->getPosition());
     out << "SpheroCylinder2D{radius: " << radius << "; halfDistance: " << halfDistance;
@@ -171,7 +171,7 @@ std::string SpheroCylinder2D::toWolfram() const {
     return out.str();
 }
 
-bool SpheroCylinder2D::withinExclusionZone(const Vector<2> &pointPos, double angle) {
+bool SpheroCylinder2D::withinExclusionZone(const Vector<2> &pointPos, double angle) const {
     Vector<2> thisPos(this->getPosition());
 
     // Check bounding spherocylinder

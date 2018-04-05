@@ -75,19 +75,19 @@ Shape<DIMENSION, 0> * OrientedCuboid<DIMENSION>::create(RND *rnd){
 }
 
 template <unsigned short DIMENSION>
-int OrientedCuboid<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s){
+int OrientedCuboid<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const{
     return this->pointInside(bc, s->getPosition());
 }
 
 template <unsigned short DIMENSION>
-int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* da){
+int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) const{
 //    if (OrientedCuboid<DIMENSION>::do2Drotation){
 //    	return Cuboid::pointInside(bc, da);
 //    }else{
     	double ta[DIMENSION];
-   		bc->getTranslation(ta, this->position, da);
+   		bc->getTranslation(ta, this->getPosition(), da);
     	for(unsigned short i=0; i<DIMENSION; i++){
-    		if (std::fabs(this->position[i] - (da[i] + ta[i])) > size[i]){
+    		if (std::fabs(this->getPosition()[i] - (da[i] + ta[i])) > size[i]){
     			return false;
     		}
     	}
@@ -96,22 +96,22 @@ int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* da){
 }
 
 template <unsigned short DIMENSION>
-int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) {
+int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const{
 	return 0;
 }
 
 template <unsigned short DIMENSION>
-double OrientedCuboid<DIMENSION>::getNeighbourListCellSize(){
+double OrientedCuboid<DIMENSION>::getNeighbourListCellSize() const{
 	return OrientedCuboid<DIMENSION>::neighbourListCellSize;
 }
 
 template <unsigned short DIMENSION>
-double OrientedCuboid<DIMENSION>::getVoxelSize(){
+double OrientedCuboid<DIMENSION>::getVoxelSize() const{
 	return OrientedCuboid<DIMENSION>::voxelSize;
 }
 
 template <unsigned short DIMENSION>
-double OrientedCuboid<DIMENSION>::getVolume(){
+double OrientedCuboid<DIMENSION>::getVolume() const{
 	return std::accumulate(size, size + DIMENSION, 1.0, std::multiplies<double>());
 }
 
@@ -119,21 +119,22 @@ template <unsigned short DIMENSION>
 std::string OrientedCuboid<DIMENSION>::toPovray() const
 {	
 	std::string s = "";
+	const double *position = this->getPosition();
 	if (DIMENSION==2){
 		double factor = 0.5;
 		s += "  polygon {4, ";
 
-		s += "< " + std::to_string(this->position[0] - factor*size[0]) + ", ";
-		s += 		std::to_string(this->position[1] - factor*size[1]) + ", 0.1>, ";
+		s += "< " + std::to_string(position[0] - factor*size[0]) + ", ";
+		s += 		std::to_string(position[1] - factor*size[1]) + ", 0.1>, ";
 
-		s += "< " + std::to_string(this->position[0] - factor*size[0]) + ", ";
-		s += 		std::to_string(this->position[1] + factor*size[1]) + ", 0.1>, ";
+		s += "< " + std::to_string(position[0] - factor*size[0]) + ", ";
+		s += 		std::to_string(position[1] + factor*size[1]) + ", 0.1>, ";
 
-		s += "< " + std::to_string(this->position[0] + factor*size[0]) + ", ";
-		s += 		std::to_string(this->position[1] + factor*size[1]) + ", 0.1>, ";
+		s += "< " + std::to_string(position[0] + factor*size[0]) + ", ";
+		s += 		std::to_string(position[1] + factor*size[1]) + ", 0.1>, ";
 
-		s += "< " + std::to_string(this->position[0] + factor*size[0]) + ", ";
-		s += 		std::to_string(this->position[1] - factor*size[1]) + ", 0.1> ";
+		s += "< " + std::to_string(position[0] + factor*size[0]) + ", ";
+		s += 		std::to_string(position[1] - factor*size[1]) + ", 0.1> ";
 
 		s += "\n    texture { pigment { color Red } }\n  }\n";
 	}
@@ -162,7 +163,7 @@ std::string OrientedCuboid<DIMENSION>::toPovray() const
 		}
 
 		for(unsigned short i=0; i<DIMENSION; i++){
-			s += std::to_string(this->position[i]);
+			s += std::to_string(position[i]);
 			if (i<DIMENSION-1)
 				s+= ", ";
 		}

@@ -5,7 +5,7 @@
 #include "SATOverlap.h"
 
 
-bool SATOverlap::overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) {
+bool SATOverlap::overlap(const Cuboid *cube1, const Cuboid *cube2, BoundaryConditions *bc) {
     double trans_arr[3];
     Vector<3> translation(bc->getTranslation(trans_arr, cube1->getPosition(), cube2->getPosition()));
     Matrix<3, 3> orientation1 = cube1->getOrientation();
@@ -81,7 +81,7 @@ std::string SATOverlap::getName() {
     return "SATOverlap";
 }
 
-void SATOverlap::runOverheadOperations(Cuboid *cube1, Cuboid *cube2) {
+void SATOverlap::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) {
     Matrix<3, 3> orientation1 = cube1->getOrientation();
     Matrix<3, 3> orientation2 = cube2->getOrientation();
 

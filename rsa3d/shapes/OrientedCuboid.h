@@ -25,12 +25,12 @@ public:
 	static void initClass(const std::string &args);
 	static Shape<DIMENSION, 0> * create(RND *rnd);
 
-    int overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s);
-    int pointInside(BoundaryConditions *bc, double* da);
-	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange);
-    double getNeighbourListCellSize();
-    double getVoxelSize();
-    double getVolume();
+    int overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const;
+    int pointInside(BoundaryConditions *bc, double* da) const;
+	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const;
+    double getNeighbourListCellSize() const;
+    double getVoxelSize() const;
+    double getVolume() const;
 
     std::string toPovray() const;
 };

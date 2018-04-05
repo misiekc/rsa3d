@@ -21,21 +21,21 @@ private:
 
     bool angleInRange(double angle, double rangeStart, double rangeEnd) const;
     double pointDistance2(const Vector<2> &p) const;
-    bool withinExclusionZone(const Vector<2> &pointPos, double angle);
+    bool withinExclusionZone(const Vector<2> &pointPos, double angle) const;
 
 public:
     static void initClass(const std::string & attr);
     static Shape<2, 1> * create(RND * rnd);
 
-    double getVoxelAngularSize() override;
-    double getNeighbourListCellSize() override;
-    double getVoxelSize() override;
-    double getVolume() override;
-    int overlap(BoundaryConditions *bc, Shape<2, 1> *s) override;
-    int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) override;
+    double getVoxelAngularSize() const override;
+    double getNeighbourListCellSize() const override;
+    double getVoxelSize() const override;
+    double getVolume() const override;
+    int overlap(BoundaryConditions *bc, Shape<2, 1> *s) const override;
+    int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const override;
     void store(std::ostream &f) const override;
     void restore(std::istream &f) override;
-    std::string toString() override;
+    std::string toString() const override;
     std::string toPovray() const override;
     std::string toWolfram() const override;
 };

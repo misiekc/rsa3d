@@ -27,7 +27,7 @@ private:
 
 protected:
 
-	void applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second);
+	void applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second) const;
 
     virtual void setOrientation(const double *orientation);
 
@@ -44,12 +44,12 @@ public:
 	virtual ~Shape();
 
 	// returns linear size of a cell in a NeighbourGrig. This size should be as small as possible but big enough to avoid overlapping between shapes having centers in cells that are not neighbours
-	virtual double getNeighbourListCellSize() = 0;
+	virtual double getNeighbourListCellSize() const = 0;
 
 	// returns initial linear size of a (cubic) voxel. This size should be as big as possible but shape with the center inside the voxel have to cover the whole voxel
-	virtual double getVoxelSize() = 0;
+	virtual double getVoxelSize() const = 0;
 
-	virtual double getVoxelAngularSize();
+	virtual double getVoxelAngularSize() const;
     const double * getOrientation() const;
 
 	// translates the shape by the given vector v
@@ -58,22 +58,22 @@ public:
 	void rotate(double *v);
 
 	// checks if there is overlap with the shape pointed by s.
-	virtual int overlap(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) = 0;
+	virtual int overlap(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const = 0;
 
 	// returns a volume of the shape
-	virtual double getVolume() = 0;
+	virtual double getVolume() const = 0;
 
 	// checks if a given point is within excluded volume
-	virtual int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) = 0;
+	virtual int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const = 0;
 
 	// checks if a given point is within excluded volume for any orientation of a virtual rotationally symmetric shape
-	virtual int pointInside(BoundaryConditions *bc, double* da);
+	virtual int pointInside(BoundaryConditions *bc, double* da) const;
 
 	// moves the shape towards given shape s
-	virtual double minDistance(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s);
+	virtual double minDistance(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const;
 
 	// returns string representation of the shape
-	virtual std::string toString();
+	virtual std::string toString() const;
 
 	// returns povray string representation of the shape
 	virtual std::string toPovray() const;

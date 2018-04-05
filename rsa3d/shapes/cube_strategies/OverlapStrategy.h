@@ -14,9 +14,9 @@ public:
     using COORD = Cuboid::COORD;
 
     virtual ~OverlapStrategy() = default;
-    virtual bool overlap(Cuboid * cube1, Cuboid * cube2, BoundaryConditions *bc) = 0;
+    virtual bool overlap(const Cuboid * cube1, const Cuboid * cube2, BoundaryConditions *bc) = 0;
     virtual std::string getName() = 0;
-    virtual void runOverheadOperations(Cuboid *cube1, Cuboid *cube2) = 0;
+    virtual void runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) = 0;
 };
 
 

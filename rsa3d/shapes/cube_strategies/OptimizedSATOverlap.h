@@ -10,11 +10,11 @@
 
 class OptimizedSATOverlap : public OverlapStrategy {
 public:
-    bool overlap(Cuboid *cube1, Cuboid *cube2, BoundaryConditions *bc) override;
+    bool overlap(const Cuboid *cube1, const Cuboid *cube2, BoundaryConditions *bc) override;
 
     std::string getName() override;
 
-    void runOverheadOperations(Cuboid *cube1, Cuboid *cube2) override;
+    void runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) override;
 };
 
 
