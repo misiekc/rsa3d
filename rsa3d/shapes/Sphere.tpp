@@ -103,7 +103,7 @@ int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) {
 
 template <unsigned short DIMENSION>
 int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) {
-    return 0;
+    return this->pointInside(bc, position);
 }
 
 template <unsigned short DIMENSION>
@@ -114,17 +114,23 @@ double Sphere<DIMENSION>::minDistance(Shape<DIMENSION, 0> *s){
 template <unsigned short DIMENSION>
 std::string Sphere<DIMENSION>::toPovray() const{
 	std::string s;
+	double r0 = this->r - 0.01;
 
 	if (DIMENSION==2){
 		s = "  disc { < ";
 		for(unsigned short i=0; i<DIMENSION; i++)
 			s += std::to_string(this->position[i]) + ", ";
-		s += "0.0002>, <0.0, 0.0, 1.0>, " + std::to_string(this->r) +"\r\n    texture { pigment { color Red } }\r\n  }\r\n";
-
+		s += "0.05>, <0.0, 0.0, 1.0>, " + std::to_string(this->r) +"\r\n    texture { pigment { color Red } }\r\n  }\r\n";
+/*
 		s += "  disc { < ";
 		for(unsigned short i=0; i<DIMENSION; i++)
 			s += std::to_string(this->position[i]) + ", ";
-		s += "0.0001>, <0.0, 0.0, 1.0>, " + std::to_string(2*this->r) +"\r\n    texture { pigment { color Coral } }\r\n  }\r\n";
+		s += "0.01>, <0.0, 0.0, 1.0>, " + std::to_string(2*r0) + "\r\n    texture { pigment { color Yellow } }\r\n  }\r\n";
+*/
+		s += "  disc { < ";
+		for(unsigned short i=0; i<DIMENSION; i++)
+			s += std::to_string(this->position[i]) + ", ";
+		s += "0.03>, <0.0, 0.0, 1.0>, " + std::to_string(2*this->r) + ", " + std::to_string(2*r0) + "\r\n    texture { pigment { color Black } }\r\n  }\r\n";
 
 
 /*

@@ -27,7 +27,7 @@ private:
 
 protected:
 
-	void applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second);
+	virtual void applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second);
 
 public:
 
@@ -53,7 +53,7 @@ public:
     virtual void setOrientation(const double *orientation);
 
 	// translates the shape by the given vector v
-	void translate(double* v);
+	virtual void translate(double* v);
 
 	virtual void rotate(double *v);
 

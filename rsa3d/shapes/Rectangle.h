@@ -22,25 +22,48 @@ private:
     // b is shorter
     double a, b, halfA, halfB;
 
+    // vertices, where last = first
+    double xs[5];
+    double ys[5];
+
     double getXOnCircle(double cx, double cy, double r, double angle);
 
     double getYOnCircle(double cx, double cy, double r, double angle);
 
     int isInsideCircle(const Vector<2, double> &point, double cx, double cy, double r) const;
 
-    int isInsideRect(const Vector<2, double> &point, double cx, double cy, double a, double b);
+    int isInsideRect(const Vector<2, double> &point, double cx, double cy, double aLength, double bLength);
+
+    int pointInsideInternal(BoundaryConditions *bc, double *da, double angleFrom, double angleTo);
 
     Vector<2, double> rotatePoint(const Vector<2, double>& point, const Matrix<2, 2, double>& rotation, const Vector<2, double>& center);
 
     Vector<2> rotatePoint(const Vector<2>& point, const Matrix<2,2>& rotation);
 
-    void getNewSize(const Matrix<2, 2, double> &rotationFrom, const double *p, const Vector<2, double> &newSizeFrom) const;
-
-    bool checkExcludingRectangle(double angleFrom, double angleTo, double x, double y) const;
+    bool isInsideExcludingRectangle(double angleFrom, double angleTo, double x, double y) const;
 
     bool checkTangents(double x, double y, double cx, double cy, double r, double angle1, double angle2);
 
     void setAngle(double angle);
+
+    // from: http://geomalgorithms.com/a03-_inclusion.html
+
+    /* isLeft(): tests if a point is Left|On|Right of an infinite line.
+     * Input:  three points P0, P1, and P2
+     * Return:
+     * >0 for P2 left of the line through P0 and P1
+     * =0 for P2  on the line
+     * <0 for P2  right of the line
+     */
+    double isLeft(double p0x, double p0y, double p1x, double p1y, double p2x, double p2y);
+
+    /*
+     * wn_PnPoly(): winding number test for a point in a polygon
+     * Input:   x,y = a point,
+     * xs, ys = vertex points of a polygon xs[n+1] with xs[n]=xs[0]
+     * Return:  wn = the winding number (=0 only when P is outside)
+     */
+    int wn_PnPoly(double x, double y, double *xs, double *ys, int n);
 
 public:
     static void initClass(const std::string &args);
@@ -51,11 +74,14 @@ public:
     Rectangle & operator = (const Rectangle & el);
     ~Rectangle() override = default;
 
-    void rotate(double *v) override;
+    // translates the shape by the given vector v
+    void translate(double* v);
 
     int overlap(BoundaryConditions *bc, Shape<2, 1> *s) override;
 
     double getVolume() override;
+
+    double getVoxelAngularSize() override;
 
     int pointInside(BoundaryConditions *bc, double* da) override;
     int pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) override;

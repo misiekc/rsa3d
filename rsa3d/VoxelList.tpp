@@ -326,12 +326,12 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsidePacking(Voxel
 	double* vpos = v->getPosition();
 	double *vangle = v->getOrientation();
 	for(unsigned short i=0; i < SPATIAL_DIMENSION; i++){
-		if (vpos[i]>this->size){
+		if (vpos[i] >= this->size){
 			return false;
 		}
 	}
 	for(unsigned short i=0; i<ANGULAR_DIMENSION; i++){
-		if (vangle[i] > this->angularSize){
+		if (vangle[i] >= this->angularSize){
 			return false;
 		}
 	}
