@@ -73,8 +73,6 @@ public:
     static Shape<2, 1> * create(RND *rnd);
 
     Rectangle();
-    /*Rectangle(const Rectangle &other);
-    Rectangle & operator = (const Rectangle & el);*/
     ~Rectangle() override = default;
 
     int overlap(BoundaryConditions *bc, Shape<2, 1> *s) const override;
