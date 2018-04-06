@@ -35,7 +35,7 @@ protected:
      * @param bc boundary conditions to apply
      * @param second shape to be translated according to bc
      */
-	void applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second) const;
+	virtual void applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second) const;
 
     /**
      * Sets shape's orientation. Derived shape classes have to override this method when they want to keep track of

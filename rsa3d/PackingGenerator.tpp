@@ -399,7 +399,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 			}
 //			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
 //			this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
-//			this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
+			this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
 //			std::string filename = "snapshot_" + std:::to_string(this->packing.size()) + "_" + std::to_string(this->voxels->length()) + ".dbg";
 //			std::ofstream file(filename, std::ios::binary);
 //			this->store(file);
@@ -644,7 +644,9 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(std::vecto
 			tr[1] = -tr[1];
 			s->translate(tr);
 		}
+
 	}
+
 
 	file << "}" << std::endl;
 

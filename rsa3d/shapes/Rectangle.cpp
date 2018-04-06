@@ -4,30 +4,89 @@
 
 #include "Rectangle.h"
 
+double Rectangle::neighbourListCellSize;
+double Rectangle::voxelSize;
+double Rectangle::longer;
+double Rectangle::shorter;
 
-double Rectangle::getXOnCircle(double cx, double cy, double r, double angle) {
+Shape<2, 1> *Rectangle::create(RND *rnd) {
+    return new Rectangle();
+}
+
+Rectangle::Rectangle() : AnisotropicShape2D() {
+    this->a = Rectangle::longer;
+    this->b = Rectangle::shorter;
+    this->halfA = a / 2;
+    this->halfB = b / 2;
+    this->setAngle(0);
+}
+
+Rectangle::Rectangle(const Rectangle &other) : AnisotropicShape2D(other), a(other.a), b(other.b), halfA(other.halfA),
+                                               halfB(other.halfB) {
+    for (int i = 0; i < 5; i++) {
+        xs[i] = other.xs[i];
+        ys[i] = other.ys[i];
+    }
+}
+
+Rectangle &Rectangle::operator=(const Rectangle &other) {
+    this->a = other.a;
+    this->b = other.b;
+    this->halfA = other.halfA;
+    this->halfB = other.halfB;
+    for (int i = 0; i < 5; i++) {
+        xs[i] = other.xs[i];
+        ys[i] = other.ys[i];
+    }
+    this->setAngle(other.getAngle());
+    this->setPosition(other.getPosition());
+    return *this;
+}
+
+double Rectangle::getXOnCircle(double cx, double cy, double r, double angle) const {
     return cx + cos(angle) * r;
 }
 
-double Rectangle::getYOnCircle(double cx, double cy, double r, double angle) {
+double Rectangle::getYOnCircle(double cx, double cy, double r, double angle) const {
     return cy + sin(angle) * r;
 }
 
 void Rectangle::setAngle(double angle) {
-    this->orientation[0] = angle;
+    AnisotropicShape2D::setAngle(angle);
+
+    const double *position = this->getPosition();
+    double p[2] = {halfA, halfB}; // 1, 1
+    const Matrix<2, 2, double> &rotation = getRotationMatrix();
+    Vector<2> point = rotatePoint(Vector<2>(p), rotation);
+    xs[0] = point[0] + position[0];
+    xs[4] = point[0] + position[0];
+    ys[0] = point[1] + position[1];
+    ys[4] = point[1] + position[1];
+    p[0] -= a; // -1, 1
+    point = rotatePoint(Vector<2>(p), rotation);
+    xs[1] = point[0] + position[0];
+    ys[1] = point[1] + position[1];
+    p[1] -= b; // -1, -1
+    point = rotatePoint(Vector<2>(p), rotation);
+    xs[2] = point[0] + position[0];
+    ys[2] = point[1] + position[1];
+    p[0] += a; // 1, - 1
+    point = rotatePoint(Vector<2>(p), rotation);
+    xs[3] = point[0] + position[0];
+    ys[3] = point[1] + position[1];
 }
 
-double Rectangle::getVoxelSize() {
+double Rectangle::getVoxelSize() const {
     return Rectangle::voxelSize;
 }
 
-double Rectangle::getNeighbourListCellSize() {
+double Rectangle::getNeighbourListCellSize() const {
     return Rectangle::neighbourListCellSize;
 }
 
 void Rectangle::initClass(const std::string &args) {
     double ratio = std::stod(args);
-    double s = sqrt(1.0/ratio);
+    double s = sqrt(1.0 / ratio);
     if (ratio >= 0) {
         Rectangle::longer = s * ratio;
         Rectangle::shorter = s;
@@ -39,50 +98,52 @@ void Rectangle::initClass(const std::string &args) {
     Rectangle::neighbourListCellSize = Rectangle::longer * 2;
 }
 
-double Rectangle::getVolume() {
+double Rectangle::getVolume() const {
     return 1;
 }
 
-Shape<2, 1> *Rectangle::create(RND *rnd) {
-    return new Rectangle();
+double Rectangle::getVoxelAngularSize() const {
+    return M_PI / 2;
 }
 
-Rectangle::Rectangle() {
-    this->a = Rectangle::longer;
-    this->b = Rectangle::shorter;
-    this->halfA = a/2;
-    this->halfB = b/2;
-    this->setAngle(0);
+// Shape::translate was made non-virtual and one should override Positioned::setPosition instead (see documentation)
+void Rectangle::setPosition(const double *position) {
+    Shape::setPosition(position);
+
+    // TODO I had to repeat the code from setAngle. Maybe in can be wrapped into a function?
+    const double *newPosition = this->getPosition();
+    double p[2] = {halfA, halfB}; // 1, 1
+    const Matrix<2, 2, double> &rotation = getRotationMatrix();
+    Vector<2> point = rotatePoint(Vector<2>(p), rotation);
+    xs[0] = point[0] + newPosition[0];
+    xs[4] = point[0] + newPosition[0];
+    ys[0] = point[1] + newPosition[1];
+    ys[4] = point[1] + newPosition[1];
+    p[0] -= a; // -1, 1
+    point = rotatePoint(Vector<2>(p), rotation);
+    xs[1] = point[0] + newPosition[0];
+    ys[1] = point[1] + newPosition[1];
+    p[1] -= b; // -1, -1
+    point = rotatePoint(Vector<2>(p), rotation);
+    xs[2] = point[0] + newPosition[0];
+    ys[2] = point[1] + newPosition[1];
+    p[0] += a; // 1, - 1
+    point = rotatePoint(Vector<2>(p), rotation);
+    xs[3] = point[0] + newPosition[0];
+    ys[3] = point[1] + newPosition[1];
 }
 
-Rectangle::Rectangle(const Rectangle &other) {
-    this->a = other.a;
-    this->b = other.b;
-    this->halfA = other.halfA;
-    this->halfB = other.halfB;
-    this->setAngle(other.getAngle());
-}
 
-Rectangle &Rectangle::operator=(const Rectangle &el) {
-    this->a = el.a;
-    this->b = el.b;
-    this->halfA = el.halfA;
-    this->halfB = el.halfB;
-    this->setAngle(el.getAngle());
-    return *this;
-}
-
-void Rectangle::rotate(double *v) {
-    Shape::rotate(v);
-}
-
-int Rectangle::pointInside(BoundaryConditions *bc, double *da) {
+// never used
+int Rectangle::pointInside(BoundaryConditions *bc, double *da) const {
     // apply bc
     double ta[2];
     double tmp[2];
+    double *position = this->getPosition();
 
-    tmp[0] = da[0]; tmp[1] = da[1];
-    bc->getTranslation(ta, this->position, tmp);
+    tmp[0] = da[0];
+    tmp[1] = da[1];
+    bc->getTranslation(ta, position, tmp);
     da[0] += ta[0];
     da[1] += ta[1];
 
@@ -116,7 +177,7 @@ int Rectangle::pointInside(BoundaryConditions *bc, double *da) {
 
     cx = position[0] - halfA;
     cy = position[1] + halfB;
-    if (pointRotated[0] < cx && pointRotated[1] > cy) { // corner -1,-1
+    if (pointRotated[0] < cx && pointRotated[1] > cy) { // corner -1,1
         return isInsideCircle(pointRotated, cx, cy, r);
     }
 
@@ -125,19 +186,23 @@ int Rectangle::pointInside(BoundaryConditions *bc, double *da) {
 }
 
 
-int Rectangle::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) {
+int Rectangle::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
     // let's have it ordered
     if (angleFrom > angleTo) {
         double tmp = angleFrom;
         angleFrom = angleTo;
-        angleTo = angleFrom;
+        angleTo = tmp;
     }
+
+    double angle = this->getAngle();
+    angleFrom -= angle;
+    angleTo -= angle;
 
     // and normalized
     normalizeAngleRange(&angleFrom, &angleTo, M_PI);
 
     // 90 degrees means minimal exclusion zone
-    if (angleTo - angleFrom > M_PI) {
+    if (angleTo - angleFrom >= M_PI) {
         return pointInside(bc, da);
     }
 
@@ -145,74 +210,95 @@ int Rectangle::pointInside(BoundaryConditions *bc, double *da, double angleFrom,
     // angle range is M_PI max
     int countFrom = (int) floor(angleFrom / pi2);
     int countTo = (int) floor(angleTo / pi2);
-    if (countTo - countFrom == 0) { // cool, easy
-        // let's move on
+    if (countTo - countFrom == 0 || (countTo - countFrom == 1 && angleTo == countTo * pi2)) {
+        return pointInsideInternal(bc, da, angleFrom, angleTo);
     } else if (countTo - countFrom == 1) { // double check
-        return pointInside(bc, da, angleFrom, pi2 * countTo) && pointInside(bc, da, pi2 * countTo, angleTo);
+        return pointInsideInternal(bc, da, angleFrom, pi2 * countTo)
+               && pointInsideInternal(bc, da, pi2 * countTo, angleTo);
     } else { // triple check
-        return pointInside(bc, da, angleFrom, pi2 * (countFrom + 1)) && pointInside(bc, da, pi2 * (countFrom + 1), pi2 * countTo)
-               && pointInside(bc, da, pi2 * countTo, angleTo);
+        return pointInsideInternal(bc, da, angleFrom, pi2 * (countFrom + 1))
+               && pointInsideInternal(bc, da, pi2 * (countFrom + 1), pi2 * countTo)
+               && pointInsideInternal(bc, da, pi2 * countTo, angleTo);
     }
+}
+
+int Rectangle::pointInsideInternal(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
+    double pi2 = M_PI / 2;
+    int countFrom = (int) floor(angleFrom / pi2);
 
     // apply bc
     double ta[2];
     double tmp[2];
+    double *position = this->getPosition();
 
-    tmp[0] = da[0]; tmp[1] = da[1];
-    bc->getTranslation(ta, this->position, tmp);
-    da[0] += ta[0];
-    da[1] += ta[1];
+    tmp[0] = da[0];
+    tmp[1] = da[1];
+    bc->getTranslation(ta, position, tmp);
+    Vector<2, double> point = Vector<2>(da);
+    point[0] += ta[0];
+    point[1] += ta[1];
 
     // rotate point relatively to rectangle center
-    Vector<2> pointRotated = rotatePoint(Vector<2>(da), getAntiRotationMatrix(), Vector<2>(position));
+    const Matrix<2, 2, double> &rotation = getAntiRotationMatrix();
+
+    Vector<2> pointRotated = rotatePoint(point, rotation, Vector<2>(position));
     double x = pointRotated[0];
     double y = pointRotated[1];
 
     // if it is not in excluding rectangle, we can quit
-    if (!checkExcludingRectangle(angleFrom, angleTo, x, y)) {
-        return 0;
+    if (!isInsideExcludingRectangle(angleFrom, angleTo, x, y)) {
+        return false;
     }
 
-    // there are two options:
-    bool option = countFrom % 2 == 1;
+    // inside rect?
+    if (isInsideRect(pointRotated, position[0], position[1], a, b)) {
+        return true;
+    }
+
+    // there are four quarters:
+    int quarter = countFrom % 4;
 
     // 1, 1
     // setup
-    double cx = halfA;
-    double cy = halfB;
-    double r = option ? b : a;
-    double angle1 = angleFrom - option * 90;
-    double angle2 = angleTo - option * 90;
+    double cx = halfA + position[0];
+    double cy = halfB + position[1];
+    double r = quarter % 2 == 0 ? halfB : halfA;
+    double desiredQuarter = 0;
+    double angle1 = angleFrom - (quarter - desiredQuarter) * pi2;
+    double angle2 = angleTo - (quarter - desiredQuarter) * pi2;
     if (!checkTangents(x, y, cx, cy, r, angle1, angle2)) {
         return false;
     }
 
     // -1, 1
-    cx = -halfA;
-    cy = halfB;
-    r = option ? a : b;
-    angle1 = angleFrom + 90 - option * 90;
-    angle2 = angleTo + 90 - option * 90;
+    cx = -halfA + position[0];
+    cy = halfB + position[1];
+    r = quarter % 2 == 0 ? halfA : halfB;
+    desiredQuarter = 1;
+    angle1 = angleFrom - (quarter - desiredQuarter) * pi2;
+    angle2 = angleTo - (quarter - desiredQuarter) * pi2;
     if (!checkTangents(x, y, cx, cy, r, angle1, angle2)) {
         return false;
     }
 
     // -1, -1
-    cx = -halfA;
-    cy = -halfB;
-    r = option ? b : a;
-    angle1 = angleFrom + 180 - option * 90;
-    angle2 = angleTo + 180 - option * 90;
+    cx = -halfA + position[0];
+    cy = -halfB + position[1];
+    r = quarter % 2 == 0 ? halfB : halfA;
+    desiredQuarter = 2;
+    angle1 = angleFrom - (quarter - desiredQuarter) * pi2;
+    angle2 = angleTo - (quarter - desiredQuarter) * pi2;
     if (!checkTangents(x, y, cx, cy, r, angle1, angle2)) {
         return false;
     }
 
     // 1, -1
-    cx = halfA;
-    cy = -halfB;
-    r = option ? a : b;
-    angle1 = angleFrom + 270 - option * 90;
-    angle2 = angleTo + 270 - option * 90;
+    cx = halfA + position[0];
+    cy = -halfB + position[1];
+    r = quarter % 2 == 0 ? halfA : halfB;
+    desiredQuarter = 3;
+    angle1 = angleFrom - (quarter - desiredQuarter) * pi2;
+    angle2 = angleTo - (quarter - desiredQuarter) * pi2;
     if (!checkTangents(x, y, cx, cy, r, angle1, angle2)) {
         return false;
     }
@@ -220,15 +306,17 @@ int Rectangle::pointInside(BoundaryConditions *bc, double *da, double angleFrom,
     return true;
 }
 
-bool Rectangle::checkTangents(double x, double y, double cx, double cy, double r, double angle1, double angle2) {// calculate tangents
+bool Rectangle::checkTangents(double x, double y, double cx, double cy, double r, double angle1,
+                              double angle2) const {
+    // calculate tangents
     double p1x = getXOnCircle(cx, cy, r, angle1);
-    double p1y = getYOnCircle(cx, cy, r, angle2);
+    double p1y = getYOnCircle(cx, cy, r, angle1);
 
     double a1 = p1x - cx;
     double b1 = p1y - cy;
     double c1 = a1 * (-cx) + b1 * (-cy) - r * r;
 
-    double p2x = getXOnCircle(cx, cy, r, angle1);
+    double p2x = getXOnCircle(cx, cy, r, angle2);
     double p2y = getYOnCircle(cx, cy, r, angle2);
 
     double a2 = p2x - cx;
@@ -239,72 +327,45 @@ bool Rectangle::checkTangents(double x, double y, double cx, double cy, double r
     double f2 = a2 * x + b2 * y + c2;
 
     // check if "inside" tangents
-    bool isIn = f1 < 0 && f2 < 0;
+    bool isIn = f1 <= 0 && f2 <= 0;
 
     // check circle
-    if (isIn && x >= std::__1::min(p2x, p1x) && x <= std::__1::max(p2x, p1x) && y >= std::__1::min(p2y, p1y) && y <= std::__1::max(p2y, p1y)) {
-        isIn = (cx - x) * (cx - x) + (cy - y) * (cy - y) < r * r;
+    if (isIn && x >= std::min(p2x, p1x) && x <= std::max(p2x, p1x) && y >= std::min(p2y, p1y) &&
+        y <= std::max(p2y, p1y)) {
+        isIn = (cx - x) * (cx - x) + (cy - y) * (cy - y) <= r * r;
     }
     return isIn;
 }
 
-bool Rectangle::checkExcludingRectangle(double angleFrom, double angleTo, double x, double y) const {// so we have angle range in 0-90, 90-180 or whatever else
+bool Rectangle::isInsideExcludingRectangle(double angleFrom, double angleTo, double x, double y) const {
+    // so we have angle range in 0-90, 90-180 or whatever else
     // let's first calculate "excluding rectangle"
-    Rectangle rec = Rectangle(*this);
-    rec.setAngle(angleFrom);
-    Matrix<2, 2> rotationFrom = rec.getRotationMatrix();
-    rec.setAngle(angleTo);
-    Matrix<2, 2> rotationTo = rec.getRotationMatrix();
-    double p[2] = {halfA, halfB};
     Vector<2> newSizeFrom = Vector<2>();
     Vector<2> newSizeTo = Vector<2>();
-    getNewSize(rotationFrom, p, newSizeFrom);
-    p[0] = halfA;
-    p[1] = halfB;
-    getNewSize(rotationTo, p, newSizeTo);
 
-    double newA = (newSizeFrom[0] > newSizeTo[0] ? newSizeFrom[0] : newSizeTo[0]) + a;
-    double newB = (newSizeFrom[1] > newSizeTo[1] ? newSizeFrom[1] : newSizeTo[1]) + b;
-
+    Rectangle rec(*this);
+    const double *position = this->getPosition();
+    const double *recPosition = rec.getPosition();
+    rec.setAngle(angleFrom);
+    for (int i = 0; i < 4; i++) {
+        newSizeFrom[0] = std::max(newSizeFrom[0], rec.xs[i] - recPosition[0]);
+        newSizeFrom[1] = std::max(newSizeFrom[1], rec.ys[i] - recPosition[1]);
+    }
+    rec.setAngle(angleTo);
+    for (int i = 0; i < 4; i++) {
+        newSizeTo[0] = std::max(newSizeTo[0], rec.xs[i] - recPosition[0]);
+        newSizeTo[1] = std::max(newSizeTo[1], rec.ys[i] - recPosition[1]);
+    }
+    double newHalfA = std::min(newSizeFrom[0], newSizeTo[0]) + halfA;
+    double newHalfB = std::min(newSizeFrom[1], newSizeTo[1]) + halfB;
 
     // if the point is outside rectangle, all work is done
-    if (x >= newA || x <= -newA || y >= newB || y <= -newB) {
-        return 0;
+    // TODO std::abs takes an int as a parameter so, did you mean std::fabs?
+    if (abs(x - position[0]) <= newHalfA && abs(y - position[1]) <= newHalfB) {
+        return 1;
     }
-    return 1;
+    return 0;
 }
-
-void Rectangle::getNewSize(const Matrix<2, 2, double> &rotationFrom, const double *p, const Vector<2, double> &newSizeFrom) const {
-    Vector<2> helpMe = Vector<2>(p);
-    Vector<2> result = rotationFrom * helpMe;
-    newSizeFrom[0] = result[0];
-    newSizeFrom[1] = result[1];
-    helpMe[0] -= a;
-    result = rotationFrom * helpMe;
-    if (result[0] > newSizeFrom[0]) {
-        newSizeFrom[0] = result[0];
-    }
-    if (result[1] > newSizeFrom[1]) {
-        newSizeFrom[1] = result[1];
-    }
-    helpMe[1] -= b;
-    result = rotationFrom * helpMe;
-    if (result[0] > newSizeFrom[0]) {
-        newSizeFrom[0] = result[0];
-    }
-    if (result[1] > newSizeFrom[1]) {
-        newSizeFrom[1] = result[1];
-    }
-    helpMe[0] += a;
-    result = rotationFrom * helpMe;
-    if (result[0] > newSizeFrom[0]) {
-        newSizeFrom[0] = result[0];
-    }
-    if (result[1] > newSizeFrom[1]) {
-        newSizeFrom[1] = result[1];
-    }
-}
-
 
 int Rectangle::isInsideCircle(const Vector<2, double> &point, double cx, double cy, double r) const {
     if ((cx - point[0]) * (cx - point[0]) + (cy - point[1]) * (cy - point[1]) <= r * r) {
@@ -313,134 +374,137 @@ int Rectangle::isInsideCircle(const Vector<2, double> &point, double cx, double 
     return 0;
 }
 
-int Rectangle::isInsideRect(const Vector<2, double> &point, double cx, double cy, double a, double b) {
-    if (abs(cx - point[0]) <= a/2 && abs(cy - point[1]) <= b/2) {
+int Rectangle::isInsideRect(const Vector<2, double> &point, double cx, double cy, double aLength, double bLength) const {
+    if (abs(cx - point[0]) <= aLength / 2 && abs(cy - point[1]) <= bLength / 2) {
         return 1;
     }
     return 0;
 }
 
-Vector<2> Rectangle::rotatePoint(const Vector<2>& point, const Matrix<2,2>& rotation) {
+Vector<2> Rectangle::rotatePoint(const Vector<2> &point, const Matrix<2, 2> &rotation) const {
     return rotation * point;
 }
 
-Vector<2> Rectangle::rotatePoint(const Vector<2>& point, const Matrix<2,2>& rotation, const Vector<2>& center) {
-    Vector<2> translatedPoint = Vector();
+Vector<2> Rectangle::rotatePoint(const Vector<2> &point, const Matrix<2, 2> &rotation, const Vector<2> &center) const {
+    Vector<2> translatedPoint = Vector<2>();
     translatedPoint[0] = point[0] - center[0];
     translatedPoint[1] = point[1] - center[1];
-    Vector<2> rotated =  rotation * translatedPoint;
+    Vector<2> rotated = rotation * translatedPoint;
     rotated[0] += center[0];
     rotated[1] += center[1];
     return rotated;
 }
 
-int Rectangle::overlap(BoundaryConditions *bc, Shape<2, 1> *s) {
-    Rectangle rectangle = *((Rectangle *)s);
+double Rectangle::isLeft(double p0x, double p0y, double p1x, double p1y, double p2x, double p2y) const {
+    return ((p1x - p0x) * (p2y - p0y) - (p2x - p0x) * (p1y - p0y));
+}
+
+int Rectangle::wn_PnPoly(double x, double y, const double *xs, const double *ys, int n) const {
+    // the  winding number counter
+    int wn = 0;
+
+    // loop through all edges of the polygon
+    for (int i = 0; i < n; i++) {
+        // edge from V[i] to  V[i+1]
+        if (ys[i] <= y) {
+            // start y <= P.y
+            if (ys[i + 1] > y) {
+                // an upward crossing
+                if (isLeft(xs[i], ys[i], xs[i + 1], ys[i + 1], x, y) > 0) {
+                    // P left of  edge
+                    ++wn;
+                    // have  a valid up intersect
+                }
+            }
+        } else {
+            // start y > P.y (no test needed)
+            if (ys[i + 1] <= y) {
+                // a downward crossing
+                if (isLeft(xs[i], ys[i], xs[i + 1], ys[i + 1], x, y) < 0) {
+                    // P right of  edge
+                    --wn;
+                    // have  a valid down intersect
+                }
+            }
+        }
+    }
+    return wn;
+}
+
+int Rectangle::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
+    Rectangle *other = (Rectangle *) s;
+    Rectangle rectangle(*other);
     this->applyBC(bc, &rectangle);
 
-    // let's say our rectangle stays aligned to axis
-    // rotate the other one
-    // and check if corners are inside
-    Matrix<2,2> rotation = getAntiRotationMatrix() * rectangle.getRotationMatrix();
-    Vector<2> rectPosition = Vector<2>(rectangle.position);
-    double x = position[0];
-    double y = position[1];
-    double p[2] = {rectangle.position[0] + halfA, rectangle.position[1] + halfB}; // 1,1
-    Vector<2> point = rotatePoint(Vector<2>(p), rotation, rectPosition);
-    if (isInsideRect(point, x, y, a, b)) {
+    const double *position = this->getPosition();
+    const double *rectanglePosition = rectangle.getPosition();
+
+    if (wn_PnPoly(position[0], position[1], rectangle.xs, rectangle.ys, 4) != 0) {
+        return 1;
+    }
+    if (wn_PnPoly(rectanglePosition[0], rectanglePosition[1], xs, ys, 4) != 0) {
         return 1;
     }
 
-    p[0] -= a; // -1, 1
-    point = rotatePoint(Vector<2>(p), rotation, rectPosition);
-    if (isInsideRect(point, x, y, a, b)) {
-        return 1;
+    for (int i = 0; i < 4; i++) {
+        if (wn_PnPoly(xs[i], ys[i], rectangle.xs, rectangle.ys, 4) != 0) {
+            return 1;
+        }
+        if (wn_PnPoly(rectangle.xs[i], rectangle.ys[i], xs, ys, 4) != 0) {
+            return 1;
+        }
     }
 
-    p[1] -= b; // -1, -1
-    point = rotatePoint(Vector<2>(p), rotation, rectPosition);
-    if (isInsideRect(point, x, y, a, b)) {
-        return 1;
-    }
-
-    p[0] += a; // 1, -1
-    point = rotatePoint(Vector<2>(p), rotation, rectPosition);
-    if (isInsideRect(point, x, y, a, b)) {
-        return 1;
-    }
-
-    // okay, now other way round
-    // second rectangle stays aligned, our is rotated
-    rotation = rectangle.getAntiRotationMatrix() * getRotationMatrix();
-
-    rectPosition = Vector<2>(position);
-    x = rectangle.position[0];
-    y = rectangle.position[1];
-    p[0] = halfA + position[0];
-    p[1] = halfB + position[1]; // 1,1
-    point = rotatePoint(Vector<2>(p), rotation, rectPosition);
-    if (isInsideRect(point, x, y, a, b)) {
-        return 1;
-    }
-
-    p[0] -= a; // -1, 1
-    point = rotatePoint(Vector<2>(p), rotation, rectPosition);
-    if (isInsideRect(point, x, y, a, b)) {
-        return 1;
-    }
-
-    p[1] -= b; // -1, -1
-    point = rotatePoint(Vector<2>(p), rotation, rectPosition);
-    if (isInsideRect(point, x, y, a, b)) {
-        return 1;
-    }
-
-    p[0] += a; // 1, -1
-    point = rotatePoint(Vector<2>(p), rotation, rectPosition);
-    if (isInsideRect(point, x, y, a, b)) {
-        return 1;
-    }
-
-    // no overlap
     return 0;
 }
 
 std::string Rectangle::toWolfram() const {
     std::stringstream out;
 
-    Vector<2> thisPos(this->position);
+    Vector<2> thisPos(this->getPosition());
     out << std::fixed;
-    out << "GeometricTransformation[Rectangle[{" << -halfA <<"," << -halfB << "}, {" << halfA << "," << halfB << "}]," << std::endl;
+    out << "GeometricTransformation[Rectangle[{" << -halfA << "," << -halfB << "}, {" << halfA << "," << halfB << "}],"
+        << std::endl;
     out << "    {RotationMatrix[" << this->getAngle() << "], " << thisPos << "}]";
 
     return out.str();
 }
 
 
-std::string Rectangle::toString() {
+std::string Rectangle::toString() const {
     std::stringstream out;
 
-    Vector<2> thisPos(this->position);
+    Vector<2> thisPos(this->getPosition());
     out << "Rectangle{position: " << thisPos << "; a: " << this->a;
     out << "; b: " << this->b << "; angle: " << this->getAngle() << "}";
     return out.str();
 }
 
-std::string Rectangle::toPovray() const{
-    // ignore
-    return "";
+std::string Rectangle::toPovray() const {
+	std::stringstream out;
+	out.precision(std::numeric_limits< double >::max_digits10);
+	out << "  polygon{5, <0.5, 0.5, 0.0002>, <-0.5, 0.5, 0.0002>, <-0.5, -0.5, 0.0002>, <0.5, -0.5, 0.0002>, <0.5, 0.5, 0.0002>" << std::endl;;
+	out << "	scale <" << this->a << ", " << this->b << ", 1.0>" << std::endl;
+	out << "	rotate <0, 0, " << (180*this->getAngle()/M_PI) << ">" << std::endl;
+	out << "	translate <";
+	for(unsigned short i=0; i<2; i++)
+		out << (this->getPosition()[i]) << ", ";
+	out << "0.0>" << std::endl << "	texture { pigment { color Red } }" << std::endl << "}" << std::endl;
+
+	return out.str();
 }
 
-void Rectangle::store(std::ostream &f) const{
+void Rectangle::store(std::ostream &f) const {
     Shape::store(f);
-    f.write((char *)(&this->a), sizeof(double));
-    f.write((char *)(&this->b), sizeof(double));
+    f.write((char *) (&this->a), sizeof(double));
+    f.write((char *) (&this->b), sizeof(double));
 }
 
-void Rectangle::restore(std::istream &f){
+void Rectangle::restore(std::istream &f) {
     Shape::restore(f);
-    f.read((char *)(&this->a), sizeof(double));
-    f.read((char *)(&this->b), sizeof(double));
-    this->halfA = a/2;
-    this->halfB = b/2;
+    f.read((char *) (&this->a), sizeof(double));
+    f.read((char *) (&this->b), sizeof(double));
+    this->halfA = a / 2;
+    this->halfB = b / 2;
+    this->setAngle(this->getAngle());
 }

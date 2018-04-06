@@ -69,6 +69,7 @@ OBJS_COMMON = rsa3d/AnisotropicShape2D \
        rsa3d/shapes/cube_strategies/TriTriOverlap \
        rsa3d/shapes/Cuboid \
        rsa3d/shapes/Ellipse \
+       rsa3d/shapes/Rectangle \
        rsa3d/shapes/SpheroCylinder2D \
        rsa3d/surfaces/NBoxFBC \
        rsa3d/surfaces/NBoxPBC \
