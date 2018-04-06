@@ -20,7 +20,6 @@ protected:
 
 public:
 	Positioned();
-	Positioned(const Positioned<SPATIAL_DIMENSION> & other);
 	virtual ~Positioned();
 
 	virtual Positioned<SPATIAL_DIMENSION> & operator=(const Positioned<SPATIAL_DIMENSION> & other);

@@ -35,9 +35,8 @@ public:
 	static void initClass(const std::string &args);
 	static Shape<2, 1> * create(RND *rnd);
 
+	// Implicit copy c-tor and assignment
 	Ellipse();
-	Ellipse(const Ellipse &other);
-	Ellipse & operator = (const Ellipse & el);
 	~Ellipse() override = default;
 
     double getNeighbourListCellSize() const override;

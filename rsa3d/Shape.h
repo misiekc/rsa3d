@@ -60,6 +60,7 @@ public:
 
     Shape();
 	Shape(const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> & other);
+    Shape &operator=(const Shape &other);
 	virtual ~Shape();
 
     /**

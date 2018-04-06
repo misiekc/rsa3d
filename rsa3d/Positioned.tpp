@@ -14,11 +14,6 @@ Positioned<SPATIAL_DIMENSION>::Positioned() {
 	}
 }
 
-template <unsigned short SPATIAL_DIMENSION>
-Positioned<SPATIAL_DIMENSION>::Positioned(const Positioned & other) {
-    std::copy(other.position, other.position+SPATIAL_DIMENSION, this->position);
-}
-
 
 template <unsigned short SPATIAL_DIMENSION>
 Positioned<SPATIAL_DIMENSION>::~Positioned() {

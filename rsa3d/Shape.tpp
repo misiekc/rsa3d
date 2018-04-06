@@ -26,6 +26,14 @@ Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape(const Shape<SPATIAL_DIMENSION
 	this->time = 0.0;
 }
 
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> &Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::operator=(const Shape &other) {
+    Positioned<SPATIAL_DIMENSION>::operator=(other);
+    this->no = 0;
+    this->time = 0.0;
+	return *this;
+}
+
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::~Shape() {
 

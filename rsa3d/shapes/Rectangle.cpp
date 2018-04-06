@@ -21,7 +21,14 @@ Rectangle::Rectangle() : AnisotropicShape2D() {
     this->setAngle(0);
 }
 
-Rectangle::Rectangle(const Rectangle &other) : AnisotropicShape2D(other), a(other.a), b(other.b), halfA(other.halfA),
+// TODO
+// Implicitly generated copy constructor and copy assignment will do everything fine, since there is no dynamically
+// allocated memory. Arrays are also appropriately copied, so there is no need doing it by hand
+//
+// Also, when you explicitly provide copy constructor and copy assignment operator, move constructor and move
+// assignment are implicitly deleted. It can potentially worsen performance
+
+/*Rectangle::Rectangle(const Rectangle &other) : AnisotropicShape2D(other), a(other.a), b(other.b), halfA(other.halfA),
                                                halfB(other.halfB) {
     for (int i = 0; i < 5; i++) {
         xs[i] = other.xs[i];
@@ -41,7 +48,7 @@ Rectangle &Rectangle::operator=(const Rectangle &other) {
     this->setAngle(other.getAngle());
     this->setPosition(other.getPosition());
     return *this;
-}
+}*/
 
 double Rectangle::getXOnCircle(double cx, double cy, double r, double angle) const {
     return cx + cos(angle) * r;

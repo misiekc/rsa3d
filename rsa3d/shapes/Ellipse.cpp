@@ -28,20 +28,6 @@ Ellipse::Ellipse() : AnisotropicShape2D(){
 	this->setAngle(0);
 }
 
-Ellipse::Ellipse(const Ellipse &other) : AnisotropicShape2D(other), a(other.a), b(other.b) {
-    for(unsigned char i = 0; i < 2; i++){
-        this->u[i]  = other.u[i];
-        this->uT[i] = other.uT[i];
-    }
-}
-
-Ellipse & Ellipse::operator = (const Ellipse & el){
-	this->a = el.a;
-	this->b = el.b;
-	this->setAngle(el.getAngle());
-	return *this;
-}
-
 void Ellipse::initClass(const std::string &args){
 	double ratio = std::stod(args);
 	Ellipse::shortSemiAxis = sqrt(1.0/(M_PI*ratio));

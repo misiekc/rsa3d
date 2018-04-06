@@ -20,7 +20,6 @@ class OverlapStrategy;
 class Cuboid : public Shape<3,0>
 {
 private:
-    Matrix<3, 3>            orientation;
 	static double           size[3];
 	static double           neighbourListCellSize;
 	static double           voxelSize;
@@ -28,6 +27,8 @@ private:
 	static Vector<3>        relativeVertices[8];
 	static OverlapStrategy  *defaultStrategy;
 	static OverlapStrategy  *strategy;
+
+    Matrix<3, 3>            orientation;
 
 	static void calculateRelativeVerties();
 
