@@ -94,13 +94,13 @@ public:
 	 * Translates the shape by a given vector v.
 	 * @param v a vector to translate
 	 */
-	void translate(double* v);
+    void translate(double* v);
 
     /**
      * Increases all shape's angles by respective values from array v.
      * @param v an array of angle deltas
      */
-	void rotate(double *v);
+    void rotate(double *v);
 
 	/**
 	 * Checks if there is overlap with the shape pointed by s.

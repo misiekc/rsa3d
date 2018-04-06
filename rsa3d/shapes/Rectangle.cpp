@@ -86,31 +86,14 @@ double Rectangle::getVoxelAngularSize() const {
 
 // Shape::translate was made non-virtual and one should override Positioned::setPosition instead (see documentation)
 void Rectangle::setPosition(const double *position) {
+    Vector<2, double> translation = Vector<2, double>(position) - Vector<2, double>(getPosition());
+    for (int i = 0; i < 5; i++) {
+        xs[i] += translation[0];
+        ys[i] += translation[1];
+    }
+
     Shape::setPosition(position);
-
-    // TODO I had to repeat the code from setAngle. Maybe in can be wrapped into a function?
-    const double *newPosition = this->getPosition();
-    double p[2] = {halfA, halfB}; // 1, 1
-    const Matrix<2, 2, double> &rotation = getRotationMatrix();
-    Vector<2> point = rotatePoint(Vector<2>(p), rotation);
-    xs[0] = point[0] + newPosition[0];
-    xs[4] = point[0] + newPosition[0];
-    ys[0] = point[1] + newPosition[1];
-    ys[4] = point[1] + newPosition[1];
-    p[0] -= a; // -1, 1
-    point = rotatePoint(Vector<2>(p), rotation);
-    xs[1] = point[0] + newPosition[0];
-    ys[1] = point[1] + newPosition[1];
-    p[1] -= b; // -1, -1
-    point = rotatePoint(Vector<2>(p), rotation);
-    xs[2] = point[0] + newPosition[0];
-    ys[2] = point[1] + newPosition[1];
-    p[0] += a; // 1, - 1
-    point = rotatePoint(Vector<2>(p), rotation);
-    xs[3] = point[0] + newPosition[0];
-    ys[3] = point[1] + newPosition[1];
 }
-
 
 // never used
 int Rectangle::pointInside(BoundaryConditions *bc, double *da) const {
@@ -338,7 +321,8 @@ bool Rectangle::isInsideExcludingRectangle(double angleFrom, double angleTo, dou
     double newHalfB = std::min(newSizeFrom[1], newSizeTo[1]) + halfB;
 
     // if the point is outside rectangle, all work is done
-    // TODO std::abs takes an int as a parameter so, did you mean std::fabs?
+    // std::abs takes an int as a parameter so, did you mean std::fabs?
+    // it's math abs
     if (abs(x - position[0]) <= newHalfA && abs(y - position[1]) <= newHalfB) {
         return 1;
     }
