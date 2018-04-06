@@ -17,8 +17,6 @@ Matrix<2, 2> AnisotropicShape2D::getAntiRotationMatrix() const {
     return Matrix<2, 2>::rotation(-this->getAngle());
 }
 
-// Keep angleFrom in [this->angle; this->angle + interval] range
-//---------------------------------------------------------------------------------------------
 void AnisotropicShape2D::normalizeAngleRange(double *angleFrom, double *angleTo, double interval) const {
     while (*angleFrom < this->getAngle()) {
         *angleFrom += interval;
@@ -30,8 +28,6 @@ void AnisotropicShape2D::normalizeAngleRange(double *angleFrom, double *angleTo,
     }
 }
 
-// Fix angle into [0; interval] range and return result
-//---------------------------------------------------------------------------------------------
 double AnisotropicShape2D::normalizeAngle(double angle, double interval) const {
     while (angle < 0)
         angle += interval;
@@ -40,23 +36,10 @@ double AnisotropicShape2D::normalizeAngle(double angle, double interval) const {
     return angle;
 }
 
-// This method is final and delegates to setAngle(double), so all deriving classes should
-// override setAngle(double) method instead
-//---------------------------------------------------------------------------------------------
 void AnisotropicShape2D::setOrientation(const double *orientation) {
     this->setAngle(*orientation);
 }
 
-// Keep angle in [0; getVoxelAngularSize()] range when setting.
-//
-// Derived classes should override this method when they want to keep track of the value of
-// an angle, for example when storing exact vertices positions:
-//
-// void Derived::setAngle(double angle) {
-//     AnisotropicShape2D::setAngle(angle);
-//     this->calculateVertices();
-// }
-//---------------------------------------------------------------------------------------------
 void AnisotropicShape2D::setAngle(double angle) {
     double interval = getVoxelAngularSize();
     double orientation = normalizeAngle(angle, interval);
