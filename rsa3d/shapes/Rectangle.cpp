@@ -81,7 +81,7 @@ double Rectangle::getVolume() const {
 }
 
 double Rectangle::getVoxelAngularSize() const {
-    return M_PI / 2;
+    return M_PI;
 }
 
 // Shape::translate was made non-virtual and one should override Positioned::setPosition instead (see documentation)
@@ -357,40 +357,22 @@ Vector<2> Rectangle::rotatePoint(const Vector<2> &point, const Matrix<2, 2> &rot
     return rotated;
 }
 
-double Rectangle::isLeft(double p0x, double p0y, double p1x, double p1y, double p2x, double p2y) const {
-    return ((p1x - p0x) * (p2y - p0y) - (p2x - p0x) * (p1y - p0y));
-}
+bool Rectangle::isIntersection(double p0_x, double p0_y, double p1_x, double p1_y, double p2_x, double p2_y, double p3_x, double p3_y) const {
+    double s1_x, s1_y, s2_x, s2_y;
+    s1_x = p1_x - p0_x;
+    s1_y = p1_y - p0_y;
+    s2_x = p3_x - p2_x;
+    s2_y = p3_y - p2_y;
 
-int Rectangle::wn_PnPoly(double x, double y, const double *xs, const double *ys, int n) const {
-    // the  winding number counter
-    int wn = 0;
+    double s, t;
+    s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y)) / (-s2_x * s1_y + s1_x * s2_y);
+    t = ( s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x)) / (-s2_x * s1_y + s1_x * s2_y);
 
-    // loop through all edges of the polygon
-    for (int i = 0; i < n; i++) {
-        // edge from V[i] to  V[i+1]
-        if (ys[i] <= y) {
-            // start y <= P.y
-            if (ys[i + 1] > y) {
-                // an upward crossing
-                if (isLeft(xs[i], ys[i], xs[i + 1], ys[i + 1], x, y) > 0) {
-                    // P left of  edge
-                    ++wn;
-                    // have  a valid up intersect
-                }
-            }
-        } else {
-            // start y > P.y (no test needed)
-            if (ys[i + 1] <= y) {
-                // a downward crossing
-                if (isLeft(xs[i], ys[i], xs[i + 1], ys[i + 1], x, y) < 0) {
-                    // P right of  edge
-                    --wn;
-                    // have  a valid down intersect
-                }
-            }
-        }
+    if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
+        return 1;
     }
-    return wn;
+
+    return 0; // No collision
 }
 
 int Rectangle::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
@@ -398,22 +380,11 @@ int Rectangle::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
     Rectangle rectangle(*other);
     this->applyBC(bc, &rectangle);
 
-    const double *position = this->getPosition();
-    const double *rectanglePosition = rectangle.getPosition();
-
-    if (wn_PnPoly(position[0], position[1], rectangle.xs, rectangle.ys, 4) != 0) {
-        return 1;
-    }
-    if (wn_PnPoly(rectanglePosition[0], rectanglePosition[1], xs, ys, 4) != 0) {
-        return 1;
-    }
-
     for (int i = 0; i < 4; i++) {
-        if (wn_PnPoly(xs[i], ys[i], rectangle.xs, rectangle.ys, 4) != 0) {
-            return 1;
-        }
-        if (wn_PnPoly(rectangle.xs[i], rectangle.ys[i], xs, ys, 4) != 0) {
-            return 1;
+        for (int j = 0; j < 4; j++) {
+            if (isIntersection(xs[i], ys[i], xs[i+1], ys[i+1], rectangle.xs[j], rectangle.ys[j], rectangle.xs[j+1], rectangle.ys[j+1])) {
+                return 1;
+            }
         }
     }
 

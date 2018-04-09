@@ -46,25 +46,7 @@ private:
 
     void setAngle(double angle) override;
 
-    // from: http://geomalgorithms.com/a03-_inclusion.html
-
-    /* isLeft(): tests if a point is Left|On|Right of an infinite line.
-     * Input:  three points P0, P1, and P2
-     * Return:
-     * >0 for P2 left of the line through P0 and P1
-     * =0 for P2  on the line
-     * <0 for P2  right of the line
-     */
-    double isLeft(double p0x, double p0y, double p1x, double p1y, double p2x, double p2y) const;
-
-    /*
-     * wn_PnPoly(): winding number test for a point in a polygon
-     * Input:   x,y = a point,
-     * xs, ys = vertex points of a polygon xs[n+1] with xs[n]=xs[0]
-     * Return:  wn = the winding number (=0 only when P is outside)
-     */
-    int wn_PnPoly(double x, double y, const double *xs, const double *ys, int n) const;
-
+    bool isIntersection(double p0_x, double p0_y, double p1_x, double p1_y, double p2_x, double p2_y, double p3_x, double p3_y) const;
 protected:
     void setPosition(const double *position) override;
 
