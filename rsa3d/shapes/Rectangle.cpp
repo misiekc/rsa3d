@@ -223,7 +223,7 @@ int Rectangle::pointInsideInternal(BoundaryConditions *bc, double *da, double an
     // setup
     double cx = halfA + position[0];
     double cy = halfB + position[1];
-    double r = quarter % 2 == 0 ? halfB : halfA;
+    double r = quarter % 2 == 0 ? halfA : halfB;
     double desiredQuarter = 0;
     double angle1 = angleFrom - (quarter - desiredQuarter) * pi2;
     double angle2 = angleTo - (quarter - desiredQuarter) * pi2;
@@ -234,7 +234,7 @@ int Rectangle::pointInsideInternal(BoundaryConditions *bc, double *da, double an
     // -1, 1
     cx = -halfA + position[0];
     cy = halfB + position[1];
-    r = quarter % 2 == 0 ? halfA : halfB;
+    r = quarter % 2 == 1 ? halfA : halfB;
     desiredQuarter = 1;
     angle1 = angleFrom - (quarter - desiredQuarter) * pi2;
     angle2 = angleTo - (quarter - desiredQuarter) * pi2;
@@ -245,7 +245,7 @@ int Rectangle::pointInsideInternal(BoundaryConditions *bc, double *da, double an
     // -1, -1
     cx = -halfA + position[0];
     cy = -halfB + position[1];
-    r = quarter % 2 == 0 ? halfB : halfA;
+    r = quarter % 2 == 0 ? halfA : halfB;
     desiredQuarter = 2;
     angle1 = angleFrom - (quarter - desiredQuarter) * pi2;
     angle2 = angleTo - (quarter - desiredQuarter) * pi2;
@@ -256,7 +256,7 @@ int Rectangle::pointInsideInternal(BoundaryConditions *bc, double *da, double an
     // 1, -1
     cx = halfA + position[0];
     cy = -halfB + position[1];
-    r = quarter % 2 == 0 ? halfA : halfB;
+    r = quarter % 2 == 1 ? halfA : halfB;
     desiredQuarter = 3;
     angle1 = angleFrom - (quarter - desiredQuarter) * pi2;
     angle2 = angleTo - (quarter - desiredQuarter) * pi2;
