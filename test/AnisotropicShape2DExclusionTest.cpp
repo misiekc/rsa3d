@@ -13,11 +13,11 @@
 
 static const char *const FIRST_SHAPE_COLOR = "Black";
 static const char *const SECOND_SHAPE_COLOR = "Blue";
-static const char *const INSIDE_COLOR = "Red";
+static const char *const INSIDE_COLOR = "Orange";
 static const char *const OUTSIDE_COLOR = "Green";
 static const char *const CIRCLE_FIX_COLOR = "Purple";
-static const char *const FIRST_ZONE_COLOR = "Orange";
-static const char *const SECOND_ZONE_COLOR = "Cyan";
+static const char *const FIRST_ZONE_COLOR = "Red";
+static const char *const SECOND_ZONE_COLOR = "Yellow";
 
 
 void as2d_extest::Context::load(const std::string &_filename) {
