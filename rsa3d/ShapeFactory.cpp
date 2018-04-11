@@ -43,10 +43,10 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
                 Ellipse::initClass(attr);
                 ShapeFactory::createShape = Ellipse::create;
                 return;
-            } else if (sClass == "Rectangle") {
-                Rectangle::initClass(attr);
-                ShapeFactory::createShape = Rectangle::create;
-                return;
+ //           } else if (sClass == "Rectangle") {
+ //               Rectangle::initClass(attr);
+ //               ShapeFactory::createShape = Rectangle::create;
+ //               return;
             }
         #endif
 

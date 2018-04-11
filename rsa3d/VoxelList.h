@@ -84,11 +84,11 @@ protected:
 	int beginningVoxelNumber;
 
 
-	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>* createVoxel(double* center, double *orientation, int index);
 	bool isVoxelInsidePacking(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
 	bool isVoxelInsideExclusionZone(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, double spatialSize, double angularSize, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s, BoundaryConditions *bc);
 	bool isVoxelInsideExclusionZone(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, double spatialSize, double angularSize, std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *shapes, BoundaryConditions *bc);
 	bool isVoxelInsideExclusionZone(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, double spatialSize, double angularSize, std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *shapes, BoundaryConditions *bc, unsigned short maxDepth);
+
 	void splitVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, double spatialSize, double angularSize, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> **vRes);
 
 
@@ -103,11 +103,12 @@ public:
 	void remove(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
 	void remove(std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *vVoxels);
 	void removeTopLevelVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
+
 	bool analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, int timestamp, unsigned short depth);
-	bool analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, int timestamp);
+	bool analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, unsigned short depth);
 	bool analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc);
 	bool analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *neighbours, BoundaryConditions *bc);
+
 	bool splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc);
 
 	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *getRandomVoxel(RND *rnd);

@@ -15,10 +15,10 @@ Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Voxel(){
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Voxel(double* pos, double *angle, int i){
+Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Voxel(double* pos, double *angle){
 	std::copy(pos, pos+SPATIAL_DIMENSION, this->position);
 	std::copy(angle, angle+ANGULAR_DIMENSION, this->orientation);
-	this->index = i;
+	this->index = 0;
 	this->missCounter = 0;
 	this->lastAnalyzed = 0;
 	this->depth = 0;

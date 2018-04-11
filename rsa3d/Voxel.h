@@ -19,12 +19,35 @@ private:
 	short missCounter;
 
 public:
+	/**
+	 * index of the voxel in array used by VoxelList - used for faster removing from the array
+	 */
 	int index;
+
+	/**
+	 * number of particle in the packing where voxel was checked if it is inside an exclusion zone - used for faster checking in the future
+	 */
 	int lastAnalyzed;
+
+	/**
+	 * depth level at which the voxel was checked if it is inside an exclusion zone
+	 */
 	unsigned short depth;
 
+
+	/**
+	 * creates an empty voxel. It position and orientation is not initialized and other attributes are set to 0
+	 */
 	Voxel();
-	Voxel(double* pos, double *angle, int i);
+
+	/**
+	 * creates a voxel of a given position and orientation
+	 */
+	Voxel(double* pos, double *angle);
+
+	/**
+	 * copy contructor
+	 */
 	Voxel(const Voxel & other);
 
 	virtual ~Voxel();

@@ -72,7 +72,6 @@ int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels(unsign
 	std::cout << "[" << this->seed << " PackingGenerator::analyzeVoxels] " << this->voxels->length() << " voxels, " << this->packing.size() << " shapes, factor = " << this->getFactor() << ", depth = " << depth << " " << std::flush;
 
 	int begin = this->voxels->length();
-	int timestamp = this->packing.size();
 	std::vector< Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>* > toRemove;
 
 	#pragma omp parallel for
@@ -80,9 +79,9 @@ int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels(unsign
 		Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = this->voxels->get(i);
 		bool bRemove;
 		if (depth==0){
-			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, timestamp);
+			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface);
 		}else{
-			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, timestamp, depth);
+			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, depth);
 		}
 		if (bRemove) {
 			#pragma omp critical
@@ -107,15 +106,14 @@ int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels(unsign
 	std::cout << "[" << this->seed << " PackingGenerator::analyzeVoxels] " << this->voxels->length() << " voxels, " << this->packing.size() << " shapes, factor = " << this->getFactor() << " ";
 
 	int begin = this->voxels->length();
-	int timestamp = this->packing.size();
 
 	for (int i = 0; i < this->voxels->length(); i++) {
 		Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = this->voxels->get(i);
 		bool bRemove;
 		if (depth==0){
-			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, timestamp);
+			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface);
 		}else{
-			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, timestamp, depth);
+			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, depth);
 		}
 		if (bRemove) {
 			this->voxels->remove(v);
@@ -329,9 +327,11 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 							std::cout << std::endl << "Problem: PackingGenerator - inconsistent voxels: " << i << std::flush;
 						}
 						vTmp->miss();
-						if( (vTmp->getMissCounter() > 0 &&  vTmp->getMissCounter() % this->params->analyze == 0) && this->voxels->analyzeVoxel(vTmp, sOverlapped[i], this->surface)){
-							#pragma omp critical
-							this->voxels->remove(vTmp);
+						if( (vTmp->getMissCounter() > 0 &&  vTmp->getMissCounter() % this->params->analyze == 0) ){
+							if (this->voxels->analyzeVoxel(vTmp, sOverlapped[i], this->surface)){
+								#pragma omp critical
+								this->voxels->remove(vTmp);
+							}
 						}
 					}
 					delete sVirtual[i];

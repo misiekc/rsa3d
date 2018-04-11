@@ -112,11 +112,6 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::disable(){
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>* VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createVoxel(double* leftbottom, double* orientation, int index){
-	return new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(leftbottom, orientation, index);
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::initVoxels(){
 	int n = this->getLinearNumberOfVoxels(this->voxelSize);
 	double position[SPATIAL_DIMENSION];
@@ -140,7 +135,8 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::initVoxels(){
 			std::cout << "VoxelList::initVoxels: Problem: " << index << " != " << i << std::endl;
 		}
 
-		this->voxels[index] = this->createVoxel(position, orientation, index);
+		this->voxels[index] = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(position, orientation);
+		this->voxels[index]->index = index;
 		this->activeTopLevelVoxels[index] = true;
 		index++;
 	}while(increment(in, SPATIAL_DIMENSION, n-1));
@@ -314,7 +310,7 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxel(Voxel<SPATIAL_D
 			for(unsigned short k=0; k<ANGULAR_DIMENSION; k++){
 				orientation[k] = vangle[k] + inangle[k]*angularSize;
 			}
-			vRes[i*angularLoop + j] = this->createVoxel(position, orientation, 0);
+			vRes[i*angularLoop + j] = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(position, orientation);
 			increment(inangle, ANGULAR_DIMENSION, (unsigned char)1);
 		} // for j
 		increment(inpos, SPATIAL_DIMENSION, (unsigned char)1);
@@ -368,7 +364,8 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsideExclusionZone
 
 	bool shapeCoversVertices = false;
 	for(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s : *shapes){
-		shapeCoversVertices = this->isVoxelInsideExclusionZone(v, spatialSize, angularSize, s, bc);
+		if (v->lastAnalyzed < s->no)
+			shapeCoversVertices = this->isVoxelInsideExclusionZone(v, spatialSize, angularSize, s, bc);
 		if (shapeCoversVertices)
 			break;
 	}
@@ -457,17 +454,8 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, int timestamp){
-	if (v->lastAnalyzed < timestamp && !this->disabled)
-		v->lastAnalyzed = timestamp;
-		return this->analyzeVoxel(v, nl, NULL, bc);
-	return false;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, int timestamp, unsigned short depth){
-	if (!this->disabled && (v->lastAnalyzed < timestamp || v->depth<depth)){
-		v->lastAnalyzed = timestamp;
+bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, unsigned short depth){
+	if (!this->disabled && v->depth<depth){
 		v->depth = depth;
 		std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> shapes;
 		nl->getNeighbours(&shapes, v->getPosition());
@@ -525,7 +513,7 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 		this->splitVoxel(this->voxels[i], this->voxelSize, this->angularVoxelSize, aVoxels[tid]);
 		for(int j=0; j<voxelsFactor; j++){
 			Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = aVoxels[tid][j];
-			if(this->isVoxelInsidePacking(v) && ( nl==NULL || bc==NULL || !this->analyzeVoxel(v, nl, NULL, bc) ) ){
+			if(this->isVoxelInsidePacking(v) && ( nl==NULL || bc==NULL || !this->analyzeVoxel(v, nl, bc) ) ){
 					v->index = i*voxelsFactor + j;
 					newList[i*voxelsFactor + j] = v;
 			}else{
