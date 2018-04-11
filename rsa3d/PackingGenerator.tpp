@@ -368,7 +368,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 			if(tmpSplit < 10*omp_get_max_threads())
 				tmpSplit = 10*omp_get_max_threads();
 
-			if (!b && v0==v1){ // if nothing changed with voxels
+			if (!b && (double)(v0-v1)/v0 < 0.1){ // not much voxels removed
 				depthAnalyze++;
 			}else{
 				if (depthAnalyze>0)
@@ -389,13 +389,15 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 			}
 //			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
 //			this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
-			this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
+//			this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
 //			std::string filename = "snapshot_" + std:::to_string(this->packing.size()) + "_" + std::to_string(this->voxels->length()) + ".dbg";
 //			std::ofstream file(filename, std::ios::binary);
 //			this->store(file);
 //			file.close();
 		}else{
 			missCounter = 0;
+			if (depthAnalyze>0)
+				depthAnalyze--;
 		}
 	} // while
 
@@ -471,6 +473,8 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 				this->voxels->removeTopLevelVoxel(v);
 			}
 			missCounter = 0;
+			if (depthAnalyze>0)
+				depthAnalyze--;
 //			std::cout << ((Ellipse *)s)->toWolfram() << std::endl;
 		}else{ // overlap detected
 			v->miss();

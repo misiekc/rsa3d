@@ -58,9 +58,13 @@ private:
 	// checks voxels indexes consistency
 	void checkIndexes();
 
+	// checks if a top level voxel for voxel v is active (if not v should be removed
+	bool isTopLevelVoxelActive(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
+
 	// checks consistency of indexes of root voxels
 	void checkTopLevelVoxels();
 
+	// aeeay of voxels will not have NULLs between pointers to objects - they can appear when splitting or analyze voxels in parallel
 	void compactVoxelArray(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> **list, int &endIndex);
 
 protected:
