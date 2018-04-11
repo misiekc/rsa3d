@@ -358,34 +358,25 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsideExclusionZone
 
 /**
  * returns true when the whole voxel is inside an exclusion area of any shape in shapes
-*/
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsideExclusionZone(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, double spatialSize, double angularSize, std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *shapes, BoundaryConditions *bc){
-
-	bool shapeCoversVertices = false;
-	for(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s : *shapes){
-		if (v->lastAnalyzed < s->no)
-			shapeCoversVertices = this->isVoxelInsideExclusionZone(v, spatialSize, angularSize, s, bc);
-		if (shapeCoversVertices)
-			break;
-	}
-	return shapeCoversVertices;
-}
-
-/**
- * returns true when the whole voxel is inside an exclusion area of any shape in shapes
  * To determine it the method tires to split voxel up to level of maxDepth
  */
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsideExclusionZone(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, double spatialSize, double angularSize, std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *shapes, BoundaryConditions *bc, unsigned short maxDepth){
+bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsideExclusionZone(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, double spatialSize, double angularSize, std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *shapes, BoundaryConditions *bc, unsigned short depth){
 	// if voxel is outside the packing it is inside exclusion zone
 	if (!this->isVoxelInsidePacking(v))
 		return true;
 	// otherwise checking
-	bool isInside = this->isVoxelInsideExclusionZone(v, spatialSize, angularSize, shapes, bc);
-	if (isInside || maxDepth == 0){
+
+	bool isInside = false;
+	for(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s : *shapes){
+		isInside = this->isVoxelInsideExclusionZone(v, spatialSize, angularSize, s, bc);
+		if (isInside)
+			break;
+	}
+
+	if (isInside || depth == 0){
 		return isInside;
-	// if cannot determine that it is inside, split and recursively check children
+	// if cannot determine that it is inside and depth > 0 split and recursively check children
 	}else{
 		// dzielimy voxel na mniejsze
 		double ss = spatialSize / 2.0;
@@ -397,7 +388,7 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsideExclusionZone
 		// sprawdzamy kazdy z mniejszych
 		for(int i=0; i<arrayLenght; i++){
 			// jesli choc jeden z mniejszych jest false zwracamy false
-			if (!this->isVoxelInsideExclusionZone(aVoxels[i], ss, as, shapes, bc, maxDepth-1)){
+			if (!this->isVoxelInsideExclusionZone(aVoxels[i], ss, as, shapes, bc, depth-1)){
 				bRes = false;
 				break;
 			}
@@ -426,10 +417,9 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL
 	return this->isVoxelInsideExclusionZone(v, this->voxelSize, this->angularVoxelSize, s, bc);
 }
 
-// returns true when the whole voxel is inside an exclusion area of one shape, thus, should be removed
+/*
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *neighbours, BoundaryConditions *bc){
-
+bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *neighbours, BoundaryConditions *bc){
 	double* vpos = v->getPosition();
 	// checking if initial voxel containing v is active (do not have a shape inside)
 	int index = this->getIndexOfTopLevelVoxel(vpos);
@@ -438,42 +428,39 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL
 
 	std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *vNeighbours;
 
-	if(neighbours==NULL){
-		vNeighbours = new std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *>();
-		nl->getNeighbours(vNeighbours, vpos);
-	}else{
-		vNeighbours = neighbours;
-	}
-
-	bool shapeCoversVertices = this->isVoxelInsideExclusionZone(v, this->voxelSize, this->angularVoxelSize, vNeighbours, bc);
-
-	if (neighbours==NULL)
-		delete vNeighbours;
-
-	return shapeCoversVertices;
+	return this->isVoxelInsideExclusionZone(v, this->voxelSize, this->angularVoxelSize, neighbours, bc);
 }
+*/
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, unsigned short depth){
-	if (!this->disabled && v->depth<depth){
-		v->depth = depth;
-		std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> shapes;
-		nl->getNeighbours(&shapes, v->getPosition());
+	if (!this->disabled && (depth > v->depth || depth==0) ){
 
-		return this->isVoxelInsideExclusionZone(v, this->voxelSize, this->angularVoxelSize, &shapes, bc, depth);
+		double* vpos = v->getPosition();
+		// checking if initial voxel containing v is active (do not have a shape inside)
+		int index = this->getIndexOfTopLevelVoxel(vpos);
+		if(this->activeTopLevelVoxels[index]==false)
+			return true;
+
+		std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> tmpShapes, shapes;
+		nl->getNeighbours(&tmpShapes, v->getPosition());
+
+		int maxNo = v->lastAnalyzed;
+		for(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s: tmpShapes){
+			if (v->lastAnalyzed < s->no || depth > v->depth){
+				shapes.push_back(s);
+				if(maxNo < s->no)
+					maxNo = s->no;
+			}
+		}
+
+		bool isInside = this->isVoxelInsideExclusionZone(v, this->voxelSize, this->angularVoxelSize, &shapes, bc, depth);
+
+		v->depth = depth;
+		v->lastAnalyzed = maxNo;
+		return isInside;
 	}
 	return false;
-}
-
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc){
-	return this->analyzeVoxel(v, nl, NULL, bc);
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *neighbours, BoundaryConditions *bc){
-	return this->analyzeVoxel(v, NULL, neighbours, bc);
 }
 
 #ifdef _OPENMP
@@ -582,7 +569,7 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 
 		this->splitVoxel(this->voxels[i], this->voxelSize, this->angularVoxelSize, aVoxels);
 		for(int j=0; j<voxelsFactor; j++){
-			if(this->isVoxelInsidePacking(aVoxels[j]) && ( nl==NULL || bc==NULL || !this->analyzeVoxel(aVoxels[j], nl, NULL, bc) ) ){
+			if(this->isVoxelInsidePacking(aVoxels[j]) && ( nl==NULL || bc==NULL || !this->analyzeVoxel(aVoxels[j], nl, bc) ) ){
 					aVoxels[j]->index = index;
 					newList[index] = aVoxels[j];
 					index++;

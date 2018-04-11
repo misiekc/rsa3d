@@ -77,12 +77,7 @@ int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels(unsign
 	#pragma omp parallel for
 	for (int i = 0; i < this->voxels->length(); i++) {
 		Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = this->voxels->get(i);
-		bool bRemove;
-		if (depth==0){
-			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface);
-		}else{
-			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, depth);
-		}
+		bool bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, depth);
 		if (bRemove) {
 			#pragma omp critical
 			toRemove.push_back(v);
@@ -109,12 +104,7 @@ int PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxels(unsign
 
 	for (int i = 0; i < this->voxels->length(); i++) {
 		Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = this->voxels->get(i);
-		bool bRemove;
-		if (depth==0){
-			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface);
-		}else{
-			bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, depth);
-		}
+		bool bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, depth);
 		if (bRemove) {
 			this->voxels->remove(v);
 			i--;
