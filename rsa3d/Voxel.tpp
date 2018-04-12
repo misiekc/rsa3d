@@ -18,7 +18,7 @@ Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Voxel(){
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Voxel(double* pos, double *angle){
 	std::copy(pos, pos+SPATIAL_DIMENSION, this->position);
-	std::copy(angle, angle+ANGULAR_DIMENSION, this->orientation);
+	std::copy(angle, angle+ANGULAR_DIMENSION, this->orientation.begin());
 	this->index = 0;
 	this->missCounter = 0;
 	this->lastAnalyzed = 0;
@@ -78,7 +78,7 @@ double* Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getPosition(){
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 double* Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation(){
-	return this->orientation;
+	return this->orientation.data();
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
@@ -177,6 +177,6 @@ void Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
 	}
 	f.read((char *)(this->position), sd*sizeof(double));
 	if (ad>0)
-		f.read((char *)(this->orientation), ad*sizeof(double));
+		f.read((char *)(this->orientation.data()), ad*sizeof(double));
 }
 

@@ -226,14 +226,14 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 
 			sVirtual[i] = ShapeFactory::createShape(aRND[tid]);
 			double pos[SPATIAL_DIMENSION];
-			double angle[ANGULAR_DIMENSION];
+			std::array <double, ANGULAR_DIMENSION> angle;
 			do{
 				aVoxels[i] = this->voxels->getRandomVoxel(aRND[tid]);
-				this->voxels->getRandomPositionAndOrientation(pos, angle, aVoxels[i], aRND[tid]);
-			}while(!this->isInside(pos, angle));
+				this->voxels->getRandomPositionAndOrientation(pos, angle.data(), aVoxels[i], aRND[tid]);
+			}while(!this->isInside(pos, angle.data()));
 			// setting shape position and orientation
 			sVirtual[i]->translate(pos);
-			sVirtual[i]->rotate(angle);
+			sVirtual[i]->rotate(angle.data());
 			// checking if shape overlaps with any shape in the packing
 			sOverlapped[i] = this->surface->check(sVirtual[i]);
 		} // parallel for

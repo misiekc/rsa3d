@@ -15,7 +15,7 @@ class Voxel{
 
 private:
 	double position[SPATIAL_DIMENSION];
-	double orientation[ANGULAR_DIMENSION];
+	std::array<double, ANGULAR_DIMENSION> orientation;
 	short missCounter;
 
 public:

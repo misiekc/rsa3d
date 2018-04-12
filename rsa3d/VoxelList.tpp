@@ -115,7 +115,7 @@ template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::initVoxels(){
 	int n = this->getLinearNumberOfVoxels(this->voxelSize);
 	double position[SPATIAL_DIMENSION];
-	double orientation[ANGULAR_DIMENSION];
+	std::array<double, ANGULAR_DIMENSION> orientation;
 	int in[SPATIAL_DIMENSION];
 
 	for(ushort i = 0; i<SPATIAL_DIMENSION; i++)
@@ -135,7 +135,7 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::initVoxels(){
 			std::cout << "VoxelList::initVoxels: Problem: " << index << " != " << i << std::endl;
 		}
 
-		this->voxels[index] = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(position, orientation);
+		this->voxels[index] = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(position, orientation.data());
 		this->voxels[index]->index = index;
 		this->activeTopLevelVoxels[index] = true;
 		index++;
@@ -283,8 +283,8 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxel(Voxel<SPATIAL_D
 
 	int inpos[SPATIAL_DIMENSION];
 	double position[SPATIAL_DIMENSION];
-	int inangle[ANGULAR_DIMENSION];
-	double orientation[ANGULAR_DIMENSION];
+	std::array<int, ANGULAR_DIMENSION> inangle;
+	std::array<double, ANGULAR_DIMENSION> orientation;
 
 
 	double* vpos = v->getPosition();
@@ -310,8 +310,8 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxel(Voxel<SPATIAL_D
 			for(unsigned short k=0; k<ANGULAR_DIMENSION; k++){
 				orientation[k] = vangle[k] + inangle[k]*angularSize;
 			}
-			vRes[i*angularLoop + j] = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(position, orientation);
-			increment(inangle, ANGULAR_DIMENSION, (unsigned char)1);
+			vRes[i*angularLoop + j] = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(position, orientation.data());
+			increment(inangle.data(), ANGULAR_DIMENSION, (unsigned char)1);
 		} // for j
 		increment(inpos, SPATIAL_DIMENSION, (unsigned char)1);
 	} // for i
