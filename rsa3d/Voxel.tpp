@@ -5,6 +5,7 @@
  *      Author: ciesla
  */
 #include <sstream>
+#include <stdexcept>
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Voxel(){
@@ -22,21 +23,6 @@ Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Voxel(double* pos, double *angle){
 	this->missCounter = 0;
 	this->lastAnalyzed = 0;
 	this->depth = 0;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::~Voxel() {
-}
-
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Voxel(const Voxel & other){
-	std::copy(other.position, other.position+SPATIAL_DIMENSION, this->position);
-	std::copy(other.orientation, other.orientation+ANGULAR_DIMENSION, this->position);
-	this->index = other.index;
-	this->missCounter = other.missCounter;
-	this->lastAnalyzed = other.lastAnalyzed;
-	this->depth = other.depth;
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>

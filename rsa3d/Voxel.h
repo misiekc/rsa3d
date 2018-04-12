@@ -45,12 +45,7 @@ public:
 	 */
 	Voxel(double* pos, double *angle);
 
-	/**
-	 * copy contructor
-	 */
-	Voxel(const Voxel & other);
-
-	virtual ~Voxel();
+	virtual ~Voxel() = default;
 
 	void miss();
 
