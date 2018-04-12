@@ -120,7 +120,7 @@ std::string Sphere<DIMENSION>::toPovray() const{
 	if (DIMENSION==2){
 		s = "  disc { < ";
 		for(unsigned short i=0; i<DIMENSION; i++)
-			s += std::to_string(this->position) + ", ";
+			s += std::to_string(position[i]) + ", ";
 		s += "0.05>, <0.0, 0.0, 1.0>, " + std::to_string(this->r) +"\r\n    texture { pigment { color Red } }\r\n  }\r\n";
 /*
 		s += "  disc { < ";
@@ -130,7 +130,7 @@ std::string Sphere<DIMENSION>::toPovray() const{
 */
 		s += "  disc { < ";
 		for(unsigned short i=0; i<DIMENSION; i++)
-			s += std::to_string(this->position) + ", ";
+			s += std::to_string(position[i]) + ", ";
 		s += "0.03>, <0.0, 0.0, 1.0>, " + std::to_string(2*this->r) + ", " + std::to_string(2*r0) + "\r\n    texture { pigment { color Black } }\r\n  }\r\n";
 
 /*
