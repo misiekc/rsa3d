@@ -68,6 +68,7 @@ OBJS_COMMON = rsa3d/AnisotropicShape2D \
        rsa3d/shapes/cube_strategies/OptimizedSATOverlap \
        rsa3d/shapes/cube_strategies/SATOverlap \
        rsa3d/shapes/cube_strategies/TriTriOverlap \
+       rsa3d/shapes/polygons/Segment2D \
        rsa3d/shapes/Cuboid \
        rsa3d/shapes/Ellipse \
        rsa3d/shapes/Rectangle \
@@ -177,5 +178,5 @@ clean:
 	
 # documentation
 doc:
-	@mkdir $(DOCDIR)
+	@mkdir -p $(DOCDIR)
 	@doxygen
