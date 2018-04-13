@@ -28,6 +28,8 @@ public:
 	double* getPosition() const;
 
 	//	Vector<SPATIAL_DIMENSION> getVectorPosition() const;
+
+	virtual void translate(double *v);
 };
 
 #include "Positioned.tpp"

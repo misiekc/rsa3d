@@ -40,3 +40,9 @@ void Positioned<SPATIAL_DIMENSION>::setPosition(const double *position) {
     std::copy(position, position + SPATIAL_DIMENSION, this->position);
 }
 
+template<unsigned short SPATIAL_DIMENSION>
+void Positioned<SPATIAL_DIMENSION>::translate(double *v){
+	for(unsigned short i=0; i<SPATIAL_DIMENSION; i++)
+		this->position[i] += v[i];
+}
+

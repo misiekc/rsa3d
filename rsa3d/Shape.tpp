@@ -51,10 +51,7 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setOrientation(const double *o
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::translate(double* v) {
-    double position[SPATIAL_DIMENSION];
-	for(unsigned short i=0; i<SPATIAL_DIMENSION; i++)
-		position[i] = this->getPosition()[i] + v[i];
-    this->setPosition(position);
+    Positioned<SPATIAL_DIMENSION>::translate(v);
 }
 
 
