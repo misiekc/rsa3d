@@ -59,9 +59,7 @@ public:
 	double time;
 
     Shape();
-	Shape(const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> & other);
-    Shape &operator=(const Shape &other);
-	virtual ~Shape();
+	virtual ~Shape() = default;
 
     /**
      * Returns linear size of a cell in a NeighbourGrid. This size should be as small as possible but big enough to

@@ -20,26 +20,6 @@ Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape() : Positioned<SPATIAL_DIMENS
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape(const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> & other) :
-        Positioned<SPATIAL_DIMENSION>(other), orientation(other.orientation) {
-	this->no = 0;
-	this->time = 0.0;
-}
-
-template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> &Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::operator=(const Shape &other) {
-    Positioned<SPATIAL_DIMENSION>::operator=(other);
-    this->no = 0;
-    this->time = 0.0;
-	return *this;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::~Shape() {
-
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 const double* Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation() const{
     return this->orientation.data();
 }
