@@ -50,8 +50,8 @@ protected:
      *
      * The angle is normalized using normalizeAngle(double, double) with getVoxelAngularSize() as an interval.
      *
-     * Derived shape classes have to
-     * override this method when they want to keep track of shape's orientation. One would then typically write:
+     * Derived shape classes have to override this method when they want to keep track of shape's orientation. One would
+     * then typically write:
      * \code
      * void Derived::setAngle(double angle) {
      *     AnisotropicShape2D::setAngle(angle);

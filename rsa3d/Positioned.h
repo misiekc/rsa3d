@@ -10,24 +10,36 @@
 
 // #include "Vector.h"
 
+#include <array>
+
 template <unsigned short SPATIAL_DIMENSION>
 class Positioned {
 private:
-    double position[SPATIAL_DIMENSION];
+    std::array<double, SPATIAL_DIMENSION> position;
 
 protected:
+
+	/**
+     * Sets new position. Derived shape classes have to override this method when they want to keep track of
+     * Positioned position. One would then typically write:
+     * \code
+     * void Derived::setPosition(const double *position) {
+     *     Positioned::setPosition(position);
+     *     // invoke getPosition and for example compute vertices
+     * }
+     * \endcode
+     * @param position new position
+     */
     virtual void setPosition(const double *position);
 
 public:
-	Positioned();
-	virtual ~Positioned();
+	virtual ~Positioned() = default;
 
-	virtual Positioned<SPATIAL_DIMENSION> & operator=(const Positioned<SPATIAL_DIMENSION> & other);
-
-	// returns position of the shape's center
+	/**
+	 * Returns position of a Positioned.
+	 * @return position of a Positioned
+	 */
 	double* getPosition() const;
-
-	//	Vector<SPATIAL_DIMENSION> getVectorPosition() const;
 };
 
 #include "Positioned.tpp"

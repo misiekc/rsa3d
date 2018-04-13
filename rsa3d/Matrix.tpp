@@ -4,9 +4,6 @@
 // (C)PKua 2017
 //-----------------------------------------------------------------------------------------------------------------------------
 
-
-// Default ctor generating zero-filled matrix
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 Matrix<ROWS, COLS, E>::Matrix() : Matrix<ROWS, COLS, E>(E(0))
 {
@@ -14,10 +11,6 @@ Matrix<ROWS, COLS, E>::Matrix() : Matrix<ROWS, COLS, E>(E(0))
 }
 
 
-// Ctor creating matrix of given size. Fills it with given value
-//--------------------------------------------------------------------------------------------
-// _fill - value to be filled with
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 Matrix<ROWS, COLS, E>::Matrix(E _fill)
 {
@@ -26,11 +19,6 @@ Matrix<ROWS, COLS, E>::Matrix(E _fill)
 }
 
 
-// Ctor creating matrix from given two-dimensional array, where the element from the i-th row
-// and the j-th column is in arr[i-1][j-1]. Data from array are copied
-//--------------------------------------------------------------------------------------------
-// _arr - array with matrix elements
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 Matrix<ROWS, COLS, E>::Matrix(const E **_arr)
 {
@@ -42,14 +30,6 @@ Matrix<ROWS, COLS, E>::Matrix(const E **_arr)
 }
 
 
-// Ctor creating matrix from given one-dimensional array. When desired matrix is
-// / 1 2 3 |
-// | 4 5 6 |
-// \ 7 8 9 |
-// then the array should be: {1, 2, 3, 4, 5, 6, 7, 8, 9}
-//--------------------------------------------------------------------------------------------
-// _arr - array with matrix elements
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 Matrix<ROWS, COLS, E>::Matrix(const E *_arr)
 {
@@ -58,14 +38,6 @@ Matrix<ROWS, COLS, E>::Matrix(const E *_arr)
 }
 
 
-// Ctor creating matrix from std::array. When desired matrix is
-// / 1 2 3 |
-// | 4 5 6 |
-// \ 7 8 9 |
-// then the array should be: {1, 2, 3, 4, 5, 6, 7, 8, 9}
-//--------------------------------------------------------------------------------------------
-// _arr - initializer lsit with matrix elements
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 Matrix<ROWS, COLS, E>::Matrix(const std::array<E, ROWS * COLS> & _arr)
 {
@@ -74,8 +46,6 @@ Matrix<ROWS, COLS, E>::Matrix(const std::array<E, ROWS * COLS> & _arr)
 }
 
 
-// Addition of 2 matrices
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 inline Matrix<ROWS, COLS, E> operator+(Matrix<ROWS, COLS, E> matrix1, const Matrix<ROWS, COLS, E> & matrix2)
 {
@@ -83,8 +53,6 @@ inline Matrix<ROWS, COLS, E> operator+(Matrix<ROWS, COLS, E> matrix1, const Matr
 }
 
 
-// Subtraction of 2 matrices
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 inline Matrix<ROWS, COLS, E> operator-(Matrix<ROWS, COLS, E> matrix1, const Matrix<ROWS, COLS, E> & matrix2)
 {
@@ -92,8 +60,6 @@ inline Matrix<ROWS, COLS, E> operator-(Matrix<ROWS, COLS, E> matrix1, const Matr
 }
 
 
-// Multiplying matrix by scalar
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 inline Matrix<ROWS, COLS, E> operator*(Matrix<ROWS, COLS, E> matrix, E x)
 {
@@ -108,8 +74,6 @@ inline Matrix<ROWS, COLS, E> operator*(E x, Matrix<ROWS, COLS, E> matrix)
 }
 
 
-// Dividing matrix by scalar
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 inline Matrix<ROWS, COLS, E> operator/(Matrix<ROWS, COLS, E> matrix, E x)
 {
@@ -117,8 +81,15 @@ inline Matrix<ROWS, COLS, E> operator/(Matrix<ROWS, COLS, E> matrix, E x)
 }
 
 
-// Multiplication of 2 matrices
-//--------------------------------------------------------------------------------------------
+template <std::size_t ROWS, std::size_t COLS, typename E>
+Matrix<ROWS, COLS, E> operator-(Matrix<ROWS, COLS, E> matrix)
+{
+    for (std::size_t i = 0; i < ROWS * COLS; i++)
+        matrix.arr[i] = -matrix.arr[i];
+    return matrix;
+}
+
+
 template <std::size_t ROWS1, std::size_t ROWS_COLS, std::size_t COLS2, typename E>
 Matrix<ROWS1, COLS2, E> operator*(const Matrix<ROWS1, ROWS_COLS, E> & matrix1, const Matrix<ROWS_COLS, COLS2, E> & matrix2)
 {
@@ -131,8 +102,6 @@ Matrix<ROWS1, COLS2, E> operator*(const Matrix<ROWS1, ROWS_COLS, E> & matrix1, c
 }
 
 
-// Equality operator of 2 matrices
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 bool operator==(const Matrix<ROWS, COLS, E> & matrix1, const Matrix<ROWS, COLS, E> & matrix2)
 {
@@ -143,8 +112,6 @@ bool operator==(const Matrix<ROWS, COLS, E> & matrix1, const Matrix<ROWS, COLS, 
 }
 
 
-// Inequality operator of 2 matrices
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 inline bool operator!=(const Matrix<ROWS, COLS, E> & matrix1, const Matrix<ROWS, COLS, E> & matrix2)
 {
@@ -152,8 +119,6 @@ inline bool operator!=(const Matrix<ROWS, COLS, E> & matrix1, const Matrix<ROWS,
 }
 
 
-// Stream insertion operator
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 std::ostream & operator<< (std::ostream & _stream, const Matrix<ROWS, COLS, E> & _matrix)
 {
@@ -168,8 +133,6 @@ std::ostream & operator<< (std::ostream & _stream, const Matrix<ROWS, COLS, E> &
 }
 
 
-// Addition assignment operator
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 Matrix<ROWS, COLS, E> & Matrix<ROWS, COLS, E>::operator+=(const Matrix<ROWS, COLS, E> & other)
 {
@@ -179,8 +142,6 @@ Matrix<ROWS, COLS, E> & Matrix<ROWS, COLS, E>::operator+=(const Matrix<ROWS, COL
 }
 
 
-// Matrix multiplication assignment operator
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 inline Matrix<ROWS, COLS, E> & Matrix<ROWS, COLS, E>::operator*=(const Matrix<COLS, COLS, E> & other)
 {
@@ -189,8 +150,6 @@ inline Matrix<ROWS, COLS, E> & Matrix<ROWS, COLS, E>::operator*=(const Matrix<CO
 }
 
 
-// Matrix multiplication by scalar assignment operator
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 Matrix<ROWS, COLS, E> & Matrix<ROWS, COLS, E>::operator*=(E x)
 {
@@ -216,8 +175,6 @@ Matrix<ROWS, COLS, E> & Matrix<ROWS, COLS, E>::operator/=(E x)
 }
 
 
-// Subtraction assignment operator
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 Matrix<ROWS, COLS, E> & Matrix<ROWS, COLS, E>::operator-=(const Matrix & other)
 {
@@ -227,21 +184,6 @@ Matrix<ROWS, COLS, E> & Matrix<ROWS, COLS, E>::operator-=(const Matrix & other)
 }
 
 
-// Unary minus operator
-//--------------------------------------------------------------------------------------------
-template <std::size_t ROWS, std::size_t COLS, typename E>
-Matrix<ROWS, COLS, E> Matrix<ROWS, COLS, E>::operator-(void) const
-{
-    Matrix<ROWS, COLS, E> ret;
-    for (std::size_t i = 0; i < ROWS * COLS; i++)
-        ret.arr[i] = -arr[i];
-    return ret;
-}
-
-// R/W access oparator. In order to get the element from i-th row and j-th column, one should
-// use matrix(i-1, j-1). Check if indexes are in bounds and throws std::invalid_argument
-// exception if needed
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 inline E & Matrix<ROWS, COLS, E>::operator()(std::size_t _row, std::size_t _column)
 {
@@ -251,10 +193,7 @@ inline E & Matrix<ROWS, COLS, E>::operator()(std::size_t _row, std::size_t _colu
     return _get(_row, _column);
 }
 
-// Read-only access oparator. In order to get the element from i-th row and j-th column, one
-// should use matrix(i-1, j-1). Check if indexes are in bounds and throws
-// std::invalid_argument exception if needed
-//--------------------------------------------------------------------------------------------
+
 template <std::size_t ROWS, std::size_t COLS, typename E>
 inline const E & Matrix<ROWS, COLS, E>::operator()(std::size_t _row, std::size_t _column) const
 {
@@ -265,8 +204,6 @@ inline const E & Matrix<ROWS, COLS, E>::operator()(std::size_t _row, std::size_t
 }
 
 
-// Returns transposition of the matrix
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 Matrix<COLS, ROWS, E> Matrix<ROWS, COLS, E>::transpose() const
 {
@@ -278,9 +215,6 @@ Matrix<COLS, ROWS, E> Matrix<ROWS, COLS, E>::transpose() const
     return matrix;
 }
 
-
-// Returns inversion of the matrix. For 1x1 matrix
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 template <std::size_t _ROWS, std::size_t _COLS>
 typename std::enable_if<_ROWS == _COLS && _ROWS == 1, Matrix<ROWS, COLS, E>>::type
@@ -291,8 +225,6 @@ Matrix<ROWS, COLS, E>::inverse() const
 }
 
 
-// Returns inversion of the matrix. For 2x2 matrix
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 template <std::size_t _ROWS, std::size_t _COLS>
 typename std::enable_if<_ROWS == _COLS && _ROWS == 2, Matrix<ROWS, COLS, E>>::type
@@ -310,8 +242,6 @@ Matrix<ROWS, COLS, E>::inverse() const
 }
 
 
-// Returns inversion of the matrix. For 3x3 and bigger matrices
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 template <std::size_t _ROWS, std::size_t _COLS>
 typename std::enable_if<_ROWS == _COLS && (_ROWS > 2), Matrix<ROWS, COLS, E>>::type
@@ -328,8 +258,6 @@ Matrix<ROWS, COLS, E>::inverse() const
 }
 
 
-// Returns identity matrix of template parameters size
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 template <std::size_t _ROWS, std::size_t _COLS>
 typename std::enable_if<_ROWS == _COLS, Matrix<ROWS, COLS, E>>::type 
@@ -342,9 +270,6 @@ Matrix<ROWS, COLS, E>::identity()
 }
 
 
-// Calculates minor of matrix created by removing (_row + 1) row and (_column + 1) column.
-// For 2x2 matrix
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 template <std::size_t _ROWS, std::size_t _COLS>
 typename std::enable_if<_ROWS == _COLS && _ROWS == 2, E>::type
@@ -354,9 +279,6 @@ Matrix<ROWS, COLS, E>::matrix_minor(std::size_t _row, std::size_t _column) const
 }
 
 
-// Calculates minor of matrix created by removing (_row + 1) row and (_column + 1) column.
-// For 3x3 and bigger matrices
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 template <std::size_t _ROWS, std::size_t _COLS>
 typename std::enable_if<_ROWS == _COLS && (_ROWS > 2), E>::type
@@ -396,8 +318,6 @@ Matrix<ROWS, COLS, E>::matrix_minor(std::size_t _row, std::size_t _column) const
 }
 
 
-// Returns determinant of the matrix. For 1x1 matrix
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 template <std::size_t _ROWS, std::size_t _COLS>
 typename std::enable_if<_ROWS == _COLS && _ROWS == 1, E>::type
@@ -407,8 +327,6 @@ Matrix<ROWS, COLS, E>::det() const
 }
 
 
-// Returns determinant of the matrix. For 2x2 matrix
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 template <std::size_t _ROWS, std::size_t _COLS>
 typename std::enable_if<_ROWS == _COLS && _ROWS == 2, E>::type
@@ -418,8 +336,6 @@ Matrix<ROWS, COLS, E>::det() const
 }
 
 
-// Returns determinant of the matrix. For 3x3 matrix
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 template <std::size_t _ROWS, std::size_t _COLS>
 typename std::enable_if<_ROWS == _COLS && _ROWS == 3, E>::type
@@ -430,8 +346,6 @@ Matrix<ROWS, COLS, E>::det() const
 }
 
 
-// Returns determinant of the matrix. For 4x4 and bigger matrices
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 template <std::size_t _ROWS, std::size_t _COLS>
 typename std::enable_if<_ROWS == _COLS && (_ROWS > 3), E>::type
@@ -449,10 +363,6 @@ Matrix<ROWS, COLS, E>::det() const
 }
 
 
-// Generates two-dimensional rotate matrix
-//--------------------------------------------------------------------------------------------
-// _a - counter-clockwise rotate angle
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 template <std::size_t _ROWS, std::size_t _COLS, typename _E>
 typename std::enable_if<_ROWS == 2 && _COLS == 2 && std::is_same<_E, double>::value, Matrix<ROWS, COLS, E>>::type
@@ -469,13 +379,6 @@ Matrix<ROWS, COLS, E>::rotation(double _a)
 }
 
 
-// Generates three-dimensional rotate matrix. The rotations are performed about X, Y and Z
-// axis in mentioned order
-//--------------------------------------------------------------------------------------------
-// _ax - counter-clockwise rotation angle about X axis
-// _ay - counter-clockwise rotation angle about Y axis
-// _az - counter-clockwise rotation angle about Z axis
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 template <std::size_t _ROWS, std::size_t _COLS, typename _E>
 typename std::enable_if<_ROWS == 3 && _COLS == 3 && std::is_same<_E, double>::value, Matrix<ROWS, COLS, E>>::type
@@ -505,8 +408,6 @@ Matrix<ROWS, COLS, E>::rotation(double _ax, double _ay, double _az)
 }
 
 
-// Depicts the matrix in the form of a string
-//--------------------------------------------------------------------------------------------
 template <std::size_t ROWS, std::size_t COLS, typename E>
 std::string Matrix<ROWS, COLS, E>::toString() const
 {
@@ -515,16 +416,14 @@ std::string Matrix<ROWS, COLS, E>::toString() const
     return sstream.str();
 }
 
-// Inline function returning number of rows in matrix
-//-------------------------------------------------------------------------------------------------------
+
 template <std::size_t ROWS, std::size_t COLS, typename E>
 inline std::size_t Matrix<ROWS, COLS, E>::getRows() const
 {
     return ROWS;
 }
 
-// Inline function returning number of columns in matrix
-//-------------------------------------------------------------------------------------------------------
+
 template <std::size_t ROWS, std::size_t COLS, typename E>
 inline std::size_t Matrix<ROWS, COLS, E>::getCols() const
 {
@@ -549,8 +448,7 @@ inline const E & Matrix<ROWS, COLS, E>::_get(std::size_t _row, std::size_t _col)
     return arr[_row * COLS + _col];
 }
 
-// Copies matrix to c array
-//-------------------------------------------------------------------------------------------------------
+
 template<size_t ROWS, size_t COLS, typename E>
 void Matrix<ROWS, COLS, E>::copyToArray(E *arr) const {
     for (size_t i = 0; i < ROWS * COLS; i++)

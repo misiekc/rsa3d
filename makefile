@@ -106,6 +106,9 @@ OBJDIR = $(BUILD)/obj
 # D files folder
 DEPSDIR = $(BUILD)/deps
 
+# Documentation dir
+DOCDIR = doc
+
 # Map all objects from source file lists to dependency files
 OBJS_COMMON_D = $(OBJS_COMMON:%=$(OBJDIR)/%.o)
 OBJS_MAIN_D = $(OBJS_MAIN:%=$(OBJDIR)/%.o)
@@ -162,12 +165,16 @@ $(LIBSTAT): $(OBJS_STAT_D)
 	@echo '## MAKING $(LIBSTAT)'
 	ar crf $@ $^
 
-.PHONY: all clean
+.PHONY: all clean doc
 
 # all executables
 all: $(EXEC) $(EXEC)_test
 
 # cleaning compilation results
 clean:
-	rm -rf $(EXEC) $(EXEC)_test $(LIBSTAT) $(BUILD)
-
+	rm -rf $(EXEC) $(EXEC)_test $(LIBSTAT) $(BUILD) $(DOCDIR)
+	
+# documentation
+doc:
+	@mkdir $(DOCDIR)
+	@doxygen
