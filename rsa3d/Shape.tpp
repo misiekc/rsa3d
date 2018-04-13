@@ -50,15 +50,6 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setOrientation(const double *o
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::translate(double* v) {
-    double position[SPATIAL_DIMENSION];
-	for(unsigned short i=0; i<SPATIAL_DIMENSION; i++)
-		position[i] = this->getPosition()[i] + v[i];
-    this->setPosition(position);
-}
-
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::rotate(double* v){
     std::array<double, ANGULAR_DIMENSION> orientation;
 	for(unsigned short i=0; i<ANGULAR_DIMENSION; i++)

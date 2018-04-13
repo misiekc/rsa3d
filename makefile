@@ -44,6 +44,7 @@ LIBSTAT = libstat.a
 PACKAGES = rsa3d/analizator/ \
            rsa3d/shapes/ \
            rsa3d/shapes/cube_strategies/ \
+           rsa3d/shapes/polygons/ \
            rsa3d/surfaces/ \
            statistics/ \
            test/ \

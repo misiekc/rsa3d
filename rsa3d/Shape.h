@@ -90,12 +90,6 @@ public:
      */
     const double * getOrientation() const;
 
-	/**
-	 * Translates the shape by a given vector v.
-	 * @param v a vector to translate
-	 */
-    void translate(double* v);
-
     /**
      * Increases all shape's angles by respective values from array v.
      * @param v an array of angle deltas

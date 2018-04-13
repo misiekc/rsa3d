@@ -40,6 +40,12 @@ public:
 	 * @return position of a Positioned
 	 */
 	double* getPosition() const;
+
+    /**
+     * Translates positioned by a given vector @a v.
+     * @param v
+     */
+	void translate(double *v);
 };
 
 #include "Positioned.tpp"
