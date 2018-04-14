@@ -20,6 +20,11 @@ Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape() : Positioned<SPATIAL_DIMENS
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVolume() const {
+    return 1.;
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 const double* Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation() const{
     return this->orientation.data();
 }
@@ -91,8 +96,10 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
 		f.read((char *)(&ad), sizeof(unsigned char));
 
 	if (sd!=SPATIAL_DIMENSION || ad!=ANGULAR_DIMENSION){
-		std::cout << "[ERROR] cannot restore Shape: incompatible dimensions: read " << f.gcount() << " bytes." << std::endl;
-		return;
+        throw std::runtime_error(
+                std::string("[ERROR] cannot restore Shape: incompatible dimensions: read ")
+                + std::to_string(f.gcount())
+                + " bytes.");
 	}
 	f.read((char *)(&this->no), sizeof(int));
 	f.read((char *)(&this->time), sizeof(double));
@@ -106,15 +113,6 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
 		f.read((char *)(this->orientation.data()), ad*sizeof(double));
 }
 
-/*
-template <unsigned short SPATIAL_DIMENSION>
-void Shape<SPATIAL_DIMENSION>::vectorTranslate(const Vector<SPATIAL_DIMENSION> &translation) {
-	double arr[SPATIAL_DIMENSION];
-	translation.copyToArray(arr);
-	translate(arr);
-}
-*/
-
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::applyBC(BoundaryConditions *bc,
                                                           Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second) const {
@@ -122,12 +120,3 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::applyBC(BoundaryConditions *bc
     bc->getTranslation(translation, this->getPosition(), second->getPosition());
     second->translate(translation);
 }
-
-/*
-template <unsigned short SPATIAL_DIMENSION>
-double* Shape<SPATIAL_DIMENSION>::applyBC(double *res, BoundaryConditions *bc, double *pointToTranslate) {
-	double* Shape<SPATIAL_DIMENSION>::applyBC(double *res, BoundaryConditions *bc, double *pointToTranslate) {
-	bc->getTranslation(res, this->position, pointToTranslate);
-	return res;
-}
-*/

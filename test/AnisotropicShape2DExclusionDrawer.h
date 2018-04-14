@@ -12,49 +12,60 @@
 
 
 /**
- * A simple program generating Wolfram Mathematica notebook presenting exclusion zone for AnisotropicShape2D.
+ * @brief A simple program generating Wolfram Mathematica notebook presenting exclusion zone for AnisotropicShape2D.
  *
- * Usage: rsa as2d_exdrawer (shape) (attr) (shape angle) (angle from) (angle to) (resolution) (output file)
+ * Usage:
+ * <blockquote>
+ * rsa as2d_exdrawer (shape) (attr) (shape angle) (angle from) (angle to) (resolution) (output file)
+ * </blockquote>
  *
  * The output file contains:
  * <ul>
  * <li> exclusion zones for angle from and angle to
  * <li> intersection on two above zones
- * <li> intersection of all ranges from given angle range (pointInside)
+ * <li> intersection of all ranges from given angle range (Shape::pointInside)
  * </ul>
+ *
+ * It can be used after checking exclusion zones correctness using as2d_extest (because it assumes that regions are
+ * convex) for drawings in an article or more accurate examination of a shape of those zones.
  */
 namespace as2d_exdrawer
 {
+    /**
+     * More descriptive name for the vector of vertices of a polygon.
+     */
     using Polygon = std::vector<Vector<2>>;
 
     /**
-     * Returns a Polygon describing exclusion zone for given shape and angle, sampling resolution points and testing
-     * overlap function
+     * Returns a as2d_exdrawer::Polygon describing exclusion zone for given @a shape and @a angle, sampling @a
+     * resolution number of points and testing Shape::overlap()
      * @param shape shape which exclusion zone to calculate
      * @param angle angle of exclusion zone
      * @param resolution number of vertices of resulting Polygon
-     * @return Polygon describing exclusion zone
+     * @return as2d_exdrawer::Polygon describing exclusion zone
      */
     Polygon zone_for_angle(AnisotropicShape2D &shape, double angle, std::size_t resolution);
 
     /**
-     * Same as zone_for_angle, but resulting Polygon is intersection of exclusion zones for angle1 and angle2
+     * Same as zone_for_angle(), but resulting as2d_exdrawerPolygon is intersection of exclusion zones for @a angle1 and
+     * @a angle2
      */
     Polygon zone_for_two_angles(AnisotropicShape2D &shape, double angle1, double angle2, std::size_t resolution);
 
     /**
-     * Same as zone_for_angle, but resulting Polygon is exclusion zone for angle range, sampled using pointInside
+     * Same as zone_for_angle(), but resulting as2d_exdrawer::Polygon is exclusion zone for angle range, sampled using
+     * Shape::pointInside
      */
     Polygon zone_for_angle_range(AnisotropicShape2D &shape, double angleFrom, double angleTo,
                                  std::size_t resolution);
 
     /**
-     * Converts given polygon to Wolfram format and prints it on stream
+     * Converts given as2d_exdrawer::Polygon to Wolfram format and prints it on stream
      */
     void polygon_to_wolfram(const Polygon &polygon, std::ostream &stream);
 
     /**
-     * Creates a whole Wolfram notebook visualizing exclusion zone for given shape and prints it on stream
+     * Creates a whole Wolfram notebook visualizing exclusion zone for given @a shape and prints it on @a stream
      * @param shape shape, drawn Black, which exclusion zone is visualized
      * @param fromZone exclusion zone for fromAngle, drawn Red
      * @param toZone exclusion zone for toAngle, drawn Yellow
@@ -68,7 +79,10 @@ namespace as2d_exdrawer
     /**
      * Main function for exclusion drawind facility
      *
-     * Usage: rsa as2d_exdrawer (shape) (attr) (shape angle) (angle from) (angle to) (resolution) (output file)
+     * Usage:
+     * <blockquote>
+     * rsa as2d_exdrawer (shape) (attr) (shape angle) (angle from) (angle to) (resolution) (output file)
+     * </blockquote>
      */
     int main(int argc, char **argv);
 }

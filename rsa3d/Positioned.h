@@ -12,6 +12,13 @@
 
 #include <array>
 
+/**
+ * @brief An object located in @a SPATIAL_DIMENSION dimensional space.
+ *
+ * The class abstracts any object which position can be described by @a SPATIAL_DIMENSION numbers. Its position can
+ * be accessed or translated by a given vector.
+ * @tparam SPATIAL_DIMENSION number of dimensions of a space in which positioned lives
+ */
 template <unsigned short SPATIAL_DIMENSION>
 class Positioned {
 private:
@@ -20,7 +27,9 @@ private:
 protected:
 
 	/**
-     * Sets new position. Derived shape classes have to override this method when they want to keep track of
+     * @brief Sets new position.
+     *
+     * Derived shape classes have to override this method when they want to keep track of
      * Positioned position. One would then typically write:
      * \code
      * void Derived::setPosition(const double *position) {
@@ -36,14 +45,14 @@ public:
 	virtual ~Positioned() = default;
 
 	/**
-	 * Returns position of a Positioned.
+	 * @brief Returns position of a Positioned.
 	 * @return position of a Positioned
 	 */
 	double* getPosition() const;
 
     /**
-     * Translates positioned by a given vector @a v.
-     * @param v
+     * @brief Translates positioned by a given vector @a v.
+     * @param v a vector to translate by
      */
 	void translate(double *v);
 };

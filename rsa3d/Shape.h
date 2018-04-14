@@ -16,6 +16,53 @@
 #include <istream>
 #include <array>
 
+/**
+ * @brief A @a SPATIAL_DIMENSION dimensional shape providing facilities to generate RSA packings.
+ *
+ * The class ships with parameters for fine-tuning packing generation (eg initial voxel size), for overlap detection,
+ * for storing and restoring. For more information see appropriate methods' documentation.
+ *
+ * Derived classes should also provide:
+ * <ul>
+ * <li>a zero-argument static method generating this specific shape in the origin of coordinate system with signature:
+ * @code
+ * Shape* ()()
+ * @endcode
+ * If @a ANGULAR_DIMENSION is zero, but a Shape is not isotropic, the method should also choose random orientation,
+ * usually with isotropic distribution. All generated shapes must have a volume of 1 and be identical (disregarding
+ * orientation).</li>
+ * <li>a method for initializing parameters of generated shapes' from a string, if the class describes the whole family
+ * of shapes of a specific kind, for example ellipses (they can have different axes ratio). Usual signature:
+ * @code
+ * void ()(std::string attr)
+ * @endcode
+ * The parameters are then stored in a global state and are used when generating shapes with a static method described
+ * above.</li>
+ * </ul>
+ *
+ * These methods will be then hard-coded in ShapeFactory, usually in such a way:
+ * @code
+ * if (shapeName == "SpecificShape") {
+ *     SpecificShape::initClass(shapeAttributes); // use initialization method
+ *     ShapeFactory::createShape = SpecificShape::create; // store a pointer to generating method
+ * }
+ * @endcode
+ * Other parts of a program, such as tests, can use it in a different way, but with respect to a contract to be
+ * described next.
+ *
+ * <strong>CALLING INITIALIZATION METHOD IS THE FIRST THING TO DO BEFORE USING A CLASS.</strong>
+ *
+ * Derived classes are <strong>not required</strong> to handle <strong>shapes of sizes other than from a global
+ * state</strong>. All methods have unexpected behavior if initializing method has not been called before, however
+ * <strong>one can change parameters</strong> in any moment by calling initialization method again. If this happens,
+ * all previously generated shapes are considered stale and using them leads to an unexpected behaviour, however all new
+ * shapes should work properly.
+ *
+ * @tparam SPATIAL_DIMENSION how many dimensions has the space in which a shape lives
+ * @tparam ANGULAR_DIMENSION how many orientational degrees of freedom a shape has. However, this parameter should be
+ * non-zero only if pointInside(BoundaryConditions*,double*,double*,double) is capable of dealing with angle-dependent
+ * exclusion zones, ie. when generating saturated RSA packings is supported
+ */
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 class Shape : public Positioned<SPATIAL_DIMENSION>{
 
@@ -28,7 +75,9 @@ private:
 protected:
 
     /**
-     * Translates second by a vector returned by
+     * @brief Translates @a second if it is required by @a bc.
+     *
+     * Ie. @a second is translated by a vector returned by
      * \code
      * bc->getTranslation(result, this, second);
      * \endcode
@@ -38,7 +87,9 @@ protected:
 	virtual void applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second) const;
 
     /**
-     * Sets shape's orientation. Derived shape classes have to override this method when they want to keep track of
+     * @brief Sets shape's new orientation.
+     *
+     * Derived shape classes have to override this method when they want to keep track of
      * shape's orientation. One would then typically write:
      * \code
      * void Derived::setOrientation(const double *orientation) {
@@ -46,56 +97,71 @@ protected:
      *     // invoke getOrientation and for example compute vertices
      * }
      * \endcode
-     * rotate(double*) method delegates to this, so no orientation changes will be missed.
+     * <strong>rotate(double*) method delegates to this, so no orientation changes will be missed.</strong>
      * @param orientation new shape's orientation
      */
     virtual void setOrientation(const double *orientation);
 
 public:
 
-	static Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>* (*createShape)(RND *rnd);
+    /**
+     * @brief Number of a shape in a packing.
+     */
     int no;
 
+    /**
+     * @brief Dimensionless time describing when a shape was added to a packing.
+     */
 	double time;
 
+    /**
+     * @brief Constructs default-oriented shape in the origin of a coordinate system.
+     */
     Shape();
 	virtual ~Shape() = default;
 
     /**
-     * Returns linear size of a cell in a NeighbourGrid. This size should be as small as possible but big enough to
-     * avoid overlapping between shapes having centers in cells that are not neighbours.
+     * @brief Returns linear size of a cell in a NeighbourGrid.
+     *
+     * This size should be as small as possible but big enough to avoid overlapping between shapes having centers in
+     * cells that are not neighbours.
      * @return linear size of a cell in a NeighbourGrid
      */
 	virtual double getNeighbourListCellSize() const = 0;
 
     /**
-     * Returns initial linear size of a (cubic) voxel. This size should be as big as possible but shape with the center
-     * inside the voxel have to cover the whole voxel.
+     * @brief Returns initial linear size of a (cubic) voxel.
+     *
+     * This size should be as big as possible but shape with the center inside the voxel have to cover the whole voxel.
      * @return initial linear size of a (cubic) voxel
      */
 	virtual double getVoxelSize() const = 0;
 
     /**
-     * Returns angular size of a voxel. This should be as small as possible but big enough so that angle range
-     * (0, `getVoxelAngularSize()`) describes all possible shape's orientations.
+     * @brief Returns angular size of a voxel.
+     *
+     * Default implementation returns 2 * M_PI. This should be as small as possible but big enough so that angle range
+     * (0, getVoxelAngularSize()) describes all possible shape's orientations.
      * @return angular size of a voxel
      */
 	virtual double getVoxelAngularSize() const;
 
     /**
-     * Returns an array of all angles describing shape's orientation.
+     * @brief Returns an array of all angles describing shape's orientation.
      * @return array describing shape's orietation
      */
     const double * getOrientation() const;
 
     /**
-     * Increases all shape's angles by respective values from array v.
+     * @brief Increases all shape's angles by respective values from array @a v.
      * @param v an array of angle deltas
      */
     void rotate(double *v);
 
 	/**
-	 * Checks if there is overlap with the shape pointed by s.
+	 * @brief Checks if there is overlap with the shape pointed by @a s.
+	 *
+	 * If @a s of `this` has a different size than from a global state is may lead to an unexpected behaviour.
 	 * @param bc boundary conditions to take into account
 	 * @param s the second shape
 	 * @return 0 if there is no overlap, nonzero number otherwise
@@ -103,16 +169,19 @@ public:
 	virtual int overlap(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const = 0;
 
     /**
-     * Returns a volume of the shape.
+     * @brief Returns a volume of the shape.
+     *
+     * Default implementation returns 1. If derived class supports shapes of volume other than 1 this method should be overriden.
      * @return a volume of the shape
      */
-	virtual double getVolume() const = 0;
+	virtual double getVolume() const;
 
     /**
-     * Checks if a given point is within intersection of all excluded volumes for all orientations denoted by
-     * orientation and orientationRange parameters.
+     * @brief Checks if a virtual particle of the same size is within intersection of all excluded volumes for all its
+     * orientations denoted by @a orientation and @a orientationRange parameters.
+     *
      * @param bc boundary conditions to take into account
-     * @param position position of a point to check
+     * @param position position of a virtual particle of the same size to check
      * @param orientation array of beginnings of angle intervals
      * @param orientationRange array of lengths of angle intervals
      * @return 0 if point is outside, nonzero number otherwise
@@ -120,47 +189,82 @@ public:
 	virtual int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const = 0;
 
     /**
-     * Checks if a given point is within excluded volume for any orientation of a virtual rotationally symmetric shape.
+     * @brief Checks if a virtual particle of the same size is within excluded volume for any orientation of it.
+     *
+	 * If @a s of `this` has a different size than from a global state is may lead to an unexpected behaviour.
      * @param bc boundary conditions to take into account
-     * @param da position of a point to check
+     * @param da position of a virtual particle of the same size to check
      * @return 0 if point is outside, nonzero number otherwise
      */
-	virtual int pointInside(BoundaryConditions *bc, double* da) const;
+	virtual int pointInside(BoundaryConditions *bc, double* position) const;
 
     /**
-     * ?? Moves the shape towards given shape s.
+     * @brief ?? Moves the shape towards given shape s.
      * @param s ??
      * @return ??
      */
 	virtual double minDistance(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const;
 
     /**
-     * Returns string representation of the shape.
+     * @brief Returns string representation of the shape.
+     *
+     * Default implementation returns an empty string.
      * @return string representation of the shape
      */
 	virtual std::string toString() const;
 
     /**
-     * Returns povray string representation of the shape.
+     * @brief Returns povray string representation of the shape.
+     *
+     * Default implementation returns an empty string.
      * @return povray string representation of the shape
      */
 	virtual std::string toPovray() const;
 
     /**
-     * Returns Wolfram Mathematica string representation of the shape.
+     * @brief Returns Wolfram Mathematica string representation of the shape.
+     *
+     * Default implementation returns an empty string.
      * @return Wolfram Mathematica string representation of the shape
      */
 	virtual std::string toWolfram() const;
 
     /**
-     * Serializes shape and writes it in binary form to f.
+     * @brief Serializes shape and writes it in binary form to f.
+     *
+     * Derived classes: Other than for restore(), not only can shapes consistent with a global state be stored, if
+     * a class supports them.
+     *
+     * Information are stored in a binary form in the following order:
+     * <ul>
+     * <li>@a SPATIAL_DIMENSION parameter as `char`</li>
+     * <li>if non-zero, @a ANGULAR_DIMENSION parameter as `char`</li>
+     * <li>Shape::no parameter as `int`</li>
+     * <li>Shape::time parameter as `double`</li>
+     * <li>Positioned::getPosition() as an array of `double`</li>
+     * <li>if @a ANGULAR_DIMENSION non-zero, Shape::getOrientation() as an array of `double`</li>
+     * </ul>
+     *
+     * Derived classes can store additional information afterwards.
+     * @code
+     * void Derived::store(std::ostream &f) const {
+     *     Shape::store(f);
+     *     // store for example axes ratio
+     * }
+     * @endcode
      * @param f stream to write serialized shape to
      */
 	virtual void store(std::ostream &f) const;
 
 	/**
-	 * Deserializes shape from f.
-	 * @param f stream to write serialized shape from
+	 * @brief Deserializes shape from f.
+	 *
+	 * Derived classes: <strong>Only shapes consistent with a global state can be restored.</strong> std::runtime_error
+	 * should be thrown otherwise.
+	 *
+	 * Format of data is described in restore().
+	 * @param f stream to write serialized shape to
+	 * @throws std::runtime_error if dimensions are incompatible
 	 */
 	virtual void restore(std::istream &f);
 };
