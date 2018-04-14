@@ -9,25 +9,35 @@
 #include "Shape.h"
 #include "Matrix.h"
 
+/**
+ * @brief 2D Shape with anisotropy - its position is described by 2 numbers and orientation by 1 number.
+ *
+ * This class specializes a bit more general Shape class and acts as a base for all anisotropic 2D shapes. Derived
+ * classes can now operate on angles, not arrays of angles and automatic normalizataion is introduced (see setAngle()).
+ *
+ * Note, that Shape::pointInside(BoundaryConditions*,double*,double*,double) and Shape::setOrientation(double*) now
+ * delegate to AnisotropicShape2D::pointInside(BoundaryConditions*,double*,double,double) and
+ * AnisotripicShape2D::setAngle(double). See those methods' documentation for more information.
+ */
 class AnisotropicShape2D : public Shape<2, 1> {
 
 protected:
 
     /**
-     * Returns rotation matrix for -getAngle() angle.
-     * @return rotation matrix for -getAngle() angle
+     * @brief Returns rotation matrix for - getAngle() angle.
+     * @return rotation matrix for - getAngle() angle
      */
     Matrix<2, 2> getAntiRotationMatrix() const;
 
     /**
-     * Returns rotation matrix for getAngle() angle.
+     * @brief Returns rotation matrix for getAngle() angle.
      * @return rotation matrix for getAngle() angle
      */
     Matrix<2, 2> getRotationMatrix() const;
 
     /**
-     * Add/subrtacts integer multiple of an interval to angleFrom and angleTo so that angleFrom lies in (0, interval)
-     * range.
+     * @brief Add/subrtacts integer multiple of @a interval to @a angleFrom and @a angleTo so that @a angleFrom lies in
+     * (0, @a interval) range.
      * @param angleFrom angle range beginning
      * @param angleTo angle range ending
      * @param interval interval to fit angleFrom into
@@ -35,18 +45,21 @@ protected:
 	void normalizeAngleRange(double *angleFrom, double *angleTo, double interval) const;
 
     /**
-     * Add/subrtacts integer multiple of an interval to angle so that it lies in (0, interval) and returns result.
+     * @brief Add/subrtacts integer multiple of @a interval to @a angle so that it lies in (0, @a interval) and returns
+     * result.
      * @param angle angle to normalize
      * @param interval interval to fit angle into
      * @return normalized angle
      */
 	double normalizeAngle(double angle, double interval) const;
 
-    // setOrientation(const double*) is delegated to setAngle(double)
+    /**
+     * @brief Delegated to AnisotropicShape2D::setAngle(double). <strong>Override that instead.</strong>
+     */
     void setOrientation(const double *orientation) final;
 
     /**
-     * Sets new orientation of a shape. It replaces Shape::setOrientation(double*).
+     * @brief Sets new orientation of a shape. It replaces Shape::setOrientation(double*).
      *
      * The angle is normalized using normalizeAngle(double, double) with getVoxelAngularSize() as an interval.
      *
@@ -64,18 +77,21 @@ protected:
 
 public:
 
-    // pointInside(double* orientation, double orientationRange) -> pointInside(double angleFrom, double angleTo)
+    /**
+     * @brief Delegated to AnisotropicShape2D::pointInside(BoundaryConditions*,double*,double,double). <strong>Implement
+     * that instead.</strong>
+     */
     int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const final;
 
     /**
-     * Returns the orientation of a shape.
+     * @brief Returns the orientation of a shape.
      * @return the orientation of a shape
      */
     double getAngle() const;
 
     /**
-     * Checks if a given point is within intersection of all excluded zone for all orientations in (angleFrom, angleTo)
-     * range.
+     * @brief Checks if a given point @a da is within intersection of all excluded zone for all orientations in
+     * (@a angleFrom, @a angleTo) range. It replaces Shape::pointInside(BOundaryConditions*,double*,double*,double).
      * @param bc boundary conditions to take into account
      * @param da position of a point to check
      * @param angleFrom array of beginnings of angle intervals
