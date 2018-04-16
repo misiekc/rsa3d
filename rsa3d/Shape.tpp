@@ -8,8 +8,44 @@
 #include <iostream>
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelSpatialSize;
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelAngularSize = 2*M_PI;
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::neighbourListCellSize;
+
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setVoxelSpatialSize(double size) {
+	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelSpatialSize = size;
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setVoxelAngularSize(double size) {
+	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelAngularSize = size;
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setNeighbourListCellSize(double size) {
+	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::neighbourListCellSize = size;
+}
+
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelSpatialSize() const {
+	return Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelSpatialSize;
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelAngularSize() const {
-	return 2*M_PI;
+	return Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelAngularSize;
+}
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getNeighbourListCellSize() const {
+	return Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::neighbourListCellSize;
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>

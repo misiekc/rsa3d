@@ -17,8 +17,6 @@ class Ellipse: public AnisotropicShape2D {
 private:
 	static double longSemiAxis;
 	static double shortSemiAxis;
-	static double neighbourListCellSize;
-	static double voxelSize;
 
 	double a, b;
 	double u[2], uT[2];
@@ -39,9 +37,6 @@ public:
 	Ellipse();
 	~Ellipse() override = default;
 
-    double getNeighbourListCellSize() const override;
-    double getVoxelSize() const override;
-    double getVoxelAngularSize() const override;
     double getVolume() const override;
     void setAngle(double angle) override;
     int overlap(BoundaryConditions *bc, Shape<2, 1> *s) const override;

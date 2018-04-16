@@ -14,8 +14,6 @@
 
 class Rectangle: public AnisotropicShape2D {
 private:
-    static double neighbourListCellSize;
-    static double voxelSize;
     static double longer;
     static double shorter;
 
@@ -61,14 +59,8 @@ public:
 
     double getVolume() const override;
 
-    double getVoxelAngularSize() const override;
-
     int pointInside(BoundaryConditions *bc, double* da) const override;
     int pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) const override;
-
-    double getNeighbourListCellSize() const override;
-    double getVoxelSize() const override;
-
 
     std::string toWolfram() const override;
     std::string toPovray() const override;

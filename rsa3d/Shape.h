@@ -68,7 +68,9 @@ class Shape : public Positioned<SPATIAL_DIMENSION>{
 
 private:
 
+    static double voxelSpatialSize;
     static double voxelAngularSize;
+    static double neighbourListCellSize;
 
     std::array<double, ANGULAR_DIMENSION> orientation;
 
@@ -102,6 +104,34 @@ protected:
      */
     virtual void setOrientation(const double *orientation);
 
+    /**
+     * @brief Sets initial size of a voxel.
+     *
+     * Derived shape classes have to use this method to indicate the largest possible voxel size
+     * that is fully covered by the exclusion zone of the shape placed in it.
+     * @param size size of a voxel
+     */
+    static void setVoxelSpatialSize(double size);
+
+    /**
+     * @brief Sets initial angular size of a voxel.
+     *
+     * Derived shape classes have to use this method to indicate the range of angular variable [0, size). By default, the angular size is 2*M_PI
+     * @param size angular size of a voxel
+     */
+    static void setVoxelAngularSize(double size);
+
+
+    /**
+     * @brief Sets size of a cell in neighbour grid.
+     *
+     * Derived shape classes have to use this method to indicate the linear size of the call in the neighbour grig.
+     * The size should be as small as possible, but shapes from not neighbouring cells must not overlap.
+     * @param size size of a cell in neighbour grid
+     */
+    static void setNeighbourListCellSize(double size);
+
+
 public:
 
     /**
@@ -127,7 +157,7 @@ public:
      * cells that are not neighbours.
      * @return linear size of a cell in a NeighbourGrid
      */
-	virtual double getNeighbourListCellSize() const = 0;
+	double getNeighbourListCellSize() const;
 
     /**
      * @brief Returns initial linear size of a (cubic) voxel.
@@ -135,7 +165,7 @@ public:
      * This size should be as big as possible but shape with the center inside the voxel have to cover the whole voxel.
      * @return initial linear size of a (cubic) voxel
      */
-	virtual double getVoxelSize() const = 0;
+	double getVoxelSpatialSize() const;
 
     /**
      * @brief Returns angular size of a voxel.
@@ -144,7 +174,7 @@ public:
      * (0, getVoxelAngularSize()) describes all possible shape's orientations.
      * @return angular size of a voxel
      */
-	virtual double getVoxelAngularSize() const;
+	double getVoxelAngularSize() const;
 
     /**
      * @brief Returns an array of all angles describing shape's orientation.

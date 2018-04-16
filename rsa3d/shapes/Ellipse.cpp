@@ -14,8 +14,6 @@ static const double EPSILON = 0.0000000001;
 
 double Ellipse::longSemiAxis;
 double Ellipse::shortSemiAxis;
-double Ellipse::neighbourListCellSize;
-double Ellipse::voxelSize;
 
 void Ellipse::calculateU() {
 	this->u[0]  = cos(this->getAngle()); this->u[1]  = sin(this->getAngle());
@@ -32,16 +30,13 @@ void Ellipse::initClass(const std::string &args){
 	double ratio = std::stod(args);
 	Ellipse::shortSemiAxis = sqrt(1.0/(M_PI*ratio));
 	Ellipse::longSemiAxis = ratio*shortSemiAxis;
-	Ellipse::neighbourListCellSize = 2*longSemiAxis;
-	Ellipse::voxelSize = 1.4*shortSemiAxis;
+	Shape<2,1>::setNeighbourListCellSize(2*longSemiAxis);
+	Shape<2,1>::setVoxelSpatialSize(1.4*shortSemiAxis);
+	Shape<2,1>::setVoxelAngularSize(M_PI);
 }
 
 Shape<2, 1> * Ellipse::create(RND *rnd){
 	return new Ellipse();
-}
-
-double Ellipse::getVoxelAngularSize() const{
-	return M_PI;
 }
 
 double Ellipse::calculateF(double* r, double g) const {
@@ -220,14 +215,6 @@ std::string Ellipse::toWolfram() const {
 	out << "    {RotationMatrix[" << this->getAngle() << "], " << thisPos << "}]";
 
 	return out.str();
-}
-
-double Ellipse::getNeighbourListCellSize() const {
-	return Ellipse::neighbourListCellSize;
-}
-
-double Ellipse::getVoxelSize() const {
-	return Ellipse::voxelSize;
 }
 
 std::string Ellipse::toString() const {

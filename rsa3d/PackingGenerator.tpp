@@ -31,7 +31,7 @@ PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::PackingGenerator(int see
 	this->spatialSize = this->params->surfaceSize;
 	this->angularSize = s->getVoxelAngularSize();
 
-	this->voxels = new VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(this->spatialSize, s->getVoxelSize(), this->angularSize);
+	this->voxels = new VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(this->spatialSize, s->getVoxelSpatialSize(), this->angularSize);
 
 	double gridSize = s->getNeighbourListCellSize();
 	if (gridSize < this->params->thresholdDistance)
@@ -39,9 +39,9 @@ PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::PackingGenerator(int see
 
 
 	if(this->params->boundaryConditions.compare("free")==0)
-		this->surface = new NBoxFBC(SPATIAL_DIMENSION, this->params->surfaceSize, gridSize, s->getVoxelSize());
+		this->surface = new NBoxFBC(SPATIAL_DIMENSION, this->params->surfaceSize, gridSize, s->getVoxelSpatialSize());
 	else
-		this->surface = new NBoxPBC(SPATIAL_DIMENSION, this->params->surfaceSize, gridSize, s->getVoxelSize());
+		this->surface = new NBoxPBC(SPATIAL_DIMENSION, this->params->surfaceSize, gridSize, s->getVoxelSpatialSize());
 
 	delete s;
 }

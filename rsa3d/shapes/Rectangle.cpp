@@ -4,8 +4,6 @@
 
 #include "Rectangle.h"
 
-double Rectangle::neighbourListCellSize;
-double Rectangle::voxelSize;
 double Rectangle::longer;
 double Rectangle::shorter;
 
@@ -54,14 +52,6 @@ void Rectangle::setAngle(double angle) {
     ys[3] = point[1] + position[1];
 }
 
-double Rectangle::getVoxelSize() const {
-    return Rectangle::voxelSize;
-}
-
-double Rectangle::getNeighbourListCellSize() const {
-    return Rectangle::neighbourListCellSize;
-}
-
 void Rectangle::initClass(const std::string &args) {
     double ratio = std::stod(args);
     double s = sqrt(1.0 / ratio);
@@ -72,16 +62,13 @@ void Rectangle::initClass(const std::string &args) {
         Rectangle::longer = s;
         Rectangle::shorter = s * ratio;
     }
-    Rectangle::voxelSize = Rectangle::shorter / 2;
-    Rectangle::neighbourListCellSize = Rectangle::longer * 2;
+    Shape<2,1>::setVoxelSpatialSize(Rectangle::shorter / 2);
+    Shape<2,1>::setNeighbourListCellSize(Rectangle::longer * 2);
+    Shape<2,1>::setVoxelAngularSize(M_PI);
 }
 
 double Rectangle::getVolume() const {
     return 1;
-}
-
-double Rectangle::getVoxelAngularSize() const {
-    return M_PI;
 }
 
 // Shape::translate was made non-virtual and one should override Positioned::setPosition instead (see documentation)

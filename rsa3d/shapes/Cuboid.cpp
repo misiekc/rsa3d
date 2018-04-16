@@ -15,8 +15,6 @@
 //----------------------------------------------------------------------------
 
 double          Cuboid::size[3];
-double          Cuboid::neighbourListCellSize;
-double          Cuboid::voxelSize;
 double          Cuboid::minDimension;
 Vector<3>       Cuboid::relativeVertices[VERTEX::NUM_OF];
 
@@ -55,12 +53,12 @@ void Cuboid::initClass(const std::string &args)
 
     // Neighbour list cell size - diagonal length. It satisfies conditions at the least favourable case - Cuboids with
     // centers near opposite edges of a cell and with diagonals lying on the line connecting their centers
-    neighbourListCellSize = std::sqrt(size[0] * size[0] + size[1] * size[1] + size[2] * size[2]);
+    Shape<3,0>::setNeighbourListCellSize(std::sqrt(size[0] * size[0] + size[1] * size[1] + size[2] * size[2]));
 
     // Voxel size. It satisfies conditions at the least favourable case - center of Cuboid lies in the corner of a voxel
     // and voxel's diagonal is parallel to the smallest Cuboid edge
     minDimension = *std::min_element(size, size + 3) / 2;
-    voxelSize = minDimension / std::sqrt(3);
+    Shape<3,0>::setVoxelSpatialSize(minDimension / std::sqrt(3));
 
     calculateRelativeVerties();
 }
@@ -126,23 +124,6 @@ OverlapStrategy * Cuboid::getOverlapStrategy()
 void Cuboid::restoreDefaultStrategy() {
     setOverlapStrategy(defaultStrategy);
 }
-
-
-// Returns neighbour list cell size determined during class initialization
-//----------------------------------------------------------------------------
-double Cuboid::getNeighbourListCellSize() const
-{
-    return Cuboid::neighbourListCellSize;
-}
-
-
-// Returns initial voxel size determined during class initialization
-//----------------------------------------------------------------------------
-double Cuboid::getVoxelSize() const
-{
-    return Cuboid::voxelSize;
-}
-
 
 // Checks whether there is an overlap between this and *s using chosen
 // stategy

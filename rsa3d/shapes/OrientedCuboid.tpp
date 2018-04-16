@@ -10,16 +10,8 @@
 
 
 // bool OrientedCuboid::do2Drotation;
-
 template <unsigned short DIMENSION>
 double OrientedCuboid<DIMENSION>::size[DIMENSION];
-
-template <unsigned short DIMENSION>
-double OrientedCuboid<DIMENSION>::neighbourListCellSize;
-
-template <unsigned short DIMENSION>
-double OrientedCuboid<DIMENSION>::voxelSize;
-
 
 template <unsigned short DIMENSION>
 OrientedCuboid<DIMENSION>::OrientedCuboid() : Shape<DIMENSION, 0>(){
@@ -50,8 +42,8 @@ void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
     // Calculate static params
 //    volume = std::accumulate(size, size + staticDimension, 1.0, std::multiplies<double>());
  
-   	neighbourListCellSize = *std::max_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION);
-   	voxelSize = 0.5*(*std::min_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION));
+   	Shape<DIMENSION, 0>::setNeighbourListCellSize(*std::max_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION));
+   	Shape<DIMENSION, 0>::setVoxelSpatialSize(0.5*(*std::min_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION)));
 }
 
 
@@ -98,16 +90,6 @@ int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) c
 template <unsigned short DIMENSION>
 int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const{
 	return 0;
-}
-
-template <unsigned short DIMENSION>
-double OrientedCuboid<DIMENSION>::getNeighbourListCellSize() const{
-	return OrientedCuboid<DIMENSION>::neighbourListCellSize;
-}
-
-template <unsigned short DIMENSION>
-double OrientedCuboid<DIMENSION>::getVoxelSize() const{
-	return OrientedCuboid<DIMENSION>::voxelSize;
 }
 
 template <unsigned short DIMENSION>

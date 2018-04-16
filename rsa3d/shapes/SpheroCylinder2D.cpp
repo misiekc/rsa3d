@@ -9,8 +9,6 @@
 
 static const double EPSILON = 0.0000000001;
 
-double SpheroCylinder2D::voxelSize;
-double SpheroCylinder2D::neighbourListCellSize;
 double SpheroCylinder2D::radius;
 double SpheroCylinder2D::halfDistance;
 Vector<2> SpheroCylinder2D::centerVector;
@@ -23,25 +21,15 @@ void SpheroCylinder2D::initClass(const std::string &attr) {
     double normalization = std::sqrt(4 * (ratio - 1) + M_PI);
     radius = 1 / normalization;
     halfDistance = (ratio - 1) / normalization;
-    neighbourListCellSize = (halfDistance + radius) * 2;
-    voxelSize = radius / M_SQRT2;
+    Shape<2,1>::setNeighbourListCellSize((halfDistance + radius) * 2);
+    Shape<2,1>::setVoxelSpatialSize(radius / M_SQRT2);
+    Shape<2,1>::setVoxelAngularSize(M_PI);
+
     centerVector = Vector<2>{{halfDistance , 0}};
 }
 
 Shape<2, 1> * SpheroCylinder2D::create(RND * rnd) {
     return new SpheroCylinder2D();
-}
-
-double SpheroCylinder2D::getVoxelAngularSize() const {
-	return M_PI;
-}
-
-double SpheroCylinder2D::getNeighbourListCellSize() const {
-    return neighbourListCellSize;
-}
-
-double SpheroCylinder2D::getVoxelSize() const {
-    return voxelSize;
 }
 
 double SpheroCylinder2D::getVolume() const {

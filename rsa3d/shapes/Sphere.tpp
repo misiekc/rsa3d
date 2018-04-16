@@ -15,12 +15,6 @@ template <unsigned short DIMENSION>
 double Sphere<DIMENSION>::radius;
 
 template <unsigned short DIMENSION>
-double Sphere<DIMENSION>::neighbourListCellSize;
-
-template <unsigned short DIMENSION>
-double Sphere<DIMENSION>::voxelSize;
-
-template <unsigned short DIMENSION>
 Sphere<DIMENSION>::~Sphere() {
 }
 
@@ -49,8 +43,8 @@ double Sphere<DIMENSION>::volume() {
 template <unsigned short DIMENSION>
 void Sphere<DIMENSION>::initClass(const std::string &args){
 	Sphere<DIMENSION>::radius = pow(1.0/Sphere::volume(), 1.0/DIMENSION);
-	Sphere<DIMENSION>::neighbourListCellSize = 2.0*Sphere::radius;
-	Sphere<DIMENSION>::voxelSize = pow(1.96, 1.0/DIMENSION)*Sphere::radius;
+	Shape<DIMENSION, 0>::setNeighbourListCellSize(2.0*Sphere::radius);
+	Shape<DIMENSION, 0>::setVoxelSpatialSize(pow(2.0, 1.0/DIMENSION)*Sphere::radius);
 }
 
 template <unsigned short DIMENSION>
@@ -61,16 +55,6 @@ Shape<DIMENSION, 0> * Sphere<DIMENSION>::create(RND *rnd){
 template <unsigned short DIMENSION>
 Sphere<DIMENSION>::Sphere() : Shape<DIMENSION, 0>(){
 	this->r = Sphere<DIMENSION>::radius;
-}
-
-template <unsigned short DIMENSION>
-double Sphere<DIMENSION>::getNeighbourListCellSize() const {
-	return Sphere<DIMENSION>::neighbourListCellSize;
-}
-
-template <unsigned short DIMENSION>
-double Sphere<DIMENSION>::getVoxelSize() const {
-	return Sphere<DIMENSION>::voxelSize;
 }
 
 template <unsigned short DIMENSION>

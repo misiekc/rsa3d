@@ -11,8 +11,6 @@
 
 class SpheroCylinder2D : public AnisotropicShape2D {
 private:
-    static double voxelSize;
-    static double neighbourListCellSize;
     static double radius;
     static double halfDistance;
     static Vector<2> centerVector;
@@ -27,9 +25,6 @@ public:
     static void initClass(const std::string & attr);
     static Shape<2, 1> * create(RND * rnd);
 
-    double getVoxelAngularSize() const override;
-    double getNeighbourListCellSize() const override;
-    double getVoxelSize() const override;
     double getVolume() const override;
     int overlap(BoundaryConditions *bc, Shape<2, 1> *s) const override;
     int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const override;

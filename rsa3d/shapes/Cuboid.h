@@ -21,8 +21,6 @@ class Cuboid : public Shape<3,0>
 {
 private:
 	static double           size[3];
-	static double           neighbourListCellSize;
-	static double           voxelSize;
 	static double           minDimension;
 	static Vector<3>        relativeVertices[8];
 	static OverlapStrategy  *defaultStrategy;
@@ -69,8 +67,6 @@ public:
 	static void setOverlapStrategy(OverlapStrategy *strategy);
 	static OverlapStrategy * getOverlapStrategy();
 
-	double getNeighbourListCellSize() const override;
-	double getVoxelSize() const override;
 	int overlap(BoundaryConditions *bc, Shape<3,0> *s) const override;
 	double getVolume() const override;
 	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const override;

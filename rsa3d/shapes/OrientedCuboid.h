@@ -13,9 +13,6 @@ template <unsigned short DIMENSION>
 class OrientedCuboid : public Shape<DIMENSION, 0>{
 private:
 //	static bool do2Drotation;
-    static double           neighbourListCellSize;
-    static double           voxelSize;
-
     static double 			size[DIMENSION];
 
 public:
@@ -28,8 +25,6 @@ public:
     int overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const;
     int pointInside(BoundaryConditions *bc, double* da) const;
 	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const;
-    double getNeighbourListCellSize() const;
-    double getVoxelSize() const;
     double getVolume() const;
 
     std::string toPovray() const;

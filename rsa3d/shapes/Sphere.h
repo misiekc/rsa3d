@@ -18,8 +18,6 @@ class Sphere : public Shape<DIMENSION, 0>{
 
 private:
 	static double radius;
-	static double neighbourListCellSize;
-	static double voxelSize;
 
 	static constexpr double g20 = 1.0; // Gamma(2.0)
 	static constexpr double g15 = 0.5*sqrt(M_PI); // Gamma(1.5)
@@ -36,8 +34,6 @@ public:
 	static void initClass(const std::string &args);
 	static Shape<DIMENSION, 0> * create(RND *rnd);
 
-	double getNeighbourListCellSize() const;
-	double getVoxelSize() const;
 	int overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const;
 	double getVolume() const;
 	int pointInside(BoundaryConditions *bc, double* da) const;
