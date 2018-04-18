@@ -159,10 +159,14 @@ int simulate(Parameters *params) {
 	return 1;
 }
 
-void boundaries(Parameters *params) {
+
+/**
+ * @brief Creates packing until the total number of shapes (in all packings) does not exceed @a max
+ */
+void boundaries(Parameters *params, unsigned long max) {
 	PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *pg;
 	char buf[20];
-	unsigned long counter = 0UL, max = 200000000UL;
+	unsigned long counter = 0;;
 	int seed = 0;
 	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
 	std::string size(buf);
@@ -194,10 +198,17 @@ int main(int argc, char **argv) {
 
 	if (strcmp(argv[1], "simulate")==0) {
 		simulate(&params);
+	}else if (strcmp(argv[1], "test")==0) {
+		std::string filename(argv[3]);
+		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(filename);
+		PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *pg = new PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>(1, &params);
+		pg->testPacking(packing, atof(argv[4]));
+		delete pg;
+		delete packing;
 	} else if (strcmp(argv[1], "debug")==0){
 		debug(&params, argv[3]);
 	} else if (strcmp(argv[1], "boundaries")==0) {
-		boundaries(&params);
+		boundaries(&params, atof(argv[3]));
 	} else if (strcmp(argv[1], "analyze")==0) {
 		Analyzer an(&params);
 		an.analyzePackingsInDirectory(argv[3], 0.01, 1.0);

@@ -180,8 +180,99 @@ bool PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isInside(double *po
 
 }
 
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::testPacking(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *vShapes, double maxTime){
 
 #ifdef _OPENMP
+	int maxthreads = omp_get_max_threads();
+#else
+	int maxthreads = 1;
+#endif
+
+	int loop = 1000*maxthreads;
+
+	std::cout.precision(std::numeric_limits< double >::max_digits10);
+
+	std::cout << "[" << this->seed << " PackingGenerator::testPacking] using up to " << maxthreads << " concurrent treads" << std::endl;
+
+
+	RND rnd(this->seed);
+	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s = ShapeFactory::createShape(&rnd);
+	double dt = s->getVolume() / this->surface->getArea();
+	delete s;
+
+	for(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s : *vShapes){
+		this->surface->add(s);
+		this->packing.push_back(s);
+	}
+	std::cout << "[" << this->seed << " PackingGenerator::testPacking] " << vShapes->size() << " shapes restored" << std::endl;
+
+
+
+	double t = 0;
+
+	RND **aRND = new RND*[maxthreads];
+	for(int i=0; i<maxthreads; i++){
+		aRND[i] = new RND((int)(1000*rnd.nextValue()));
+	}
+
+	while (t<maxTime) {
+
+		std::cout << "\r" << "[" << this->seed << " PackingGenerator::testPacking] t=" << t/maxTime << " choosing " << loop << " shapes..." << std::flush;
+
+		#pragma omp parallel for
+		for(int i = 0; i<loop; i++){
+
+		#ifdef _OPENMP
+			int tid = omp_get_thread_num();
+		#else
+			int tid = 0;
+		#endif
+			Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *sVirtual = ShapeFactory::createShape(aRND[tid]);
+			Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v;
+			double pos[SPATIAL_DIMENSION];
+			std::array <double, ANGULAR_DIMENSION> angle;
+			do{
+				v = this->voxels->getRandomVoxel(aRND[tid]);
+				this->voxels->getRandomPositionAndOrientation(pos, angle.data(), v, aRND[tid]);
+			}while(!this->isInside(pos, angle.data()));
+			// setting shape position and orientation
+			sVirtual->translate(pos);
+			sVirtual->rotate(angle.data());
+			// checking if shape overlaps with any shape in the packing
+			if (this->surface->check(sVirtual)==NULL){
+				#pragma omp critical
+				std::cout << std::endl << "\t non overlapping shape found " << sVirtual->toString() << std::endl << std::flush;
+
+				double *position = sVirtual->getPosition();
+				const double *tmp = sVirtual->getOrientation();
+				double orientation[ANGULAR_DIMENSION];
+				std::copy(tmp, tmp + ANGULAR_DIMENSION, orientation);
+				double delta = 0.0001;
+				for(unsigned short j = 0; j< ANGULAR_DIMENSION; j++)
+					orientation[j] -= 0.5*delta;
+
+				#pragma omp critical
+				std::cout << "\t point inside: " << (sVirtual->pointInside(this->surface, position, orientation, delta)) << std::endl;
+			}
+		} // parallel for
+
+		t += dt * loop;
+	} // while
+
+	for(int i=0; i<maxthreads; i++){
+		delete aRND[i];
+	}
+	delete[] aRND;
+
+	std::cout << "[" << seed << " PackingGenerator::testPacking] finished after time " << t << std::endl;
+}
+
+
+
+
+#ifdef _OPENMP
+
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createPacking(){
 
