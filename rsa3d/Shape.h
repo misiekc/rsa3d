@@ -31,13 +31,16 @@
  * If @a ANGULAR_DIMENSION is zero, but a Shape is not isotropic, the method should also choose random orientation,
  * usually with isotropic distribution. All generated shapes must have a volume of 1 and be identical (disregarding
  * orientation).</li>
- * <li>a method for initializing parameters of generated shapes' from a string, if the class describes the whole family
- * of shapes of a specific kind, for example ellipses (they can have different axes ratio). Usual signature:
+ * <li>a method for initializing parameters of generated shapes' from a string, which is non-empty if the class
+ * describes the whole family of shapes of a specific kind, for example ellipses (they can have different axes ratio).
+ * Signature:
  * @code
  * void ()(std::string attr)
  * @endcode
  * The parameters are then stored in a global state and are used when generating shapes with a static method described
- * above.</li>
+ * earlier. Moreover, <strong>this method is obliged to invoke setNeighbourListCellSize(), setVoxelSpatialSize() and
+ * setVoxelAngularSize()</strong> with appropriate arguments every time it is called (after shape change or @a attr
+ * change).</li>
  * </ul>
  *
  * These methods will be then hard-coded in ShapeFactory, usually in such a way:
@@ -47,12 +50,13 @@
  *     ShapeFactory::createShape = SpecificShape::create; // store a pointer to generating method
  * }
  * @endcode
- * Other parts of a program, such as tests, can use it in a different way, but with respect to a contract to be
- * described next.
  *
  * <strong>CALLING INITIALIZATION METHOD IS THE FIRST THING TO DO BEFORE USING A CLASS.</strong>
  *
- * Derived classes are <strong>not required</strong> to handle <strong>shapes of sizes other than from a global
+ * <strong>Creating shapes using ShapeFactory is then the preferred way to create them</strong>. Derived classes do not
+ * have to provide public constuctors.
+ *
+ * Derived classes are <strong>not required</strong> to handle <strong>shapes of sizes other than from the global
  * state</strong>. All methods have unexpected behavior if initializing method has not been called before, however
  * <strong>one can change parameters</strong> in any moment by calling initialization method again. If this happens,
  * all previously generated shapes are considered stale and using them leads to an unexpected behaviour, however all new
@@ -107,8 +111,8 @@ protected:
     /**
      * @brief Sets initial size of a voxel.
      *
-     * Derived shape classes have to use this method to indicate the largest possible voxel size
-     * that is fully covered by the exclusion zone of the shape placed in it.
+     * Derived Shape classes have to use this method in the initialization method (see class description) to indicate
+     * the largest possible voxel size that is fully covered by the exclusion zone of the shape placed in it.
      * @param size size of a voxel
      */
     static void setVoxelSpatialSize(double size);
@@ -116,7 +120,8 @@ protected:
     /**
      * @brief Sets initial angular size of a voxel.
      *
-     * Derived shape classes have to use this method to indicate the range of angular variable [0, size). By default, the angular size is 2*M_PI
+     * Derived Shape classes have to use this method in the initialization method (see class description) to indicate
+     * the range of angular variable [0, size). By default, the angular size is 2*M_PI
      * @param size angular size of a voxel
      */
     static void setVoxelAngularSize(double size);
@@ -125,8 +130,9 @@ protected:
     /**
      * @brief Sets size of a cell in neighbour grid.
      *
-     * Derived shape classes have to use this method to indicate the linear size of the call in the neighbour grig.
-     * The size should be as small as possible, but shapes from not neighbouring cells must not overlap.
+     * Derived Shape classes have to use this method in the initialization method (see class description) to indicate
+     * the linear size of the call in them neighbour grid. The size should be as small as possible, but shapes from not
+     * neighbouring cells must not overlap.
      * @param size size of a cell in neighbour grid
      */
     static void setNeighbourListCellSize(double size);
@@ -157,7 +163,7 @@ public:
      * cells that are not neighbours.
      * @return linear size of a cell in a NeighbourGrid
      */
-	double getNeighbourListCellSize() const;
+	static double getNeighbourListCellSize();
 
     /**
      * @brief Returns initial linear size of a (cubic) voxel.
@@ -165,7 +171,7 @@ public:
      * This size should be as big as possible but shape with the center inside the voxel have to cover the whole voxel.
      * @return initial linear size of a (cubic) voxel
      */
-	double getVoxelSpatialSize() const;
+	static double getVoxelSpatialSize();
 
     /**
      * @brief Returns angular size of a voxel.
@@ -174,7 +180,7 @@ public:
      * (0, getVoxelAngularSize()) describes all possible shape's orientations.
      * @return angular size of a voxel
      */
-	double getVoxelAngularSize() const;
+	static double getVoxelAngularSize();
 
     /**
      * @brief Returns an array of all angles describing shape's orientation.
