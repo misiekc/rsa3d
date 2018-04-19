@@ -12,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <limits>
+#include <iomanip>
 
 
 #ifdef _OPENMP
@@ -218,7 +219,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::testPacking(std::ve
 
 	while (t<maxTime) {
 
-		std::cout << "\r" << "[" << this->seed << " PackingGenerator::testPacking] t=" << t/maxTime << " choosing " << loop << " shapes..." << std::flush;
+		std::cout << "\r" << "[" << this->seed << " PackingGenerator::testPacking] t=" << std::setprecision(4) << t/maxTime << " choosing " << loop << " shapes..." << std::flush;
 
 		#pragma omp parallel for
 		for(int i = 0; i<loop; i++){
@@ -241,9 +242,11 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::testPacking(std::ve
 			sVirtual->rotate(angle.data());
 			// checking if shape overlaps with any shape in the packing
 			if (this->surface->check(sVirtual)==NULL){
-				#pragma omp critical
-				std::cout << std::endl << "\t non overlapping shape found " << sVirtual->toString() << std::endl << std::flush;
-
+				#pragma omp critical(stdout)
+				{
+					std::cout << std::endl << "\t non overlapping shape found " << std::setprecision(10) << sVirtual->toString() << std::endl << std::flush;
+					std::cout << "\t povray: " << std::endl << std::setprecision(10) << sVirtual->toPovray() << std::endl << std::flush;
+				}
 				double *position = sVirtual->getPosition();
 				const double *tmp = sVirtual->getOrientation();
 				double orientation[ANGULAR_DIMENSION];
@@ -252,9 +255,10 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::testPacking(std::ve
 				for(unsigned short j = 0; j< ANGULAR_DIMENSION; j++)
 					orientation[j] -= 0.5*delta;
 
-				#pragma omp critical
+				#pragma omp critical(stdout)
 				std::cout << "\t point inside: " << (sVirtual->pointInside(this->surface, position, orientation, delta)) << std::endl;
 			}
+			delete sVirtual;
 		} // parallel for
 
 		t += dt * loop;
