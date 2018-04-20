@@ -249,8 +249,8 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::testPacking(std::ve
 				}
 				double *position = sVirtual->getPosition();
 				const double *tmp = sVirtual->getOrientation();
-				double orientation[ANGULAR_DIMENSION];
-				std::copy(tmp, tmp + ANGULAR_DIMENSION, orientation);
+				std::array<double, ANGULAR_DIMENSION> orientation;
+				std::copy(tmp, tmp + ANGULAR_DIMENSION, orientation.begin());
 				double delta = 0.0001;
 				for(unsigned short j = 0; j< ANGULAR_DIMENSION; j++)
 					orientation[j] -= 0.5*delta;
@@ -259,7 +259,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::testPacking(std::ve
 				std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> vNeighbours;
 				this->surface->getNeighbours(&vNeighbours, position);
 				for(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *sTmp : vNeighbours){
-					if (sTmp->pointInside(this->surface, position, orientation, delta)){
+					if (sTmp->pointInside(this->surface, position, orientation.data(), delta)){
 						sCovers = sTmp;
 						break;
 					}
