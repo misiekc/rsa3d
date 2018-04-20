@@ -8,13 +8,17 @@
 #include <iostream>
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelSpatialSize;
+double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelSpatialSize = 0;
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelAngularSize = 2*M_PI;
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::neighbourListCellSize;
+double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::neighbourListCellSize = 0;
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::create_shape_fun_ptr
+        Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createShapeImpl = nullptr;
 
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
@@ -46,6 +50,12 @@ double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelAngularSize() {
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getNeighbourListCellSize() {
 	return Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::neighbourListCellSize;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+const typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::create_shape_fun_ptr
+Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getCreateShapeImpl() {
+    return createShapeImpl;
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
@@ -155,4 +165,9 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::applyBC(BoundaryConditions *bc
     double translation[SPATIAL_DIMENSION];
     bc->getTranslation(translation, this->getPosition(), second->getPosition());
     second->translate(translation);
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setCreateShapeImpl(Shape *(*const fptr)(RND *)) {
+    createShapeImpl = fptr;
 }

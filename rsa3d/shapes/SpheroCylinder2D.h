@@ -16,6 +16,7 @@ private:
     static Vector<2> centerVector;
 
     static double pointDistance2(const Vector<2> &pos, double angle, const Vector<2> &point);
+    static Shape<2, 1> * create(RND * rnd);
 
     bool angleInRange(double angle, double rangeStart, double rangeEnd) const;
     double pointDistance2(const Vector<2> &p) const;
@@ -23,7 +24,6 @@ private:
 
 public:
     static void initClass(const std::string & attr);
-    static Shape<2, 1> * create(RND * rnd);
 
     double getVolume() const override;
     int overlap(BoundaryConditions *bc, Shape<2, 1> *s) const override;

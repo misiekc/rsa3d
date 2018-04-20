@@ -29,6 +29,8 @@ private:
     Matrix<3, 3>            orientation;
 
 	static void calculateRelativeVerties();
+    static Shape<3, 0> * create2D(RND *rnd);
+    static Shape<3, 0> * create3D(RND *rnd);
 
 public:
 
@@ -58,8 +60,6 @@ public:
     ~Cuboid() override = default;
 
 	static void initClass(const std::string &args);
-	static Shape<3, 0> * create2D(RND *rnd);
-	static Shape<3, 0> * create3D(RND *rnd);
 	static double * getSize(double * arr);
 	static const Vector<3> getRelativeVertex(std::size_t index);
 

@@ -24,37 +24,37 @@
  *
  * Derived classes should also provide:
  * <ul>
- * <li>a zero-argument static method generating this specific shape in the origin of coordinate system with signature:
+ * <li>a static method generating this specific shape in the origin of coordinate system with signature of
+ * create_shape_fun_ptr:
  * @code
- * Shape* ()()
+ * Shape* (*)(RND *rnd)
  * @endcode
- * If @a ANGULAR_DIMENSION is zero, but a Shape is not isotropic, the method should also choose random orientation,
- * usually with isotropic distribution. All generated shapes must have a volume of 1 and be identical (disregarding
- * orientation).</li>
+ * If @a ANGULAR_DIMENSION is zero, but a Shape is not isotropic, the method should also choose random orientation from
+ * supplied random number generator, usually with isotropic distribution. All generated shapes must have a volume of 1
+ * and be identical (disregarding orientation).</li>
  * <li>a method for initializing parameters of generated shapes' from a string, which is non-empty if the class
  * describes the whole family of shapes of a specific kind, for example ellipses (they can have different axes ratio).
  * Signature:
  * @code
- * void ()(std::string attr)
+ * void (*)(const std::string &attr)
  * @endcode
  * The parameters are then stored in a global state and are used when generating shapes with a static method described
- * earlier. Moreover, <strong>this method is obliged to invoke setNeighbourListCellSize(), setVoxelSpatialSize() and
- * setVoxelAngularSize()</strong> with appropriate arguments every time it is called (after shape change or @a attr
- * change).</li>
+ * earlier. Moreover, <strong>this method is obliged to invoke setNeighbourListCellSize(), setVoxelSpatialSize(),
+ * setVoxelAngularSize() and setCreateShapeImpl()</strong> with appropriate arguments every time it is called (after
+ * shape change or @a attr change).</li>
  * </ul>
  *
- * These methods will be then hard-coded in ShapeFactory, usually in such a way:
+ * Initialization method will be then hard-coded in ShapeFactory in such a way:
  * @code
  * if (shapeName == "SpecificShape") {
  *     SpecificShape::initClass(shapeAttributes); // use initialization method
- *     ShapeFactory::createShape = SpecificShape::create; // store a pointer to generating method
  * }
  * @endcode
  *
  * <strong>CALLING INITIALIZATION METHOD IS THE FIRST THING TO DO BEFORE USING A CLASS.</strong>
  *
  * <strong>Creating shapes using ShapeFactory is then the preferred way to create them</strong>. Derived classes do not
- * have to provide public constuctors.
+ * have to provide public constructors.
  *
  * Derived classes are <strong>not required</strong> to handle <strong>shapes of sizes other than from the global
  * state</strong>. All methods have unexpected behavior if initializing method has not been called before, however
@@ -69,12 +69,18 @@
  */
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 class Shape : public Positioned<SPATIAL_DIMENSION>{
+public:
+    /**
+     * @brief A pointer to function for creating shapes - taking RND pointer and returning Shape pointer
+     */
+    using create_shape_fun_ptr = Shape* (*)(RND *rnd);
 
 private:
 
     static double voxelSpatialSize;
     static double voxelAngularSize;
     static double neighbourListCellSize;
+    static create_shape_fun_ptr createShapeImpl;
 
     std::array<double, ANGULAR_DIMENSION> orientation;
 
@@ -126,7 +132,6 @@ protected:
      */
     static void setVoxelAngularSize(double size);
 
-
     /**
      * @brief Sets size of a cell in neighbour grid.
      *
@@ -136,6 +141,12 @@ protected:
      * @param size size of a cell in neighbour grid
      */
     static void setNeighbourListCellSize(double size);
+
+    /**
+     * @brief Sets a function which will be used to create new shapes.
+     * @param fptr a pointer to function with signature `Shape* (*)(RND *rnd)`
+     */
+    static void setCreateShapeImpl(create_shape_fun_ptr fptr);
 
 
 public:
@@ -151,7 +162,7 @@ public:
 	double time;
 
     /**
-     * @brief Constructs default-oriented shape in the origin of a coordinate system.
+     * @brief Constructs default-oriented shape in the origin of the coordinate system.
      */
     Shape();
 	virtual ~Shape() = default;
@@ -181,6 +192,12 @@ public:
      * @return angular size of a voxel
      */
 	static double getVoxelAngularSize();
+
+    /**
+     * @brief returns a pointer to function for creating shapes - taking RND pointer and returning Shape pointer.
+     * @return a pointer to function for creating shapes - taking RND pointer and returning Shape pointer
+     */
+    static const create_shape_fun_ptr getCreateShapeImpl();
 
     /**
      * @brief Returns an array of all angles describing shape's orientation.
@@ -302,7 +319,7 @@ public:
 	 * @param f stream to write serialized shape to
 	 * @throws std::runtime_error if dimensions are incompatible
 	 */
-	virtual void restore(std::istream &f);
+    virtual void restore(std::istream &f);
 };
 
 #include "Shape.tpp"

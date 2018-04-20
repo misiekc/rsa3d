@@ -60,6 +60,8 @@ void Cuboid::initClass(const std::string &args)
     minDimension = *std::min_element(size, size + 3) / 2;
     Shape<3,0>::setVoxelSpatialSize(minDimension / std::sqrt(3));
 
+    Shape<3,0>::setCreateShapeImpl(&create3D);
+
     calculateRelativeVerties();
 }
 

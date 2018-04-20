@@ -15,12 +15,13 @@ private:
 //	static bool do2Drotation;
     static double 			size[DIMENSION];
 
+	static Shape<DIMENSION, 0> * create(RND *rnd);
+
 public:
 	OrientedCuboid();
-	virtual ~OrientedCuboid();
 
+	virtual ~OrientedCuboid();
 	static void initClass(const std::string &args);
-	static Shape<DIMENSION, 0> * create(RND *rnd);
 
     int overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const;
     int pointInside(BoundaryConditions *bc, double* da) const;

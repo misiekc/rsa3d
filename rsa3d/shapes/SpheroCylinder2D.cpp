@@ -24,6 +24,7 @@ void SpheroCylinder2D::initClass(const std::string &attr) {
     Shape<2,1>::setNeighbourListCellSize((halfDistance + radius) * 2);
     Shape<2,1>::setVoxelSpatialSize(radius / M_SQRT2);
     Shape<2,1>::setVoxelAngularSize(M_PI);
+    Shape<2,1>::setCreateShapeImpl(&create);
 
     centerVector = Vector<2>{{halfDistance , 0}};
 }

@@ -44,6 +44,7 @@ void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
  
    	Shape<DIMENSION, 0>::setNeighbourListCellSize(*std::max_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION));
    	Shape<DIMENSION, 0>::setVoxelSpatialSize(0.5*(*std::min_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION)));
+	Shape<DIMENSION, 0>::setCreateShapeImpl(&create);
 }
 
 

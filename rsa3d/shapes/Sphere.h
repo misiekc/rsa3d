@@ -27,12 +27,13 @@ private:
 	static double gamma();
 	static double volume();
 
+	static Shape<DIMENSION, 0> * create(RND *rnd);
+
 public:
 	Sphere();
-	virtual ~Sphere();
 
+	virtual ~Sphere();
 	static void initClass(const std::string &args);
-	static Shape<DIMENSION, 0> * create(RND *rnd);
 
 	int overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const;
 	double getVolume() const;

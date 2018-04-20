@@ -21,17 +21,18 @@ private:
 	double a, b;
 	double u[2], uT[2];
 
+	static Shape<2, 1> * create(RND *rnd);
+
 	void calculateU();
 	double calculateF(double* r, double g) const;
 	bool pointInsideUnrotated(const Vector<2> &p, double angleFrom, double angleTo) const;
 	bool withinAngle(const Vector<2> &p, double angleFrom, double angleTo) const;
 	bool withinAngleCheckCollision(const Vector<2> &p, double lowerAngle, double upperAngle) const;
 	bool circleCollision(const Vector<2> &p, double tMin, double tMax) const;
-	int pointInsideSpecialArea(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) const;
 
+	int pointInsideSpecialArea(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) const;
 public:
 	static void initClass(const std::string &args);
-	static Shape<2, 1> * create(RND *rnd);
 
 	// Implicit copy c-tor and assignment
 	Ellipse();
