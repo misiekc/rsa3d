@@ -309,7 +309,7 @@ bool Rectangle::isInsideExcludingRectangle(double angleFrom, double angleTo, dou
     // if the point is outside rectangle, all work is done
     // std::abs takes an int as a parameter so, did you mean std::fabs?
     // it's math abs
-    if (abs(x - position[0]) <= newHalfA && abs(y - position[1]) <= newHalfB) {
+    if (std::fabs(x - position[0]) <= newHalfA && std::fabs(y - position[1]) <= newHalfB) {
         return 1;
     }
     return 0;
@@ -323,7 +323,7 @@ int Rectangle::isInsideCircle(const Vector<2, double> &point, double cx, double 
 }
 
 int Rectangle::isInsideRect(const Vector<2, double> &point, double cx, double cy, double aLength, double bLength) const {
-    if (abs(cx - point[0]) <= aLength / 2 && abs(cy - point[1]) <= bLength / 2) {
+    if (std::fabs(cx - point[0]) <= aLength / 2 && std::fabs(cy - point[1]) <= bLength / 2) {
         return 1;
     }
     return 0;
