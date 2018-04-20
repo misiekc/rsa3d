@@ -69,6 +69,7 @@ OBJS_COMMON = rsa3d/AnisotropicShape2D \
        rsa3d/shapes/cube_strategies/SATOverlap \
        rsa3d/shapes/cube_strategies/TriTriOverlap \
        rsa3d/shapes/polygons/Segment2D \
+       rsa3d/shapes/polygons/Polygon \
        rsa3d/shapes/Cuboid \
        rsa3d/shapes/Ellipse \
        rsa3d/shapes/Rectangle \
@@ -84,12 +85,13 @@ OBJS_MAIN = rsa3d/Main \
 OBJS_TEST = test/utility/BallFactory \
        		test/utility/BoxFactory \
        		test/utility/Quantity \
-       		test/AnisotropicShape2DExclusionTest \
        		test/AnisotropicShape2DExclusionDrawer \
+       		test/AnisotropicShape2DExclusionTest \
        		test/CuboidIntTest \
        		test/CuboidPointInsideTest \
        		test/CuboidSpeedTest \
        		test/Main \
+       		test/RectangleCase \
        		test/VectorSpeedTest
 
 # Source files list (withous extensions) for statistics lib

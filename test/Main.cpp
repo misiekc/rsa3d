@@ -11,8 +11,11 @@
 #include "VectorSpeedTest.h"
 #include "AnisotropicShape2DExclusionDrawer.h"
 
+#include "RectangleCase.h"
+
 
 int main(int argc, char **argv) {
+
     if (argc < 2)
         die("No mode param. Aborting.");
 
@@ -29,6 +32,8 @@ int main(int argc, char **argv) {
         return vec_speedtest::main(argc, argv);
     else if (mode == "as2d_exdrawer")
         return as2d_exdrawer::main(argc, argv);
+    else if (mode == "rectangle_case")
+    	return rectanglecase::main(argc, argv);
 
     std::cerr << "Unknown test mode: " << mode << std::endl;
     return EXIT_FAILURE;
