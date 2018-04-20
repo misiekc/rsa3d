@@ -255,8 +255,18 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::testPacking(std::ve
 				for(unsigned short j = 0; j< ANGULAR_DIMENSION; j++)
 					orientation[j] -= 0.5*delta;
 
+				Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *sCovers = NULL;
+				std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> vNeighbours;
+				this->surface->getNeighbours(&vNeighbours, position);
+				for(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *sTmp : vNeighbours){
+					if (sTmp->pointInside(this->surface, position, orientation, delta)){
+						sCovers = sTmp;
+						break;
+					}
+				}
+				if (sCovers!=NULL)
 				#pragma omp critical(stdout)
-				std::cout << "\t point inside: " << (sVirtual->pointInside(this->surface, position, orientation, delta)) << std::endl;
+				std::cout << "\t in exclusion zone of " << sCovers->toString() << std::endl;
 			}
 			delete sVirtual;
 		} // parallel for

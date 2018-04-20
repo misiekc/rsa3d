@@ -292,7 +292,9 @@ bool Rectangle::isInsideExcludingRectangle(double angleFrom, double angleTo, dou
     Vector<2> newSizeFrom = Vector<2>();
     Vector<2> newSizeTo = Vector<2>();
 
-    Rectangle rec(*this);
+    Rectangle rec = Rectangle();
+    rec.translate(this->getPosition());
+
     const double *position = this->getPosition();
     const double *recPosition = rec.getPosition();
     rec.setAngle(angleFrom);
