@@ -23,9 +23,10 @@ public:
 	virtual ~OrientedCuboid();
 	static void initClass(const std::string &args);
 
-    int overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const;
-    int pointInside(BoundaryConditions *bc, double* da) const;
-	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const;
+    int overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const override;
+    int pointInside(BoundaryConditions *bc, double* da) const override;
+	int pointInside(BoundaryConditions *bc, double* position, const std::array<double, 0> &orientation,
+					double orientationRange) const override;
     double getVolume() const;
 
     std::string toPovray() const;

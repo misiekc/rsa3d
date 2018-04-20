@@ -257,7 +257,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::testPacking(std::ve
 				std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> vNeighbours;
 				this->surface->getNeighbours(&vNeighbours, position);
 				for(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *sTmp : vNeighbours){
-					if (sTmp->pointInside(this->surface, position, orientation.data(), delta)){
+					if (sTmp->pointInside(this->surface, position, orientation, delta)){
 						sCovers = sTmp;
 						break;
 					}

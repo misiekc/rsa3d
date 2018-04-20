@@ -347,7 +347,7 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsideExclusionZone
 		for(ushort j=0; j<SPATIAL_DIMENSION; j++){
 			position[j] = vpos[j] + this->offset[i][j]*spatialSize;
 		}
-		if(!s->pointInside(bc, position, v->getOrientation().data(), angularSize)){
+		if(!s->pointInside(bc, position, v->getOrientation(), angularSize)){
 			isInside = false;
 			break;
 		}

@@ -239,7 +239,8 @@ public:
      * @param orientationRange array of lengths of angle intervals
      * @return 0 if point is outside, nonzero number otherwise
      */
-	virtual int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const = 0;
+	virtual int pointInside(BoundaryConditions *bc, double* position,
+                            const std::array<double, ANGULAR_DIMENSION> &orientation, double orientationRange) const = 0;
 
     /**
      * @brief Checks if a virtual particle of the same size is within excluded volume for any orientation of it.

@@ -157,7 +157,8 @@ double Cuboid::getVolume() const
 // Checks whether the point with coordinates da lies inside excluded volume.
 // It is an interior of a set of point which distanse from
 //----------------------------------------------------------------------------
-int Cuboid::pointInside(BoundaryConditions *bc, double* pos, double *orientation, double orientationRange) const
+int Cuboid::pointInside(BoundaryConditions *bc, double* pos, const std::array<double, 0> &orientation,
+                        double orientationRange) const
 {
     Vector<3> cuboidTranslation(this->getPosition());
     Vector<3> pointTranslation(pos);

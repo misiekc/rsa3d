@@ -90,7 +90,9 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::rotate(double* v){
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 int Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions *bc, double *position) const{
-	return this->pointInside(bc, position, 0, 2*M_PI);
+    std::array<double, ANGULAR_DIMENSION> zeroAngle;
+    zeroAngle.fill(0);
+	return this->pointInside(bc, position, zeroAngle, 2*M_PI);
 }
 
 

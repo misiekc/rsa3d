@@ -81,7 +81,8 @@ public:
      * @brief Delegated to AnisotropicShape2D::pointInside(BoundaryConditions*,double*,double,double). <strong>Implement
      * that instead.</strong>
      */
-    int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const final;
+    int pointInside(BoundaryConditions *bc, double* position, const std::array<double, 1> &orientation,
+                    double orientationRange) const final;
 
     /**
      * @brief Returns the orientation of a shape.

@@ -87,7 +87,8 @@ int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) const {
 }
 
 template <unsigned short DIMENSION>
-int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const {
+int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, const std::array<double, 0> &orientation,
+								   double orientationRange) const {
     return this->pointInside(bc, position);
 }
 

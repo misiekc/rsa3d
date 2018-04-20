@@ -69,7 +69,8 @@ public:
 
 	int overlap(BoundaryConditions *bc, Shape<3,0> *s) const override;
 	double getVolume() const override;
-	int pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const override;
+	int pointInside(BoundaryConditions *bc, double* position, const std::array<double, 0> &orientation,
+                    double orientationRange) const override;
 	std::string toPovray() const override;
 	std::string toWolfram() const override;
 	void store(std::ostream &f) const override;

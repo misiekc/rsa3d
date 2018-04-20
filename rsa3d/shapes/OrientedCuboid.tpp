@@ -89,7 +89,8 @@ int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) c
 }
 
 template <unsigned short DIMENSION>
-int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, double *orientation, double orientationRange) const{
+int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* position,
+										   const std::array<double, 0> &orientation, double orientationRange) const{
 	return 0;
 }
 
