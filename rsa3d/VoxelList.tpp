@@ -135,7 +135,7 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::initVoxels(){
 			std::cout << "VoxelList::initVoxels: Problem: " << index << " != " << i << std::endl;
 		}
 
-		this->voxels[index] = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(position, orientation.data());
+		this->voxels[index] = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(position, orientation);
 		this->voxels[index]->index = index;
 		this->activeTopLevelVoxels[index] = true;
 		index++;
@@ -265,7 +265,7 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::checkTopLevelVoxels(){
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxel(double *pos, const double *angle){
+Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxel(double *pos, const std::array<double, ANGULAR_DIMENSION> &angle){
 	std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *vTmp = this->voxelNeighbourGrid->getCell(pos);
 	for(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v : *vTmp){
 		if (v->isInside(pos, this->voxelSize, angle, this->angularVoxelSize)){
@@ -293,11 +293,10 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxel(Voxel<SPATIAL_D
 		position[j] = vpos[j];
 	}
 
-	double *vangle = v->getOrientation();
-	for(ushort j=0; j < ANGULAR_DIMENSION; j++){
+	std::array<double, ANGULAR_DIMENSION> vangle = v->getOrientation();
+    orientation = vangle;
+	for(ushort j=0; j < ANGULAR_DIMENSION; j++)
 		inangle[j] = 0;
-		orientation[j] = vangle[j];
-	}
 
 	for(unsigned short i=0; i<spatialLoop; i++){
 		for(unsigned short j=0; j < SPATIAL_DIMENSION; j++){
@@ -310,7 +309,7 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxel(Voxel<SPATIAL_D
 			for(unsigned short k=0; k<ANGULAR_DIMENSION; k++){
 				orientation[k] = vangle[k] + inangle[k]*angularSize;
 			}
-			vRes[i*angularLoop + j] = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(position, orientation.data());
+			vRes[i*angularLoop + j] = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(position, orientation);
 			increment(inangle.data(), ANGULAR_DIMENSION, (unsigned char)1);
 		} // for j
 		increment(inpos, SPATIAL_DIMENSION, (unsigned char)1);
@@ -320,7 +319,7 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxel(Voxel<SPATIAL_D
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsidePacking(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v){
 	double* vpos = v->getPosition();
-	double *vangle = v->getOrientation();
+	std::array<double, ANGULAR_DIMENSION> vangle = v->getOrientation();
 	for(unsigned short i=0; i < SPATIAL_DIMENSION; i++){
 		if (vpos[i] >= this->size){
 			return false;
@@ -348,7 +347,7 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsideExclusionZone
 		for(ushort j=0; j<SPATIAL_DIMENSION; j++){
 			position[j] = vpos[j] + this->offset[i][j]*spatialSize;
 		}
-		if(!s->pointInside(bc, position, v->getOrientation(), angularSize)){
+		if(!s->pointInside(bc, position, v->getOrientation().data(), angularSize)){
 			isInside = false;
 			break;
 		}
@@ -602,7 +601,7 @@ Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * VoxelList<SPATIAL_DIMENSION, ANGUL
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getRandomPositionAndOrientation(double *position, double *orientation, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, RND *rnd){
 	double *vpos = v->getPosition();
-	double *vangle = v->getOrientation();
+	std::array<double, ANGULAR_DIMENSION> vangle = v->getOrientation();
 
 	for (ushort i=0; i < SPATIAL_DIMENSION; i++)
 		position[i] = vpos[i] + rnd->nextValue(this->spatialDistribution);

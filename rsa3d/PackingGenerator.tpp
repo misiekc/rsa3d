@@ -248,9 +248,7 @@ void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::testPacking(std::ve
 					std::cout << "\t povray: " << std::endl << std::setprecision(10) << sVirtual->toPovray() << std::endl << std::flush;
 				}
 				double *position = sVirtual->getPosition();
-				const double *tmp = sVirtual->getOrientation();
-				std::array<double, ANGULAR_DIMENSION> orientation;
-				std::copy(tmp, tmp + ANGULAR_DIMENSION, orientation.begin());
+				std::array<double, ANGULAR_DIMENSION> orientation = sVirtual->getOrientation();
 				double delta = 0.0001;
 				for(unsigned short j = 0; j< ANGULAR_DIMENSION; j++)
 					orientation[j] -= 0.5*delta;

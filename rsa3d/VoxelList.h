@@ -111,7 +111,7 @@ public:
 
 	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *getRandomVoxel(RND *rnd);
 	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *getVoxel(int i);
-	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * getVoxel(double* pos, const double *angle);
+	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * getVoxel(double* pos, const std::array<double, ANGULAR_DIMENSION> &angle);
 	void getRandomPositionAndOrientation(double *position, double *orientation, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, RND *rnd);
 	double getVoxelSize();
 	double getVoxelAngularSize();

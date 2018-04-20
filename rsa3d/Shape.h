@@ -203,7 +203,7 @@ public:
      * @brief Returns an array of all angles describing shape's orientation.
      * @return array describing shape's orietation
      */
-    const double * getOrientation() const;
+    std::array<double, ANGULAR_DIMENSION> getOrientation() const;
 
     /**
      * @brief Increases all shape's angles by respective values from array @a v.
