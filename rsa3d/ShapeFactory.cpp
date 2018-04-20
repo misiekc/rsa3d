@@ -37,10 +37,9 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             } else if (sClass == "Ellipse") {
                 Ellipse::initClass(attr);
                 return;
- //           } else if (sClass == "Rectangle") {
- //               Rectangle::initClass(attr);
- //               ShapeFactory::createShape = Rectangle::create;
- //               return;
+            } else if (sClass == "Rectangle") {
+                Rectangle::initClass(attr);
+                return;
             }
         #endif
 
