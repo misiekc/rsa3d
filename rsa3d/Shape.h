@@ -40,8 +40,8 @@
  * @endcode
  * The parameters are then stored in a global state and are used when generating shapes with a static method described
  * earlier. Moreover, <strong>this method is obliged to invoke setNeighbourListCellSize(), setVoxelSpatialSize(),
- * setVoxelAngularSize() and setCreateShapeImpl()</strong> with appropriate arguments every time it is called (after
- * shape change or @a attr change).</li>
+ * setVoxelAngularSize() and setCreateShapeImpl() (or setDefaultCreateShapeImpl())</strong> with appropriate arguments
+ * every time it is called (after shape change or @a attr change).</li>
  * </ul>
  *
  * Initialization method will be then hard-coded in ShapeFactory in such a way:
@@ -144,9 +144,19 @@ protected:
 
     /**
      * @brief Sets a function which will be used to create new shapes.
+     *
+     * If a function simply returns dynamically allocated default-constructed shape, setDefaultCreateShapeImpl() can be
+     * used.
      * @param fptr a pointer to function with signature `Shape* (*)(RND *rnd)`
      */
     static void setCreateShapeImpl(create_shape_fun_ptr fptr);
+
+    /**
+     * @brief Sets a function which will be used to create new shapes using default constructor.
+     * @tparam SPECIFIC_SHAPE derived Shape class to instantiate
+     */
+    template<typename SPECIFIC_SHAPE>
+    static void setDefaultCreateShapeImpl();
 
 
 public:

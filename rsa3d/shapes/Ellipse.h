@@ -21,8 +21,6 @@ private:
 	double a, b;
 	double u[2], uT[2];
 
-	static Shape<2, 1> * create(RND *rnd);
-
 	void calculateU();
 	double calculateF(double* r, double g) const;
 	bool pointInsideUnrotated(const Vector<2> &p, double angleFrom, double angleTo) const;

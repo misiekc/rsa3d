@@ -44,27 +44,10 @@ void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
  
    	Shape<DIMENSION, 0>::setNeighbourListCellSize(*std::max_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION));
    	Shape<DIMENSION, 0>::setVoxelSpatialSize(0.5*(*std::min_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION)));
-	Shape<DIMENSION, 0>::setCreateShapeImpl(&create);
-}
-
-
-template <unsigned short DIMENSION>
-Shape<DIMENSION, 0> * OrientedCuboid<DIMENSION>::create(RND *rnd){
-	OrientedCuboid<DIMENSION> *cuboid;
-//	if (OrientedCuboid::do2Drotation)
-//	    cuboid = new OrientedCuboid(Matrix<3, 3>::rotation(
-//	        0,
-//	        std::asin(rnd->nextValue() * 2 - 1),
-//	        rnd->nextValue() * 2 * M_PI));
-//	else
-    	cuboid = new OrientedCuboid<DIMENSION>();
-
-#ifdef CUBOID_DEBUG
-    std::cout << "Creating OrientedCuboid:" << std::endl;
-    std::cout << cuboid->orientation;
-#endif
-
-    return cuboid;
+//	Shape<DIMENSION, 0>::setCreateShapeImpl([](RND *rnd) -> Shape<DIMENSION, 0>* {
+//		return new OrientedCuboid<DIMENSION>;
+//	});
+	Shape<DIMENSION, 0>::template setDefaultCreateShapeImpl <OrientedCuboid<DIMENSION>> ();
 }
 
 template <unsigned short DIMENSION>

@@ -20,28 +20,28 @@ private:
 
 public:
 	/**
-	 * index of the voxel in array used by VoxelList - used for faster removing from the array
+	 * @brief index of the voxel in array used by VoxelList - used for faster removing from the array
 	 */
 	int index;
 
 	/**
-	 * number of particle in the packing where voxel was checked if it is inside an exclusion zone - used for faster checking in the future
+	 * @brief number of particle in the packing where voxel was checked if it is inside an exclusion zone - used for faster checking in the future
 	 */
 	int lastAnalyzed;
 
 	/**
-	 * depth level at which the voxel was checked if it is inside an exclusion zone
+	 * @brief depth level at which the voxel was checked if it is inside an exclusion zone
 	 */
 	unsigned short depth;
 
 
 	/**
-	 * creates an empty voxel. It position and orientation is not initialized and other attributes are set to 0
+	 * @brief creates an empty voxel. It position and orientation is not initialized and other attributes are set to 0
 	 */
 	Voxel();
 
 	/**
-	 * creates a voxel of a given position and orientation
+	 * @brief creates a voxel of a given position and orientation
 	 */
 	Voxel(double* pos, const std::array<double, ANGULAR_DIMENSION> &angle);
 

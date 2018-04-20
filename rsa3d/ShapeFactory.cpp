@@ -44,7 +44,7 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             }
         #endif
 
-    #elif RSA_SPATIAL_DIMENSION == 3
+    #elif RSA_SPATIAL_DIMENSION == 3 && RSA_ANGULAR_DIMENSION == 0
         if (sClass == "Cuboid") {
             Cuboid::initClass(attr);
             return;
@@ -56,6 +56,7 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
 }
 
 RSAShape *ShapeFactory::createShape(RND *rnd) {
+    // Fetch appropriate function from Shape
     auto createShapeImpl = RSAShape::getCreateShapeImpl();
     return createShapeImpl(rnd);
 }

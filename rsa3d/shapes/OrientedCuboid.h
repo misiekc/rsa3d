@@ -15,8 +15,6 @@ private:
 //	static bool do2Drotation;
     static double 			size[DIMENSION];
 
-	static Shape<DIMENSION, 0> * create(RND *rnd);
-
 public:
 	OrientedCuboid();
 

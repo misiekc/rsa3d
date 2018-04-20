@@ -27,8 +27,6 @@ private:
 	static double gamma();
 	static double volume();
 
-	static Shape<DIMENSION, 0> * create(RND *rnd);
-
 public:
 	Sphere();
 

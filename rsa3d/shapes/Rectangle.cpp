@@ -7,10 +7,6 @@
 double Rectangle::longer;
 double Rectangle::shorter;
 
-Shape<2, 1> *Rectangle::create(RND *rnd) {
-    return new Rectangle();
-}
-
 Rectangle::Rectangle() : AnisotropicShape2D() {
     this->a = Rectangle::longer;
     this->b = Rectangle::shorter;
@@ -65,7 +61,7 @@ void Rectangle::initClass(const std::string &args) {
     Shape<2,1>::setVoxelSpatialSize(Rectangle::shorter / 2);
     Shape<2,1>::setNeighbourListCellSize(Rectangle::longer * 2);
     Shape<2,1>::setVoxelAngularSize(M_PI);
-    Shape<2,1>::setCreateShapeImpl(&create);
+    Shape<2,1>::setDefaultCreateShapeImpl <Rectangle> ();
 }
 
 double Rectangle::getVolume() const {

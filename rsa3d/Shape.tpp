@@ -173,3 +173,11 @@ template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setCreateShapeImpl(Shape *(*const fptr)(RND *)) {
     createShapeImpl = fptr;
 }
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+template<typename SPECIFIC_SHAPE>
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setDefaultCreateShapeImpl() {
+    createShapeImpl = [](RND *rnd) {
+        return static_cast<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *>(new SPECIFIC_SHAPE());
+    };
+}

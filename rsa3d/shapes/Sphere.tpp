@@ -45,12 +45,10 @@ void Sphere<DIMENSION>::initClass(const std::string &args){
 	Sphere<DIMENSION>::radius = pow(1.0/Sphere::volume(), 1.0/DIMENSION);
 	Shape<DIMENSION, 0>::setNeighbourListCellSize(2.0*Sphere::radius);
 	Shape<DIMENSION, 0>::setVoxelSpatialSize(pow(2.0, 1.0/DIMENSION)*Sphere::radius);
-	Shape<DIMENSION, 0>::setCreateShapeImpl(&create);
-}
-
-template <unsigned short DIMENSION>
-Shape<DIMENSION, 0> * Sphere<DIMENSION>::create(RND *rnd){
-	return new Sphere<DIMENSION>();
+//	Shape<DIMENSION, 0>::setCreateShapeImpl([](RND *rnd) -> Shape<DIMENSION, 0> {
+//        return new Sphere<DIMENSION, 0>;
+//    });
+    Shape<DIMENSION, 0>::template setDefaultCreateShapeImpl <Sphere<DIMENSION>> ();
 }
 
 template <unsigned short DIMENSION>

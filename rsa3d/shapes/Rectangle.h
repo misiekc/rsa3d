@@ -45,7 +45,6 @@ private:
     void setAngle(double angle) override;
 
     bool isIntersection(double p0_x, double p0_y, double p1_x, double p1_y, double p2_x, double p2_y, double p3_x, double p3_y) const;
-    static Shape<2, 1> * create(RND *rnd);
 
 protected:
     void setPosition(const double *position) override;

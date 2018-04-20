@@ -33,11 +33,7 @@ void Ellipse::initClass(const std::string &args){
 	Shape<2,1>::setNeighbourListCellSize(2*longSemiAxis);
 	Shape<2,1>::setVoxelSpatialSize(1.4*shortSemiAxis);
 	Shape<2,1>::setVoxelAngularSize(M_PI);
-	Shape<2,1>::setCreateShapeImpl(&create);
-}
-
-Shape<2, 1> * Ellipse::create(RND *rnd){
-	return new Ellipse();
+	Shape<2,1>::setDefaultCreateShapeImpl <Ellipse> ();
 }
 
 double Ellipse::calculateF(double* r, double g) const {
