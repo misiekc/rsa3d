@@ -19,32 +19,27 @@ void PlatonicSolid<SpecificSolid>::initClass(const std::string &attr) {
 }
 
 template<typename SpecificSolid>
+template<size_t SIZE>
+std::array<Vector<3>, SIZE> PlatonicSolid<SpecificSolid>::applyOrientation(const std::array<Vector<3>, SIZE> &axes) const {
+    std::array<Vector<3>, SIZE> result;
+    std::transform(axes.begin(), axes.end(), result.begin(), [this](const Vector<3> &axis) {
+        return this->orientation * axis;
+    });
+    return result;
+}
+
+template<typename SpecificSolid>
 int PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions *bc, Shape<3, 0> *s) const {
-
-    // Calculate edge and face axes for current positions. Use std::array with appropriate size dictated by CRTP
-    // SpecificSolid
-    // TODO maybe store rotated axes in SpecificSolid instances?
-    using face_array = decltype(SpecificSolid::faceAxes);
-    using edge_array = decltype(SpecificSolid::edgeAxes);
-    face_array thisFaceAxes, otherFaceAxes;
-    edge_array thisEdgeAxes, otherEdgeAxes;
-
-    auto this_rotater = [this](const Vector<3> &edge) {
-        return this->orientation * edge;
-    };
-
     auto other = dynamic_cast<PlatonicSolid<SpecificSolid>*>(s);
-    auto other_rotater = [other](const Vector<3> &edge) {
-        return other->orientation * edge;
-    };
 
-    std::transform(SpecificSolid::faceAxes.begin(), SpecificSolid::faceAxes.end(), thisFaceAxes.begin(), this_rotater);
-    std::transform(SpecificSolid::faceAxes.begin(), SpecificSolid::faceAxes.end(), thisEdgeAxes.begin(), this_rotater);
-    std::transform(SpecificSolid::edgeAxes.begin(), SpecificSolid::edgeAxes.end(), otherFaceAxes.begin(), other_rotater);
-    std::transform(SpecificSolid::edgeAxes.begin(), SpecificSolid::edgeAxes.end(), otherEdgeAxes.begin(), other_rotater);
+    // TODO maybe store rotated axes in SpecificSolid instances?
+    auto thisFaceAxes = this->applyOrientation(SpecificSolid::faceAxes);
+    auto thisEdgeAxes = this->applyOrientation(SpecificSolid::edgeAxes);
+    auto otherFaceAxes = other->applyOrientation(SpecificSolid::faceAxes);
+    auto otherEdgeAxes = other->applyOrientation(SpecificSolid::edgeAxes);
 
+    Vector<3> distance = Vector<3>(other->getPosition()) - Vector<3>(this->getPosition());
     auto thisSpecific = static_cast<const SpecificSolid *>(this);
-    Vector<3> distance = Vector<3>(s->getPosition()) - Vector<3>(this->getPosition());
     // Face axes for this
     for (const auto &face : thisFaceAxes)
         if (thisSpecific->isSeparatingAxis(face, *other, distance))
@@ -69,6 +64,16 @@ int PlatonicSolid<SpecificSolid>::pointInside(BoundaryConditions *bc, double *po
     Vector<3> vPointPos(position);
 
     return (vPointPos - vThisPos).norm2() <= SpecificSolid::insphereRadius;
+}
+
+template<typename SpecificSolid>
+bool PlatonicSolid<SpecificSolid>::isSeparatingAxis(const Vector<3> &axis, const PlatonicSolid &other,
+                                                    const Vector<3> &distance) const {
+    auto &thisSpecific = static_cast<const SpecificSolid&>(*this);
+    auto &otherSpecific = static_cast<const SpecificSolid&>(other);
+
+    double distanceProj = std::abs(distance * axis);
+    return distanceProj > thisSpecific.projectionHalfsize(axis) + otherSpecific.projectionHalfsize(axis);
 }
 
 template<typename SpecificSolid>
@@ -98,14 +103,4 @@ void PlatonicSolid<SpecificSolid>::restore(std::istream &f) {
 template<typename SpecificSolid>
 const Matrix<3, 3> &PlatonicSolid<SpecificSolid>::getOrientationMatrix() const {
     return orientation;
-}
-
-template<typename SpecificSolid>
-bool PlatonicSolid<SpecificSolid>::isSeparatingAxis(const Vector<3> &axis, const PlatonicSolid &other,
-                                                    const Vector<3> &distance) const {
-    auto &thisSpecific = static_cast<const SpecificSolid&>(*this);
-    auto &otherSpecific = static_cast<const SpecificSolid&>(other);
-
-    double distanceProj = std::abs(distance * axis);
-    return distanceProj > thisSpecific.projectionHalfsize(axis) + otherSpecific.projectionHalfsize(axis);
 }

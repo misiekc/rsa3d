@@ -18,6 +18,9 @@ private:
 protected:
     explicit PlatonicSolid(const Matrix<3, 3> &orientation) : orientation(orientation) {}
 
+    template <std::size_t SIZE>
+    std::array<Vector<3>, SIZE> applyOrientation(const std::array<Vector<3>, SIZE> &axes) const;
+
     bool isSeparatingAxis(const Vector<3> &axis, const PlatonicSolid &other, const Vector<3> &distance) const;
 
 public:
