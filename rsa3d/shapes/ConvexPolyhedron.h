@@ -4,6 +4,8 @@
 // (C)PKua 2017
 //----------------------------------------------------------------------------
 
+static_assert(false, "ConvexPolyhedron class is currently abandoned. Exclude it from compilation.");
+
 #ifndef _CONVEX_POLYHEDRON_H
     #define _CONVEX_POLYHEDRON_H
 
