@@ -14,6 +14,8 @@ private:
 
     constexpr static double exsphereRadius = 0;
     constexpr static double insphereRadius = 0;
+    static std::array<Vector<3>, 10> faceAxes;
+    static std::array<Vector<3>, 15> edgeAxes;
 
     static void calculateStatic(const std::string &attr) {
 
@@ -21,6 +23,10 @@ private:
 
 public:
     explicit RegularIcosahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularIcosahedron>{orientation} {}
+
+    double projectionHalfsize(const Vector<3> &axis) const {
+        return 0;
+    }
 };
 
 

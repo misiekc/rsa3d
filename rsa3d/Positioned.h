@@ -21,6 +21,8 @@
  */
 template <unsigned short SPATIAL_DIMENSION>
 class Positioned {
+	static_assert(SPATIAL_DIMENSION > 0, "SPATIAL_DIMENTION == 0");
+
 private:
     std::array<double, SPATIAL_DIMENSION> position;
 

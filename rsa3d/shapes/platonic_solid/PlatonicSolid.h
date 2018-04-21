@@ -18,7 +18,7 @@ private:
 protected:
     explicit PlatonicSolid(const Matrix<3, 3> &orientation) : orientation(orientation) {}
 
-    bool isSeparatingAxis(const Vector<3> &axis, const PlatonicSolid &other, const Vector<3> &distance);
+    bool isSeparatingAxis(const Vector<3> &axis, const PlatonicSolid &other, const Vector<3> &distance) const;
 
 public:
     static void initClass(const std::string &attr);

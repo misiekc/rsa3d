@@ -20,22 +20,46 @@ void PlatonicSolid<SpecificSolid>::initClass(const std::string &attr) {
 
 template<typename SpecificSolid>
 int PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions *bc, Shape<3, 0> *s) const {
-    /*auto *other = dynamic_cast<PlatonicSolid<SpecificSolid>*>(s);
-    Vector<3> distance = vOtherPos - vThisPos;
 
-    // Calculate edge Use std::array with appropriate size dictated by CRTP SpecificSolid
-    using edge_array = decltype(SpecificSolid::edges);
-    edge_array thisAxes, otherAxes;
-    std::transform(SpecificSolid::edges.begin(), SpecificSolid::edges.end(), thisAxes,
-                   [this](const Vector<3> &edge) {
-                       return this->orientation * edge;
-                   });
-    std::transform(SpecificSolid::edges.begin(), SpecificSolid::edges.end(), otherAxes,
-                   [other](const Vector<3> &edge) {
-                       return other->orientation * edge;
-                   });*/
+    // Calculate edge and face axes for current positions. Use std::array with appropriate size dictated by CRTP
+    // SpecificSolid
+    // TODO maybe store rotated axes in SpecificSolid instances?
+    using face_array = decltype(SpecificSolid::faceAxes);
+    using edge_array = decltype(SpecificSolid::edgeAxes);
+    face_array thisFaceAxes, otherFaceAxes;
+    edge_array thisEdgeAxes, otherEdgeAxes;
 
-    return 0;
+    auto this_rotater = [this](const Vector<3> &edge) {
+        return this->orientation * edge;
+    };
+
+    auto other = dynamic_cast<PlatonicSolid<SpecificSolid>*>(s);
+    auto other_rotater = [other](const Vector<3> &edge) {
+        return other->orientation * edge;
+    };
+
+    std::transform(SpecificSolid::faceAxes.begin(), SpecificSolid::faceAxes.end(), thisFaceAxes.begin(), this_rotater);
+    std::transform(SpecificSolid::faceAxes.begin(), SpecificSolid::faceAxes.end(), thisEdgeAxes.begin(), this_rotater);
+    std::transform(SpecificSolid::edgeAxes.begin(), SpecificSolid::edgeAxes.end(), otherFaceAxes.begin(), other_rotater);
+    std::transform(SpecificSolid::edgeAxes.begin(), SpecificSolid::edgeAxes.end(), otherEdgeAxes.begin(), other_rotater);
+
+    auto thisSpecific = static_cast<const SpecificSolid *>(this);
+    Vector<3> distance = Vector<3>(s->getPosition()) - Vector<3>(this->getPosition());
+    // Face axes for this
+    for (const auto &face : thisFaceAxes)
+        if (thisSpecific->isSeparatingAxis(face, *other, distance))
+            return 0;
+    // Face axes for other
+    for (const auto &face : otherFaceAxes)
+        if (thisSpecific->isSeparatingAxis(face, *other, distance))
+            return 0;
+    // Egde axes cross products
+    for (const auto &thisEdge : thisEdgeAxes)
+        for (const auto &otherEdge : otherEdgeAxes)
+            if (thisSpecific->isSeparatingAxis(thisEdge ^ otherEdge, *other, distance))
+                return 0;
+
+    return 1;
 }
 
 template<typename SpecificSolid>
@@ -78,7 +102,10 @@ const Matrix<3, 3> &PlatonicSolid<SpecificSolid>::getOrientationMatrix() const {
 
 template<typename SpecificSolid>
 bool PlatonicSolid<SpecificSolid>::isSeparatingAxis(const Vector<3> &axis, const PlatonicSolid &other,
-                                                    const Vector<3> &distance) {
+                                                    const Vector<3> &distance) const {
+    auto &thisSpecific = static_cast<const SpecificSolid&>(*this);
+    auto &otherSpecific = static_cast<const SpecificSolid&>(other);
+
     double distanceProj = std::abs(distance * axis);
-    return distanceProj > this->projectionHalfsize(axis) + other.projectionHalfsize(axis);
+    return distanceProj > thisSpecific.projectionHalfsize(axis) + otherSpecific.projectionHalfsize(axis);
 }
