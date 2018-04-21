@@ -13,6 +13,10 @@
 #include "shapes/SpheroCylinder2D.h"
 #include "shapes/Ellipse.h"
 #include "shapes/Rectangle.h"
+#include "shapes/platonic_solid/RegularDodecahedron.h"
+#include "shapes/platonic_solid/RegularIcosahedron.h"
+#include "shapes/platonic_solid/RegularOctahedron.h"
+#include "shapes/platonic_solid/RegularTetrahedron.h"
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
 
@@ -46,6 +50,18 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
     #elif RSA_SPATIAL_DIMENSION == 3 && RSA_ANGULAR_DIMENSION == 0
         if (sClass == "Cuboid") {
             Cuboid::initClass(attr);
+            return;
+        } else if (sClass == "RegularTetrahedron") {
+            PlatonicSolid<RegularTetrahedron>::initClass(attr);
+            return;
+        } else if (sClass == "RegularOctahedron") {
+            PlatonicSolid<RegularOctahedron>::initClass(attr);
+            return;
+        } else if (sClass == "RegularDodecahedron") {
+            PlatonicSolid<RegularDodecahedron>::initClass(attr);
+            return;
+        } else if (sClass == "RegularIcosahedron") {
+            PlatonicSolid<RegularIcosahedron>::initClass(attr);
             return;
         }
     #endif

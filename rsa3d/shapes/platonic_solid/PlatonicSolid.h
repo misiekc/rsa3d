@@ -6,8 +6,27 @@
 #define RSA3D_PLATONICSOLID_H
 
 
-class PlatonicSolid {
+#include "../../Shape.h"
+#include "../../Matrix.h"
 
+// CRTP idiom
+template <typename SpecificSolid>
+class PlatonicSolid : public Shape<3, 0> {
+private:
+    Matrix<3, 3> orientation = Matrix<3, 3>::identity();
+
+protected:
+    explicit PlatonicSolid(const Matrix<3, 3> &orientation) : orientation(orientation) {}
+
+public:
+    static void initClass(const std::string &attr);
+
+    int overlap(BoundaryConditions *bc, Shape<3, 0> *s) const override;
+    int pointInside(BoundaryConditions *bc, double *position, const std::array<double, 0> &orientation,
+                    double orientationRange) const override;
+    void restore(std::istream &f) override;
+
+    const Matrix<3, 3> &getOrientationMatrix() const;
 };
 
 #include "PlatonicSolid.tpp"

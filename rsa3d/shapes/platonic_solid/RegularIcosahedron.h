@@ -6,8 +6,21 @@
 #define RSA3D_REGULARICOSAHEDRON_H
 
 
-class RegularIcosahedron {
+#include "PlatonicSolid.h"
 
+class RegularIcosahedron : public PlatonicSolid<RegularIcosahedron> {
+private:
+    friend PlatonicSolid<RegularIcosahedron>;
+
+    constexpr static double exsphereRadius = 0;
+    constexpr static double insphereRadius = 0;
+
+    static void calculateStatic(const std::string &attr) {
+
+    }
+
+public:
+    explicit RegularIcosahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularIcosahedron>{orientation} {}
 };
 
 
