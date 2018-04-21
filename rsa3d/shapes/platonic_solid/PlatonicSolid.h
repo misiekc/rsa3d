@@ -18,12 +18,15 @@ private:
 protected:
     explicit PlatonicSolid(const Matrix<3, 3> &orientation) : orientation(orientation) {}
 
+    bool isSeparatingAxis(const Vector<3> &axis, const PlatonicSolid &other, const Vector<3> &distance);
+
 public:
     static void initClass(const std::string &attr);
 
     int overlap(BoundaryConditions *bc, Shape<3, 0> *s) const override;
     int pointInside(BoundaryConditions *bc, double *position, const std::array<double, 0> &orientation,
                     double orientationRange) const override;
+    void store(std::ostream &f) const override;
     void restore(std::istream &f) override;
 
     const Matrix<3, 3> &getOrientationMatrix() const;
