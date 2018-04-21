@@ -12,7 +12,7 @@ class RegularIcosahedron : public PlatonicSolid<RegularIcosahedron> {
 private:
     friend PlatonicSolid<RegularIcosahedron>;
 
-    constexpr static double exsphereRadius = 0;
+    constexpr static double circumsphereRadius = 0;
     constexpr static double insphereRadius = 0;
     static std::array<Vector<3>, 10> faceAxes;
     static std::array<Vector<3>, 15> edgeAxes;

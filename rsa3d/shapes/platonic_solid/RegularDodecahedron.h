@@ -12,7 +12,7 @@ class RegularDodecahedron : public PlatonicSolid<RegularDodecahedron> {
 private:
     friend PlatonicSolid<RegularDodecahedron>;
 
-    constexpr static double exsphereRadius = 0;
+    constexpr static double circumsphereRadius = 0;
     constexpr static double insphereRadius = 0;
     static std::array<Vector<3>, 6> faceAxes;
     static std::array<Vector<3>, 15> edgeAxes;

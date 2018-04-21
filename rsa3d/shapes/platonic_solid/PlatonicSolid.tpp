@@ -7,7 +7,7 @@
 template<typename SpecificSolid>
 void PlatonicSolid<SpecificSolid>::initClass(const std::string &attr) {
     SpecificSolid::calculateStatic(attr);
-    Shape::setNeighbourListCellSize(2 * SpecificSolid::exsphereRadius);
+    Shape::setNeighbourListCellSize(2 * SpecificSolid::circumsphereRadius);
     Shape::setVoxelSpatialSize(SpecificSolid::insphereRadius / M_SQRT2);
 
     Shape::setCreateShapeImpl([](RND *rnd) -> Shape* {
@@ -30,7 +30,7 @@ std::array<Vector<3>, SIZE> PlatonicSolid<SpecificSolid>::applyOrientation(const
 
 template<typename SpecificSolid>
 int PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions *bc, Shape<3, 0> *s) const {
-    auto other = dynamic_cast<PlatonicSolid<SpecificSolid>*>(s);
+    auto other = dynamic_cast<SpecificSolid*>(s);
 
     // TODO maybe store rotated axes in SpecificSolid instances?
     auto thisFaceAxes = this->applyOrientation(SpecificSolid::faceAxes);
@@ -67,13 +67,12 @@ int PlatonicSolid<SpecificSolid>::pointInside(BoundaryConditions *bc, double *po
 }
 
 template<typename SpecificSolid>
-bool PlatonicSolid<SpecificSolid>::isSeparatingAxis(const Vector<3> &axis, const PlatonicSolid &other,
+bool PlatonicSolid<SpecificSolid>::isSeparatingAxis(const Vector<3> &axis, const SpecificSolid &other,
                                                     const Vector<3> &distance) const {
     auto &thisSpecific = static_cast<const SpecificSolid&>(*this);
-    auto &otherSpecific = static_cast<const SpecificSolid&>(other);
 
     double distanceProj = std::abs(distance * axis);
-    return distanceProj > thisSpecific.projectionHalfsize(axis) + otherSpecific.projectionHalfsize(axis);
+    return distanceProj > thisSpecific.projectionHalfsize(axis) + other.projectionHalfsize(axis);
 }
 
 template<typename SpecificSolid>

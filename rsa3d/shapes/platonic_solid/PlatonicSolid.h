@@ -21,7 +21,7 @@ protected:
     template <std::size_t SIZE>
     std::array<Vector<3>, SIZE> applyOrientation(const std::array<Vector<3>, SIZE> &axes) const;
 
-    bool isSeparatingAxis(const Vector<3> &axis, const PlatonicSolid &other, const Vector<3> &distance) const;
+    bool isSeparatingAxis(const Vector<3> &axis, const SpecificSolid &other, const Vector<3> &distance) const;
 
 public:
     static void initClass(const std::string &attr);

@@ -12,7 +12,7 @@ class RegularOctahedron : public PlatonicSolid<RegularOctahedron> {
 private:
     friend PlatonicSolid<RegularOctahedron>;
 
-    constexpr static double exsphereRadius = 0;
+    constexpr static double circumsphereRadius = 0;
     constexpr static double insphereRadius = 0;
     static std::array<Vector<3>, 4> faceAxes;
     static std::array<Vector<3>, 6> edgeAxes;
