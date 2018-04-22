@@ -51,8 +51,9 @@ RegularTetrahedron::interval RegularTetrahedron::getProjection(const Vector<3> &
 {
     interval projInterval = {std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
 
-    // Find enpoints of polyhedron projection (multiplied by unknown but const for _axit factor)
-    for (const auto &v : this->vertices) {
+    // Find enpoints of polyhedron projection (multiplied by unknown but const for axis factor)
+    auto thisVertices = applyOrientation(vertices);
+    for (const auto &v : thisVertices) {
         double proj = v * axis;
         if (proj < projInterval.first)
             projInterval.first = proj;

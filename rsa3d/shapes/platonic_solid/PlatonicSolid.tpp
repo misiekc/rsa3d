@@ -20,38 +20,39 @@ void PlatonicSolid<SpecificSolid>::initClass(const std::string &attr) {
 
 template<typename SpecificSolid>
 template<size_t SIZE>
-std::array<Vector<3>, SIZE> PlatonicSolid<SpecificSolid>::applyOrientation(const std::array<Vector<3>, SIZE> &axes) const {
+std::array<Vector<3>, SIZE> PlatonicSolid<SpecificSolid>::applyOrientation(const std::array<Vector<3>, SIZE> &vectors) const {
     std::array<Vector<3>, SIZE> result;
-    std::transform(axes.begin(), axes.end(), result.begin(), [this](const Vector<3> &axis) {
-        return this->orientation * axis;
+    std::transform(vectors.begin(), vectors.end(), result.begin(), [this](const Vector<3> &v) {
+        return this->orientation * v;
     });
     return result;
 }
 
 template<typename SpecificSolid>
 int PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions *bc, Shape<3, 0> *s) const {
-    auto other = dynamic_cast<SpecificSolid*>(s);
+    SpecificSolid other = dynamic_cast<SpecificSolid>(*s);   // Make a copy
+    this->applyBC(bc, &other);
 
     // TODO maybe store rotated axes in SpecificSolid instances?
     auto thisFaceAxes = this->applyOrientation(SpecificSolid::faceAxes);
     auto thisEdgeAxes = this->applyOrientation(SpecificSolid::edgeAxes);
-    auto otherFaceAxes = other->applyOrientation(SpecificSolid::faceAxes);
-    auto otherEdgeAxes = other->applyOrientation(SpecificSolid::edgeAxes);
+    auto otherFaceAxes = other.applyOrientation(SpecificSolid::faceAxes);
+    auto otherEdgeAxes = other.applyOrientation(SpecificSolid::edgeAxes);
 
-    Vector<3> distance = Vector<3>(other->getPosition()) - Vector<3>(this->getPosition());
+    Vector<3> distance = Vector<3>(other.getPosition()) - Vector<3>(this->getPosition());
     auto thisSpecific = static_cast<const SpecificSolid *>(this);
     // Face axes for this
     for (const auto &face : thisFaceAxes)
-        if (thisSpecific->isSeparatingAxis(face, *other, distance))
+        if (thisSpecific->isSeparatingAxis(face, other, distance))
             return 0;
     // Face axes for other
     for (const auto &face : otherFaceAxes)
-        if (thisSpecific->isSeparatingAxis(face, *other, distance))
+        if (thisSpecific->isSeparatingAxis(face, other, distance))
             return 0;
     // Egde axes cross products
     for (const auto &thisEdge : thisEdgeAxes)
         for (const auto &otherEdge : otherEdgeAxes)
-            if (thisSpecific->isSeparatingAxis(thisEdge ^ otherEdge, *other, distance))
+            if (thisSpecific->isSeparatingAxis(thisEdge ^ otherEdge, other, distance))
                 return 0;
 
     return 1;
@@ -63,7 +64,7 @@ int PlatonicSolid<SpecificSolid>::pointInside(BoundaryConditions *bc, double *po
     Vector<3> vThisPos(this->getPosition());
     Vector<3> vPointPos(position);
 
-    return (vPointPos - vThisPos).norm2() <= SpecificSolid::insphereRadius;
+    return (vPointPos - vThisPos).norm2() <= 4 * std::pow(SpecificSolid::insphereRadius, 2);
 }
 
 template<typename SpecificSolid>
