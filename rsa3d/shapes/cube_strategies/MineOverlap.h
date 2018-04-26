@@ -5,9 +5,9 @@
 #ifndef RSA3D_MINEOVERLAP_H
 #define RSA3D_MINEOVERLAP_H
 
-#include "OverlapStrategy.h"
+#include "CuboidOverlapStrategy.h"
 
-class MineOverlap : public OverlapStrategy {
+class MineOverlap : public CuboidOverlapStrategy {
 private:
     bool checkSegment(const Cuboid *cube, const Vector<3> &point1, const Vector<3> &point2);
 

@@ -24,7 +24,7 @@ namespace cube_speedtest
     struct Context {
         std::size_t pairs{};
         std::size_t repeats{};
-        std::vector<OverlapStrategy *> strategies;
+        std::vector<CuboidOverlapStrategy *> strategies;
         std::vector<double> ballRadia;
 
         void load(const std::string &_filename);
@@ -33,7 +33,7 @@ namespace cube_speedtest
 
     /* End results for single strategy */
     struct StrategyResult {
-        OverlapStrategy * strategy;
+        CuboidOverlapStrategy * strategy;
         Quantity        time;
     };
 
@@ -60,7 +60,7 @@ namespace cube_speedtest
 
     /* All times acquired for single strategy from single ball radius */
     struct StrategyAcquiredData {
-        OverlapStrategy * strategy;
+        CuboidOverlapStrategy * strategy;
         std::vector<double> times;
 
         StrategyResult generateResult();

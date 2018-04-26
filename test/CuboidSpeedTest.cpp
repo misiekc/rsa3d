@@ -26,7 +26,7 @@ using namespace std::chrono;
 namespace
 {
 
-    OverlapStrategy * strategyFromString(const std::string &_name) {
+    CuboidOverlapStrategy * strategyFromString(const std::string &_name) {
         if (_name == "mine")
             return new MineOverlap;
         else if (_name == "sat")
@@ -57,7 +57,7 @@ namespace cube_speedtest
     SingleTestAcquiredData test_single_alg(ShapePairFactory * _factory, std::size_t _pairs_to_test)
     {
         SingleTestAcquiredData result{};
-        OverlapStrategy * strategy = Cuboid::getOverlapStrategy();
+        CuboidOverlapStrategy * strategy = Cuboid::getOverlapStrategy();
         MockBC bc;
         Timer timer;
 

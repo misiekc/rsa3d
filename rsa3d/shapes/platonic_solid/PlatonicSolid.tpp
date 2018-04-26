@@ -3,6 +3,8 @@
 //
 
 #include "../../Vector.h"
+#include "SATOverlap.h"
+#include "TriTriOverlap.h"
 
 template<typename SpecificSolid>
 void PlatonicSolid<SpecificSolid>::initClass(const std::string &attr) {
@@ -133,4 +135,19 @@ template<typename SpecificSolid>
 void PlatonicSolid<SpecificSolid>::calculateVertices() {
     auto *thisSpecific = static_cast<SpecificSolid*>(this);
     thisSpecific->vertices = this->applyOrientation(SpecificSolid::orientedVertices);
+}
+
+template<typename SpecificSolid>
+std::vector<std::string> PlatonicSolid<SpecificSolid>::getSupportedStrategiesNames() const {
+    return std::vector<std::string>{{"sat", "tri-tri"}};
+}
+
+template<typename SpecificSolid>
+OverlapStrategy<3, 0> *PlatonicSolid<SpecificSolid>::getStrategy(const std::string &name) const {
+    if (name == "sat")
+        return new SATOverlap<SpecificSolid>;
+    else if (name == "tri-tri")
+        return new TriTriOverlap<SpecificSolid>;
+    else
+        return nullptr;
 }

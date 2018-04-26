@@ -35,7 +35,7 @@ namespace cube_inttest
     // Performs Cuboid::overlap algorithm check. It generates some random pairs of cuboids
     // and compares result given by ::MINE strategy and _strategy strategy
     //--------------------------------------------------------------------------------------------
-    Results perform(ShapePairFactory * _factory, OverlapStrategy * _strategy, int _max_tries)
+    Results perform(ShapePairFactory * _factory, CuboidOverlapStrategy * _strategy, int _max_tries)
     {
         cube_inttest::Results result;
 	    bool    mine_intersected, second_intersected;

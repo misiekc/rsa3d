@@ -19,8 +19,8 @@ double          Cuboid::minDimension;
 Vector<3>       Cuboid::relativeVertices[VERTEX::NUM_OF];
 
 
-OverlapStrategy * Cuboid::defaultStrategy = new OptimizedSATOverlap;
-OverlapStrategy * Cuboid::strategy = Cuboid::defaultStrategy;
+CuboidOverlapStrategy * Cuboid::defaultStrategy = new OptimizedSATOverlap;
+CuboidOverlapStrategy * Cuboid::strategy = Cuboid::defaultStrategy;
 
 
 // Default constructor creating new Cuboid in (0, 0, 0) with size set in
@@ -107,7 +107,7 @@ Shape<3, 0> * Cuboid::create2D(RND *rnd)
 
 // Sets which overlap algorithm to use
 //----------------------------------------------------------------------------
-void Cuboid::setOverlapStrategy(OverlapStrategy * _strategy)
+void Cuboid::setOverlapStrategy(CuboidOverlapStrategy * _strategy)
 {
     strategy = _strategy;
 }
@@ -115,7 +115,7 @@ void Cuboid::setOverlapStrategy(OverlapStrategy * _strategy)
 
 // Returns overlap algorithm used
 //----------------------------------------------------------------------------
-OverlapStrategy * Cuboid::getOverlapStrategy()
+CuboidOverlapStrategy * Cuboid::getOverlapStrategy()
 {
     return Cuboid::strategy;
 }

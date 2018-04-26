@@ -5,9 +5,9 @@
 #ifndef RSA3D_SATOVERLAP_H
 #define RSA3D_SATOVERLAP_H
 
-#include "OverlapStrategy.h"
+#include "CuboidOverlapStrategy.h"
 
-class SATOverlap : public OverlapStrategy {
+class SATOverlap : public CuboidOverlapStrategy {
 private:
     typedef std::pair<double, double>   interval;
 

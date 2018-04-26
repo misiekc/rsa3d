@@ -5,9 +5,9 @@
 #ifndef RSA3D_TRITRIOVERLAP_H
 #define RSA3D_TRITRIOVERLAP_H
 
-#include "OverlapStrategy.h"
+#include "CuboidOverlapStrategy.h"
 
-class TriTriOverlap : public OverlapStrategy {
+class TriTriOverlap : public CuboidOverlapStrategy {
 private:
     void obtainTris(const Cuboid *cube, Vector<3> (&arr)[12][3], const Vector<3> &translation);
 

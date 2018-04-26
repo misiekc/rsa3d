@@ -3,9 +3,7 @@
     #define _RECTANGLECASE_H
     
 #include <ostream> 
-#include <vector>  
-#include "../rsa3d/shapes/Cuboid.h"
-#include "../rsa3d/shapes/cube_strategies/OverlapStrategy.h"
+#include <vector>
 
 namespace rectanglecase
 {

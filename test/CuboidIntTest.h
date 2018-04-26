@@ -11,7 +11,7 @@
 #include <ostream> 
 #include <vector>  
 #include "../rsa3d/shapes/Cuboid.h"
-#include "../rsa3d/shapes/cube_strategies/OverlapStrategy.h"
+#include "../rsa3d/shapes/cube_strategies/CuboidOverlapStrategy.h"
 
 namespace cube_inttest
 {
@@ -31,7 +31,7 @@ namespace cube_inttest
         }
     };
 
-    Results perform(ShapePairFactory * _factory, OverlapStrategy * _strategy, int _max_tries);
+    Results perform(ShapePairFactory * _factory, CuboidOverlapStrategy * _strategy, int _max_tries);
     void print_results(Results _results);
     void dump_missed_pairs(Results _results, std::ostream & _ostr);
 

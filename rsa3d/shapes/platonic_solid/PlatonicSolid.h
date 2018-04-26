@@ -8,10 +8,11 @@
 
 #include "../../Shape.h"
 #include "../../Matrix.h"
+#include "../OverlapStrategyShape.h"
 
 // CRTP idiom
 template <typename SpecificSolid>
-class PlatonicSolid : public Shape<3, 0> {
+class PlatonicSolid : public Shape<3, 0>, public OverlapStrategyShape<3, 0> {
 private:
     Matrix<3, 3> orientation = Matrix<3, 3>::identity();
 
@@ -35,9 +36,14 @@ public:
     int pointInside(BoundaryConditions *bc, double *position, const std::array<double, 0> &orientation,
                     double orientationRange) const override;
     void store(std::ostream &f) const override;
+
     void restore(std::istream &f) override;
 
     const Matrix<3, 3> &getOrientationMatrix() const;
+
+    std::vector<std::string> getSupportedStrategiesNames() const override;
+
+    OverlapStrategy<3, 0> *getStrategy(const std::string &name) const override;
 };
 
 #include "PlatonicSolid.tpp"

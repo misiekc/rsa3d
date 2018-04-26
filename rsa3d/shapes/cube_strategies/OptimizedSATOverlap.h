@@ -6,9 +6,9 @@
 #define RSA3D_OPTIMIZEDSATOVERLAP_H
 
 
-#include "OverlapStrategy.h"
+#include "CuboidOverlapStrategy.h"
 
-class OptimizedSATOverlap : public OverlapStrategy {
+class OptimizedSATOverlap : public CuboidOverlapStrategy {
 public:
     bool overlap(const Cuboid *cube1, const Cuboid *cube2, BoundaryConditions *bc) override;
 

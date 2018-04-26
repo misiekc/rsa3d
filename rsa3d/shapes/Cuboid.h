@@ -15,7 +15,7 @@
 #include "../Vector.h"
 
 
-class OverlapStrategy;
+class CuboidOverlapStrategy;
 
 class Cuboid : public Shape<3,0>
 {
@@ -23,8 +23,8 @@ private:
 	static double           size[3];
 	static double           minDimension;
 	static Vector<3>        relativeVertices[8];
-	static OverlapStrategy  *defaultStrategy;
-	static OverlapStrategy  *strategy;
+	static CuboidOverlapStrategy  *defaultStrategy;
+	static CuboidOverlapStrategy  *strategy;
 
     Matrix<3, 3>            orientation;
 
@@ -64,8 +64,8 @@ public:
 	static const Vector<3> getRelativeVertex(std::size_t index);
 
 	static void restoreDefaultStrategy();
-	static void setOverlapStrategy(OverlapStrategy *strategy);
-	static OverlapStrategy * getOverlapStrategy();
+	static void setOverlapStrategy(CuboidOverlapStrategy *strategy);
+	static CuboidOverlapStrategy * getOverlapStrategy();
 
 	int overlap(BoundaryConditions *bc, Shape<3,0> *s) const override;
 	double getVolume() const override;
