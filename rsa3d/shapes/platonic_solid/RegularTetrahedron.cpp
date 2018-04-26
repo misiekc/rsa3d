@@ -5,22 +5,22 @@
 #include "RegularTetrahedron.h"
 
 
+std::array<Vector<3>, 4> RegularTetrahedron::orientedVertices;
 std::array<Vector<3>, 4> RegularTetrahedron::orientedFaceAxes;
 std::array<Vector<3>, 6> RegularTetrahedron::orientedEdgeAxes;
-std::array<Vector<3>, 4> RegularTetrahedron::vertices;
 
 void RegularTetrahedron::calculateStatic(const std::string &attr) {
-    vertices = {{Vector<3>{{1, 1, 1}},
+    orientedVertices = {{Vector<3>{{1, 1, 1}},
                  Vector<3>{{1, -1, -1}},
                  Vector<3>{{-1, 1, -1}},
                  Vector<3>{{-1, -1, 1}} }};
 
-    orientedEdgeAxes = {{vertices[0] - vertices[3],
-                 vertices[0] - vertices[1],
-                 vertices[0] - vertices[2],
-                 vertices[2] - vertices[1],
-                 vertices[1] - vertices[3],
-                 vertices[3] - vertices[2]}};
+    orientedEdgeAxes = {{orientedVertices[0] - orientedVertices[3],
+                 orientedVertices[0] - orientedVertices[1],
+                 orientedVertices[0] - orientedVertices[2],
+                 orientedVertices[2] - orientedVertices[1],
+                 orientedVertices[1] - orientedVertices[3],
+                 orientedVertices[3] - orientedVertices[2]}};
 
     orientedFaceAxes = {{orientedEdgeAxes[3] ^ orientedEdgeAxes[4],
                  orientedEdgeAxes[2] ^ orientedEdgeAxes[0],
@@ -52,7 +52,7 @@ RegularTetrahedron::interval RegularTetrahedron::getProjection(const Vector<3> &
     interval projInterval = {std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
 
     // Find enpoints of polyhedron projection (multiplied by unknown but const for axis factor)
-    auto thisVertices = applyOrientation(vertices);
+    auto thisVertices = applyOrientation(orientedVertices);
     for (const auto &v : thisVertices) {
         double proj = v * axis;
         if (proj < projInterval.first)
@@ -61,4 +61,21 @@ RegularTetrahedron::interval RegularTetrahedron::getProjection(const Vector<3> &
             projInterval.second = proj;
     }
     return projInterval;
+}
+
+std::array<Vector<3>, 4> RegularTetrahedron::getFaceAxes() const {
+    return faceAxes;
+}
+
+std::array<Vector<3>, 6> RegularTetrahedron::getEdgeAxes() const {
+    return edgeAxes;
+}
+
+std::array<Vector<3>, 4> RegularTetrahedron::getVertices() const {
+    return this->vertices;
+}
+
+RegularTetrahedron::RegularTetrahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularTetrahedron>{orientation} {
+    this->calculateVertices();
+    this->calculateAxes();
 }

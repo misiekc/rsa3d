@@ -32,26 +32,20 @@ template<typename SpecificSolid>
 int PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions *bc, Shape<3, 0> *s) const {
     SpecificSolid other = dynamic_cast<SpecificSolid&>(*s);   // Make a copy
     this->applyBC(bc, &other);
-
-    // TODO maybe store rotated axes in SpecificSolid instances?
-    auto thisFaceAxes = this->applyOrientation(SpecificSolid::orientedFaceAxes);
-    auto thisEdgeAxes = this->applyOrientation(SpecificSolid::orientedEdgeAxes);
-    auto otherFaceAxes = other.applyOrientation(SpecificSolid::orientedFaceAxes);
-    auto otherEdgeAxes = other.applyOrientation(SpecificSolid::orientedEdgeAxes);
-
-    Vector<3> distance = Vector<3>(other.getPosition()) - Vector<3>(this->getPosition());
     auto thisSpecific = static_cast<const SpecificSolid *>(this);
+    Vector<3> distance = Vector<3>(other.getPosition()) - Vector<3>(this->getPosition());
+
     // Face axes for this
-    for (const auto &face : thisFaceAxes)
+    for (const auto &face : thisSpecific->getFaceAxes())
         if (thisSpecific->isSeparatingAxis(face, other, distance))
             return 0;
     // Face axes for other
-    for (const auto &face : otherFaceAxes)
+    for (const auto &face : other.getFaceAxes())
         if (thisSpecific->isSeparatingAxis(face, other, distance))
             return 0;
     // Egde axes cross products
-    for (const auto &thisEdge : thisEdgeAxes)
-        for (const auto &otherEdge : otherEdgeAxes)
+    for (const auto &thisEdge : thisSpecific->getEdgeAxes())
+        for (const auto &otherEdge : other.getEdgeAxes())
             if (thisSpecific->isSeparatingAxis(thisEdge ^ otherEdge, other, distance))
                 return 0;
 
@@ -92,15 +86,51 @@ template<typename SpecificSolid>
 void PlatonicSolid<SpecificSolid>::restore(std::istream &f) {
     Shape::restore(f);
     double d;
+    Matrix<3, 3> orientation;
     for (unsigned short i=0; i<3; i++){
         for (unsigned short j=0; j<3; j++){
             f.read((char *)&d, sizeof(double));
-            this->orientation(i, j) = d;
+            orientation(i, j) = d;
         }
     }
+    this->setOrientationMatrix(orientation);
 }
 
 template<typename SpecificSolid>
 const Matrix<3, 3> &PlatonicSolid<SpecificSolid>::getOrientationMatrix() const {
     return orientation;
+}
+
+template<typename SpecificSolid>
+void PlatonicSolid<SpecificSolid>::setOrientationMatrix(const Matrix<3, 3> &orientation) {
+    this->orientation = orientation;
+    calculateAxes();
+}
+
+template<typename SpecificSolid>
+void PlatonicSolid<SpecificSolid>::setPosition(const double *position) {
+    Vector<3> oldPos(this->getPosition());
+    Positioned::setPosition(position);
+    Vector<3> newPos(this->getPosition());
+
+    Vector<3> translation = newPos - oldPos;
+    auto *thisSpecific = static_cast<SpecificSolid*>(this);
+    std::transform(SpecificSolid::orientedVertices.begin(), SpecificSolid::orientedVertices.end(),
+                   thisSpecific->vertices.begin(),
+                   [&translation](const Vector<3> &vertex) {
+                       return vertex + translation;
+                   });
+}
+
+template<typename SpecificSolid>
+void PlatonicSolid<SpecificSolid>::calculateAxes() {
+    auto *thisSpecific = static_cast<SpecificSolid*>(this);
+    thisSpecific->edgeAxes = this->applyOrientation(SpecificSolid::orientedEdgeAxes);
+    thisSpecific->faceAxes = this->applyOrientation(SpecificSolid::orientedFaceAxes);
+}
+
+template<typename SpecificSolid>
+void PlatonicSolid<SpecificSolid>::calculateVertices() {
+    auto *thisSpecific = static_cast<SpecificSolid*>(this);
+    thisSpecific->vertices = this->applyOrientation(SpecificSolid::orientedVertices);
 }

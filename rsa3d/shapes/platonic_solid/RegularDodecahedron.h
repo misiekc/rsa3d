@@ -14,19 +14,23 @@ private:
 
     constexpr static double circumsphereRadius = 0;
     constexpr static double insphereRadius = 0;
+    static std::array<Vector<3>, 12> orientedVertices;
     static std::array<Vector<3>, 6> orientedFaceAxes;
     static std::array<Vector<3>, 15> orientedEdgeAxes;
 
-    static void calculateStatic(const std::string &attr) {
+    std::array<Vector<3>, 12> vertices;
+    std::array<Vector<3>, 6> faceAxes;
+    std::array<Vector<3>, 15> edgeAxes;
 
-    }
+    static void calculateStatic(const std::string &attr);
 
 public:
-    explicit RegularDodecahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularDodecahedron>{orientation} {}
+    explicit RegularDodecahedron(const Matrix<3, 3> &orientation);
 
-    double projectionHalfsize(const Vector<3> &axis) const {
-        return 0;
-    }
+    double projectionHalfsize(const Vector<3> &axis) const;
+    std::array<Vector<3>, 12> getVertices() const;
+    std::array<Vector<3>, 6> getFaceAxes() const;
+    std::array<Vector<3>, 15> getEdgeAxes() const;
 };
 
 

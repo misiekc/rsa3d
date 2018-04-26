@@ -16,11 +16,16 @@ private:
     Matrix<3, 3> orientation = Matrix<3, 3>::identity();
 
 protected:
-    explicit PlatonicSolid(const Matrix<3, 3> &orientation) : orientation(orientation) {}
+    explicit PlatonicSolid(const Matrix<3, 3> &orientation) : orientation(orientation) {};
+
+    void setPosition(const double *position) override;
 
     template <std::size_t SIZE>
     std::array<Vector<3>, SIZE> applyOrientation(const std::array<Vector<3>, SIZE> &vectors) const;
 
+    void calculateVertices();
+    void calculateAxes();
+    void setOrientationMatrix(const Matrix<3, 3> &orientation);
     bool isSeparatingAxis(const Vector<3> &axis, const SpecificSolid &other, const Vector<3> &distance) const;
 
 public:
