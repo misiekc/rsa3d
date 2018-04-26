@@ -3,7 +3,7 @@
 //
 
 template <typename SpecificSolid>
-int TriTriOverlap<SpecificSolid>::overlap(Shape<3, 0> *first,
-                                       Shape<3, 0> *second) const {
+int TriTriOverlap<SpecificSolid>::overlap(const Shape<3, 0> *first,
+                                          const Shape<3, 0> *second) const {
     return 0;
 }

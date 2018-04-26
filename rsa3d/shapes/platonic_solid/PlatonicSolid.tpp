@@ -32,26 +32,9 @@ std::array<Vector<3>, SIZE> PlatonicSolid<SpecificSolid>::applyOrientation(const
 
 template<typename SpecificSolid>
 int PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions *bc, Shape<3, 0> *s) const {
-    SpecificSolid other = dynamic_cast<SpecificSolid&>(*s);   // Make a copy
+    SpecificSolid other = dynamic_cast<SpecificSolid&>(*s);     // Make a copy
     this->applyBC(bc, &other);
-    auto thisSpecific = static_cast<const SpecificSolid *>(this);
-    Vector<3> distance = Vector<3>(other.getPosition()) - Vector<3>(this->getPosition());
-
-    // Face axes for this
-    for (const auto &face : thisSpecific->getFaceAxes())
-        if (thisSpecific->isSeparatingAxis(face, other, distance))
-            return 0;
-    // Face axes for other
-    for (const auto &face : other.getFaceAxes())
-        if (thisSpecific->isSeparatingAxis(face, other, distance))
-            return 0;
-    // Egde axes cross products
-    for (const auto &thisEdge : thisSpecific->getEdgeAxes())
-        for (const auto &otherEdge : other.getEdgeAxes())
-            if (thisSpecific->isSeparatingAxis(thisEdge ^ otherEdge, other, distance))
-                return 0;
-
-    return 1;
+    return OverlapStrategyShape::overlap(this, &other, SATOverlap<SpecificSolid>());
 }
 
 template<typename SpecificSolid>

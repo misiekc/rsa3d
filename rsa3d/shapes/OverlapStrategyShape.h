@@ -9,22 +9,16 @@
 #include "../Shape.h"
 #include "OverlapStrategy.h"
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+template <unsigned short SD, unsigned short AD>
 class OverlapStrategyShape {
 public:
     virtual std::vector<std::string> getSupportedStrategiesNames() const = 0;
-    virtual OverlapStrategy<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *getStrategy(const std::string &name) const = 0;
+    virtual OverlapStrategy<SD, AD> *getStrategy(const std::string &name) const = 0;
 
-    int overlap(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *other,
-                const OverlapStrategy<SPATIAL_DIMENSION, ANGULAR_DIMENSION> &strategy);
+    inline int overlap(const Shape<SD, AD> *first, const Shape<SD, AD> *second,
+                const OverlapStrategy<SD, AD> &strategy) const {
+        return strategy.overlap(first, second);
+    };
 };
-
-template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-int OverlapStrategyShape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::
-overlap(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *other,
-        const OverlapStrategy<SPATIAL_DIMENSION, ANGULAR_DIMENSION> &strategy)
-{
-    return 0;
-}
 
 #endif //RSA3D_OVERLAPSTRATEGYSHAPE_H

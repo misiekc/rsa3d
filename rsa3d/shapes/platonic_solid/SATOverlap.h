@@ -11,7 +11,7 @@
 template <typename SpecificSolid>
 class SATOverlap : public OverlapStrategy<3, 0> {
 public:
-    int overlap(Shape<3, 0> *first, Shape<3, 0> *second) const override;
+    int overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const override;
 };
 
 #include "SATOverlap.tpp"
