@@ -15,8 +15,8 @@ private:
     constexpr static double circumsphereRadius = std::pow(3, 5./6) / 2;
     constexpr static double insphereRadius = std::pow(3, -1./6) / 2;
     static std::array<Vector<3>, 4> vertices;
-    static std::array<Vector<3>, 4> faceAxes;
-    static std::array<Vector<3>, 6> edgeAxes;
+    static std::array<Vector<3>, 4> orientedFaceAxes;
+    static std::array<Vector<3>, 6> orientedEdgeAxes;
 
     static void calculateStatic(const std::string &attr);
 

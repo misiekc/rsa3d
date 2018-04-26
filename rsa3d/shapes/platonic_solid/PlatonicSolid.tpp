@@ -30,14 +30,14 @@ std::array<Vector<3>, SIZE> PlatonicSolid<SpecificSolid>::applyOrientation(const
 
 template<typename SpecificSolid>
 int PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions *bc, Shape<3, 0> *s) const {
-    SpecificSolid other = dynamic_cast<SpecificSolid>(*s);   // Make a copy
+    SpecificSolid other = dynamic_cast<SpecificSolid&>(*s);   // Make a copy
     this->applyBC(bc, &other);
 
     // TODO maybe store rotated axes in SpecificSolid instances?
-    auto thisFaceAxes = this->applyOrientation(SpecificSolid::faceAxes);
-    auto thisEdgeAxes = this->applyOrientation(SpecificSolid::edgeAxes);
-    auto otherFaceAxes = other.applyOrientation(SpecificSolid::faceAxes);
-    auto otherEdgeAxes = other.applyOrientation(SpecificSolid::edgeAxes);
+    auto thisFaceAxes = this->applyOrientation(SpecificSolid::orientedFaceAxes);
+    auto thisEdgeAxes = this->applyOrientation(SpecificSolid::orientedEdgeAxes);
+    auto otherFaceAxes = other.applyOrientation(SpecificSolid::orientedFaceAxes);
+    auto otherEdgeAxes = other.applyOrientation(SpecificSolid::orientedEdgeAxes);
 
     Vector<3> distance = Vector<3>(other.getPosition()) - Vector<3>(this->getPosition());
     auto thisSpecific = static_cast<const SpecificSolid *>(this);

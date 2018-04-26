@@ -5,8 +5,8 @@
 #include "RegularTetrahedron.h"
 
 
-std::array<Vector<3>, 4> RegularTetrahedron::faceAxes;
-std::array<Vector<3>, 6> RegularTetrahedron::edgeAxes;
+std::array<Vector<3>, 4> RegularTetrahedron::orientedFaceAxes;
+std::array<Vector<3>, 6> RegularTetrahedron::orientedEdgeAxes;
 std::array<Vector<3>, 4> RegularTetrahedron::vertices;
 
 void RegularTetrahedron::calculateStatic(const std::string &attr) {
@@ -15,24 +15,24 @@ void RegularTetrahedron::calculateStatic(const std::string &attr) {
                  Vector<3>{{-1, 1, -1}},
                  Vector<3>{{-1, -1, 1}} }};
 
-    edgeAxes = {{vertices[0] - vertices[3],
+    orientedEdgeAxes = {{vertices[0] - vertices[3],
                  vertices[0] - vertices[1],
                  vertices[0] - vertices[2],
                  vertices[2] - vertices[1],
                  vertices[1] - vertices[3],
                  vertices[3] - vertices[2]}};
 
-    faceAxes = {{edgeAxes[3] ^ edgeAxes[4],
-                 edgeAxes[2] ^ edgeAxes[0],
-                 edgeAxes[0] ^ edgeAxes[1],
-                 edgeAxes[1] ^ edgeAxes[2]}};
+    orientedFaceAxes = {{orientedEdgeAxes[3] ^ orientedEdgeAxes[4],
+                 orientedEdgeAxes[2] ^ orientedEdgeAxes[0],
+                 orientedEdgeAxes[0] ^ orientedEdgeAxes[1],
+                 orientedEdgeAxes[1] ^ orientedEdgeAxes[2]}};
 
     // Normalize axes
     auto normalizer = [](const Vector<3> &v) {
         return v / v.norm();
     };
-    std::transform(edgeAxes.begin(), edgeAxes.end(), edgeAxes.begin(), normalizer);
-    std::transform(faceAxes.begin(), faceAxes.end(), faceAxes.begin(), normalizer);
+    std::transform(orientedEdgeAxes.begin(), orientedEdgeAxes.end(), orientedEdgeAxes.begin(), normalizer);
+    std::transform(orientedFaceAxes.begin(), orientedFaceAxes.end(), orientedFaceAxes.begin(), normalizer);
 }
 
 double RegularTetrahedron::projectionHalfsize(const Vector<3> &axis) const {
