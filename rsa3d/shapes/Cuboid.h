@@ -13,11 +13,12 @@
 #include "../Shape.h"
 #include "../Matrix.h"
 #include "../Vector.h"
+#include "OverlapStrategyShape.h"
 
 
 class CuboidOverlapStrategy;
 
-class Cuboid : public Shape<3,0>
+class Cuboid : public Shape<3, 0>, public OverlapStrategyShape<3, 0>
 {
 private:
 	static double           size[3];
@@ -76,8 +77,12 @@ public:
 	void store(std::ostream &f) const override;
 	void restore(std::istream &f) override;
 
+	std::vector<std::string> getSupportedStrategies() const override;
+	OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
+
 	bool pointInsideCuboid(const Vector<3> &vertex) const;
 	void obtainVertices(Vector<3> (&vertices)[8], const Vector<3> &translation) const;
+
 	Matrix<3, 3> getOrientation() const;
 };
 

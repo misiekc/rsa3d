@@ -36,21 +36,12 @@ void RegularTetrahedron::calculateStatic(const std::string &attr) {
 }
 
 RegularTetrahedron::RegularTetrahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularTetrahedron>{orientation} {
-    this->calculateVertices();
-    this->calculateAxes();
+    this->calculateVerticesAndAxes();
 }
 
-std::array<Vector<3>, 4> RegularTetrahedron::getFaceAxes() const {
-    return faceAxes;
-}
-
-std::array<Vector<3>, 6> RegularTetrahedron::getEdgeAxes() const {
-    return edgeAxes;
-}
-
-std::array<Vector<3>, 4> RegularTetrahedron::getVertices() const {
-    return this->vertices;
-}
+std::array<Vector<3>, 4> RegularTetrahedron::getFaceAxes() const { return this->faceAxes; }
+std::array<Vector<3>, 6> RegularTetrahedron::getEdgeAxes() const { return this->edgeAxes; }
+std::array<Vector<3>, 4> RegularTetrahedron::getVertices() const { return this->vertices; }
 
 double RegularTetrahedron::projectionHalfsize(const Vector<3> &axis) const {
     throw std::runtime_error("unimplemented");

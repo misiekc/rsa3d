@@ -13,16 +13,15 @@ std::array<Vector<3>, 12> RegularDodecahedron::getVertices() const {
 }
 
 std::array<Vector<3>, 6> RegularDodecahedron::getFaceAxes() const {
-    return faceAxes;
+    return this->faceAxes;
 }
 
 std::array<Vector<3>, 15> RegularDodecahedron::getEdgeAxes() const {
-    return edgeAxes;
+    return this->edgeAxes;
 }
 
 RegularDodecahedron::RegularDodecahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularDodecahedron>{orientation} {
-    this->calculateVertices();
-    this->calculateAxes();
+    this->calculateVerticesAndAxes();
 }
 
 void RegularDodecahedron::calculateStatic(const std::string &attr) {

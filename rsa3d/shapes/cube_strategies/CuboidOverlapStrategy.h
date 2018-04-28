@@ -8,15 +8,13 @@
 #include "../Cuboid.h"
 
 // Overlap stategies
-class CuboidOverlapStrategy {
+class CuboidOverlapStrategy : public OverlapStrategy<3, 0> {
 public:
     using VERTEX = Cuboid::VERTEX;
     using COORD = Cuboid::COORD;
 
-    virtual ~CuboidOverlapStrategy() = default;
-    virtual bool overlap(const Cuboid * cube1, const Cuboid * cube2, BoundaryConditions *bc) = 0;
-    virtual std::string getName() = 0;
-    virtual void runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) = 0;
+    virtual std::string getName() const = 0;
+    virtual void runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) const = 0;
 };
 
 

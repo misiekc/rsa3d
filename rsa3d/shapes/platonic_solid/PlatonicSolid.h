@@ -23,23 +23,22 @@ protected:
 
     template <std::size_t SIZE>
     std::array<Vector<3>, SIZE> applyOrientation(const std::array<Vector<3>, SIZE> &vectors) const;
-    void calculateVertices();
-    void calculateAxes();
+    void calculateVerticesAndAxes();
     void setOrientationMatrix(const Matrix<3, 3> &orientation);
 
 public:
     static void initClass(const std::string &attr);
-    int overlap(BoundaryConditions *bc, Shape<3, 0> *s) const override;
 
+    int overlap(BoundaryConditions *bc, Shape<3, 0> *s) const override;
     int pointInside(BoundaryConditions *bc, double *position, const std::array<double, 0> &orientation,
                     double orientationRange) const override;
     void store(std::ostream &f) const override;
     void restore(std::istream &f) override;
 
-    const Matrix<3, 3> &getOrientationMatrix() const;
-    std::vector<std::string> getSupportedStrategiesNames() const override;
-    OverlapStrategy<3, 0> *getStrategy(const std::string &name) const override;
+    std::vector<std::string> getSupportedStrategies() const override;
+    OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
 
+    const Matrix<3, 3> &getOrientationMatrix() const;
     bool isSeparatingAxis(const Vector<3> &axis, const SpecificSolid &other, const Vector<3> &distance) const;
 };
 

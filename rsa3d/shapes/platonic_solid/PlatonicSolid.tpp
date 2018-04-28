@@ -82,14 +82,12 @@ void PlatonicSolid<SpecificSolid>::restore(std::istream &f) {
 }
 
 template<typename SpecificSolid>
-const Matrix<3, 3> &PlatonicSolid<SpecificSolid>::getOrientationMatrix() const {
-    return orientation;
-}
+const Matrix<3, 3> &PlatonicSolid<SpecificSolid>::getOrientationMatrix() const { return orientation; }
 
 template<typename SpecificSolid>
 void PlatonicSolid<SpecificSolid>::setOrientationMatrix(const Matrix<3, 3> &orientation) {
     this->orientation = orientation;
-    calculateAxes();
+    calculateVerticesAndAxes();
 }
 
 template<typename SpecificSolid>
@@ -108,25 +106,20 @@ void PlatonicSolid<SpecificSolid>::setPosition(const double *position) {
 }
 
 template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::calculateAxes() {
+void PlatonicSolid<SpecificSolid>::calculateVerticesAndAxes() {
     auto *thisSpecific = static_cast<SpecificSolid*>(this);
+    thisSpecific->vertices = this->applyOrientation(SpecificSolid::orientedVertices);
     thisSpecific->edgeAxes = this->applyOrientation(SpecificSolid::orientedEdgeAxes);
     thisSpecific->faceAxes = this->applyOrientation(SpecificSolid::orientedFaceAxes);
 }
 
 template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::calculateVertices() {
-    auto *thisSpecific = static_cast<SpecificSolid*>(this);
-    thisSpecific->vertices = this->applyOrientation(SpecificSolid::orientedVertices);
-}
-
-template<typename SpecificSolid>
-std::vector<std::string> PlatonicSolid<SpecificSolid>::getSupportedStrategiesNames() const {
+std::vector<std::string> PlatonicSolid<SpecificSolid>::getSupportedStrategies() const {
     return std::vector<std::string>{{"sat", "tri-tri"}};
 }
 
 template<typename SpecificSolid>
-OverlapStrategy<3, 0> *PlatonicSolid<SpecificSolid>::getStrategy(const std::string &name) const {
+OverlapStrategy<3, 0> *PlatonicSolid<SpecificSolid>::createStrategy(const std::string &name) const {
     if (name == "sat")
         return new SATOverlap<SpecificSolid>;
     else if (name == "tri-tri")

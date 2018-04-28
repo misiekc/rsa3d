@@ -4,12 +4,13 @@
 
 #include "../Shape.h"
 
-#ifndef RSA3D_CUBOIDOVERLAPSTRATEGY_H
-#define RSA3D_CUBOIDOVERLAPSTRATEGY_H
+#ifndef RSA3D_OVERLAPSTRATEGY_H
+#define RSA3D_OVERLAPSTRATEGY_H
 
 template <unsigned short SD, unsigned short AD>
 class OverlapStrategy {
 public:
+    virtual ~OverlapStrategy() = default;
     virtual int overlap(const Shape<SD, AD> *first, const Shape<SD, AD> *second) const = 0;
 };
 

@@ -41,12 +41,13 @@ namespace
 }
 
 
-bool MineOverlap::overlap(const Cuboid *cube1, const Cuboid *cube2, BoundaryConditions *bc) {
+int MineOverlap::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
+    auto cube1 = dynamic_cast<const Cuboid*>(first);
+    auto cube2 = dynamic_cast<const Cuboid*>(second);
+
     // Prepare matrices of translations for operations on shapes;
     Vector<3> thisTranslation(cube1->getPosition());
     Vector<3> sTranslation(cube2->getPosition());
-    double transArray[3];
-    sTranslation += Vector<3>(bc->getTranslation(transArray, cube1->getPosition(), cube2->getPosition()));
     Matrix<3, 3> backwards_rot = cube1->getOrientation().transpose();
 
     // Transform s coordinates to this coordinate system
@@ -118,7 +119,7 @@ bool MineOverlap::overlap(const Cuboid *cube1, const Cuboid *cube2, BoundaryCond
 // Checks whether a segment determined by point1 and point2 intersects with
 // Cuboid
 //----------------------------------------------------------------------------
-bool MineOverlap::checkSegment(const Cuboid *cube, const Vector<3> &point1, const Vector<3> &point2)
+bool MineOverlap::checkSegment(const Cuboid *cube, const Vector<3> &point1, const Vector<3> &point2) const
 {
     double size[3];
     cube->getSize(size);
@@ -135,10 +136,10 @@ bool MineOverlap::checkSegment(const Cuboid *cube, const Vector<3> &point1, cons
            checkSegmentFace(-hsize_z, hsize_x, hsize_y, point1[COORD::Z], point1[COORD::X], point1[COORD::Y], point2[COORD::Z], point2[COORD::X], point2[COORD::Y]);
 }
 
-std::string MineOverlap::getName() {
+std::string MineOverlap::getName() const {
     return "MineOverlap";
 }
 
-void MineOverlap::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) {
+void MineOverlap::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) const {
 
 }

@@ -13,16 +13,15 @@ std::array<Vector<3>, 20> RegularIcosahedron::getVertices() const {
 }
 
 std::array<Vector<3>, 10> RegularIcosahedron::getFaceAxes() const {
-    return faceAxes;
+    return this->faceAxes;
 }
 
 std::array<Vector<3>, 15> RegularIcosahedron::getEdgeAxes() const {
-    return edgeAxes;
+    return this->edgeAxes;
 }
 
 RegularIcosahedron::RegularIcosahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularIcosahedron>{orientation} {
-    this->calculateVertices();
-    this->calculateAxes();
+    this->calculateVerticesAndAxes();
 }
 
 void RegularIcosahedron::calculateStatic(const std::string &attr) {

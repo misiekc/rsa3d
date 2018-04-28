@@ -17,11 +17,11 @@ double RegularOctahedron::projectionHalfsize(const Vector<3> &axis) const {
 }
 
 std::array<Vector<3>, 4> RegularOctahedron::getFaceAxes() const {
-    return faceAxes;
+    return this->faceAxes;
 }
 
 std::array<Vector<3>, 6> RegularOctahedron::getEdgeAxes() const {
-    return edgeAxes;
+    return this->edgeAxes;
 }
 
 std::array<Vector<3>, 8> RegularOctahedron::getVertices() const {
@@ -29,6 +29,5 @@ std::array<Vector<3>, 8> RegularOctahedron::getVertices() const {
 }
 
 RegularOctahedron::RegularOctahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularOctahedron>{orientation} {
-    this->calculateVertices();
-    this->calculateAxes();
+    this->calculateVerticesAndAxes();
 }

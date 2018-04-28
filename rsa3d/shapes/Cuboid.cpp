@@ -7,6 +7,8 @@
 #include "Cuboid.h"
 #include "cube_strategies/MineOverlap.h"
 #include "cube_strategies/OptimizedSATOverlap.h"
+#include "cube_strategies/SATOverlap.h"
+#include "cube_strategies/TriTriOverlap.h"
 
 #include <algorithm>
 
@@ -132,9 +134,10 @@ void Cuboid::restoreDefaultStrategy() {
 //----------------------------------------------------------------------------
 int Cuboid::overlap(BoundaryConditions *bc, Shape *s) const
 {
-    return strategy->overlap(this, (Cuboid*)s, bc);
+    Cuboid other = dynamic_cast<Cuboid&>(*s);
+    this->applyBC(bc, &other);
+    return strategy->overlap(this, &other);
 }
-
 
 // Checks whether given vertex (in this coordinates) lies in Cuboid
 //----------------------------------------------------------------------------
@@ -310,5 +313,22 @@ void Cuboid::obtainVertices(Vector<3> (&vertices)[VERTEX::NUM_OF], const Vector<
 //----------------------------------------------------------------------------
 const Vector<3>  Cuboid::getRelativeVertex(std::size_t index) {
     return relativeVertices[index];
+}
+
+std::vector<std::string> Cuboid::getSupportedStrategies() const {
+    return std::vector<std::string>{"mine", "sat", "optimised_sat", "tri_tri"};
+}
+
+OverlapStrategy<3, 0> *Cuboid::createStrategy(const std::string &name) const {
+    if (name == "mine")
+        return new MineOverlap;
+    else if (name == "sat")
+        return new SATOverlap;
+    else if (name == "optimised_sat")
+        return new OptimizedSATOverlap;
+    else if (name == "tri_tri")
+        return new TriTriOverlap;
+    else
+        throw std::runtime_error("unknown strategy: " + name);
 }
 

@@ -13,19 +13,19 @@ namespace
     Vector<3>       cuboid2_tris[12][3];
 }
 
-bool TriTriOverlap::overlap(const Cuboid *cube1, const Cuboid *cube2, BoundaryConditions *bc) {
-    double trans_arr[3];
-    Vector<3> translation(bc->getTranslation(trans_arr, cube1->getPosition(), cube2->getPosition()));
+int TriTriOverlap::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
+    auto cube1 = dynamic_cast<const Cuboid*>(first);
+    auto cube2 = dynamic_cast<const Cuboid*>(second);
 
     obtainTris(cube1, cuboid1_tris, Vector<3>());
-    obtainTris(cube2, cuboid2_tris, translation);
+    obtainTris(cube2, cuboid2_tris, Vector<3>());
 
     return intersection::polyh_polyh(cuboid1_tris, 12, cuboid2_tris, 12);
 }
 
 // Helper method. Obtains and saves triangles from cuboid's faces
 //--------------------------------------------------------------------------------------------
-void TriTriOverlap::obtainTris(const Cuboid *cube, Vector<3> (&arr)[12][3], const Vector<3> &translation)
+void TriTriOverlap::obtainTris(const Cuboid *cube, Vector<3> (&arr)[12][3], const Vector<3> &translation) const
 {
     double size[3];
     cube->getSize(size);
@@ -46,11 +46,11 @@ void TriTriOverlap::obtainTris(const Cuboid *cube, Vector<3> (&arr)[12][3], cons
     arr[11][0] = vert[7];   arr[11][1] = vert[3];   arr[11][2] = vert[4];
 }
 
-std::string TriTriOverlap::getName() {
+std::string TriTriOverlap::getName() const {
     return "TriTriOverlap";
 }
 
-void TriTriOverlap::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) {
+void TriTriOverlap::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) const {
     Vector<3> vert[VERTEX::NUM_OF];
     cube1->obtainVertices(vert, Vector<3>());
     cube2->obtainVertices(vert, Vector<3>());

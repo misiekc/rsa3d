@@ -5,9 +5,10 @@
 #include "SATOverlap.h"
 
 
-bool SATOverlap::overlap(const Cuboid *cube1, const Cuboid *cube2, BoundaryConditions *bc) {
-    double trans_arr[3];
-    Vector<3> translation(bc->getTranslation(trans_arr, cube1->getPosition(), cube2->getPosition()));
+int SATOverlap::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
+    auto cube1 = dynamic_cast<const Cuboid*>(first);
+    auto cube2 = dynamic_cast<const Cuboid*>(second);
+
     Matrix<3, 3> orientation1 = cube1->getOrientation();
     Matrix<3, 3> orientation2 = cube2->getOrientation();
     Vector<3> vertices1[VERTEX::NUM_OF];
@@ -29,7 +30,7 @@ bool SATOverlap::overlap(const Cuboid *cube1, const Cuboid *cube2, BoundaryCondi
     };
 
     cube1->obtainVertices(vertices1, Vector<3>());
-    cube2->obtainVertices(vertices2, translation);
+    cube2->obtainVertices(vertices2, Vector<3>());
 
     // Check all possible separating axes - edge lines ...
     for (int i = 0; i < 3; i++)
@@ -77,11 +78,11 @@ SATOverlap::interval SATOverlap::getProjection(const Vector<3> & _axis, Vector<3
     return proj_int;
 }
 
-std::string SATOverlap::getName() {
+std::string SATOverlap::getName() const {
     return "SATOverlap";
 }
 
-void SATOverlap::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) {
+void SATOverlap::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) const {
     Matrix<3, 3> orientation1 = cube1->getOrientation();
     Matrix<3, 3> orientation2 = cube2->getOrientation();
 

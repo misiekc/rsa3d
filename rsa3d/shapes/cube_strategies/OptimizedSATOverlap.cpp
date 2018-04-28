@@ -10,16 +10,17 @@ using std::abs;
 // Optimized SAT algorithm from:
 // http://www.jkh.me/files/tutorials/Separating%20Axis%20Theorem%20for%20Oriented%20Bounding%20Boxes.pdf
 
-bool OptimizedSATOverlap::overlap(const Cuboid *cube1, const Cuboid *cube2, BoundaryConditions *bc) {
+int OptimizedSATOverlap::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
+    auto cube1 = dynamic_cast<const Cuboid*>(first);
+    auto cube2 = dynamic_cast<const Cuboid*>(second);
+
     Vector<3> position1(cube1->getPosition());
     Vector<3> position2(cube2->getPosition());
     Matrix<3, 3> orientation1 = cube1->getOrientation();
     Matrix<3, 3> orientation2 = cube2->getOrientation();
-    double transArray[3];
-    auto translation = Vector<3>(bc->getTranslation(transArray, cube1->getPosition(), cube2->getPosition()));
 
     // Centroid difference
-    Vector<3> T = position2 - position1 + translation;
+    Vector<3> T = position2 - position1;
 
     double size[3];
     Cuboid::getSize(size);
@@ -82,11 +83,11 @@ bool OptimizedSATOverlap::overlap(const Cuboid *cube1, const Cuboid *cube2, Boun
     return true;
 }
 
-std::string OptimizedSATOverlap::getName() {
+std::string OptimizedSATOverlap::getName() const {
     return "OptimizedSATOverlap";
 }
 
-void OptimizedSATOverlap::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) {
+void OptimizedSATOverlap::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) const {
     Matrix<3, 3> orientation1 = cube1->getOrientation();
     Matrix<3, 3> orientation2 = cube2->getOrientation();
     orientation1 * Vector<3>{{1, 0, 0}};
