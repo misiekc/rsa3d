@@ -94,7 +94,19 @@ namespace intersection
         else
             return true;
     }
-    
+
+    bool tri_tri3D(const triangle3D &tri1, const triangle3D &tri2) {
+        return tri_tri3D(tri1.data(), tri2.data());
+    }
+
+    bool polyh_polyh(const polyhedron &polyhedron1, const polyhedron &polyhedron2) {
+        for (const auto &tri1 : polyhedron1)
+            for (const auto &tri2 : polyhedron2)
+                if (tri_tri3D(tri1, tri2))
+                    return true;
+        return false;
+    }
+
     // Check intersection between two polyherdons (using tri_tri3D function)
     //--------------------------------------------------------------------------------------------
     bool polyh_polyh(const Vector<3> (*_polyh1)[3], int _num_faces1, const Vector<3> (*_polyh2)[3], int _num_faces2)
@@ -105,7 +117,7 @@ namespace intersection
                     return true;
         return false;
     }
-    
+
     // Check whether the point lies inside convex polyhedron with positive-oriented faces
     //--------------------------------------------------------------------------------------------
     bool point_polyh(const Vector<3> & _point, const Vector<3>(*_polyh)[3], int _num_faces)

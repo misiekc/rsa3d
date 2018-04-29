@@ -10,10 +10,11 @@ std::array<Vector<3>, 4> RegularTetrahedron::orientedFaceAxes;
 std::array<Vector<3>, 6> RegularTetrahedron::orientedEdgeAxes;
 
 void RegularTetrahedron::calculateStatic(const std::string &attr) {
-    orientedVertices = {{Vector<3>{{1, 1, 1}},
-                 Vector<3>{{1, -1, -1}},
-                 Vector<3>{{-1, 1, -1}},
-                 Vector<3>{{-1, -1, 1}} }};
+    constexpr double edgeFactor = std::pow(3, 1./3) / 2;
+    orientedVertices = {{Vector<3>{{1, 1, 1}} * edgeFactor,
+                 Vector<3>{{1, -1, -1}} * edgeFactor,
+                 Vector<3>{{-1, 1, -1}} * edgeFactor,
+                 Vector<3>{{-1, -1, 1}} * edgeFactor}};
 
     orientedEdgeAxes = {{orientedVertices[0] - orientedVertices[3],
                  orientedVertices[0] - orientedVertices[1],
@@ -52,16 +53,14 @@ bool RegularTetrahedron::isSeparatingAxis(const Vector<3> &axis, const RegularTe
     interval thisInterval = this->getProjection(axis);
     interval otherInterval = other.getProjection(axis);
 
-    return std::min(thisInterval.second, otherInterval.second) >= std::max(thisInterval.first, otherInterval.first);
+    return std::min(thisInterval.second, otherInterval.second) <= std::max(thisInterval.first, otherInterval.first);
 }
 
 RegularTetrahedron::interval RegularTetrahedron::getProjection(const Vector<3> & axis) const
 {
-    interval projInterval = {std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
-
     // Find enpoints of polyhedron projection (multiplied by unknown but const for axis factor)
-    auto thisVertices = applyOrientation(orientedVertices);
-    for (const auto &v : thisVertices) {
+    interval projInterval = {std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
+    for (const auto &v : this->vertices) {
         double proj = v * axis;
         if (proj < projInterval.first)
             projInterval.first = proj;
@@ -69,4 +68,13 @@ RegularTetrahedron::interval RegularTetrahedron::getProjection(const Vector<3> &
             projInterval.second = proj;
     }
     return projInterval;
+}
+
+intersection::polyhedron RegularTetrahedron::getTriangles() const {
+    return intersection::polyhedron{
+            {{this->vertices[3], this->vertices[2], this->vertices[1]}},
+            {{this->vertices[3], this->vertices[0], this->vertices[2]}},
+            {{this->vertices[0], this->vertices[3], this->vertices[1]}},
+            {{this->vertices[0], this->vertices[1], this->vertices[2]}}
+    };
 }

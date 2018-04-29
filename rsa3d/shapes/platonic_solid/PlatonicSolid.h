@@ -9,6 +9,7 @@
 #include "../../Shape.h"
 #include "../../Matrix.h"
 #include "../OverlapStrategyShape.h"
+#include "../../Intersection.h"
 
 // CRTP idiom
 template <typename SpecificSolid>
@@ -29,7 +30,7 @@ protected:
 public:
     static void initClass(const std::string &attr);
 
-    int overlap(BoundaryConditions *bc, Shape<3, 0> *s) const override;
+    int overlap(BoundaryConditions *bc, Shape<3, 0> *s) const final;
     int pointInside(BoundaryConditions *bc, double *position, const std::array<double, 0> &orientation,
                     double orientationRange) const override;
     void store(std::ostream &f) const override;
@@ -38,8 +39,16 @@ public:
     std::vector<std::string> getSupportedStrategies() const override;
     OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
 
+    /* double projectionHalfsize(const Vector<3> &axis) const;      CRTP pure virtual */
+    /* std::array<Vector<3>, 4> getVertices() const;                CRTP pure virtual */
+    /* std::array<Vector<3>, 4> getFaceAxes() const;                CRTP pure virtual */
+    /* std::array<Vector<3>, 6> getEdgeAxes() const;                CRTP pure virtual */
+
+    bool isSeparatingAxis(const Vector<3> &axis, const SpecificSolid &other,
+                          const Vector<3> &distance) const; /* CRTP virtual */
+    intersection::polyhedron getTriangles() const; /* CRTP pure virtual */
+
     const Matrix<3, 3> &getOrientationMatrix() const;
-    bool isSeparatingAxis(const Vector<3> &axis, const SpecificSolid &other, const Vector<3> &distance) const;
 };
 
 #include "PlatonicSolid.tpp"

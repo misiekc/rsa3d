@@ -34,7 +34,8 @@ template<typename SpecificSolid>
 int PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions *bc, Shape<3, 0> *s) const {
     SpecificSolid other = dynamic_cast<SpecificSolid&>(*s);     // Make a copy
     this->applyBC(bc, &other);
-    return OverlapStrategyShape::overlap(this, &other, SATOverlap<SpecificSolid>());
+    SATOverlap<SpecificSolid> satOverlap;
+    return satOverlap.overlap(this, &other);
 }
 
 template<typename SpecificSolid>
@@ -98,8 +99,7 @@ void PlatonicSolid<SpecificSolid>::setPosition(const double *position) {
 
     Vector<3> translation = newPos - oldPos;
     auto *thisSpecific = static_cast<SpecificSolid*>(this);
-    std::transform(SpecificSolid::orientedVertices.begin(), SpecificSolid::orientedVertices.end(),
-                   thisSpecific->vertices.begin(),
+    std::transform(thisSpecific->vertices.begin(), thisSpecific->vertices.end(), thisSpecific->vertices.begin(),
                    [&translation](const Vector<3> &vertex) {
                        return vertex + translation;
                    });
@@ -115,7 +115,7 @@ void PlatonicSolid<SpecificSolid>::calculateVerticesAndAxes() {
 
 template<typename SpecificSolid>
 std::vector<std::string> PlatonicSolid<SpecificSolid>::getSupportedStrategies() const {
-    return std::vector<std::string>{{"sat", "tri-tri"}};
+    return std::vector<std::string>{"sat", "tri-tri"};
 }
 
 template<typename SpecificSolid>
@@ -126,4 +126,9 @@ OverlapStrategy<3, 0> *PlatonicSolid<SpecificSolid>::createStrategy(const std::s
         return new TriTriOverlap<SpecificSolid>;
     else
         return nullptr;
+}
+
+template<typename SpecificSolid>
+intersection::polyhedron PlatonicSolid<SpecificSolid>::getTriangles() const {
+    return std::vector<intersection::triangle3D>();
 }
