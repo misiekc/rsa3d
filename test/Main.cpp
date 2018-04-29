@@ -5,8 +5,8 @@
 #include <cstdlib>
 #include "../rsa3d/Utils.h"
 #include "CuboidSpeedTest.h"
-#include "ShapeIntTest.h"
-#include "CuboidPointInsideTest.h"
+#include "ShapeOverlapTest.h"
+#include "ShapePointInsideTest.h"
 #include "AnisotropicShape2DExclusionTest.h"
 #include "VectorSpeedTest.h"
 #include "AnisotropicShape2DExclusionDrawer.h"
@@ -22,10 +22,10 @@ int main(int argc, char **argv) {
     std::string mode(argv[1]);
     if (mode == "cube_speedtest")
         return cube_speedtest::main(argc, argv);
-    else if (mode == "shape_inttest")
-        return shape_inttest::main(argc, argv);
-    else if (mode == "cube_pitest")
-        return cube_pitest::main(argc, argv);
+    else if (mode == "shape_ovtest")
+        return shape_ovtest::main(argc, argv);
+    else if (mode == "shape_pitest")
+        return shape_pitest::main(argc, argv);
     else if (mode == "as2d_extest")
         return as2d_extest::main(argc, argv);
     else if (mode == "vec_speedtest")

@@ -13,7 +13,7 @@
 #include <string>
 
 
-namespace cube_pitest
+namespace shape_pitest
 {
     struct Results {
         std::size_t tested = 0;

@@ -13,7 +13,7 @@
 #include <typeinfo>
 #include <memory>
 
-#include "ShapeIntTest.h"
+#include "ShapeOverlapTest.h"
 #include "../rsa3d/ShapeFactory.h"
 #include "../rsa3d/Utils.h"
 #include "utility/BallFactory.h"
@@ -112,12 +112,12 @@ namespace
     }
 }
 
-namespace shape_inttest
+namespace shape_ovtest
 {
     int main(int argc, char **argv)
     {
         if (argc < 6)
-            die("Usage: ./rsa_test shape_inttest [particle] [attibutes] [ball_radius] [max_tries]");
+            die("Usage: ./rsa_test shape_ovtest [particle] [attibutes] [ball_radius] [max_tries]");
 
         double ball_radius = std::stod(argv[4]);
         int max_tries = std::stoi(argv[5]);
@@ -128,8 +128,8 @@ namespace shape_inttest
         BallFactory factory;
         factory.setRadius(ball_radius);
 
-        std::ofstream dumpFile("inttest_dump.nb");
-        if (!dumpFile)  die("Cannot open inttest_dump.nb to write");
+        std::ofstream dumpFile("ovtest_dump.nb");
+        if (!dumpFile)  die("Cannot open ovtest_dump.nb to write");
 
         auto osShape = acquireShape();
         verifyShape(argv[2], osShape.get());

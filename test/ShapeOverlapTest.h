@@ -18,22 +18,22 @@
  * @brief A test of Shape::overlap method.
  *
  * Usage:
- * <blockquote>./rsa_test shape_inttest [particle] [attibutes] [ball_radius] [max_tries]</blockquote>
+ * <blockquote>./rsa_test shape_ovtest [particle] [attibutes] [ball_radius] [max_tries]</blockquote>
  *
  * The test is using BallFactory for creating shape pairs. It can be performed provided a shape configured in input.txt
  * is a subclass of OverlapStrategyShape and supports at least two overlap strategies.
  *
  * Each second and following strategies will be compared with the first one (the order from
- * OverlapStrategyShape::getStrategies) and each pair with two different overlap results will be dump to inttest_dump.nb
+ * OverlapStrategyShape::getStrategies) and each pair with two different overlap results will be dump to ovtest_dump.nb
  * file.
  */
-namespace shape_inttest
+namespace shape_ovtest
 {
     /**
      * @brief Main function for the test of Shape::overlap method..
      *
      * Usage:
-     * <blockquote>./rsa_test shape_inttest [particle] [attibutes] [ball_radius] [max_tries]</blockquote>
+     * <blockquote>./rsa_test shape_ovtest [particle] [attibutes] [ball_radius] [max_tries]</blockquote>
      */
     int main(int argc, char **argv);
 }

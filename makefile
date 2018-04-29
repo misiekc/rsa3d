@@ -92,11 +92,11 @@ OBJS_TEST = test/utility/BallFactory \
        		test/utility/Quantity \
        		test/AnisotropicShape2DExclusionDrawer \
        		test/AnisotropicShape2DExclusionTest \
-       		test/ShapeIntTest \
-       		test/CuboidPointInsideTest \
        		test/CuboidSpeedTest \
        		test/Main \
        		test/RectangleCase \
+       		test/ShapeOverlapTest \
+       		test/ShapePointInsideTest \
        		test/VectorSpeedTest
 
 # Source files list (withous extensions) for statistics lib

@@ -4,17 +4,14 @@
 // (C)PKua 2017
 //--------------------------------------------------------------------------------------------
 
-#include "CuboidPointInsideTest.h"
+#include "ShapePointInsideTest.h"
 #include "utility/MockBC.h"
 #include "../rsa3d/ShapeFactory.h"
 #include "utility/BallFactory.h"
 #include "../rsa3d/Utils.h"
 
-namespace
-{
-}
 
-namespace cube_pitest
+namespace shape_pitest
 {   
     // Performs Cuboid::pointInside test. It generates a pair of cubes and checks results
     // given by Cuboid::overlap and Cuboid::pointInside. If pointInside gives true, so should
@@ -69,22 +66,22 @@ namespace cube_pitest
     //------------------------------------------------------------------------------------------
     int main(int argc, char **argv)
     {
-        if (argc < 7)
-            die("Usage: ./rsa cube_pi_test [size_x] [size_y] [size_z] [ball_radius] [max_tries]");
+        if (argc < 6)
+            die("Usage: ./rsa shape_pitest [particle] [attr] [ball_radius] [max_tries]");
 
-        double ball_radius = std::stod(argv[5]);
-        int max_tries = std::stoi(argv[6]);
+        double ball_radius = std::stod(argv[4]);
+        int max_tries = std::stoi(argv[5]);
 
         if (ball_radius <= 0 || max_tries <= 0)
             die("Wrong input. Aborting.");
 
-        ShapeFactory::initShapeClass("Cuboid", std::string("3 ") + argv[2] + " " + argv[3] + " " + argv[4]);
+        ShapeFactory::initShapeClass(argv[2], argv[3]);
         BallFactory factory;
         factory.setRadius(ball_radius);
 
-        cube_pitest::Results results = cube_pitest::perform(factory, max_tries);
+        shape_pitest::Results results = shape_pitest::perform(factory, max_tries);
         std::cout << std::endl;
-        cube_pitest::print_results(results);
+        shape_pitest::print_results(results);
 
         return EXIT_SUCCESS;
     }
