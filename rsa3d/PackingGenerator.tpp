@@ -807,7 +807,12 @@ template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void PackingGenerator<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * packing, double size, VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels, const std::string &filename){
 	std::ofstream file(filename);
 
-	file << "Graphics[{Red";
+    if (SPATIAL_DIMENSION == 2)
+	    file << "Graphics[{Red";
+    else if (SPATIAL_DIMENSION == 3)
+        file << "Graphics3D[{Red";
+    else
+        die("Only 2D and 3D shapes are supported");
 
 //	file << "  polygon {4, <0, 0, 0.0>, <0, " << size << ", 0.0>, <" << size << ", " << size << ", 0.0>, <" << size << ", 0, 0.0>  texture { finish { ambient 1 diffuse 0 } pigment { color Gray} } }" << std::endl;
 //	file << "  text { ttf \"timrom.ttf\" \"0\" 1, 0 pigment { color Black } scale 1.0 translate < 0, 0, 0.0002> }" << std::endl;

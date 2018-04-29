@@ -13,13 +13,11 @@
 #include <typeinfo>
 #include <memory>
 
-#include "../rsa3d/Vector.h"
-#include "../rsa3d/shapes/Cuboid.h"
-#include "utility/ShapePairFactory.h"
 #include "ShapeIntTest.h"
 #include "../rsa3d/ShapeFactory.h"
-#include "utility/BallFactory.h"
 #include "../rsa3d/Utils.h"
+#include "utility/BallFactory.h"
+#include "utility/ShapePairFactory.h"
 
 namespace
 {
