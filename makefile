@@ -92,7 +92,7 @@ OBJS_TEST = test/utility/BallFactory \
        		test/utility/Quantity \
        		test/AnisotropicShape2DExclusionDrawer \
        		test/AnisotropicShape2DExclusionTest \
-       		test/CuboidIntTest \
+       		test/ShapeIntTest \
        		test/CuboidPointInsideTest \
        		test/CuboidSpeedTest \
        		test/Main \

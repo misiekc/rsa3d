@@ -10,58 +10,47 @@
 #include <cstring>
 #include <sstream>
 #include <fstream>
+#include <typeinfo>
+#include <memory>
 
 #include "../rsa3d/Vector.h"
 #include "../rsa3d/shapes/Cuboid.h"
-#include "utility/MockBC.h"
 #include "utility/ShapePairFactory.h"
-#include "CuboidIntTest.h"
-#include "../rsa3d/shapes/cube_strategies/MineOverlap.h"
+#include "ShapeIntTest.h"
 #include "../rsa3d/ShapeFactory.h"
 #include "utility/BallFactory.h"
-#include "../rsa3d/shapes/cube_strategies/SATOverlap.h"
-#include "../rsa3d/shapes/cube_strategies/TriTriOverlap.h"
-#include "../rsa3d/shapes/cube_strategies/OptimizedSATOverlap.h"
 #include "../rsa3d/Utils.h"
 
 
-namespace
-{
-    MineOverlap mineOverlap;
-}
 
-namespace cube_inttest
+namespace shape_inttest
 {
     // Performs Cuboid::overlap algorithm check. It generates some random pairs of cuboids
     // and compares result given by ::MINE strategy and _strategy strategy
     //--------------------------------------------------------------------------------------------
-    Results perform(ShapePairFactory * _factory, CuboidOverlapStrategy * _strategy, int _max_tries)
+    Results perform(ShapePairFactory *_factory, const OverlapStrategy *firstStrategy, const OverlapStrategy *secondStrategy,
+                    int _max_tries)
     {
-        cube_inttest::Results result;
-	    bool    mine_intersected, second_intersected;
-	    MockBC  bc;
-        RND     rnd;
-	
+        shape_inttest::Results result;
         result.tries = _max_tries;
 	
-	    std::cout << ">> Performing " << mineOverlap.getName() << " and " << _strategy->getName()
+	    std::cout << ">> Performing " << typeid(*firstStrategy).name() << " and " << typeid(*secondStrategy).name()
 	        << " for OverlapStrategy comparison..." << std::endl;
 	    for (int i = 0; i < _max_tries; i++) {
 	        ShapePairFactory::ShapePair pair = _factory->generate();
+
+            bool firstIntersected = (bool)firstStrategy->overlap(pair.first, pair.second);
+            bool secondIntersected = (bool)secondStrategy->overlap(pair.first, pair.second);
+
+            if (firstIntersected)
+                result.intersected++;
+            else
+                result.disjunct++;
 	        
-	        Cuboid::setOverlapStrategy(&mineOverlap);
-	        mine_intersected = (bool)pair.first->overlap(&bc, pair.second);
-	        Cuboid::setOverlapStrategy(_strategy);
-	        second_intersected = (bool)pair.first->overlap(&bc, pair.second);
-	        
-	        if (mine_intersected != second_intersected) {  // Missed overlap return value, dump
+	        if (firstIntersected != secondIntersected) {  // Missed overlap return value, dump
 	            result.missed++;
 	            result.missed_dump.push_back(pair);
-	        } else {  // Otherwise, update statistics and delete pair
-	            if (mine_intersected)
-	                result.intersected++;
-	            else
-	                result.disjunct++;
+	        } else {  // Otherwisedelete pair
 	            pair.free();
 	        }
 	        
@@ -99,41 +88,37 @@ namespace cube_inttest
     //----------------------------------------------------------------------------------------
     int main(int argc, char **argv)
     {
-        if (argc < 7)
-            die("Usage: ./rsa cube_inttest [size_x] [size_y] [size_z] [ball_radius] [max_tries]");
+        if (argc < 6)
+            die("Usage: ./rsa shape_inttest [particle] [attibutes] [ball_radius] [max_tries]");
 
-        double ball_radius = std::stod(argv[5]);
-        int max_tries = std::stoi(argv[6]);
+        double ball_radius = std::stod(argv[4]);
+        int max_tries = std::stoi(argv[5]);
         if (ball_radius <= 0 || max_tries <= 0)
             die("Wrong input. Aborting.");
 
-        std::stringstream init_stream;
-        init_stream << "3 " << argv[2] << " " << argv[3] << " " << argv[4];
-        ShapeFactory::initShapeClass("Cuboid", init_stream.str());
+        ShapeFactory::initShapeClass(argv[2], argv[3]);
         BallFactory * factory = BallFactory::getInstance();
         factory->setRadius(ball_radius);
 
-        // Test SAT
-        SATOverlap satOverlap;
-        cube_inttest::Results results = cube_inttest::perform(factory, &satOverlap, max_tries);
-        print_results(results);
-        std::cout << std::endl;
-        results.free_missed_pairs();
+        RND rnd;
+        auto shape = ShapeFactory::createShape(&rnd);
+        std::unique_ptr<const OverlapStrategyShape> osShape(dynamic_cast<const OverlapStrategyShape*>(shape));
+        if (!osShape)
+            die(std::string(argv[2]) + " is not OverlapStrategyShape");
+        else if (osShape->getSupportedStrategies().size() < 2)
+            die(std::string(argv[2]) + " does not supprot at least 2 strategies");
 
-        // Test TRI_TRI
-        TriTriOverlap triTriOverlap;
-        results = cube_inttest::perform(factory, &triTriOverlap, max_tries);
-        print_results(results);
-        std::cout << std::endl;
-        results.free_missed_pairs();
+        auto strategies = osShape->getSupportedStrategies();
+        std::unique_ptr<const OverlapStrategy> firstStrategy(osShape->createStrategy(strategies.front()));
+        for (auto name = strategies.begin() + 1; name != strategies.end(); name++) {
+            std::unique_ptr<const OverlapStrategy> secondStrategy(osShape->createStrategy(*name));
+            Results results = perform(factory, firstStrategy.get(), secondStrategy.get(), max_tries);
+            print_results(results);
+            std::cout << std::endl;
+            results.free_missed_pairs();
+        }
 
-        // Test optimised SAT
-        OptimizedSATOverlap optimizedSATOverlap;
-        results = cube_inttest::perform(factory, &optimizedSATOverlap, max_tries);
-        print_results(results);
-        std::cout << std::endl;
-
-        // Dump missed test to file
+        /*// Dump missed test to file
         if (results.missed > 0) {
             std::ofstream dump_file("inttest_dump.nb");
             if (dump_file) {
@@ -144,7 +129,7 @@ namespace cube_inttest
             } else {
                 std::cout << ">> Could not write to inttest_dump.nb";
             }
-        }
+        }*/
 
         return EXIT_SUCCESS;
     }
