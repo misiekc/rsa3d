@@ -5,6 +5,7 @@
 #include "../../Vector.h"
 #include "SATOverlap.h"
 #include "TriTriOverlap.h"
+#include <sstream>
 
 template<typename SpecificSolid>
 void PlatonicSolid<SpecificSolid>::initClass(const std::string &attr) {
@@ -96,8 +97,11 @@ void PlatonicSolid<SpecificSolid>::setPosition(const double *position) {
     Vector<3> oldPos(this->getPosition());
     Positioned::setPosition(position);
     Vector<3> newPos(this->getPosition());
+    this->translateVertices(newPos - oldPos);
+}
 
-    Vector<3> translation = newPos - oldPos;
+template<typename SpecificSolid>
+void PlatonicSolid<SpecificSolid>::translateVertices(const Vector<3> &translation) {
     auto *thisSpecific = static_cast<SpecificSolid*>(this);
     std::transform(thisSpecific->vertices.begin(), thisSpecific->vertices.end(), thisSpecific->vertices.begin(),
                    [&translation](const Vector<3> &vertex) {
@@ -111,6 +115,8 @@ void PlatonicSolid<SpecificSolid>::calculateVerticesAndAxes() {
     thisSpecific->vertices = this->applyOrientation(SpecificSolid::orientedVertices);
     thisSpecific->edgeAxes = this->applyOrientation(SpecificSolid::orientedEdgeAxes);
     thisSpecific->faceAxes = this->applyOrientation(SpecificSolid::orientedFaceAxes);
+    Vector<3> pos(this->getPosition());
+    this->translateVertices(pos);
 }
 
 template<typename SpecificSolid>
@@ -131,4 +137,18 @@ OverlapStrategy<3, 0> *PlatonicSolid<SpecificSolid>::createStrategy(const std::s
 template<typename SpecificSolid>
 intersection::polyhedron PlatonicSolid<SpecificSolid>::getTriangles() const {
     return std::vector<intersection::triangle3D>();
+}
+
+template<typename SpecificSolid>
+std::string PlatonicSolid<SpecificSolid>::toWolfram() const {
+    auto &thisSpecific = static_cast<const SpecificSolid&>(*this);
+    auto triangles = thisSpecific.getTriangles();
+
+    std::stringstream result;
+    result << "Polygon[{";
+    for (auto it = triangles.begin(); it != triangles.end() - 1; it++)
+        result << "{" << (*it)[0] << ", " << (*it)[1] << ", " << (*it)[2] << "}," << std::endl << "    ";
+    auto lastTri = triangles.back();
+    result << "{" << lastTri[0] << ", " << lastTri[1] << ", " << lastTri[2] << "}}]";
+    return result.str();
 }
