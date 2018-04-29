@@ -15,9 +15,7 @@ namespace intersection
     using triangle3D = std::array<Vector<3>, 3>;
     using polyhedron = std::vector<triangle3D>;
 
-    bool tri_tri3D(const Vector<3> * _tri1, const Vector<3> * _tri2);
     bool tri_tri3D(const triangle3D &tri1, const triangle3D &tri2);
-    bool polyh_polyh(const Vector<3> (*_polyh1)[3], int _num_faces1, const Vector<3> (*_polyh2)[3], int _num_faces2);
     bool polyh_polyh(const polyhedron &polyhedron1, const polyhedron &polyhedron2);
     bool point_polyh(const Vector<3> & _point, const Vector<3> (*_polyh)[3], int _num_faces2);
     bool line_circle(const Vector<2> &center, double r, const Vector<2> &p1, const Vector<2> &p2);
