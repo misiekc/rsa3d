@@ -6,11 +6,9 @@
 #define RSA3D_TRITRIOVERLAP_H
 
 #include "CuboidOverlapStrategy.h"
+#include "../../Intersection.h"
 
 class TriTriOverlap : public CuboidOverlapStrategy {
-private:
-    void obtainTris(const Cuboid *cube, Vector<3> (&arr)[12][3], const Vector<3> &translation) const;
-
 public:
     int overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const override;
     std::string getName() const override;
