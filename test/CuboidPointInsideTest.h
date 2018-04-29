@@ -23,7 +23,7 @@ namespace cube_pitest
         std::string factoryDesc;
     };
     
-    Results perform(ShapePairFactory * _factory, std::size_t _pairs_to_test);
+    Results perform(ShapePairFactory &factory, std::size_t _pairs_to_test);
     void print_results(Results results);
     int main(int argc, char **argv);
 }

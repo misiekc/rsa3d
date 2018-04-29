@@ -4,33 +4,14 @@
 // (C)PKua 2017
 //--------------------------------------------------------------------------------------------
 
+#include <sstream>
+
 #include "BallFactory.h"
 #include "../../rsa3d/ShapeFactory.h"
 
 typedef ShapePairFactory::ShapePair pair;
-BallFactory * BallFactory::instance = nullptr;
 
 
-// Private singleton constructor
-//--------------------------------------------------------------------------------------------  
-BallFactory::BallFactory()
-{
-    
-}
-
-// Returns singleton instance
-//--------------------------------------------------------------------------------------------  
-BallFactory * BallFactory::getInstance()
-{
-    if (instance == nullptr)
-        instance = new BallFactory();
-    return instance;
-}
-
-
-// Helper method. Creates random Cuboid based on objects parameters. Delegate cuboid creation
-// to standard ShapeFactory
-//--------------------------------------------------------------------------------------------    
 Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * BallFactory::randomShape()
 {
     double trans[3];
@@ -51,28 +32,11 @@ Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * BallFactory::randomShape()
     return shape;
 }
 
+void BallFactory::setRadius(double _radius) { this->radius = _radius; }
 
-// Sets sizes of half lengths of intervals describing box
-//--------------------------------------------------------------------------------------------
-void BallFactory::setRadius(double _radius)
-{
-    this->radius = _radius;
-}
+pair BallFactory::generate() { return {this->randomShape(), this->randomShape()}; }
 
-
-// Generates random pair of cuboids from the box of set size
-//--------------------------------------------------------------------------------------------
-pair BallFactory::generate()
-{
-    return pair(
-            this->randomShape(),
-        this->randomShape());
-}
-
-
-// Prints description of the factory on the standard output
-//--------------------------------------------------------------------------------------------
-std::string BallFactory::getDescription()
+std::string BallFactory::getDescription() const
 {
     std::stringstream stream;
     stream << "BallFactory of radius " << this->radius;

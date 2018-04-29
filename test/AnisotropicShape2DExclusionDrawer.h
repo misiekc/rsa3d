@@ -32,7 +32,7 @@
 namespace as2d_exdrawer
 {
     /**
-     * More descriptive name for the vector of vertices of a polygon.
+     * @brief More descriptive name for the vector of vertices of a polygon.
      */
     using Polygon = std::vector<Vector<2>>;
 
@@ -47,25 +47,25 @@ namespace as2d_exdrawer
     Polygon zone_for_angle(AnisotropicShape2D &shape, double angle, std::size_t resolution);
 
     /**
-     * Same as zone_for_angle(), but resulting as2d_exdrawerPolygon is intersection of exclusion zones for @a angle1 and
-     * @a angle2
+     * @brief Same as zone_for_angle(), but resulting as2d_exdrawerPolygon is intersection of exclusion zones for @a
+     * angle1 and @a angle2
      */
     Polygon zone_for_two_angles(AnisotropicShape2D &shape, double angle1, double angle2, std::size_t resolution);
 
     /**
-     * Same as zone_for_angle(), but resulting as2d_exdrawer::Polygon is exclusion zone for angle range, sampled using
-     * Shape::pointInside
+     * @brief Same as zone_for_angle(), but resulting as2d_exdrawer::Polygon is exclusion zone for angle range, sampled
+     * using Shape::pointInside
      */
     Polygon zone_for_angle_range(AnisotropicShape2D &shape, double angleFrom, double angleTo,
                                  std::size_t resolution);
 
     /**
-     * Converts given as2d_exdrawer::Polygon to Wolfram format and prints it on stream
+     * @brief Converts given as2d_exdrawer::Polygon to Wolfram format and prints it on stream
      */
     void polygon_to_wolfram(const Polygon &polygon, std::ostream &stream);
 
     /**
-     * Creates a whole Wolfram notebook visualizing exclusion zone for given @a shape and prints it on @a stream
+     * @brief Creates a whole Wolfram notebook visualizing exclusion zone for given @a shape and prints it on @a stream
      * @param shape shape, drawn Black, which exclusion zone is visualized
      * @param fromZone exclusion zone for fromAngle, drawn Red
      * @param toZone exclusion zone for toAngle, drawn Yellow
@@ -77,7 +77,7 @@ namespace as2d_exdrawer
                         const Polygon &fromAndToZone, const Polygon &rangeZone, std::ostream &stream);
 
     /**
-     * Main function for exclusion drawind facility
+     * @brief Main function for exclusion drawind facility.
      *
      * Usage:
      * <blockquote>

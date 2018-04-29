@@ -20,19 +20,18 @@ namespace cube_pitest
     // given by Cuboid::overlap and Cuboid::pointInside. If pointInside gives true, so should
     // overlap do
     //----------------------------------------------------------------------------------------
-    Results perform(ShapePairFactory * _factory, std::size_t _pairs_to_test) {
+    Results perform(ShapePairFactory &factory, std::size_t _pairs_to_test) {
         if (_pairs_to_test == 0)
             throw std::runtime_error("_pairs_to_test == 0");
         
         MockBC bc;
         Results results;
         results.tested = _pairs_to_test;
-        results.factoryDesc = _factory->getDescription();
+        results.factoryDesc = factory.getDescription();
         
         std::cout << ">> Starting..." << std::endl;
         for (std::size_t i = 0; i < _pairs_to_test; i++) {
-            ShapePairFactory::ShapePair pair;
-	        pair = _factory->generate();
+            auto pair = factory.generate();
 	        
 	        bool overlap = pair.first->overlap(&bc, pair.second);
 	        bool pi_first = pair.first->pointInside(&bc, pair.second->getPosition());
@@ -80,8 +79,8 @@ namespace cube_pitest
             die("Wrong input. Aborting.");
 
         ShapeFactory::initShapeClass("Cuboid", std::string("3 ") + argv[2] + " " + argv[3] + " " + argv[4]);
-        BallFactory * factory = BallFactory::getInstance();
-        factory->setRadius(ball_radius);
+        BallFactory factory;
+        factory.setRadius(ball_radius);
 
         cube_pitest::Results results = cube_pitest::perform(factory, max_tries);
         std::cout << std::endl;

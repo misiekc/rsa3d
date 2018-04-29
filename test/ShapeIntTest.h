@@ -14,32 +14,27 @@
 #include "../rsa3d/shapes/OverlapStrategy.h"
 #include "utility/ShapePairFactory.h"
 
+/**
+ * @brief A test of Shape::overlap method.
+ *
+ * Usage:
+ * <blockquote>./rsa_test shape_inttest [particle] [attibutes] [ball_radius] [max_tries]</blockquote>
+ *
+ * The test is using BallFactory for creating shape pairs. It can be performed provided a shape configured in input.txt
+ * is a subclass of OverlapStrategyShape and supports at least two overlap strategies.
+ *
+ * Each second and following strategies will be compared with the first one (the order from
+ * OverlapStrategyShape::getStrategies) and each pair with two different overlap results will be dump to inttest_dump.nb
+ * file.
+ */
 namespace shape_inttest
 {
-    // Struct representing intersection test results
-    //--------------------------------------------------------------------------------------------
-    struct Results {
-        int tries = 0;
-        int missed = 0;
-        int intersected = 0;
-        int disjunct = 0;
-        std::vector<ShapePairFactory::ShapePair> missed_dump;
-        
-        void free_missed_pairs() {
-            // Delete missed pairs memory
-            for (auto pair : missed_dump)
-                pair.free();
-        }
-    };
-
-    using OverlapStrategy = OverlapStrategy<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>;
-    using OverlapStrategyShape = OverlapStrategyShape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>;
-
-    Results perform(ShapePairFactory *_factory, const OverlapStrategy *firstStrategy, const OverlapStrategy *secondStrategy,
-                        int _max_tries);
-    void print_results(Results _results);
-    void dump_missed_pairs(Results _results, std::ostream & _ostr);
-
+    /**
+     * @brief Main function for the test of Shape::overlap method..
+     *
+     * Usage:
+     * <blockquote>./rsa_test shape_inttest [particle] [attibutes] [ball_radius] [max_tries]</blockquote>
+     */
     int main(int argc, char **argv);
 }
 

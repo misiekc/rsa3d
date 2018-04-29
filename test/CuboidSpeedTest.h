@@ -13,6 +13,7 @@
 #include "utility/BallFactory.h"
 #include "utility/ShapePairFactory.h"
 #include "utility/Quantity.h"
+#include "../rsa3d/shapes/cube_strategies/CuboidOverlapStrategy.h"
 
 #include <vector>
 #include <ostream>
@@ -73,15 +74,15 @@ namespace cube_speedtest
         std::vector<double>     numOverlapped;
         std::size_t             numAll{};
 
-        AcquiredData(const Context &_context, ShapePairFactory *_factory);
-        static std::vector<AcquiredData> initVector(const Context &_context, BallFactory *_factory);
+        AcquiredData(const Context &_context, ShapePairFactory &_factory);
+        static std::vector<AcquiredData> initVector(const Context &_context, BallFactory &_factory);
         Result generateResult();
         static std::vector<Result> generateResultVector(std::vector<AcquiredData> &_acquiredDatas);
     };
 
-    void warmUp(ShapePairFactory * _factor);
-    SingleTestAcquiredData test_single_alg(ShapePairFactory * _factory, std::size_t _pairs_to_test);
-    void test_single_repeat(const Context &_context, ShapePairFactory *_factory, AcquiredData &_acquired_data);
+    void warmUp(ShapePairFactory &_factor);
+    SingleTestAcquiredData test_single_alg(ShapePairFactory &_factory, std::size_t _pairs_to_test);
+    void test_single_repeat(const Context &_context, ShapePairFactory &_factory, AcquiredData &_acquired_data);
 
     int main(int argc, char **argv);
 }

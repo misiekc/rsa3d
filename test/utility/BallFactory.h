@@ -9,24 +9,25 @@
 
 #include "ShapePairFactory.h"
 
-
+/**
+ * @brief ShapePairFactory generating shapes from a ball of given size.
+ */
 class BallFactory : public ShapePairFactory
 {
 private:
-    double radius = 0.5;
-    unsigned int no = 0;
-    RND rnd;
-  
-    static BallFactory * instance;
-    
-    BallFactory();
-    Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * randomShape();
+    double radius{0.5};
+    unsigned int no{};
+    RND rnd{};
+
+    /* Helper method. Creates random Cuboid based on objects parameters. Delegate shape creation to the standard
+     * ShapeFactory */
+    Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *randomShape();
 
 public:
-    static BallFactory * getInstance();
+    ShapePair generate() override;
+    std::string getDescription() const override;
+
     void setRadius(double _radius);
-    ShapePair generate();
-    std::string getDescription();
 };
 
 #endif // _BALL_FACTORY_H

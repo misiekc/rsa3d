@@ -265,15 +265,14 @@ std::string Cuboid::toWolfram() const
 {
     const double *position = this->getPosition();
     std::stringstream out;
-    out << "cube" << this->no << " = " << std::endl;
-    out << "    GeometricTransformation[" << std::endl;
-    out << "        Cuboid[{" << (-this->size[0] / 2) << ", " << (-this->size[1] / 2) << ", " << (-this->size[2] / 2) << "}, ";
+    out << "GeometricTransformation[" << std::endl;
+    out << "    Cuboid[{" << (-this->size[0] / 2) << ", " << (-this->size[1] / 2) << ", " << (-this->size[2] / 2) << "}, ";
     out << "{" << (this->size[0] / 2) << ", " << (this->size[1] / 2) << ", " << (this->size[2] / 2) << "}]," << std::endl;
-    out << "        AffineTransform[" << std::endl;
-    out << "            {{{" << this->orientation(0, 0) << ", " << this->orientation(0, 1) << ", " << this->orientation(0, 2) << "}," << std::endl;
-    out << "            {" << this->orientation(1, 0) << ", " << this->orientation(1, 1) << ", " << this->orientation(1, 2) << "}," << std::endl;
-    out << "            {" << this->orientation(2, 0) << ", " << this->orientation(2, 1) << ", " << this->orientation(2, 2) << "}}," << std::endl;
-    out << "            {" << position[0] << ", " << position[1] << ", " << position[2] << "}}]];";
+    out << "    AffineTransform[" << std::endl;
+    out << "        {{{" << this->orientation(0, 0) << ", " << this->orientation(0, 1) << ", " << this->orientation(0, 2) << "}," << std::endl;
+    out << "        {" << this->orientation(1, 0) << ", " << this->orientation(1, 1) << ", " << this->orientation(1, 2) << "}," << std::endl;
+    out << "        {" << this->orientation(2, 0) << ", " << this->orientation(2, 1) << ", " << this->orientation(2, 2) << "}}," << std::endl;
+    out << "        {" << position[0] << ", " << position[1] << ", " << position[2] << "}}]]";
     return out.str();
 }
 

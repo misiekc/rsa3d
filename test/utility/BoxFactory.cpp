@@ -4,34 +4,13 @@
 // (C)PKua 2017
 //--------------------------------------------------------------------------------------------
 
+#include <sstream>
 #include "BoxFactory.h"
 #include "../../rsa3d/ShapeFactory.h"
 
 
 typedef ShapePairFactory::ShapePair pair;
-BoxFactory * BoxFactory::instance = nullptr;
 
-
-// Private singleton constructor
-//--------------------------------------------------------------------------------------------  
-BoxFactory::BoxFactory()
-{
-    
-}
-
-// Returns singleton instance
-//--------------------------------------------------------------------------------------------  
-BoxFactory * BoxFactory::getInstance()
-{
-    if (instance == nullptr)
-        instance = new BoxFactory();
-    return instance;
-}
-
-
-// Helper method. Creates random Cuboid based on objects parameters. Delegate cuboid creation
-// to standard ShapeFactory
-//--------------------------------------------------------------------------------------------    
 Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * BoxFactory::randomShape()
 {
     double trans[3];
@@ -44,9 +23,6 @@ Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * BoxFactory::randomShape()
     return shape;
 }
 
-
-// Sets sizes of half lengths of intervals describing box
-//--------------------------------------------------------------------------------------------
 void BoxFactory::setBoxSize(double _halfsize_x, double _halfsize_y, double _halfsize_z)
 {
     this->halfsizeX = _halfsize_x;
@@ -54,20 +30,9 @@ void BoxFactory::setBoxSize(double _halfsize_x, double _halfsize_y, double _half
     this->halfsizeZ = _halfsize_z;
 }
 
+pair BoxFactory::generate() { return {this->randomShape(), this->randomShape()}; }
 
-// Generates random pair of cuboids from the box of set size
-//--------------------------------------------------------------------------------------------
-pair BoxFactory::generate()
-{
-    return pair(
-            this->randomShape(),
-        this->randomShape());
-}
-
-
-// Prints description of the factory on the standard output
-//--------------------------------------------------------------------------------------------
-std::string BoxFactory::getDescription()
+std::string BoxFactory::getDescription() const
 {
     std::stringstream stream;
     stream << "BoxFactory of size " << this->halfsizeX * 2 << " x " << this->halfsizeY * 2 
