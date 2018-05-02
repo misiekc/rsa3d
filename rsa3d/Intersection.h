@@ -9,6 +9,7 @@
 
 #include "Matrix.h"
 #include "Vector.h"
+#include <vector>
 
 namespace intersection
 {

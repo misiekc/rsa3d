@@ -4,6 +4,7 @@
 
 #include <memory>
 #include <fstream>
+#include <functional>
 #include "AnisotropicShape2DExclusionDrawer.h"
 #include "../rsa3d/Utils.h"
 #include "../rsa3d/ShapeFactory.h"

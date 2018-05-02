@@ -5,6 +5,7 @@
  *      Author: ciesla
  */
 
+#include <cmath>
 #include "Segment2D.h"
 #include "../../BoundaryConditions.h"
 
