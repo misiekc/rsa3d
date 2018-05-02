@@ -17,6 +17,8 @@ class PlatonicSolid : public Shape<3, 0>, public OverlapStrategyShape<3, 0> {
 private:
     Matrix<3, 3> orientation = Matrix<3, 3>::identity();
 
+    static void normalizeAxes();
+
 protected:
     explicit PlatonicSolid(const Matrix<3, 3> &orientation) : orientation(orientation) {};
 

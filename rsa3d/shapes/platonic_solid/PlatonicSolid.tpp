@@ -10,6 +10,8 @@
 template<typename SpecificSolid>
 void PlatonicSolid<SpecificSolid>::initClass(const std::string &attr) {
     SpecificSolid::calculateStatic(attr);
+    normalizeAxes();
+
     Shape::setNeighbourListCellSize(2 * SpecificSolid::circumsphereRadius);
     Shape::setVoxelSpatialSize(SpecificSolid::insphereRadius / M_SQRT2);
 
@@ -19,6 +21,17 @@ void PlatonicSolid<SpecificSolid>::initClass(const std::string &attr) {
                 std::asin(rnd->nextValue() * 2 - 1),
                 rnd->nextValue() * 2 * M_PI));
     });
+}
+
+template<typename SpecificSolid>
+void PlatonicSolid<SpecificSolid>::normalizeAxes() {
+    auto normalizer = [](const Vector<3> &v) {
+        return v / v.norm();
+    };
+    std::transform(SpecificSolid::orientedEdgeAxes.begin(), SpecificSolid::orientedEdgeAxes.end(),
+                   SpecificSolid::orientedEdgeAxes.begin(), normalizer);
+    std::transform(SpecificSolid::orientedFaceAxes.begin(), SpecificSolid::orientedFaceAxes.end(),
+                   SpecificSolid::orientedFaceAxes.begin(), normalizer);
 }
 
 template<typename SpecificSolid>

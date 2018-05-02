@@ -12,8 +12,9 @@ class RegularOctahedron : public PlatonicSolid<RegularOctahedron> {
 private:
     friend PlatonicSolid<RegularOctahedron>;
 
-    constexpr static double circumsphereRadius = 0;
-    constexpr static double insphereRadius = 0;
+    constexpr static double circumsphereRadius = std::pow(0.75, 1./3);
+    constexpr static double insphereRadius = std::pow(48, -1./6);
+    constexpr static double edgeFactor = std::pow(0.75, 1./3);
     static std::array<Vector<3>, 8> orientedVertices;
     static std::array<Vector<3>, 4> orientedFaceAxes;
     static std::array<Vector<3>, 6> orientedEdgeAxes;
@@ -27,10 +28,12 @@ private:
 public:
     explicit RegularOctahedron(const Matrix<3, 3> &orientation);
 
-    double projectionHalfsize(const Vector<3> &axis) const;
-    std::array<Vector<3>, 8> getVertices() const;
-    std::array<Vector<3>, 4> getFaceAxes() const;
-    std::array<Vector<3>, 6> getEdgeAxes() const;
+    std::array<Vector<3>, 8> getVertices() const;               /* CRTP implement */
+    std::array<Vector<3>, 4> getFaceAxes() const;               /* CRTP implement */
+    std::array<Vector<3>, 6> getEdgeAxes() const;               /* CRTP implement */
+
+    double projectionHalfsize(const Vector<3> &axis) const;     /* CRTP implement */
+    intersection::polyhedron getTriangles() const;              /* CRTP implement */
 };
 
 

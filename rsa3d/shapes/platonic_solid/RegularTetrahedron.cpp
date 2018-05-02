@@ -27,13 +27,6 @@ void RegularTetrahedron::calculateStatic(const std::string &attr) {
                  orientedEdgeAxes[2] ^ orientedEdgeAxes[0],
                  orientedEdgeAxes[0] ^ orientedEdgeAxes[1],
                  orientedEdgeAxes[1] ^ orientedEdgeAxes[2]}};
-
-    // Normalize axes
-    auto normalizer = [](const Vector<3> &v) {
-        return v / v.norm();
-    };
-    std::transform(orientedEdgeAxes.begin(), orientedEdgeAxes.end(), orientedEdgeAxes.begin(), normalizer);
-    std::transform(orientedFaceAxes.begin(), orientedFaceAxes.end(), orientedFaceAxes.begin(), normalizer);
 }
 
 RegularTetrahedron::RegularTetrahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularTetrahedron>{orientation} {

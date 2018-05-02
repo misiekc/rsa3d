@@ -9,11 +9,40 @@ std::array<Vector<3>, 4> RegularOctahedron::orientedFaceAxes;
 std::array<Vector<3>, 6> RegularOctahedron::orientedEdgeAxes;
 
 void RegularOctahedron::calculateStatic(const std::string &attr) {
+    orientedVertices = {{Vector<3>{{ 1,  0,  0}} * edgeFactor,
+            Vector<3>{{-1,  0,  0}} * edgeFactor,
+            Vector<3>{{ 0,  1,  0}} * edgeFactor,
+            Vector<3>{{ 0, -1,  0}} * edgeFactor,
+            Vector<3>{{ 0,  0,  1}} * edgeFactor,
+            Vector<3>{{ 0,  0, -1}} * edgeFactor
+    }};
 
+    orientedEdgeAxes = {{orientedVertices[4] - orientedVertices[2],
+            orientedVertices[4] - orientedVertices[1],
+            orientedVertices[3] - orientedVertices[4],
+            orientedVertices[0] - orientedVertices[4],
+            orientedVertices[0] - orientedVertices[3],
+            orientedVertices[2] - orientedVertices[0]
+    }};
+
+    orientedFaceAxes = {{
+            orientedEdgeAxes[3] ^ orientedEdgeAxes[0],
+            orientedEdgeAxes[0] ^ orientedEdgeAxes[1],
+            orientedEdgeAxes[2] ^ orientedEdgeAxes[1],
+            orientedEdgeAxes[2] ^ orientedEdgeAxes[3],
+    }};
 }
 
 double RegularOctahedron::projectionHalfsize(const Vector<3> &axis) const {
-    return 0;
+    Vector<3> xAxis = this->getOrientationMatrix() * Vector<3>{{1, 0, 0}};
+    Vector<3> yAxis = this->getOrientationMatrix() * Vector<3>{{0, 1, 0}};
+    Vector<3> zAxis = this->getOrientationMatrix() * Vector<3>{{0, 0, 1}};
+
+    double xHalfsize = std::abs(xAxis * axis);
+    double yHalfsize = std::abs(yAxis * axis);
+    double zHalfsize = std::abs(zAxis * axis);
+
+    return std::max(std::max(xHalfsize, yHalfsize), zHalfsize) * edgeFactor;
 }
 
 std::array<Vector<3>, 4> RegularOctahedron::getFaceAxes() const {
@@ -30,4 +59,17 @@ std::array<Vector<3>, 8> RegularOctahedron::getVertices() const {
 
 RegularOctahedron::RegularOctahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularOctahedron>{orientation} {
     this->calculateVerticesAndAxes();
+}
+
+intersection::polyhedron RegularOctahedron::getTriangles() const {
+    return intersection::polyhedron{
+            {{this->vertices[0], this->vertices[2], this->vertices[4]}},
+            {{this->vertices[1], this->vertices[5], this->vertices[3]}},
+            {{this->vertices[4], this->vertices[2], this->vertices[1]}},
+            {{this->vertices[3], this->vertices[5], this->vertices[0]}},
+            {{this->vertices[4], this->vertices[1], this->vertices[3]}},
+            {{this->vertices[2], this->vertices[0], this->vertices[5]}},
+            {{this->vertices[3], this->vertices[0], this->vertices[4]}},
+            {{this->vertices[1], this->vertices[2], this->vertices[5]}}
+    };
 }
