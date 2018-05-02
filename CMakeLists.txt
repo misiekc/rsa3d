@@ -16,13 +16,21 @@ set(MAIN_SOURCE
         rsa3d/shapes/platonic_solid/RegularOctahedron.cpp
         rsa3d/shapes/platonic_solid/RegularDodecahedron.cpp
         rsa3d/shapes/platonic_solid/RegularIcosahedron.cpp
+        rsa3d/shapes/platonic_solid/SATOverlap.h
+        rsa3d/shapes/platonic_solid/SATOverlap.tpp
+        rsa3d/shapes/platonic_solid/TriTriOverlap.h
+        rsa3d/shapes/platonic_solid/TriTriOverlap.tpp
         rsa3d/shapes/polygons/Segment2D.cpp
         rsa3d/shapes/Cuboid.cpp
         rsa3d/shapes/Ellipse.cpp
         rsa3d/shapes/OrientedCuboid.h
+        rsa3d/shapes/OrientedCuboid.tpp
+        rsa3d/shapes/OverlapStrategy.h
+        rsa3d/shapes/OverlapStrategyShape.h
         rsa3d/shapes/polygons/Polygon.cpp
         rsa3d/shapes/Rectangle.cpp
         rsa3d/shapes/Sphere.h
+        rsa3d/shapes/Sphere.tpp
         rsa3d/shapes/SpheroCylinder2D.cpp
         rsa3d/surfaces/NBoxFBC.cpp
         rsa3d/surfaces/NBoxPBC.cpp
@@ -34,17 +42,22 @@ set(MAIN_SOURCE
         rsa3d/NeighbourGrid.h
         rsa3d/OrientedFace.cpp
         rsa3d/PackingGenerator.h
+        rsa3d/PackingGenerator.tpp
         rsa3d/Parameters.cpp
         rsa3d/Positioned.h
+        rsa3d/Positioned.tpp
         rsa3d/RND.cpp
         rsa3d/Shape.h
+        rsa3d/Shape.tpp
         rsa3d/ShapeFactory.cpp
         rsa3d/Surface.cpp
         rsa3d/Timer.cpp
         rsa3d/Utils.cpp
         rsa3d/Vector.h
         rsa3d/Voxel.h
-        rsa3d/VoxelList.h rsa3d/shapes/OverlapStrategyShape.h rsa3d/shapes/OverlapStrategy.h rsa3d/shapes/platonic_solid/SATOverlap.tpp rsa3d/shapes/platonic_solid/SATOverlap.h rsa3d/shapes/platonic_solid/TriTriOverlap.tpp rsa3d/shapes/platonic_solid/TriTriOverlap.h)
+        rsa3d/Voxel.tpp
+        rsa3d/VoxelList.h
+        rsa3d/VoxelList.tpp)
 
 set(STATISTICS_SOURCE
         statistics/ASFRegression.cpp
@@ -70,8 +83,8 @@ set(TEST_SOURCE
 include_directories(statistics)
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -Wall -pedantic")
+
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
-#set (CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -O3 -fopenmp")
 set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
 
 add_library(rsa_src ${MAIN_SOURCE})
