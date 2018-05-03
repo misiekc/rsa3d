@@ -12,21 +12,21 @@ std::array<Vector<3>, 6> RegularTetrahedron::orientedEdgeAxes;
 void RegularTetrahedron::calculateStatic(const std::string &attr) {
     constexpr double edgeFactor = std::pow(3, 1./3) / 2;
     orientedVertices = {{Vector<3>{{1, 1, 1}} * edgeFactor,
-                 Vector<3>{{1, -1, -1}} * edgeFactor,
-                 Vector<3>{{-1, 1, -1}} * edgeFactor,
-                 Vector<3>{{-1, -1, 1}} * edgeFactor}};
+                         Vector<3>{{1, -1, -1}} * edgeFactor,
+                         Vector<3>{{-1, 1, -1}} * edgeFactor,
+                         Vector<3>{{-1, -1, 1}} * edgeFactor}};
 
     orientedEdgeAxes = {{orientedVertices[0] - orientedVertices[3],
-                 orientedVertices[0] - orientedVertices[1],
-                 orientedVertices[0] - orientedVertices[2],
-                 orientedVertices[2] - orientedVertices[1],
-                 orientedVertices[1] - orientedVertices[3],
-                 orientedVertices[3] - orientedVertices[2]}};
+                         orientedVertices[0] - orientedVertices[1],
+                         orientedVertices[0] - orientedVertices[2],
+                         orientedVertices[2] - orientedVertices[1],
+                         orientedVertices[1] - orientedVertices[3],
+                         orientedVertices[3] - orientedVertices[2]}};
 
     orientedFaceAxes = {{orientedEdgeAxes[3] ^ orientedEdgeAxes[4],
-                 orientedEdgeAxes[2] ^ orientedEdgeAxes[0],
-                 orientedEdgeAxes[0] ^ orientedEdgeAxes[1],
-                 orientedEdgeAxes[1] ^ orientedEdgeAxes[2]}};
+                         orientedEdgeAxes[2] ^ orientedEdgeAxes[0],
+                         orientedEdgeAxes[0] ^ orientedEdgeAxes[1],
+                         orientedEdgeAxes[1] ^ orientedEdgeAxes[2]}};
 }
 
 RegularTetrahedron::RegularTetrahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularTetrahedron>{orientation} {

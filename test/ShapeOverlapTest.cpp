@@ -107,7 +107,7 @@ namespace
     void dump_missed_pairs_to_file(Results results, std::ostream &dumpFile) {
         if (results.missed > 0) {
             dump_missed_pairs(results, dumpFile);
-            std::cout << ">> Missed pairs dumped to file " << std::endl;
+            std::cout << ">> Missed pairs dumped to file" << std::endl;
         }
     }
 }
