@@ -270,6 +270,20 @@ public:
      * @return the element from @a row + 1 row and @a column + 1 column
      */
     const E & operator()(std::size_t row, std::size_t column) const;
+
+    /**
+     * @brief Returns a row of the matrix as a Vector
+     * @param row index of a row (starting from 0) to extract
+     * @return a row of the matrix as a Vector
+     */
+    Vector<COLS, E> row(std::size_t row) const;
+
+    /**
+     * @brief Returns a column of the matrix as a Vector
+     * @param column index of a column (starting from 0) to extract
+     * @return a column of the matrix as a Vector
+     */
+    Vector<ROWS, E> column(std::size_t column) const;
     
     // Friendship declarations
     //----------------------------------------------------------------------------------------

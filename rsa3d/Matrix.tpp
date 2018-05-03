@@ -430,6 +430,24 @@ inline std::size_t Matrix<ROWS, COLS, E>::getCols() const
     return COLS;
 }
 
+template<size_t ROWS, size_t COLS, typename E>
+Vector<COLS, E> Matrix<ROWS, COLS, E>::row(std::size_t row) const {
+    if (row >= ROWS) throw std::invalid_argument("row >= ROWS");
+    Vector<COLS, E> result;
+    for (std::size_t i = 0; i < COLS; i++)
+        result.v._get(i, 0) = this->_get(row, i);
+    return result;
+}
+
+template<size_t ROWS, size_t COLS, typename E>
+Vector<ROWS, E> Matrix<ROWS, COLS, E>::column(std::size_t column) const {
+    if (column >= COLS) throw std::invalid_argument("column >= COLS");
+    Vector<ROWS, E> result;
+    for (std::size_t i = 0; i < ROWS; i++)
+        result.v._get(i, 0) = this->_get(i, column);
+    return result;
+}
+
 // Private inline function returning the element from the array of given address. Doesn't perform
 // arguments validation
 //-------------------------------------------------------------------------------------------------------
@@ -447,7 +465,6 @@ inline const E & Matrix<ROWS, COLS, E>::_get(std::size_t _row, std::size_t _col)
 {
     return arr[_row * COLS + _col];
 }
-
 
 template<size_t ROWS, size_t COLS, typename E>
 void Matrix<ROWS, COLS, E>::copyToArray(E *arr) const {

@@ -64,6 +64,9 @@ class Vector
     template <std::size_t, typename>
     friend class Vector;
 
+    template <std::size_t, std::size_t, typename>
+    friend class Matrix;
+
 private:
 
     Matrix<DIM, 1, E> v;        // Backing matrix
