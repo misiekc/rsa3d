@@ -158,6 +158,7 @@ std::string PlatonicSolid<SpecificSolid>::toWolfram() const {
     auto triangles = thisSpecific.getTriangles();
 
     std::stringstream result;
+    result << std::fixed;
     result << "Polygon[{";
     for (auto it = triangles.begin(); it != triangles.end() - 1; it++)
         result << "{" << (*it)[0] << ", " << (*it)[1] << ", " << (*it)[2] << "}," << std::endl << "    ";
