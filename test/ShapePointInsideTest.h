@@ -6,25 +6,24 @@
 
 #ifndef _CUBOID_POINT_INSDE_TEST_H
     #define _CUBOID_POINT_INSDE_TEST_H
-    
 
-#include "utility/ShapePairFactory.h"
-
-#include <string>
-
-
+/**
+ * @brief A test of Shape::pointInside method.
+ *
+ * Usage:
+ * <blockquote>./rsa_test shape_pitest [particle] [attibutes] [ball_radius] [max_tries]</blockquote>
+ *
+ * The test is using BallFactory for creating shape pairs. For each pair it checks results given by Shape::overlap and
+ * Shape::pointInside. If Shape::pointInside gives true, so should Shape:overlap do - otherwise a @a conflict occurs.
+ */
 namespace shape_pitest
 {
-    struct Results {
-        std::size_t tested = 0;
-        std::size_t overlapped = 0;
-        std::size_t withPointInside = 0;
-        std::size_t conflicts = 0;
-        std::string factoryDesc;
-    };
-    
-    Results perform(ShapePairFactory &factory, std::size_t _pairs_to_test);
-    void print_results(Results results);
+    /**
+     * @brief Main function for the test of Shape::pointInside method.
+     *
+     * Usage:
+     * <blockquote>./rsa_test shape_pitest [particle] [attibutes] [ball_radius] [max_tries]</blockquote>
+     */
     int main(int argc, char **argv);
 }
 

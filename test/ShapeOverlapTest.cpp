@@ -23,17 +23,27 @@ namespace
 {
     /* A struct representing intersection test results */
     struct Results {
-        unsigned int tries{};
+        unsigned long tries{};
         unsigned int intersected{};
         unsigned int disjunct{};
         std::vector<ShapePairFactory::ShapePair> missed_dump;
 
-        inline void free_missed_pairs() const {
-            for (auto pair : missed_dump)
-                pair.free();
+        std::size_t missed() const { return missed_dump.size(); }
+
+        void report(ShapePairFactory::ShapePair &pair, bool firstIntersected, bool secondIntersected) {
+            if (firstIntersected)   this->intersected++;
+            else                    this->disjunct++;
+
+            if (firstIntersected != secondIntersected)  // Missed overlap return value, dump
+                this->missed_dump.push_back(pair);
         }
 
-        std::size_t missed() const { return missed_dump.size(); }
+        /* Prints result info to given ostream */
+        void print(std::ostream &ostr) const {
+            ostr << ">> " << this->missed() << " from " << this->tries << " intersection results missed" << std::endl;
+            ostr << ">> " << this->intersected << " shapes overlapped, " << this->disjunct;
+            ostr << " shapes were disjunctive" << std::endl;
+        }
     };
 
     /* Helper class for dumping missed pairs. Creates dump file only if it is needed. */
@@ -49,18 +59,19 @@ namespace
             if (file.is_open()) file.close();
         }
 
+        const std::string &getFilename() const { return filename; }
+
         void dump(Results results) {
             if (results.missed() > 0) {
                 if (!file.is_open())
                     file.open(filename);
                 
                 for (auto pair : results.missed_dump) {
-                    file << "first = " << pair.first->toWolfram() << ";" << std::endl;
-                    file << "second = " << pair.second->toWolfram() << ";" << std::endl;
+                    file << "first = " << pair.first()->toWolfram() << ";" << std::endl;
+                    file << "second = " << pair.second()->toWolfram() << ";" << std::endl;
                     file << "Graphics3D[{first, second}]" << std::endl;
                     file << std::endl;
                 }
-                std::cout << ">> Missed pairs dumped to " << filename << std::endl;
             }
         }
     };
@@ -89,39 +100,22 @@ namespace
 
     /* Performs a comparison of two strategies */
     Results perform(ShapePairFactory &factory, const RSAOverlapStrategy &firstStrategy,
-                    const RSAOverlapStrategy &secondStrategy, int _max_tries) {
+                    const RSAOverlapStrategy &secondStrategy, unsigned long maxTries) {
         Results result;
-        result.tries = _max_tries;
+        result.tries = maxTries;
 
-        std::cout << ">> Performing " << typeid(firstStrategy).name() << " and " << typeid(secondStrategy).name()
-                  << " for OverlapStrategy comparison..." << std::endl;
-        for (int i = 0; i < _max_tries; i++) {
+        std::cout << ">> Performing " << typeid(firstStrategy).name() << " and " << typeid(secondStrategy).name();
+        std::cout << " for OverlapStrategy comparison..." << std::endl;
+        for (unsigned long i = 0; i < maxTries; i++) {
             ShapePairFactory::ShapePair pair = factory.generate();
+            bool firstIntersected = (bool)firstStrategy.overlap(pair.first(), pair.second());
+            bool secondIntersected = (bool)secondStrategy.overlap(pair.first(), pair.second());
 
-            bool firstIntersected = (bool)firstStrategy.overlap(pair.first, pair.second);
-            bool secondIntersected = (bool)secondStrategy.overlap(pair.first, pair.second);
-
-            if (firstIntersected)
-                result.intersected++;
-            else
-                result.disjunct++;
-
-            if (firstIntersected != secondIntersected)  // Missed overlap return value, dump
-                result.missed_dump.push_back(pair);
-            else  // Otherwise delete pair
-                pair.free();
-
+            result.report(pair, firstIntersected, secondIntersected);
             if ((i % 10000) == 9999)
                 std::cout << (i + 1) << " pairs tested..." << std::endl;
         }
-
         return result;
-    }
-
-    /* Prints result to a standard output */
-    void print_results(Results results) {
-        std::cout << ">> " << results.missed() << " from " << results.tries << " intersection results missed" << std::endl;
-        std::cout << ">> " << results.intersected << " shapes overlapped, " << results.disjunct << " shapes were disjunctive" << std::endl;
     }
 }
 
@@ -132,7 +126,7 @@ namespace shape_ovtest
             die("Usage: ./rsa_test shape_ovtest [particle] [attibutes] [ball_radius] [max_tries]");
 
         double ball_radius = std::stod(argv[4]);
-        int max_tries = std::stoi(argv[5]);
+        unsigned long max_tries = std::stoul(argv[5]);
         if (ball_radius <= 0 || max_tries <= 0)
             die("Wrong input. Aborting.");
 
@@ -150,10 +144,10 @@ namespace shape_ovtest
         for (auto name = strategies.begin() + 1; name != strategies.end(); name++) {
             auto secondStrategy = acquireStrategy(*osShape, *name);
             Results results = perform(factory, *firstStrategy, *secondStrategy, max_tries);
-            print_results(results);
+            results.print(std::cout);
             dumper.dump(results);
+            if (results.missed() > 0) std::cout << ">> Missed pairs dumped to " << dumper.getFilename() << std::endl;
             std::cout << std::endl;
-            results.free_missed_pairs();
         }
         return EXIT_SUCCESS;
     }

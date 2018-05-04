@@ -8,6 +8,7 @@
     #define _CUBOID_PAIR_FACTORY_H
 
 #include <string>
+#include <memory>
 
 #include "../../rsa3d/Shape.h"
 #include "../../rsa3d/Parameters.h"
@@ -24,22 +25,18 @@ public:
     using RSAShape = Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>;
 
     /**
-     * @brief Pair of two shapes. Provides also self-cleaning utility.
+     * @brief Pair of two shapes. Takes ownership of given shapes and perform deallocation.
      */
-    struct ShapePair
+    class ShapePair
     {
-        RSAShape *first;
-        RSAShape *second;
+    private:
+        std::shared_ptr<RSAShape> _first;
+        std::shared_ptr<RSAShape> _second;
 
-        ShapePair(RSAShape *first, RSAShape *second) : first(first), second(second) { }
-        
-        /**
-         * @brief Deallocates memory for stored shapes.
-         */
-        inline void free() {
-            delete first;
-            delete second;
-        }
+    public:
+        ShapePair(RSAShape *first, RSAShape *second) : _first(first), _second(second) { }
+        RSAShape *first() { return _first.get(); }
+        RSAShape *second() { return _second.get(); }
     };
     
     /**

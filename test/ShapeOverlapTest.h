@@ -30,7 +30,7 @@
 namespace shape_ovtest
 {
     /**
-     * @brief Main function for the test of Shape::overlap method..
+     * @brief Main function for the test of Shape::overlap method.
      *
      * Usage:
      * <blockquote>./rsa_test shape_ovtest [particle] [attibutes] [ball_radius] [max_tries]</blockquote>

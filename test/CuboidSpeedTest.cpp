@@ -66,9 +66,8 @@ namespace cube_speedtest
         timer.start();
         for (std::size_t i = 0; i < _pairs_to_test; i++) {
             ShapePairFactory::ShapePair pair = _factory.generate();
-            if (pair.first->overlap(&bc, pair.second))
+            if (pair.first()->overlap(&bc, pair.second()))
                 result.overlapped++;
-            pair.free();
         }
         timer.stop();
         result.nanos = timer.count<nanoseconds>() / _pairs_to_test;
@@ -76,8 +75,7 @@ namespace cube_speedtest
         timer.start();
         for (std::size_t i = 0; i < _pairs_to_test; i++) {
             ShapePairFactory::ShapePair pair = _factory.generate();
-            strategy->runOverheadOperations((Cuboid *)pair.first, (Cuboid *)pair.second);
-            pair.free();
+            strategy->runOverheadOperations((Cuboid *)pair.first(), (Cuboid *)pair.second());
         }
         timer.stop();
         result.overhead = timer.count<nanoseconds>() / _pairs_to_test;
