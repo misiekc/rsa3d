@@ -23,15 +23,45 @@ namespace
 {
     /* A struct representing intersection test results */
     struct Results {
-        int tries = 0;
-        int missed = 0;
-        int intersected = 0;
-        int disjunct = 0;
+        unsigned int tries{};
+        unsigned int intersected{};
+        unsigned int disjunct{};
         std::vector<ShapePairFactory::ShapePair> missed_dump;
 
-        inline void free_missed_pairs() {
+        inline void free_missed_pairs() const {
             for (auto pair : missed_dump)
                 pair.free();
+        }
+
+        std::size_t missed() const { return missed_dump.size(); }
+    };
+
+    /* Helper class for dumping missed pairs. Creates dump file only if it is needed. */
+    class MissedPairsDumper {
+    private:
+        std::string filename;
+        std::ofstream file;
+
+    public:
+        explicit MissedPairsDumper(const std::string &filename) : filename(filename) {}
+        
+        ~MissedPairsDumper() { 
+            if (file.is_open()) file.close();
+        }
+
+        void dump(Results results) {
+            if (results.missed() > 0) {
+                if (!file.is_open())
+                    file.open(filename);
+                
+                for (auto pair : results.missed_dump) {
+                    file << "first = " << pair.first->toWolfram() << ";" << std::endl;
+                    file << "second = " << pair.second->toWolfram() << ";" << std::endl;
+                    file << "Graphics3D[{first, second}]" << std::endl;
+                    file << std::endl;
+                }
+                std::cout << ">> Missed pairs dumped to " << filename << std::endl;
+            }
         }
     };
 
@@ -51,10 +81,15 @@ namespace
             die(name + " does not support at least 2 strategies");
     }
 
+    /* Wraps some ugliness */
+    std::unique_ptr<const RSAOverlapStrategy> acquireStrategy(const RSAOverlapStrategyShape &shape,
+                                                              const std::string &strategyName) {
+        return std::unique_ptr<const RSAOverlapStrategy>(shape.createStrategy(strategyName));
+    }
+
     /* Performs a comparison of two strategies */
     Results perform(ShapePairFactory &factory, const RSAOverlapStrategy &firstStrategy,
-                    const RSAOverlapStrategy &secondStrategy, int _max_tries)
-    {
+                    const RSAOverlapStrategy &secondStrategy, int _max_tries) {
         Results result;
         result.tries = _max_tries;
 
@@ -71,12 +106,10 @@ namespace
             else
                 result.disjunct++;
 
-            if (firstIntersected != secondIntersected) {  // Missed overlap return value, dump
-                result.missed++;
+            if (firstIntersected != secondIntersected)  // Missed overlap return value, dump
                 result.missed_dump.push_back(pair);
-            } else {  // Otherwise delete pair
+            else  // Otherwise delete pair
                 pair.free();
-            }
 
             if ((i % 10000) == 9999)
                 std::cout << (i + 1) << " pairs tested..." << std::endl;
@@ -86,36 +119,15 @@ namespace
     }
 
     /* Prints result to a standard output */
-    void print_results(Results results)
-    {
-        std::cout << ">> " << results.missed << " from " << results.tries << " intersection results missed" << std::endl;
+    void print_results(Results results) {
+        std::cout << ">> " << results.missed() << " from " << results.tries << " intersection results missed" << std::endl;
         std::cout << ">> " << results.intersected << " shapes overlapped, " << results.disjunct << " shapes were disjunctive" << std::endl;
-    }
-
-    /* Dumps missed pair onto std::ostream ostr */
-    void dump_missed_pairs(Results results, std::ostream &ostr)
-    {
-        for (auto pair : results.missed_dump) {
-            ostr << "first = " << pair.first->toWolfram() << ";" << std::endl;
-            ostr << "second = " << pair.second->toWolfram() << ";" << std::endl;
-            ostr << "Graphics3D[{first, second}]" << std::endl;
-            ostr << std::endl;
-        }
-    }
-
-    /* Dumps missed pairs to a file of given name */
-    void dump_missed_pairs_to_file(Results results, std::ostream &dumpFile) {
-        if (results.missed > 0) {
-            dump_missed_pairs(results, dumpFile);
-            std::cout << ">> Missed pairs dumped to file" << std::endl;
-        }
     }
 }
 
 namespace shape_ovtest
 {
-    int main(int argc, char **argv)
-    {
+    int main(int argc, char **argv) {
         if (argc < 6)
             die("Usage: ./rsa_test shape_ovtest [particle] [attibutes] [ball_radius] [max_tries]");
 
@@ -128,24 +140,21 @@ namespace shape_ovtest
         BallFactory factory;
         factory.setRadius(ball_radius);
 
-        std::ofstream dumpFile("ovtest_dump.nb");
-        if (!dumpFile)  die("Cannot open ovtest_dump.nb to write");
-
         auto osShape = acquireShape();
         verifyShape(argv[2], osShape.get());
 
         // Compare first strategy results with each following. Dump all missed pairs to a file
         auto strategies = osShape->getSupportedStrategies();
-        std::unique_ptr<const RSAOverlapStrategy> firstStrategy(osShape->createStrategy(strategies.front()));
+        auto firstStrategy = acquireStrategy(*osShape, strategies.front());
+        MissedPairsDumper dumper("ovtest_dump.nb");
         for (auto name = strategies.begin() + 1; name != strategies.end(); name++) {
-            std::unique_ptr<const RSAOverlapStrategy> secondStrategy(osShape->createStrategy(*name));
+            auto secondStrategy = acquireStrategy(*osShape, *name);
             Results results = perform(factory, *firstStrategy, *secondStrategy, max_tries);
             print_results(results);
-            dump_missed_pairs_to_file(results, dumpFile);
+            dumper.dump(results);
             std::cout << std::endl;
             results.free_missed_pairs();
         }
-        dumpFile.close();
         return EXIT_SUCCESS;
     }
 }
