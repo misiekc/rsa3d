@@ -91,12 +91,15 @@ intersection::polyhedron RegularDodecahedron::getTriangles() const {
             {{this->vertices[3], this->vertices[0], this->vertices[16]}},
             {{this->vertices[3], this->vertices[11], this->vertices[0]}},
             {{this->vertices[11], this->vertices[8], this->vertices[0]}},
+
             {{this->vertices[17], this->vertices[6], this->vertices[7]}},
             {{this->vertices[7], this->vertices[6], this->vertices[8]}},
             {{this->vertices[7], this->vertices[8], this->vertices[11]}},
+
             {{this->vertices[15], this->vertices[12], this->vertices[0]}},
             {{this->vertices[15], this->vertices[0], this->vertices[8]}},
             {{this->vertices[15], this->vertices[8], this->vertices[6]}},
+
             {{this->vertices[16], this->vertices[0], this->vertices[12]}},
             {{this->vertices[16], this->vertices[12], this->vertices[1]}},
             {{this->vertices[16], this->vertices[1], this->vertices[19]}},
@@ -104,12 +107,15 @@ intersection::polyhedron RegularDodecahedron::getTriangles() const {
             {{this->vertices[3], this->vertices[16], this->vertices[19]}},
             {{this->vertices[3], this->vertices[19], this->vertices[2]}},
             {{this->vertices[3], this->vertices[2], this->vertices[13]}},
+
             {{this->vertices[11], this->vertices[3], this->vertices[13]}},
             {{this->vertices[11], this->vertices[13], this->vertices[14]}},
             {{this->vertices[11], this->vertices[14], this->vertices[7]}},
+
             {{this->vertices[4], this->vertices[10], this->vertices[9]}},
             {{this->vertices[4], this->vertices[9], this->vertices[5]}},
             {{this->vertices[4], this->vertices[5], this->vertices[18]}},
+
             {{this->vertices[2], this->vertices[19], this->vertices[1]}},
             {{this->vertices[2], this->vertices[1], this->vertices[9]}},
             {{this->vertices[2], this->vertices[9], this->vertices[10]}},
@@ -117,12 +123,15 @@ intersection::polyhedron RegularDodecahedron::getTriangles() const {
             {{this->vertices[4], this->vertices[14], this->vertices[13]}},
             {{this->vertices[4], this->vertices[13], this->vertices[2]}},
             {{this->vertices[4], this->vertices[2], this->vertices[10]}},
+
             {{this->vertices[18], this->vertices[17], this->vertices[7]}},
             {{this->vertices[18], this->vertices[7], this->vertices[14]}},
             {{this->vertices[18], this->vertices[14], this->vertices[4]}},
+
             {{this->vertices[17], this->vertices[18], this->vertices[5]}},
             {{this->vertices[17], this->vertices[5], this->vertices[15]}},
             {{this->vertices[17], this->vertices[15], this->vertices[6]}},
+
             {{this->vertices[9], this->vertices[1], this->vertices[12]}},
             {{this->vertices[9], this->vertices[12], this->vertices[15]}},
             {{this->vertices[9], this->vertices[15], this->vertices[5]}}

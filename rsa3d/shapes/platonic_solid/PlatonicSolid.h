@@ -43,14 +43,14 @@ public:
     std::vector<std::string> getSupportedStrategies() const override;
     OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
 
-    /* double projectionHalfsize(const Vector<3> &axis) const;      CRTP pure virtual */
     /* std::array<Vector<3>, ?> getVertices() const;                CRTP pure virtual */
     /* std::array<Vector<3>, ?> getFaceAxes() const;                CRTP pure virtual */
     /* std::array<Vector<3>, ?> getEdgeAxes() const;                CRTP pure virtual */
+    /* double projectionHalfsize(const Vector<3> &axis) const;      CRTP pure virtual */
+    /* intersection::polyhedron getTriangles() const;               CRTP pure virtual */
 
     bool isSeparatingAxis(const Vector<3> &axis, const SpecificSolid &other,
                           const Vector<3> &distance) const; /* CRTP virtual */
-    intersection::polyhedron getTriangles() const; /* CRTP pure virtual */
     const Matrix<3, 3> &getOrientationMatrix() const;
 };
 

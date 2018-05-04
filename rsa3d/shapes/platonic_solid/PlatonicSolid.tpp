@@ -148,11 +148,6 @@ OverlapStrategy<3, 0> *PlatonicSolid<SpecificSolid>::createStrategy(const std::s
 }
 
 template<typename SpecificSolid>
-intersection::polyhedron PlatonicSolid<SpecificSolid>::getTriangles() const {
-    return std::vector<intersection::triangle3D>();
-}
-
-template<typename SpecificSolid>
 std::string PlatonicSolid<SpecificSolid>::toWolfram() const {
     auto &thisSpecific = static_cast<const SpecificSolid&>(*this);
     auto triangles = thisSpecific.getTriangles();
