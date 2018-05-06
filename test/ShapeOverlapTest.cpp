@@ -10,8 +10,9 @@
 #include <cstring>
 #include <sstream>
 #include <fstream>
-#include <typeinfo>
 #include <memory>
+#include <typeinfo>
+#include <cxxabi.h>
 
 #include "ShapeOverlapTest.h"
 #include "../rsa3d/ShapeFactory.h"
@@ -98,14 +99,23 @@ namespace
         return std::unique_ptr<const RSAOverlapStrategy>(shape.createStrategy(strategyName));
     }
 
+    std::string get_strategy_name(const RSAOverlapStrategy &strategy) {
+        int status;
+        auto _name = abi::__cxa_demangle(typeid(strategy).name(), nullptr, 0, &status);
+        if (status != 0)    throw std::runtime_error("demangle error");
+        std::string name(_name);
+        std::free(_name);
+        return name;
+    }
+
     /* Performs a comparison of two strategies */
     Results perform(ShapePairFactory &factory, const RSAOverlapStrategy &firstStrategy,
                     const RSAOverlapStrategy &secondStrategy, unsigned long maxTries) {
         Results result;
         result.tries = maxTries;
 
-        std::cout << ">> Performing " << typeid(firstStrategy).name() << " and " << typeid(secondStrategy).name();
-        std::cout << " for OverlapStrategy comparison..." << std::endl;
+        std::cout << ">> Performing " << get_strategy_name(firstStrategy) << " and ";
+        std::cout << get_strategy_name(secondStrategy) << " for OverlapStrategy comparison..." << std::endl;
         for (unsigned long i = 0; i < maxTries; i++) {
             ShapePairFactory::ShapePair pair = factory.generate();
             bool firstIntersected = (bool)firstStrategy.overlap(pair.first(), pair.second());
