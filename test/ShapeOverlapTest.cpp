@@ -11,6 +11,7 @@
 #include <sstream>
 #include <fstream>
 #include <memory>
+#include <utility>
 #include <typeinfo>
 #include <cxxabi.h>
 
@@ -54,7 +55,7 @@ namespace
         std::ofstream file;
 
     public:
-        explicit MissedPairsDumper(const std::string &filename) : filename(filename) {}
+        explicit MissedPairsDumper(std::string filename) : filename(std::move(filename)) {}
         
         ~MissedPairsDumper() { 
             if (file.is_open()) file.close();
@@ -78,7 +79,7 @@ namespace
     };
 
     /* Creates a shape using shape factory and tries to cast it to OverlapStrategyShape */
-    std::unique_ptr<RSAOverlapStrategyShape> acquireShape() {
+    std::unique_ptr<RSAOverlapStrategyShape> acquire_shape() {
         RND rnd;
         auto shape = ShapeFactory::createShape(&rnd);
         auto osShape = dynamic_cast<RSAOverlapStrategyShape*>(shape);
@@ -94,14 +95,15 @@ namespace
     }
 
     /* Wraps some ugliness */
-    std::unique_ptr<const RSAOverlapStrategy> acquireStrategy(const RSAOverlapStrategyShape &shape,
-                                                              const std::string &strategyName) {
+    std::unique_ptr<const RSAOverlapStrategy> acquire_strategy(const RSAOverlapStrategyShape &shape,
+                                                               const std::string &strategyName) {
         return std::unique_ptr<const RSAOverlapStrategy>(shape.createStrategy(strategyName));
     }
 
+    /* Returns formatted (demangled) strategy name based on typeid and abi's demangling */
     std::string get_strategy_name(const RSAOverlapStrategy &strategy) {
         int status;
-        auto _name = abi::__cxa_demangle(typeid(strategy).name(), nullptr, 0, &status);
+        auto _name = abi::__cxa_demangle(typeid(strategy).name(), nullptr, nullptr, &status);
         if (status != 0)    throw std::runtime_error("demangle error");
         std::string name(_name);
         std::free(_name);
@@ -109,8 +111,8 @@ namespace
     }
 
     /* Performs a comparison of two strategies */
-    Results perform(ShapePairFactory &factory, const RSAOverlapStrategy &firstStrategy,
-                    const RSAOverlapStrategy &secondStrategy, unsigned long maxTries) {
+    Results perform_test(ShapePairFactory &factory, const RSAOverlapStrategy &firstStrategy,
+                         const RSAOverlapStrategy &secondStrategy, unsigned long maxTries) {
         Results result;
         result.tries = maxTries;
 
@@ -144,16 +146,16 @@ namespace shape_ovtest
         BallFactory factory;
         factory.setRadius(ball_radius);
 
-        auto osShape = acquireShape();
+        auto osShape = acquire_shape();
         verifyShape(argv[2], osShape.get());
 
         // Compare first strategy results with each following. Dump all missed pairs to a file
         auto strategies = osShape->getSupportedStrategies();
-        auto firstStrategy = acquireStrategy(*osShape, strategies.front());
+        auto firstStrategy = acquire_strategy(*osShape, strategies.front());
         MissedPairsDumper dumper("ovtest_dump.nb");
         for (auto name = strategies.begin() + 1; name != strategies.end(); name++) {
-            auto secondStrategy = acquireStrategy(*osShape, *name);
-            Results results = perform(factory, *firstStrategy, *secondStrategy, max_tries);
+            auto secondStrategy = acquire_strategy(*osShape, *name);
+            Results results = perform_test(factory, *firstStrategy, *secondStrategy, max_tries);
             results.print(std::cout);
             dumper.dump(results);
             if (results.missed() > 0) std::cout << ">> Missed pairs dumped to " << dumper.getFilename() << std::endl;

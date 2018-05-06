@@ -31,11 +31,7 @@ namespace
         }
     };
 
-    // Performs Cuboid::pointInside test. It generates a pair of cubes and checks results
-    // given by Cuboid::overlap and Cuboid::pointInside. If pointInside gives true, so should
-    // overlap do
-    //----------------------------------------------------------------------------------------
-    Results perform(ShapePairFactory &factory, unsigned long pairsToTest) {
+    Results perform_test(ShapePairFactory &factory, unsigned long pairsToTest) {
         if (pairsToTest == 0) throw std::runtime_error("pairsToTest == 0");
 
         MockBC bc;
@@ -46,9 +42,9 @@ namespace
         std::cout << ">> Starting..." << std::endl;
         for (std::size_t i = 0; i < pairsToTest; i++) {
             auto pair = factory.generate();
-            bool overlap = pair.first()->overlap(&bc, pair.second());
-            bool pi_first = pair.first()->pointInside(&bc, pair.second()->getPosition());
-            bool pi_second = pair.second()->pointInside(&bc, pair.first()->getPosition());
+            bool overlap = (bool)pair.first()->overlap(&bc, pair.second());
+            bool pi_first = (bool)pair.first()->pointInside(&bc, pair.second()->getPosition());
+            bool pi_second = (bool)pair.second()->pointInside(&bc, pair.first()->getPosition());
 
             if (overlap)    results.overlapped++;
             if (pi_first)   results.withPointInside++;
@@ -80,7 +76,7 @@ namespace shape_pitest
         BallFactory factory;
         factory.setRadius(ballRadius);
 
-        Results results = perform(factory, maxTries);
+        Results results = perform_test(factory, maxTries);
         std::cout << std::endl;
         results.print(std::cout);
 

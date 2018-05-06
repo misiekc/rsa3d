@@ -14,7 +14,7 @@
  * <blockquote>./rsa_test shape_pitest [particle] [attibutes] [ball_radius] [max_tries]</blockquote>
  *
  * The test is using BallFactory for creating shape pairs. For each pair it checks results given by Shape::overlap and
- * Shape::pointInside. If Shape::pointInside gives true, so should Shape:overlap do - otherwise a @a conflict occurs.
+ * Shape::pointInside. If Shape::pointInside gives true, so should Shape::overlap do - otherwise a @a conflict occurs.
  */
 namespace shape_pitest
 {
