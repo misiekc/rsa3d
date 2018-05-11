@@ -54,6 +54,7 @@ set(MAIN_SOURCE
         rsa3d/Timer.cpp
         rsa3d/Utils.cpp
         rsa3d/Vector.h
+        rsa3d/Vector.tpp
         rsa3d/Voxel.h
         rsa3d/Voxel.tpp
         rsa3d/VoxelList.h
@@ -80,19 +81,37 @@ set(TEST_SOURCE
         test/RectangleCase.cpp
         test/VectorSpeedTest.cpp)
 
-include_directories(statistics)
+# Generates targets: rsa common code library, rsa test library, rsa exec, rsa test exec for given spatial and angular
+# dimenstions. It is done so multiple binaries can coexist without recompiling every time parameters are changed.
+function(register_targets_for_dimensions SD AD)
+    set(DIM_SUFFIX ".${SD}.${AD}")
 
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -Wall -pedantic")
+    set(RSA_LIB "librsa${DIM_SUFFIX}")
+    set(TEST_LIB "libtest${DIM_SUFFIX}")
+    set(RSA_EXEC "rsa${DIM_SUFFIX}")
+    set(RSA_TEST_EXEC "rsa_test${DIM_SUFFIX}")
 
-set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
+    add_library(${RSA_LIB} ${MAIN_SOURCE})
+    target_compile_definitions(${RSA_LIB} PUBLIC RSA_SPATIAL_DIMENSION=${SD} RSA_ANGULAR_DIMENSION=${AD})
 
-add_library(rsa_src ${MAIN_SOURCE})
-add_library(tests ${TEST_SOURCE})
-add_library(statistics ${STATISTICS_SOURCE})
+    add_library(${TEST_LIB} ${TEST_SOURCE})
+    target_compile_definitions(${TEST_LIB} PUBLIC RSA_SPATIAL_DIMENSION=${SD} RSA_ANGULAR_DIMENSION=${AD})
 
-add_executable(rsa3d rsa3d/Main.cpp)
-target_link_libraries(rsa3d rsa_src statistics)
+    add_executable(${RSA_EXEC} rsa3d/Main.cpp)
+    target_include_directories(${RSA_EXEC} PUBLIC statistics)
+    target_link_libraries(${RSA_EXEC} ${RSA_LIB} libstatistics)
 
-add_executable(rsa_test test/Main.cpp)
-target_link_libraries(rsa_test tests rsa_src)
+    add_executable(${RSA_TEST_EXEC} test/Main.cpp)
+    target_link_libraries(${RSA_TEST_EXEC} ${TEST_LIB} ${RSA_LIB})
+endfunction(register_targets_for_dimensions)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -Wall -pedantic")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")   # -O3 in relase, in debug no optimisations
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
+
+add_library(libstatistics ${STATISTICS_SOURCE})
+
+# Here come all dimensions for which binaries should be generated
+register_targets_for_dimensions(3 0)    # 3D spheres, cuboids, platonic solids and so on
+register_targets_for_dimensions(2 0)    # 2D disks
+register_targets_for_dimensions(2 1)    # AnisotropicShape2D's

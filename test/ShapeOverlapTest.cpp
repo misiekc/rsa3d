@@ -86,7 +86,7 @@ namespace
         return std::unique_ptr<RSAOverlapStrategyShape>(osShape);
     }
 
-    /* Check if a shape created by aquireShape is valid fpor this test */
+    /* Check if a shape created by acquire_shape is valid for this test */
     void verifyShape(const std::string &name, const RSAOverlapStrategyShape *osShape) {
         if (osShape == nullptr)
             die(name + " is not OverlapStrategyShape");

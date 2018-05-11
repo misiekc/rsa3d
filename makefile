@@ -24,7 +24,7 @@
 CC = g++
 
 # Compiler flags
-CFLAGS = -Wall -pedantic -std=c++14 -I"$(CURDIR)/statistics" -O3 -fopenmp
+CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -O3 -fopenmp -DRSA_SPATIAL_DIMENSION=3 -DRSA_ANGULAR_DIMENSION=0
 
 # Linker flags
 LFLAGS = -fopenmp
