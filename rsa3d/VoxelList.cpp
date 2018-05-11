@@ -240,17 +240,17 @@ void VoxelList::checkTopLevelVoxels(){
 
 	RND rnd;
 	double pos[RSA_SPATIAL_DIMENSION];
-	double angle[RSA_ANGULAR_DIMENSION];
+	std::array<double, RSA_ANGULAR_DIMENSION> angle;
 
 	for(int i=0; i<=this->last; i++){
 		Voxel *v = this->voxels[i];
-		this->getRandomPositionAndOrientation(pos, angle, v, &rnd);
+		this->getRandomPositionAndOrientation(pos, angle.data(), v, &rnd);
 		int index = this->getIndexOfTopLevelVoxel(pos);
 		if (this->getIndexOfTopLevelVoxel(v->getPosition())!=index){
 			std::cout << "checkTopVoxels problem" << std::endl;
 		}
 		for(int j=0; j<10; j++){
-			this->getRandomPositionAndOrientation(pos, angle, v, &rnd);
+			this->getRandomPositionAndOrientation(pos, angle.data(), v, &rnd);
 			if (this->getIndexOfTopLevelVoxel(pos)!=index){
 				std::cout << "checkTopVoxels problem" << std::endl;
 			}
