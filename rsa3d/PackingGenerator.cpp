@@ -664,82 +664,6 @@ void PackingGenerator::toPovray(Packing *packing, double size, VoxelList *voxels
 		double *da = s->getPosition();
 		file << "  text { ttf \"timrom.ttf\" \"" << s->no << "\" 1, 0 pigment { color White } scale 0.2 translate < " << da[0] << ", " << da[1] << ", 0.01> }" << std::endl;
 		file << s->toPovray();
-// periodic boundary check
-		double tr[2];
-
-		if (da[0]<0.1*size){
-			tr[0] = size;
-			tr[1] = 0;
-			s->translate(tr);
-			file << s->toPovray();
-			tr[0] = -tr[0];
-			tr[1] = -tr[1];
-			s->translate(tr);
-			if (da[1]<0.1*size){
-				tr[0] = size;
-				tr[1] = size;
-				s->translate(tr);
-				file << s->toPovray();
-				tr[0] = -tr[0];
-				tr[1] = -tr[1];
-				s->translate(tr);
-			}
-			if(da[1]>0.9*size){
-				tr[0] = size;
-				tr[1] = -size;
-				s->translate(tr);
-				file << s->toPovray();
-				tr[0] = -tr[0];
-				tr[1] = -tr[1];
-				s->translate(tr);
-			}
-		}
-		if (da[0]>0.9*size){
-			tr[0] = -size;
-			tr[1] = 0;
-			s->translate(tr);
-			file << s->toPovray();
-			tr[0] = -tr[0];
-			tr[1] = -tr[1];
-			s->translate(tr);
-			if (da[1]<0.1*size){
-				tr[0] = -size;
-				tr[1] = size;
-				s->translate(tr);
-				file << s->toPovray();
-				tr[0] = -tr[0];
-				tr[1] = -tr[1];
-				s->translate(tr);
-			}
-			if(da[1]>0.9*size){
-				tr[0] = -size;
-				tr[1] = -size;
-				s->translate(tr);
-				file << s->toPovray();
-				tr[0] = -tr[0];
-				tr[1] = -tr[1];
-				s->translate(tr);
-			}
-		}
-		if (da[1]<0.1*size){
-			tr[0] = 0;
-			tr[1] = size;
-			s->translate(tr);
-			file << s->toPovray();
-			tr[0] = -tr[0];
-			tr[1] = -tr[1];
-			s->translate(tr);
-		}
-		if (da[1]>0.9*size){
-			tr[0] = 0;
-			tr[1] = -size;
-			s->translate(tr);
-			file << s->toPovray();
-			tr[0] = -tr[0];
-			tr[1] = -tr[1];
-			s->translate(tr);
-		}
-
 	}
 
 
@@ -805,19 +729,15 @@ void PackingGenerator::printRemainingVoxels(const std::string &prefix){
 void PackingGenerator::toWolfram(Packing *packing, double size, VoxelList *voxels, const std::string &filename){
 	std::ofstream file(filename);
 
-    if (RSA_SPATIAL_DIMENSION == 2)
+#if RSA_SPATIAL_DIMENSION == 2
 	    file << "Graphics[{Red";
-    else if (RSA_SPATIAL_DIMENSION == 3)
+#elif RSA_SPATIAL_DIMENSION == 3
         file << "Graphics3D[{Red";
-    else
+#else
         die("Only 2D and 3D shapes are supported");
-
-//	file << "  polygon {4, <0, 0, 0.0>, <0, " << size << ", 0.0>, <" << size << ", " << size << ", 0.0>, <" << size << ", 0, 0.0>  texture { finish { ambient 1 diffuse 0 } pigment { color Gray} } }" << std::endl;
-//	file << "  text { ttf \"timrom.ttf\" \"0\" 1, 0 pigment { color Black } scale 1.0 translate < 0, 0, 0.0002> }" << std::endl;
+#endif
 
 	for (Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s : *packing) {
-//		double *da = s->getPosition();
-//		file << "  text { ttf \"timrom.ttf\" \"" << s->no << "\" 1, 0 pigment { color White } scale 0.2 translate < " << da[0] << ", " << da[1] << ", 5> }" << std::endl;
 		file << ", " << std::endl << s->toWolfram();
 	}
 
@@ -838,13 +758,7 @@ void PackingGenerator::toWolfram(const std::string &filename){
 
 
 void PackingGenerator::toFile(const std::string &filename) {
-	std::ofstream file(filename, std::ios::binary);
-    if (!file)
-        die("Cannot open file " + filename + " to store packing");
-	for (RSAShape *s : this->packing) {
-		s->store(file);
-	}
-	file.close();
+    PackingGenerator::toFile(&this->packing, filename);
 }
 
 
@@ -889,4 +803,39 @@ void PackingGenerator::restore(std::istream &f){
 //		std::cout << s->toString() << std::endl;
 	}
 	this->voxels->restore(f);
+}
+
+void PackingGenerator::expandPackingOnPBC(Packing *packing, double size, double expandMargin) {
+    for (std::size_t i = 0; i < RSA_SPATIAL_DIMENSION; i++) {
+        std::size_t pSize = packing->size();
+        for (std::size_t j = 0; j < pSize; j++) {
+            auto shape = (*packing)[j];
+            const double *position = shape->getPosition();
+            if (position[i] < expandMargin * size)
+				expandShapeOnBC(packing, shape, size, i);
+            else if (position[i] > (1 - expandMargin) * size)
+				expandShapeOnBC(packing, shape, -size, i);
+        }
+    }
+}
+
+/* Helper method. Clones a shape and translates one of its coordinates in given direction. */
+void PackingGenerator::expandShapeOnBC(Packing *packing, const RSAShape *shape, double translation,
+								       size_t translateCoordIdx) {
+    RSAShape *shapeClone = shape->clone();
+    std::array<double, RSA_SPATIAL_DIMENSION> trans{};
+    trans.fill(0);
+    trans[translateCoordIdx] = translation;
+    shapeClone->translate(trans.data());
+    packing->push_back(shapeClone);
+}
+
+void PackingGenerator::toFile(const Packing *packing, const std::string &filename) {
+    std::ofstream file(filename, std::ios::binary);
+    if (!file)
+        die("Cannot open file " + filename + " to store packing");
+    for (RSAShape *s : *packing) {
+        s->store(file);
+    }
+    file.close();
 }

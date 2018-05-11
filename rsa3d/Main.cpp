@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <chrono>
 #include <fstream>
+#include <memory>
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -186,38 +187,48 @@ void boundaries(Parameters *params, unsigned long max) {
 
 int main(int argc, char **argv) {
     if (argc < 3)
-        die("No input file given. Aborting.");
-    
-	Parameters params(argv[2]);
-	ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
+        die("Usage: ./rsa <mode> <config> (additional parameters)");
 
-	if (strcmp(argv[1], "simulate")==0) {
-		simulate(&params);
-	}else if (strcmp(argv[1], "test")==0) {
-		std::string filename(argv[3]);
-		Packing *packing = fromFile(filename);
-		PackingGenerator *pg = new PackingGenerator(1, &params);
-		pg->testPacking(packing, atof(argv[4]));
-		delete pg;
-		delete packing;
-	} else if (strcmp(argv[1], "debug")==0){
-		debug(&params, argv[3]);
-	} else if (strcmp(argv[1], "boundaries")==0) {
-		boundaries(&params, atof(argv[3]));
-	} else if (strcmp(argv[1], "analyze")==0) {
-		Analyzer an(&params);
-		an.analyzePackingsInDirectory(argv[3], 0.01, 1.0);
-	} else if (strcmp(argv[1], "povray")==0) {
-		std::string file(argv[3]);
-		Packing *packing = fromFile(argv[3]);
-		PackingGenerator::toPovray(packing, params.surfaceSize, nullptr, file + ".pov");
-		delete packing;
-	} else if (strcmp(argv[1], "wolfram")==0) {
-		std::string file(argv[3]);
-		Packing *packing = fromFile(file);
-		PackingGenerator::toWolfram(packing, params.surfaceSize, nullptr, file + ".nb");
-		delete packing;
-	}else{
+    Parameters params(argv[2]);
+    ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
+
+    std::string mode(argv[1]);
+    if (mode == "simulate") {
+        simulate(&params);
+    } else if (mode == "test") {
+        if (argc < 5)   die("Usage: ./rsa test <config> <file in> <max time>");
+        std::string filename(argv[3]);
+        Packing *packing = fromFile(filename);
+        PackingGenerator *pg = new PackingGenerator(1, &params);
+        pg->testPacking(packing, atof(argv[4]));
+        delete pg;
+        delete packing;
+    } else if (mode == "debug") {
+        debug(&params, argv[3]);
+    } else if (mode == "boundaries") {
+        boundaries(&params, atof(argv[3]));
+    } else if (mode == "analyze") {
+        Analyzer an(&params);
+        an.analyzePackingsInDirectory(argv[3], 0.01, 1.0);
+    } else if (mode == "povray") {
+        std::string file(argv[3]);
+        Packing *packing = fromFile(argv[3]);
+        PackingGenerator::toPovray(packing, params.surfaceSize, nullptr, file + ".pov");
+        delete packing;
+    } else if (mode == "wolfram") {
+        std::string file(argv[3]);
+        Packing *packing = fromFile(file);
+        PackingGenerator::toWolfram(packing, params.surfaceSize, nullptr, file + ".nb");
+        delete packing;
+    } else if (mode == "bc_expand") {
+        if (argc < 4)   die("Usage: ./rsa bc_expand <config> <file in> (file out = file in)");
+        std::string fileIn(argv[3]);
+        std::string fileOut = (argc < 5 ? fileIn : argv[4]);
+        auto packing = fromFile(fileIn);
+        PackingGenerator::expandPackingOnPBC(packing, params.surfaceSize, 0.1);
+        PackingGenerator::toFile(packing, fileOut);
+        delete packing;
+    } else {
 		std::cerr << "Unknown mode: " << argv[1] << std::endl;
         return EXIT_FAILURE;
 	}

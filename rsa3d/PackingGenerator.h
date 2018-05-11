@@ -51,20 +51,41 @@ private:
 
 	void store(std::ostream &f) const;
 
-public:
-	PackingGenerator(int seed, Parameters *params);
-	virtual ~PackingGenerator();
+    static void expandShapeOnBC(Packing *packing, const RSAShape *shape, double translation, size_t translateCoordIdx);
 
-	void run();
+public:
+    PackingGenerator(int seed, Parameters *params);
+
+	virtual ~PackingGenerator();
+    void run();
+
 	Packing *getPacking();
 
 	void testPacking(Packing *packing, double maxTime);
+    void toFile(const std::string &filename);
+	void restore(std::istream &f);
 
-	void toFile(const std::string &filename);
+    /**
+     * @brief Stores a @a packing to given file. Dies if a file cannot be created.
+     * @param packing a packing to store
+     * @param filename the name of a file to store packing to
+     */
+    static void toFile(const Packing *packing, const std::string &filename);
+
 	static void toPovray(Packing *packing, double size, VoxelList *voxels, const std::string &filename);
 	static void toWolfram(Packing *packing, double size, VoxelList *voxels, const std::string &filename);
 
-	void restore(std::istream &f);
+    /**
+     * @brief Clones and translates shapes distant from the surface boundary not more than @a expandMargin x @a size
+     * according to periodic boundary conditions
+     * @param packing a packing to expand
+     * @param size the size of the packing
+     * @param expandMargin the distance (from 0 to 0.5) relative to @a size from the surface boundary from which shapes
+     * will be translated
+     */
+    static void expandPackingOnPBC(Packing *packing, double size, double expandMargin);
+
+    static void testPackingOverlaps(const Packing *packing);
 };
 
 #endif /* PACKINGGENERATOR_H_ */
