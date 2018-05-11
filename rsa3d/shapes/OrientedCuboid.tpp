@@ -139,3 +139,8 @@ std::string OrientedCuboid<DIMENSION>::toPovray() const
 	}
 	return s;
 }
+
+template<unsigned short DIMENSION>
+Shape<DIMENSION, 0> *OrientedCuboid<DIMENSION>::clone() const {
+    return new OrientedCuboid(*this);
+}

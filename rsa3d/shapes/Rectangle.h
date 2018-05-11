@@ -68,6 +68,7 @@ public:
 
     void store(std::ostream &f) const override;
     void restore(std::istream &f) override;
+    Shape<2, 1> *clone() const override;
 };
 
 

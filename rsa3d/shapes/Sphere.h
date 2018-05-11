@@ -43,6 +43,8 @@ public:
 	std::string toPovray() const;
 	void store(std::ostream &f) const;
 	void restore(std::istream &f);
+
+	Shape<DIMENSION, 0> *clone() const override;
 };
 
 #include "Sphere.tpp"

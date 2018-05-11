@@ -161,3 +161,9 @@ std::string PlatonicSolid<SpecificSolid>::toWolfram() const {
     result << "{" << lastTri[0] << ", " << lastTri[1] << ", " << lastTri[2] << "}}]";
     return result.str();
 }
+
+template<typename SpecificSolid>
+Shape<3, 0> *PlatonicSolid<SpecificSolid>::clone() const {
+    auto &thisSpecific = static_cast<const SpecificSolid&>(*this);
+    return new SpecificSolid(thisSpecific);
+}

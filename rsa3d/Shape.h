@@ -331,6 +331,12 @@ public:
 	 * @throws std::runtime_error if dimensions are incompatible
 	 */
     virtual void restore(std::istream &f);
+
+	/**
+	 * @brief Returns dynamically allocated exact copy of a shape.
+	 * @return dynamically allocated exact copy of a shape
+	 */
+    virtual Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *clone() const = 0;
 };
 
 /**

@@ -178,3 +178,7 @@ bool SpheroCylinder2D::withinExclusionZone(const Vector<2> &pointPos, double ang
            this->pointDistance2(thisPos + thisRot * centerVector, angle, pointPos) < 4 * radius * radius ||
            this->pointDistance2(thisPos - thisRot * centerVector, angle, pointPos) < 4 * radius * radius;
 }
+
+Shape<2, 1> *SpheroCylinder2D::clone() const {
+    return new SpheroCylinder2D(*this);
+}

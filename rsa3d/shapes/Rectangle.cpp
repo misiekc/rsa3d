@@ -427,3 +427,7 @@ void Rectangle::restore(std::istream &f) {
     this->halfB = b / 2;
     this->setAngle(this->getAngle());
 }
+
+Shape<2, 1> *Rectangle::clone() const {
+    return new Rectangle(*this);
+}

@@ -31,6 +31,9 @@ public:
 	virtual ~Polygon();
 
 	void applyBC(BoundaryConditions *bc, Shape<2,0> *second) const override;
+
+	Shape<2, 0> *clone() const override;
+
 	int overlap(BoundaryConditions *bc, Shape<2, 0> *s) const override;
 	virtual int pointInside(BoundaryConditions *bc, double* position, const std::array<double, 0> &orientation, double orientationRange) const override;
 

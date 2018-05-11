@@ -76,6 +76,8 @@ public:
 	std::string toPovray() const override;
 	std::string toWolfram() const override;
 	void store(std::ostream &f) const override;
+	Shape<3, 0> *clone() const override;
+
 	void restore(std::istream &f) override;
 
 	std::vector<std::string> getSupportedStrategies() const override;

@@ -144,3 +144,8 @@ void Sphere<DIMENSION>::restore(std::istream &f){
 	f.read((char *)(&this->r), sizeof(double));
 }
 
+template<unsigned short DIMENSION>
+Shape<DIMENSION, 0> *Sphere<DIMENSION>::clone() const {
+    return new Sphere(*this);
+}
+

@@ -26,8 +26,9 @@ public:
 	int pointInside(BoundaryConditions *bc, double* position, const std::array<double, 0> &orientation,
 					double orientationRange) const override;
     double getVolume() const;
+	Shape<DIMENSION, 0> *clone() const override;
 
-    std::string toPovray() const;
+	std::string toPovray() const;
 };
 
 #include "OrientedCuboid.tpp"

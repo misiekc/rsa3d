@@ -253,3 +253,7 @@ void Ellipse::restore(std::istream &f){
 	this->calculateU();
 
 }
+
+Shape<2, 1> *Ellipse::clone() const {
+    return new Ellipse(*this);
+}

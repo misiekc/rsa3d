@@ -101,3 +101,7 @@ int Polygon::pointInside(BoundaryConditions *bc, double* position, const std::ar
 	else
 		return 0;
 }
+
+Shape<2, 0> *Polygon::clone() const {
+    return new Polygon(*this);
+}

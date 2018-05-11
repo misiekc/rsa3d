@@ -353,3 +353,7 @@ intersection::polyhedron Cuboid::obtainTris() const
         {{vert[7], vert[3], vert[4]}}
     };
 }
+
+Shape<3, 0> *Cuboid::clone() const {
+    return new Cuboid(*this);
+}

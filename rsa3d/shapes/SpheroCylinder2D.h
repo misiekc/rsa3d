@@ -25,6 +25,9 @@ public:
     static void initClass(const std::string & attr);
 
     double getVolume() const override;
+
+    Shape<2, 1> *clone() const override;
+
     int overlap(BoundaryConditions *bc, Shape<2, 1> *s) const override;
     int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const override;
     void store(std::ostream &f) const override;

@@ -28,6 +28,11 @@ private:
 	bool withinAngleCheckCollision(const Vector<2> &p, double lowerAngle, double upperAngle) const;
 	bool circleCollision(const Vector<2> &p, double tMin, double tMax) const;
 
+public:
+	Shape<2, 1> *clone() const override;
+
+private:
+
 	int pointInsideSpecialArea(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) const;
 public:
 	static void initClass(const std::string &args);

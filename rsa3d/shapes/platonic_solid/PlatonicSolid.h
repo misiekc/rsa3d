@@ -41,6 +41,9 @@ public:
     std::string toWolfram() const override;
 
     std::vector<std::string> getSupportedStrategies() const override;
+
+    Shape<3, 0> *clone() const override;
+
     OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
 
     /* std::array<Vector<3>, ?> getVertices() const;                CRTP pure virtual */
