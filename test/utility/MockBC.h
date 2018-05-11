@@ -11,16 +11,11 @@
     
 class MockBC : public BoundaryConditions
 {
-    double distance2(double *p1, double *p2)
-    {
-        return 0;
-    }
+    double distance2(double *p1, double *p2) { return 0; }
     
-    double * getTranslation(double *result, double* p1, double* p2)
-    {
-        result[0] = 0;
-        result[1] = 0;
-        result[2] = 0;
+    double * getTranslation(double *result, double* p1, double* p2) {
+        for (std::size_t i = 0; i < RSA_SPATIAL_DIMENSION; i++)
+            result[i] = 0;
         return result;
     }
 };

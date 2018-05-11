@@ -228,6 +228,12 @@ int main(int argc, char **argv) {
         PackingGenerator::expandPackingOnPBC(packing, params.surfaceSize, 0.1);
         PackingGenerator::toFile(packing, fileOut);
         delete packing;
+    } else if (mode == "overlap") {
+        if (argc < 4)   die("Usage: ./rsa overlap <config> <file in>");
+        std::string fileIn(argv[3]);
+        auto packing = fromFile(fileIn);
+        PackingGenerator::testPackingOverlaps(packing);
+        delete packing;
     } else {
 		std::cerr << "Unknown mode: " << argv[1] << std::endl;
         return EXIT_FAILURE;
