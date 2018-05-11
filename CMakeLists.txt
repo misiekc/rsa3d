@@ -42,7 +42,7 @@ set(MAIN_SOURCE
         rsa3d/NeighbourGrid.h
         rsa3d/OrientedFace.cpp
         rsa3d/PackingGenerator.h
-        rsa3d/PackingGenerator.tpp
+        rsa3d/PackingGenerator.cpp
         rsa3d/Parameters.cpp
         rsa3d/Positioned.h
         rsa3d/Positioned.tpp
@@ -56,9 +56,9 @@ set(MAIN_SOURCE
         rsa3d/Vector.h
         rsa3d/Vector.tpp
         rsa3d/Voxel.h
-        rsa3d/Voxel.tpp
+        rsa3d/Voxel.cpp
         rsa3d/VoxelList.h
-        rsa3d/VoxelList.tpp)
+        rsa3d/VoxelList.cpp)
 
 set(STATISTICS_SOURCE
         statistics/ASFRegression.cpp

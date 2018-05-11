@@ -17,23 +17,22 @@
 #include <vector>
 #include <map>
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 class PackingGenerator {
 private:
 	static double FACTOR_LIMIT;
 
 	int seed;
 	Parameters *params;
-	std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> packing;
-	VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels;
+	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> packing;
+	VoxelList *voxels;
 	Surface *surface;
 
 	double spatialSize;
 	double angularSize;
 
 	int analyzeVoxels(unsigned short depth);
-	int analyzeRegion(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
-	void modifiedRSA(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
+	int analyzeRegion(Voxel *v);
+	void modifiedRSA(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s, Voxel *v);
 	bool isSaturated();
 	double getFactor();
 	bool isInside(double *position, double *orientation);
@@ -52,17 +51,15 @@ public:
 	virtual ~PackingGenerator();
 
 	void run();
-	std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * getPacking();
+	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * getPacking();
 
-	void testPacking(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *packing, double maxTime);
+	void testPacking(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing, double maxTime);
 
 	void toFile(const std::string &filename);
-	static void toPovray(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * packing, double size, VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels, const std::string &filename);
-	static void toWolfram(std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> * packing, double size, VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *voxels, const std::string &filename);
+	static void toPovray(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * packing, double size, VoxelList *voxels, const std::string &filename);
+	static void toWolfram(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * packing, double size, VoxelList *voxels, const std::string &filename);
 
 	void restore(std::istream &f);
 };
-
-#include "PackingGenerator.tpp"
 
 #endif /* PACKINGGENERATOR_H_ */

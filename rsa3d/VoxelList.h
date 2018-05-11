@@ -16,7 +16,6 @@
 #include "Positioned.h"
 #include <vector>
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 class VoxelList {
 
 private:
@@ -25,7 +24,7 @@ private:
 	const double dxFactor = 1.0; // 1.0000000001;
 
 	// neighbour grid structure for voxels. Needed to quickly find a voxel using its location
-	NeighbourGrid<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>>* voxelNeighbourGrid;
+	NeighbourGrid<Voxel>* voxelNeighbourGrid;
 
 	// probability distrubutions for drawing position inside a voxel
 	std::uniform_real_distribution<double> *spatialDistribution;
@@ -59,17 +58,17 @@ private:
 	void checkIndexes();
 
 	// checks if a top level voxel for voxel v is active (if not v should be removed
-	bool isTopLevelVoxelActive(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
+	bool isTopLevelVoxelActive(Voxel *v);
 
 	// checks consistency of indexes of root voxels
 	void checkTopLevelVoxels();
 
 	// aeeay of voxels will not have NULLs between pointers to objects - they can appear when splitting or analyze voxels in parallel
-	void compactVoxelArray(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> **list, int &endIndex);
+	void compactVoxelArray(Voxel **list, int &endIndex);
 
 protected:
-	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>** voxels;
-	int offset[(1 << SPATIAL_DIMENSION)][SPATIAL_DIMENSION]; // matrix of d-dimensional offsets to 2^d voxel vertices
+	Voxel** voxels;
+	int offset[(1 << RSA_SPATIAL_DIMENSION)][RSA_SPATIAL_DIMENSION]; // matrix of d-dimensional offsets to 2^d voxel vertices
 	int last;
 
 	double initialVoxelSize;
@@ -84,11 +83,11 @@ protected:
 	int beginningVoxelNumber;
 
 
-	bool isVoxelInsidePacking(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
-	bool isVoxelInsideExclusionZone(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, double spatialSize, double angularSize, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s, BoundaryConditions *bc);
-	bool isVoxelInsideExclusionZone(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, double spatialSize, double angularSize, std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *shapes, BoundaryConditions *bc, unsigned short depth = 0);
+	bool isVoxelInsidePacking(Voxel *v);
+	bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize, Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s, BoundaryConditions *bc);
+	bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *shapes, BoundaryConditions *bc, unsigned short depth = 0);
 
-	void splitVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, double spatialSize, double angularSize, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> **vRes);
+	void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes);
 
 
 public:
@@ -98,24 +97,24 @@ public:
 
 	virtual ~VoxelList();
 
-	void getNeighbours(std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *result, double *da);
-	void remove(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
-	void remove(std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *vVoxels);
-	void removeTopLevelVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v);
+	void getNeighbours(std::vector<Voxel *> *result, double *da);
+	void remove(Voxel *v);
+	void remove(std::vector<Voxel *> *vVoxels);
+	void removeTopLevelVoxel(Voxel *v);
 
-	bool analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s, BoundaryConditions *bc);
-//	bool analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *neighbours, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, unsigned short depth = 0);
+	bool analyzeVoxel(Voxel *v, Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s, BoundaryConditions *bc);
+//	bool analyzeVoxel(Voxel *v, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *neighbours, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel *v, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, unsigned short depth = 0);
 
-	bool splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc);
+	bool splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc);
 
-	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *getRandomVoxel(RND *rnd);
-	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *getVoxel(int i);
-	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * getVoxel(double* pos, const std::array<double, ANGULAR_DIMENSION> &angle);
-	void getRandomPositionAndOrientation(double *position, double *orientation, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, RND *rnd);
+	Voxel *getRandomVoxel(RND *rnd);
+	Voxel *getVoxel(int i);
+	Voxel * getVoxel(double* pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle);
+	void getRandomPositionAndOrientation(double *position, double *orientation, Voxel *v, RND *rnd);
 	double getVoxelSize();
 	double getVoxelAngularSize();
-	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>* get(int i);
+	Voxel* get(int i);
 	int length() const;
 	double getVoxelsSurface();
 	std::string toPovray();
@@ -126,6 +125,5 @@ public:
 
 };
 
-#include "VoxelList.tpp"
 
 #endif /* VOXELLIST_H_ */

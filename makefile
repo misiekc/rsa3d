@@ -59,12 +59,15 @@ OBJS_COMMON = rsa3d/AnisotropicShape2D \
        rsa3d/Config \
        rsa3d/Intersection \
        rsa3d/OrientedFace \
+       rsa3d/PackingGenerator \
        rsa3d/Parameters \
        rsa3d/RND \
        rsa3d/ShapeFactory \
        rsa3d/Surface \
        rsa3d/Timer \
        rsa3d/Utils \
+       rsa3d/Voxel \
+       rsa3d/VoxelList \
        rsa3d/shapes/cube_strategies/MineOverlap \
        rsa3d/shapes/cube_strategies/OptimizedSATOverlap \
        rsa3d/shapes/cube_strategies/SATOverlap \

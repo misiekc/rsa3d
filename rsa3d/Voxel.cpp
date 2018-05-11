@@ -4,20 +4,25 @@
  *  Created on: 08.03.2017
  *      Author: ciesla
  */
+
+#include "Voxel.h"
+
 #include <sstream>
 #include <stdexcept>
+#include <array>
+#include <iostream>
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Voxel(){
+
+Voxel::Voxel(){
 	this->index = 0;
 	this->missCounter = 0;
 	this->lastAnalyzed = 0;
 	this->depth = 0;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Voxel(double* pos, const std::array<double, ANGULAR_DIMENSION> &angle){
-	std::copy(pos, pos+SPATIAL_DIMENSION, this->position);
+
+Voxel::Voxel(double* pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle){
+	std::copy(pos, pos+RSA_SPATIAL_DIMENSION, this->position);
 	this->orientation = angle;
 	this->index = 0;
 	this->missCounter = 0;
@@ -25,24 +30,24 @@ Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Voxel(double* pos, const std::array
 	this->depth = 0;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::miss(){
+
+void Voxel::miss(){
 	this->missCounter++;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-int Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getMissCounter(){
+
+int Voxel::getMissCounter(){
 	return this->missCounter;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::resetMissCounter(){
+
+void Voxel::resetMissCounter(){
 	this->missCounter = 0;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isInside(double *pos, double size){
-	for(int i=0; i<SPATIAL_DIMENSION; i++){
+
+bool Voxel::isInside(double *pos, double size){
+	for(int i=0; i<RSA_SPATIAL_DIMENSION; i++){
 		if (pos[i]<this->position[i])
 			return false;
 		if (pos[i]>=(this->position[i]+size))
@@ -51,16 +56,16 @@ bool Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isInside(double *pos, double s
 	return true;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isInside(double *pos, double size, const std::array<double, ANGULAR_DIMENSION> &angle, double asize){
-	for(int i=0; i<SPATIAL_DIMENSION; i++){
+
+bool Voxel::isInside(double *pos, double size, const std::array<double, RSA_ANGULAR_DIMENSION> &angle, double asize){
+	for(int i=0; i<RSA_SPATIAL_DIMENSION; i++){
 		if (pos[i]<this->position[i])
 			return false;
 		if (pos[i]>=(this->position[i]+size))
 			return false;
 	}
 
-	for(int i=0; i<ANGULAR_DIMENSION; i++){
+	for(int i=0; i<RSA_ANGULAR_DIMENSION; i++){
 		if (angle[i]<this->orientation[i])
 			return false;
 		if (angle[i]>=(this->orientation[i]+asize))
@@ -71,18 +76,18 @@ bool Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isInside(double *pos, double s
 }
 
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double* Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getPosition(){
+
+double* Voxel::getPosition(){
 	return this->position;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-std::array<double, ANGULAR_DIMENSION> Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation(){
+
+std::array<double, RSA_ANGULAR_DIMENSION> Voxel::getOrientation(){
 	return this->orientation;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-std::string Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(double ssize){
+
+std::string Voxel::toPovray(double ssize){
 	std::stringstream out;
 
 	out.precision(std::numeric_limits< double >::max_digits10);
@@ -109,8 +114,8 @@ std::string Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(double ssize){
 }
 
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-std::string Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram(double ssize, double asize){
+
+std::string Voxel::toWolfram(double ssize, double asize){
 	std::stringstream out;
 	out.precision(std::numeric_limits< double >::max_digits10);
 
@@ -122,56 +127,56 @@ std::string Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram(double ssize,
 			<< "{" << x1 << ", " << y2 << "}, "
 			<< "{" << x2 << ", " << y2 << "}, "
 			<< "{" << x2 << ", " << y1 << "} }]";
-	if (ANGULAR_DIMENSION > 0){
+	if (RSA_ANGULAR_DIMENSION > 0){
 		out << "(* angles: [ " << this->getOrientation()[0] << ", " << (this->getOrientation()[0] + asize) << ") *)" << std::endl;
 	}
 	return out.str();
 }
 
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-std::string Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toString(){
+
+std::string Voxel::toString(){
 	std::stringstream out;
 	out.precision(std::numeric_limits< double >::max_digits10);
 
 	out << "index: " << this->index << " position: (";
-	for (unsigned short i=0; i<SPATIAL_DIMENSION; i++){
+	for (unsigned short i=0; i<RSA_SPATIAL_DIMENSION; i++){
 		out << this->position[i];
-		if (i<SPATIAL_DIMENSION-1)
+		if (i<RSA_SPATIAL_DIMENSION-1)
 			out << ", ";
 	}
 	out << ") orientation: (";
-	for (unsigned short i=0; i<ANGULAR_DIMENSION; i++){
+	for (unsigned short i=0; i<RSA_ANGULAR_DIMENSION; i++){
 		out << this->orientation[i];
-		if (i<ANGULAR_DIMENSION-1)
+		if (i<RSA_ANGULAR_DIMENSION-1)
 			out << ", ";
 	}
 	out << ")";
 	return out.str();
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::store(std::ostream &f) const{
-	unsigned short sd = SPATIAL_DIMENSION;
-	unsigned short ad = ANGULAR_DIMENSION;
+
+void Voxel::store(std::ostream &f) const{
+	unsigned short sd = RSA_SPATIAL_DIMENSION;
+	unsigned short ad = RSA_ANGULAR_DIMENSION;
 	f.write((char *)(&sd), sizeof(unsigned char));
 	if (ad>0)
 		f.write((char *)(&ad), sizeof(unsigned char));
-	f.write((char *)(this->position), SPATIAL_DIMENSION*sizeof(double));
+	f.write((char *)(this->position), RSA_SPATIAL_DIMENSION*sizeof(double));
 	if (ad>0)
-		f.write((char *)(this->orientation), ANGULAR_DIMENSION*sizeof(double));
+		f.write((char *)(this->orientation.data()), RSA_ANGULAR_DIMENSION*sizeof(double));
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
-	unsigned char sd = SPATIAL_DIMENSION;
-	unsigned char ad = ANGULAR_DIMENSION;
+
+void Voxel::restore(std::istream &f){
+	unsigned char sd = RSA_SPATIAL_DIMENSION;
+	unsigned char ad = RSA_ANGULAR_DIMENSION;
 
 	f.read((char *)(&sd), sizeof(unsigned char));
 	if (ad > 0)
 		f.read((char *)(&ad), sizeof(unsigned char));
 
-	if (sd!=SPATIAL_DIMENSION || ad!=ANGULAR_DIMENSION){
+	if (sd!=RSA_SPATIAL_DIMENSION || ad!=RSA_ANGULAR_DIMENSION){
 		std::cout << "[ERROR] cannot restore Voxel: incompatible dimensions: read " << f.gcount() << " bytes." << std::endl;
 		return;
 	}

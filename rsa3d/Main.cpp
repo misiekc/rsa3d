@@ -1,18 +1,13 @@
 #include "PackingGenerator.h"
 #include "analizator/Analyzer.h"
+#include "ShapeFactory.h"
 
 #include <unistd.h>
 #include <sys/wait.h>
 #include <cstring>
 #include <iomanip>
-
 #include <chrono>
-
-#include <unistd.h>
-#include <ios>
-#include <iostream>
 #include <fstream>
-#include <string>
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -88,7 +83,7 @@ void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-	PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *pg = new PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>(seed, params);
+	PackingGenerator *pg = new PackingGenerator(seed, params);
 	pg->run();
 	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = pg->getPacking();
 
@@ -114,7 +109,7 @@ void debug(Parameters *params, char *cfile){
 	if (!file)
 		die("Cannot open file " + filename + " to restore packing generator");
 
-	PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *pg = new PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>(0, params);
+	PackingGenerator *pg = new PackingGenerator(0, params);
 	pg->restore(file);
 	pg->run();
 	delete pg;
@@ -164,7 +159,7 @@ int simulate(Parameters *params) {
  * @brief Creates packing until the total number of shapes (in all packings) does not exceed @a max
  */
 void boundaries(Parameters *params, unsigned long max) {
-	PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *pg;
+	PackingGenerator *pg;
 	char buf[20];
 	unsigned long counter = 0;;
 	int seed = 0;
@@ -175,7 +170,7 @@ void boundaries(Parameters *params, unsigned long max) {
 	file.precision(std::numeric_limits<double>::digits10 + 1);
 	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing;
 	do {
-		pg = new PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>(seed, params);
+		pg = new PackingGenerator(seed, params);
 		pg->run();
 		packing = pg->getPacking();
 		file << seed << "\t" << packing->size() << "\t" << (*packing)[packing->size() - 1]->time << std::endl;
@@ -201,7 +196,7 @@ int main(int argc, char **argv) {
 	}else if (strcmp(argv[1], "test")==0) {
 		std::string filename(argv[3]);
 		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(filename);
-		PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *pg = new PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>(1, &params);
+		PackingGenerator *pg = new PackingGenerator(1, &params);
 		pg->testPacking(packing, atof(argv[4]));
 		delete pg;
 		delete packing;
@@ -215,12 +210,12 @@ int main(int argc, char **argv) {
 	} else if (strcmp(argv[1], "povray")==0) {
 		std::string file(argv[3]);
 		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(file);
-		PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>::toPovray(packing, params.surfaceSize, nullptr, file + ".pov");
+		PackingGenerator::toPovray(packing, params.surfaceSize, nullptr, file + ".pov");
 		delete packing;
 	} else if (strcmp(argv[1], "wolfram")==0) {
 		std::string file(argv[3]);
 		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(file);
-		PackingGenerator<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>::toWolfram(packing, params.surfaceSize, nullptr, file + ".nb");
+		PackingGenerator::toWolfram(packing, params.surfaceSize, nullptr, file + ".nb");
 		delete packing;
 	}else{
 		std::cerr << "Unknown mode: " << argv[1] << std::endl;

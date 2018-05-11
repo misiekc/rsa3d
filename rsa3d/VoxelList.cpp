@@ -9,12 +9,7 @@
 #include <cmath>
 #include <algorithm>
 
-#include "Voxel.h"
-#include "math.h"
-#include "NeighbourGrid.h"
-#include "Shape.h"
-
-#include "Utils.h"
+#include "VoxelList.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -24,8 +19,8 @@
 /**
  * d - requested initial size of a voxel
  */
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::findInitialVoxelSize(double d){
+
+double VoxelList::findInitialVoxelSize(double d){
 	double dRes = 1.0;
 	while (dRes > d)
 		dRes /= 2;
@@ -34,8 +29,8 @@ double VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::findInitialVoxelSize(dou
 	return dRes;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::findInitialVoxelAngularSize(double d){
+
+double VoxelList::findInitialVoxelAngularSize(double d){
 	double dRes = 4.0;
 	while (dRes < d)
 		dRes *= 2;
@@ -45,8 +40,8 @@ double VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::findInitialVoxelAngularS
 }
 
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-inline int VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getLinearNumberOfVoxels(double vs){
+
+inline int VoxelList::getLinearNumberOfVoxels(double vs){
 	return (int)(this->size/vs) + 1;
 }
 
@@ -55,8 +50,8 @@ dim - packing dimension
 s - packing size (linear)
 d - requested initial size of a voxel
 **/
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::VoxelList(double s, double d, double ad){
+
+VoxelList::VoxelList(double s, double d, double ad){
 	this->size = s;
 	this->voxelSize = this->findInitialVoxelSize(d);
 	this->initialVoxelSize = this->voxelSize;
@@ -70,20 +65,20 @@ VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::VoxelList(double s, double d, d
 	this->disabled = false;
 
 	int n = this->getLinearNumberOfVoxels(this->voxelSize);
-	int voxelsLength = (int)(pow(n, SPATIAL_DIMENSION)+0.5);
-	this->voxels = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>*[voxelsLength];
+	int voxelsLength = (int)(pow(n, RSA_SPATIAL_DIMENSION)+0.5);
+	this->voxels = new Voxel*[voxelsLength];
 	this->activeTopLevelVoxels = new bool[voxelsLength];
-	this->voxelNeighbourGrid = new NeighbourGrid<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>>(SPATIAL_DIMENSION, this->voxelSize*n, n);
+	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(RSA_SPATIAL_DIMENSION, this->voxelSize*n, n);
 
 
-	int in[SPATIAL_DIMENSION];
-	for(ushort i=0; i<SPATIAL_DIMENSION; i++)
+	int in[RSA_SPATIAL_DIMENSION];
+	for(ushort i=0; i<RSA_SPATIAL_DIMENSION; i++)
 		in[i] = 0;
 	int index = 0;
 	do{
-		std::copy(in, in+SPATIAL_DIMENSION, offset[index]);
+		std::copy(in, in+RSA_SPATIAL_DIMENSION, offset[index]);
 		index++;
-	}while(increment(in, SPATIAL_DIMENSION, 1));
+	}while(increment(in, RSA_SPATIAL_DIMENSION, 1));
 
 	this->initVoxels();
 	this->voxelSize *= this->dxFactor;
@@ -94,8 +89,8 @@ VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::VoxelList(double s, double d, d
 //		this.checkIndexes();
 	}
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::~VoxelList() {
+
+VoxelList::~VoxelList() {
 	delete this->spatialDistribution;
 
 	for(int i=0; i<=this->last; i++){
@@ -106,73 +101,73 @@ VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::~VoxelList() {
 	delete this->voxelNeighbourGrid;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::disable(){
+
+void VoxelList::disable(){
 	this->disabled = true;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::initVoxels(){
-	int n = this->getLinearNumberOfVoxels(this->voxelSize);
-	double position[SPATIAL_DIMENSION];
-	std::array<double, ANGULAR_DIMENSION> orientation;
-	int in[SPATIAL_DIMENSION];
 
-	for(ushort i = 0; i<SPATIAL_DIMENSION; i++)
+void VoxelList::initVoxels(){
+	int n = this->getLinearNumberOfVoxels(this->voxelSize);
+	double position[RSA_SPATIAL_DIMENSION];
+	std::array<double, RSA_ANGULAR_DIMENSION> orientation;
+	int in[RSA_SPATIAL_DIMENSION];
+
+	for(ushort i = 0; i<RSA_SPATIAL_DIMENSION; i++)
 		in[i] = 0;
 
-	for(ushort i = 0; i<ANGULAR_DIMENSION; i++)
+	for(ushort i = 0; i<RSA_ANGULAR_DIMENSION; i++)
 		orientation[i] = 0;
 
 
 	int i, index = 0;
 	do{
-		for(unsigned char i=0; i<SPATIAL_DIMENSION; i++){
+		for(unsigned char i=0; i<RSA_SPATIAL_DIMENSION; i++){
 			position[i] = this->voxelSize*in[i]; // da point to the "left bottom" corner of a voxel
 		}
-		i = position2i(position, SPATIAL_DIMENSION, n*this->voxelSize, this->voxelSize, n);
+		i = position2i(position, RSA_SPATIAL_DIMENSION, n*this->voxelSize, this->voxelSize, n);
 		if(index!=i){
 			std::cout << "VoxelList::initVoxels: Problem: " << index << " != " << i << std::endl;
 		}
 
-		this->voxels[index] = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(position, orientation);
+		this->voxels[index] = new Voxel(position, orientation);
 		this->voxels[index]->index = index;
 		this->activeTopLevelVoxels[index] = true;
 		index++;
-	}while(increment(in, SPATIAL_DIMENSION, n-1));
+	}while(increment(in, RSA_SPATIAL_DIMENSION, n-1));
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::fillNeighbourGrid(){
+
+void VoxelList::fillNeighbourGrid(){
 	this->voxelNeighbourGrid->clear();
 	for(int i=0; i<=this->last; i++){
 		this->voxelNeighbourGrid->add(this->voxels[i], this->voxels[i]->getPosition());
 	}
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getNeighbours(std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *result, double *da){
+
+void VoxelList::getNeighbours(std::vector<Voxel *> *result, double *da){
 	return this->voxelNeighbourGrid->getNeighbours(result, da);
 }
 
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::checkIndexes(){
+
+void VoxelList::checkIndexes(){
 	for(int i=0; i<=this->last; i++){
 		if(this->voxels[i]->index!=i)
 			std::cout << "VoxelList::checkIndexes: Error " << i << std::endl;
 	}
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::remove(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v){
+
+void VoxelList::remove(Voxel *v){
 	if (this->disabled)
 		return;
 
 	int index = v->index;
 
 	if (index!=last){
-		Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *vl = this->voxels[last];
+		Voxel *vl = this->voxels[last];
 		vl->index = index;
 		this->voxels[index] = vl;
 	}
@@ -184,8 +179,8 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::remove(Voxel<SPATIAL_DIMEN
 //		this.checkIndexes();
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::compactVoxelArray(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> **list, int &endIndex){
+
+void VoxelList::compactVoxelArray(Voxel **list, int &endIndex){
 	int beginIndex = 0;
 
 	while(list[endIndex]==NULL && endIndex > -1)
@@ -204,11 +199,11 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::compactVoxelArray(Voxel<SP
 }
 
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::remove(std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *vVoxels){
+
+void VoxelList::remove(std::vector<Voxel *> *vVoxels){
 	if (this->disabled)
 		return;
-	for(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v : *vVoxels){
+	for(Voxel *v : *vVoxels){
 		this->voxels[v->index] = NULL;
 		delete v;
 	}
@@ -225,30 +220,30 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::remove(std::vector<Voxel<S
 
 
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-int VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getIndexOfTopLevelVoxel(double *da){
+
+int VoxelList::getIndexOfTopLevelVoxel(double *da){
 
 	int n = (int)(this->size/this->initialVoxelSize) + 1;
-	int index = position2i(da, SPATIAL_DIMENSION, n*this->initialVoxelSize, this->initialVoxelSize, n);
+	int index = position2i(da, RSA_SPATIAL_DIMENSION, n*this->initialVoxelSize, this->initialVoxelSize, n);
 	return index;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::removeTopLevelVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v){
+
+void VoxelList::removeTopLevelVoxel(Voxel *v){
 	if (this->disabled)
 		return;
 	this->activeTopLevelVoxels[this->getIndexOfTopLevelVoxel(v->getPosition())]=false;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::checkTopLevelVoxels(){
+
+void VoxelList::checkTopLevelVoxels(){
 
 	RND rnd;
-	double pos[SPATIAL_DIMENSION];
-	double angle[ANGULAR_DIMENSION];
+	double pos[RSA_SPATIAL_DIMENSION];
+	double angle[RSA_ANGULAR_DIMENSION];
 
 	for(int i=0; i<=this->last; i++){
-		Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = this->voxels[i];
+		Voxel *v = this->voxels[i];
 		this->getRandomPositionAndOrientation(pos, angle, v, &rnd);
 		int index = this->getIndexOfTopLevelVoxel(pos);
 		if (this->getIndexOfTopLevelVoxel(v->getPosition())!=index){
@@ -264,10 +259,10 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::checkTopLevelVoxels(){
 	}
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxel(double *pos, const std::array<double, ANGULAR_DIMENSION> &angle){
-	std::vector<Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *vTmp = this->voxelNeighbourGrid->getCell(pos);
-	for(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v : *vTmp){
+
+Voxel * VoxelList::getVoxel(double *pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle){
+	std::vector<Voxel *> *vTmp = this->voxelNeighbourGrid->getCell(pos);
+	for(Voxel *v : *vTmp){
 		if (v->isInside(pos, this->voxelSize, angle, this->angularVoxelSize)){
 			return v;
 		}
@@ -275,57 +270,57 @@ Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * VoxelList<SPATIAL_DIMENSION, ANGUL
 	return NULL;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, double spatialSize, double angularSize, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> **vRes){
 
-	unsigned short spatialLoop = 1 << SPATIAL_DIMENSION;
-	unsigned short angularLoop = 1 << ANGULAR_DIMENSION;
+void VoxelList::splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes){
 
-	int inpos[SPATIAL_DIMENSION];
-	double position[SPATIAL_DIMENSION];
-	std::array<int, ANGULAR_DIMENSION> inangle;
-	std::array<double, ANGULAR_DIMENSION> orientation;
+	unsigned short spatialLoop = 1 << RSA_SPATIAL_DIMENSION;
+	unsigned short angularLoop = 1 << RSA_ANGULAR_DIMENSION;
+
+	int inpos[RSA_SPATIAL_DIMENSION];
+	double position[RSA_SPATIAL_DIMENSION];
+	std::array<int, RSA_ANGULAR_DIMENSION> inangle;
+	std::array<double, RSA_ANGULAR_DIMENSION> orientation;
 
 
 	double* vpos = v->getPosition();
-	for(ushort j=0; j < SPATIAL_DIMENSION; j++){
+	for(ushort j=0; j < RSA_SPATIAL_DIMENSION; j++){
 		inpos[j] = 0;
 		position[j] = vpos[j];
 	}
 
-	std::array<double, ANGULAR_DIMENSION> vangle = v->getOrientation();
+	std::array<double, RSA_ANGULAR_DIMENSION> vangle = v->getOrientation();
     orientation = vangle;
-	for(ushort j=0; j < ANGULAR_DIMENSION; j++)
+	for(ushort j=0; j < RSA_ANGULAR_DIMENSION; j++)
 		inangle[j] = 0;
 
 	for(unsigned short i=0; i<spatialLoop; i++){
-		for(unsigned short j=0; j < SPATIAL_DIMENSION; j++){
+		for(unsigned short j=0; j < RSA_SPATIAL_DIMENSION; j++){
 			position[j] = vpos[j] + inpos[j]*spatialSize;
 		}
-		for(unsigned short j=0; j < ANGULAR_DIMENSION; j++){
+		for(unsigned short j=0; j < RSA_ANGULAR_DIMENSION; j++){
 			inangle[j] = 0;
 		}
 		for(unsigned short j=0; j<angularLoop; j++){
-			for(unsigned short k=0; k<ANGULAR_DIMENSION; k++){
+			for(unsigned short k=0; k<RSA_ANGULAR_DIMENSION; k++){
 				orientation[k] = vangle[k] + inangle[k]*angularSize;
 			}
-			vRes[i*angularLoop + j] = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>(position, orientation);
-			increment(inangle.data(), ANGULAR_DIMENSION, (unsigned char)1);
+			vRes[i*angularLoop + j] = new Voxel(position, orientation);
+			increment(inangle.data(), RSA_ANGULAR_DIMENSION, (unsigned char)1);
 		} // for j
-		increment(inpos, SPATIAL_DIMENSION, (unsigned char)1);
+		increment(inpos, RSA_SPATIAL_DIMENSION, (unsigned char)1);
 	} // for i
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsidePacking(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v){
+
+bool VoxelList::isVoxelInsidePacking(Voxel *v){
 	double* vpos = v->getPosition();
-	std::array<double, ANGULAR_DIMENSION> vangle = v->getOrientation();
-	for(unsigned short i=0; i < SPATIAL_DIMENSION; i++){
+	std::array<double, RSA_ANGULAR_DIMENSION> vangle = v->getOrientation();
+	for(unsigned short i=0; i < RSA_SPATIAL_DIMENSION; i++){
 		if (vpos[i] >= this->size){
 			return false;
 		}
 	}
-	for(unsigned short i=0; i<ANGULAR_DIMENSION; i++){
+	for(unsigned short i=0; i<RSA_ANGULAR_DIMENSION; i++){
 		if (vangle[i] >= this->angularSize){
 			return false;
 		}
@@ -336,15 +331,15 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsidePacking(Voxel
 /**
  * returns true when the whole voxel is inside an exclusion area of the shape s
  */
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsideExclusionZone(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, double spatialSize, double angularSize, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s, BoundaryConditions *bc){
+
+bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize, Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s, BoundaryConditions *bc){
 
 	double* vpos = v->getPosition();
-	double position[SPATIAL_DIMENSION];
-	int counterSize = 1 << SPATIAL_DIMENSION;
+	double position[RSA_SPATIAL_DIMENSION];
+	int counterSize = 1 << RSA_SPATIAL_DIMENSION;
 	bool isInside = true;
 	for(int i=0; i<counterSize; i++){
-		for(ushort j=0; j<SPATIAL_DIMENSION; j++){
+		for(ushort j=0; j<RSA_SPATIAL_DIMENSION; j++){
 			position[j] = vpos[j] + this->offset[i][j]*spatialSize;
 		}
 		if(!s->pointInside(bc, position, v->getOrientation(), angularSize)){
@@ -359,15 +354,15 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsideExclusionZone
  * returns true when the whole voxel is inside an exclusion area of any shape in shapes
  * To determine it the method tires to split voxel up to level of maxDepth
  */
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsideExclusionZone(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, double spatialSize, double angularSize, std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *shapes, BoundaryConditions *bc, unsigned short depth){
+
+bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *shapes, BoundaryConditions *bc, unsigned short depth){
 	// if voxel is outside the packing it is inside exclusion zone
 	if (!this->isVoxelInsidePacking(v))
 		return true;
 	// otherwise checking
 
 	bool isInside = false;
-	for(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s : *shapes){
+	for(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s : *shapes){
 		isInside = this->isVoxelInsideExclusionZone(v, spatialSize, angularSize, s, bc);
 		if (isInside)
 			break;
@@ -380,8 +375,8 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsideExclusionZone
 		// dzielimy voxel na mniejsze
 		double ss = spatialSize / 2.0;
 		double as = angularSize / 2.0;
-		int arrayLenght = (int)round( pow(2, SPATIAL_DIMENSION+ANGULAR_DIMENSION) );
-		Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> **aVoxels = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>*[ arrayLenght ];
+		int arrayLenght = (int)round( pow(2, RSA_SPATIAL_DIMENSION+RSA_ANGULAR_DIMENSION) );
+		Voxel **aVoxels = new Voxel*[ arrayLenght ];
 		this->splitVoxel(v, ss, as, aVoxels);
 		bool bRes = true;
 		// sprawdzamy kazdy z mniejszych
@@ -403,8 +398,8 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isVoxelInsideExclusionZone
 	}
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isTopLevelVoxelActive(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v){
+
+bool VoxelList::isTopLevelVoxelActive(Voxel *v){
 
 	double *vpos = v->getPosition();
 	// checking if initial voxel containing v is active (do not have a shape inside)
@@ -412,8 +407,8 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::isTopLevelVoxelActive(Voxe
 	return this->activeTopLevelVoxels[index];
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s, BoundaryConditions *bc){
+
+bool VoxelList::analyzeVoxel(Voxel *v, Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s, BoundaryConditions *bc){
 
 	if (!isTopLevelVoxelActive(v))
 		return true;
@@ -421,18 +416,18 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL
 	return this->isVoxelInsideExclusionZone(v, this->voxelSize, this->angularVoxelSize, s, bc);
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, unsigned short depth){
+
+bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, unsigned short depth){
 	if (!this->disabled && (depth > v->depth || depth==0) ){
 
 	if (!isTopLevelVoxelActive(v))
 		return true;
 
-	std::vector<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> tmpShapes, shapes;
+	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> tmpShapes, shapes;
 		nl->getNeighbours(&tmpShapes, v->getPosition());
 
 		int maxNo = v->lastAnalyzed;
-		for(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s: tmpShapes){
+		for(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s: tmpShapes){
 			if (v->lastAnalyzed < s->no || depth > v->depth){
 				shapes.push_back(s);
 				if(maxNo < s->no)
@@ -451,17 +446,17 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::analyzeVoxel(Voxel<SPATIAL
 
 #ifdef _OPENMP
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc){
+
+bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc){
 	if (this->disabled)
 		return false;
-	int voxelsFactor = (int)round( pow(2, SPATIAL_DIMENSION+ANGULAR_DIMENSION) );
+	int voxelsFactor = (int)round( pow(2, RSA_SPATIAL_DIMENSION+RSA_ANGULAR_DIMENSION) );
 	if ((this->voxelSize<2*minDx && voxelsFactor*this->last > this->beginningVoxelNumber) || voxelsFactor*this->last > maxVoxels){
 		return false;
 	}
 
 	int newListSize = voxelsFactor*(this->last+1);
-	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>** newList = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>*[ newListSize ];
+	Voxel** newList = new Voxel*[ newListSize ];
 	for(int i=0; i<newListSize; i++){
 		newList[i] = NULL;
 	}
@@ -475,9 +470,9 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 	this->angularDistribution = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize);
 
 	int maxthreads = omp_get_max_threads();
-	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> ***aVoxels = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>**[maxthreads];
+	Voxel ***aVoxels = new Voxel**[maxthreads];
 	for(int i=0; i<maxthreads; i++){
-		aVoxels[i] = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>*[ voxelsFactor ];
+		aVoxels[i] = new Voxel*[ voxelsFactor ];
 	}
 
 	#pragma omp parallel for
@@ -485,7 +480,7 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 		int tid = omp_get_thread_num();
 		this->splitVoxel(this->voxels[i], this->voxelSize, this->angularVoxelSize, aVoxels[tid]);
 		for(int j=0; j<voxelsFactor; j++){
-			Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = aVoxels[tid][j];
+			Voxel *v = aVoxels[tid][j];
 			if(this->isVoxelInsidePacking(v) && ( nl==NULL || bc==NULL || !this->analyzeVoxel(v, nl, bc) ) ){
 					v->index = i*voxelsFactor + j;
 					if(this->voxels[i]->depth > 0){
@@ -525,17 +520,17 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 
 #else
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc){
+
+bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc){
 	if (this->disabled)
 		return false;
-	int voxelsFactor = (int)round( pow(2, SPATIAL_DIMENSION+ANGULAR_DIMENSION) );
+	int voxelsFactor = (int)round( pow(2, RSA_SPATIAL_DIMENSION+RSA_ANGULAR_DIMENSION) );
 	if ((this->voxelSize<2*minDx && voxelsFactor*this->last > this->beginningVoxelNumber) || voxelsFactor*this->last > maxVoxels){
 		return false;
 	}
 
 	int newListSize = voxelsFactor*(this->last+1);
-	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>** newList = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>*[ newListSize ];
+	Voxel** newList = new Voxel*[ newListSize ];
 
 	this->voxelSize = (this->voxelSize/2.0)*this->dxFactor;
 	delete this->spatialDistribution;
@@ -547,14 +542,14 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 
 	int index = 0;
 
-	int inpos[SPATIAL_DIMENSION];
-	double position[SPATIAL_DIMENSION];
-	int inangle[ANGULAR_DIMENSION];
-	double orientation[ANGULAR_DIMENSION];
-	Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> **aVoxels = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>*[voxelsFactor];
+	int inpos[RSA_SPATIAL_DIMENSION];
+	double position[RSA_SPATIAL_DIMENSION];
+	int inangle[RSA_ANGULAR_DIMENSION];
+	double orientation[RSA_ANGULAR_DIMENSION];
+	Voxel **aVoxels = new Voxel*[voxelsFactor];
 
 	for(int i=0; i<=this->last; i++){
-		Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = this->voxels[i];
+		Voxel *v = this->voxels[i];
 
 		this->splitVoxel(this->voxels[i], this->voxelSize, this->angularVoxelSize, aVoxels);
 		for(int j=0; j<voxelsFactor; j++){
@@ -587,55 +582,55 @@ bool VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::splitVoxels(double minDx, 
 #endif
 
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getRandomVoxel(RND *rnd){
+
+Voxel * VoxelList::getRandomVoxel(RND *rnd){
 	double d = rnd->nextValue();
 	return this->voxels[(int)(d*(this->last+1))];
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> * VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxel(int i){
+
+Voxel * VoxelList::getVoxel(int i){
 	return this->voxels[i];
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getRandomPositionAndOrientation(double *position, double *orientation, Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v, RND *rnd){
-	double *vpos = v->getPosition();
-	std::array<double, ANGULAR_DIMENSION> vangle = v->getOrientation();
 
-	for (ushort i=0; i < SPATIAL_DIMENSION; i++)
+void VoxelList::getRandomPositionAndOrientation(double *position, double *orientation, Voxel *v, RND *rnd){
+	double *vpos = v->getPosition();
+	std::array<double, RSA_ANGULAR_DIMENSION> vangle = v->getOrientation();
+
+	for (ushort i=0; i < RSA_SPATIAL_DIMENSION; i++)
 		position[i] = vpos[i] + rnd->nextValue(this->spatialDistribution);
-	for (ushort i=0; i < ANGULAR_DIMENSION; i++)
+	for (ushort i=0; i < RSA_ANGULAR_DIMENSION; i++)
 		orientation[i] = vangle[i] + rnd->nextValue(this->angularDistribution);
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelSize(){
+
+double VoxelList::getVoxelSize(){
 	return this->voxelSize;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelAngularSize(){
+
+double VoxelList::getVoxelAngularSize(){
 	return this->angularVoxelSize;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>* VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::get(int i){
+
+Voxel* VoxelList::get(int i){
 	return this->voxels[i];
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-int VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::length() const{
+
+int VoxelList::length() const{
 	return this->last+1;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelsSurface(){
-	return (this->last+1)*pow(this->voxelSize, SPATIAL_DIMENSION)*pow((this->angularVoxelSize/(this->initialAngularVoxelSize)), ANGULAR_DIMENSION);
+
+double VoxelList::getVoxelsSurface(){
+	return (this->last+1)*pow(this->voxelSize, RSA_SPATIAL_DIMENSION)*pow((this->angularVoxelSize/(this->initialAngularVoxelSize)), RSA_ANGULAR_DIMENSION);
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-std::string VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(){
+
+std::string VoxelList::toPovray(){
 	std::string sRes = "";
 
 	for(int i=0; i<=this->last; i++){
@@ -644,8 +639,8 @@ std::string VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toPovray(){
 	return sRes;
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-std::string VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram(){
+
+std::string VoxelList::toWolfram(){
 	std::stringstream out;
 
 	for(int i=0; i<=this->last; i++){
@@ -653,17 +648,17 @@ std::string VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toWolfram(){
 		if (i!=this->last)
 			out << ", ";
 		out << std::endl;
-		if (ANGULAR_DIMENSION > 0){
+		if (RSA_ANGULAR_DIMENSION > 0){
 			out << "(* angles: [ " << this->voxels[i]->getOrientation()[0] << ", " << (this->voxels[i]->getOrientation()[0] + this->angularVoxelSize) << ") *)" << std::endl;
 		}
 	}
 	return out.str();
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::store(std::ostream &f) const{
-	unsigned short sd = SPATIAL_DIMENSION;
-	unsigned short ad = ANGULAR_DIMENSION;
+
+void VoxelList::store(std::ostream &f) const{
+	unsigned short sd = RSA_SPATIAL_DIMENSION;
+	unsigned short ad = RSA_ANGULAR_DIMENSION;
 	f.write((char *)(&sd), sizeof(unsigned char));
 	if (ad>0)
 		f.write((char *)(&ad), sizeof(unsigned char));
@@ -677,16 +672,16 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::store(std::ostream &f) con
 	}
 }
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
-	unsigned char sd = SPATIAL_DIMENSION;
-	unsigned char ad = ANGULAR_DIMENSION;
+
+void VoxelList::restore(std::istream &f){
+	unsigned char sd = RSA_SPATIAL_DIMENSION;
+	unsigned char ad = RSA_ANGULAR_DIMENSION;
 
 	f.read((char *)(&sd), sizeof(unsigned char));
 	if (ad > 0)
 		f.read((char *)(&ad), sizeof(unsigned char));
 
-	if (sd!=SPATIAL_DIMENSION || ad!=ANGULAR_DIMENSION){
+	if (sd!=RSA_SPATIAL_DIMENSION || ad!=RSA_ANGULAR_DIMENSION){
 		std::cout << "[ERROR] cannot restore VoxelList: incompatible dimensions: read " << f.gcount() << " bytes." << std::endl;
 		return;
 	}
@@ -707,9 +702,9 @@ void VoxelList<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
 	int size;
 	int topIndex;
 	f.read((char *)&size, sizeof(int));
-	this->voxels = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *[size];
+	this->voxels = new Voxel *[size];
 	for(int i=0; i<size; i++){
-		Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *v = new Voxel<SPATIAL_DIMENSION, ANGULAR_DIMENSION>();
+		Voxel *v = new Voxel();
 		v->restore(f);
 		this->voxels[i] = v;
 		v->index = i;

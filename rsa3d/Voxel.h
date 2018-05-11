@@ -9,13 +9,13 @@
 #define VOXEL_H_
 
 #include <algorithm>
+#include <array>
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 class Voxel{
 
 private:
-	double position[SPATIAL_DIMENSION];
-	std::array<double, ANGULAR_DIMENSION> orientation;
+	double position[RSA_SPATIAL_DIMENSION];
+	std::array<double, RSA_ANGULAR_DIMENSION> orientation;
 	short missCounter;
 
 public:
@@ -43,7 +43,7 @@ public:
 	/**
 	 * @brief creates a voxel of a given position and orientation
 	 */
-	Voxel(double* pos, const std::array<double, ANGULAR_DIMENSION> &angle);
+	Voxel(double* pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle);
 
 	virtual ~Voxel() = default;
 
@@ -55,11 +55,11 @@ public:
 
 	bool isInside(double *pos, double size);
 
-	bool isInside(double *pos, double size, const std::array<double, ANGULAR_DIMENSION> &angle, double asize);
+	bool isInside(double *pos, double size, const std::array<double, RSA_ANGULAR_DIMENSION> &angle, double asize);
 
 	double *getPosition();
 
-	std::array<double, ANGULAR_DIMENSION> getOrientation();
+	std::array<double, RSA_ANGULAR_DIMENSION> getOrientation();
 
 	std::string toPovray(double ssize);
 	std::string toWolfram(double ssize, double asize);
@@ -67,11 +67,7 @@ public:
 
 	void store(std::ostream &f) const;
 	void restore(std::istream &f);
-
-
-
 };
 
-#include "Voxel.tpp"
 
 #endif /* VOXEL_H_ */
