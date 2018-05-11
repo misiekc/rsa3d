@@ -14,20 +14,6 @@
 #include "shapes/OverlapStrategyShape.h"
 #include <string>
 
-/**
- * @brief A shortcut for Shape template specialization with curently used parameters.
- */
-using RSAShape = Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>;
-
-/**
- * @brief A shortcut for OverlapStrategy template specialization with curently used parameters.
- */
-using RSAOverlapStrategy = OverlapStrategy<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>;
-
-/**
- * @brief A shortcut for OverlapStrategyShape template specialization with curently used parameters.
- */
-using RSAOverlapStrategyShape = OverlapStrategyShape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>;
 
 /**
  * @brief A class providing a way to create shapes of a type determined at the runtime.

@@ -14,4 +14,9 @@ public:
     virtual int overlap(const Shape<SD, AD> *first, const Shape<SD, AD> *second) const = 0;
 };
 
+/**
+ * @brief A shortcut for OverlapStrategy template specialization with curently used parameters.
+ */
+using RSAOverlapStrategy = OverlapStrategy<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>;
+
 #endif //RSA3D_OVERLAPSTRATEGY_H

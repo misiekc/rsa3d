@@ -17,13 +17,18 @@
 #include <vector>
 #include <map>
 
+/**
+ * @brief A short form of vector of pointers to Shape with current parameters representing a packing
+ */
+using Packing = std::vector<RSAShape*>;
+
 class PackingGenerator {
 private:
 	static double FACTOR_LIMIT;
 
 	int seed;
 	Parameters *params;
-	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> packing;
+	Packing packing;
 	VoxelList *voxels;
 	Surface *surface;
 
@@ -32,7 +37,7 @@ private:
 
 	int analyzeVoxels(unsigned short depth);
 	int analyzeRegion(Voxel *v);
-	void modifiedRSA(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s, Voxel *v);
+	void modifiedRSA(RSAShape *s, Voxel *v);
 	bool isSaturated();
 	double getFactor();
 	bool isInside(double *position, double *orientation);
@@ -51,13 +56,13 @@ public:
 	virtual ~PackingGenerator();
 
 	void run();
-	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * getPacking();
+	Packing *getPacking();
 
-	void testPacking(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing, double maxTime);
+	void testPacking(Packing *packing, double maxTime);
 
 	void toFile(const std::string &filename);
-	static void toPovray(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * packing, double size, VoxelList *voxels, const std::string &filename);
-	static void toWolfram(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * packing, double size, VoxelList *voxels, const std::string &filename);
+	static void toPovray(Packing *packing, double size, VoxelList *voxels, const std::string &filename);
+	static void toWolfram(Packing *packing, double size, VoxelList *voxels, const std::string &filename);
 
 	void restore(std::istream &f);
 };

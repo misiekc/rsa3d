@@ -17,4 +17,9 @@ public:
     virtual OverlapStrategy<SD, AD> *createStrategy(const std::string &name) const = 0;
 };
 
+/**
+ * @brief A shortcut for OverlapStrategyShape template specialization with curently used parameters.
+ */
+using RSAOverlapStrategyShape = OverlapStrategyShape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>;
+
 #endif //RSA3D_OVERLAPSTRATEGYSHAPE_H

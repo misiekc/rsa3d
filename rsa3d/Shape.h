@@ -333,6 +333,12 @@ public:
     virtual void restore(std::istream &f);
 };
 
+/**
+ * @brief A shortcut for Shape template specialization with curently used parameters.
+ */
+using RSAShape = Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>;
+
+
 #include "Shape.tpp"
 
 

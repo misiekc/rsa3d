@@ -56,16 +56,16 @@ void process_mem_usage(double& vm_usage, double& resident_set)
 
 
 
-std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * fromFile(const std::string &filename) {
+Packing *fromFile(const std::string &filename) {
 	std::ifstream file(filename, std::ios::binary);
 	if (!file)
 		die("Cannot open file " + filename + " to restore packing");
 
-	auto v = new std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *>;
+	auto v = new Packing;
 	RND rnd(1);
 
 	while (!file.eof()) {
-		Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s = ShapeFactory::createShape(&rnd);
+		RSAShape *s = ShapeFactory::createShape(&rnd);
 		s->restore(file);
 		v->push_back(s);
 	}
@@ -85,7 +85,7 @@ void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 
 	PackingGenerator *pg = new PackingGenerator(seed, params);
 	pg->run();
-	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = pg->getPacking();
+	Packing *packing = pg->getPacking();
 
 	if (params->storePackings) {
 		std::string sPackingFile = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + "_" + std::to_string(seed) + ".bin";
@@ -168,7 +168,7 @@ void boundaries(Parameters *params, unsigned long max) {
 	std::string filename = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + ".dat";
 	std::ofstream file(filename);
 	file.precision(std::numeric_limits<double>::digits10 + 1);
-	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing;
+	Packing *packing;
 	do {
 		pg = new PackingGenerator(seed, params);
 		pg->run();
@@ -195,7 +195,7 @@ int main(int argc, char **argv) {
 		simulate(&params);
 	}else if (strcmp(argv[1], "test")==0) {
 		std::string filename(argv[3]);
-		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(filename);
+		Packing *packing = fromFile(filename);
 		PackingGenerator *pg = new PackingGenerator(1, &params);
 		pg->testPacking(packing, atof(argv[4]));
 		delete pg;
@@ -209,12 +209,12 @@ int main(int argc, char **argv) {
 		an.analyzePackingsInDirectory(argv[3], 0.01, 1.0);
 	} else if (strcmp(argv[1], "povray")==0) {
 		std::string file(argv[3]);
-		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(file);
+		Packing *packing = fromFile(argv[3]);
 		PackingGenerator::toPovray(packing, params.surfaceSize, nullptr, file + ".pov");
 		delete packing;
 	} else if (strcmp(argv[1], "wolfram")==0) {
 		std::string file(argv[3]);
-		std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing = fromFile(file);
+		Packing *packing = fromFile(file);
 		PackingGenerator::toWolfram(packing, params.surfaceSize, nullptr, file + ".nb");
 		delete packing;
 	}else{
