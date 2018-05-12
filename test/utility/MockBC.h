@@ -8,6 +8,7 @@
     #define _MOCK_BC_H
     
 #include "../../rsa3d/BoundaryConditions.h"
+#include <cstdlib>
     
 class MockBC : public BoundaryConditions
 {
