@@ -6,6 +6,8 @@
  */
 
 #include "ShapeFactory.h"
+#include "Positioned.h"
+#include "Utils.h"
 
 #include "shapes/Sphere.h"
 #include "shapes/Cuboid.h"
@@ -19,6 +21,16 @@
 #include "shapes/platonic_solid/RegularTetrahedron.h"
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
+
+	int in[RSA_SPATIAL_DIMENSION];
+	for(ushort i=0; i<RSA_SPATIAL_DIMENSION; i++)
+		in[i] = 0;
+	int index = 0;
+	do{
+		std::copy(in, in+RSA_SPATIAL_DIMENSION, Positioned<RSA_SPATIAL_DIMENSION>::offset[index]);
+		index++;
+	}while(increment(in, RSA_SPATIAL_DIMENSION, 1));
+
 
     // Shapes for any dimension, without angular dimensions
     #if RSA_ANGULAR_DIMENSION == 0

@@ -73,7 +73,7 @@ void Surface::checkPosition(double *da){
 	// do nothing
 }
 
-double Surface::distance2(double *a1, double *a2) {
+double Surface::distance2(const double *a1, const double *a2) {
 	double *v = new double[this->dimension];
 	for (int i = 0; i < this->dimension; i++)
 		v[i] = a1[i] - a2[i];

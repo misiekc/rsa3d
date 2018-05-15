@@ -44,6 +44,9 @@ protected:
     virtual void setPosition(const double *position);
 
 public:
+
+    static int offset[(1 << SPATIAL_DIMENSION)][SPATIAL_DIMENSION];
+
 	virtual ~Positioned() = default;
 
 	/**

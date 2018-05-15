@@ -17,7 +17,7 @@ double NBoxPBC::getArea(){
 	return pow(this->size, this->dimension);
 }
 
-double * NBoxPBC::getTranslation(double *result, int dim, double s, double *p1, double *p2) {
+double * NBoxPBC::getTranslation(double *result, int dim, double s, const double *p1, const double *p2) {
 	double d;
 	for(int i=0; i<dim; i++){
 		d = 2*(p1[i] - p2[i]);
@@ -31,7 +31,7 @@ double * NBoxPBC::getTranslation(double *result, int dim, double s, double *p1, 
 	return result;
 	}
 
-double * NBoxPBC::getTranslation(double *result, double *p1, double *p2) {
+double * NBoxPBC::getTranslation(double *result, const double *p1, const double *p2) {
 		return NBoxPBC::getTranslation(result, this->dimension, this->size, p1, p2);
 	}
 

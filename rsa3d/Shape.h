@@ -160,7 +160,6 @@ protected:
 
 
 public:
-
     /**
      * @brief Number of a shape in a packing.
      */
@@ -250,7 +249,7 @@ public:
      * @return 0 if point is outside, nonzero number otherwise
      */
 	virtual int pointInside(BoundaryConditions *bc, double* position,
-                            const std::array<double, ANGULAR_DIMENSION> &orientation, double orientationRange) const = 0;
+                            const std::array<double, ANGULAR_DIMENSION> &orientation, double orientationRange) const;
 
     /**
      * @brief Checks if a virtual particle of the same size is within excluded volume for any orientation of it.
@@ -261,6 +260,22 @@ public:
      * @return 0 if point is outside, nonzero number otherwise
      */
 	virtual int pointInside(BoundaryConditions *bc, double* position) const;
+
+
+    /**
+     * @brief Checks if whole voxel is inside an exclusion zone of @this shape.
+     * Specifically, the procedure returns true any virtual paricle with a center and orientation within the voxel will overlap with @a this shape
+     * Default implementation bases on pointInside() and assumes that the excluded volume of @a this is convex.
+     *
+     * @param bc boundary conditions to take into account
+     * @param voxelPosition position of the "left-bottom" corner of the voxel
+     * @param orientation orientation of the "left-bottom" corner of the voxel
+     * @param spatialSize spatial size of the voxel
+     * @param angularSize angular size of the voxel
+     * @return true if the voxel is fully covered by the exclusion zone of @a this shape, false otherwise.
+     */
+	virtual bool voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, ANGULAR_DIMENSION> &orientation, double spatialSize, double angularSize) const;
+
 
     /**
      * @brief ?? Moves the shape towards given shape s.

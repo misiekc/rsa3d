@@ -70,16 +70,6 @@ VoxelList::VoxelList(double s, double d, double ad){
 	this->activeTopLevelVoxels = new bool[voxelsLength];
 	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(RSA_SPATIAL_DIMENSION, this->voxelSize*n, n);
 
-
-	int in[RSA_SPATIAL_DIMENSION];
-	for(ushort i=0; i<RSA_SPATIAL_DIMENSION; i++)
-		in[i] = 0;
-	int index = 0;
-	do{
-		std::copy(in, in+RSA_SPATIAL_DIMENSION, offset[index]);
-		index++;
-	}while(increment(in, RSA_SPATIAL_DIMENSION, 1));
-
 	this->initVoxels();
 	this->voxelSize *= this->dxFactor;
 	this->beginningVoxelNumber = voxelsLength;
@@ -329,28 +319,6 @@ bool VoxelList::isVoxelInsidePacking(Voxel *v){
 }
 
 /**
- * returns true when the whole voxel is inside an exclusion area of the shape s
- */
-
-bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize, Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s, BoundaryConditions *bc){
-
-	double* vpos = v->getPosition();
-	double position[RSA_SPATIAL_DIMENSION];
-	int counterSize = 1 << RSA_SPATIAL_DIMENSION;
-	bool isInside = true;
-	for(int i=0; i<counterSize; i++){
-		for(ushort j=0; j<RSA_SPATIAL_DIMENSION; j++){
-			position[j] = vpos[j] + this->offset[i][j]*spatialSize;
-		}
-		if(!s->pointInside(bc, position, v->getOrientation(), angularSize)){
-			isInside = false;
-			break;
-		}
-	}
-	return isInside;
-}
-
-/**
  * returns true when the whole voxel is inside an exclusion area of any shape in shapes
  * To determine it the method tires to split voxel up to level of maxDepth
  */
@@ -363,7 +331,7 @@ bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double 
 
 	bool isInside = false;
 	for(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s : *shapes){
-		isInside = this->isVoxelInsideExclusionZone(v, spatialSize, angularSize, s, bc);
+		isInside = s->voxelInside(bc, v->getPosition(), v->getOrientation(), spatialSize, angularSize);
 		if (isInside)
 			break;
 	}
@@ -413,7 +381,7 @@ bool VoxelList::analyzeVoxel(Voxel *v, Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_
 	if (!isTopLevelVoxelActive(v))
 		return true;
 
-	return this->isVoxelInsideExclusionZone(v, this->voxelSize, this->angularVoxelSize, s, bc);
+	return s->voxelInside(bc, v->getPosition(), v->getOrientation(), this->voxelSize, this->angularVoxelSize);
 }
 
 

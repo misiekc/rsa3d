@@ -68,7 +68,6 @@ private:
 
 protected:
 	Voxel** voxels;
-	int offset[(1 << RSA_SPATIAL_DIMENSION)][RSA_SPATIAL_DIMENSION]; // matrix of d-dimensional offsets to 2^d voxel vertices
 	int last;
 
 	double initialVoxelSize;
@@ -84,7 +83,6 @@ protected:
 
 
 	bool isVoxelInsidePacking(Voxel *v);
-	bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize, Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s, BoundaryConditions *bc);
 	bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *shapes, BoundaryConditions *bc, unsigned short depth = 0);
 
 	void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes);

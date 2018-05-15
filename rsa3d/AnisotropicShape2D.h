@@ -99,7 +99,8 @@ public:
      * @param angleTo array of lengths of angle intervals
      * @return 0 if point is outside, nonzero number otherwise
      */
-    virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const = 0;
+    virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const;
+
 };
 
 

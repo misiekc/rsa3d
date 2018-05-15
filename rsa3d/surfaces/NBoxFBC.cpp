@@ -20,13 +20,13 @@ double NBoxFBC::getArea(){
 	return pow(this->size, this->dimension);
 }
 
-double * NBoxFBC::getTranslation(double *result, int dim, double s, double *p1, double *p2) {
+double * NBoxFBC::getTranslation(double *result, int dim, double s, const double *p1, const double *p2) {
 	for(int i=0; i<dim; i++)
 		result[i] = 0.0;
 	return result;
 }
 
-double * NBoxFBC::getTranslation(double *result, double *p1, double *p2) {
+double * NBoxFBC::getTranslation(double *result, const double *p1, const double *p2) {
 		return NBoxFBC::getTranslation(result, this->dimension, this->size, p1, p2);
 	}
 

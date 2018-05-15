@@ -13,14 +13,14 @@
 
 class NBoxPBC : public Surface {
 private:
-	static double * getTranslation(double *result, int dim, double s, double *p1, double *p2);
+	static double * getTranslation(double *result, int dim, double s, const double *p1, const double *p2);
 
 public:
 	NBoxPBC(int dim, double s, double ndx, double vdx);
 	virtual ~NBoxPBC();
 
 	double getArea();
-	double * getTranslation(double *result, double *p1, double *p2);
+	double * getTranslation(double *result, const double *p1, const double *p2);
 	void vector(double *v);
 
 	void checkPosition(double *da);

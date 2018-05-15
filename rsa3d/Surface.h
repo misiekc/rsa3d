@@ -40,9 +40,9 @@ public:
 	void getNeighbours(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *result, double *da);
 	Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * getClosestNeighbour(double *da, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *neighbours);
 	NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> * getNeighbourGrid();
-	double distance2(double *a1, double *a2);
+	double distance2(const double *a1, const double *a2);
 
-	virtual double * getTranslation(double *result, double *p1, double *p2) = 0;
+	virtual double * getTranslation(double *result, const double *p1, const double *p2) = 0;
 	virtual void vector(double *v) = 0;
 	virtual void checkPosition(double *da);
 	virtual double getArea() = 0;

@@ -13,8 +13,11 @@ public:
 	BoundaryConditions();
 	virtual ~BoundaryConditions();
 
-	virtual double distance2(double *p1, double *p2) = 0;
-	virtual double * getTranslation(double *result, double* p1, double* p2) = 0;
+	virtual double distance2(const double *p1, const double *p2) = 0;
+	/**
+	 * @brief Returns translation that should be applied to @a p2 to move him to the "proximity" of @a p1
+	 */
+	virtual double * getTranslation(double *result, const double* p1, const double* p2) = 0;
 
 };
 

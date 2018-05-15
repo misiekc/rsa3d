@@ -9,6 +9,9 @@
 
 
 template <unsigned short SPATIAL_DIMENSION>
+int Positioned<SPATIAL_DIMENSION>::offset[(1 << SPATIAL_DIMENSION)][SPATIAL_DIMENSION];
+
+template <unsigned short SPATIAL_DIMENSION>
 double* Positioned<SPATIAL_DIMENSION>::getPosition() const {
     // TODO const_cast
 	return (const_cast<Positioned*>(this))->position.data();
