@@ -20,14 +20,13 @@ set(MAIN_SOURCE
         rsa3d/shapes/platonic_solid/SATOverlap.tpp
         rsa3d/shapes/platonic_solid/TriTriOverlap.h
         rsa3d/shapes/platonic_solid/TriTriOverlap.tpp
-        rsa3d/shapes/polygons/Segment2D.cpp
         rsa3d/shapes/Cuboid.cpp
         rsa3d/shapes/Ellipse.cpp
         rsa3d/shapes/OrientedCuboid.h
         rsa3d/shapes/OrientedCuboid.tpp
         rsa3d/shapes/OverlapStrategy.h
         rsa3d/shapes/OverlapStrategyShape.h
-        rsa3d/shapes/polygons/Polygon.cpp
+        rsa3d/shapes/Polygon.cpp
         rsa3d/shapes/Rectangle.cpp
         rsa3d/shapes/Sphere.h
         rsa3d/shapes/Sphere.tpp
@@ -107,7 +106,7 @@ endfunction(register_targets_for_dimensions)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -Wall -pedantic")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")   # -O3 in relase, in debug no optimisations
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -static")    # link dependencies statically
 
 add_library(libstatistics ${STATISTICS_SOURCE})
 
