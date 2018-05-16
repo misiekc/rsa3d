@@ -320,6 +320,7 @@ void PackingGenerator::createPacking(){
 
 		std::cout << "[" << this->seed << " PackingGenerator::createPacking] choosing " << tmpSplit << " shapes..." << std::flush;
 		factor = this->getFactor();
+		factor = (factor < 1.0)?1.0:factor;
 
 		#pragma omp parallel for
 		for(int i = 0; i<tmpSplit; i++){
@@ -525,14 +526,16 @@ void PackingGenerator::createPacking(){
 	delete s;
 
 	int l = 0;
-	double t = 0;
+	double t = 0, factor;
 	int tmpSplit = this->params->split;
 	int depthAnalyze = 0;
 //	int snapshotCounter = 0;
 
 
 	while (!this->isSaturated() && t<params->maxTime && missCounter<params->maxTriesWithoutSuccess) {
-		t += this->getFactor() * dt;
+		factor = this->getFactor();
+		factor = (factor<1.0)?1.0:factor;
+		t += factor * dt;
 		s = ShapeFactory::createShape(&rnd);
 
 		Voxel *v;

@@ -31,8 +31,6 @@ private:
 	//calculate the area of the triangle made from the origin, vertex i, and vertex (i+1)
 	static double getTriangleArea(size_t i);
 
-	static void initClass(const std::string &args);
-
 	//test if line segment from point 1 to 2 intersects with line segment from point 3 to 4
 	static bool lineLineIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
 
@@ -40,6 +38,8 @@ private:
 	static bool lineVoxelIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double dx, double dtheta, double l3, double l4);
 
 public:
+
+	static void initClass(const std::string &args);
 
 	Polygon();
 	~Polygon() override = default;
@@ -49,6 +49,7 @@ public:
 	int overlap(BoundaryConditions *bc, RSAShape *s) const;
 	bool voxelInside(BoundaryConditions *bc, const double *voxelPosition, double *voxelAngle, double spatialSize, double angularSize) const;
 
+	std::string toPovray() const;
 };
 
 #endif /* SHAPES_POLYGONS_POLYGON_H_ */

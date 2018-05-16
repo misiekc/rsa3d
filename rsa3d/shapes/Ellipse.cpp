@@ -49,7 +49,8 @@ void Ellipse::setAngle(double angle){
 }
 
 int Ellipse::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
-	Ellipse es = *((Ellipse *)s);
+	Ellipse *esPtr = (Ellipse *)s;
+	Ellipse es(*esPtr);
     this->applyBC(bc, &es);
 	double d;
 	d = (this->a/this->b - this->b/this->a)*sin(this->getAngle() - es.getAngle());
