@@ -43,10 +43,10 @@ public:
 
 	Polygon();
 	~Polygon() override = default;
-	RSAShape *clone() const override;
+	Shape<2, 1> *clone() const override;
 	double getVolume();
 
-	int overlap(BoundaryConditions *bc, RSAShape *s) const;
+	int overlap(BoundaryConditions *bc, Shape<2, 1> *s) const;
 	bool voxelInside(BoundaryConditions *bc, const double *voxelPosition, double *voxelAngle, double spatialSize, double angularSize) const;
 
 	std::string toPovray() const;
