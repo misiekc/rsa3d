@@ -46,13 +46,9 @@ public:
 	Shape<2, 1> *clone() const override;
 	double getVolume();
 
-<<<<<<< HEAD
+
 	int overlap(BoundaryConditions *bc, RSAShape *s) const;
 	bool voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, RSA_ANGULAR_DIMENSION> &voxelOrientation, double spatialSize, double angularSize) const override;
-=======
-	int overlap(BoundaryConditions *bc, Shape<2, 1> *s) const;
-	bool voxelInside(BoundaryConditions *bc, const double *voxelPosition, double *voxelAngle, double spatialSize, double angularSize) const;
->>>>>>> branch 'master' of https://github.com/misiekc/rsa3d
 
 	std::string toPovray() const;
 };

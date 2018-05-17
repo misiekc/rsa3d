@@ -100,15 +100,12 @@ void Polygon::initClass(const std::string &args){
 		Polygon::vertexR[i] /= std::sqrt(area);
 	}
 
-<<<<<<< HEAD
 	RSAShape::setNeighbourListCellSize(2.0*Polygon::getCircumscribedCircleRadius());
-=======
-	Shape<2, 1>::setNeighbourListCellSize(2*Polygon::getCircumscribedCircleRadius());
->>>>>>> branch 'master' of https://github.com/misiekc/rsa3d
+	RSAShape::setNeighbourListCellSize(2*Polygon::getCircumscribedCircleRadius());
 	Polygon::inscribedCircleRadius = Polygon::getInscribedCircleRadius();
-	Shape<2, 1>::setVoxelSpatialSize(1.4*Polygon::inscribedCircleRadius);
-	Shape<2, 1>::setVoxelAngularSize(2*M_PI);
-	Shape<2, 1>::setDefaultCreateShapeImpl <Polygon> ();
+	RSAShape::setVoxelSpatialSize(1.4*Polygon::inscribedCircleRadius);
+	RSAShape::setVoxelAngularSize(2*M_PI);
+	RSAShape::setDefaultCreateShapeImpl <Polygon> ();
 }
 
 /*
@@ -281,7 +278,7 @@ bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition, c
 	return false;
 }
 
-Shape<2, 1> *Polygon::clone() const {
+RSAShape *Polygon::clone() const {
     return new Polygon(*this);
 }
 
