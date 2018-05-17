@@ -100,11 +100,15 @@ void Polygon::initClass(const std::string &args){
 		Polygon::vertexR[i] /= std::sqrt(area);
 	}
 
+<<<<<<< HEAD
 	RSAShape::setNeighbourListCellSize(2.0*Polygon::getCircumscribedCircleRadius());
+=======
+	Shape<2, 1>::setNeighbourListCellSize(2*Polygon::getCircumscribedCircleRadius());
+>>>>>>> branch 'master' of https://github.com/misiekc/rsa3d
 	Polygon::inscribedCircleRadius = Polygon::getInscribedCircleRadius();
-	RSAShape::setVoxelSpatialSize(1.4*Polygon::inscribedCircleRadius);
-	RSAShape::setVoxelAngularSize(2*M_PI);
-	RSAShape::setDefaultCreateShapeImpl <Polygon> ();
+	Shape<2, 1>::setVoxelSpatialSize(1.4*Polygon::inscribedCircleRadius);
+	Shape<2, 1>::setVoxelAngularSize(2*M_PI);
+	Shape<2, 1>::setDefaultCreateShapeImpl <Polygon> ();
 }
 
 /*
@@ -196,7 +200,7 @@ double Polygon::getVolume(){
 	return result;
 }
 
-int Polygon::overlap(BoundaryConditions *bc, RSAShape *s) const{
+int Polygon::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const{
 	Polygon *polPtr = (Polygon *)s;
 	Polygon pol(*polPtr);
 	this->applyBC(bc, &pol);
@@ -277,7 +281,7 @@ bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition, c
 	return false;
 }
 
-RSAShape *Polygon::clone() const {
+Shape<2, 1> *Polygon::clone() const {
     return new Polygon(*this);
 }
 
