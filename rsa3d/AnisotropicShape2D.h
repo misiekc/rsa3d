@@ -81,7 +81,7 @@ public:
      * @brief Delegated to AnisotropicShape2D::pointInside(BoundaryConditions*,double*,double,double). <strong>Implement
      * that instead.</strong>
      */
-    int pointInside(BoundaryConditions *bc, double* position, const std::array<double, 1> &orientation,
+    bool pointInside(BoundaryConditions *bc, double* position, const std::array<double, 1> &orientation,
                     double orientationRange) const final;
 
     /**
@@ -99,7 +99,7 @@ public:
      * @param angleTo array of lengths of angle intervals
      * @return 0 if point is outside, nonzero number otherwise
      */
-    virtual int pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const;
+    virtual bool pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const;
 
 };
 

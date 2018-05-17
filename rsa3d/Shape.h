@@ -228,7 +228,7 @@ public:
 	 * @param s the second shape
 	 * @return 0 if there is no overlap, nonzero number otherwise
 	 */
-	virtual int overlap(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const = 0;
+	virtual bool overlap(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const = 0;
 
     /**
      * @brief Returns a volume of the shape.
@@ -246,9 +246,9 @@ public:
      * @param position position of a virtual particle of the same size to check
      * @param orientation array of beginnings of angle intervals
      * @param orientationRange array of lengths of angle intervals
-     * @return 0 if point is outside, nonzero number otherwise
+     * @return false if point is outside, true otherwise
      */
-	virtual int pointInside(BoundaryConditions *bc, double* position,
+	virtual bool pointInside(BoundaryConditions *bc, double* position,
                             const std::array<double, ANGULAR_DIMENSION> &orientation, double orientationRange) const;
 
     /**
@@ -257,9 +257,9 @@ public:
 	 * If @a s of `this` has a different size than from a global state is may lead to an unexpected behaviour.
      * @param bc boundary conditions to take into account
      * @param da position of a virtual particle of the same size to check
-     * @return 0 if point is outside, nonzero number otherwise
+     * @return false if point is outside, true otherwise
      */
-	virtual int pointInside(BoundaryConditions *bc, double* position) const;
+	virtual bool pointInside(BoundaryConditions *bc, double* position) const;
 
 
     /**

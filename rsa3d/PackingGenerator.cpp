@@ -411,22 +411,6 @@ void PackingGenerator::createPacking(){
 		for(int i=0; i<tmpSplit; i++){
 			// non overlapping shapes was already processed. Now we process missed hits (where there was an overlap)
 			if (sOverlapped[i]!=NULL){
-
-				Voxel *vTmp = this->voxels->getVoxel(sVirtual[i]->getPosition(), sVirtual[i]->getOrientation());
-				if (vTmp != NULL){
-					// checking voxels consistency
-					if (vTmp != aVoxels[i]){
-						std::cout << std::endl << "Problem: PackingGenerator - inconsistent voxels: " << i << std::flush;
-					}
-					vTmp->miss();
-					if( (vTmp->getMissCounter() > 0 &&  vTmp->getMissCounter() % this->params->analyze == 0) ){
-						if (this->voxels->analyzeVoxel(vTmp, sOverlapped[i], this->surface)){
-							#pragma omp critical
-							this->voxels->remove(vTmp);
-						}
-					}
-				}
-
 				delete sVirtual[i];
 			}
 		} // parallel for
@@ -581,12 +565,7 @@ void PackingGenerator::createPacking(){
 				depthAnalyze--;
 //			std::cout << ((Ellipse *)s)->toWolfram() << std::endl;
 		}else{ // overlap detected
-			v->miss();
 			missCounter++;
-
-			if(this->getFactor()>FACTOR_LIMIT && (v->getMissCounter() > 0 &&  v->getMissCounter() % this->params->analyze == 0) && this->voxels->analyzeVoxel(v, sTmp, this->surface)){
-				this->voxels->remove(v);
-			}
 			if (missCounter > tmpSplit) { // v.getMissCounter() % iSplit == 0){ //
 				missCounter = 0;
 				int v0 = this->voxels->length(), v1 = v0;

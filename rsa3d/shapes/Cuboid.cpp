@@ -132,7 +132,7 @@ void Cuboid::restoreDefaultStrategy() {
 // Checks whether there is an overlap between this and *s using chosen
 // stategy
 //----------------------------------------------------------------------------
-int Cuboid::overlap(BoundaryConditions *bc, Shape *s) const
+bool Cuboid::overlap(BoundaryConditions *bc, Shape *s) const
 {
     Cuboid other = dynamic_cast<Cuboid&>(*s);
     this->applyBC(bc, &other);
@@ -160,7 +160,7 @@ double Cuboid::getVolume() const
 // Checks whether the point with coordinates da lies inside excluded volume.
 // It is an interior of a set of point which distanse from
 //----------------------------------------------------------------------------
-int Cuboid::pointInside(BoundaryConditions *bc, double* pos, const std::array<double, 0> &orientation,
+bool Cuboid::pointInside(BoundaryConditions *bc, double* pos, const std::array<double, 0> &orientation,
                         double orientationRange) const
 {
     Vector<3> cuboidTranslation(this->getPosition());

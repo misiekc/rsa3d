@@ -89,12 +89,12 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::rotate(double* v){
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-int Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions *bc, double* position, const std::array<double, ANGULAR_DIMENSION> &orientation, double orientationRange) const{
+bool Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions *bc, double* position, const std::array<double, ANGULAR_DIMENSION> &orientation, double orientationRange) const{
 	return false;
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-int Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions *bc, double *position) const{
+bool Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions *bc, double *position) const{
     std::array<double, ANGULAR_DIMENSION> zeroAngle;
     zeroAngle.fill(0);
 	return this->pointInside(bc, position, zeroAngle, 2*M_PI);

@@ -48,7 +48,7 @@ void Ellipse::setAngle(double angle){
 	this->calculateU();
 }
 
-int Ellipse::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
+bool Ellipse::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
 	Ellipse *esPtr = (Ellipse *)s;
 	Ellipse es(*esPtr);
     this->applyBC(bc, &es);
@@ -69,7 +69,7 @@ double Ellipse::getVolume() const {
 	return M_PI*this->a*this->b;
 }
 
-int Ellipse::pointInside(BoundaryConditions *bc, double* da) const {
+bool Ellipse::pointInside(BoundaryConditions *bc, double* da) const {
 	double ta[2];
 	double tmp[2];
 
@@ -91,7 +91,7 @@ int Ellipse::pointInside(BoundaryConditions *bc, double* da) const {
 	return (dx*dx+dy*dy < 1);
 }
 
-int Ellipse::pointInside(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) const
+bool Ellipse::pointInside(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) const
 {
     // Check exlusion zones for angle interval endpoinds - angleFrom and angleTo
     Ellipse ellTmp;

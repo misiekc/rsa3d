@@ -4,12 +4,12 @@
 
 #include "AnisotropicShape2D.h"
 
-int AnisotropicShape2D::pointInside(BoundaryConditions *bc, double* position, const std::array<double, 1> &orientation,
+bool AnisotropicShape2D::pointInside(BoundaryConditions *bc, double* position, const std::array<double, 1> &orientation,
                                     double orientationRange) const {
 	return this->pointInside(bc, position, orientation[0], orientation[0]+orientationRange);
 }
 
-int AnisotropicShape2D::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const{
+bool AnisotropicShape2D::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const{
 	return 0;
 }
 

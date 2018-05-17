@@ -16,7 +16,6 @@ class Voxel{
 private:
 	double position[RSA_SPATIAL_DIMENSION];
 	std::array<double, RSA_ANGULAR_DIMENSION> orientation;
-	short missCounter;
 
 public:
 	/**
@@ -46,12 +45,6 @@ public:
 	Voxel(double* pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle);
 
 	virtual ~Voxel() = default;
-
-	void miss();
-
-	int getMissCounter();
-
-	void resetMissCounter();
 
 	bool isInside(double *pos, double size);
 

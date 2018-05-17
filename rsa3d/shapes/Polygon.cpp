@@ -100,54 +100,13 @@ void Polygon::initClass(const std::string &args){
 		Polygon::vertexR[i] /= std::sqrt(area);
 	}
 
-	RSAShape::setNeighbourListCellSize(2.0*Polygon::getCircumscribedCircleRadius());
-	RSAShape::setNeighbourListCellSize(2*Polygon::getCircumscribedCircleRadius());
+	Shape<2, 1>::setNeighbourListCellSize(2.0*Polygon::getCircumscribedCircleRadius());
+	Shape<2, 1>::setNeighbourListCellSize(2*Polygon::getCircumscribedCircleRadius());
 	Polygon::inscribedCircleRadius = Polygon::getInscribedCircleRadius();
-	RSAShape::setVoxelSpatialSize(1.4*Polygon::inscribedCircleRadius);
-	RSAShape::setVoxelAngularSize(2*M_PI);
-	RSAShape::setDefaultCreateShapeImpl <Polygon> ();
+	Shape<2, 1>::setVoxelSpatialSize(1.4*Polygon::inscribedCircleRadius);
+	Shape<2, 1>::setVoxelAngularSize(2*M_PI);
+	Shape<2, 1>::setDefaultCreateShapeImpl <Polygon> ();
 }
-
-/*
-	void FindHasParallelSides()
-	{
-		HasParallelSides = false;
-		if (VertexR.size() < 3)
-		{
-			return;
-		}
-		for (int i = 0; i<this->VertexR.size(); i++)
-			for (int j = 0; j < this->VertexR.size(); j++)
-			{
-				if (i == j)
-					continue;
-				size_t ii = i + 1;
-				if (ii == this->VertexR.size())
-					ii = 0;
-				size_t jj = j + 1;
-				if (jj == this->VertexR.size())
-					jj = 0;
-
-				double x1 =  VertexR[i] * std::cos(VertexTheta[i] );
-				double y1 =  VertexR[i] * std::sin(VertexTheta[i] );
-				double x2 =  VertexR[ii] * std::cos(VertexTheta[ii] );
-				double y2 =  VertexR[ii] * std::sin(VertexTheta[ii] );
-				double x3 =  VertexR[j] * std::cos(VertexTheta[j] );
-				double y3 =  VertexR[j] * std::sin(VertexTheta[j] );
-				double x4 =  VertexR[jj] * std::cos(VertexTheta[jj] );
-				double y4 =  VertexR[jj] * std::sin(VertexTheta[jj] );
-
-				double direction1 = std::atan2(y2 - y1, x2 - x1);
-				double direction2 = std::atan2(y4 - y3, x4 - x3);
-				double dDirection = std::abs(direction1 - direction2);
-				if (dDirection < 1e-10 || std::abs(dDirection - Pi) < 1e-10)
-				{
-					HasParallelSides = true;
-					return;
-				}
-			}
-	}
-*/
 
 
 	//test if line segment from point 1 to 2 intersects with line segment from point 3 to 4
@@ -197,7 +156,7 @@ double Polygon::getVolume(){
 	return result;
 }
 
-int Polygon::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const{
+bool Polygon::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const{
 	Polygon *polPtr = (Polygon *)s;
 	Polygon pol(*polPtr);
 	this->applyBC(bc, &pol);
@@ -212,7 +171,7 @@ int Polygon::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const{
 		d2 += tmp*tmp;
 	}
 	if (std::sqrt(d2) < 2.0*Polygon::inscribedCircleRadius)
-		return 1;
+		return true;
 
 	double angle = this->getAngle();
 	double polangle = pol.getAngle();
@@ -231,16 +190,16 @@ int Polygon::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const{
 			double x4 = position[0] + Polygon::vertexR[nextj] * std::cos(Polygon::vertexTheta[nextj] + angle);
 			double y4 = position[1] + Polygon::vertexR[nextj] * std::sin(Polygon::vertexTheta[nextj] + angle);
 			if (Polygon::lineLineIntersect(x1, y1, x2, y2, x3, y3, x4, y4))
-				return 1;
+				return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, RSA_ANGULAR_DIMENSION> &voxelOrientation, double spatialSize, double angularSize) const{
 
 
-	if (voxelOrientation[0] > RSAShape::getVoxelAngularSize())
+	if (voxelOrientation[0] > Shape<2, 1>::getVoxelAngularSize())
 		return true;
 
 	double *position = this->getPosition();
@@ -278,7 +237,7 @@ bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition, c
 	return false;
 }
 
-RSAShape *Polygon::clone() const {
+Shape<2, 1> *Polygon::clone() const {
     return new Polygon(*this);
 }
 

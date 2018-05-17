@@ -22,7 +22,6 @@ public:
 	int from = 0;
 	int collectors = 1;
 	double maxTime = std::numeric_limits<double>::infinity();
-	int analyze = 10;
 	int split = 3000;
 	double surfaceSize = pow(100000.0, 1.0/2.0);
 	bool storePackings = true;

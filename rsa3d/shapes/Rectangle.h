@@ -32,7 +32,7 @@ private:
 
     int isInsideRect(const Vector<2, double> &point, double cx, double cy, double aLength, double bLength) const;
 
-    int pointInsideInternal(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const;
+    bool pointInsideInternal(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const;
 
     Vector<2, double> rotatePoint(const Vector<2, double>& point, const Matrix<2, 2, double>& rotation, const Vector<2, double>& center) const;
 
@@ -55,12 +55,12 @@ public:
     Rectangle();
     ~Rectangle() override = default;
 
-    int overlap(BoundaryConditions *bc, Shape<2, 1> *s) const override;
+    bool overlap(BoundaryConditions *bc, Shape<2, 1> *s) const override;
 
     double getVolume() const override;
 
-    int pointInside(BoundaryConditions *bc, double* da) const override;
-    int pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) const override;
+    bool pointInside(BoundaryConditions *bc, double* da) const override;
+    bool pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) const override;
 
     std::string toWolfram() const override;
     std::string toPovray() const override;

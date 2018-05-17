@@ -33,7 +33,7 @@ double SpheroCylinder2D::getVolume() const {
     return 1;
 }
 
-int SpheroCylinder2D::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
+bool SpheroCylinder2D::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
     SpheroCylinder2D *otherPtr = (SpheroCylinder2D*)s;
     SpheroCylinder2D other(*otherPtr);
     this->applyBC(bc, &other);
@@ -58,7 +58,7 @@ double SpheroCylinder2D::pointDistance2(const Vector<2> &pos, double angle, cons
         return (diff - centerVector).norm2();
 }
 
-int SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
+bool SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
     this->normalizeAngleRange(&angleFrom, &angleTo, M_PI);
 
     // If angleTo not in normal range (see normalizeAngleRange), divide it and check separately

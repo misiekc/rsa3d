@@ -510,14 +510,9 @@ bool VoxelList::splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<RSA
 
 	int index = 0;
 
-	int inpos[RSA_SPATIAL_DIMENSION];
-	double position[RSA_SPATIAL_DIMENSION];
-	int inangle[RSA_ANGULAR_DIMENSION];
-	double orientation[RSA_ANGULAR_DIMENSION];
 	Voxel **aVoxels = new Voxel*[voxelsFactor];
 
 	for(int i=0; i<=this->last; i++){
-		Voxel *v = this->voxels[i];
 
 		this->splitVoxel(this->voxels[i], this->voxelSize, this->angularVoxelSize, aVoxels);
 		for(int j=0; j<voxelsFactor; j++){

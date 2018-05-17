@@ -80,7 +80,7 @@ void Rectangle::setPosition(const double *position) {
 }
 
 // never used
-int Rectangle::pointInside(BoundaryConditions *bc, double *da) const {
+bool Rectangle::pointInside(BoundaryConditions *bc, double *da) const {
     // apply bc
     double ta[2];
     double tmp[2];
@@ -131,7 +131,7 @@ int Rectangle::pointInside(BoundaryConditions *bc, double *da) const {
 }
 
 
-int Rectangle::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
+bool Rectangle::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
     // let's have it ordered
     if (angleFrom > angleTo) {
         double tmp = angleFrom;
@@ -167,7 +167,7 @@ int Rectangle::pointInside(BoundaryConditions *bc, double *da, double angleFrom,
     }
 }
 
-int Rectangle::pointInsideInternal(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
+bool Rectangle::pointInsideInternal(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
     double pi2 = M_PI / 2;
     int countFrom = (int) floor(angleFrom / pi2);
 
@@ -361,7 +361,7 @@ bool Rectangle::isIntersection(double p0_x, double p0_y, double p1_x, double p1_
     return 0; // No collision
 }
 
-int Rectangle::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
+bool Rectangle::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
     Rectangle *other = (Rectangle *) s;
     Rectangle rectangle(*other);
     this->applyBC(bc, &rectangle);

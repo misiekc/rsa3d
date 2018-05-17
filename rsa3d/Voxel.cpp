@@ -15,7 +15,6 @@
 
 Voxel::Voxel(){
 	this->index = 0;
-	this->missCounter = 0;
 	this->lastAnalyzed = 0;
 	this->depth = 0;
 }
@@ -25,26 +24,9 @@ Voxel::Voxel(double* pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle
 	std::copy(pos, pos+RSA_SPATIAL_DIMENSION, this->position);
 	this->orientation = angle;
 	this->index = 0;
-	this->missCounter = 0;
 	this->lastAnalyzed = 0;
 	this->depth = 0;
 }
-
-
-void Voxel::miss(){
-	this->missCounter++;
-}
-
-
-int Voxel::getMissCounter(){
-	return this->missCounter;
-}
-
-
-void Voxel::resetMissCounter(){
-	this->missCounter = 0;
-}
-
 
 bool Voxel::isInside(double *pos, double size){
 	for(int i=0; i<RSA_SPATIAL_DIMENSION; i++){
