@@ -166,7 +166,7 @@ void VoxelList::remove(Voxel *v){
 	this->voxelNeighbourGrid->remove(v, v->getPosition());
 	delete v;
 
-//		this.checkIndexes();
+//	this->checkIndexes();
 }
 
 

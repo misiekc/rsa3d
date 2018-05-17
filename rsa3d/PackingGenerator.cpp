@@ -407,29 +407,29 @@ void PackingGenerator::createPacking(){
 
 
 		// when factor is large there is no need to check voxels because the chance of finding removing voxel is very small
-		if (factor<1000){
-			#pragma omp parallel for
-			for(int i=0; i<tmpSplit; i++){
-				// non overlapping shapes was already processed. Now we process missed hits (where there was an overlap)
-				if (sOverlapped[i]!=NULL){
-					Voxel *vTmp = this->voxels->getVoxel(sVirtual[i]->getPosition(), sVirtual[i]->getOrientation());
-					if (vTmp != NULL){
-						// checking voxels consistency
-						if (vTmp != aVoxels[i]){
-							std::cout << std::endl << "Problem: PackingGenerator - inconsistent voxels: " << i << std::flush;
-						}
-						vTmp->miss();
-						if( (vTmp->getMissCounter() > 0 &&  vTmp->getMissCounter() % this->params->analyze == 0) ){
-							if (this->voxels->analyzeVoxel(vTmp, sOverlapped[i], this->surface)){
-								#pragma omp critical
-								this->voxels->remove(vTmp);
-							}
+		#pragma omp parallel for
+		for(int i=0; i<tmpSplit; i++){
+			// non overlapping shapes was already processed. Now we process missed hits (where there was an overlap)
+			if (sOverlapped[i]!=NULL){
+
+				Voxel *vTmp = this->voxels->getVoxel(sVirtual[i]->getPosition(), sVirtual[i]->getOrientation());
+				if (vTmp != NULL){
+					// checking voxels consistency
+					if (vTmp != aVoxels[i]){
+						std::cout << std::endl << "Problem: PackingGenerator - inconsistent voxels: " << i << std::flush;
+					}
+					vTmp->miss();
+					if( (vTmp->getMissCounter() > 0 &&  vTmp->getMissCounter() % this->params->analyze == 0) ){
+						if (this->voxels->analyzeVoxel(vTmp, sOverlapped[i], this->surface)){
+							#pragma omp critical
+							this->voxels->remove(vTmp);
 						}
 					}
-					delete sVirtual[i];
 				}
-			} // parallel for
-		}
+
+				delete sVirtual[i];
+			}
+		} // parallel for
 
 		// processing remaining voxels with miss
 

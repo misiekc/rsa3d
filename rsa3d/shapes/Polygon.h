@@ -47,7 +47,7 @@ public:
 	double getVolume();
 
 	int overlap(BoundaryConditions *bc, RSAShape *s) const;
-	bool voxelInside(BoundaryConditions *bc, const double *voxelPosition, double *voxelAngle, double spatialSize, double angularSize) const;
+	bool voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, RSA_ANGULAR_DIMENSION> &voxelOrientation, double spatialSize, double angularSize) const override;
 
 	std::string toPovray() const;
 };

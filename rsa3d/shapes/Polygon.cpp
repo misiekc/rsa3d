@@ -100,7 +100,7 @@ void Polygon::initClass(const std::string &args){
 		Polygon::vertexR[i] /= std::sqrt(area);
 	}
 
-	RSAShape::setNeighbourListCellSize(2*Polygon::getCircumscribedCircleRadius());
+	RSAShape::setNeighbourListCellSize(2.0*Polygon::getCircumscribedCircleRadius());
 	Polygon::inscribedCircleRadius = Polygon::getInscribedCircleRadius();
 	RSAShape::setVoxelSpatialSize(1.4*Polygon::inscribedCircleRadius);
 	RSAShape::setVoxelAngularSize(2*M_PI);
@@ -236,8 +236,11 @@ int Polygon::overlap(BoundaryConditions *bc, RSAShape *s) const{
 	return 0;
 }
 
-bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition, double *voxelAngle, double spatialSize, double angularSize) const{
+bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, RSA_ANGULAR_DIMENSION> &voxelOrientation, double spatialSize, double angularSize) const{
 
+
+	if (voxelOrientation[0] > RSAShape::getVoxelAngularSize())
+		return true;
 
 	double *position = this->getPosition();
 	double translation[RSA_SPATIAL_DIMENSION];
@@ -250,7 +253,7 @@ bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition, d
 	}
 
 	double halfAngularSize = 0.5*angularSize;
-	double angularCenter = (*voxelAngle) + halfAngularSize;
+	double angularCenter = voxelOrientation[0] + halfAngularSize;
 
 	double angle = this->getAngle();
 	//complex check
