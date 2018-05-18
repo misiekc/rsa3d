@@ -102,9 +102,8 @@ bool Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 bool Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, ANGULAR_DIMENSION> &orientation, double spatialSize, double angularSize) const{
-
-	double position[RSA_SPATIAL_DIMENSION];
-	int counterSize = 1 << RSA_SPATIAL_DIMENSION;
+	double position[SPATIAL_DIMENSION];
+	int counterSize = 1 << SPATIAL_DIMENSION;
 	bool isInside = true;
 	for(int i=0; i<counterSize; i++){
 		for(unsigned short j=0; j<SPATIAL_DIMENSION; j++){
