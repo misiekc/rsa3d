@@ -68,7 +68,7 @@ private:
 
 protected:
 	Voxel** voxels;
-	int last;
+	size_t length;
 
 	double initialVoxelSize;
 	double initialAngularVoxelSize;
@@ -79,7 +79,7 @@ protected:
 	double angularSize;
 	double size;
 
-	int beginningVoxelNumber;
+	size_t beginningVoxelNumber;
 
 
 	bool isVoxelInsidePacking(Voxel *v);
@@ -104,7 +104,10 @@ public:
 //	bool analyzeVoxel(Voxel *v, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *neighbours, BoundaryConditions *bc);
 	bool analyzeVoxel(Voxel *v, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, unsigned short depth = 0);
 
-	bool splitVoxels(double minDx, int maxVoxels, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc);
+	size_t analyzeVoxels(BoundaryConditions *bc, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, unsigned short depth);
+
+
+	bool splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc);
 
 	Voxel *getRandomVoxel(RND *rnd);
 	Voxel *getVoxel(int i);
@@ -113,7 +116,7 @@ public:
 	double getVoxelSize();
 	double getVoxelAngularSize();
 	Voxel* get(int i);
-	int length() const;
+	size_t getLength() const;
 	double getVoxelsSurface();
 	std::string toPovray();
 	std::string toWolfram();

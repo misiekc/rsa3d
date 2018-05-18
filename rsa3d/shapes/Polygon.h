@@ -48,7 +48,8 @@ public:
 
 
 	bool overlap(BoundaryConditions *bc, RSAShape *s) const;
-	bool voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, RSA_ANGULAR_DIMENSION> &voxelOrientation, double spatialSize, double angularSize) const override;
+	bool voxelInside111(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, RSA_ANGULAR_DIMENSION> &voxelOrientation, double spatialSize, double angularSize) const;
+	bool pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const override;
 
 	std::string toPovray() const;
 };

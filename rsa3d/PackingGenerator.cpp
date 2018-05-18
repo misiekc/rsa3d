@@ -56,81 +56,13 @@ PackingGenerator::~PackingGenerator() {
 
 
 bool PackingGenerator::isSaturated() {
-	return (this->voxels->length() == 0);
+	return (this->voxels->getLength() == 0);
 }
 
 
 double PackingGenerator::getFactor() {
 	return this->surface->getArea() / this->voxels->getVoxelsSurface();
 }
-
-#ifdef _OPENMP
-
-int PackingGenerator::analyzeVoxels(unsigned short depth) {
-
-	std::cout << "[" << this->seed << " PackingGenerator::analyzeVoxels] " << this->voxels->length() << " voxels, " << this->packing.size() << " shapes, factor = " << this->getFactor() << ", depth = " << depth << " " << std::flush;
-
-	int begin = this->voxels->length();
-	std::vector< Voxel* > toRemove;
-
-	#pragma omp parallel for
-	for (int i = 0; i < this->voxels->length(); i++) {
-		Voxel *v = this->voxels->get(i);
-		bool bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, depth);
-		if (bRemove) {
-			#pragma omp critical
-			toRemove.push_back(v);
-		}
-		if (i%10000 == 0){ std::cout << "."; std::cout.flush(); }
-	}
-	std::cout << " removing " << toRemove.size() << " voxels "<< std::flush;
-
-	this->voxels->remove(&toRemove);
-
-	std::cout << " done: " << this->voxels->length() << " voxels remained, factor = " << this->getFactor() << std::endl << std::flush;
-
-	return begin - this->voxels->length();
-}
-
-#else
-
-
-int PackingGenerator::analyzeVoxels(unsigned short depth) {
-
-	std::cout << "[" << this->seed << " PackingGenerator::analyzeVoxels] " << this->voxels->length() << " voxels, " << this->packing.size() << " shapes, factor = " << this->getFactor() << " ";
-
-	int begin = this->voxels->length();
-
-	for (int i = 0; i < this->voxels->length(); i++) {
-		Voxel *v = this->voxels->get(i);
-		bool bRemove = this->voxels->analyzeVoxel(v, this->surface->getNeighbourGrid(), this->surface, depth);
-		if (bRemove) {
-			this->voxels->remove(v);
-			i--;
-		}
-		if (i%10000 == 0){ std::cout << "."; std::cout.flush(); }
-	}
-
-	std::cout << " done: " << this->voxels->length() << " voxels remained, factor = " << this->getFactor() << std::endl;
-
-	return begin - this->voxels->length();
-}
-
-#endif
-
-// analyzes all voxels inside a region around v
-
-int PackingGenerator::analyzeRegion(Voxel *v){
-	int begin = this->voxels->length();
-	std::vector<Voxel *> region;
-	this->voxels->getNeighbours(&region, v->getPosition());
-	for(Voxel *v1: region){
-		if (this->voxels->analyzeVoxel(v1, this->surface->getNeighbourGrid(), this->surface))
-			this->voxels->remove(v1);
-	}
-	return begin - this->voxels->length();
-}
-
 
 void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
 	double da[RSA_SPATIAL_DIMENSION];
@@ -219,14 +151,16 @@ void PackingGenerator::testPacking(Packing *vShapes, double maxTime){
 
 		std::cout << "\r" << "[" << this->seed << " PackingGenerator::testPacking] t=" << std::setprecision(4) << t/maxTime << " choosing " << loop << " shapes..." << std::flush;
 
+		#ifdef _OPENMP
 		#pragma omp parallel for
+		#endif
 		for(int i = 0; i<loop; i++){
 
-		#ifdef _OPENMP
+			#ifdef _OPENMP
 			int tid = omp_get_thread_num();
-		#else
+			#else
 			int tid = 0;
-		#endif
+			#endif
 			RSAShape *sVirtual = ShapeFactory::createShape(aRND[tid]);
 			Voxel *v;
 			double pos[RSA_SPATIAL_DIMENSION];
@@ -240,7 +174,9 @@ void PackingGenerator::testPacking(Packing *vShapes, double maxTime){
 			sVirtual->rotate(angle.data());
 			// checking if shape overlaps with any shape in the packing
 			if (this->surface->check(sVirtual)==NULL){
+				#ifdef _OPENMP
 				#pragma omp critical(stdout)
+				#endif
 				{
 					std::cout << std::endl << "\t non overlapping shape found " << std::setprecision(10) << sVirtual->toString() << std::endl << std::flush;
 					std::cout << "\t povray: " << std::endl << std::setprecision(10) << sVirtual->toPovray() << std::endl << std::flush;
@@ -261,7 +197,9 @@ void PackingGenerator::testPacking(Packing *vShapes, double maxTime){
 					}
 				}
 				if (sCovers!=NULL)
+				#ifdef _OPENMP
 				#pragma omp critical(stdout)
+				#endif
 				std::cout << "\t in exclusion zone of " << sCovers->toString() << std::endl;
 			}
 			delete sVirtual;
@@ -394,35 +332,21 @@ void PackingGenerator::createPacking(){
 
 					this->surface->add(sVirtual[i]);
 					this->packing.push_back(sVirtual[i]);
-					this->voxels->remove(aVoxels[i]);
+//					this->voxels->remove(aVoxels[i]);
 					this->voxels->removeTopLevelVoxel(aVoxels[i]);
 				}  //second overlapping check
+				else{
+					delete sVirtual[i];
+				}
 			} // first overlapping check
 		}  // for
-
-
-		// now processing voxels, with missed hits
-
-		std::cout << " processing voxels..." << std::flush;
-
-
-		// when factor is large there is no need to check voxels because the chance of finding removing voxel is very small
-		#pragma omp parallel for
-		for(int i=0; i<tmpSplit; i++){
-			// non overlapping shapes was already processed. Now we process missed hits (where there was an overlap)
-			if (sOverlapped[i]!=NULL){
-				delete sVirtual[i];
-			}
-		} // parallel for
-
-		// processing remaining voxels with miss
 
 		std::cout << "done, double checked: " << checkedAgain << " added: " << added << ", time: " << t << ", shapes: " << l << std::endl << std::flush;
 
 		//whether splitting voxels
 		if (added == 0) { // v.getMissCounter() % iSplit == 0){ //
 			missCounter += tmpSplit;
-			int v0 = this->voxels->length(), v1 = v0;
+			int v0 = this->voxels->getLength(), v1 = v0;
 
 			std::cout << "[" << this->seed << " PackingGenerator::createPacking] splitting " << v0 << " voxels ";
 			std::cout.flush();
@@ -430,15 +354,16 @@ void PackingGenerator::createPacking(){
 
 			bool b = voxels->splitVoxels(this->params->minDx, this->params->maxVoxels, this->surface->getNeighbourGrid(), this->surface);
 			if (b){
-				v1 = this->voxels->length();
+				v1 = this->voxels->getLength();
 //				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
 				std::cout << " done. " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << ", factor: " << this->getFactor() << std::endl;
 				missCounter = 0;
 			}else{
-				std::cout << "skipped." << std::endl;
-				this->analyzeVoxels(depthAnalyze);
+				std::cout << "skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;
+				this->voxels->analyzeVoxels(this->surface, this->surface->getNeighbourGrid(), depthAnalyze);
+				std::cout << " done: " << this->voxels->getLength() << " voxels remained, factor = " << this->getFactor() << std::endl << std::flush;
 				tmpSplit = 1.1*tmpSplit;
-				v1 = this->voxels->length();
+				v1 = this->voxels->getLength();
 			}
 			// if number of voxels has changed
 			if (v1!=v0){
@@ -449,7 +374,7 @@ void PackingGenerator::createPacking(){
 
 			if (tmpSplit > std::max(this->params->maxVoxels/20, 10*this->params->split))
 				tmpSplit = std::max(this->params->maxVoxels/20, 10*this->params->split);
-			if(voxels->length()<0.001*this->params->maxVoxels && tmpSplit > 10*omp_get_max_threads())
+			if(voxels->getLength()<0.001*this->params->maxVoxels && tmpSplit > 10*omp_get_max_threads())
 				tmpSplit /= 10.0;
 			if(tmpSplit < 10*omp_get_max_threads())
 				tmpSplit = 10*omp_get_max_threads();
@@ -554,12 +479,6 @@ void PackingGenerator::createPacking(){
 			this->surface->add(s);
 			this->packing.push_back(s);
 
-			if(this->getFactor()>FACTOR_LIMIT){
-				this->analyzeRegion(v);
-			}else{
-				this->voxels->remove(v);
-				this->voxels->removeTopLevelVoxel(v);
-			}
 			missCounter = 0;
 			if (depthAnalyze>0)
 				depthAnalyze--;
@@ -568,7 +487,7 @@ void PackingGenerator::createPacking(){
 			missCounter++;
 			if (missCounter > tmpSplit) { // v.getMissCounter() % iSplit == 0){ //
 				missCounter = 0;
-				int v0 = this->voxels->length(), v1 = v0;
+				int v0 = this->voxels->getLength(), v1 = v0;
 
 				std::cout << "[" << this->seed << " PackingGenerator::createPacking] splitting " << v0 << " voxels ";
 				std::cout.flush();
@@ -576,15 +495,16 @@ void PackingGenerator::createPacking(){
 
 				bool b = voxels->splitVoxels(this->params->minDx, this->params->maxVoxels, this->surface->getNeighbourGrid(), this->surface);
 				if (b){
-					v1 = this->voxels->length();
+					v1 = this->voxels->getLength();
 	//				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
 					std::cout << " done. " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << ", factor: " << this->getFactor() << std::endl;
 					missCounter = 0;
 				}else{
-					std::cout << "skipped." << std::endl;
-					this->analyzeVoxels(depthAnalyze);
+					std::cout << "skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;
+					this->voxels->analyzeVoxels(this->surface, this->surface->getNeighbourGrid(), depthAnalyze);
+					std::cout << " done: " << this->voxels->getLength() << " voxels remained, factor = " << this->getFactor() << std::endl << std::flush;
 					tmpSplit = 1.1*tmpSplit;
-					v1 = this->voxels->length();
+					v1 = this->voxels->getLength();
 				}
 				// if number of voxels has changed
 				if (v1!=v0){
@@ -595,7 +515,7 @@ void PackingGenerator::createPacking(){
 
 				if (tmpSplit > std::max(this->params->maxVoxels/20, 10*this->params->split))
 					tmpSplit = std::max(this->params->maxVoxels/20, 10*this->params->split);
-				if(voxels->length()<0.001*this->params->maxVoxels && tmpSplit > 100)
+				if(voxels->getLength()<0.001*this->params->maxVoxels && tmpSplit > 100)
 					tmpSplit /= 10.0;
 				if(tmpSplit < 100)
 					tmpSplit = 100;
@@ -699,9 +619,9 @@ void PackingGenerator::toWolfram(double *da, const std::string &filename){
 
 
 void PackingGenerator::printRemainingVoxels(const std::string &prefix){
-	if (this->voxels->length()>20)
+	if (this->voxels->getLength()>20)
 		return;
-	for(int i=0; i<this->voxels->length(); i++){
+	for(size_t i=0; i<this->voxels->getLength(); i++){
 		std::string filename(prefix + "_" + std::to_string(i) + ".nb");
 		this->toWolfram(this->voxels->getVoxel(i)->getPosition(), filename);
 	}

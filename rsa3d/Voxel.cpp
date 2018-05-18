@@ -14,7 +14,6 @@
 
 
 Voxel::Voxel(){
-	this->index = 0;
 	this->lastAnalyzed = 0;
 	this->depth = 0;
 }
@@ -23,7 +22,6 @@ Voxel::Voxel(){
 Voxel::Voxel(double* pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle){
 	std::copy(pos, pos+RSA_SPATIAL_DIMENSION, this->position);
 	this->orientation = angle;
-	this->index = 0;
 	this->lastAnalyzed = 0;
 	this->depth = 0;
 }
@@ -121,7 +119,7 @@ std::string Voxel::toString(){
 	std::stringstream out;
 	out.precision(std::numeric_limits< double >::max_digits10);
 
-	out << "index: " << this->index << " position: (";
+	out << " position: (";
 	for (unsigned short i=0; i<RSA_SPATIAL_DIMENSION; i++){
 		out << this->position[i];
 		if (i<RSA_SPATIAL_DIMENSION-1)

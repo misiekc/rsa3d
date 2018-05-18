@@ -196,7 +196,7 @@ bool Polygon::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const{
 	return false;
 }
 
-bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, RSA_ANGULAR_DIMENSION> &voxelOrientation, double spatialSize, double angularSize) const{
+bool Polygon::voxelInside111(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, RSA_ANGULAR_DIMENSION> &voxelOrientation, double spatialSize, double angularSize) const{
 
 
 	if (voxelOrientation[0] > Shape<2, 1>::getVoxelAngularSize())
@@ -236,6 +236,14 @@ bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition, c
 	}
 	return false;
 }
+
+bool Polygon::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
+	std::array<double, RSA_ANGULAR_DIMENSION> orientation;
+	orientation[0] = 0.5*(angleFrom+angleTo);
+	double angularSize = std::abs(0.5*(angleTo-angleFrom));
+	return this->voxelInside111(bc, da, orientation, 0.0, angularSize);
+}
+
 
 Shape<2, 1> *Polygon::clone() const {
     return new Polygon(*this);

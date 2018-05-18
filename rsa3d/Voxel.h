@@ -18,10 +18,6 @@ private:
 	std::array<double, RSA_ANGULAR_DIMENSION> orientation;
 
 public:
-	/**
-	 * @brief index of the voxel in array used by VoxelList - used for faster removing from the array
-	 */
-	int index;
 
 	/**
 	 * @brief number of particle in the packing where voxel was checked if it is inside an exclusion zone - used for faster checking in the future
