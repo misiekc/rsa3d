@@ -16,7 +16,7 @@
  *
  * Usage:
  * <blockquote>
- * rsa as2d_exdrawer (shape) (attr) (shape angle) (angle from) (angle to) (resolution) (output file)
+ * ./rsa_test as2d_exdrawer (shape) (attr) (shape angle) (angle from) (angle to) (resolution) (output file)
  * </blockquote>
  *
  * The output file contains:
@@ -77,11 +77,11 @@ namespace as2d_exdrawer
                         const Polygon &fromAndToZone, const Polygon &rangeZone, std::ostream &stream);
 
     /**
-     * @brief Main function for exclusion drawind facility.
+     * @brief Main function for exclusion drawing facility.
      *
      * Usage:
      * <blockquote>
-     * rsa as2d_exdrawer (shape) (attr) (shape angle) (angle from) (angle to) (resolution) (output file)
+     * ./rsa_test as2d_exdrawer (shape) (attr) (shape angle) (angle from) (angle to) (resolution) (output file)
      * </blockquote>
      */
     int main(int argc, char **argv);
