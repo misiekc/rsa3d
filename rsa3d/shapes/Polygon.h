@@ -47,7 +47,7 @@ public:
 	double getVolume();
 
 
-	bool overlap(BoundaryConditions *bc, RSAShape *s) const;
+	bool overlap(BoundaryConditions *bc, Shape<2, 1> *s) const;
 	bool voxelInside111(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, RSA_ANGULAR_DIMENSION> &voxelOrientation, double spatialSize, double angularSize) const;
 	bool pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const override;
 

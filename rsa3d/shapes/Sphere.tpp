@@ -57,7 +57,7 @@ Sphere<DIMENSION>::Sphere() : Shape<DIMENSION, 0>(){
 }
 
 template <unsigned short DIMENSION>
-int Sphere<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const {
+bool Sphere<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const {
 	Sphere *sd = (Sphere<DIMENSION> *) s;
 	double d2 = bc->distance2(this->getPosition(), sd->getPosition());
 	double r2 = this->r + sd->r;
@@ -72,7 +72,7 @@ double Sphere<DIMENSION>::getVolume() const {
 }
 
 template <unsigned short DIMENSION>
-int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) const {
+bool Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) const {
 	double d2;
 	if (bc!=NULL)
 		d2 = bc->distance2(da, this->getPosition());
@@ -85,7 +85,7 @@ int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) const {
 }
 
 template <unsigned short DIMENSION>
-int Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, const std::array<double, 0> &orientation,
+bool Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, const std::array<double, 0> &orientation,
 								   double orientationRange) const {
     return this->pointInside(bc, position);
 }

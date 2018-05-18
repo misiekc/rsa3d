@@ -51,12 +51,12 @@ void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
 }
 
 template <unsigned short DIMENSION>
-int OrientedCuboid<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const{
+bool OrientedCuboid<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const{
     return this->pointInside(bc, s->getPosition());
 }
 
 template <unsigned short DIMENSION>
-int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) const{
+bool OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) const{
 //    if (OrientedCuboid<DIMENSION>::do2Drotation){
 //    	return Cuboid::pointInside(bc, da);
 //    }else{
@@ -72,7 +72,7 @@ int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) c
 }
 
 template <unsigned short DIMENSION>
-int OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* position,
+bool OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* position,
 										   const std::array<double, 0> &orientation, double orientationRange) const{
 	return 0;
 }
