@@ -76,20 +76,23 @@ std::array<double, ANGULAR_DIMENSION> Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION
 }
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setOrientation(const double *orientation) {
-    std::copy(orientation, orientation + ANGULAR_DIMENSION, this->orientation.begin());
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setOrientation(
+		const std::array<double, ANGULAR_DIMENSION> &orientation) {
+	this->orientation = orientation;
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::rotate(double* v){
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::rotate(const std::array<double, ANGULAR_DIMENSION> &v){
     std::array<double, ANGULAR_DIMENSION> orientation;
 	for(unsigned short i=0; i<ANGULAR_DIMENSION; i++)
 		orientation[i] = this->getOrientation()[i] + v[i];
-    this->setOrientation(orientation.data());
+    this->setOrientation(orientation);
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions *bc, double* position, const std::array<double, ANGULAR_DIMENSION> &orientation, double orientationRange) const{
+bool Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions *bc, double* position,
+                                                              const std::array<double, ANGULAR_DIMENSION> &orientation,
+                                                              double orientationRange) const{
 	return false;
 }
 
@@ -101,7 +104,9 @@ bool Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, ANGULAR_DIMENSION> &orientation, double spatialSize, double angularSize) const{
+bool Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelInside(BoundaryConditions *bc, const double *voxelPosition,
+                                                              const std::array<double, ANGULAR_DIMENSION> &orientation,
+                                                              double spatialSize, double angularSize) const {
 	double position[SPATIAL_DIMENSION];
 	int counterSize = 1 << SPATIAL_DIMENSION;
 	bool isInside = true;

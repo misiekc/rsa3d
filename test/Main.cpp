@@ -7,6 +7,7 @@
 #include "CuboidSpeedTest.h"
 #include "ShapeOverlapTest.h"
 #include "ShapePointInsideTest.h"
+#include "ShapeStaticSizesTest.h"
 #include "AnisotropicShape2DExclusionTest.h"
 #include "VectorSpeedTest.h"
 #include "AnisotropicShape2DExclusionDrawer.h"
@@ -26,6 +27,8 @@ int main(int argc, char **argv) {
         return shape_ovtest::main(argc, argv);
     else if (mode == "shape_pitest")
         return shape_pitest::main(argc, argv);
+    else if (mode == "shape_sizetest")
+        return shape_sizetest::main(argc, argv);
     else if (mode == "as2d_extest")
         return as2d_extest::main(argc, argv);
     else if (mode == "vec_speedtest")

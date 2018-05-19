@@ -89,7 +89,7 @@ namespace
         auto shape = (AnisotropicShape2D *) ShapeFactory::createShape(nullptr);
         double posAngle[] = {pos[0], pos[1]};
         shape->translate(posAngle);
-        shape->rotate(&angle);
+        shape->rotate({{angle}});
         return std::unique_ptr<AnisotropicShape2D>(shape);
     }
 

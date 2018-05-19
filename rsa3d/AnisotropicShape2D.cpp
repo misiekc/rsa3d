@@ -40,14 +40,14 @@ double AnisotropicShape2D::normalizeAngle(double angle, double interval) const {
     return angle;
 }
 
-void AnisotropicShape2D::setOrientation(const double *orientation) {
-    this->setAngle(*orientation);
+void AnisotropicShape2D::setOrientation(const std::array<double, 1> &orientation) {
+    this->setAngle(orientation[0]);
 }
 
 void AnisotropicShape2D::setAngle(double angle) {
     double interval = getVoxelAngularSize();
-    double orientation = normalizeAngle(angle, interval);
-    Shape::setOrientation(&orientation);  // Now use the original setter from Shape
+    std::array<double, 1> orientation{{normalizeAngle(angle, interval)}};
+    Shape::setOrientation(orientation);  // Now use the original setter from Shape
 }
 
 double AnisotropicShape2D::getAngle() const{

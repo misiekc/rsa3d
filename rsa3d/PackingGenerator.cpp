@@ -164,16 +164,16 @@ void PackingGenerator::testPacking(Packing *vShapes, double maxTime){
 			RSAShape *sVirtual = ShapeFactory::createShape(aRND[tid]);
 			Voxel *v;
 			double pos[RSA_SPATIAL_DIMENSION];
-			std::array <double, RSA_ANGULAR_DIMENSION> angle;
+			std::array <double, RSA_ANGULAR_DIMENSION> angle{};
 			do{
 				v = this->voxels->getRandomVoxel(aRND[tid]);
 				this->voxels->getRandomPositionAndOrientation(pos, angle.data(), v, aRND[tid]);
 			}while(!this->isInside(pos, angle.data()));
 			// setting shape position and orientation
 			sVirtual->translate(pos);
-			sVirtual->rotate(angle.data());
+			sVirtual->rotate(angle);
 			// checking if shape overlaps with any shape in the packing
-			if (this->surface->check(sVirtual)==NULL){
+			if (this->surface->check(sVirtual)== nullptr){
 				#ifdef _OPENMP
 				#pragma omp critical(stdout)
 				#endif
@@ -187,7 +187,7 @@ void PackingGenerator::testPacking(Packing *vShapes, double maxTime){
 				for(unsigned short j = 0; j< RSA_ANGULAR_DIMENSION; j++)
 					orientation[j] -= 0.5*delta;
 
-				RSAShape *sCovers = NULL;
+				RSAShape *sCovers = nullptr;
 				std::vector<RSAShape*> vNeighbours;
 				this->surface->getNeighbours(&vNeighbours, position);
 				for(RSAShape *sTmp : vNeighbours){
@@ -196,7 +196,7 @@ void PackingGenerator::testPacking(Packing *vShapes, double maxTime){
 						break;
 					}
 				}
-				if (sCovers!=NULL)
+				if (sCovers!= nullptr)
 				#ifdef _OPENMP
 				#pragma omp critical(stdout)
 				#endif
@@ -273,7 +273,7 @@ void PackingGenerator::createPacking(){
 			}while(!this->isInside(pos, angle.data()));
 			// setting shape position and orientation
 			sVirtual[i]->translate(pos);
-			sVirtual[i]->rotate(angle.data());
+			sVirtual[i]->rotate(angle);
 			// checking if shape overlaps with any shape in the packing
 			sOverlapped[i] = this->surface->check(sVirtual[i]);
 		} // parallel for

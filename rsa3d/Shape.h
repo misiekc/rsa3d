@@ -104,7 +104,7 @@ protected:
      * <strong>rotate(double*) method delegates to this, so no orientation changes will be missed.</strong>
      * @param orientation new shape's orientation
      */
-    virtual void setOrientation(const double *orientation);
+    virtual void setOrientation(const std::array<double, ANGULAR_DIMENSION> &orientation);
 
     /**
      * @brief Sets initial size of a voxel.
@@ -214,7 +214,7 @@ public:
      * @brief Increases all shape's angles by respective values from array @a v.
      * @param v an array of angle deltas
      */
-    void rotate(double *v);
+    void rotate(const std::array<double, ANGULAR_DIMENSION> &v);
 
 	/**
 	 * @brief Checks if there is overlap with the shape pointed by @a s.

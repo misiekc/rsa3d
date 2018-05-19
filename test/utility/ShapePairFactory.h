@@ -21,9 +21,18 @@
  */
 class ShapePairFactory
 {
-public:
-    using RSAShape = Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>;
+protected:
+    RND rnd{};
 
+    std::array<double, RSA_ANGULAR_DIMENSION> randomOrientation() {
+        std::array<double, RSA_ANGULAR_DIMENSION> orientation{};
+        std::for_each(orientation.begin(), orientation.end(), [this](double &elem) {
+            elem = this->rnd.nextValue() * RSAShape::getVoxelAngularSize();
+        });
+        return orientation;
+    };
+
+public:
     /**
      * @brief Pair of two shapes. Takes ownership of given shapes and perform deallocation.
      */

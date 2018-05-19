@@ -17,7 +17,6 @@ class BallFactory : public ShapePairFactory
 private:
     double radius{0.5};
     unsigned int no{};
-    RND rnd{};
 
     /* Helper method. Creates random Cuboid based on objects parameters. Delegate shape creation to the standard
      * ShapeFactory */

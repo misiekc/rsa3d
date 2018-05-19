@@ -20,12 +20,12 @@ namespace rectanglecase
 		double pos1[] = {6.21535, 4.96956};
 		double a1 = 3.11356;
 		r1.translate(pos1);
-		r1.rotate(&a1);
+		r1.rotate({{a1}});
 
 		double pos2[] = {7.01689, 5.90029};
 		double a2 = 0.879741;
 		r2.translate(pos2);
-		r2.rotate(&a2);
+		r2.rotate({{a2}});
 
 		std::cout << "overlap :" << r1.overlap(bc, &r2) << ", " << r2.overlap(bc, &r1) << std::endl;
 

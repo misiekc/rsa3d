@@ -56,7 +56,7 @@ protected:
     /**
      * @brief Delegated to AnisotropicShape2D::setAngle(double). <strong>Override that instead.</strong>
      */
-    void setOrientation(const double *orientation) final;
+    void setOrientation(const std::array<double, 1> &orientation) final;
 
     /**
      * @brief Sets new orientation of a shape. It replaces Shape::setOrientation(double*).

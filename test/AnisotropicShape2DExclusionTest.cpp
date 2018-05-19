@@ -61,9 +61,9 @@ namespace
     /* Generates shape using ShapeFactory, translates and rotates it */
     std::unique_ptr<AnisotropicShape2D> generate_shape(double angle, const Vector<2> &position) {
         auto shape = (AnisotropicShape2D*)ShapeFactory::createShape(nullptr);
-        double posAngle[3] = {position[0], position[1], angle};
-        shape->translate(posAngle);
-        shape->rotate(posAngle + 2);
+        double arrayPos[3] = {position[0], position[1]};
+        shape->translate(arrayPos);
+        shape->rotate({{angle}});
         return std::unique_ptr<AnisotropicShape2D>(shape);
     }
 

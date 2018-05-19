@@ -12,10 +12,10 @@
 typedef ShapePairFactory::ShapePair pair;
 
 
-Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * BallFactory::randomShape()
+RSAShape *BallFactory::randomShape()
 {
     double trans[3];
-    Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * shape = ShapeFactory::createShape(&this->rnd);
+    RSAShape *shape = ShapeFactory::createShape(&this->rnd);
     shape->no = this->no++;
     
     double cos_theta = 2 * rnd.nextValue() - 1;
@@ -29,6 +29,7 @@ Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * BallFactory::randomShape()
     trans[1] = radius * sin_theta * sin_phi;
     trans[2] = radius * cos_theta;
     shape->translate(trans);
+    shape->rotate(this->randomOrientation());
     return shape;
 }
 

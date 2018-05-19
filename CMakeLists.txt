@@ -76,6 +76,7 @@ set(TEST_SOURCE
         test/AnisotropicShape2DExclusionTest.cpp
         test/ShapeOverlapTest.cpp
         test/ShapePointInsideTest.cpp
+        test/ShapeStaticSizesTest.cpp
         test/CuboidSpeedTest.cpp
         test/RectangleCase.cpp
         test/VectorSpeedTest.cpp)

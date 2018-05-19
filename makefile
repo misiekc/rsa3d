@@ -98,6 +98,7 @@ OBJS_TEST = test/utility/BallFactory \
        		test/RectangleCase \
        		test/ShapeOverlapTest \
        		test/ShapePointInsideTest \
+       		test/ShapeStaticSizesTest \
        		test/VectorSpeedTest
 
 # Source files list (withous extensions) for statistics lib
