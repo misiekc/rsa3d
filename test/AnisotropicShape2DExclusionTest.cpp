@@ -44,6 +44,7 @@ namespace
         double box_height{};
         double points{};
         bool append{};
+        bool wolframSupported{};
 
         // For Mode::OVERLAP
         double secondAngle{};
@@ -57,6 +58,15 @@ namespace
         ColoredPoint randomPoint(RND * rnd) const;
     };
 
+    /* Generates shape using ShapeFactory, translates and rotates it */
+    std::unique_ptr<AnisotropicShape2D> generate_shape(double angle, const Vector<2> &position) {
+        auto shape = (AnisotropicShape2D*)ShapeFactory::createShape(nullptr);
+        double posAngle[3] = {position[0], position[1], angle};
+        shape->translate(posAngle);
+        shape->rotate(posAngle + 2);
+        return std::unique_ptr<AnisotropicShape2D>(shape);
+    }
+
     /* Loads context from a given file */
     void Context::load(const std::string &filename) {
         std::ifstream input(filename);
@@ -65,6 +75,8 @@ namespace
         auto config = std::unique_ptr<Config>(Config::parse(input));
         this->particle = config->getString("particle");
         this->attributes = config->getString("attr");
+        ShapeFactory::initShapeClass(this->particle, this->attributes);
+
         this->firstPos = Vector<2>{{config->getDouble("first_x"), config->getDouble("first_y")}};
         this->firstAngle = config->getDouble("first_angle") * M_PI / 180;
 
@@ -77,23 +89,16 @@ namespace
             this->fromAngle = config->getDouble("from_angle") * M_PI / 180;
             this->toAngle = config->getDouble("to_angle") * M_PI / 180;
         } else {
-            throw std::runtime_error("Unknown test mode: " + modeStr);
+            die("Unknown test mode: " + modeStr);
         }
 
         this->box_width = config->getDouble("box_width");
         this->box_height = config->getDouble("box_height");
         this->points = config->getDouble("points");
         this->append = config->getString("append") == "true";
+        this->wolframSupported = !generate_shape(0, Vector<2>())->toWolfram().empty();
+        std::cout << "[WARNING] " << this->particle << " has no toWolfram(). Shapes will not be drawn." << std::endl;
         std::cout << "Context loaded from " << filename << std::endl;
-    }
-
-    /* Generates shape using ShapeFactory, translates and rotates it */
-    std::unique_ptr<AnisotropicShape2D> generate_shape(double angle, const Vector<2> &position) {
-        auto shape = (AnisotropicShape2D*)ShapeFactory::createShape(nullptr);
-        double posAngle[3] = {position[0], position[1], angle};
-        shape->translate(posAngle);
-        shape->rotate(posAngle + 2);
-        return std::unique_ptr<AnisotropicShape2D>(shape);
     }
 
     /* Performs inttest based on context and returns result */
@@ -164,8 +169,9 @@ namespace
     ColoredPoint Context::randomPoint(RND * rnd) const {
         ColoredPoint point;
         Vector<2> secondTranslation{{
-                                            (rnd->nextValue() - 0.5) * box_width,
-                                            (rnd->nextValue() - 0.5) * box_height}};
+            (rnd->nextValue() - 0.5) * box_width,
+            (rnd->nextValue() - 0.5) * box_height
+        }};
         point.position = firstPos + secondTranslation;
         return point;
     }
@@ -214,13 +220,17 @@ namespace
         out << "    {" << result.back().color << ", Point[" << result.back().position << "]}};" << std::endl;
 
         auto first = generate_shape(context.firstAngle, context.firstPos);
-        out << "shape1 = " << first->toWolfram() << ";" << std::endl;
-        if (context.mode == Context::Mode::OVERLAP) {
-            auto second = generate_shape(context.secondAngle, find_max_x_red_point(result).position);
-            out << "shape2 = " << second->toWolfram() << ";" << std::endl << std::endl;
-            out << "Graphics[Join[{{" << SECOND_SHAPE_COLOR << ", shape2}, {" << FIRST_SHAPE_COLOR << ", shape1}}, points]]";
-        } else {  // Context::Mode::POINT_INSIDE
-            out << std::endl << "Graphics[Join[{{" << FIRST_SHAPE_COLOR << ", shape1}}, points]]";
+        if (!context.wolframSupported) {
+            out << std::endl << "Graphics[points]";
+        } else {
+            out << "shape1 = " << first->toWolfram() << ";" << std::endl;
+            if (context.mode == Context::Mode::OVERLAP) {
+                auto second = generate_shape(context.secondAngle, find_max_x_red_point(result).position);
+                out << "shape2 = " << second->toWolfram() << ";" << std::endl << std::endl;
+                out << "Graphics[Join[{{" << SECOND_SHAPE_COLOR << ", shape2}, {" << FIRST_SHAPE_COLOR << ", shape1}}, points]]";
+            } else {  // Context::Mode::POINT_INSIDE
+                out << std::endl << "Graphics[Join[{{" << FIRST_SHAPE_COLOR << ", shape1}}, points]]";
+            }
         }
     }
 }
@@ -231,7 +241,6 @@ int as2d_extest::main(int argc, char **argv) {
 
     Context context;
     context.load(argv[2]);
-    ShapeFactory::initShapeClass(context.particle, context.attributes);
 
     Result result = perform_test(context);
     std::string filename = (argc == 4 ? argv[3] : "out.nb");
