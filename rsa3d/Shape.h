@@ -24,14 +24,6 @@
  *
  * Derived classes should also provide:
  * <ul>
- * <li>a static method generating this specific shape in the origin of coordinate system with signature of
- * create_shape_fun_ptr:
- * @code
- * Shape* (*)(RND *rnd)
- * @endcode
- * If @a ANGULAR_DIMENSION is zero, but a Shape is not isotropic, the method should also choose random orientation from
- * supplied random number generator, usually with isotropic distribution. All generated shapes must have a volume of 1
- * and be identical (disregarding orientation).</li>
  * <li>a method for initializing parameters of generated shapes' from a string, which is non-empty if the class
  * describes the whole family of shapes of a specific kind, for example ellipses (they can have different axes ratio).
  * Signature:
@@ -144,6 +136,10 @@ protected:
 
     /**
      * @brief Sets a function which will be used to create new shapes.
+     *
+     * If @a ANGULAR_DIMENSION is zero, but a Shape is not isotropic, a function should choose random orientation from
+     * supplied random number generator, usually with isotropic distribution. All generated shapes must be identical
+     * (disregarding orientation).
      *
      * If a function simply returns dynamically allocated default-constructed shape, setDefaultCreateShapeImpl() can be
      * used.
