@@ -69,9 +69,10 @@ set(STATISTICS_SOURCE
 set(TEST_SOURCE
         test/utility/BallFactory.cpp
         test/utility/BoxFactory.cpp
-        test/utility/ShapePairFactory.h
+        test/utility/InfoLooper.h
         test/utility/MockBC.h
         test/utility/Quantity.cpp
+        test/utility/ShapePairFactory.h
         test/AnisotropicShape2DExclusionDrawer.cpp
         test/AnisotropicShape2DExclusionTest.cpp
         test/ShapeOverlapTest.cpp

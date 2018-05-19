@@ -20,6 +20,7 @@
 #include "../rsa3d/Utils.h"
 #include "utility/BallFactory.h"
 #include "utility/ShapePairFactory.h"
+#include "utility/InfoLooper.h"
 
 namespace
 {
@@ -118,14 +119,12 @@ namespace
 
         std::cout << ">> Performing " << get_strategy_name(firstStrategy) << " and ";
         std::cout << get_strategy_name(secondStrategy) << " for OverlapStrategy comparison..." << std::endl;
-        for (unsigned long i = 0; i < maxTries; i++) {
+        InfoLooper looper(maxTries, 10000, "pairs tested...");
+        while (looper.step()) {
             ShapePairFactory::ShapePair pair = factory.generate();
             bool firstIntersected = (bool)firstStrategy.overlap(pair.first(), pair.second());
             bool secondIntersected = (bool)secondStrategy.overlap(pair.first(), pair.second());
-
             result.report(pair, firstIntersected, secondIntersected);
-            if ((i % 10000) == 9999)
-                std::cout << (i + 1) << " pairs tested..." << std::endl;
         }
         return result;
     }

@@ -9,6 +9,7 @@
 #include "../rsa3d/ShapeFactory.h"
 #include "utility/BallFactory.h"
 #include "../rsa3d/Utils.h"
+#include "utility/InfoLooper.h"
 
 
 namespace
@@ -40,7 +41,8 @@ namespace
         results.factoryDesc = factory.getDescription();
 
         std::cout << ">> Starting..." << std::endl;
-        for (std::size_t i = 0; i < pairsToTest; i++) {
+        InfoLooper looper(pairsToTest, 10000, "pairs tested...");
+        while(looper.step()) {
             auto pair = factory.generate();
             bool overlap = (bool)pair.first()->overlap(&bc, pair.second());
             bool pi_first = (bool)pair.first()->pointInside(&bc, pair.second()->getPosition());
@@ -52,9 +54,6 @@ namespace
             // pointInside and overlap conflict
             if (!overlap && (pi_first || pi_second))
                 results.conflicts++;
-
-            if ((i % 10000) == 9999)
-                std::cout << (i + 1) << " pairs tested..." << std::endl;
         }
         return results;
     }
