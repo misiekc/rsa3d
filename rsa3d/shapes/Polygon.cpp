@@ -164,6 +164,7 @@ bool Polygon::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const{
 	double *polposition = pol.getPosition();
 	double *position = this->getPosition();
 
+
 	//easy check
 	double d2 = 0, tmp;
 	for (unsigned short i = 0; i < RSA_SPATIAL_DIMENSION; i++){
@@ -196,7 +197,7 @@ bool Polygon::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const{
 	return false;
 }
 
-bool Polygon::voxelInside111(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, RSA_ANGULAR_DIMENSION> &voxelOrientation, double spatialSize, double angularSize) const{
+bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, RSA_ANGULAR_DIMENSION> &voxelOrientation, double spatialSize, double angularSize) const{
 
 
 	if (voxelOrientation[0] > Shape<2, 1>::getVoxelAngularSize())
@@ -211,6 +212,19 @@ bool Polygon::voxelInside111(BoundaryConditions *bc, const double *voxelPosition
 	for(unsigned short i = 0; i<RSA_SPATIAL_DIMENSION; i++){
 		spatialCenter[i] = voxelPosition[i] + halfSpatialSize;
 	}
+
+	//easy check
+	double d2 = 0, tmp;
+	for (unsigned short j = 0; j<RSA_SPATIAL_DIMENSION; j++){
+		tmp = position[j] + translation[j] - spatialCenter[j];
+		if (tmp>0)
+			tmp += 0.5*spatialSize;
+		else
+			tmp -= 0.5*spatialSize;
+		d2 += tmp*tmp;
+	}
+	if (std::sqrt(d2) < 2.0*Polygon::inscribedCircleRadius)
+		return true;
 
 	double halfAngularSize = 0.5*angularSize;
 	double angularCenter = voxelOrientation[0] + halfAngularSize;
@@ -236,14 +250,14 @@ bool Polygon::voxelInside111(BoundaryConditions *bc, const double *voxelPosition
 	}
 	return false;
 }
-
+/*
 bool Polygon::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
 	std::array<double, RSA_ANGULAR_DIMENSION> orientation;
 	orientation[0] = 0.5*(angleFrom+angleTo);
 	double angularSize = std::abs(0.5*(angleTo-angleFrom));
 	return this->voxelInside111(bc, da, orientation, 0.0, angularSize);
 }
-
+*/
 
 Shape<2, 1> *Polygon::clone() const {
     return new Polygon(*this);
@@ -259,13 +273,13 @@ std::string Polygon::toPovray() const{
 		out << position[0] + Polygon::vertexR[i] * std::cos(Polygon::vertexTheta[i] + this->getAngle());
 		out << ", ";
 		out << position[1] + Polygon::vertexR[i] * std::sin(Polygon::vertexTheta[i] + this->getAngle());
-		out << "> ,";
+		out << ", 0.0002> ,";
 	}
 	out << "< ";
 	out << position[0] + Polygon::vertexR[0] * std::cos(Polygon::vertexTheta[0] + this->getAngle());
 	out << ", ";
 	out << position[1] + Polygon::vertexR[0] * std::sin(Polygon::vertexTheta[0] + this->getAngle());
-	out << ">";
+	out << ", 0.0002>";
 	out << "  texture { finish { ambient 1 diffuse 0 } pigment { color Red} } }" << std::endl;
 
 	return out.str();
