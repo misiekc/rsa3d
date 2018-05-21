@@ -29,7 +29,7 @@ private:
 	std::vector<std::vector<E * > * > lists;
 	std::vector<std::vector<int> * > neighbouringCells;
 
-	void init(int dim, double size, int n){
+	void init(int dim, double size, size_t n){
 		this->dimension = dim;
 		this->linearSize = size;
 		this->n = n;
@@ -65,11 +65,11 @@ private:
 public:
 
 	NeighbourGrid(int dim, double size, double dx){
-		this->init(dim, size, (int)(size/dx));
+		this->init(dim, size, (size_t)(size/dx));
 	}
 
 
-	NeighbourGrid(int dim, double size, int n){
+	NeighbourGrid(int dim, double size, size_t n){
 		this->init(dim, size, n);
 	}
 

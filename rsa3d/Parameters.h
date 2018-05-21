@@ -18,6 +18,7 @@ class Parameters {
 public:
 	int maxTriesWithoutSuccess = std::numeric_limits<int>::max();
 	int maxVoxels = 100000000;
+	double requestedAngularVoxelSize = 2*M_PI;
 	double minDx = 0.0;
 	int from = 0;
 	int collectors = 1;

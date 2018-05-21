@@ -29,8 +29,10 @@ PackingGenerator::PackingGenerator(int seed, Parameters *params) {
 
 	this->spatialSize = this->params->surfaceSize;
 	this->angularSize = s->getVoxelAngularSize();
+	if (this->params->requestedAngularVoxelSize > this->angularSize)
+		this->params->requestedAngularVoxelSize = this->angularSize;
 
-	this->voxels = new VoxelList(this->spatialSize, s->getVoxelSpatialSize(), this->angularSize);
+	this->voxels = new VoxelList(this->spatialSize, s->getVoxelSpatialSize(), this->angularSize, this->params->requestedAngularVoxelSize);
 
 	double gridSize = s->getNeighbourListCellSize();
 	if (gridSize < this->params->thresholdDistance)

@@ -61,6 +61,7 @@ Parameters::Parameters(const std::string& sFile) : Parameters(){
 
 		if (sKey.compare("maxTriesWithoutSuccess")==0) 	this->maxTriesWithoutSuccess = std::stoi(sValue);
 		else if (sKey.compare("maxVoxels")==0)					this->maxVoxels = std::stoi(sValue);
+		else if (sKey.compare("requestedAngularVoxelSize")==0)	this->requestedAngularVoxelSize = std::stod(sValue);
 		else if (sKey.compare("minDx")==0)						this->minDx = std::stod(sValue);
 		else if (sKey.compare("maxTime")==0) 					this->maxTime = std::stod(sValue);
 		else if (sKey.compare("split")==0) 						this->split = std::stoi(sValue);

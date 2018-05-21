@@ -36,14 +36,14 @@ private:
 	// disables voxel list for debug purposes - typically is false
 	bool disabled;
 
-	// returns initial spatial size of a vovel. It should be not grater than d and be an integer power of 2 (due to numerical issues)
-	double findInitialVoxelSize(double d);
+	// returns initial size of a vovel. It is not grater than d and be an integer power of 2 (due to numerical issues)
+	double findFloorSize(double d);
 
-	// returns initial angular size of a vovel. It should be not smaller than d and be an integer power of 2 (due to numerical issues)
-	double findInitialVoxelAngularSize(double d);
+	// returns initial size of a vovel. It is not smaller than d and be an integer power of 2 (due to numerical issues)
+	double findCeilSize(double d);
 
-	// returns number ov voxels needed to cover a packing (along a line)
-	int getLinearNumberOfVoxels(double vs);
+	// returns number of elements of size cellSize needed to cover a desired range
+	size_t findArraySize(double range, double cellSize);
 
 	// fills neigbour grid with voxels
 	void fillNeighbourGrid();
@@ -55,13 +55,14 @@ private:
 	void initVoxels();
 
 	// checks voxels indexes consistency
-	void checkIndexes();
+//	void checkIndexes();
 
 	// checks if a top level voxel for voxel v is active (if not v should be removed
 	bool isTopLevelVoxelActive(Voxel *v);
 
 	// checks consistency of indexes of root voxels
 	void checkTopLevelVoxels();
+
 
 	// aeeay of voxels will not have NULLs between pointers to objects - they can appear when splitting or analyze voxels in parallel
 	void compactVoxelArray(Voxel **list, int &endIndex);
@@ -72,12 +73,12 @@ protected:
 
 	double initialVoxelSize;
 	double initialAngularVoxelSize;
-	double voxelSize;
+	double spatialVoxelSize;
 	double angularVoxelSize;
 
 
-	double angularSize;
-	double size;
+	double angularRange;
+	double spatialRange;
 
 	size_t beginningVoxelNumber;
 
@@ -90,7 +91,15 @@ protected:
 
 public:
 
-	VoxelList(double s, double d, double ad);
+	/**
+	 * @brief Constructor
+	 * @param packingSpatialSize packing size to be covered by voxels
+	 * @param requestedSpatialVoxelSize suggested initial size of a voxel. Initial size of a allocated voxels will not be larger than the requested one.
+	 * @param shapeAngularRange typpically 2*M_PI. Can be smaller for shapes with rotational symmetry. For example for squares it should be M_PI/2.0, and for ellipses, sherocylinders or rectangles M_PI.
+	 * @param requestedAngularVoxelSize suggested initial angular size of a voxel. Initial angular size of allocaced voxels will not be larger than requested one.
+	 */
+	VoxelList(double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange, double requestedAngularVoxelSize);
+
 	void disable();
 
 	virtual ~VoxelList();
