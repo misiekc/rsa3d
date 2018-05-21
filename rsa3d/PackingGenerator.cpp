@@ -335,10 +335,10 @@ void PackingGenerator::createPacking(){
 //					this->voxels->remove(aVoxels[i]);
 					this->voxels->removeTopLevelVoxel(aVoxels[i]);
 				}  //second overlapping check
-				else{
-					delete sVirtual[i];
-				}
 			} // first overlapping check
+			if (sOverlapped[i]!=NULL){ // removing overlapped virtual shapes
+				delete sVirtual[i];
+			}
 		}  // for
 
 		std::cout << "done, double checked: " << checkedAgain << " added: " << added << ", time: " << t << ", shapes: " << l << std::endl << std::flush;
@@ -449,11 +449,11 @@ void PackingGenerator::createPacking(){
 
 		Voxel *v;
 		double pos[RSA_SPATIAL_DIMENSION];
-		double angle[RSA_ANGULAR_DIMENSION];
+		std::array<double, RSA_ANGULAR_DIMENSION> angle;
 		do{
 			v = this->voxels->getRandomVoxel(&rnd);
-			this->voxels->getRandomPositionAndOrientation(pos, angle, v, &rnd);
-		}while(!this->isInside(pos, angle));
+			this->voxels->getRandomPositionAndOrientation(pos, angle.data(), v, &rnd);
+		}while(!this->isInside(pos, angle.data()));
 		s->translate(pos);
 		s->rotate(angle);
 
