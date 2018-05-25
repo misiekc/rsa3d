@@ -23,12 +23,15 @@ namespace
 
         /* Prints test results onto given ostream */
         void print(std::ostream &ostr) {
+            std::size_t percentRatio = 100 * this->withPointInside / this->overlapped;
+
             ostr << ">> Test results:" << std::endl;
-            ostr << "factory           : " << this->factoryDesc << std::endl;
-            ostr << "pairs tested      : " << this->tested << std::endl;
-            ostr << "overlapped        : " << this->overlapped << std::endl;
-            ostr << "with point inside : " << this->withPointInside << std::endl;
-            ostr << "conflicts         : " << this->conflicts << std::endl;
+            ostr << "factory               : " << this->factoryDesc << std::endl;
+            ostr << "pairs tested          : " << this->tested << std::endl;
+            ostr << "overlapped            : " << this->overlapped << std::endl;
+            ostr << "with point inside     : " << this->withPointInside << std::endl;
+            ostr << "point inside accuracy : " << percentRatio << "%" << std::endl;
+            ostr << "conflicts             : " << this->conflicts << std::endl;
         }
     };
 
