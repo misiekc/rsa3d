@@ -32,21 +32,23 @@ namespace
     /* Presents result on the out ostream */
     void Result::print(std::ostream &out) const {
         out << std::endl;
-        out << ">> Voxel overlap conflicts: " << voxelConflicts << std::endl;
-        if (biggerVoxelConflicts == 0)
-            out << ">> Voxel size too small, no conflicts found in slightly bigger" << std::endl;
+        if (voxelConflicts != 0)
+            out << "[ERROR] Voxel size too big. Empty spaces will be produced" << std::endl;
+        else if (biggerVoxelConflicts == 0)
+            out << "[WARNING] Voxel size too small, no conflicts found in a slightly bigger. Check more pairs before enlarging" << std::endl;
         else
-            out << ">> Voxel size optimal" << std::endl;
+            out << "[PASSED] Voxel size correct and optimal" << std::endl;
 
-        out << ">> NeighbourGrid cell overlap conflicts: " << neighbourListConflicts << std::endl;
-        if (smallerNeighbourListConflicts == 0)
-            out << ">> NeighbourGrid cell too big, no conflicts found in slightly smaller" << std::endl;
+        if (neighbourListConflicts != 0)
+            out << "[ERROR] NeighbourGrid cell to small. Overlapping shapes will occur" << std::endl;
+        else if (smallerNeighbourListConflicts == 0)
+            out << "[WARNING] NeighbourGrid cell too big, no conflicts found in a slightly smaller. Check more pairs before reducing" << std::endl;
         else
-            out << ">> NeighbourGrid cell size optimal" << std::endl;
+            out << "[PASSED] NeighbourGrid cell size correct and optimal" << std::endl;
     }
 
     bool Result::success() const {
-        return voxelConflicts == 0 && neighbourListConflicts == 0;
+        return neighbourListConflicts == 0;
     }
 
     /* Generates shapes in given position with random orientation */
@@ -83,9 +85,9 @@ namespace
         RND rnd;
         InfoLooper looper(max_tries, 10000, "pairs tested...");
         while (looper.step()) {
-            if (!randomPairOverlap(&rnd, RSAShape::getVoxelSpatialSize() * 1.9999 * std::sqrt(RSA_SPATIAL_DIMENSION)))
+            if (!randomPairOverlap(&rnd, RSAShape::getVoxelSpatialSize() * 0.9999 * std::sqrt(RSA_SPATIAL_DIMENSION)))
                 result.voxelConflicts++;
-            if (!randomPairOverlap(&rnd, RSAShape::getVoxelSpatialSize() * 2.1 * std::sqrt(RSA_SPATIAL_DIMENSION)))
+            if (!randomPairOverlap(&rnd, RSAShape::getVoxelSpatialSize() * 1.05 * std::sqrt(RSA_SPATIAL_DIMENSION)))
                 result.biggerVoxelConflicts++;
             if (randomPairOverlap(&rnd, RSAShape::getNeighbourListCellSize() * 1.0001))
                 result.neighbourListConflicts++;

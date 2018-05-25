@@ -25,10 +25,11 @@
  * <li> for neighbour grid cell, checks if a pair never overlaps.
  * </ul>
  *
- * If those criteria are not met, a conflict occurs and is reported.
+ * If those criteria are not met, a conflict occurs and is reporte. Next, the program tries a bit smaller voxels and
+ * bigger neighbour list cells to see whether the values set are optimal.
  *
- * Next, the program tries a bit smaller voxels and bigger neighbour list cells to see whether the values set are
- * optimal.
+ * Only neighbour grid cell size conflict is critical and can cause overlaps in generated packings. If it is the case
+ * <strong>the program returns failure exit code 1.</strong> In all other cases the program returns 0.
  */
 namespace shape_sizetest
 {
