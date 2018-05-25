@@ -60,7 +60,7 @@ void Cuboid::initClass(const std::string &args)
     // Voxel size. It satisfies conditions at the least favourable case - center of Cuboid lies in the corner of a voxel
     // and voxel's diagonal is parallel to the smallest Cuboid edge
     minDimension = *std::min_element(size, size + 3) / 2;
-    Shape<3,0>::setVoxelSpatialSize(minDimension / std::sqrt(3));
+    Shape<3,0>::setVoxelSpatialSize(2 * minDimension / std::sqrt(3));
 
     Shape<3,0>::setCreateShapeImpl(&create3D);
 

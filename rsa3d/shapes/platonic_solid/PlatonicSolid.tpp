@@ -13,7 +13,7 @@ void PlatonicSolid<SpecificSolid>::initClass(const std::string &attr) {
     normalizeAxes();
 
     Shape::setNeighbourListCellSize(2 * SpecificSolid::circumsphereRadius);
-    Shape::setVoxelSpatialSize(SpecificSolid::insphereRadius / std::sqrt(3.));
+    Shape::setVoxelSpatialSize(2 * SpecificSolid::insphereRadius / std::sqrt(3.));
 
     Shape::setCreateShapeImpl([](RND *rnd) -> Shape* {
         return new SpecificSolid(Matrix<3, 3>::rotation(
