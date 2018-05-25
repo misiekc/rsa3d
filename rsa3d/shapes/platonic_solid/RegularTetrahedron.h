@@ -39,6 +39,9 @@ public:
                           const Vector<3> &distance) const;     /* CRTP override */
 
     interval getProjection(const Vector<3> & axis) const;
+
+    bool pointInside(BoundaryConditions *bc, double *position, const std::array<double, 0> &orientation,
+                     double orientationRange) const override;
 };
 
 
