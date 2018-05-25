@@ -65,16 +65,15 @@ namespace
         const std::string &getFilename() const { return filename; }
 
         void dump(Results results) {
-            if (results.missed() > 0) {
-                if (!file.is_open())
-                    file.open(filename);
-                
-                for (auto pair : results.missed_dump) {
-                    file << "first = " << pair.first()->toWolfram() << ";" << std::endl;
-                    file << "second = " << pair.second()->toWolfram() << ";" << std::endl;
-                    file << "Graphics3D[{first, second}]" << std::endl;
-                    file << std::endl;
-                }
+            if (results.missed() <= 0)  return;
+
+            if (!file.is_open())
+                file.open(filename);
+            for (auto pair : results.missed_dump) {
+                file << "first = " << pair.first()->toWolfram() << ";" << std::endl;
+                file << "second = " << pair.second()->toWolfram() << ";" << std::endl;
+                file << "Graphics3D[{first, second}]" << std::endl;
+                file << std::endl;
             }
         }
     };

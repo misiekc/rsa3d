@@ -56,26 +56,6 @@ void process_mem_usage(double& vm_usage, double& resident_set)
 }
 
 
-
-Packing *fromFile(const std::string &filename) {
-	std::ifstream file(filename, std::ios::binary);
-	if (!file)
-		die("Cannot open file " + filename + " to restore packing");
-
-	auto v = new Packing;
-	RND rnd(1);
-
-	while (!file.eof()) {
-		RSAShape *s = ShapeFactory::createShape(&rnd);
-		s->restore(file);
-		v->push_back(s);
-	}
-	v->pop_back();
-
-	file.close();
-	return v;
-}
-
 void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 	char buf[20];
 	double vm, rss;
@@ -198,7 +178,7 @@ int main(int argc, char **argv) {
     } else if (mode == "test") {
         if (argc < 5)   die("Usage: ./rsa test <config> <file in> <max time>");
         std::string filename(argv[3]);
-        Packing *packing = fromFile(filename);
+        Packing *packing = PackingGenerator::fromFile(filename);
         PackingGenerator *pg = new PackingGenerator(1, &params);
         pg->testPacking(packing, atof(argv[4]));
         delete pg;
@@ -212,26 +192,26 @@ int main(int argc, char **argv) {
         an.analyzePackingsInDirectory(argv[3], 0.01, 1.0);
     } else if (mode == "povray") {
         std::string file(argv[3]);
-        Packing *packing = fromFile(argv[3]);
+        Packing *packing = PackingGenerator::fromFile(argv[3]);
         PackingGenerator::toPovray(packing, params.surfaceSize, nullptr, file + ".pov");
         delete packing;
     } else if (mode == "wolfram") {
         std::string file(argv[3]);
-        Packing *packing = fromFile(file);
+        Packing *packing = PackingGenerator::fromFile(file);
         PackingGenerator::toWolfram(packing, params.surfaceSize, nullptr, file + ".nb");
         delete packing;
     } else if (mode == "bc_expand") {
         if (argc < 4)   die("Usage: ./rsa bc_expand <config> <file in> (file out = file in)");
         std::string fileIn(argv[3]);
         std::string fileOut = (argc < 5 ? fileIn : argv[4]);
-        auto packing = fromFile(fileIn);
+        auto packing = PackingGenerator::fromFile(fileIn);
         PackingGenerator::expandPackingOnPBC(packing, params.surfaceSize, 0.1);
         PackingGenerator::toFile(packing, fileOut);
         delete packing;
     } else if (mode == "overlap") {
         if (argc < 4)   die("Usage: ./rsa overlap <config> <file in>");
         std::string fileIn(argv[3]);
-        auto packing = fromFile(fileIn);
+        auto packing = PackingGenerator::fromFile(fileIn);
         PackingGenerator::testPackingOverlaps(packing);
         delete packing;
     } else {

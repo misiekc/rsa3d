@@ -14,6 +14,7 @@
 #include "../../statistics/LinearRegression.h"
 #include "../../statistics/PowerRegression.h"
 #include "../../statistics/ASFRegression.h"
+#include "../PackingGenerator.h"
 #include <fstream>
 #include <iostream>
 #include <dirent.h>
@@ -29,21 +30,6 @@ Analyzer::Analyzer(Parameters *params) {
 Analyzer::~Analyzer() {
 }
 
-std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * Analyzer::fromFile(std::string filename){
-	std::ifstream file(filename, std::ios::binary);
-	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * v = new std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *>;
-	RND rnd(1);
-
-	while(!file.eof()){
-		Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s = ShapeFactory::createShape(&rnd);
-		s->restore(file);
-		v->push_back(s);
-	}
-	v->pop_back();
-
-	file.close();
-	return v;
-}
 
 double P2(double x){
 	return 0.5*(3*x*x - 1);
@@ -328,7 +314,8 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 	while ((de = readdir(dir)) != NULL){
 		if (strncmp(prefix, de->d_name, strlen(prefix))==0){
 			std::string filename(de->d_name);
- 			std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * packing = this->fromFile(dirname + "/" + filename);
+ 			std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * packing
+					= PackingGenerator::fromFile(dirname + "/" + filename);
 			n += packing->size();
 			n2 += packing->size()*packing->size();
 			counter++;

@@ -65,6 +65,13 @@ public:
     void toFile(const std::string &filename);
 	void restore(std::istream &f);
 
+	/**
+	 * @brieg Restores dynamically allocated packing from file and returns it
+	 * @param filename file name to read from
+	 * @return restored packing
+	 */
+	static Packing *fromFile(const std::string &filename);
+
     /**
      * @brief Stores a @a packing to given file. Dies if a file cannot be created.
      * @param packing a packing to store

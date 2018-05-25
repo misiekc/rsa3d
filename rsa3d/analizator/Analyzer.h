@@ -28,7 +28,6 @@ public:
 private:
 	Parameters *params;
 
-	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * fromFile(std::string filename);
 	void analyzePacking(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor);
 	void analyzeOrder(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing, Plot **order);
 	void calculateOrderParameters(double *result, Cuboid *c1, Cuboid *c2);

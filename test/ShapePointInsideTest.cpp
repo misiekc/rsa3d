@@ -47,9 +47,9 @@ namespace
         InfoLooper looper(pairsToTest, 10000, "pairs tested...");
         while(looper.step()) {
             auto pair = factory.generate();
-            bool overlap = (bool)pair.first()->overlap(&bc, pair.second());
-            bool pi_first = (bool)pair.first()->pointInside(&bc, pair.second()->getPosition());
-            bool pi_second = (bool)pair.second()->pointInside(&bc, pair.first()->getPosition());
+            bool overlap = pair.first()->overlap(&bc, pair.second());
+            bool pi_first = pair.first()->pointInside(&bc, pair.second()->getPosition());
+            bool pi_second = pair.second()->pointInside(&bc, pair.first()->getPosition());
 
             if (overlap)    results.overlapped++;
             if (pi_first)   results.withPointInside++;

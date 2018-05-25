@@ -33,14 +33,14 @@ namespace
     void Result::print(std::ostream &out) const {
         out << std::endl;
         if (voxelConflicts != 0)
-            out << "[ERROR] Voxel size too big. Empty spaces will be produced" << std::endl;
+            out << "[FAILED] Voxel size too big. Empty spaces will be produced" << std::endl;
         else if (biggerVoxelConflicts == 0)
             out << "[WARNING] Voxel size too small, no conflicts found in a slightly bigger. Check more pairs before enlarging" << std::endl;
         else
             out << "[PASSED] Voxel size correct and optimal" << std::endl;
 
         if (neighbourListConflicts != 0)
-            out << "[ERROR] NeighbourGrid cell to small. Overlapping shapes will occur" << std::endl;
+            out << "[FAILED] NeighbourGrid cell to small. Overlapping shapes will occur" << std::endl;
         else if (smallerNeighbourListConflicts == 0)
             out << "[WARNING] NeighbourGrid cell too big, no conflicts found in a slightly smaller. Check more pairs before reducing" << std::endl;
         else
@@ -69,7 +69,7 @@ namespace
         return shape;
     }
 
-    /* Generates random pair distant on x coordinate by distance and check overlap */
+    /* Generates random pair distant on x coordinate by distance and checks overlap */
     bool randomPairOverlap(RND *rnd, double distance) {
         Vector<RSA_SPATIAL_DIMENSION> pos;
         pos[0] = distance / 2;

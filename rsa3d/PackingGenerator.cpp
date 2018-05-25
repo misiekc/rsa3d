@@ -5,6 +5,9 @@
  *      Author: ciesla
  */
 
+#include <memory>
+#include <chrono>
+#include <cstring>
 #include "PackingGenerator.h"
 #include "surfaces/NBoxPBC.h"
 #include "surfaces/NBoxFBC.h"
@@ -732,6 +735,25 @@ void PackingGenerator::expandShapeOnBC(Packing *packing, const RSAShape *shape, 
     trans[translateCoordIdx] = translation;
     shapeClone->translate(trans.data());
     packing->push_back(shapeClone);
+}
+
+Packing *PackingGenerator::fromFile(const std::string &filename) {
+	std::ifstream file(filename, std::ios_base::binary);
+	if (!file)
+		die("Cannot open file " + filename + " to restore packing");
+
+	auto v = new Packing;
+	RND rnd(1);
+
+	while (!file.eof()) {
+		RSAShape *s = ShapeFactory::createShape(&rnd);
+		s->restore(file);
+		v->push_back(s);
+	}
+	v->pop_back();
+
+	file.close();
+	return v;
 }
 
 void PackingGenerator::toFile(const Packing *packing, const std::string &filename) {
