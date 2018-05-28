@@ -9,6 +9,7 @@
 #include <chrono>
 #include <fstream>
 #include <memory>
+#include <dirent.h>
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -55,6 +56,40 @@ void process_mem_usage(double& vm_usage, double& resident_set)
    resident_set = rss * page_size_kb / 1024.0 / 1024.0;
 }
 
+void makeDatFileForPackingsInDirectory(Parameters *params, char *sdir){
+	char prefix[] = "packing";
+
+	char buf[20];
+	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
+	std::string size(buf);
+
+	std::string sFile = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + ".dat";
+	std::ofstream dataFile(sFile);
+    if (!dataFile)
+        die("Cannot open file " + sFile + " to store packing info");
+	dataFile.precision(std::numeric_limits<double>::digits10 + 1);
+
+	DIR *dir = opendir(sdir);
+	dirent *de;
+	std::string dirname(sdir);
+	while ((de = readdir(dir)) != NULL){
+		if (std::strncmp(prefix, de->d_name, strlen(prefix))==0){
+			int no1 = lastIndexOf(de->d_name, '_');
+			int no2 = lastIndexOf(de->d_name, '.');
+			char seed[10];
+			strncpy(seed, de->d_name+no1+1, no2-no1-1);
+			seed[no2-no1-1] = '\0';
+			std::string filename(de->d_name);
+ 			std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * packing = PackingGenerator::fromFile(dirname + "/" + filename);
+			dataFile << seed << "\t" << (*packing)[packing->size() - 1]->no << "\t"	<< (*packing)[packing->size() - 1]->time  <<  std::endl;
+			delete packing;
+			std::cout << ".";
+			std::cout.flush();
+		}
+	}
+	(void)closedir(dir);
+	std::cout << std::endl;
+}
 
 void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 	char buf[20];
@@ -187,6 +222,8 @@ int main(int argc, char **argv) {
         debug(&params, argv[3]);
     } else if (mode == "boundaries") {
         boundaries(&params, atof(argv[3]));
+    } else if (mode == "dat") {
+        makeDatFileForPackingsInDirectory(&params, argv[3]);
     } else if (mode == "analyze") {
         Analyzer an(&params);
         an.analyzePackingsInDirectory(argv[3], 0.01, 1.0);

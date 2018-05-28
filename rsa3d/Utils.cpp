@@ -156,6 +156,16 @@ std::string &trim(std::string &s) {
     return ltrim(rtrim(s));
 }
 
+int lastIndexOf(const char * s, char target){
+	int ret = -1;
+	int curIdx = 0;
+	while(s[curIdx] != '\0'){
+		if (s[curIdx] == target) ret = curIdx;
+		curIdx++;
+	}
+	return ret;
+}
+
 double getAngleToOrigin(const Vector<2> & point) {
 	double angle = atan2(point[1], point[0]);
 	if(angle < 0)

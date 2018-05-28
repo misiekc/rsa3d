@@ -24,6 +24,8 @@ std::string &rtrim(std::string &s);
 // trim from both ends
 std::string &trim(std::string &s);
 
+int lastIndexOf(const char * s, char target);
+
 void die(const std::string & reason);
 
 double getAngleToOrigin(const Vector<2> &point);
