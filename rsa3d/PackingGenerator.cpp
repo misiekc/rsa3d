@@ -250,13 +250,15 @@ void PackingGenerator::createPacking(){
 	double t = 0, factor = 1;
 	int tmpSplit = this->params->split, oldTmpSplit = tmpSplit;
 //	int snapshotCounter = 0;
-	RND **aRND = new RND*[maxthreads];
+
+    RND **aRND = new RND*[maxthreads];
 	for(int i=0; i<maxthreads; i++){
-		aRND[i] = new RND((int)(1000*rnd.nextValue()));
+	    int seed = static_cast<int>(1000 * (i + rnd.nextValue()));
+		aRND[i] = new RND(seed);
 	}
 
-	RSAShape **sOverlapped = new Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *[tmpSplit];
-	RSAShape **sVirtual = new Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *[tmpSplit];
+	RSAShape **sOverlapped = new RSAShape*[tmpSplit];
+	RSAShape **sVirtual = new RSAShape*[tmpSplit];
 	Voxel **aVoxels = new Voxel *[tmpSplit];
 
 	while (!this->isSaturated() && t<params->maxTime && missCounter<params->maxTriesWithoutSuccess) {
@@ -784,7 +786,7 @@ void PackingGenerator::testPackingOverlaps(const Packing *packing) {
             auto shape2 = (*packing)[j];
             if (shape1->overlap(&bc, shape2) != 0)
                 overlaps++;
-            if (counter % 100000 == 0)
+            if (counter % 1000000 == 0)
                 std::cout << counter << " pairs tested..." << std::endl;
         }
     }
