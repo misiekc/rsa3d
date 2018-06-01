@@ -46,11 +46,11 @@ bool RegularTetrahedron::isSeparatingAxis(const Vector<3> &axis, const RegularTe
     interval thisInterval = this->getProjection(axis);
     interval otherInterval = other.getProjection(axis);
 
-    return std::min(thisInterval.second, otherInterval.second) <= std::max(thisInterval.first, otherInterval.first);
+    // TODO epsilon needed
+    return std::min(thisInterval.second, otherInterval.second) < std::max(thisInterval.first, otherInterval.first);
 }
 
-RegularTetrahedron::interval RegularTetrahedron::getProjection(const Vector<3> & axis) const
-{
+RegularTetrahedron::interval RegularTetrahedron::getProjection(const Vector<3> & axis) const {
     // Find enpoints of polyhedron projection (multiplied by unknown but const for axis factor)
     interval projInterval = {std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
     for (const auto &v : this->vertices) {
