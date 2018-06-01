@@ -9,6 +9,7 @@
 #define SHAPES_POLYGONS_POLYGON_H_
 
 #include <vector>
+#include <utility>
 #include <cstddef>
 
 #include "../AnisotropicShape2D.h"
@@ -21,6 +22,7 @@ private:
 	//assume vertex (VertexR.size()-1) is linked to vertex 0
 	static std::vector<double> vertexR;
 	static std::vector<double> vertexTheta;
+	static std::vector<std::pair<size_t, size_t>> helperSegments;
 
 	static double inscribedCircleRadius;
 

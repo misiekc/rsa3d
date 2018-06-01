@@ -366,35 +366,23 @@ size_t VoxelList::analyzeVoxels(BoundaryConditions *bc, NeighbourGrid<Shape<RSA_
 
 	size_t begin = this->length;
 
-	size_t newListSize = this->length;
-	Voxel** newList = new Voxel*[ newListSize ];
-
-	#pragma omp parallel for
-	for(size_t i=0; i<newListSize; i++){
-		newList[i] = NULL;
-	}
-
-	size_t newIndex = 0;
 	#pragma omp parallel for
 	for (size_t i = 0; i < this->length; i++) {
 		Voxel *v = this->voxels[i];
 		bool bRemove = this->analyzeVoxel(v, nl, bc, depth);
-		if (!bRemove) {
-			#pragma omp critical
-			{
-			  newList[newIndex] = v;
-			  newIndex++;
-		    }
-		}else{
+		if (bRemove){
+			this->voxelNeighbourGrid->remove(v, v->getPosition());
 			delete v;
+			this->voxels[i] = NULL;
 		}
 		if (i%10000 == 0){ std::cout << "."; std::cout.flush(); }
 	}
 
-	delete[] this->voxels;
+	std::cout << " compacting" << std::flush;
 
-	this->length = newIndex;
-	this->voxels = newList;
+	int endIndex = this->length-1;
+	this->compactVoxelArray(this->voxels, endIndex);
+	this->length = endIndex+1;
 
 	return begin - this->length;
 }
