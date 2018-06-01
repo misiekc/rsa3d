@@ -100,9 +100,9 @@ void VoxelList::initVoxels(){
 	size_t ns = this->findArraySize(this->spatialRange, this->spatialVoxelSize);
 	size_t na = this->findArraySize(this->angularRange, this->angularVoxelSize);
 	double position[RSA_SPATIAL_DIMENSION];
-	std::array<double, RSA_ANGULAR_DIMENSION> orientation;
+	std::array<double, RSA_ANGULAR_DIMENSION> orientation{};
 	int ins[RSA_SPATIAL_DIMENSION];
-	int ina[RSA_ANGULAR_DIMENSION];
+	std::array<int, RSA_ANGULAR_DIMENSION> ina{};
 
 	for(ushort i = 0; i<RSA_SPATIAL_DIMENSION; i++)
 		ins[i] = 0;
@@ -126,7 +126,7 @@ void VoxelList::initVoxels(){
 			}
 			this->voxels[index] = new Voxel(position, orientation);
 			index++;
-		}while(increment(ina, RSA_ANGULAR_DIMENSION, na-1));
+		}while(increment(ina.data(), RSA_ANGULAR_DIMENSION, na-1));
 	}while(increment(ins, RSA_SPATIAL_DIMENSION, ns-1));
 }
 
