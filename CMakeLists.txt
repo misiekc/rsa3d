@@ -70,6 +70,7 @@ set(TEST_SOURCE
         test/utility/BallFactory.cpp
         test/utility/BoxFactory.cpp
         test/utility/InfoLooper.h
+        test/utility/IsotropicFactory.cpp
         test/utility/MockBC.h
         test/utility/Quantity.cpp
         test/utility/ShapePairFactory.h

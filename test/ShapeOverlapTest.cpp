@@ -21,6 +21,7 @@
 #include "utility/BallFactory.h"
 #include "utility/ShapePairFactory.h"
 #include "utility/InfoLooper.h"
+#include "utility/IsotropicFactory.h"
 
 namespace
 {
@@ -43,9 +44,10 @@ namespace
 
         /* Prints result info to given ostream */
         void print(std::ostream &ostr) const {
-            ostr << ">> " << this->missed() << " from " << this->tries << " intersection results missed" << std::endl;
-            ostr << ">> " << this->intersected << " shapes overlapped, " << this->disjunct;
+            ostr << "[INFO] " << this->intersected << " shapes overlapped, " << this->disjunct;
             ostr << " shapes were disjunctive" << std::endl;
+            ostr << (this->missed() == 0 ? "[SUCCESS] " : "[FAILURE] ");
+            ostr << this->missed() << " from " << this->tries << " intersection results missed" << std::endl;
         }
     };
 
@@ -79,15 +81,15 @@ namespace
     };
 
     /* Creates a shape using shape factory and tries to cast it to OverlapStrategyShape */
-    std::unique_ptr<RSAOverlapStrategyShape> acquire_shape() {
+    std::unique_ptr<RSAOverlapStrategyShape> acquire_overlap_strategy_shape() {
         RND rnd;
         auto shape = ShapeFactory::createShape(&rnd);
         auto osShape = dynamic_cast<RSAOverlapStrategyShape*>(shape);
         return std::unique_ptr<RSAOverlapStrategyShape>(osShape);
     }
 
-    /* Check if a shape created by acquire_shape is valid for this test */
-    void verifyShape(const std::string &name, const RSAOverlapStrategyShape *osShape) {
+    /* Check if a shape created by acquire_overlap_strategy_shape is valid for this test */
+    void verify_shape(const std::string &name, const RSAOverlapStrategyShape *osShape) {
         if (osShape == nullptr)
             die(name + " is not OverlapStrategyShape");
         else if (osShape->getSupportedStrategies().size() < 2)
@@ -111,12 +113,12 @@ namespace
     }
 
     /* Performs a comparison of two strategies */
-    Results perform_test(ShapePairFactory &factory, const RSAOverlapStrategy &firstStrategy,
-                         const RSAOverlapStrategy &secondStrategy, unsigned long maxTries) {
+    Results test_strategy_pair(ShapePairFactory &factory, const RSAOverlapStrategy &firstStrategy,
+                               const RSAOverlapStrategy &secondStrategy, unsigned long maxTries) {
         Results result;
         result.tries = maxTries;
 
-        std::cout << ">> Performing " << get_strategy_name(firstStrategy) << " and ";
+        std::cout << "[INFO] Performing " << get_strategy_name(firstStrategy) << " and ";
         std::cout << get_strategy_name(secondStrategy) << " for OverlapStrategy comparison..." << std::endl;
         InfoLooper looper(maxTries, 10000, "pairs tested...");
         while (looper.step()) {
@@ -126,6 +128,24 @@ namespace
             result.report(pair, firstIntersected, secondIntersected);
         }
         return result;
+    }
+
+    /* Performs test of all strategies, prints info and dumps missed pairs. Returns true on success. */
+    bool perform_test(const RSAOverlapStrategyShape &osShape, ShapePairFactory &factory, unsigned long maxTries,
+                      const std::string &dumpFile) {
+        auto strategies = osShape.getSupportedStrategies();
+        auto firstStrategy = acquire_strategy(osShape, strategies.front());
+        MissedPairsDumper dumper(dumpFile);
+        Results results;
+        for (auto name = strategies.begin() + 1; name != strategies.end(); name++) {
+            auto secondStrategy = acquire_strategy(osShape, *name);
+            results = test_strategy_pair(factory, *firstStrategy, *secondStrategy, maxTries);
+            results.print(std::cout);
+            dumper.dump(results);
+            if (results.missed() > 0) std::cout << "[INFO] Missed pairs dumped to " << dumper.getFilename() << std::endl;
+            std::cout << std::endl;
+        }
+        return (results.missed() == 0);
     }
 }
 
@@ -141,24 +161,19 @@ namespace shape_ovtest
             die("Wrong input. Aborting.");
 
         ShapeFactory::initShapeClass(argv[2], argv[3]);
+
+        auto osShape = acquire_overlap_strategy_shape();
+        verify_shape(argv[2], osShape.get());
+
         BallFactory factory;
         factory.setRadius(ball_radius);
+        std::cout << "[INFO] Performing test with unoriented shapes" << std::endl;
+        if (!perform_test(*osShape, factory, max_tries, "ovtest_anisotropic_dump.nb")) return EXIT_FAILURE;
 
-        auto osShape = acquire_shape();
-        verifyShape(argv[2], osShape.get());
+        IsotropicFactory isotropicFactory(factory);
+        std::cout << "[INFO] Performing test with oriented shapes" << std::endl;
+        if (!perform_test(*osShape, isotropicFactory, max_tries, "ovtest_isotropic_dump.nb")) return EXIT_FAILURE;
 
-        // Compare first strategy results with each following. Dump all missed pairs to a file
-        auto strategies = osShape->getSupportedStrategies();
-        auto firstStrategy = acquire_strategy(*osShape, strategies.front());
-        MissedPairsDumper dumper("ovtest_dump.nb");
-        for (auto name = strategies.begin() + 1; name != strategies.end(); name++) {
-            auto secondStrategy = acquire_strategy(*osShape, *name);
-            Results results = perform_test(factory, *firstStrategy, *secondStrategy, max_tries);
-            results.print(std::cout);
-            dumper.dump(results);
-            if (results.missed() > 0) std::cout << ">> Missed pairs dumped to " << dumper.getFilename() << std::endl;
-            std::cout << std::endl;
-        }
         return EXIT_SUCCESS;
     }
 }

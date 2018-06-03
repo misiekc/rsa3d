@@ -20,12 +20,14 @@
  * Usage:
  * <blockquote>./rsa_test shape_ovtest [particle] [attibutes] [ball_radius] [max_tries]</blockquote>
  *
- * The test is using BallFactory for creating shape pairs. It can be performed provided a shape configured in input.txt
- * is a subclass of OverlapStrategyShape and supports at least two overlap strategies.
+ * The test is using BallFactory for creating shape pairs. It can be performed provided a @a particle is a subclass of
+ * OverlapStrategyShape and supports at least two overlap strategies.
  *
  * Each second and following strategies will be compared with the first one (the order from
- * OverlapStrategyShape::getStrategies) and each pair with two different overlap results will be dump to ovtest_dump.nb
- * file.
+ * OverlapStrategyShape::getStrategies) and each pair with two different overlap results will be dump to file.
+ *
+ * The tests are repeated twice: one time using normal BallFactory and one time using IsotropicFactory wrapped over
+ * BallFactory - in the second case all generated shapes are parallel. This enables some degenerate cases to be tested.
  */
 namespace shape_ovtest
 {
