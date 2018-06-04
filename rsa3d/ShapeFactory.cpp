@@ -16,6 +16,7 @@
 #include "shapes/Ellipse.h"
 #include "shapes/Rectangle.h"
 #include "shapes/Polygon.h"
+#include "shapes/polygons/SBPolygon.h"
 #include "shapes/platonic_solid/RegularDodecahedron.h"
 #include "shapes/platonic_solid/RegularIcosahedron.h"
 #include "shapes/platonic_solid/RegularOctahedron.h"
@@ -57,6 +58,12 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             } else if (sClass == "Rectangle") {
                 Rectangle::initClass(attr);
                 return;
+            } else if (sClass == "SBPolygon") {
+            	SBPolygon::initClass(attr);
+            	return;
+            } else if (sClass == "HBPolygon") {
+            	HBPolygon::initClass(attr);
+            	return;
             } else if (sClass == "Polygon") {
             	Polygon::initClass(attr);
             	return;

@@ -17,6 +17,13 @@
 class Polygon : public AnisotropicShape2D{
 
 private:
+	//test if line segment from point 1 to 2 intersects with line segment from point 3 to 4
+	static bool lineLineIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
+
+	//same as above, except that endpoints 3 and 4 comes from a line in a voxel, and thus carry an uncertainty
+	static bool lineVoxelIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double dx, double dtheta, double l3, double l4);
+
+protected:
 	//polar coordinates of all vertices
 	//assume vertex 0 is linked to vertex 1, vertex 1 is linked to vertex 2, vertex 2 is linked to vertex 3, etc.
 	//assume vertex (VertexR.size()-1) is linked to vertex 0
@@ -33,11 +40,6 @@ private:
 	//calculate the area of the triangle made from the origin, vertex i, and vertex (i+1)
 	static double getTriangleArea(size_t i);
 
-	//test if line segment from point 1 to 2 intersects with line segment from point 3 to 4
-	static bool lineLineIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
-
-	//same as above, except that endpoints 3 and 4 comes from a line in a voxel, and thus carry an uncertainty
-	static bool lineVoxelIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double dx, double dtheta, double l3, double l4);
 
 public:
 
