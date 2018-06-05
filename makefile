@@ -45,6 +45,7 @@ PACKAGES = rsa3d/analizator/ \
            rsa3d/shapes/ \
            rsa3d/shapes/cube_strategies/ \
            rsa3d/shapes/platonic_solid/ \
+           rsa3d/shapes/polygons/ \
            rsa3d/surfaces/ \
            statistics/ \
            test/ \
@@ -75,6 +76,8 @@ OBJS_COMMON = rsa3d/AnisotropicShape2D \
        rsa3d/shapes/platonic_solid/RegularIcosahedron \
        rsa3d/shapes/platonic_solid/RegularOctahedron \
        rsa3d/shapes/platonic_solid/RegularTetrahedron \
+       rsa3d/shapes/polygons/HBPolygon \
+       rsa3d/shapes/polygons/SBPolygon \
        rsa3d/shapes/Polygon \
        rsa3d/shapes/Cuboid \
        rsa3d/shapes/Ellipse \
@@ -90,6 +93,7 @@ OBJS_MAIN = rsa3d/Main \
 # Objects to be linked only with custom tests executable
 OBJS_TEST = test/utility/BallFactory \
        		test/utility/BoxFactory \
+       		test/utility/IsotropicFactory \
        		test/utility/Quantity \
        		test/AnisotropicShape2DExclusionDrawer \
        		test/AnisotropicShape2DExclusionTest \

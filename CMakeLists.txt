@@ -20,6 +20,8 @@ set(MAIN_SOURCE
         rsa3d/shapes/platonic_solid/SATOverlap.tpp
         rsa3d/shapes/platonic_solid/TriTriOverlap.h
         rsa3d/shapes/platonic_solid/TriTriOverlap.tpp
+        rsa3d/shapes/polygons/HBPolygon.cpp
+        rsa3d/shapes/polygons/SBPolygon.cpp
         rsa3d/shapes/Cuboid.cpp
         rsa3d/shapes/Ellipse.cpp
         rsa3d/shapes/OrientedCuboid.h
