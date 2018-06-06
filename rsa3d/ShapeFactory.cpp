@@ -17,6 +17,7 @@
 #include "shapes/Rectangle.h"
 #include "shapes/Polygon.h"
 #include "shapes/polygons/SBPolygon.h"
+#include "shapes/polygons/HBPolygon.h"
 #include "shapes/platonic_solid/RegularDodecahedron.h"
 #include "shapes/platonic_solid/RegularIcosahedron.h"
 #include "shapes/platonic_solid/RegularOctahedron.h"
