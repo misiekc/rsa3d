@@ -9,10 +9,6 @@ bool AnisotropicShape2D::pointInside(BoundaryConditions *bc, double* position, c
 	return this->pointInside(bc, position, orientation[0], orientation[0]+orientationRange);
 }
 
-bool AnisotropicShape2D::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const{
-	return 0;
-}
-
 Matrix<2, 2> AnisotropicShape2D::getRotationMatrix() const {
     return Matrix<2, 2>::rotation(this->getAngle());
 }

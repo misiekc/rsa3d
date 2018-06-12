@@ -79,10 +79,10 @@ void Polygon::initClass(const std::string &args){
 		double c1, c2;
 		in >> c1;
 		in >> c2;
-		if(format.compare("xy")==0){
+		if(format == "xy"){
 			r = std::sqrt(c1*c1 + c2*c2);
 			t = std::atan2(c2, c1);
-		}else if (format.compare("rt")==0){
+		}else if (format == "rt"){
 			r = c1;
 			t = c2;
 		}else{
@@ -156,10 +156,6 @@ bool Polygon::lineVoxelIntersect(double x1, double y1, double x2, double y2, dou
 		return false;
 }
 
-Polygon::Polygon() : AnisotropicShape2D(){
-	this->setAngle(0.0);
-}
-
 double Polygon::getVolume(){
 	double result = 0.0;
 	for (size_t i = 0; i < Polygon::vertexR.size(); i++){
@@ -179,15 +175,15 @@ bool Polygon::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const{
 
 	//easy check
 	double d2 = 0, tmp;
-	for (unsigned short i = 0; i < RSA_SPATIAL_DIMENSION; i++){
+	for (unsigned short i = 0; i < 2; i++){
 		tmp = position[i] - polposition[i];
 		d2 += tmp*tmp;
 	}
 	if (std::sqrt(d2) < 2.0*Polygon::inscribedCircleRadius)
 		return true;
 
-	double angle = this->getAngle();
-	double polangle = pol.getAngle();
+	double angle = this->getOrientation()[0];
+	double polangle = pol.getOrientation()[0];
 	//complex check
 	size_t fi, si, fj, sj;
 	for (size_t i = 0; i < Polygon::vertexR.size() + Polygon::helperSegments.size(); i++){
@@ -222,25 +218,25 @@ bool Polygon::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const{
 	return false;
 }
 
-bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, RSA_ANGULAR_DIMENSION> &voxelOrientation, double spatialSize, double angularSize) const{
-
+bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition,
+						  const std::array<double, 1> &voxelOrientation, double spatialSize, double angularSize) const{
 
 	if (voxelOrientation[0] > Shape<2, 1>::getVoxelAngularSize())
 		return true;
 
 	double *position = this->getPosition();
-	double translation[RSA_SPATIAL_DIMENSION];
+	double translation[2];
 	bc->getTranslation(translation, voxelPosition, position);
 
-	double spatialCenter[RSA_SPATIAL_DIMENSION];
+	double spatialCenter[2];
 	double halfSpatialSize = 0.5*spatialSize;
-	for(unsigned short i = 0; i<RSA_SPATIAL_DIMENSION; i++){
+	for(unsigned short i = 0; i<2; i++){
 		spatialCenter[i] = voxelPosition[i] + halfSpatialSize;
 	}
 
 	//easy check
 	double d2 = 0, tmp;
-	for (unsigned short j = 0; j<RSA_SPATIAL_DIMENSION; j++){
+	for (unsigned short j = 0; j<2; j++){
 		tmp = position[j] + translation[j] - spatialCenter[j];
 		if (tmp>0)
 			tmp += 0.5*spatialSize;
@@ -254,7 +250,7 @@ bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition, c
 	double halfAngularSize = 0.5*angularSize;
 	double angularCenter = voxelOrientation[0] + halfAngularSize;
 
-	double angle = this->getAngle();
+	double angle = this->getOrientation()[0];
 	//complex check
 	size_t fi, si, fj, sj;
 	for (size_t i = 0; i < Polygon::vertexR.size() + Polygon::helperSegments.size(); i++){
@@ -288,14 +284,6 @@ bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition, c
 	}
 	return false;
 }
-/*
-bool Polygon::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
-	std::array<double, RSA_ANGULAR_DIMENSION> orientation;
-	orientation[0] = 0.5*(angleFrom+angleTo);
-	double angularSize = std::abs(0.5*(angleTo-angleFrom));
-	return this->voxelInside111(bc, da, orientation, 0.0, angularSize);
-}
-*/
 
 Shape<2, 1> *Polygon::clone() const {
     return new Polygon(*this);
@@ -308,15 +296,15 @@ std::string Polygon::toPovray() const{
 	out << "  polygon {" << Polygon::vertexR.size()+1 << ", ";
 	for (size_t i=0; i < Polygon::vertexR.size(); i++){
 		out << "< ";
-		out << position[0] + Polygon::vertexR[i] * std::cos(Polygon::vertexTheta[i] + this->getAngle());
+		out << position[0] + Polygon::vertexR[i] * std::cos(Polygon::vertexTheta[i] + this->getOrientation()[0]);
 		out << ", ";
-		out << position[1] + Polygon::vertexR[i] * std::sin(Polygon::vertexTheta[i] + this->getAngle());
+		out << position[1] + Polygon::vertexR[i] * std::sin(Polygon::vertexTheta[i] + this->getOrientation()[0]);
 		out << ", 0.0002> ,";
 	}
 	out << "< ";
-	out << position[0] + Polygon::vertexR[0] * std::cos(Polygon::vertexTheta[0] + this->getAngle());
+	out << position[0] + Polygon::vertexR[0] * std::cos(Polygon::vertexTheta[0] + this->getOrientation()[0]);
 	out << ", ";
-	out << position[1] + Polygon::vertexR[0] * std::sin(Polygon::vertexTheta[0] + this->getAngle());
+	out << position[1] + Polygon::vertexR[0] * std::sin(Polygon::vertexTheta[0] + this->getOrientation()[0]);
 	out << ", 0.0002>";
 	out << "  texture { finish { ambient 1 diffuse 0 } pigment { color Red} } }" << std::endl;
 

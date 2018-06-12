@@ -10,16 +10,16 @@
 
 //#define CUBOID_DEBUG        // Used for debbuging output
 
-#include "../Shape.h"
 #include "../Matrix.h"
 #include "../Vector.h"
 #include "OverlapStrategyShape.h"
 #include "../Intersection.h"
+#include "../ConvexShape.h"
 
 
 class CuboidOverlapStrategy;
 
-class Cuboid : public Shape<3, 0>, public OverlapStrategyShape<3, 0>
+class Cuboid : public ConvexShape<3, 0>, public OverlapStrategyShape<3, 0>
 {
 private:
 	static double           size[3];

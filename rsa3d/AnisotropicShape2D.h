@@ -6,8 +6,8 @@
 #define RSA3D_ANISOTROPICSHAPE2D_H
 
 
-#include "Shape.h"
 #include "Matrix.h"
+#include "ConvexShape.h"
 
 /**
  * @brief 2D Shape with anisotropy - its position is described by 2 numbers and orientation by 1 number.
@@ -19,7 +19,7 @@
  * delegate to AnisotropicShape2D::pointInside(BoundaryConditions*,double*,double,double) and
  * AnisotripicShape2D::setAngle(double). See those methods' documentation for more information.
  */
-class AnisotropicShape2D : public Shape<2, 1> {
+class AnisotropicShape2D : public ConvexShape<2, 1> {
 
 protected:
 
@@ -99,7 +99,7 @@ public:
      * @param angleTo array of lengths of angle intervals
      * @return 0 if point is outside, nonzero number otherwise
      */
-    virtual bool pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const;
+    virtual bool pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const = 0;
 
 };
 

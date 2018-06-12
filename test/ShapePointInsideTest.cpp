@@ -10,6 +10,7 @@
 #include "utility/BallFactory.h"
 #include "../rsa3d/Utils.h"
 #include "utility/InfoLooper.h"
+#include "../rsa3d/ConvexShape.h"
 
 
 namespace
@@ -47,9 +48,12 @@ namespace
         InfoLooper looper(pairsToTest, 10000, "pairs tested...");
         while(looper.step()) {
             auto pair = factory.generate();
-            bool overlap = pair.first()->overlap(&bc, pair.second());
-            bool pi_first = pair.first()->pointInside(&bc, pair.second()->getPosition());
-            bool pi_second = pair.second()->pointInside(&bc, pair.first()->getPosition());
+            auto &first = dynamic_cast<RSAConvexShape&>(*pair.first());
+            auto &second = dynamic_cast<RSAConvexShape&>(*pair.second());
+            
+            bool overlap = first.overlap(&bc, &second);
+            bool pi_first = first.pointInside(&bc, second.getPosition());
+            bool pi_second = second.pointInside(&bc, first.getPosition());
 
             if (overlap)    results.overlapped++;
             if (pi_first)   results.withPointInside++;

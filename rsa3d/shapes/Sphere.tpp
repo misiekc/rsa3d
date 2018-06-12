@@ -52,7 +52,7 @@ void Sphere<DIMENSION>::initClass(const std::string &args){
 }
 
 template <unsigned short DIMENSION>
-Sphere<DIMENSION>::Sphere() : Shape<DIMENSION, 0>(){
+Sphere<DIMENSION>::Sphere() : ConvexShape<DIMENSION, 0>(){
 	this->r = Sphere<DIMENSION>::radius;
 }
 

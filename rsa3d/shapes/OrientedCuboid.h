@@ -10,7 +10,7 @@
 
 
 template <unsigned short DIMENSION>
-class OrientedCuboid : public Shape<DIMENSION, 0>{
+class OrientedCuboid : public ConvexShape<DIMENSION, 0>{
 private:
 //	static bool do2Drotation;
     static double 			size[DIMENSION];

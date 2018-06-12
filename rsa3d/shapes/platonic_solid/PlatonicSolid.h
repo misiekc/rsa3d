@@ -6,14 +6,14 @@
 #define RSA3D_PLATONICSOLID_H
 
 
-#include "../../Shape.h"
 #include "../../Matrix.h"
 #include "../OverlapStrategyShape.h"
 #include "../../Intersection.h"
+#include "../../ConvexShape.h"
 
 // CRTP idiom
 template <typename SpecificSolid>
-class PlatonicSolid : public Shape<3, 0>, public OverlapStrategyShape<3, 0> {
+class PlatonicSolid : public ConvexShape<3, 0>, public OverlapStrategyShape<3, 0> {
 private:
     Matrix<3, 3> orientation = Matrix<3, 3>::identity();
 

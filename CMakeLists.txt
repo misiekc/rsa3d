@@ -38,6 +38,8 @@ set(MAIN_SOURCE
         rsa3d/AnisotropicShape2D.cpp
         rsa3d/BoundaryConditions.cpp
         rsa3d/Config.cpp
+        rsa3d/ConvexShape.h
+        rsa3d/ConvexShape.tpp
         rsa3d/Intersection.cpp
         rsa3d/Matrix.h
         rsa3d/NeighbourGrid.h

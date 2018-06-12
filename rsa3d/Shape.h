@@ -56,8 +56,8 @@
  *
  * @tparam SPATIAL_DIMENSION how many dimensions has the space in which a shape lives
  * @tparam ANGULAR_DIMENSION how many orientational degrees of freedom a shape has. However, this parameter should be
- * non-zero only if pointInside(BoundaryConditions*,double*,double*,double) is capable of dealing with angle-dependent
- * exclusion zones, ie. when generating saturated RSA packings is supported
+ * non-zero only if voxelInside is capable of dealing with angle-dependent exclusion zones, ie. when generating
+ * saturated RSA packings is supported
  */
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 class Shape : public Positioned<SPATIAL_DIMENSION>{
@@ -235,30 +235,6 @@ public:
 	virtual double getVolume() const;
 
     /**
-     * @brief Checks if a virtual particle of the same size is within intersection of all excluded volumes for all its
-     * orientations denoted by @a orientation and @a orientationRange parameters.
-     *
-     * @param bc boundary conditions to take into account
-     * @param position position of a virtual particle of the same size to check
-     * @param orientation array of beginnings of angle intervals
-     * @param orientationRange array of lengths of angle intervals
-     * @return false if point is outside, true otherwise
-     */
-	virtual bool pointInside(BoundaryConditions *bc, double* position,
-                            const std::array<double, ANGULAR_DIMENSION> &orientation, double orientationRange) const;
-
-    /**
-     * @brief Checks if a virtual particle of the same size is within excluded volume for any orientation of it.
-     *
-	 * If @a s of `this` has a different size than from a global state is may lead to an unexpected behaviour.
-     * @param bc boundary conditions to take into account
-     * @param da position of a virtual particle of the same size to check
-     * @return false if point is outside, true otherwise
-     */
-	virtual bool pointInside(BoundaryConditions *bc, double* position) const;
-
-
-    /**
      * @brief Checks if whole voxel is inside an exclusion zone of @this shape.
      * Specifically, the procedure returns true any virtual paricle with a center and orientation within the voxel will overlap with @a this shape
      * Default implementation bases on pointInside() and assumes that the excluded volume of @a this is convex.
@@ -270,8 +246,9 @@ public:
      * @param angularSize angular size of the voxel
      * @return true if the voxel is fully covered by the exclusion zone of @a this shape, false otherwise.
      */
-	virtual bool voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, ANGULAR_DIMENSION> &orientation, double spatialSize, double angularSize) const;
-
+	virtual bool voxelInside(BoundaryConditions *bc, const double *voxelPosition,
+                             const std::array<double, ANGULAR_DIMENSION> &orientation, double spatialSize,
+                             double angularSize) const = 0;
 
     /**
      * @brief ?? Moves the shape towards given shape s.

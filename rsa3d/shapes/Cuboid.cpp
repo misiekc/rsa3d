@@ -28,7 +28,7 @@ CuboidOverlapStrategy * Cuboid::strategy = Cuboid::defaultStrategy;
 // Default constructor creating new Cuboid in (0, 0, 0) with size set in
 // Cuboid::initClass
 //----------------------------------------------------------------------------
-Cuboid::Cuboid(const Matrix<3, 3> & orientation) : Shape<3, 0>(), orientation(orientation)
+Cuboid::Cuboid(const Matrix<3, 3> & orientation) : orientation(orientation)
 {
 
 }

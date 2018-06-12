@@ -14,7 +14,7 @@ template <unsigned short DIMENSION>
 double OrientedCuboid<DIMENSION>::size[DIMENSION];
 
 template <unsigned short DIMENSION>
-OrientedCuboid<DIMENSION>::OrientedCuboid() : Shape<DIMENSION, 0>(){
+OrientedCuboid<DIMENSION>::OrientedCuboid() : ConvexShape<DIMENSION, 0>(){
 }
 
 template <unsigned short DIMENSION>

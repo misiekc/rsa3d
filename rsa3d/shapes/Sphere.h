@@ -8,13 +8,13 @@
 #ifndef SHAPES_SPHERE_H_
 #define SHAPES_SPHERE_H_
 
-#include <math.h>
+#include <cmath>
 #include <string>
 #include "../RND.h"
-#include "../Shape.h"
+#include "../ConvexShape.h"
 
 template <unsigned short DIMENSION>
-class Sphere : public Shape<DIMENSION, 0>{
+class Sphere : public ConvexShape<DIMENSION, 0>{
 
 private:
 	static double radius;

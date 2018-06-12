@@ -14,7 +14,7 @@
 
 #include "../AnisotropicShape2D.h"
 
-class Polygon : public AnisotropicShape2D{
+class Polygon : public Shape<2, 1> {
 
 private:
 	//test if line segment from point 1 to 2 intersects with line segment from point 3 to 4
@@ -45,17 +45,15 @@ public:
 
 	static void initClass(const std::string &args);
 
-	Polygon();
 	~Polygon() override = default;
+
 	Shape<2, 1> *clone() const override;
 	double getVolume();
 
-
-	bool overlap(BoundaryConditions *bc, Shape<2, 1> *s) const;
-	bool voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, RSA_ANGULAR_DIMENSION> &voxelOrientation, double spatialSize, double angularSize) const;
-//	bool pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const override;
-
-	std::string toPovray() const;
+	bool overlap(BoundaryConditions *bc, Shape<2, 1> *s) const override;
+	bool voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, 1> &voxelOrientation,
+                     double spatialSize, double angularSize) const override;
+	std::string toPovray() const override;
 };
 
 #endif /* SHAPES_POLYGONS_POLYGON_H_ */
