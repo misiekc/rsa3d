@@ -53,18 +53,20 @@ namespace
         double fromAngle{};
         double toAngle{};
 
-        void load(const std::string & filename);
-        void printInfo() const;
-        ColoredPoint randomPoint(RND * rnd) const;
+        void load(const std::string &filename);
+        void printInfo(std::ostream &out) const;
+        ColoredPoint randomPoint(RND *rnd) const;
     };
 
     /* Generates shape using ShapeFactory, translates and rotates it */
-    std::unique_ptr<AnisotropicShape2D> generate_shape(double angle, const Vector<2> &position) {
-        auto shape = (AnisotropicShape2D*)ShapeFactory::createShape(nullptr);
+    std::unique_ptr<Shape<2, 1>> generate_shape(double angle, const Vector<2> &position) {
+        auto shape = dynamic_cast<Shape<2, 1>*>(ShapeFactory::createShape(nullptr));
+        if (shape == nullptr)   die("Only Shape<2, 1> shapes supported");
+
         double arrayPos[3] = {position[0], position[1]};
         shape->translate(arrayPos);
         shape->rotate({{angle}});
-        return std::unique_ptr<AnisotropicShape2D>(shape);
+        return std::unique_ptr<Shape<2, 1>>(shape);
     }
 
     /* Loads context from a given file */
@@ -97,17 +99,18 @@ namespace
         this->points = config->getDouble("points");
         this->append = config->getString("append") == "true";
         this->wolframSupported = !generate_shape(0, Vector<2>())->toWolfram().empty();
-        std::cout << "[WARNING] " << this->particle << " has no toWolfram(). Shapes will not be drawn." << std::endl;
-        std::cout << "Context loaded from " << filename << std::endl;
+        if (!this->wolframSupported)
+            std::cout << "[WARNING] " << this->particle << " has no toWolfram(). Shapes will not be drawn." << std::endl;
+        std::cout << "[INFO] Context loaded from " << filename << std::endl;
     }
 
     /* Performs inttest based on context and returns result */
-    Result perform_inttest(const Context &context) {
+    Result perform_inttest(const Context &context, std::ostream &out) {
         RND rnd;
         MockBC mockBC;
         Result result;
 
-        context.printInfo();
+        context.printInfo(out);
         auto first = generate_shape(context.firstAngle, context.firstPos);
         for (std::size_t i = 0; i < context.points; i++) {
             ColoredPoint point = context.randomPoint(&rnd);
@@ -122,26 +125,37 @@ namespace
         return result;
     }
 
+    /* Uses pointInside method when dealing with ConvexShape or voxelInside with zero spatial size for normal Shape */
+    bool point_inside(const Shape<2, 1> &shape, const Vector<2> &point, double angleFrom, double angleTo) {
+        MockBC bc;
+        double pointArr[2];
+        point.copyToArray(pointArr);
+
+        try {
+            auto &convexShape = dynamic_cast<const ConvexShape<2, 1>&>(shape);
+            return convexShape.pointInside(&bc, pointArr, {{angleFrom}}, angleTo - angleFrom);
+        } catch (std::bad_cast&) {
+            return shape.voxelInside(&bc, pointArr, {{angleFrom}}, 0, angleTo - angleFrom);
+        }
+    }
+
     /* Performs pitest based on context and returns result */
-    Result perform_pitest(const Context &context) {
+    Result perform_pitest(const Context &context, std::ostream &out) {
         MockBC mockBC;
         RND rnd;
         Result result;
 
-        context.printInfo();
-        auto first = generate_shape(context.firstAngle, context.firstPos);
+        context.printInfo(out);
+        auto shape = generate_shape(context.firstAngle, context.firstPos);
         for (std::size_t i = 0; i < context.points; i++) {
             ColoredPoint point = context.randomPoint(&rnd);
-            double pointPosArray[2];
-            point.position.copyToArray(pointPosArray);
-
-            if (first->pointInside(&mockBC, pointPosArray, context.fromAngle, context.toAngle)) {
+            if (point_inside(*shape, point.position, context.fromAngle, context.toAngle)) {
                 point.color = INSIDE_COLOR;
             } else {
                 auto angleFromShape = generate_shape(context.fromAngle, point.position);
                 auto angleToShape = generate_shape(context.toAngle, point.position);
-                auto withinAngleFromZone = (bool)first->overlap(&mockBC, angleFromShape.get());
-                auto withinAngleToZone = (bool)first->overlap(&mockBC, angleToShape.get());
+                auto withinAngleFromZone = shape->overlap(&mockBC, angleFromShape.get());
+                auto withinAngleToZone = shape->overlap(&mockBC, angleToShape.get());
 
                 if (withinAngleFromZone && withinAngleToZone)
                     point.color = CIRCLE_FIX_COLOR;
@@ -159,11 +173,11 @@ namespace
     }
 
     /* Checks in context what test to perform and executes it*/
-    std::vector<ColoredPoint> perform_test(Context context) {
+    std::vector<ColoredPoint> perform_test(const Context &context, std::ostream &out) {
         if (context.mode == Context::Mode::OVERLAP)
-            return perform_inttest(context);
+            return perform_inttest(context, out);
         else  // Context::Mode::POINT_INSIDE
-            return perform_pitest(context);
+            return perform_pitest(context, out);
     }
 
     ColoredPoint Context::randomPoint(RND * rnd) const {
@@ -177,21 +191,21 @@ namespace
     }
 
     /* Prints info about current context */
-    void Context::printInfo() const {
+    void Context::printInfo(std::ostream &out) const {
         if (this->mode == Mode::OVERLAP)
-            std::cout << "[OVERLAP TEST] ";
+            out << "[OVERLAP TEST] ";
         else    // Mode::POINT_INSIDE
-            std::cout << "[POINT INSIDE TEST] ";
+            out << "[POINT INSIDE TEST] ";
 
         auto first = generate_shape(this->firstAngle, this->firstPos);
-        std::cout << "Generating " << this->points << " points from " << this->box_width << " x ";
-        std::cout << this->box_height << " box for:" << std::endl;
-        std::cout << first->toString() << std::endl;
+        out << "Generating " << this->points << " points from " << this->box_width << " x ";
+        out << this->box_height << " box for:" << std::endl;
+        out << first->toString() << std::endl;
 
         if (this->mode == Mode::OVERLAP)
-            std::cout << "Second angle: " << this->secondAngle * 180 / M_PI << std::endl;
+            out << "Second angle: " << this->secondAngle * 180 / M_PI << std::endl;
         else    // Mode::POINT_INSIDE
-            std::cout << "Angle range: [" << this->fromAngle * 180 / M_PI << ", " << this->toAngle * 180 / M_PI << "]" << std::endl;
+            out << "Angle range: [" << this->fromAngle * 180 / M_PI << ", " << this->toAngle * 180 / M_PI << "]" << std::endl;
     }
 
     /* Finds a red point in the result which X coordinate is the greatest - used for drawing the second shape*/
@@ -242,7 +256,7 @@ int as2d_extest::main(int argc, char **argv) {
     Context context;
     context.load(argv[2]);
 
-    Result result = perform_test(context);
+    Result result = perform_test(context, std::cout);
     std::string filename = (argc == 4 ? argv[3] : "out.nb");
     std::ofstream output(filename, context.append ? std::ofstream::app : std::ofstream::out);
     if (!output)
