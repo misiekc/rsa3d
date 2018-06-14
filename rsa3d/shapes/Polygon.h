@@ -13,6 +13,7 @@
 #include <cstddef>
 
 #include "../AnisotropicShape2D.h"
+#include "../Vector.h"
 
 class Polygon : public Shape<2, 1> {
 
@@ -22,6 +23,9 @@ private:
 
 	//same as above, except that endpoints 3 and 4 comes from a line in a voxel, and thus carry an uncertainty
 	static bool lineVoxelIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double dx, double dtheta, double l3, double l4);
+
+	Vector<2> getVertexPosition(std::size_t index) const;
+	void vertexToPovray(std::size_t index, std::ostream &out) const;
 
 protected:
 	//polar coordinates of all vertices
@@ -54,6 +58,10 @@ public:
 	bool voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, 1> &voxelOrientation,
                      double spatialSize, double angularSize) const override;
 	std::string toPovray() const override;
+
+	std::string toString() const override;
+
+	std::string toWolfram() const override;
 };
 
 #endif /* SHAPES_POLYGONS_POLYGON_H_ */

@@ -291,22 +291,43 @@ Shape<2, 1> *Polygon::clone() const {
 
 std::string Polygon::toPovray() const{
 	std::stringstream out;
-	double *position = this->getPosition();
 	out.precision(std::numeric_limits< double >::max_digits10);
 	out << "  polygon {" << Polygon::vertexR.size()+1 << ", ";
-	for (size_t i=0; i < Polygon::vertexR.size(); i++){
-		out << "< ";
-		out << position[0] + Polygon::vertexR[i] * std::cos(Polygon::vertexTheta[i] + this->getOrientation()[0]);
-		out << ", ";
-		out << position[1] + Polygon::vertexR[i] * std::sin(Polygon::vertexTheta[i] + this->getOrientation()[0]);
-		out << ", 0.0002> ,";
-	}
-	out << "< ";
-	out << position[0] + Polygon::vertexR[0] * std::cos(Polygon::vertexTheta[0] + this->getOrientation()[0]);
-	out << ", ";
-	out << position[1] + Polygon::vertexR[0] * std::sin(Polygon::vertexTheta[0] + this->getOrientation()[0]);
-	out << ", 0.0002>";
+	for (size_t i=0; i < Polygon::vertexR.size(); i++) {
+        this->vertexToPovray(i, out);
+        out << " ,";
+    }
+    this->vertexToPovray(0, out);
 	out << "  texture { finish { ambient 1 diffuse 0 } pigment { color Red} } }" << std::endl;
 
 	return out.str();
+}
+
+std::string Polygon::toString() const {
+	return this->toWolfram();
+}
+
+std::string Polygon::toWolfram() const {
+    std::ostringstream out;
+    out.precision(std::numeric_limits<double>::max_digits10);
+    out << "Polygon[{";
+    for (std::size_t i = 0; i < vertexR.size() - 1; i++)
+        out << this->getVertexPosition(i) << ", ";
+    out << this->getVertexPosition(vertexR.size() - 1);
+    out << "}]";
+    return out.str();
+}
+
+Vector<2> Polygon::getVertexPosition(std::size_t index) const {
+    const double *position = this->getPosition();
+    double angle = Polygon::vertexTheta[index] + this->getOrientation()[0];
+    return Vector<2>{{
+        position[0] + Polygon::vertexR[index] * std::cos(angle),
+        position[1] + Polygon::vertexR[index] * std::sin(angle)
+    }};
+}
+
+void Polygon::vertexToPovray(std::size_t index, std::ostream &out) const {
+    Vector<2> position = this->getVertexPosition(index);
+    out << "< " << position[0] << ", " << position[1] << ", 0.0002> ,";
 }
