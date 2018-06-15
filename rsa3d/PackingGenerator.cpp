@@ -12,6 +12,7 @@
 #include "surfaces/NBoxPBC.h"
 #include "surfaces/NBoxFBC.h"
 #include "ShapeFactory.h"
+#include "ConvexShape.h"
 #include <fstream>
 #include <iomanip>
 
@@ -196,8 +197,9 @@ void PackingGenerator::testPacking(Packing *vShapes, double maxTime){
 				std::vector<RSAShape*> vNeighbours;
 				this->surface->getNeighbours(&vNeighbours, position);
 				for(RSAShape *sTmp : vNeighbours){
-					if (sTmp->pointInside(this->surface, position, orientation, delta)){
-						sCovers = sTmp;
+				    RSAConvexShape *convexShape = dynamic_cast<RSAConvexShape*>(sTmp);
+					if (convexShape->pointInside(this->surface, position, orientation, delta)){
+						sCovers = convexShape;
 						break;
 					}
 				}
