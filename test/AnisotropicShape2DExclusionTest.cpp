@@ -63,7 +63,7 @@ namespace
         auto shape = dynamic_cast<Shape<2, 1>*>(ShapeFactory::createShape(nullptr));
         if (shape == nullptr)   die("Only Shape<2, 1> shapes supported");
 
-        double arrayPos[3] = {position[0], position[1]};
+        double arrayPos[2] = {position[0], position[1]};
         shape->translate(arrayPos);
         shape->rotate({{angle}});
         return std::unique_ptr<Shape<2, 1>>(shape);

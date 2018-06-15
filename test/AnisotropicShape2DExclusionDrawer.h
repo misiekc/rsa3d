@@ -12,7 +12,7 @@
 
 
 /**
- * @brief A simple program generating Wolfram Mathematica notebook presenting exclusion zone for AnisotropicShape2D.
+ * @brief A simple program generating Wolfram Mathematica notebook presenting exclusion zone for ConvexShape<2, 1>.
  *
  * Usage:
  * <blockquote>
@@ -23,7 +23,7 @@
  * <ul>
  * <li> exclusion zones for angle from and angle to
  * <li> intersection on two above zones
- * <li> intersection of all ranges from given angle range (Shape::pointInside)
+ * <li> intersection of all ranges from given angle range (ConvexShape::pointInside)
  * </ul>
  *
  * It can be used after checking exclusion zones correctness using as2d_extest (because it assumes that regions are
@@ -44,20 +44,19 @@ namespace as2d_exdrawer
      * @param resolution number of vertices of resulting Polygon
      * @return as2d_exdrawer::Polygon describing exclusion zone
      */
-    Polygon zone_for_angle(AnisotropicShape2D &shape, double angle, std::size_t resolution);
+    Polygon zone_for_angle(const Shape<2, 1> &shape, double angle, std::size_t resolution);
 
     /**
      * @brief Same as zone_for_angle(), but resulting as2d_exdrawerPolygon is intersection of exclusion zones for @a
      * angle1 and @a angle2
      */
-    Polygon zone_for_two_angles(AnisotropicShape2D &shape, double angle1, double angle2, std::size_t resolution);
+    Polygon zone_for_two_angles(const Shape<2, 1> &shape, double angle1, double angle2, std::size_t resolution);
 
     /**
      * @brief Same as zone_for_angle(), but resulting as2d_exdrawer::Polygon is exclusion zone for angle range, sampled
      * using Shape::pointInside
      */
-    Polygon zone_for_angle_range(AnisotropicShape2D &shape, double angleFrom, double angleTo,
-                                 std::size_t resolution);
+    Polygon zone_for_angle_range(const Shape<2, 1> &shape, double angleFrom, double angleTo, std::size_t resolution);
 
     /**
      * @brief Converts given as2d_exdrawer::Polygon to Wolfram format and prints it on stream
@@ -73,7 +72,7 @@ namespace as2d_exdrawer
      * @param rangeZone exclusion zone for angle range, drawn Orange
      * @param stream stream to print on
      */
-    void print_notebook(AnisotropicShape2D &shape, const Polygon &fromZone, const Polygon &toZone,
+    void print_notebook(const Shape<2, 1> &shape, const Polygon &fromZone, const Polygon &toZone,
                         const Polygon &fromAndToZone, const Polygon &rangeZone, std::ostream &stream);
 
     /**

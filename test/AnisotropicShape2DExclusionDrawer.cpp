@@ -18,7 +18,7 @@ namespace
     // Helper stuff declarations
     //------------------------------------------------------------------------------------------------------------------
     using overlap_funct = std::function<bool(const Vector<2> &)>;
-    using shape_ptr = std::unique_ptr<AnisotropicShape2D>;
+    using shape_ptr = std::unique_ptr<Shape<2, 1>>;
 
     // Helper functions
     static Vector<2> bisect_ray(double initialRadius, double rayAngle, const overlap_funct &overlaps);
@@ -86,11 +86,12 @@ namespace
     }
 
     shape_ptr generate_shape(const Vector<2> &pos, double angle) {
-        auto shape = (AnisotropicShape2D *) ShapeFactory::createShape(nullptr);
-        double posAngle[] = {pos[0], pos[1]};
-        shape->translate(posAngle);
+        auto shape = dynamic_cast<Shape<2, 1>*>(ShapeFactory::createShape(nullptr));
+        if (shape == nullptr)   die("Only Shape<2, 1> is supported");
+        double arrayPos[] = {pos[0], pos[1]};
+        shape->translate(arrayPos);
         shape->rotate({{angle}});
-        return std::unique_ptr<AnisotropicShape2D>(shape);
+        return shape_ptr(shape);
     }
 
     // Return Polygon describing a boundary of convex set fo given characteristic function overlapFunct
@@ -105,6 +106,21 @@ namespace
         }
 
         return result;
+    }
+
+    // TODO duplicate code
+    /* Uses pointInside method when dealing with ConvexShape or voxelInside with zero spatial size for normal Shape */
+    bool point_inside(const Shape<2, 1> &shape, const Vector<2> &point, double angleFrom, double angleTo) {
+        MockBC bc;
+        double pointArr[2];
+        point.copyToArray(pointArr);
+
+        try {
+            auto &convexShape = dynamic_cast<const ConvexShape<2, 1>&>(shape);
+            return convexShape.pointInside(&bc, pointArr, {{angleFrom}}, angleTo - angleFrom);
+        } catch (std::bad_cast&) {
+            return shape.voxelInside(&bc, pointArr, {{angleFrom}}, 0, angleTo - angleFrom);
+        }
     }
 }
 
@@ -133,37 +149,37 @@ namespace as2d_exdrawer
         return EXIT_SUCCESS;
     }
 
-    Polygon zone_for_angle(AnisotropicShape2D &shape, double angle, std::size_t resolution) {
+    Polygon zone_for_angle(const Shape<2, 1> &shape, double angle, std::size_t resolution) {
         MockBC bc;
         overlap_funct overlapFunct = [&](const Vector<2> &pos) {
             auto secondShape = generate_shape(pos, angle);
-            return (bool) shape.overlap(&bc, secondShape.get());
+            return shape.overlap(&bc, secondShape.get());
         };
 
-        return calculate_zone(1.1 * shape.getNeighbourListCellSize(), resolution, overlapFunct);
+        return calculate_zone(1.1 * Shape<2, 1>::getNeighbourListCellSize(), resolution, overlapFunct);
     }
 
-    Polygon zone_for_two_angles(AnisotropicShape2D &shape, double angle1, double angle2, std::size_t resolution) {
+    Polygon zone_for_two_angles(const Shape<2, 1> &shape, double angle1, double angle2, std::size_t resolution) {
         MockBC bc;
         overlap_funct overlapFunct = [&](const Vector<2> &pos) {
             auto secondShape1 = generate_shape(pos, angle1);
             auto secondShape2 = generate_shape(pos, angle2);
-            return (bool)shape.overlap(&bc, secondShape1.get()) && (bool)shape.overlap(&bc, secondShape2.get());
+            return shape.overlap(&bc, secondShape1.get()) && shape.overlap(&bc, secondShape2.get());
         };
 
-        return calculate_zone(1.1 * shape.getNeighbourListCellSize(), resolution, overlapFunct);
+        return calculate_zone(1.1 * Shape<2, 1>::getNeighbourListCellSize(), resolution, overlapFunct);
     }
 
-    Polygon zone_for_angle_range(AnisotropicShape2D &shape, double angleFrom, double angleTo,
+    Polygon zone_for_angle_range(const Shape<2, 1> &shape, double angleFrom, double angleTo,
                                  std::size_t resolution) {
         MockBC bc;
         overlap_funct overlapFunct = [&](const Vector<2> &pos) {
             double posArray[2];
             pos.copyToArray(posArray);
-            return (bool) shape.pointInside(&bc, posArray, angleFrom, angleTo);
+            return point_inside(shape, pos, angleFrom, angleTo);
         };
 
-        return calculate_zone(1.1 * shape.getNeighbourListCellSize(), resolution, overlapFunct);
+        return calculate_zone(1.1 * Shape<2, 1>::getNeighbourListCellSize(), resolution, overlapFunct);
     }
 
     void polygon_to_wolfram(const Polygon &polygon, std::ostream &stream) {
@@ -177,7 +193,7 @@ namespace as2d_exdrawer
         stream << "}";
     }
 
-    void print_notebook(AnisotropicShape2D &shape, const Polygon &fromZone, const Polygon &toZone,
+    void print_notebook(const Shape<2, 1> &shape, const Polygon &fromZone, const Polygon &toZone,
                         const Polygon &fromAndToZone, const Polygon &rangeZone, std::ostream &stream) {
         stream << "(* Shape *)" << std::endl;
         stream << "shape = " << shape.toWolfram() << ";" << std::endl << std::endl;

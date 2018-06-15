@@ -56,7 +56,7 @@
  *     <li>
  *     For @a point_inside:
  *     <ul>
- *         <li> <strong>from_angle</strong>, <strong>to_angle</strong> - angle range for Shape::point_inside
+ *         <li> <strong>from_angle</strong>, <strong>to_angle</strong> - angle range for ConvexShape::point_inside
  *     </ul>
  *     </li>
  * </ul>
@@ -67,12 +67,12 @@
  * <li> <strong>Blue</strong> - (for @a overlap) color of the second shape
  * <li> <strong>Orange</strong> - color of points inside exclusion zone (the type of a zone depends on test mode)
  * <li> <strong>Green</strong> - color of points outside all "interesting" areas
- * <li> <strong>Purple</strong> - (for @a point_inside) color of points in both Shape::overlap exclusion zones for endpoints
- * of Shape::pointInside angle range but eventually not in a Shape::pointInside exclusion zone
- * <li> <strong>Red</strong> - (for @a point_inside) color of points in a Shape::overlap exclusion zone for the first angle of
- * Shape::pointInside but not in the second exclusion zone
- * <li> <strong>Yellow</strong> - (for @a point_inside) color of points in a Shape::overlap exclusion zone for the second angle of
- * Shape::pointInside but not in the first exclusion zone
+ * <li> <strong>Purple</strong> - (for @a point_inside) color of points in both Shape::overlap exclusion zones for
+ * endpoints of ConvexShape::pointInside angle range but eventually not in a ConvexShape::pointInside exclusion zone
+ * <li> <strong>Red</strong> - (for @a point_inside) color of points in a Shape::overlap exclusion zone for the first
+ * angle of ConvexShape::pointInside but not in the second exclusion zone
+ * <li> <strong>Yellow</strong> - (for @a point_inside) color of points in a Shape::overlap exclusion zone for the
+ * second angle of ConvexShape::pointInside but not in the first exclusion zone
  * </ul>
  */
 namespace as2d_extest
