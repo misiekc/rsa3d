@@ -11,7 +11,7 @@ template <unsigned short SD, unsigned short AD>
 class OverlapStrategy {
 public:
     virtual ~OverlapStrategy() = default;
-    virtual int overlap(const Shape<SD, AD> *first, const Shape<SD, AD> *second) const = 0;
+    virtual bool overlap(const Shape<SD, AD> *first, const Shape<SD, AD> *second) const = 0;
 };
 
 /**

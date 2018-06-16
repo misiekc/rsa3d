@@ -10,7 +10,7 @@
 
 class TriTriOverlap : public CuboidOverlapStrategy {
 public:
-    int overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const override;
+    bool overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const override;
     std::string getName() const override;
 
     void runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) const override;

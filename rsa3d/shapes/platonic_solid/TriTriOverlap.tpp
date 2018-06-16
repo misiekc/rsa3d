@@ -3,7 +3,7 @@
 //
 
 template <typename SpecificSolid>
-int TriTriOverlap<SpecificSolid>::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
+bool TriTriOverlap<SpecificSolid>::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
     auto firstSpecific = dynamic_cast<const SpecificSolid&>(*first);
     auto secondSpecific = dynamic_cast<const SpecificSolid&>(*second);
 

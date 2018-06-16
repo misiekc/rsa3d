@@ -93,7 +93,6 @@ OBJS_MAIN = rsa3d/Main \
 # Objects to be linked only with custom tests executable
 OBJS_TEST = test/utility/BallFactory \
        		test/utility/BoxFactory \
-       		test/utility/IsotropicFactory \
        		test/utility/Quantity \
        		test/AnisotropicShape2DExclusionDrawer \
        		test/AnisotropicShape2DExclusionTest \

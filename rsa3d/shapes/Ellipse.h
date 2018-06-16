@@ -44,7 +44,7 @@ public:
     double getVolume() const override;
     void setAngle(double angle) override;
     bool overlap(BoundaryConditions *bc, Shape<2, 1> *s) const override;
-    bool pointInside(BoundaryConditions *bc, double* da) const override;
+    //bool pointInside(BoundaryConditions *bc, double* da) const override;
     bool pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) const override;
     std::string toWolfram() const override;
 	std::string toPovray() const override;

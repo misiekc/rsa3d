@@ -69,11 +69,12 @@ double Ellipse::getVolume() const {
 	return M_PI*this->a*this->b;
 }
 
-bool Ellipse::pointInside(BoundaryConditions *bc, double* da) const {
+// TODO not working properly
+
+/*bool Ellipse::pointInside(BoundaryConditions *bc, double* da) const {
 	double ta[2];
 	double tmp[2];
 
-	// TODO const double
 	double *position = this->getPosition();
 
 	tmp[0] = da[0]; tmp[1] = da[1];
@@ -89,7 +90,7 @@ bool Ellipse::pointInside(BoundaryConditions *bc, double* da) const {
 	double dx = da[0]/(this->a+this->b);
 	double dy = da[1]/(2*this->b);
 	return (dx*dx+dy*dy < 1);
-}
+}*/
 
 bool Ellipse::pointInside(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) const
 {

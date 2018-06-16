@@ -10,9 +10,11 @@
 #include "ShapePairFactory.h"
 
 /**
- * @brief ShapePairFactory generating shapes from a ball of given size.
+ * @brief ShapePairFactory generating shapes from a hyperball of given radius.
+ *
+ * A dimension is determined by current @a RSA_SPATIAL_DIMESION.
  */
-class BallFactory : public ShapePairFactory
+class BallFactory : public RSAShapePairFactory
 {
 private:
     double radius{0.5};
@@ -20,12 +22,12 @@ private:
 
     /* Helper method. Creates random Cuboid based on objects parameters. Delegate shape creation to the standard
      * ShapeFactory */
-    Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *randomShape();
+    std::unique_ptr<RSAShape> randomShape();
+    double randomGaussian();
 
 public:
     ShapePair generate() override;
     std::string getDescription() const override;
-
     void setRadius(double _radius);
 };
 

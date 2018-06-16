@@ -74,9 +74,10 @@ set(TEST_SOURCE
         test/utility/BallFactory.cpp
         test/utility/BoxFactory.cpp
         test/utility/InfoLooper.h
-        test/utility/IsotropicFactory.cpp
+        test/utility/IsotropicFactory.h
         test/utility/MockBC.h
         test/utility/Quantity.cpp
+        test/utility/ShapeGenerators.h
         test/utility/ShapePairFactory.h
         test/AnisotropicShape2DExclusionDrawer.cpp
         test/AnisotropicShape2DExclusionTest.cpp

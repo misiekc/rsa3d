@@ -7,17 +7,44 @@
 
 
 #include "ShapePairFactory.h"
+#include "../../rsa3d/Vector.h"
 
-class IsotropicFactory : public ShapePairFactory {
+/**
+ * @brief ShapePairFactory decorator ensuring both shapes have identical orientations.
+ *
+ * @tparam SD spatial dimension of produces shapes
+ * @tparam AD angular dimesnion of produces shapes
+ */
+template <unsigned short SD, unsigned short AD>
+class IsotropicFactory : public ShapePairFactory<SD, AD> {
 private:
-    ShapePairFactory &factory;
+    using shape_pair_factory = ShapePairFactory<SD, AD>;
+    using shape_pair = typename ShapePairFactory<SD, AD>::ShapePair;
+
+    shape_pair_factory &factory;
 
 public:
-    IsotropicFactory(ShapePairFactory &factory) : factory(factory) {}
+    IsotropicFactory(shape_pair_factory &factory) : factory(factory) {}
 
-    ShapePair generate() override;
-    std::string getDescription() const override;
+    shape_pair generate() override {
+        auto pair = factory.generate();
+
+        using V = Vector<SD>;
+        double transArr[SD];
+        V translation = V(pair.second()->getPosition()) - V(pair.first()->getPosition());
+        translation.copyToArray(transArr);
+
+        auto shape1 = pair.first()->clone();
+        auto shape2 = pair.first()->clone();
+        shape2->translate(transArr);
+        return shape_pair(shape1, shape2);
+    };
+
+    std::string getDescription() const override {
+        return "IsotropicFactory over " + factory.getDescription();
+    }
 };
 
+using RSAIsotropicFactory = IsotropicFactory<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>;
 
 #endif //RSA3D_ISOTROPICFACTORY_H

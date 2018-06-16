@@ -11,9 +11,11 @@
 
 
 /**
- * @brief ShapePairFactory generating shapes from a box of given size.
+ * @brief ShapePairFactory generating shapes from a hyperbox of given size.
+ *
+ * A dimension is determined by current @a RSA_SPATIAL_DIMESION.
  */
-class BoxFactory : public ShapePairFactory
+class BoxFactory : public ShapePairFactory<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>
 {
 private:
     std::array<double, RSA_SPATIAL_DIMENSION> halfsize{};
@@ -21,7 +23,7 @@ private:
 
     /* Helper method. Creates random Cuboid based on objects parameters. Delegate cuboid creation to standard
      * ShapeFactory */
-    RSAShape *randomShape();
+    std::unique_ptr<RSAShape> randomShape();
 
 public:
     BoxFactory() : BoxFactory(halfsize) {};

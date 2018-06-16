@@ -10,7 +10,7 @@ using std::abs;
 // Optimized SAT algorithm from:
 // http://www.jkh.me/files/tutorials/Separating%20Axis%20Theorem%20for%20Oriented%20Bounding%20Boxes.pdf
 
-int OptimizedSATOverlap::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
+bool OptimizedSATOverlap::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
     auto cube1 = dynamic_cast<const Cuboid*>(first);
     auto cube2 = dynamic_cast<const Cuboid*>(second);
 

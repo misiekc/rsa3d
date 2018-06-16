@@ -41,7 +41,7 @@ namespace
 }
 
 
-int MineOverlap::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
+bool MineOverlap::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
     auto cube1 = dynamic_cast<const Cuboid*>(first);
     auto cube2 = dynamic_cast<const Cuboid*>(second);
 

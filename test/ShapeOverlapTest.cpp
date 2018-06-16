@@ -30,11 +30,11 @@ namespace
         unsigned long tries{};
         unsigned int intersected{};
         unsigned int disjunct{};
-        std::vector<ShapePairFactory::ShapePair> missed_dump;
+        std::vector<RSAShapePairFactory::ShapePair> missed_dump;
 
         std::size_t missed() const { return missed_dump.size(); }
 
-        void report(ShapePairFactory::ShapePair &pair, bool firstIntersected, bool secondIntersected) {
+        void report(RSAShapePairFactory::ShapePair &pair, bool firstIntersected, bool secondIntersected) {
             if (firstIntersected)   this->intersected++;
             else                    this->disjunct++;
 
@@ -113,7 +113,7 @@ namespace
     }
 
     /* Performs a comparison of two strategies */
-    Results test_strategy_pair(ShapePairFactory &factory, const RSAOverlapStrategy &firstStrategy,
+    Results test_strategy_pair(RSAShapePairFactory &factory, const RSAOverlapStrategy &firstStrategy,
                                const RSAOverlapStrategy &secondStrategy, unsigned long maxTries) {
         Results result;
         result.tries = maxTries;
@@ -122,16 +122,16 @@ namespace
         std::cout << get_strategy_name(secondStrategy) << " for OverlapStrategy comparison..." << std::endl;
         InfoLooper looper(maxTries, 10000, "pairs tested...");
         while (looper.step()) {
-            ShapePairFactory::ShapePair pair = factory.generate();
-            bool firstIntersected = (bool)firstStrategy.overlap(pair.first(), pair.second());
-            bool secondIntersected = (bool)secondStrategy.overlap(pair.first(), pair.second());
+            RSAShapePairFactory::ShapePair pair = factory.generate();
+            bool firstIntersected = firstStrategy.overlap(pair.first(), pair.second());
+            bool secondIntersected = secondStrategy.overlap(pair.first(), pair.second());
             result.report(pair, firstIntersected, secondIntersected);
         }
         return result;
     }
 
     /* Performs test of all strategies, prints info and dumps missed pairs. Returns true on success. */
-    bool perform_test(const RSAOverlapStrategyShape &osShape, ShapePairFactory &factory, unsigned long maxTries,
+    bool perform_test(const RSAOverlapStrategyShape &osShape, RSAShapePairFactory &factory, unsigned long maxTries,
                       const std::string &dumpFile) {
         auto strategies = osShape.getSupportedStrategies();
         auto firstStrategy = acquire_strategy(osShape, strategies.front());
@@ -170,7 +170,7 @@ namespace shape_ovtest
         std::cout << "[INFO] Performing test with unoriented shapes" << std::endl;
         if (!perform_test(*osShape, factory, max_tries, "ovtest_anisotropic_dump.nb")) return EXIT_FAILURE;
 
-        IsotropicFactory isotropicFactory(factory);
+        IsotropicFactory<> isotropicFactory(factory);
         std::cout << "[INFO] Performing test with oriented shapes" << std::endl;
         if (!perform_test(*osShape, isotropicFactory, max_tries, "ovtest_isotropic_dump.nb")) return EXIT_FAILURE;
 

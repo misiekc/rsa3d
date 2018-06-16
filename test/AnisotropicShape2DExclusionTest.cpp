@@ -10,6 +10,7 @@
 #include "../rsa3d/ShapeFactory.h"
 #include "../rsa3d/Utils.h"
 #include "utility/MockBC.h"
+#include "utility/ShapeGenerators.h"
 
 namespace
 {
@@ -58,17 +59,6 @@ namespace
         ColoredPoint randomPoint(RND *rnd) const;
     };
 
-    /* Generates shape using ShapeFactory, translates and rotates it */
-    std::unique_ptr<Shape<2, 1>> generate_shape(double angle, const Vector<2> &position) {
-        auto shape = dynamic_cast<Shape<2, 1>*>(ShapeFactory::createShape(nullptr));
-        if (shape == nullptr)   die("Only Shape<2, 1> shapes supported");
-
-        double arrayPos[2] = {position[0], position[1]};
-        shape->translate(arrayPos);
-        shape->rotate({{angle}});
-        return std::unique_ptr<Shape<2, 1>>(shape);
-    }
-
     /* Loads context from a given file */
     void Context::load(const std::string &filename) {
         std::ifstream input(filename);
@@ -98,7 +88,7 @@ namespace
         this->box_height = config->getDouble("box_height");
         this->points = config->getDouble("points");
         this->append = config->getString("append") == "true";
-        this->wolframSupported = !generate_shape(0, Vector<2>())->toWolfram().empty();
+        this->wolframSupported = !generate_shape<2, 1>(Vector<2>(), {{0}})->toWolfram().empty();
         if (!this->wolframSupported)
             std::cout << "[WARNING] " << this->particle << " has no toWolfram(). Shapes will not be drawn." << std::endl;
         std::cout << "[INFO] Context loaded from " << filename << std::endl;
@@ -111,10 +101,10 @@ namespace
         Result result;
 
         context.printInfo(out);
-        auto first = generate_shape(context.firstAngle, context.firstPos);
+        auto first = generate_shape<2, 1>(context.firstPos, {{context.firstAngle}});
         for (std::size_t i = 0; i < context.points; i++) {
             ColoredPoint point = context.randomPoint(&rnd);
-            auto second = generate_shape(context.secondAngle, point.position);
+            auto second = generate_shape<2, 1>(point.position, {{context.secondAngle}});
 
             if (first->overlap(&mockBC, second.get()))
                 point.color = INSIDE_COLOR;
@@ -146,14 +136,14 @@ namespace
         Result result;
 
         context.printInfo(out);
-        auto shape = generate_shape(context.firstAngle, context.firstPos);
+        auto shape = generate_shape<2, 1>(context.firstPos, {{context.firstAngle}});
         for (std::size_t i = 0; i < context.points; i++) {
             ColoredPoint point = context.randomPoint(&rnd);
             if (point_inside(*shape, point.position, context.fromAngle, context.toAngle)) {
                 point.color = INSIDE_COLOR;
             } else {
-                auto angleFromShape = generate_shape(context.fromAngle, point.position);
-                auto angleToShape = generate_shape(context.toAngle, point.position);
+                auto angleFromShape = generate_shape<2, 1>(point.position, {{context.fromAngle}});
+                auto angleToShape = generate_shape<2, 1>(point.position, {{context.toAngle}});
                 auto withinAngleFromZone = shape->overlap(&mockBC, angleFromShape.get());
                 auto withinAngleToZone = shape->overlap(&mockBC, angleToShape.get());
 
@@ -197,7 +187,7 @@ namespace
         else    // Mode::POINT_INSIDE
             out << "[POINT INSIDE TEST] ";
 
-        auto first = generate_shape(this->firstAngle, this->firstPos);
+        auto first = generate_shape<2, 1>(this->firstPos, {{this->firstAngle}});
         out << "Generating " << this->points << " points from " << this->box_width << " x ";
         out << this->box_height << " box for:" << std::endl;
         out << first->toString() << std::endl;
@@ -233,13 +223,13 @@ namespace
             out << "    {" << point.color << ", Point[" << point.position << "]}," << std::endl;
         out << "    {" << result.back().color << ", Point[" << result.back().position << "]}};" << std::endl;
 
-        auto first = generate_shape(context.firstAngle, context.firstPos);
+        auto first = generate_shape<2, 1>(context.firstPos, {{context.firstAngle}});
         if (!context.wolframSupported) {
             out << std::endl << "Graphics[points]";
         } else {
             out << "shape1 = " << first->toWolfram() << ";" << std::endl;
             if (context.mode == Context::Mode::OVERLAP) {
-                auto second = generate_shape(context.secondAngle, find_max_x_red_point(result).position);
+                auto second = generate_shape<2, 1>(find_max_x_red_point(result).position, {{context.secondAngle}});
                 out << "shape2 = " << second->toWolfram() << ";" << std::endl << std::endl;
                 out << "Graphics[Join[{{" << SECOND_SHAPE_COLOR << ", shape2}, {" << FIRST_SHAPE_COLOR << ", shape1}}, points]]";
             } else {  // Context::Mode::POINT_INSIDE

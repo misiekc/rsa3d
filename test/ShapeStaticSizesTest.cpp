@@ -16,6 +16,7 @@
 #include "../rsa3d/Utils.h"
 #include "utility/MockBC.h"
 #include "utility/InfoLooper.h"
+#include "utility/ShapeGenerators.h"
 
 namespace
 {
@@ -51,30 +52,12 @@ namespace
         return neighbourListConflicts == 0;
     }
 
-    /* Generates shapes in given position with random orientation */
-    std::unique_ptr<RSAShape> generateShape(RND *rnd, const Vector<RSA_SPATIAL_DIMENSION> &position) {
-        auto shape = std::unique_ptr<RSAShape>(ShapeFactory::createShape(rnd));
-
-        double arrayPos[RSA_SPATIAL_DIMENSION];
-        position.copyToArray(arrayPos);
-        shape->translate(arrayPos);
-
-        double angularSize = RSAShape::getVoxelAngularSize();
-        std::array<double, RSA_ANGULAR_DIMENSION> orientation{};
-        std::for_each(orientation.begin(), orientation.end(), [rnd, angularSize](double &elem) {
-            elem = rnd->nextValue() * angularSize;
-        });
-        shape->rotate(orientation);
-
-        return shape;
-    }
-
     /* Generates random pair distant on x coordinate by distance and checks overlap */
-    bool randomPairOverlap(RND *rnd, double distance) {
+    bool random_pair_overlap(RND *rnd, double distance) {
         Vector<RSA_SPATIAL_DIMENSION> pos;
         pos[0] = distance / 2;
-        auto shape1 = generateShape(rnd, -pos);
-        auto shape2 = generateShape(rnd, pos);
+        auto shape1 = generate_randomly_oriented_shape(-pos, rnd);
+        auto shape2 = generate_randomly_oriented_shape(pos, rnd);
 
         MockBC bc;
         return shape1->overlap(&bc, shape2.get());
@@ -85,13 +68,13 @@ namespace
         RND rnd;
         InfoLooper looper(max_tries, 10000, "pairs tested...");
         while (looper.step()) {
-            if (!randomPairOverlap(&rnd, RSAShape::getVoxelSpatialSize() * 0.9999 * std::sqrt(RSA_SPATIAL_DIMENSION)))
+            if (!random_pair_overlap(&rnd, RSAShape::getVoxelSpatialSize() * 0.9999 * std::sqrt(RSA_SPATIAL_DIMENSION)))
                 result.voxelConflicts++;
-            if (!randomPairOverlap(&rnd, RSAShape::getVoxelSpatialSize() * 1.05 * std::sqrt(RSA_SPATIAL_DIMENSION)))
+            if (!random_pair_overlap(&rnd, RSAShape::getVoxelSpatialSize() * 1.05 * std::sqrt(RSA_SPATIAL_DIMENSION)))
                 result.biggerVoxelConflicts++;
-            if (randomPairOverlap(&rnd, RSAShape::getNeighbourListCellSize() * 1.0001))
+            if (random_pair_overlap(&rnd, RSAShape::getNeighbourListCellSize() * 1.0001))
                 result.neighbourListConflicts++;
-            if (randomPairOverlap(&rnd, RSAShape::getNeighbourListCellSize() * 0.95))
+            if (random_pair_overlap(&rnd, RSAShape::getNeighbourListCellSize() * 0.95))
                 result.smallerNeighbourListConflicts++;
         }
         return result;

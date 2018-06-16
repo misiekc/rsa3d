@@ -8,40 +8,38 @@
 
 #include "BallFactory.h"
 #include "../../rsa3d/ShapeFactory.h"
+#include "ShapeGenerators.h"
 
-typedef ShapePairFactory::ShapePair pair;
+typedef RSAShapePairFactory::ShapePair pair;
 
-
-RSAShape *BallFactory::randomShape()
-{
-    double trans[3];
+std::unique_ptr<RSAShape> BallFactory::randomShape() {
     RSAShape *shape = ShapeFactory::createShape(&this->rnd);
     shape->no = this->no++;
-    
-    double cos_theta = 2 * rnd.nextValue() - 1;
-    double sin_theta = sqrt(1 - cos_theta * cos_theta);
-    double phi = rnd.nextValue() * 2 * M_PI;
-    double cos_phi = cos(phi);
-    double sin_phi = sin(phi);
-    double radius = pow(rnd.nextValue(), 1. / 3) * this->radius;
-    
-    trans[0] = radius * sin_theta * cos_phi;
-    trans[1] = radius * sin_theta * sin_phi;
-    trans[2] = radius * cos_theta;
-    shape->translate(trans);
-    shape->rotate(this->randomOrientation());
-    return shape;
+
+    std::array<double, RSA_SPATIAL_DIMENSION> posArray{};
+    std::for_each(posArray.begin(), posArray.end(), [this](double &elem){
+       elem = this->randomGaussian();
+    });
+
+    double radius = pow(rnd.nextValue(), 1. / RSA_SPATIAL_DIMENSION) * this->radius;
+    Vector<RSA_SPATIAL_DIMENSION> pos(posArray);
+    pos = pos / pos.norm() * radius;
+
+    return generate_randomly_oriented_shape(pos, &rnd);
 }
 
 void BallFactory::setRadius(double _radius) { this->radius = _radius; }
 
 pair BallFactory::generate() { return {this->randomShape(), this->randomShape()}; }
 
-std::string BallFactory::getDescription() const
-{
+std::string BallFactory::getDescription() const {
     std::stringstream stream;
     stream << "BallFactory of radius " << this->radius;
     return stream.str();
+}
+
+double BallFactory::randomGaussian() {
+    return std::sqrt(-2 * std::log(rnd.nextValue())) * std::cos(2 * M_PI * rnd.nextValue());
 }
 
 

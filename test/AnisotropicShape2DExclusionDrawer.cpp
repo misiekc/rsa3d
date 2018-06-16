@@ -9,6 +9,7 @@
 #include "../rsa3d/Utils.h"
 #include "../rsa3d/ShapeFactory.h"
 #include "utility/MockBC.h"
+#include "utility/ShapeGenerators.h"
 
 
 namespace
@@ -19,11 +20,6 @@ namespace
     //------------------------------------------------------------------------------------------------------------------
     using overlap_funct = std::function<bool(const Vector<2> &)>;
     using shape_ptr = std::unique_ptr<Shape<2, 1>>;
-
-    // Helper functions
-    static Vector<2> bisect_ray(double initialRadius, double rayAngle, const overlap_funct &overlaps);
-    static shape_ptr generate_shape(const Vector<2> &pos, double angle);
-    static Polygon calculate_zone(double initialRadius, double resolution, const overlap_funct &overlapFunct);
 
     // Class containing basic options load from command line
     struct Context {
@@ -59,7 +55,7 @@ namespace
     }
 
     shape_ptr Context::generateMainShape() {
-        return generate_shape(Vector<2>(), this->shapeAngle);
+        return generate_shape<2, 1>(Vector<2>(), {{this->shapeAngle}}, nullptr);
     }
 
     // Assuming overlaps is the characteristic function of a convex set, find its intersection with ary of angle
@@ -83,15 +79,6 @@ namespace
                 radiusEnd = halfRadius;
         }
         return normal * halfRadius;
-    }
-
-    shape_ptr generate_shape(const Vector<2> &pos, double angle) {
-        auto shape = dynamic_cast<Shape<2, 1>*>(ShapeFactory::createShape(nullptr));
-        if (shape == nullptr)   die("Only Shape<2, 1> is supported");
-        double arrayPos[] = {pos[0], pos[1]};
-        shape->translate(arrayPos);
-        shape->rotate({{angle}});
-        return shape_ptr(shape);
     }
 
     // Return Polygon describing a boundary of convex set fo given characteristic function overlapFunct
@@ -151,8 +138,8 @@ namespace as2d_exdrawer
 
     Polygon zone_for_angle(const Shape<2, 1> &shape, double angle, std::size_t resolution) {
         MockBC bc;
-        overlap_funct overlapFunct = [&](const Vector<2> &pos) {
-            auto secondShape = generate_shape(pos, angle);
+        auto overlapFunct = [&](const Vector<2> &pos) {
+            auto secondShape = generate_shape<2, 1>(pos, {{angle}}, nullptr);
             return shape.overlap(&bc, secondShape.get());
         };
 
@@ -161,9 +148,9 @@ namespace as2d_exdrawer
 
     Polygon zone_for_two_angles(const Shape<2, 1> &shape, double angle1, double angle2, std::size_t resolution) {
         MockBC bc;
-        overlap_funct overlapFunct = [&](const Vector<2> &pos) {
-            auto secondShape1 = generate_shape(pos, angle1);
-            auto secondShape2 = generate_shape(pos, angle2);
+        auto overlapFunct = [&](const Vector<2> &pos) {
+            auto secondShape1 = generate_shape<2, 1>(pos, {{angle1}}, nullptr);
+            auto secondShape2 = generate_shape<2, 1>(pos, {{angle2}}, nullptr);
             return shape.overlap(&bc, secondShape1.get()) && shape.overlap(&bc, secondShape2.get());
         };
 
@@ -173,7 +160,7 @@ namespace as2d_exdrawer
     Polygon zone_for_angle_range(const Shape<2, 1> &shape, double angleFrom, double angleTo,
                                  std::size_t resolution) {
         MockBC bc;
-        overlap_funct overlapFunct = [&](const Vector<2> &pos) {
+        auto overlapFunct = [&](const Vector<2> &pos) {
             double posArray[2];
             pos.copyToArray(posArray);
             return point_inside(shape, pos, angleFrom, angleTo);

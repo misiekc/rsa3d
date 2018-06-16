@@ -11,7 +11,7 @@
 template <typename SpecificSolid>
 class TriTriOverlap : public OverlapStrategy<3, 0> {
 public:
-    int overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const override;
+    bool overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const override;
 };
 
 #include "TriTriOverlap.tpp"
