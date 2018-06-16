@@ -18,6 +18,10 @@
 /**
  * @brief Generates a shape using ShapeFactory of given position and orientation.
  *
+ * If provided dimensions are different that ones from ShapeFactory, an exception will be thrown. It can be useful when
+ * utilized in tests tailored for specific dimensions (like as2d_extest) which are anyway included in all test
+ * executables, even if dimensions are incompatible.
+ *
  * A number of orientational degrees of freedom is determined by @a AD and can vary from the real one - note, that some
  * shapes do not support oriented voxels and they pick their orientation by themselves and do not expose it; in that
  * case, the orientation cannot be specified here and will be random.

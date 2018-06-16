@@ -21,7 +21,7 @@
  * Derived instances can be useful when performing tests on pairs of shapes.
  *
  * @tparam SD spatial dimension of produced shapes
- * @tparam AD angular dimension of priduced shapes
+ * @tparam AD angular dimension of produced shapes
  */
 template<unsigned short SD, unsigned short AD>
 class ShapePairFactory
@@ -33,7 +33,7 @@ protected:
 
 public:
     /**
-     * @brief Pair of two shapes. Takes ownership of given shapes and perform deallocation.
+     * @brief Pair of two shapes. Takes ownership of given shapes and performs deallocation.
      */
     class ShapePair
     {
