@@ -115,20 +115,6 @@ namespace
         return result;
     }
 
-    /* Uses pointInside method when dealing with ConvexShape or voxelInside with zero spatial size for normal Shape */
-    bool point_inside(const Shape<2, 1> &shape, const Vector<2> &point, double angleFrom, double angleTo) {
-        MockBC bc;
-        double pointArr[2];
-        point.copyToArray(pointArr);
-
-        try {
-            auto &convexShape = dynamic_cast<const ConvexShape<2, 1>&>(shape);
-            return convexShape.pointInside(&bc, pointArr, {{angleFrom}}, angleTo - angleFrom);
-        } catch (std::bad_cast&) {
-            return shape.voxelInside(&bc, pointArr, {{angleFrom}}, 0, angleTo - angleFrom);
-        }
-    }
-
     /* Performs pitest based on context and returns result */
     Result perform_pitest(const Context &context, std::ostream &out) {
         MockBC mockBC;
@@ -139,7 +125,7 @@ namespace
         auto shape = generate_shape<2, 1>(context.firstPos, {{context.firstAngle}});
         for (std::size_t i = 0; i < context.points; i++) {
             ColoredPoint point = context.randomPoint(&rnd);
-            if (point_inside(*shape, point.position, context.fromAngle, context.toAngle)) {
+            if (as2d_extest::point_inside(*shape, point.position, context.fromAngle, context.toAngle)) {
                 point.color = INSIDE_COLOR;
             } else {
                 auto angleFromShape = generate_shape<2, 1>(point.position, {{context.fromAngle}});
@@ -236,6 +222,20 @@ namespace
                 out << std::endl << "Graphics[Join[{{" << FIRST_SHAPE_COLOR << ", shape1}}, points]]";
             }
         }
+    }
+}
+
+/* Uses pointInside method when dealing with ConvexShape or voxelInside with zero spatial size for normal Shape */
+bool as2d_extest::point_inside(const Shape<2, 1> &shape, const Vector<2> &point, double angleFrom, double angleTo) {
+    MockBC bc;
+    double pointArr[2];
+    point.copyToArray(pointArr);
+
+    try {
+        auto &convexShape = dynamic_cast<const ConvexShape<2, 1>&>(shape);
+        return convexShape.pointInside(&bc, pointArr, {{angleFrom}}, angleTo - angleFrom);
+    } catch (std::bad_cast&) {
+        return shape.voxelInside(&bc, pointArr, {{angleFrom}}, 0, angleTo - angleFrom);
     }
 }
 

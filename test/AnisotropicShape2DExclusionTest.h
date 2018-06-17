@@ -77,6 +77,8 @@
  */
 namespace as2d_extest
 {
+    bool point_inside(const Shape<2, 1> &shape, const Vector<2> &point, double angleFrom, double angleTo);
+
     /**
      * @brief Main function for exclusion testing facility.
      *

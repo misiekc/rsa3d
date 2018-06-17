@@ -170,7 +170,7 @@ namespace shape_ovtest
         std::cout << "[INFO] Performing test with unoriented shapes" << std::endl;
         if (!perform_test(*osShape, factory, max_tries, "ovtest_anisotropic_dump.nb")) return EXIT_FAILURE;
 
-        IsotropicFactory<> isotropicFactory(factory);
+        RSAIsotropicFactory isotropicFactory(factory);
         std::cout << "[INFO] Performing test with oriented shapes" << std::endl;
         if (!perform_test(*osShape, isotropicFactory, max_tries, "ovtest_isotropic_dump.nb")) return EXIT_FAILURE;
 

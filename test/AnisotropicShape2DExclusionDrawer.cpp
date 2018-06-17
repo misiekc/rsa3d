@@ -5,6 +5,7 @@
 #include <memory>
 #include <fstream>
 #include <functional>
+#include "AnisotropicShape2DExclusionTest.h"
 #include "AnisotropicShape2DExclusionDrawer.h"
 #include "../rsa3d/Utils.h"
 #include "../rsa3d/ShapeFactory.h"
@@ -94,21 +95,6 @@ namespace
 
         return result;
     }
-
-    // TODO duplicate code
-    /* Uses pointInside method when dealing with ConvexShape or voxelInside with zero spatial size for normal Shape */
-    bool point_inside(const Shape<2, 1> &shape, const Vector<2> &point, double angleFrom, double angleTo) {
-        MockBC bc;
-        double pointArr[2];
-        point.copyToArray(pointArr);
-
-        try {
-            auto &convexShape = dynamic_cast<const ConvexShape<2, 1>&>(shape);
-            return convexShape.pointInside(&bc, pointArr, {{angleFrom}}, angleTo - angleFrom);
-        } catch (std::bad_cast&) {
-            return shape.voxelInside(&bc, pointArr, {{angleFrom}}, 0, angleTo - angleFrom);
-        }
-    }
 }
 
 
@@ -163,7 +149,7 @@ namespace as2d_exdrawer
         auto overlapFunct = [&](const Vector<2> &pos) {
             double posArray[2];
             pos.copyToArray(posArray);
-            return point_inside(shape, pos, angleFrom, angleTo);
+            return as2d_extest::point_inside(shape, pos, angleFrom, angleTo);
         };
 
         return calculate_zone(1.1 * Shape<2, 1>::getNeighbourListCellSize(), resolution, overlapFunct);
