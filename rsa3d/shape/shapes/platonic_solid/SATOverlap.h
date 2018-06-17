@@ -6,7 +6,7 @@
 #define RSA3D_SATOVERLAP_H
 
 
-#include "../OverlapStrategy.h"
+#include "../../OverlapStrategy.h"
 
 template <typename SpecificSolid>
 class SATOverlap : public OverlapStrategy<3, 0> {

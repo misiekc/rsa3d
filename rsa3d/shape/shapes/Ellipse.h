@@ -9,8 +9,8 @@
 #define SHAPES_ELLIPSE_H_
 
 #include "../Shape.h"
-#include "../RND.h"
-#include "../BoundaryConditions.h"
+#include "../../RND.h"
+#include "../../BoundaryConditions.h"
 #include "../AnisotropicShape2D.h"
 
 class Ellipse: public AnisotropicShape2D {

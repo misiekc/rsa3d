@@ -5,10 +5,10 @@
 //----------------------------------------------------------------------------
 
 #include "Cuboid.h"
-#include "cube_strategies/MineOverlap.h"
-#include "cube_strategies/OptimizedSATOverlap.h"
-#include "cube_strategies/SATOverlap.h"
-#include "cube_strategies/TriTriOverlap.h"
+#include "MineOverlap.h"
+#include "OptimizedSATOverlap.h"
+#include "SATOverlap.h"
+#include "TriTriOverlap.h"
 
 #include <algorithm>
 

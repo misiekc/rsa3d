@@ -9,7 +9,7 @@
 #define VOXELLIST_H_
 
 #include "Voxel.h"
-#include "Shape.h"
+#include "shape/Shape.h"
 #include "RND.h"
 #include "NeighbourGrid.h"
 #include "BoundaryConditions.h"

@@ -10,7 +10,7 @@
 
 #include <cmath>
 #include <string>
-#include "../RND.h"
+#include "../../RND.h"
 #include "../ConvexShape.h"
 
 template <unsigned short DIMENSION>

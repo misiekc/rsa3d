@@ -42,10 +42,11 @@ LIBSTAT = libstat.a
 
 # All packages in the project
 PACKAGES = rsa3d/analizator/ \
-           rsa3d/shapes/ \
-           rsa3d/shapes/cube_strategies/ \
-           rsa3d/shapes/platonic_solid/ \
-           rsa3d/shapes/polygons/ \
+           rsa3d/shape/ \
+           rsa3d/shape/shapes/ \
+           rsa3d/shape/shapes/cuboid/ \
+           rsa3d/shape/shapes/platonic_solid/ \
+           rsa3d/shape/shapes/polygon/ \
            rsa3d/surfaces/ \
            statistics/ \
            test/ \
@@ -54,35 +55,34 @@ PACKAGES = rsa3d/analizator/ \
 # Source files list (without extensions) except of the Main.cpp file
 # These objects will be linked with both main executable and test
 # executables
-OBJS_COMMON = rsa3d/AnisotropicShape2D \
-       rsa3d/BoundaryConditions \
+OBJS_COMMON = rsa3d/BoundaryConditions \
        rsa3d/Config \
        rsa3d/Intersection \
-       rsa3d/OrientedFace \
        rsa3d/PackingGenerator \
        rsa3d/Parameters \
        rsa3d/RND \
-       rsa3d/ShapeFactory \
        rsa3d/Surface \
        rsa3d/Timer \
        rsa3d/Utils \
        rsa3d/Voxel \
        rsa3d/VoxelList \
-       rsa3d/shapes/cube_strategies/MineOverlap \
-       rsa3d/shapes/cube_strategies/OptimizedSATOverlap \
-       rsa3d/shapes/cube_strategies/SATOverlap \
-       rsa3d/shapes/cube_strategies/TriTriOverlap \
-       rsa3d/shapes/platonic_solid/RegularDodecahedron \
-       rsa3d/shapes/platonic_solid/RegularIcosahedron \
-       rsa3d/shapes/platonic_solid/RegularOctahedron \
-       rsa3d/shapes/platonic_solid/RegularTetrahedron \
-       rsa3d/shapes/polygons/HBPolygon \
-       rsa3d/shapes/polygons/SBPolygon \
-       rsa3d/shapes/Polygon \
-       rsa3d/shapes/Cuboid \
-       rsa3d/shapes/Ellipse \
-       rsa3d/shapes/Rectangle \
-       rsa3d/shapes/SpheroCylinder2D \
+       rsa3d/shape/shapes/cuboid/Cuboid \
+       rsa3d/shape/shapes/cuboid/MineOverlap \
+       rsa3d/shape/shapes/cuboid/OptimizedSATOverlap \
+       rsa3d/shape/shapes/cuboid/SATOverlap \
+       rsa3d/shape/shapes/cuboid/TriTriOverlap \
+       rsa3d/shape/shapes/platonic_solid/RegularDodecahedron \
+       rsa3d/shape/shapes/platonic_solid/RegularIcosahedron \
+       rsa3d/shape/shapes/platonic_solid/RegularOctahedron \
+       rsa3d/shape/shapes/platonic_solid/RegularTetrahedron \
+       rsa3d/shape/shapes/polygon/HBPolygon \
+       rsa3d/shape/shapes/polygon/SBPolygon \
+       rsa3d/shape/shapes/polygon/Polygon \
+       rsa3d/shape/shapes/Ellipse \
+       rsa3d/shape/shapes/Rectangle \
+       rsa3d/shape/shapes/SpheroCylinder2D \
+       rsa3d/shape/AnisotropicShape2D \
+       rsa3d/shape/ShapeFactory \
        rsa3d/surfaces/NBoxFBC \
        rsa3d/surfaces/NBoxPBC \
 
@@ -96,7 +96,7 @@ OBJS_TEST = test/utility/BallFactory \
        		test/utility/Quantity \
        		test/AnisotropicShape2DExclusionDrawer \
        		test/AnisotropicShape2DExclusionTest \
-       		test/PackingOverlapTest \
+       		test/PackingOverlapsTest \
        		test/CuboidSpeedTest \
        		test/Main \
        		test/RectangleCase \

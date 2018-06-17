@@ -5,7 +5,7 @@
  *      Author: ciesla
  */
 
-#include "../rsa3d/shapes/Rectangle.h"
+#include "../rsa3d/shape/shapes/Rectangle.h"
 #include "utility/MockBC.h"
 #include  <iostream>
 

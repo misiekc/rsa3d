@@ -6,7 +6,7 @@
 #define RSA3D_TRITRIOVERLAP_H
 
 
-#include "../OverlapStrategy.h"
+#include "../../OverlapStrategy.h"
 
 template <typename SpecificSolid>
 class TriTriOverlap : public OverlapStrategy<3, 0> {

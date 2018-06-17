@@ -6,8 +6,8 @@
  */
 
 #include "Ellipse.h"
-#include "../Utils.h"
-#include "../Intersection.h"
+#include "../../Utils.h"
+#include "../../Intersection.h"
 
 
 static const double EPSILON = 0.0000000001;

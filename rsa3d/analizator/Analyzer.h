@@ -8,9 +8,9 @@
 #ifndef ANALIZATOR_ANALYZER_H_
 #define ANALIZATOR_ANALYZER_H_
 
-#include "../Shape.h"
+#include "../shape/Shape.h"
 #include "../Parameters.h"
-#include "../shapes/Cuboid.h"
+#include "../shape/shapes/cuboid/Cuboid.h"
 
 #include "../../statistics/Plot.h"
 #include "../../statistics/LogPlot.h"

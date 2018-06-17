@@ -8,10 +8,10 @@
 #ifndef SHAPEFACTORY_H_
 #define SHAPEFACTORY_H_
 
-#include "Parameters.h"
+#include "../Parameters.h"
 #include "Shape.h"
-#include "shapes/OverlapStrategy.h"
-#include "shapes/OverlapStrategyShape.h"
+#include "OverlapStrategy.h"
+#include "OverlapStrategyShape.h"
 #include <string>
 
 

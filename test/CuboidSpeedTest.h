@@ -9,11 +9,11 @@
 
 
 #include "../rsa3d/Config.h"
-#include "../rsa3d/ShapeFactory.h"
+#include "../rsa3d/shape/ShapeFactory.h"
 #include "utility/BallFactory.h"
 #include "utility/ShapePairFactory.h"
 #include "utility/Quantity.h"
-#include "../rsa3d/shapes/cube_strategies/CuboidOverlapStrategy.h"
+#include "../rsa3d/shape/shapes/cuboid/CuboidOverlapStrategy.h"
 
 #include <vector>
 #include <ostream>

@@ -9,7 +9,7 @@
 #define PACKINGGENERATOR_H_
 
 #include "RND.h"
-#include "Shape.h"
+#include "shape/Shape.h"
 #include "BoundaryConditions.h"
 #include "Parameters.h"
 #include "VoxelList.h"

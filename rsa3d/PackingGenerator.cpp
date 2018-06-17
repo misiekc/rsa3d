@@ -11,8 +11,8 @@
 #include "PackingGenerator.h"
 #include "surfaces/NBoxPBC.h"
 #include "surfaces/NBoxFBC.h"
-#include "ShapeFactory.h"
-#include "ConvexShape.h"
+#include "shape/ShapeFactory.h"
+#include "shape/ConvexShape.h"
 #include <fstream>
 #include <iomanip>
 

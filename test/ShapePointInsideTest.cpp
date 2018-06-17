@@ -6,11 +6,11 @@
 
 #include "ShapePointInsideTest.h"
 #include "utility/MockBC.h"
-#include "../rsa3d/ShapeFactory.h"
+#include "../rsa3d/shape/ShapeFactory.h"
 #include "utility/BallFactory.h"
 #include "../rsa3d/Utils.h"
 #include "utility/InfoLooper.h"
-#include "../rsa3d/ConvexShape.h"
+#include "../rsa3d/shape/ConvexShape.h"
 
 
 namespace

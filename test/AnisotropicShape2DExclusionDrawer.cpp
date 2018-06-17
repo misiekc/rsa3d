@@ -8,7 +8,7 @@
 #include "AnisotropicShape2DExclusionTest.h"
 #include "AnisotropicShape2DExclusionDrawer.h"
 #include "../rsa3d/Utils.h"
-#include "../rsa3d/ShapeFactory.h"
+#include "../rsa3d/shape/ShapeFactory.h"
 #include "utility/MockBC.h"
 #include "utility/ShapeGenerators.h"
 

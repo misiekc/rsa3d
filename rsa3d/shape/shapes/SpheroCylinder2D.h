@@ -7,7 +7,7 @@
 
 
 #include "../AnisotropicShape2D.h"
-#include "../Vector.h"
+#include "../../Vector.h"
 
 class SpheroCylinder2D : public AnisotropicShape2D {
 private:

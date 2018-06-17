@@ -16,7 +16,7 @@
 #include <cxxabi.h>
 
 #include "ShapeOverlapTest.h"
-#include "../rsa3d/ShapeFactory.h"
+#include "../rsa3d/shape/ShapeFactory.h"
 #include "../rsa3d/Utils.h"
 #include "utility/BallFactory.h"
 #include "utility/ShapePairFactory.h"

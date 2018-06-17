@@ -6,7 +6,7 @@
 #define RSA3D_TRITRIOVERLAP_H
 
 #include "CuboidOverlapStrategy.h"
-#include "../../Intersection.h"
+#include "../../../Intersection.h"
 
 class TriTriOverlap : public CuboidOverlapStrategy {
 public:

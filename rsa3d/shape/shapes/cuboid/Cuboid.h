@@ -10,11 +10,11 @@
 
 //#define CUBOID_DEBUG        // Used for debbuging output
 
-#include "../Matrix.h"
-#include "../Vector.h"
-#include "OverlapStrategyShape.h"
-#include "../Intersection.h"
-#include "../ConvexShape.h"
+#include "../../../Matrix.h"
+#include "../../../Vector.h"
+#include "../../OverlapStrategyShape.h"
+#include "../../../Intersection.h"
+#include "../../ConvexShape.h"
 
 
 class CuboidOverlapStrategy;

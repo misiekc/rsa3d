@@ -5,7 +5,7 @@
 #ifndef RSA3D_PACKINGOVERLAPSTEST_H
 #define RSA3D_PACKINGOVERLAPSTEST_H
 
-#include "../rsa3d/Shape.h"
+#include "../rsa3d/shape/Shape.h"
 #include "../rsa3d/PackingGenerator.h"
 
 /**

@@ -14,10 +14,10 @@
 
 #include "CuboidSpeedTest.h"
 #include "utility/MockBC.h"
-#include "../rsa3d/shapes/cube_strategies/MineOverlap.h"
-#include "../rsa3d/shapes/cube_strategies/TriTriOverlap.h"
-#include "../rsa3d/shapes/cube_strategies/SATOverlap.h"
-#include "../rsa3d/shapes/cube_strategies/OptimizedSATOverlap.h"
+#include "../rsa3d/shape/shapes/cuboid/MineOverlap.h"
+#include "../rsa3d/shape/shapes/cuboid/TriTriOverlap.h"
+#include "../rsa3d/shape/shapes/cuboid/SATOverlap.h"
+#include "../rsa3d/shape/shapes/cuboid/OptimizedSATOverlap.h"
 #include "../rsa3d/Timer.h"
 #include "../rsa3d/Utils.h"
 

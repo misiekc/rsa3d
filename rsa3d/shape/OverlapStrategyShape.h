@@ -6,7 +6,7 @@
 #define RSA3D_OVERLAPSTRATEGYSHAPE_H
 
 #include "../BoundaryConditions.h"
-#include "../Shape.h"
+#include "Shape.h"
 #include "OverlapStrategy.h"
 
 template <unsigned short SD, unsigned short AD>

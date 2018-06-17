@@ -12,8 +12,8 @@
 #include <utility>
 #include <cstddef>
 
-#include "../AnisotropicShape2D.h"
-#include "../Vector.h"
+#include "../../AnisotropicShape2D.h"
+#include "../../../Vector.h"
 
 class Polygon : public Shape<2, 1> {
 

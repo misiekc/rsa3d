@@ -7,7 +7,7 @@
 #include <sstream>
 #include <iterator>
 #include "BoxFactory.h"
-#include "../../rsa3d/ShapeFactory.h"
+#include "../../rsa3d/shape/ShapeFactory.h"
 #include "ShapeGenerators.h"
 
 

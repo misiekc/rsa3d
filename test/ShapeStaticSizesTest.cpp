@@ -12,7 +12,7 @@
 #include <utility>
 
 #include "ShapeStaticSizesTest.h"
-#include "../rsa3d/ShapeFactory.h"
+#include "../rsa3d/shape/ShapeFactory.h"
 #include "../rsa3d/Utils.h"
 #include "utility/MockBC.h"
 #include "utility/InfoLooper.h"

@@ -2,7 +2,7 @@
 // Created by PKua on 26.04.18.
 //
 
-#include "../Shape.h"
+#include "Shape.h"
 
 #ifndef RSA3D_OVERLAPSTRATEGY_H
 #define RSA3D_OVERLAPSTRATEGY_H

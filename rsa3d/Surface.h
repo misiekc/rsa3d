@@ -9,7 +9,7 @@
 #define SURFACE_H_
 
 #include "Parameters.h"
-#include "Shape.h"
+#include "shape/Shape.h"
 #include <vector>
 #include <unordered_set>
 #include "RND.h"

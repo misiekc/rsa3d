@@ -10,7 +10,7 @@
 #ifndef RSA3D_SHAPEGENERATORS_H
 #define RSA3D_SHAPEGENERATORS_H
 
-#include "../../rsa3d/ShapeFactory.h"
+#include "../../rsa3d/shape/ShapeFactory.h"
 #include "../../rsa3d/Vector.h"
 #include "../../rsa3d/Utils.h"
 #include <memory>

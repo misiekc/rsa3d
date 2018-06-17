@@ -6,9 +6,9 @@
  */
 
 #include "Analyzer.h"
-#include "../Shape.h"
-#include "../ShapeFactory.h"
-#include "../shapes/Cuboid.h"
+#include "../shape/Shape.h"
+#include "../shape/ShapeFactory.h"
+#include "../shape/shapes/cuboid/Cuboid.h"
 #include "../../statistics/Plot.h"
 #include "../../statistics/LogPlot.h"
 #include "../../statistics/LinearRegression.h"

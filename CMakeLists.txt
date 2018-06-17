@@ -5,54 +5,53 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(MAIN_SOURCE
         rsa3d/analizator/Analyzer.cpp
-        rsa3d/shapes/cube_strategies/OptimizedSATOverlap.cpp
-        rsa3d/shapes/cube_strategies/CuboidOverlapStrategy.h
-        rsa3d/shapes/cube_strategies/MineOverlap.cpp
-        rsa3d/shapes/cube_strategies/SATOverlap.cpp
-        rsa3d/shapes/cube_strategies/TriTriOverlap.cpp
-        rsa3d/shapes/platonic_solid/PlatonicSolid.h
-        rsa3d/shapes/platonic_solid/PlatonicSolid.tpp
-        rsa3d/shapes/platonic_solid/RegularTetrahedron.cpp
-        rsa3d/shapes/platonic_solid/RegularOctahedron.cpp
-        rsa3d/shapes/platonic_solid/RegularDodecahedron.cpp
-        rsa3d/shapes/platonic_solid/RegularIcosahedron.cpp
-        rsa3d/shapes/platonic_solid/SATOverlap.h
-        rsa3d/shapes/platonic_solid/SATOverlap.tpp
-        rsa3d/shapes/platonic_solid/TriTriOverlap.h
-        rsa3d/shapes/platonic_solid/TriTriOverlap.tpp
-        rsa3d/shapes/polygons/HBPolygon.cpp
-        rsa3d/shapes/polygons/SBPolygon.cpp
-        rsa3d/shapes/Cuboid.cpp
-        rsa3d/shapes/Ellipse.cpp
-        rsa3d/shapes/OrientedCuboid.h
-        rsa3d/shapes/OrientedCuboid.tpp
-        rsa3d/shapes/OverlapStrategy.h
-        rsa3d/shapes/OverlapStrategyShape.h
-        rsa3d/shapes/Polygon.cpp
-        rsa3d/shapes/Rectangle.cpp
-        rsa3d/shapes/Sphere.h
-        rsa3d/shapes/Sphere.tpp
-        rsa3d/shapes/SpheroCylinder2D.cpp
+        rsa3d/shape/shapes/cuboid/Cuboid.cpp
+        rsa3d/shape/shapes/cuboid/CuboidOverlapStrategy.h
+        rsa3d/shape/shapes/cuboid/MineOverlap.cpp
+        rsa3d/shape/shapes/cuboid/OptimizedSATOverlap.cpp
+        rsa3d/shape/shapes/cuboid/SATOverlap.cpp
+        rsa3d/shape/shapes/cuboid/TriTriOverlap.cpp
+        rsa3d/shape/shapes/platonic_solid/PlatonicSolid.h
+        rsa3d/shape/shapes/platonic_solid/PlatonicSolid.tpp
+        rsa3d/shape/shapes/platonic_solid/RegularTetrahedron.cpp
+        rsa3d/shape/shapes/platonic_solid/RegularOctahedron.cpp
+        rsa3d/shape/shapes/platonic_solid/RegularDodecahedron.cpp
+        rsa3d/shape/shapes/platonic_solid/RegularIcosahedron.cpp
+        rsa3d/shape/shapes/platonic_solid/SATOverlap.h
+        rsa3d/shape/shapes/platonic_solid/SATOverlap.tpp
+        rsa3d/shape/shapes/platonic_solid/TriTriOverlap.h
+        rsa3d/shape/shapes/platonic_solid/TriTriOverlap.tpp
+        rsa3d/shape/shapes/polygon/HBPolygon.cpp
+        rsa3d/shape/shapes/polygon/SBPolygon.cpp
+        rsa3d/shape/shapes/Ellipse.cpp
+        rsa3d/shape/shapes/OrientedCuboid.h
+        rsa3d/shape/shapes/OrientedCuboid.tpp
+        rsa3d/shape/shapes/polygon/Polygon.cpp
+        rsa3d/shape/shapes/Rectangle.cpp
+        rsa3d/shape/shapes/Sphere.h
+        rsa3d/shape/shapes/Sphere.tpp
+        rsa3d/shape/shapes/SpheroCylinder2D.cpp
+        rsa3d/shape/AnisotropicShape2D.cpp
+        rsa3d/shape/ConvexShape.h
+        rsa3d/shape/ConvexShape.tpp
+        rsa3d/shape/OverlapStrategy.h
+        rsa3d/shape/OverlapStrategyShape.h
+        rsa3d/shape/Shape.h
+        rsa3d/shape/Shape.tpp
+        rsa3d/shape/ShapeFactory.cpp
         rsa3d/surfaces/NBoxFBC.cpp
         rsa3d/surfaces/NBoxPBC.cpp
-        rsa3d/AnisotropicShape2D.cpp
         rsa3d/BoundaryConditions.cpp
         rsa3d/Config.cpp
-        rsa3d/ConvexShape.h
-        rsa3d/ConvexShape.tpp
         rsa3d/Intersection.cpp
         rsa3d/Matrix.h
         rsa3d/NeighbourGrid.h
-        rsa3d/OrientedFace.cpp
         rsa3d/PackingGenerator.h
         rsa3d/PackingGenerator.cpp
         rsa3d/Parameters.cpp
         rsa3d/Positioned.h
         rsa3d/Positioned.tpp
         rsa3d/RND.cpp
-        rsa3d/Shape.h
-        rsa3d/Shape.tpp
-        rsa3d/ShapeFactory.cpp
         rsa3d/Surface.cpp
         rsa3d/Timer.cpp
         rsa3d/Utils.cpp

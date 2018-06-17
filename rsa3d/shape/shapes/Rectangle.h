@@ -6,11 +6,11 @@
 #define RSA3D_RECTANGLE_H
 
 #include "../Shape.h"
-#include "../RND.h"
-#include "../BoundaryConditions.h"
+#include "../../RND.h"
+#include "../../BoundaryConditions.h"
 #include "../AnisotropicShape2D.h"
-#include "math.h"
-#include "../Vector.h"
+#include "../../Vector.h"
+#include <cmath>
 
 class Rectangle: public AnisotropicShape2D {
 private:

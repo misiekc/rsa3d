@@ -10,7 +10,7 @@
 #include <string>
 #include <memory>
 
-#include "../../rsa3d/Shape.h"
+#include "../../rsa3d/shape/Shape.h"
 #include "../../rsa3d/Parameters.h"
 
 

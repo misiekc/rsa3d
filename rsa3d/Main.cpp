@@ -1,6 +1,6 @@
 #include "PackingGenerator.h"
 #include "analizator/Analyzer.h"
-#include "ShapeFactory.h"
+#include "shape/ShapeFactory.h"
 
 #include <unistd.h>
 #include <sys/wait.h>

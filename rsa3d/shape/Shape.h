@@ -8,9 +8,9 @@
 #ifndef SHAPE_H_
 #define SHAPE_H_
 
-#include "BoundaryConditions.h"
-#include "Positioned.h"
-#include "RND.h"
+#include "../BoundaryConditions.h"
+#include "../Positioned.h"
+#include "../RND.h"
 #include <string>
 #include <ostream>
 #include <istream>

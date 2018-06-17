@@ -11,7 +11,7 @@
 #include <ostream> 
 #include <vector>
 #include "../rsa3d/Parameters.h"
-#include "../rsa3d/shapes/OverlapStrategy.h"
+#include "../rsa3d/shape/OverlapStrategy.h"
 #include "utility/ShapePairFactory.h"
 
 /**

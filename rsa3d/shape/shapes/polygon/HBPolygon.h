@@ -8,7 +8,7 @@
 #ifndef SHAPES_POLYGONS_HBPOLYGON_H_
 #define SHAPES_POLYGONS_HBPOLYGON_H_
 
-#include "../Polygon.h"
+#include "Polygon.h"
 
 class HBPolygon : public Polygon{
 public:

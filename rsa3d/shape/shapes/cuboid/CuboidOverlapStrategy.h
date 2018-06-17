@@ -5,7 +5,7 @@
 #ifndef RSA3D_CUBOIDOVERLAPSTRATEGY_H
 #define RSA3D_CUBOIDOVERLAPSTRATEGY_H
 
-#include "../Cuboid.h"
+#include "Cuboid.h"
 
 // Overlap stategies
 class CuboidOverlapStrategy : public OverlapStrategy<3, 0> {

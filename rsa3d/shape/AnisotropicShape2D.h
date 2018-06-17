@@ -6,7 +6,7 @@
 #define RSA3D_ANISOTROPICSHAPE2D_H
 
 
-#include "Matrix.h"
+#include "../Matrix.h"
 #include "ConvexShape.h"
 
 /**

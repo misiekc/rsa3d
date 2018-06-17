@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <iomanip>
 #include "SpheroCylinder2D.h"
-#include "../Utils.h"
+#include "../../Utils.h"
 
 static const double EPSILON = 0.0000000001;
 

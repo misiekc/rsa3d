@@ -4,7 +4,7 @@
 
 #include "PackingOverlapsTest.h"
 #include "utility/MockBC.h"
-#include "../rsa3d/ShapeFactory.h"
+#include "../rsa3d/shape/ShapeFactory.h"
 #include "utility/ParalellInfoLooper.h"
 
 

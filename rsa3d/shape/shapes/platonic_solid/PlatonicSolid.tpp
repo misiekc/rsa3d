@@ -2,7 +2,7 @@
 // Created by PKua on 21.04.18.
 //
 
-#include "../../Vector.h"
+#include "../../../Vector.h"
 #include "SATOverlap.h"
 #include "TriTriOverlap.h"
 #include <sstream>

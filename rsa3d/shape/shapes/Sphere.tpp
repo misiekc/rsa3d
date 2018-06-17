@@ -8,7 +8,7 @@
 #include <math.h>
 #include <iostream>
 
-#include "../BoundaryConditions.h"
+#include "../../BoundaryConditions.h"
 
 
 template <unsigned short DIMENSION>

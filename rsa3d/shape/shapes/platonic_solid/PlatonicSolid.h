@@ -6,9 +6,9 @@
 #define RSA3D_PLATONICSOLID_H
 
 
-#include "../../Matrix.h"
-#include "../OverlapStrategyShape.h"
-#include "../../Intersection.h"
+#include "../../../Matrix.h"
+#include "../../OverlapStrategyShape.h"
+#include "../../../Intersection.h"
 #include "../../ConvexShape.h"
 
 // CRTP idiom
