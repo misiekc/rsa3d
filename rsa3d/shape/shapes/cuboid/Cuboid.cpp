@@ -132,9 +132,9 @@ void Cuboid::restoreDefaultStrategy() {
 // Checks whether there is an overlap between this and *s using chosen
 // stategy
 //----------------------------------------------------------------------------
-bool Cuboid::overlap(BoundaryConditions *bc, Shape *s) const
+bool Cuboid::overlap(BoundaryConditions *bc, const Shape *s) const
 {
-    Cuboid other = dynamic_cast<Cuboid&>(*s);
+    Cuboid other = dynamic_cast<const Cuboid&>(*s);
     this->applyBC(bc, &other);
     return strategy->overlap(this, &other);
 }

@@ -45,8 +45,8 @@ std::array<Vector<3>, SIZE> PlatonicSolid<SpecificSolid>::applyOrientation(const
 }
 
 template<typename SpecificSolid>
-bool PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions *bc, Shape<3, 0> *s) const {
-    SpecificSolid other = dynamic_cast<SpecificSolid&>(*s);     // Make a copy
+bool PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions *bc, const Shape<3, 0> *s) const {
+    SpecificSolid other = dynamic_cast<const SpecificSolid&>(*s);     // Make a copy
     this->applyBC(bc, &other);
     SATOverlap<SpecificSolid> satOverlap;
     return satOverlap.overlap(this, &other);

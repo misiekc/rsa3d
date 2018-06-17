@@ -33,7 +33,7 @@ protected:
 public:
     static void initClass(const std::string &attr);
 
-    bool overlap(BoundaryConditions *bc, Shape<3, 0> *s) const final;
+    bool overlap(BoundaryConditions *bc, const Shape<3, 0> *s) const final;
     bool pointInside(BoundaryConditions *bc, double *position, const std::array<double, 0> &orientation,
                     double orientationRange) const override;
     void store(std::ostream &f) const override;

@@ -69,7 +69,7 @@ public:
 	static void setOverlapStrategy(CuboidOverlapStrategy *strategy);
 	static CuboidOverlapStrategy * getOverlapStrategy();
 
-	bool overlap(BoundaryConditions *bc, Shape<3,0> *s) const override;
+	bool overlap(BoundaryConditions *bc, const Shape<3,0> *s) const override;
 	double getVolume() const override;
 	bool pointInside(BoundaryConditions *bc, double* position, const std::array<double, 0> &orientation,
                     double orientationRange) const override;

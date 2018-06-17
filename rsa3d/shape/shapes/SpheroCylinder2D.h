@@ -28,7 +28,7 @@ public:
 
     Shape<2, 1> *clone() const override;
 
-    bool overlap(BoundaryConditions *bc, Shape<2, 1> *s) const override;
+    bool overlap(BoundaryConditions *bc, const Shape<2, 1> *s) const override;
     bool pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const override;
     void store(std::ostream &f) const override;
     void restore(std::istream &f) override;

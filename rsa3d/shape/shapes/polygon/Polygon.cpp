@@ -164,9 +164,8 @@ double Polygon::getVolume(){
 	return result;
 }
 
-bool Polygon::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const{
-	Polygon *polPtr = (Polygon *)s;
-	Polygon pol(*polPtr);
+bool Polygon::overlap(BoundaryConditions *bc, const Shape<2, 1> *s) const{
+	Polygon pol = dynamic_cast<const Polygon&>(*s);
 	this->applyBC(bc, &pol);
 
 	double *polposition = pol.getPosition();

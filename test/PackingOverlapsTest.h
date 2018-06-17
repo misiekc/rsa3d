@@ -6,7 +6,7 @@
 #define RSA3D_PACKINGOVERLAPSTEST_H
 
 #include "../rsa3d/shape/Shape.h"
-#include "../rsa3d/PackingGenerator.h"
+#include "../rsa3d/Packing.h"
 
 /**
  * @brief A simple program testing voxel packing whether there are any overlaps.
@@ -26,7 +26,7 @@ namespace pack_ovtest {
      * @param packing Packing to be tested
      * @return true, if any overlaps has been found, false otherwise
      */
-    bool test_packing_overlaps(const Packing *packing);
+    bool test_packing_overlaps(const Packing &packing);
 
     /**
      * @brief Main function for the test of packing overlaps.

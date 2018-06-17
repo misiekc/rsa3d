@@ -33,9 +33,8 @@ double SpheroCylinder2D::getVolume() const {
     return 1;
 }
 
-bool SpheroCylinder2D::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
-    SpheroCylinder2D *otherPtr = (SpheroCylinder2D*)s;
-    SpheroCylinder2D other(*otherPtr);
+bool SpheroCylinder2D::overlap(BoundaryConditions *bc, const Shape<2, 1> *s) const {
+    SpheroCylinder2D other = dynamic_cast<const SpheroCylinder2D&>(*s);
     this->applyBC(bc, &other);
     Vector<2> otherPos(other.getPosition());
     return withinExclusionZone(otherPos, other.getAngle());

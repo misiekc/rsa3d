@@ -224,7 +224,7 @@ public:
 	 * @param s the second shape
 	 * @return 0 if there is no overlap, nonzero number otherwise
 	 */
-	virtual bool overlap(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const = 0;
+	virtual bool overlap(BoundaryConditions *bc, const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const = 0;
 
     /**
      * @brief Returns a volume of the shape.

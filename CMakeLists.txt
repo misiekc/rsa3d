@@ -46,7 +46,7 @@ set(MAIN_SOURCE
         rsa3d/Intersection.cpp
         rsa3d/Matrix.h
         rsa3d/NeighbourGrid.h
-        rsa3d/PackingGenerator.h
+        rsa3d/Packing.cpp
         rsa3d/PackingGenerator.cpp
         rsa3d/Parameters.cpp
         rsa3d/Positioned.h

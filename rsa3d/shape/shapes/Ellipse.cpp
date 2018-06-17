@@ -48,9 +48,8 @@ void Ellipse::setAngle(double angle){
 	this->calculateU();
 }
 
-bool Ellipse::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
-	Ellipse *esPtr = (Ellipse *)s;
-	Ellipse es(*esPtr);
+bool Ellipse::overlap(BoundaryConditions *bc, const Shape<2, 1> *s) const {
+	Ellipse es = dynamic_cast<const Ellipse&>(*s);
     this->applyBC(bc, &es);
 	double d;
 	d = (this->a/this->b - this->b/this->a)*sin(this->getAngle() - es.getAngle());

@@ -55,7 +55,7 @@ public:
     Rectangle();
     ~Rectangle() override = default;
 
-    bool overlap(BoundaryConditions *bc, Shape<2, 1> *s) const override;
+    bool overlap(BoundaryConditions *bc, const Shape<2, 1> *s) const override;
 
     double getVolume() const override;
 

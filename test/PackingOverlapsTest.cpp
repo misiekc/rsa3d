@@ -6,10 +6,11 @@
 #include "utility/MockBC.h"
 #include "../rsa3d/shape/ShapeFactory.h"
 #include "utility/ParalellInfoLooper.h"
+#include "../rsa3d/Utils.h"
 
 
-bool pack_ovtest::test_packing_overlaps(const Packing *packing) {
-    std::size_t size = packing->size();
+bool pack_ovtest::test_packing_overlaps(const Packing &packing) {
+    std::size_t size = packing.getSize();
     std::size_t total = size * (size - 1) / 2;
     std::cout << "[INFO] Checking " << size << " shapes, " << total << " checks required..." << std::endl;
 
@@ -20,8 +21,8 @@ bool pack_ovtest::test_packing_overlaps(const Packing *packing) {
     _OMP_PARALLEL_FOR
     for (std::size_t i = 0; i < size; i++) {
         for (std::size_t j = i + 1; j < size; j++) {
-            auto shape1 = (*packing)[i];
-            auto shape2 = (*packing)[j];
+            auto shape1 = packing[i];
+            auto shape2 = packing[j];
             if (shape1->overlap(&bc, shape2) != 0) {
                 _OMP_ATOMIC
                 overlaps++;
@@ -43,8 +44,8 @@ int pack_ovtest::main(int argc, char **argv) {
     ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
     std::string fileIn(argv[3]);
 
-    auto packing = PackingGenerator::fromFile(fileIn);
+    Packing packing;
+    packing.restore(fileIn);
     bool overlapsFound = test_packing_overlaps(packing);
-    delete packing;
     return overlapsFound ? EXIT_FAILURE : EXIT_SUCCESS;
 }

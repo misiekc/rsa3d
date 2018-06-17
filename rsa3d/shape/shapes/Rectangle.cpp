@@ -361,9 +361,8 @@ bool Rectangle::isIntersection(double p0_x, double p0_y, double p1_x, double p1_
     return 0; // No collision
 }
 
-bool Rectangle::overlap(BoundaryConditions *bc, Shape<2, 1> *s) const {
-    Rectangle *other = (Rectangle *) s;
-    Rectangle rectangle(*other);
+bool Rectangle::overlap(BoundaryConditions *bc, const Shape<2, 1> *s) const {
+    Rectangle rectangle = dynamic_cast<const Rectangle &>(*s);
     this->applyBC(bc, &rectangle);
 
     for (int i = 0; i < 4; i++) {

@@ -54,7 +54,7 @@ public:
 	Shape<2, 1> *clone() const override;
 	double getVolume();
 
-	bool overlap(BoundaryConditions *bc, Shape<2, 1> *s) const override;
+	bool overlap(BoundaryConditions *bc, const Shape<2, 1> *s) const override;
 	bool voxelInside(BoundaryConditions *bc, const double *voxelPosition, const std::array<double, 1> &voxelOrientation,
                      double spatialSize, double angularSize) const override;
 	std::string toPovray() const override;

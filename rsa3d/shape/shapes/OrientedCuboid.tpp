@@ -51,7 +51,7 @@ void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
 }
 
 template <unsigned short DIMENSION>
-bool OrientedCuboid<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const{
+bool OrientedCuboid<DIMENSION>::overlap(BoundaryConditions *bc, const Shape<DIMENSION, 0> *s) const{
     return this->pointInside(bc, s->getPosition());
 }
 

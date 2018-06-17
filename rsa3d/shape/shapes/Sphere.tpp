@@ -57,8 +57,8 @@ Sphere<DIMENSION>::Sphere() : ConvexShape<DIMENSION, 0>(){
 }
 
 template <unsigned short DIMENSION>
-bool Sphere<DIMENSION>::overlap(BoundaryConditions *bc, Shape<DIMENSION, 0> *s) const {
-	Sphere *sd = (Sphere<DIMENSION> *) s;
+bool Sphere<DIMENSION>::overlap(BoundaryConditions *bc, const Shape<DIMENSION, 0> *s) const {
+	const Sphere *sd = dynamic_cast<const Sphere<DIMENSION>*>(s);
 	double d2 = bc->distance2(this->getPosition(), sd->getPosition());
 	double r2 = this->r + sd->r;
 	r2 *= r2;
