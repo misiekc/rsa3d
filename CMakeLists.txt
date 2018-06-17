@@ -76,6 +76,7 @@ set(TEST_SOURCE
         test/utility/InfoLooper.h
         test/utility/IsotropicFactory.h
         test/utility/MockBC.h
+        test/utility/ParalellInfoLooper.h
         test/utility/Quantity.cpp
         test/utility/ShapeGenerators.h
         test/utility/ShapePairFactory.h
