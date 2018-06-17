@@ -96,6 +96,7 @@ OBJS_TEST = test/utility/BallFactory \
        		test/utility/Quantity \
        		test/AnisotropicShape2DExclusionDrawer \
        		test/AnisotropicShape2DExclusionTest \
+       		test/PackingOverlapTest \
        		test/CuboidSpeedTest \
        		test/Main \
        		test/RectangleCase \

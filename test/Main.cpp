@@ -13,6 +13,7 @@
 #include "AnisotropicShape2DExclusionDrawer.h"
 
 #include "RectangleCase.h"
+#include "PackingOverlapsTest.h"
 
 
 int main(int argc, char **argv) {
@@ -37,6 +38,8 @@ int main(int argc, char **argv) {
         return as2d_exdrawer::main(argc, argv);
     else if (mode == "rectangle_case")
     	return rectanglecase::main(argc, argv);
+    else if (mode == "pack_ovtest")
+        return pack_ovtest::main(argc, argv);
 
     std::cerr << "Unknown test mode: " << mode << std::endl;
     return EXIT_FAILURE;

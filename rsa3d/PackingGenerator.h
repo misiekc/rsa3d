@@ -35,9 +35,7 @@ private:
 	double spatialSize;
 	double angularSize;
 
-	int analyzeVoxels(unsigned short depth);
-	int analyzeRegion(Voxel *v);
-	void modifiedRSA(RSAShape *s, Voxel *v);
+    void modifiedRSA(RSAShape *s, Voxel *v);
 	bool isSaturated();
 	double getFactor();
 	bool isInside(double *position, double *orientation);
@@ -91,8 +89,6 @@ public:
      * will be translated
      */
     static void expandPackingOnPBC(Packing *packing, double size, double expandMargin);
-
-    static void testPackingOverlaps(const Packing *packing);
 };
 
 #endif /* PACKINGGENERATOR_H_ */

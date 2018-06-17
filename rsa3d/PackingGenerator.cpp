@@ -769,29 +769,3 @@ void PackingGenerator::toFile(const Packing *packing, const std::string &filenam
     }
     file.close();
 }
-
-// TODO quick and dirty temporary solution
-#include "../test/utility/MockBC.h"
-
-void PackingGenerator::testPackingOverlaps(const Packing *packing) {
-    std::size_t size = packing->size();
-    std::size_t total = size * (size - 1) / 2;
-    std::cout << ">> Checking " << size << " shapes, " << total << " checks required..." << std::endl;
-
-    std::size_t counter = 0;
-    std::size_t overlaps = 0;
-    MockBC bc;
-    for (std::size_t i = 0; i < size; i++) {
-        for (std::size_t j = i + 1; j < size; j++) {
-            counter++;
-            auto shape1 = (*packing)[i];
-            auto shape2 = (*packing)[j];
-            if (shape1->overlap(&bc, shape2) != 0)
-                overlaps++;
-            if (counter % 1000000 == 0)
-                std::cout << counter << " pairs tested..." << std::endl;
-        }
-    }
-
-    std::cout << ">> Finished. " << overlaps << " overlaps found" << std::endl;
-}

@@ -81,6 +81,7 @@ set(TEST_SOURCE
         test/utility/ShapePairFactory.h
         test/AnisotropicShape2DExclusionDrawer.cpp
         test/AnisotropicShape2DExclusionTest.cpp
+        test/PackingOverlapsTest.cpp
         test/ShapeOverlapTest.cpp
         test/ShapePointInsideTest.cpp
         test/ShapeStaticSizesTest.cpp
