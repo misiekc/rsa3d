@@ -11,7 +11,7 @@
 Surface::Surface(int dim, double s, double ndx, double vdx) : BoundaryConditions() {
 	this->dimension = dim;
 	this->size = s;
-	this->list = new NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>>(dim, s, ndx);
+	this->list = new NeighbourGrid<const RSAShape>(dim, s, ndx);
 }
 
 Surface::~Surface() {
@@ -23,49 +23,49 @@ void Surface::clear(){
 }
 
 
-void Surface::add(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s) {
-		this->list->add(s, s->getPosition());
-	}
+void Surface::add(const RSAShape *s) {
+	this->list->add(s, s->getPosition());
+}
 
-Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>* Surface::check(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s){
-	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> neighbours;
+const RSAShape* Surface::check(const RSAShape *s){
+	std::vector<const RSAShape *> neighbours;
 	this->list->getNeighbours(&neighbours, s->getPosition());
 
-	for(Positioned<RSA_SPATIAL_DIMENSION> *shape: neighbours) {
-		if (((Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *)shape)->overlap(this, s)){
-			return (Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *)shape;
-		}
+	for(const RSAPositioned *positioned: neighbours) {
+	    auto shape = dynamic_cast<const RSAShape*>(positioned);
+		if (shape->overlap(this, s))
+			return shape;
 	}
-	return NULL;
+	return nullptr;
 }
 
 
-Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * Surface::getClosestNeighbour(double *da, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *neighbours){
-
-	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> result;
-	if(neighbours==NULL){
-		this->list->getNeighbours(&result, da);
-		neighbours = &result;
-	}
-	double d, dmin = std::numeric_limits<double>::max();
-	Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *pmin = NULL;
-	for(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *p : *neighbours){
-		d = this->distance2(da, p->getPosition());
-		if (d<dmin){
-			pmin = p;
-			dmin = d;
-		}
-	}
-	return pmin;
+const RSAShape *Surface::getClosestNeighbour(double *da, const std::vector<const RSAShape*> &neighbours){
+    double d, dmin = std::numeric_limits<double>::max();
+    const RSAShape *pmin = nullptr;
+    for(const RSAShape *p : neighbours){
+        d = this->distance2(da, p->getPosition());
+        if (d<dmin){
+            pmin = p;
+            dmin = d;
+        }
+    }
+    return pmin;
 }
 
 
+const RSAShape *Surface::getClosestNeighbour(double *da) {
+    std::vector<const RSAShape*> result;
+    this->list->getNeighbours(&result, da);
+    return getClosestNeighbour(da, result);
+}
 
-void Surface::getNeighbours(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *result, double* da) {
+
+void Surface::getNeighbours(std::vector<const RSAShape*> *result, double* da) {
 	this->list->getNeighbours(result, da);
 }
 
-NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> * Surface::getNeighbourGrid(){
+NeighbourGrid<const RSAShape> *Surface::getNeighbourGrid(){
 	return this->list;
 }
 

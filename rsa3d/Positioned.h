@@ -62,6 +62,8 @@ public:
 	void translate(double *v);
 };
 
+using RSAPositioned = Positioned<RSA_SPATIAL_DIMENSION>;
+
 #include "Positioned.tpp"
 
 #endif /* POSITIONED_H_ */

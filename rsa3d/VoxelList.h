@@ -84,7 +84,7 @@ protected:
 
 
 	bool isVoxelInsidePacking(Voxel *v);
-	bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *shapes, BoundaryConditions *bc, unsigned short depth = 0);
+	bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize, std::vector<const RSAShape*> *shapes, BoundaryConditions *bc, unsigned short depth = 0);
 
 	void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes);
 
@@ -105,18 +105,16 @@ public:
 	virtual ~VoxelList();
 
 	void getNeighbours(std::vector<Voxel *> *result, double *da);
-	void remove(Voxel *v);
-	void remove(std::vector<Voxel *> *vVoxels);
 	void removeTopLevelVoxel(Voxel *v);
 
-	bool analyzeVoxel(Voxel *v, Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel *v, const RSAShape *s, BoundaryConditions *bc);
 //	bool analyzeVoxel(Voxel *v, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *neighbours, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel *v, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, unsigned short depth = 0);
+	bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, BoundaryConditions *bc, unsigned short depth = 0);
 
-	size_t analyzeVoxels(BoundaryConditions *bc, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, unsigned short depth);
+	size_t analyzeVoxels(BoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth);
 
 
-	bool splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc);
+	bool splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, BoundaryConditions *bc);
 
 	Voxel *getRandomVoxel(RND *rnd);
 	Voxel *getVoxel(int i);

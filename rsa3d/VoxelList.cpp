@@ -271,14 +271,16 @@ bool VoxelList::isVoxelInsidePacking(Voxel *v){
  * To determine it the method tires to split voxel up to level of maxDepth
  */
 
-bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *shapes, BoundaryConditions *bc, unsigned short depth){
+bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
+										   std::vector<const RSAShape *> *shapes, BoundaryConditions *bc,
+                                           unsigned short depth){
 	// if voxel is outside the packing it is inside exclusion zone
 	if (!this->isVoxelInsidePacking(v))
 		return true;
 	// otherwise checking
 
 	bool isInside = false;
-	for(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s : *shapes){
+	for(const RSAShape *s : *shapes){
 		isInside = s->voxelInside(bc, v->getPosition(), v->getOrientation(), spatialSize, angularSize);
 		if (isInside)
 			break;
@@ -324,7 +326,7 @@ bool VoxelList::isTopLevelVoxelActive(Voxel *v){
 }
 
 
-bool VoxelList::analyzeVoxel(Voxel *v, Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s, BoundaryConditions *bc){
+bool VoxelList::analyzeVoxel(Voxel *v, const RSAShape *s, BoundaryConditions *bc){
 
 	if (!isTopLevelVoxelActive(v))
 		return true;
@@ -333,17 +335,17 @@ bool VoxelList::analyzeVoxel(Voxel *v, Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_
 }
 
 
-bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc, unsigned short depth){
+bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, BoundaryConditions *bc, unsigned short depth){
 	if (!this->disabled && (depth > v->depth || depth==0) ){
 
 	if (!isTopLevelVoxelActive(v))
 		return true;
 
-	std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> tmpShapes, shapes;
+	std::vector<const RSAShape*> tmpShapes, shapes;
 		nl->getNeighbours(&tmpShapes, v->getPosition());
 
 		int maxNo = v->lastAnalyzed;
-		for(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s: tmpShapes){
+		for(const RSAShape *s: tmpShapes){
 			if (v->lastAnalyzed < s->no || depth > v->depth){
 				shapes.push_back(s);
 				if(maxNo < s->no)
@@ -362,7 +364,7 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION
 
 #ifdef _OPENMP
 
-size_t VoxelList::analyzeVoxels(BoundaryConditions *bc, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, unsigned short depth) {
+size_t VoxelList::analyzeVoxels(BoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth) {
 
 	size_t begin = this->length;
 
@@ -426,7 +428,7 @@ size_t VoxelList::analyzeVoxels(BoundaryConditions *bc, NeighbourGrid<Shape<RSA_
 #ifdef _OPENMP
 
 
-bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc){
+bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, BoundaryConditions *bc){
 	if (this->disabled)
 		return false;
 	size_t voxelsFactor = (size_t)round( pow(2, RSA_SPATIAL_DIMENSION+RSA_ANGULAR_DIMENSION) );

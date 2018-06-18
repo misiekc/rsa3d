@@ -90,7 +90,7 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::rotate(const std::array<double
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::minDistance(Shape *s) const{
+double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::minDistance(const Shape *s) const{
 	return 0.0;
 }
 

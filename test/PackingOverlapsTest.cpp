@@ -10,7 +10,7 @@
 
 
 bool pack_ovtest::test_packing_overlaps(const Packing &packing) {
-    std::size_t size = packing.getSize();
+    std::size_t size = packing.size();
     std::size_t total = size * (size - 1) / 2;
     std::cout << "[INFO] Checking " << size << " shapes, " << total << " checks required..." << std::endl;
 

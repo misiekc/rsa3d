@@ -80,9 +80,9 @@ void makeDatFileForPackingsInDirectory(Parameters *params, char *sdir){
 			strncpy(seed, de->d_name+no1+1, no2-no1-1);
 			seed[no2-no1-1] = '\0';
 			std::string filename(de->d_name);
- 			std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * packing = PackingGenerator::fromFile(dirname + "/" + filename);
-			dataFile << seed << "\t" << (*packing)[packing->size() - 1]->no << "\t"	<< (*packing)[packing->size() - 1]->time  <<  std::endl;
-			delete packing;
+			Packing packing;
+			packing.restore(dirname + "/" + filename);
+			dataFile << seed << "\t" << packing.back()->no << "\t"	<< packing.back()->time  <<  std::endl;
 			std::cout << ".";
 			std::cout.flush();
 		}
@@ -99,20 +99,19 @@ void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-	PackingGenerator *pg = new PackingGenerator(seed, params);
-	pg->run();
-	Packing *packing = pg->getPacking();
+	PackingGenerator pg(seed, params);
+	pg.run();
+	const Packing &packing = pg.getPacking();
 
 	if (params->storePackings) {
 		std::string sPackingFile = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + "_" + std::to_string(seed) + ".bin";
-		pg->toFile(sPackingFile);
+		pg.getPacking().store(sPackingFile);
 	}
 	std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
 	process_mem_usage(vm, rss);
-	dataFile << seed << "\t" << packing->size() << "\t"	<< (*packing)[packing->size() - 1]->time << std::endl;
+	dataFile << seed << "\t" << packing.size() << "\t"	<< packing.back()->time << std::endl;
 	dataFile.flush();
 	std::cout << "T:" << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "; VM: " << vm << "; RSS: " << rss << std::endl;
-	delete pg;
 }
 
 void debug(Parameters *params, char *cfile){
@@ -125,10 +124,9 @@ void debug(Parameters *params, char *cfile){
 	if (!file)
 		die("Cannot open file " + filename + " to restore packing generator");
 
-	PackingGenerator *pg = new PackingGenerator(0, params);
-	pg->restore(file);
-	pg->run();
-	delete pg;
+	PackingGenerator pg(0, params);
+	pg.restore(file);
+	pg.run();
 }
 
 int simulate(Parameters *params) {
@@ -175,26 +173,23 @@ int simulate(Parameters *params) {
  * @brief Creates packing until the total number of shapes (in all packings) does not exceed @a max
  */
 void boundaries(Parameters *params, unsigned long max) {
-	PackingGenerator *pg;
 	char buf[20];
-	unsigned long counter = 0;;
-	int seed = 0;
-	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
-	std::string size(buf);
-	std::string filename = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + ".dat";
-	std::ofstream file(filename);
-	file.precision(std::numeric_limits<double>::digits10 + 1);
-	Packing *packing;
-	do {
-		pg = new PackingGenerator(seed, params);
-		pg->run();
-		packing = pg->getPacking();
-		file << seed << "\t" << packing->size() << "\t" << (*packing)[packing->size() - 1]->time << std::endl;
+    unsigned long counter = 0;;
+    int seed = 0;
+    std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
+    std::string size(buf);
+    std::string filename = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + ".dat";
+    std::ofstream file(filename);
+    file.precision(std::numeric_limits<double>::digits10 + 1);
+    do {
+        PackingGenerator pg(seed, params);
+        pg.run();
+        const Packing &packing = pg.getPacking();
+		file << seed << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;
 		file.flush();
-		counter += pg->getPacking()->size();
+		counter += packing.size();
 		std::cout << (double) counter / (double) max << std::endl;
 		seed++;
-		delete pg;
 	} while (counter < max);
 	file.close();
 }
@@ -213,11 +208,10 @@ int main(int argc, char **argv) {
     } else if (mode == "test") {
         if (argc < 5)   die("Usage: ./rsa test <config> <file in> <max time>");
         std::string filename(argv[3]);
-        Packing *packing = PackingGenerator::fromFile(filename);
-        PackingGenerator *pg = new PackingGenerator(1, &params);
-        pg->testPacking(packing, atof(argv[4]));
-        delete pg;
-        delete packing;
+        Packing packing;
+        packing.restore(filename);
+        PackingGenerator pg(1, &params);
+        pg.testPacking(packing, atof(argv[4]));
     } else if (mode == "debug") {
         debug(&params, argv[3]);
     } else if (mode == "boundaries") {
@@ -229,22 +223,22 @@ int main(int argc, char **argv) {
         an.analyzePackingsInDirectory(argv[3], 0.01, 1.0);
     } else if (mode == "povray") {
         std::string file(argv[3]);
-        Packing *packing = PackingGenerator::fromFile(argv[3]);
+        Packing packing;
+        packing.restore(file);
         PackingGenerator::toPovray(packing, params.surfaceSize, nullptr, file + ".pov");
-        delete packing;
     } else if (mode == "wolfram") {
         std::string file(argv[3]);
-        Packing *packing = PackingGenerator::fromFile(file);
+        Packing packing;
+        packing.restore(file);
         PackingGenerator::toWolfram(packing, params.surfaceSize, nullptr, file + ".nb");
-        delete packing;
     } else if (mode == "bc_expand") {
         if (argc < 4)   die("Usage: ./rsa bc_expand <config> <file in> (file out = file in)");
         std::string fileIn(argv[3]);
         std::string fileOut = (argc < 5 ? fileIn : argv[4]);
-        auto packing = PackingGenerator::fromFile(fileIn);
-        PackingGenerator::expandPackingOnPBC(packing, params.surfaceSize, 0.1);
-        PackingGenerator::toFile(packing, fileOut);
-        delete packing;
+        Packing packing;
+        packing.restore(fileIn);
+        packing.expandOnPBC(params.surfaceSize, 0.1);
+        packing.store(fileOut);
     } else {
 		std::cerr << "Unknown mode: " << argv[1] << std::endl;
         return EXIT_FAILURE;

@@ -80,13 +80,13 @@ void Analyzer::calculateOrderParameters(double *result, Cuboid *c1, Cuboid *c2){
 	result[4] = (5.0*prod4 - 9.0)/6.0;
 }
 
-void Analyzer::analyzeOrder(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing, Plot **order){
+void Analyzer::analyzeOrder(const Packing &packing, Plot **order){
 	double *posi, *posj, da[RSA_SPATIAL_DIMENSION];
 	double orderParameters[5];
-	for(uint i=0; i<packing->size(); i++){
-		posi = (*packing)[i]->getPosition();
-		for(uint j=i+1; j<packing->size(); j++){
-			posj = (*packing)[j]->getPosition();
+	for(uint i=0; i<packing.size(); i++){
+		posi = packing[i]->getPosition();
+		for(uint j=i+1; j<packing.size(); j++){
+			posj = packing[j]->getPosition();
 			double dist = 0.0;
 			for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
 				da[k] = fabs(posi[k] - posj[k]);
@@ -97,7 +97,7 @@ void Analyzer::analyzeOrder(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR
 			dist = sqrt(dist);
 			if (dist > order[0]->getMax())
 				continue;
-			this->calculateOrderParameters(orderParameters, (Cuboid *)((*packing)[i]), (Cuboid *)((*packing)[j]) );
+			this->calculateOrderParameters(orderParameters, (Cuboid *)(packing[i]), (Cuboid *)(packing[j]) );
 			for(ushort k = 0; k<5; k++){
 				order[k]->add(dist, orderParameters[k]);
 			}
@@ -105,10 +105,10 @@ void Analyzer::analyzeOrder(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR
 	}
 }
 
-void Analyzer::analyzePacking(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor){
+void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor){
 	double lastt = 0.0;
-	for(uint i=0; i<packing->size(); i++){
-		double t = (*packing)[i]->time;
+	for(uint i=0; i<packing.size(); i++){
+		double t = packing[i]->time;
 		if (nvt != NULL)
 			nvt->addBetween(lastt, t, i);
 		if (asf != NULL){
@@ -121,13 +121,13 @@ void Analyzer::analyzePacking(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGUL
 		lastt = t;
 	}
 	if (nvt != NULL)
-		nvt->addBetween(lastt, nvt->getMax()+1.0, packing->size());
+		nvt->addBetween(lastt, nvt->getMax()+1.0, packing.size());
 	if (corr!=NULL){
 		double *posi, *posj, da[RSA_SPATIAL_DIMENSION];
-		for(uint i=0; i<packing->size(); i++){
-			posi = (*packing)[i]->getPosition();
-			for(uint j=i+1; j<packing->size(); j++){
-				posj = (*packing)[j]->getPosition();
+		for(uint i=0; i<packing.size(); i++){
+			posi = packing[i]->getPosition();
+			for(uint j=i+1; j<packing.size(); j++){
+				posj = packing[j]->getPosition();
 				double dist = 0.0;
 				for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
 					da[k] = fabs(posi[k] - posj[k]);
@@ -314,15 +314,14 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 	while ((de = readdir(dir)) != NULL){
 		if (strncmp(prefix, de->d_name, strlen(prefix))==0){
 			std::string filename(de->d_name);
- 			std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> * packing
-					= PackingGenerator::fromFile(dirname + "/" + filename);
-			n += packing->size();
-			n2 += packing->size()*packing->size();
+			Packing packing;
+			packing.restore(dirname + "/" + filename);
+			n += packing.size();
+			n2 += packing.size()*packing.size();
 			counter++;
 			this->analyzePacking(packing, nvt, asf, correlations, particleSize/packingSize);
 			if (this->params->particleType.compare("Cuboid")==0)
 				this->analyzeOrder(packing, order);
-			delete packing;
 			std::cout << ".";
 			std::cout.flush();
 		}

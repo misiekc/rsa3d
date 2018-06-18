@@ -14,6 +14,7 @@
 
 #include "../../statistics/Plot.h"
 #include "../../statistics/LogPlot.h"
+#include "../Packing.h"
 
 #include <string>
 #include <vector>
@@ -28,8 +29,8 @@ public:
 private:
 	Parameters *params;
 
-	void analyzePacking(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor);
-	void analyzeOrder(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *packing, Plot **order);
+	void analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor);
+	void analyzeOrder(const Packing &packing, Plot **order);
 	void calculateOrderParameters(double *result, Cuboid *c1, Cuboid *c2);
 	double * printNvT(LogPlot &nvt, std::string filename, double *fixedA, double surfaceFactor, double *res);
 	double * printASF(Plot &asf, std::string filename, int counter, double packingFraction, double *res);

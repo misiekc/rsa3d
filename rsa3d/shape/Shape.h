@@ -255,7 +255,7 @@ public:
      * @param s ??
      * @return ??
      */
-	virtual double minDistance(Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const;
+	virtual double minDistance(const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const;
 
     /**
      * @brief Returns string representation of the shape.

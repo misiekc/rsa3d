@@ -6,28 +6,33 @@
 #include "shape/ShapeFactory.h"
 #include <fstream>
 
+
+Packing::~Packing() {
+    for (auto shape : this->packing)
+        delete shape;
+}
+
 Packing::Packing(const Packing &other) {
     for (auto &shape : other.packing)
         this->addShape(shape->clone());
 }
 
 Packing &Packing::operator=(const Packing &other) {
-    this->packing.clear();
+    this->clear();
     for (auto &shape : other.packing)
         this->addShape(shape->clone());
     return *this;
 }
 
-void Packing::addShape(const RSAShape *shape) {
-    this->packing.push_back(shape_ptr(shape));
+Packing::Packing(Packing &&other) noexcept : packing(std::move(other.packing)) {
+    other.packing.clear();
 }
 
-void Packing::removeShape(std::size_t index) {
-    this->packing.erase(this->packing.begin() + index);
-}
-
-std::size_t Packing::getSize() const {
-    return this->packing.size();
+Packing &Packing::operator=(Packing &&other) noexcept {
+    this->clear();
+    this->packing = std::move(other.packing);
+    other.packing.clear();
+    return *this;
 }
 
 void Packing::store(std::ostream &out) const {
@@ -44,7 +49,7 @@ void Packing::restore(std::istream &in) {
         shape->restore(in);
         this->addShape(shape);
     }
-    this->removeShape(this->getSize() - 1);
+    this->removeShape(this->size() - 1);
 }
 
 void Packing::store(const std::string &filename) const {
@@ -61,19 +66,16 @@ void Packing::restore(const std::string &filename) {
     file.close();
 }
 
-const RSAShape *Packing::operator[](std::size_t index) const {
-    return this->packing[index].get();
-}
-
-void Packing::expandOnPBC(double size, double expandMargin) {
+void Packing::expandOnPBC(double linearSize, double expandMargin) {
+    std::size_t oldSize = this->size();
     for (std::size_t i = 0; i < RSA_SPATIAL_DIMENSION; i++) {
-        for (std::size_t j = 0; j < this->getSize(); j++) {
+        for (std::size_t j = 0; j < oldSize; j++) {
             auto shape = (*this)[j];
             const double *position = shape->getPosition();
-            if (position[i] < expandMargin * size)
-                expandShapeOnBC(shape, size, i);
-            else if (position[i] > (1 - expandMargin) * size)
-                expandShapeOnBC(shape, -size, i);
+            if (position[i] < expandMargin * linearSize)
+                expandShapeOnBC(shape, linearSize, i);
+            else if (position[i] > (1 - expandMargin) * linearSize)
+                expandShapeOnBC(shape, -linearSize, i);
         }
     }
 }

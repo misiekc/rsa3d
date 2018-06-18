@@ -17,11 +17,11 @@
 #include "NeighbourGrid.h"
 #include "VoxelList.h"
 
-class Surface : public BoundaryConditions{
+class Surface : public BoundaryConditions {
 
 protected:
 
-	NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *list;
+	NeighbourGrid<const RSAShape> *list;
 
 	double size;
 	int dimension;
@@ -35,14 +35,15 @@ public:
 	virtual ~Surface();
 
 	void clear();
-	void add(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s);
-	Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>* check(Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s);
-	void getNeighbours(std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *result, double *da);
-	Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> * getClosestNeighbour(double *da, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *neighbours);
-	NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> * getNeighbourGrid();
-	double distance2(const double *a1, const double *a2);
+	void add(const RSAShape *s);
+	const RSAShape *check(const RSAShape *s);
+	void getNeighbours(std::vector<const RSAShape*> *result, double *da);
+	const RSAShape *getClosestNeighbour(double *da);
+	const RSAShape *getClosestNeighbour(double *da, const std::vector<const RSAShape*> &neighbours);
+	NeighbourGrid<const RSAShape> *getNeighbourGrid();
+	double distance2(const double *a1, const double *a2) override;
 
-	virtual double * getTranslation(double *result, const double *p1, const double *p2) = 0;
+	double *getTranslation(double *result, const double *p1, const double *p2) override = 0;
 	virtual void vector(double *v) = 0;
 	virtual void checkPosition(double *da);
 	virtual double getArea() = 0;
