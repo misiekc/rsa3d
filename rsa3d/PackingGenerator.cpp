@@ -482,7 +482,7 @@ void PackingGenerator::createPacking(){
 			}
 
 			this->surface->add(s);
-			this->packing.push_back(s);
+			this->packing.addShape(s);
 
 			missCounter = 0;
 			if (depthAnalyze>0)

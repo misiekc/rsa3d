@@ -63,7 +63,7 @@ void makeDatFileForPackingsInDirectory(Parameters *params, char *sdir){
 	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
 	std::string size(buf);
 
-	std::string sFile = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + ".dat";
+	std::string sFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_") + "_" + size + ".dat";
 	std::ofstream dataFile(sFile);
     if (!dataFile)
         die("Cannot open file " + sFile + " to store packing info");
@@ -104,7 +104,7 @@ void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 	const Packing &packing = pg.getPacking();
 
 	if (params->storePackings) {
-		std::string sPackingFile = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + "_" + std::to_string(seed) + ".bin";
+		std::string sPackingFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_") + "_" + size + "_" + std::to_string(seed) + ".bin";
 		pg.getPacking().store(sPackingFile);
 	}
 	std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
@@ -135,7 +135,7 @@ int simulate(Parameters *params) {
 	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
 	std::string size(buf);
 
-	std::string sFile = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + ".dat";
+	std::string sFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_") + "_" + size + ".dat";
 	std::ofstream file(sFile);
     if (!file)
         die("Cannot open file " + sFile + " to store packing info");
@@ -178,7 +178,7 @@ void boundaries(Parameters *params, unsigned long max) {
     int seed = 0;
     std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
     std::string size(buf);
-    std::string filename = "packing_" + params->particleType + "_" + params->particleAttributes + "_" + size + ".dat";
+    std::string filename = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_") + "_" + size + ".dat";
     std::ofstream file(filename);
     file.precision(std::numeric_limits<double>::digits10 + 1);
     do {

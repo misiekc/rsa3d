@@ -22,6 +22,8 @@ void SBPolygon::initClass(const std::string &args){
 	in >> width;
 	in >> alpha;
 
+	alpha *= M_PI / 180.0;
+
 	double s = sin(alpha);
 	double c = cos(alpha);
 	double d = width / s;
