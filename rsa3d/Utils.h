@@ -24,7 +24,7 @@ std::string &rtrim(std::string &s);
 // trim from both ends
 std::string &trim(std::string &s);
 // replaces all occurences of search in source by replace
-std::string &ReplaceString(std::string source, const std::string& search, const std::string& replace);
+std::string replaceAll(std::string source, const std::string& search, const std::string& replace);
 
 int lastIndexOf(const char * s, char target);
 

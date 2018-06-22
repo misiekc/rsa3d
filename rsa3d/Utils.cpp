@@ -156,7 +156,7 @@ std::string &trim(std::string &s) {
     return ltrim(rtrim(s));
 }
 
-std::string &replaceAll(std::string source, const std::string& search, const std::string& replace) {
+std::string replaceAll(std::string source, const std::string& search, const std::string& replace) {
     size_t pos = 0;
     while ((pos = source.find(search, pos)) != std::string::npos) {
          source.replace(pos, search.length(), replace);

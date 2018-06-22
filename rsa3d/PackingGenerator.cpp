@@ -569,7 +569,7 @@ void PackingGenerator::toPovray(const Packing &packing, double size, VoxelList *
 
 	for (const RSAShape *s : packing) {
 		double *da = s->getPosition();
-		file << "  text { ttf \"timrom.ttf\" \"" << s->no << "\" 1, 0 pigment { color White } scale 0.2 translate < " << da[0] << ", " << da[1] << ", 0.01> }" << std::endl;
+//		file << "  text { ttf \"timrom.ttf\" \"" << s->no << "\" 1, 0 pigment { color White } scale 0.2 translate < " << da[0] << ", " << da[1] << ", 0.01> }" << std::endl;
 		file << s->toPovray();
 	}
 
