@@ -8,17 +8,24 @@
 #ifndef BOUNDARYCONDITIONS_H_
 #define BOUNDARYCONDITIONS_H_
 
+#include "Vector.h"
+
+template <unsigned short SPATIAL_DIMENSION>
 class BoundaryConditions {
 public:
-	BoundaryConditions();
-	virtual ~BoundaryConditions();
+    using vector = Vector<SPATIAL_DIMENSION>;
 
-	virtual double distance2(const double *p1, const double *p2) = 0;
+	virtual ~BoundaryConditions() = default;
+
+	virtual double distance2(const vector &p1, const vector &p2) const = 0;
+
 	/**
 	 * @brief Returns translation that should be applied to @a p2 to move him to the "proximity" of @a p1
 	 */
-	virtual double * getTranslation(double *result, const double* p1, const double* p2) = 0;
+	virtual vector getTranslation(const vector& p1, const vector &p2) const = 0;
 
 };
+
+using RSABoundaryConditions = BoundaryConditions<RSA_SPATIAL_DIMENSION>;
 
 #endif /* BOUNDARYCONDITIONS_H_ */

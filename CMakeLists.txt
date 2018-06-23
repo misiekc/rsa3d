@@ -41,7 +41,7 @@ set(MAIN_SOURCE
         rsa3d/shape/ShapeFactory.cpp
         rsa3d/surfaces/NBoxFBC.cpp
         rsa3d/surfaces/NBoxPBC.cpp
-        rsa3d/BoundaryConditions.cpp
+        rsa3d/BoundaryConditions.h
         rsa3d/Config.cpp
         rsa3d/Intersection.cpp
         rsa3d/Matrix.h

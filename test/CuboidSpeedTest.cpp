@@ -58,7 +58,7 @@ namespace cube_speedtest
     {
         SingleTestAcquiredData result{};
         CuboidOverlapStrategy * strategy = Cuboid::getOverlapStrategy();
-        MockBC bc;
+        RSAMockBC bc;
         Timer timer;
 
         std::cout << std::setw(20) << std::left << Cuboid::getOverlapStrategy()->getName() << " test... " << std::flush;

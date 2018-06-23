@@ -7,29 +7,21 @@
 
 #include "NBoxFBC.h"
 
-NBoxFBC::NBoxFBC(int dim, double s, double ndx, double vdx) : Surface(dim, s, ndx, vdx) {
+NBoxFBC::NBoxFBC(double s, double ndx, double vdx) : Surface(s, ndx, vdx) {
 	// TODO Auto-generated constructor stub
-
 }
 
-NBoxFBC::~NBoxFBC() {
-	// TODO Auto-generated destructor stub
+double NBoxFBC::getArea() const {
+	return pow(this->size, RSA_SPATIAL_DIMENSION);
 }
 
-double NBoxFBC::getArea(){
-	return pow(this->size, this->dimension);
+RSAVector NBoxFBC::getTranslation(double s, const RSAVector &p1, const RSAVector &p2) {
+	return RSAVector();
 }
 
-double * NBoxFBC::getTranslation(double *result, int dim, double s, const double *p1, const double *p2) {
-	for(int i=0; i<dim; i++)
-		result[i] = 0.0;
-	return result;
-}
+RSAVector NBoxFBC::getTranslation(const RSAVector &p1, const RSAVector &p2) const {
+	return NBoxFBC::getTranslation(this->size, p1, p2); }
 
-double * NBoxFBC::getTranslation(double *result, const double *p1, const double *p2) {
-		return NBoxFBC::getTranslation(result, this->dimension, this->size, p1, p2);
-	}
-
-void NBoxFBC::vector(double* v) {
-	this->vectorFreeBC(v);
+RSAVector NBoxFBC::vector(const RSAVector &v) const {
+	return this->vectorFreeBC(v);
 }

@@ -88,7 +88,8 @@ protected:
      * @param bc boundary conditions to apply
      * @param second shape to be translated according to bc
      */
-	virtual void applyBC(BoundaryConditions *bc, Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second) const;
+	virtual void applyBC(BoundaryConditions<SPATIAL_DIMENSION> *bc,
+                         Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second) const;
 
     /**
      * @brief Sets shape's new orientation.
@@ -224,7 +225,8 @@ public:
 	 * @param s the second shape
 	 * @return 0 if there is no overlap, nonzero number otherwise
 	 */
-	virtual bool overlap(BoundaryConditions *bc, const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const = 0;
+	virtual bool overlap(BoundaryConditions<SPATIAL_DIMENSION> *bc,
+                         const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const = 0;
 
     /**
      * @brief Returns a volume of the shape.
@@ -246,7 +248,7 @@ public:
      * @param angularSize angular size of the voxel
      * @return true if the voxel is fully covered by the exclusion zone of @a this shape, false otherwise.
      */
-	virtual bool voxelInside(BoundaryConditions *bc, const double *voxelPosition,
+	virtual bool voxelInside(BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &voxelPosition,
                              const std::array<double, ANGULAR_DIMENSION> &orientation, double spatialSize,
                              double angularSize) const = 0;
 

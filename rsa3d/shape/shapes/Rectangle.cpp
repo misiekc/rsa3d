@@ -26,7 +26,7 @@ double Rectangle::getYOnCircle(double cx, double cy, double r, double angle) con
 void Rectangle::setAngle(double angle) {
     AnisotropicShape2D::setAngle(angle);
 
-    const double *position = this->getPosition();
+    Vector<2> position = this->getPosition();
     double p[2] = {halfA, halfB}; // 1, 1
     const Matrix<2, 2, double> &rotation = getRotationMatrix();
     Vector<2> point = rotatePoint(Vector<2>(p), rotation);
@@ -69,7 +69,7 @@ double Rectangle::getVolume() const {
 }
 
 // Shape::translate was made non-virtual and one should override Positioned::setPosition instead (see documentation)
-void Rectangle::setPosition(const double *position) {
+void Rectangle::setPosition(const Vector<2> &position) {
     Vector<2, double> translation = Vector<2, double>(position) - Vector<2, double>(getPosition());
     for (int i = 0; i < 5; i++) {
         xs[i] += translation[0];
@@ -80,20 +80,13 @@ void Rectangle::setPosition(const double *position) {
 }
 
 // never used
-bool Rectangle::pointInside(BoundaryConditions *bc, double *da) const {
+bool Rectangle::pointInside(BoundaryConditions<2> *bc, const Vector<2> &da) const {
     // apply bc
-    double ta[2];
-    double tmp[2];
-    double *position = this->getPosition();
-
-    tmp[0] = da[0];
-    tmp[1] = da[1];
-    bc->getTranslation(ta, position, tmp);
-    da[0] += ta[0];
-    da[1] += ta[1];
+    Vector<2> position = this->getPosition();
+    Vector<2> newDa = da + bc->getTranslation(position, da);
 
     // rotate point relatively to rectangle center
-    Vector<2> pointRotated = rotatePoint(Vector<2>(da), getAntiRotationMatrix(), Vector<2>(position));
+    Vector<2> pointRotated = rotatePoint(newDa, getAntiRotationMatrix(), Vector<2>(position));
     if (!isInsideRect(pointRotated, position[0], position[1], a + b, b + b)) {
         return 0;
     }
@@ -131,7 +124,7 @@ bool Rectangle::pointInside(BoundaryConditions *bc, double *da) const {
 }
 
 
-bool Rectangle::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
+bool Rectangle::pointInside(BoundaryConditions<2> *bc, const Vector<2> &da, double angleFrom, double angleTo) const {
     // let's have it ordered
     if (angleFrom > angleTo) {
         double tmp = angleFrom;
@@ -167,26 +160,18 @@ bool Rectangle::pointInside(BoundaryConditions *bc, double *da, double angleFrom
     }
 }
 
-bool Rectangle::pointInsideInternal(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
+bool Rectangle::pointInsideInternal(BoundaryConditions<2> *bc, const Vector<2> &da, double angleFrom, double angleTo) const {
     double pi2 = M_PI / 2;
     int countFrom = (int) floor(angleFrom / pi2);
 
     // apply bc
-    double ta[2];
-    double tmp[2];
-    double *position = this->getPosition();
-
-    tmp[0] = da[0];
-    tmp[1] = da[1];
-    bc->getTranslation(ta, position, tmp);
-    Vector<2, double> point = Vector<2>(da);
-    point[0] += ta[0];
-    point[1] += ta[1];
+    Vector<2> position = this->getPosition();
+    Vector<2> point = da + bc->getTranslation(position, da);
 
     // rotate point relatively to rectangle center
     const Matrix<2, 2, double> &rotation = getAntiRotationMatrix();
 
-    Vector<2> pointRotated = rotatePoint(point, rotation, Vector<2>(position));
+    Vector<2> pointRotated = rotatePoint(point, rotation, position);
     double x = pointRotated[0];
     double y = pointRotated[1];
 
@@ -291,8 +276,8 @@ bool Rectangle::isInsideExcludingRectangle(double angleFrom, double angleTo, dou
     Rectangle rec = Rectangle();
     rec.translate(this->getPosition());
 
-    const double *position = this->getPosition();
-    const double *recPosition = rec.getPosition();
+    Vector<2> position = this->getPosition();
+    Vector<2> recPosition = rec.getPosition();
     rec.setAngle(angleFrom);
     for (int i = 0; i < 4; i++) {
         newSizeFrom[0] = std::max(newSizeFrom[0], rec.xs[i] - recPosition[0]);
@@ -361,7 +346,7 @@ bool Rectangle::isIntersection(double p0_x, double p0_y, double p1_x, double p1_
     return 0; // No collision
 }
 
-bool Rectangle::overlap(BoundaryConditions *bc, const Shape<2, 1> *s) const {
+bool Rectangle::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const {
     Rectangle rectangle = dynamic_cast<const Rectangle &>(*s);
     this->applyBC(bc, &rectangle);
 

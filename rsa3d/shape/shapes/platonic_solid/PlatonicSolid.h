@@ -22,7 +22,7 @@ private:
 protected:
     explicit PlatonicSolid(const Matrix<3, 3> &orientation) : orientation(orientation) {};
 
-    void setPosition(const double *position) override;
+    void setPosition(const Vector<3> &position) override;
 
     template <std::size_t SIZE>
     std::array<Vector<3>, SIZE> applyOrientation(const std::array<Vector<3>, SIZE> &vectors) const;
@@ -33,8 +33,8 @@ protected:
 public:
     static void initClass(const std::string &attr);
 
-    bool overlap(BoundaryConditions *bc, const Shape<3, 0> *s) const final;
-    bool pointInside(BoundaryConditions *bc, double *position, const std::array<double, 0> &orientation,
+    bool overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const final;
+    bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const std::array<double, 0> &orientation,
                     double orientationRange) const override;
     void store(std::ostream &f) const override;
     void restore(std::istream &f) override;

@@ -28,15 +28,9 @@ public:
 
     shape_pair generate() override {
         auto pair = factory.generate();
-
-        using V = Vector<SD>;
-        double transArr[SD];
-        V translation = V(pair.second()->getPosition()) - V(pair.first()->getPosition());
-        translation.copyToArray(transArr);
-
         auto shape1 = pair.first()->clone();
         auto shape2 = pair.first()->clone();
-        shape2->translate(transArr);
+        shape2->translate(pair.second()->getPosition() - pair.first()->getPosition());
         return shape_pair(shape1, shape2);
     };
 

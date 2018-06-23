@@ -45,9 +45,7 @@ std::unique_ptr<Shape<SD, AD>> generate_shape(const Vector<SD> &pos, const std::
         throw std::runtime_error(out.str());
     }
 
-    double arrayPos[SD];
-    pos.copyToArray(arrayPos);
-    shape->translate(arrayPos);
+    shape->translate(pos);
     shape->rotate(orientation);
     return std::unique_ptr<Shape<SD, AD>>(shape);
 }

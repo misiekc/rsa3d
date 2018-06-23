@@ -48,7 +48,7 @@ void Ellipse::setAngle(double angle){
 	this->calculateU();
 }
 
-bool Ellipse::overlap(BoundaryConditions *bc, const Shape<2, 1> *s) const {
+bool Ellipse::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const {
 	Ellipse es = dynamic_cast<const Ellipse&>(*s);
     this->applyBC(bc, &es);
 	double d;
@@ -91,7 +91,7 @@ double Ellipse::getVolume() const {
 	return (dx*dx+dy*dy < 1);
 }*/
 
-bool Ellipse::pointInside(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) const
+bool Ellipse::pointInside(BoundaryConditions<2> *bc, const Vector<2> &other, double angleFrom, double angleTo) const
 {
     // Check exlusion zones for angle interval endpoinds - angleFrom and angleTo
     Ellipse ellTmp;
@@ -108,7 +108,8 @@ bool Ellipse::pointInside(BoundaryConditions *bc, double *other, double angleFro
 	return pointInsideSpecialArea(bc, other, angleFrom, angleTo);
 }
 
-int Ellipse::pointInsideSpecialArea(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) const {
+bool Ellipse::pointInsideSpecialArea(BoundaryConditions<2> *bc, const Vector<2> &other, double angleFrom,
+									double angleTo) const {
 
 	this->normalizeAngleRange(&angleFrom, &angleTo, M_PI);
 	// now angleFrom is in [this->getAngle(), this->getAngle() + M_PI)
@@ -121,8 +122,7 @@ int Ellipse::pointInsideSpecialArea(BoundaryConditions *bc, double *other, doubl
 
     // Now angleTo - angleFrom <= pi. Align ellipse with coordinate system. Transform angles' range
     // (and divide if necessary) so that its fully contained in [0, pi] range
-    double translationArr[2];
-    Vector<2> translationVector(bc->getTranslation(translationArr, this->getPosition(), other));
+    Vector<2> translationVector = bc->getTranslation(this->getPosition(), other);
     Vector<2> thisPos(this->getPosition());
     Vector<2> otherPos = Vector<2>(other) + translationVector;
 	Vector<2> otherAligned = getAntiRotationMatrix() * (thisPos - otherPos);
@@ -233,7 +233,7 @@ std::string Ellipse::toPovray() const{
 	out << "	rotate <0, 0, " << (180*this->getAngle()/M_PI) << ">" << std::endl;
 	out << "	translate <";
 
-	const double *position = this->getPosition();
+	Vector<2> position = this->getPosition();
 	for(unsigned short i=0; i<2; i++)
 		out << position[i] << ", ";
 	out << "0.0>" << std::endl << "	texture { pigment { color Red } }" << std::endl << "}" << std::endl;

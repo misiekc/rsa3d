@@ -59,7 +59,7 @@ namespace
         auto shape1 = generate_randomly_oriented_shape(-pos, rnd);
         auto shape2 = generate_randomly_oriented_shape(pos, rnd);
 
-        MockBC bc;
+        RSAMockBC bc;
         return shape1->overlap(&bc, shape2.get());
     }
 

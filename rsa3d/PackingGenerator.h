@@ -35,7 +35,7 @@ private:
     void modifiedRSA(RSAShape *s, Voxel *v);
 	bool isSaturated();
 	double getFactor();
-	bool isInside(double *position, double *orientation);
+	bool isInside(const RSAVector &position, double *orientation);
 	void createPacking();
 
 	void toPovray(const std::string &filename);

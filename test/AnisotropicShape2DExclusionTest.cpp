@@ -97,7 +97,7 @@ namespace
     /* Performs inttest based on context and returns result */
     Result perform_inttest(const Context &context, std::ostream &out) {
         RND rnd;
-        MockBC mockBC;
+        MockBC<2> mockBC;
         Result result;
 
         context.printInfo(out);
@@ -117,7 +117,7 @@ namespace
 
     /* Performs pitest based on context and returns result */
     Result perform_pitest(const Context &context, std::ostream &out) {
-        MockBC mockBC;
+        MockBC<2> mockBC;
         RND rnd;
         Result result;
 
@@ -227,15 +227,13 @@ namespace
 
 /* Uses pointInside method when dealing with ConvexShape or voxelInside with zero spatial size for normal Shape */
 bool as2d_extest::point_inside(const Shape<2, 1> &shape, const Vector<2> &point, double angleFrom, double angleTo) {
-    MockBC bc;
-    double pointArr[2];
-    point.copyToArray(pointArr);
+    MockBC<2> bc;
 
     try {
         auto &convexShape = dynamic_cast<const ConvexShape<2, 1>&>(shape);
-        return convexShape.pointInside(&bc, pointArr, {{angleFrom}}, angleTo - angleFrom);
+        return convexShape.pointInside(&bc, point, {{angleFrom}}, angleTo - angleFrom);
     } catch (std::bad_cast&) {
-        return shape.voxelInside(&bc, pointArr, {{angleFrom}}, 0, angleTo - angleFrom);
+        return shape.voxelInside(&bc, point, {{angleFrom}}, 0, angleTo - angleFrom);
     }
 }
 

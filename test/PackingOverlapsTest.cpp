@@ -15,7 +15,7 @@ bool pack_ovtest::test_packing_overlaps(const Packing &packing) {
     std::cout << "[INFO] Checking " << size << " shapes, " << total << " checks required..." << std::endl;
 
     std::size_t overlaps = 0;
-    MockBC bc;
+    RSAMockBC bc;
     ParallelInfoLooper infoLooper(10000000);
 
     _OMP_PARALLEL_FOR

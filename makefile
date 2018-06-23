@@ -55,8 +55,7 @@ PACKAGES = rsa3d/analizator/ \
 # Source files list (without extensions) except of the Main.cpp file
 # These objects will be linked with both main executable and test
 # executables
-OBJS_COMMON = rsa3d/BoundaryConditions \
-       rsa3d/Config \
+OBJS_COMMON = rsa3d/Config \
        rsa3d/Intersection \
        rsa3d/PackingGenerator \
        rsa3d/Parameters \

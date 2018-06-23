@@ -164,13 +164,14 @@ double Polygon::getVolume(){
 	return result;
 }
 
-bool Polygon::overlap(BoundaryConditions *bc, const Shape<2, 1> *s) const{
+bool Polygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{
 	Polygon pol = dynamic_cast<const Polygon&>(*s);
 	this->applyBC(bc, &pol);
 
-	double *polposition = pol.getPosition();
-	double *position = this->getPosition();
-
+	double polposition[2];
+	pol.getPosition().copyToArray(polposition);
+	double position[2];
+	this->getPosition().copyToArray(position);
 
 	//easy check
 	double d2 = 0, tmp;
@@ -217,15 +218,16 @@ bool Polygon::overlap(BoundaryConditions *bc, const Shape<2, 1> *s) const{
 	return false;
 }
 
-bool Polygon::voxelInside(BoundaryConditions *bc, const double *voxelPosition,
+bool Polygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition,
 						  const std::array<double, 1> &voxelOrientation, double spatialSize, double angularSize) const{
 
 	if (voxelOrientation[0] > Shape<2, 1>::getVoxelAngularSize())
 		return true;
 
-	double *position = this->getPosition();
+	double position[2];
+	this->getPosition().copyToArray(position);
 	double translation[2];
-	bc->getTranslation(translation, voxelPosition, position);
+	bc->getTranslation(voxelPosition, this->getPosition()).copyToArray(translation);
 
 	double spatialCenter[2];
 	double halfSpatialSize = 0.5*spatialSize;
@@ -318,7 +320,7 @@ std::string Polygon::toWolfram() const {
 }
 
 Vector<2> Polygon::getVertexPosition(std::size_t index) const {
-    const double *position = this->getPosition();
+    Vector<2> position = this->getPosition();
     double angle = Polygon::vertexTheta[index] + this->getOrientation()[0];
     return Vector<2>{{
         position[0] + Polygon::vertexR[index] * std::cos(angle),

@@ -81,7 +81,8 @@ void Analyzer::calculateOrderParameters(double *result, Cuboid *c1, Cuboid *c2){
 }
 
 void Analyzer::analyzeOrder(const Packing &packing, Plot **order){
-	double *posi, *posj, da[RSA_SPATIAL_DIMENSION];
+	double da[RSA_SPATIAL_DIMENSION];
+	RSAVector posi, posj;
 	double orderParameters[5];
 	for(uint i=0; i<packing.size(); i++){
 		posi = packing[i]->getPosition();
@@ -123,7 +124,8 @@ void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, P
 	if (nvt != NULL)
 		nvt->addBetween(lastt, nvt->getMax()+1.0, packing.size());
 	if (corr!=NULL){
-		double *posi, *posj, da[RSA_SPATIAL_DIMENSION];
+		double da[RSA_SPATIAL_DIMENSION];
+		RSAVector posi, posj;
 		for(uint i=0; i<packing.size(); i++){
 			posi = packing[i]->getPosition();
 			for(uint j=i+1; j<packing.size(); j++){

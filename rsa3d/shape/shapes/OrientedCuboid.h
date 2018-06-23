@@ -21,10 +21,10 @@ public:
 	virtual ~OrientedCuboid();
 	static void initClass(const std::string &args);
 
-    bool overlap(BoundaryConditions *bc, const Shape<DIMENSION, 0> *s) const override;
-    bool pointInside(BoundaryConditions *bc, double* da) const override;
-	bool pointInside(BoundaryConditions *bc, double* position, const std::array<double, 0> &orientation,
-					double orientationRange) const override;
+    bool overlap(BoundaryConditions<DIMENSION> *bc, const Shape<DIMENSION, 0> *s) const override;
+    bool pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &da) const override;
+	bool pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position,
+					 const std::array<double, 0> &orientation, double orientationRange) const override;
     double getVolume() const;
 	Shape<DIMENSION, 0> *clone() const override;
 

@@ -33,7 +33,8 @@ public:
 
 private:
 
-	int pointInsideSpecialArea(BoundaryConditions *bc, double *other, double angleFrom, double angleTo) const;
+	bool pointInsideSpecialArea(BoundaryConditions<2> *bc, const Vector<2> &other, double angleFrom,
+							   double angleTo) const;
 public:
 	static void initClass(const std::string &args);
 
@@ -43,9 +44,9 @@ public:
 
     double getVolume() const override;
     void setAngle(double angle) override;
-    bool overlap(BoundaryConditions *bc, const Shape<2, 1> *s) const override;
+    bool overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const override;
     //bool pointInside(BoundaryConditions *bc, double* da) const override;
-    bool pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) const override;
+    bool pointInside(BoundaryConditions<2> *bc, const Vector<2> &da, double angleFrom, double angleTo) const override;
     std::string toWolfram() const override;
 	std::string toPovray() const override;
     std::string toString() const override;

@@ -33,17 +33,15 @@ double SpheroCylinder2D::getVolume() const {
     return 1;
 }
 
-bool SpheroCylinder2D::overlap(BoundaryConditions *bc, const Shape<2, 1> *s) const {
+bool SpheroCylinder2D::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const {
     SpheroCylinder2D other = dynamic_cast<const SpheroCylinder2D&>(*s);
     this->applyBC(bc, &other);
-    Vector<2> otherPos(other.getPosition());
-    return withinExclusionZone(otherPos, other.getAngle());
+    return withinExclusionZone(other.getPosition(), other.getAngle());
 }
 
 double SpheroCylinder2D::pointDistance2(const Vector<2> &p) const
 {
-	Vector<2> thisPos(this->getPosition());
-    return pointDistance2(thisPos, this->getAngle(), p);
+    return pointDistance2(this->getPosition(), this->getAngle(), p);
 }
 
 double SpheroCylinder2D::pointDistance2(const Vector<2> &pos, double angle, const Vector<2> &point) {
@@ -57,7 +55,8 @@ double SpheroCylinder2D::pointDistance2(const Vector<2> &pos, double angle, cons
         return (diff - centerVector).norm2();
 }
 
-bool SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const {
+bool SpheroCylinder2D::pointInside(BoundaryConditions<2> *bc, const Vector<2> &da, double angleFrom,
+                                   double angleTo) const {
     this->normalizeAngleRange(&angleFrom, &angleTo, M_PI);
 
     // If angleTo not in normal range (see normalizeAngleRange), divide it and check separately
@@ -66,8 +65,7 @@ bool SpheroCylinder2D::pointInside(BoundaryConditions *bc, double *da, double an
                pointInside(bc, da, this->getAngle(), angleTo - M_PI);
     }
 
-    double translationArr[2];
-    Vector<2> translationVector(bc->getTranslation(translationArr, this->getPosition(), da));
+    Vector<2> translationVector = bc->getTranslation(this->getPosition(), da);
     Vector<2> thisPos(this->getPosition());
     Vector<2> pointPos = Vector<2>(da) + translationVector;
     Vector<2> pointPosThisAligned = getAntiRotationMatrix() * (pointPos - thisPos);
@@ -125,7 +123,7 @@ std::string SpheroCylinder2D::toPovray() const {
 	out << "    rotate <0, 0, " << (180*this->getAngle()/M_PI) << ">" << std::endl;
 	out << "	translate <";
 
-    const double *position = this->getPosition();
+    Vector<2> position = this->getPosition();
 	for(unsigned short i=0; i<2; i++)
 		out << (position[i]) << ", ";
 	out << "0.0>" << std::endl << "	texture { pigment { color Red } }" << std::endl << "}" << std::endl;

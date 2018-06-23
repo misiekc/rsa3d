@@ -6,6 +6,7 @@
 #include "shape/ShapeFactory.h"
 #include <fstream>
 
+using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;
 
 Packing::~Packing() {
     for (auto shape : this->packing)
@@ -71,7 +72,7 @@ void Packing::expandOnPBC(double linearSize, double expandMargin) {
     for (std::size_t i = 0; i < RSA_SPATIAL_DIMENSION; i++) {
         for (std::size_t j = 0; j < oldSize; j++) {
             auto shape = (*this)[j];
-            const double *position = shape->getPosition();
+            RSAVector position = shape->getPosition();
             if (position[i] < expandMargin * linearSize)
                 expandShapeOnBC(shape, linearSize, i);
             else if (position[i] > (1 - expandMargin) * linearSize)
@@ -83,9 +84,8 @@ void Packing::expandOnPBC(double linearSize, double expandMargin) {
 /* Helper method. Clones a shape and translates one of its coordinates in a given direction. */
 void Packing::expandShapeOnBC(const RSAShape *shape, double translation, size_t translateCoordIdx) {
     RSAShape *shapeClone = shape->clone();
-    std::array<double, RSA_SPATIAL_DIMENSION> trans{};
-    trans.fill(0);
+    RSAVector trans;
     trans[translateCoordIdx] = translation;
-    shapeClone->translate(trans.data());
+    shapeClone->translate(trans);
     this->addShape(shapeClone);
 }

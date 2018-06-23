@@ -11,6 +11,7 @@
 // #include "Vector.h"
 
 #include <array>
+#include "Vector.h"
 
 /**
  * @brief An object located in @a SPATIAL_DIMENSION dimensional space.
@@ -24,7 +25,7 @@ class Positioned {
 	static_assert(SPATIAL_DIMENSION > 0, "SPATIAL_DIMENTION == 0");
 
 private:
-    std::array<double, SPATIAL_DIMENSION> position;
+    Vector<SPATIAL_DIMENSION> position;
 
 protected:
 
@@ -41,7 +42,7 @@ protected:
      * \endcode
      * @param position new position
      */
-    virtual void setPosition(const double *position);
+    virtual void setPosition(const Vector<SPATIAL_DIMENSION> &position);
 
 public:
 
@@ -53,13 +54,13 @@ public:
 	 * @brief Returns position of a Positioned.
 	 * @return position of a Positioned
 	 */
-	double* getPosition() const;
+	const Vector<SPATIAL_DIMENSION> &getPosition() const;
 
     /**
      * @brief Translates positioned by a given vector @a v.
      * @param v a vector to translate by
      */
-	void translate(double *v);
+	void translate(const Vector<SPATIAL_DIMENSION> &position);
 };
 
 using RSAPositioned = Positioned<RSA_SPATIAL_DIMENSION>;

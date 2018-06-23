@@ -51,17 +51,16 @@ void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
 }
 
 template <unsigned short DIMENSION>
-bool OrientedCuboid<DIMENSION>::overlap(BoundaryConditions *bc, const Shape<DIMENSION, 0> *s) const{
+bool OrientedCuboid<DIMENSION>::overlap(BoundaryConditions<DIMENSION> *bc, const Shape<DIMENSION, 0> *s) const{
     return this->pointInside(bc, s->getPosition());
 }
 
 template <unsigned short DIMENSION>
-bool OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) const{
+bool OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &da) const{
 //    if (OrientedCuboid<DIMENSION>::do2Drotation){
 //    	return Cuboid::pointInside(bc, da);
 //    }else{
-    	double ta[DIMENSION];
-   		bc->getTranslation(ta, this->getPosition(), da);
+    	Vector<DIMENSION> ta = bc->getTranslation(this->getPosition(), da);
     	for(unsigned short i=0; i<DIMENSION; i++){
     		if (std::fabs(this->getPosition()[i] - (da[i] + ta[i])) > size[i]){
     			return false;
@@ -72,7 +71,7 @@ bool OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) 
 }
 
 template <unsigned short DIMENSION>
-bool OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions *bc, double* position,
+bool OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position,
 										   const std::array<double, 0> &orientation, double orientationRange) const{
 	return 0;
 }
@@ -86,7 +85,7 @@ template <unsigned short DIMENSION>
 std::string OrientedCuboid<DIMENSION>::toPovray() const
 {	
 	std::string s = "";
-	const double *position = this->getPosition();
+	Vector<DIMENSION> position = this->getPosition();
 	if (DIMENSION==2){
 		double factor = 0.5;
 		s += "  polygon {4, ";

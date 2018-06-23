@@ -132,7 +132,7 @@ void Cuboid::restoreDefaultStrategy() {
 // Checks whether there is an overlap between this and *s using chosen
 // stategy
 //----------------------------------------------------------------------------
-bool Cuboid::overlap(BoundaryConditions *bc, const Shape *s) const
+bool Cuboid::overlap(BoundaryConditions<3> *bc, const Shape *s) const
 {
     Cuboid other = dynamic_cast<const Cuboid&>(*s);
     this->applyBC(bc, &other);
@@ -160,16 +160,12 @@ double Cuboid::getVolume() const
 // Checks whether the point with coordinates da lies inside excluded volume.
 // It is an interior of a set of point which distanse from
 //----------------------------------------------------------------------------
-bool Cuboid::pointInside(BoundaryConditions *bc, double* pos, const std::array<double, 0> &orientation,
+bool Cuboid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &pos, const std::array<double, 0> &orientation,
                         double orientationRange) const
 {
-    Vector<3> cuboidTranslation(this->getPosition());
-    Vector<3> pointTranslation(pos);
-
     // Transform point coordinates to Cuboid coordinate system
-    double trans_arr[3];
-    cuboidTranslation += Vector<3>(bc->getTranslation(trans_arr, this->getPosition(), pos));
-    pointTranslation = this->orientation.transpose() * (pointTranslation - cuboidTranslation);
+    Vector<3> cuboidTranslation = this->getPosition() + bc->getTranslation(this->getPosition(), pos);
+    Vector<3> pointTranslation = this->orientation.transpose() * (pos - cuboidTranslation);
 
     double abs_point_coords[3];
     for (unsigned short i = 0; i < 3; i++)
@@ -248,7 +244,7 @@ std::string Cuboid::toPovray() const
 		s+= ",\n    ";
 	}
 
-    const double *position = this->getPosition();
+    Vector<3> position = this->getPosition();
 	for(unsigned short i=0; i<3; i++){
 		s += std::to_string(position[i]);
 		if (i<2)
@@ -263,7 +259,6 @@ std::string Cuboid::toPovray() const
 //----------------------------------------------------------------------------
 std::string Cuboid::toWolfram() const
 {
-    const double *position = this->getPosition();
     std::stringstream out;
     out << "GeometricTransformation[" << std::endl;
     out << "    Cuboid[{" << (-this->size[0] / 2) << ", " << (-this->size[1] / 2) << ", " << (-this->size[2] / 2) << "}, ";
@@ -272,7 +267,7 @@ std::string Cuboid::toWolfram() const
     out << "        {{{" << this->orientation(0, 0) << ", " << this->orientation(0, 1) << ", " << this->orientation(0, 2) << "}," << std::endl;
     out << "        {" << this->orientation(1, 0) << ", " << this->orientation(1, 1) << ", " << this->orientation(1, 2) << "}," << std::endl;
     out << "        {" << this->orientation(2, 0) << ", " << this->orientation(2, 1) << ", " << this->orientation(2, 2) << "}}," << std::endl;
-    out << "        {" << position[0] << ", " << position[1] << ", " << position[2] << "}}]]";
+    out << "        " << this->getPosition() << "}]]";
     return out.str();
 }
 

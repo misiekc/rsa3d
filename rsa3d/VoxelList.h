@@ -20,6 +20,8 @@ class VoxelList {
 
 private:
 
+    using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;
+
 	// allows voxels to overlap - only for testing purposes and normally should be set to 1
 	const double dxFactor = 1.0; // 1.0000000001;
 
@@ -49,7 +51,7 @@ private:
 	void fillNeighbourGrid();
 
 	// for a given voxel returns index of its root
-	int getIndexOfTopLevelVoxel(double *da);
+	int getIndexOfTopLevelVoxel(const RSAVector &da);
 
 	// initialize voxels - used inside a constructor
 	void initVoxels();
@@ -84,7 +86,9 @@ protected:
 
 
 	bool isVoxelInsidePacking(Voxel *v);
-	bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize, std::vector<const RSAShape*> *shapes, BoundaryConditions *bc, unsigned short depth = 0);
+	bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
+                                    std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc,
+                                    unsigned short depth = 0);
 
 	void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes);
 
@@ -107,19 +111,19 @@ public:
 	void getNeighbours(std::vector<Voxel *> *result, double *da);
 	void removeTopLevelVoxel(Voxel *v);
 
-	bool analyzeVoxel(Voxel *v, const RSAShape *s, BoundaryConditions *bc);
+	bool analyzeVoxel(Voxel *v, const RSAShape *s, RSABoundaryConditions *bc);
 //	bool analyzeVoxel(Voxel *v, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *neighbours, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, BoundaryConditions *bc, unsigned short depth = 0);
+	bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, unsigned short depth = 0);
 
-	size_t analyzeVoxels(BoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth);
+	size_t analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth);
 
 
-	bool splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, BoundaryConditions *bc);
+	bool splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc);
 
 	Voxel *getRandomVoxel(RND *rnd);
 	Voxel *getVoxel(int i);
 	Voxel * getVoxel(double* pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle);
-	void getRandomPositionAndOrientation(double *position, double *orientation, Voxel *v, RND *rnd);
+	void getRandomPositionAndOrientation(RSAVector &position, double *orientation, Voxel *v, RND *rnd);
 	double getVoxelSize();
 	double getVoxelAngularSize();
 	Voxel* get(int i);

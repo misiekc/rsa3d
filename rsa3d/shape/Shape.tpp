@@ -119,7 +119,9 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::store(std::ostream &f) const{
 	f.write((char *)(&this->no), sizeof(int));
 	f.write((char *)(&this->time), sizeof(double));
     // TODO move to Positioned::store?
-	f.write((char *)(this->getPosition()), SPATIAL_DIMENSION*sizeof(double));
+    double position[SPATIAL_DIMENSION];
+    this->getPosition().copyToArray(position);
+	f.write((char *)(position), SPATIAL_DIMENSION*sizeof(double));
 	if (ad>0)
 		f.write((char *)(this->orientation.data()), ANGULAR_DIMENSION*sizeof(double));
 }
@@ -148,18 +150,16 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
 	// TODO move to Positioned::restore?
 	double position[SPATIAL_DIMENSION];
 	f.read((char *)(position), sd*sizeof(double));
-	this->setPosition(position);
+	this->setPosition(Vector<SPATIAL_DIMENSION>(position));
 
 	if (ad>0)
 		f.read((char *)(this->orientation.data()), ad*sizeof(double));
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::applyBC(BoundaryConditions *bc,
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::applyBC(BoundaryConditions<SPATIAL_DIMENSION> *bc,
                                                           Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *second) const {
-    double translation[SPATIAL_DIMENSION];
-    bc->getTranslation(translation, this->getPosition(), second->getPosition());
-    second->translate(translation);
+    second->translate(bc->getTranslation(this->getPosition(), second->getPosition()));
 }
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>

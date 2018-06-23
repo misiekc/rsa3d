@@ -32,7 +32,7 @@ private:
 
     int isInsideRect(const Vector<2, double> &point, double cx, double cy, double aLength, double bLength) const;
 
-    bool pointInsideInternal(BoundaryConditions *bc, double *da, double angleFrom, double angleTo) const;
+    bool pointInsideInternal(BoundaryConditions<2> *bc, const Vector<2> &da, double angleFrom, double angleTo) const;
 
     Vector<2, double> rotatePoint(const Vector<2, double>& point, const Matrix<2, 2, double>& rotation, const Vector<2, double>& center) const;
 
@@ -47,7 +47,7 @@ private:
     bool isIntersection(double p0_x, double p0_y, double p1_x, double p1_y, double p2_x, double p2_y, double p3_x, double p3_y) const;
 
 protected:
-    void setPosition(const double *position) override;
+    void setPosition(const Vector<2> &position) override;
 
 public:
     static void initClass(const std::string &args);
@@ -55,12 +55,12 @@ public:
     Rectangle();
     ~Rectangle() override = default;
 
-    bool overlap(BoundaryConditions *bc, const Shape<2, 1> *s) const override;
+    bool overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const override;
 
     double getVolume() const override;
 
-    bool pointInside(BoundaryConditions *bc, double* da) const override;
-    bool pointInside(BoundaryConditions *bc, double* da, double angleFrom, double angleTo) const override;
+    bool pointInside(BoundaryConditions<2> *bc, const Vector<2> &da) const override;
+    bool pointInside(BoundaryConditions<2> *bc, const Vector<2> &da, double angleFrom, double angleTo) const override;
 
     std::string toWolfram() const override;
     std::string toPovray() const override;

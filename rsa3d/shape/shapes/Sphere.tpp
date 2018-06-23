@@ -57,7 +57,7 @@ Sphere<DIMENSION>::Sphere() : ConvexShape<DIMENSION, 0>(){
 }
 
 template <unsigned short DIMENSION>
-bool Sphere<DIMENSION>::overlap(BoundaryConditions *bc, const Shape<DIMENSION, 0> *s) const {
+bool Sphere<DIMENSION>::overlap(BoundaryConditions<DIMENSION> *bc, const Shape<DIMENSION, 0> *s) const {
 	const Sphere *sd = dynamic_cast<const Sphere<DIMENSION>*>(s);
 	double d2 = bc->distance2(this->getPosition(), sd->getPosition());
 	double r2 = this->r + sd->r;
@@ -72,7 +72,7 @@ double Sphere<DIMENSION>::getVolume() const {
 }
 
 template <unsigned short DIMENSION>
-bool Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) const {
+bool Sphere<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &da) const {
 	double d2;
 	if (bc!=NULL)
 		d2 = bc->distance2(da, this->getPosition());
@@ -85,8 +85,8 @@ bool Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* da) const {
 }
 
 template <unsigned short DIMENSION>
-bool Sphere<DIMENSION>::pointInside(BoundaryConditions *bc, double* position, const std::array<double, 0> &orientation,
-								   double orientationRange) const {
+bool Sphere<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position,
+									const std::array<double, 0> &orientation, double orientationRange) const {
     return this->pointInside(bc, position);
 }
 
@@ -98,7 +98,7 @@ double Sphere<DIMENSION>::minDistance(Shape<DIMENSION, 0> *s) const{
 template <unsigned short DIMENSION>
 std::string Sphere<DIMENSION>::toPovray() const{
 	std::string s;
-    const double *position = this->getPosition();
+    Vector<DIMENSION> position = this->getPosition();
 	double r0 = this->r - 0.01;
 
 	if (DIMENSION==2){

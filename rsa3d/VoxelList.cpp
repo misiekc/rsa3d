@@ -158,10 +158,12 @@ void VoxelList::compactVoxelArray(Voxel **list, int &endIndex){
 	}
 }
 
-int VoxelList::getIndexOfTopLevelVoxel(double *da){
+int VoxelList::getIndexOfTopLevelVoxel(const RSAVector &da){
 
+	double daArray[RSA_SPATIAL_DIMENSION];
+	da.copyToArray(daArray);
 	int n = (int)(this->spatialRange/this->initialVoxelSize) + 1;
-	int index = position2i(da, RSA_SPATIAL_DIMENSION, n*this->initialVoxelSize, this->initialVoxelSize, n);
+	int index = position2i(daArray, RSA_SPATIAL_DIMENSION, n*this->initialVoxelSize, this->initialVoxelSize, n);
 	return index;
 }
 
@@ -169,21 +171,21 @@ int VoxelList::getIndexOfTopLevelVoxel(double *da){
 void VoxelList::removeTopLevelVoxel(Voxel *v){
 	if (this->disabled)
 		return;
-	this->activeTopLevelVoxels[this->getIndexOfTopLevelVoxel(v->getPosition())]=false;
+	this->activeTopLevelVoxels[this->getIndexOfTopLevelVoxel(RSAVector(v->getPosition()))]=false;
 }
 
 
 void VoxelList::checkTopLevelVoxels(){
 
 	RND rnd;
-	double pos[RSA_SPATIAL_DIMENSION];
+	RSAVector pos;
 	std::array<double, RSA_ANGULAR_DIMENSION> angle;
 
 	for(size_t i=0; i<this->length; i++){
 		Voxel *v = this->voxels[i];
 		this->getRandomPositionAndOrientation(pos, angle.data(), v, &rnd);
 		int index = this->getIndexOfTopLevelVoxel(pos);
-		if (this->getIndexOfTopLevelVoxel(v->getPosition())!=index){
+		if (this->getIndexOfTopLevelVoxel(RSAVector(v->getPosition()))!=index){
 			std::cout << "checkTopVoxels problem" << std::endl;
 		}
 		for(int j=0; j<10; j++){
@@ -280,7 +282,7 @@ bool VoxelList::isVoxelInsidePacking(Voxel *v){
  */
 
 bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
-										   std::vector<const RSAShape *> *shapes, BoundaryConditions *bc,
+										   std::vector<const RSAShape *> *shapes, RSABoundaryConditions *bc,
                                            unsigned short depth){
 	// if voxel is outside the packing it is inside exclusion zone
 	if (!this->isVoxelInsidePacking(v))
@@ -289,7 +291,7 @@ bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double 
 
 	bool isInside = false;
 	for(const RSAShape *s : *shapes){
-		isInside = s->voxelInside(bc, v->getPosition(), v->getOrientation(), spatialSize, angularSize);
+		isInside = s->voxelInside(bc, RSAVector(v->getPosition()), v->getOrientation(), spatialSize, angularSize);
 		if (isInside)
 			break;
 	}
@@ -327,23 +329,22 @@ bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double 
 
 bool VoxelList::isTopLevelVoxelActive(Voxel *v){
 
-	double *vpos = v->getPosition();
 	// checking if initial voxel containing v is active (do not have a shape inside)
-	int index = this->getIndexOfTopLevelVoxel(vpos);
+	int index = this->getIndexOfTopLevelVoxel(RSAVector(v->getPosition()));
 	return this->activeTopLevelVoxels[index];
 }
 
 
-bool VoxelList::analyzeVoxel(Voxel *v, const RSAShape *s, BoundaryConditions *bc){
+bool VoxelList::analyzeVoxel(Voxel *v, const RSAShape *s, RSABoundaryConditions *bc){
 
 	if (!isTopLevelVoxelActive(v))
 		return true;
 
-	return s->voxelInside(bc, v->getPosition(), v->getOrientation(), this->spatialVoxelSize, this->angularVoxelSize);
+	return s->voxelInside(bc, RSAVector(v->getPosition()), v->getOrientation(), this->spatialVoxelSize, this->angularVoxelSize);
 }
 
 
-bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, BoundaryConditions *bc, unsigned short depth){
+bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, unsigned short depth){
 	if (!this->disabled && (depth > v->depth || depth==0) ){
 
 	if (!isTopLevelVoxelActive(v))
@@ -371,7 +372,7 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, Bounda
 }
 
 
-size_t VoxelList::analyzeVoxels(BoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth) {
+size_t VoxelList::analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth) {
 
 	size_t begin = this->length;
 
@@ -397,8 +398,7 @@ size_t VoxelList::analyzeVoxels(BoundaryConditions *bc, NeighbourGrid<const RSAS
 }
 
 
-bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, BoundaryConditions *bc){
-
+bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc){
 	if (this->disabled)
 		return false;
 	size_t voxelsFactor = (size_t)round( pow(2, RSA_SPATIAL_DIMENSION+RSA_ANGULAR_DIMENSION) );
@@ -481,7 +481,7 @@ Voxel * VoxelList::getVoxel(int i){
 }
 
 
-void VoxelList::getRandomPositionAndOrientation(double *position, double *orientation, Voxel *v, RND *rnd){
+void VoxelList::getRandomPositionAndOrientation(RSAVector &position, double *orientation, Voxel *v, RND *rnd){
 	double *vpos = v->getPosition();
 	std::array<double, RSA_ANGULAR_DIMENSION> vangle = v->getOrientation();
 
@@ -618,7 +618,7 @@ void VoxelList::restore(std::istream &f){
 		Voxel *v = new Voxel();
 		v->restore(f);
 		this->voxels[i] = v;
-		topIndex = this->getIndexOfTopLevelVoxel(v->getPosition());
+		topIndex = this->getIndexOfTopLevelVoxel(RSAVector(v->getPosition()));
 		this->activeTopLevelVoxels[topIndex] = true;
 	}
 	this->length = size;

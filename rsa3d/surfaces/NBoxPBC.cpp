@@ -7,42 +7,38 @@
 
 #include "NBoxPBC.h"
 
-NBoxPBC::NBoxPBC(int dim, double s, double ndx, double vdx) : Surface(dim, s, ndx, vdx){
+NBoxPBC::NBoxPBC(double s, double ndx, double vdx) : Surface(s, ndx, vdx){
 }
 
-NBoxPBC::~NBoxPBC() {
+double NBoxPBC::getArea() const {
+	return pow(this->size, RSA_SPATIAL_DIMENSION);
 }
 
-double NBoxPBC::getArea(){
-	return pow(this->size, this->dimension);
-}
-
-double * NBoxPBC::getTranslation(double *result, int dim, double s, const double *p1, const double *p2) {
-	double d;
-	for(int i=0; i<dim; i++){
-		d = 2*(p1[i] - p2[i]);
+RSAVector NBoxPBC::getTranslation(double s, const RSAVector &p1, const RSAVector &p2) {
+    RSAVector result;
+	for(int i=0; i<RSA_SPATIAL_DIMENSION; i++){
+		double d = 2*(p1[i] - p2[i]);
 		if (d > s)
 			result[i] = s;
 		else if (d < -s)
 			result[i] = -s;
-		else
-			result[i] = 0.0;
-		}
+	}
 	return result;
-	}
-
-double * NBoxPBC::getTranslation(double *result, const double *p1, const double *p2) {
-		return NBoxPBC::getTranslation(result, this->dimension, this->size, p1, p2);
-	}
-
-void NBoxPBC::vector(double* v) {
-	this->vectorPeriodicBC(v);
 }
 
-void NBoxPBC::checkPosition(double *da) {
-	for(int i=0; i<this->dimension; i++)
-		if (da[i] < 0.0)
-			da[i] += this->size;
-		else if (da[i] >= this->size)
-			da[i] -= this->size;
+RSAVector NBoxPBC::getTranslation(const RSAVector &p1, const RSAVector &p2) const {
+    return NBoxPBC::getTranslation(this->size, p1, p2);
+}
+
+RSAVector NBoxPBC::vector(const RSAVector &v) const {
+	return this->vectorPeriodicBC(v);
+}
+
+void NBoxPBC::checkPosition(RSAVector &da) const {
+	for(int i=0; i<RSA_SPATIAL_DIMENSION; i++) {
+        if (da[i] < 0.0)
+            da[i] += this->size;
+        else if (da[i] >= this->size)
+            da[i] -= this->size;
+    }
 }

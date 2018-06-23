@@ -72,21 +72,20 @@ intersection::polyhedron RegularTetrahedron::getTriangles() const {
     };
 }
 
-bool RegularTetrahedron::pointInside(BoundaryConditions *bc, double *position, const std::array<double, 0> &orientation,
-                                     double orientationRange) const {
+bool RegularTetrahedron::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
+                                     const std::array<double, 0> &orientation, double orientationRange) const {
     if (PlatonicSolid::pointInside(bc, position, orientation, orientationRange))
         return true;
 
     // Additional spheres in vertices
-    Vector<3> vPointPos(position);
     for (auto vertex : this->vertices)
-        if ((vPointPos - vertex).norm2() <= insphereRadius * insphereRadius)
+        if ((position - vertex).norm2() <= insphereRadius * insphereRadius)
             return true;
 
     // Additional spheres in midedges
     for (auto vi = vertices.begin(); vi != vertices.end(); vi++)
         for (auto vj = vi; vj != vertices.end(); vj++)
-            if ((vPointPos - (*vi + *vj)/2.).norm2() <= insphereRadius * insphereRadius)
+            if ((position - (*vi + *vj)/2.).norm2() <= insphereRadius * insphereRadius)
                 return true;
 
     return false;

@@ -8,10 +8,9 @@
 #include "Surface.h"
 #include <iostream>
 
-Surface::Surface(int dim, double s, double ndx, double vdx) : BoundaryConditions() {
-	this->dimension = dim;
+Surface::Surface(double s, double ndx, double vdx) : BoundaryConditions() {
 	this->size = s;
-	this->list = new NeighbourGrid<const RSAShape>(dim, s, ndx);
+	this->list = new NeighbourGrid<const RSAShape>(RSA_SPATIAL_DIMENSION, s, ndx);
 }
 
 Surface::~Surface() {
@@ -24,12 +23,16 @@ void Surface::clear(){
 
 
 void Surface::add(const RSAShape *s) {
-	this->list->add(s, s->getPosition());
+	double pos[RSA_SPATIAL_DIMENSION];
+	s->getPosition().copyToArray(pos);
+	this->list->add(s, pos);
 }
 
 const RSAShape* Surface::check(const RSAShape *s){
 	std::vector<const RSAShape *> neighbours;
-	this->list->getNeighbours(&neighbours, s->getPosition());
+	double pos[RSA_SPATIAL_DIMENSION];
+	s->getPosition().copyToArray(pos);
+	this->list->getNeighbours(&neighbours, pos);
 
 	for(const RSAPositioned *positioned: neighbours) {
 	    auto shape = dynamic_cast<const RSAShape*>(positioned);
@@ -40,7 +43,7 @@ const RSAShape* Surface::check(const RSAShape *s){
 }
 
 
-const RSAShape *Surface::getClosestNeighbour(double *da, const std::vector<const RSAShape*> &neighbours){
+const RSAShape *Surface::getClosestNeighbour(const RSAVector &da, const std::vector<const RSAShape*> &neighbours){
     double d, dmin = std::numeric_limits<double>::max();
     const RSAShape *pmin = nullptr;
     for(const RSAShape *p : neighbours){
@@ -54,9 +57,11 @@ const RSAShape *Surface::getClosestNeighbour(double *da, const std::vector<const
 }
 
 
-const RSAShape *Surface::getClosestNeighbour(double *da) {
+const RSAShape *Surface::getClosestNeighbour(const RSAVector &da) {
     std::vector<const RSAShape*> result;
-    this->list->getNeighbours(&result, da);
+    double pos[RSA_SPATIAL_DIMENSION];
+    da.copyToArray(pos);
+    this->list->getNeighbours(&result, pos);
     return getClosestNeighbour(da, result);
 }
 
@@ -69,31 +74,25 @@ NeighbourGrid<const RSAShape> *Surface::getNeighbourGrid(){
 	return this->list;
 }
 
-void Surface::checkPosition(double *da){
+void Surface::checkPosition(RSAVector &da) const {
 	// do nothing
 }
 
-double Surface::distance2(const double *a1, const double *a2) {
-	double *v = new double[this->dimension];
-	for (int i = 0; i < this->dimension; i++)
-		v[i] = a1[i] - a2[i];
-	this->vector(v);
-	double res = 0.0;
-	for (int i = 0; i < this->dimension; i++)
-		res += v[i] * v[i];
-	delete[] v;
-	return res;
+double Surface::distance2(const RSAVector &a1, const RSAVector &a2) const {
+	return this->vector(a1 - a2).norm2();
 }
 
-void Surface::vectorFreeBC(double* v) {
-	// do nothing
+RSAVector Surface::vectorFreeBC(const RSAVector &v) const {
+	return v;
 }
 
-void Surface::vectorPeriodicBC(double* v) {
-	for (int i = 0; i < this->dimension; i++) {
+RSAVector Surface::vectorPeriodicBC(const RSAVector &v) const {
+    RSAVector result = v;
+	for (int i = 0; i < RSA_SPATIAL_DIMENSION; i++) {
 		if (v[i] > this->size / 2.0)
-			v[i] -= this->size;
+			result[i] -= this->size;
 		else if (v[i] < -this->size / 2.0)
-			v[i] += this->size;
+			result[i] += this->size;
 	}
+	return result;
 }

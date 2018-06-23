@@ -45,7 +45,7 @@ std::array<Vector<3>, SIZE> PlatonicSolid<SpecificSolid>::applyOrientation(const
 }
 
 template<typename SpecificSolid>
-bool PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions *bc, const Shape<3, 0> *s) const {
+bool PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
     SpecificSolid other = dynamic_cast<const SpecificSolid&>(*s);     // Make a copy
     this->applyBC(bc, &other);
     SATOverlap<SpecificSolid> satOverlap;
@@ -53,12 +53,9 @@ bool PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions *bc, const Shape<3
 }
 
 template<typename SpecificSolid>
-bool PlatonicSolid<SpecificSolid>::pointInside(BoundaryConditions *bc, double *position,
+bool PlatonicSolid<SpecificSolid>::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
                                               const std::array<double, 0> &orientation, double orientationRange) const {
-    Vector<3> vThisPos(this->getPosition());
-    Vector<3> vPointPos(position);
-
-    return (vPointPos - vThisPos).norm2() <= 4 * std::pow(SpecificSolid::insphereRadius, 2);
+    return (position - this->getPosition()).norm2() <= 4 * std::pow(SpecificSolid::insphereRadius, 2);
 }
 
 template<typename SpecificSolid>
@@ -106,10 +103,10 @@ void PlatonicSolid<SpecificSolid>::setOrientationMatrix(const Matrix<3, 3> &orie
 }
 
 template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::setPosition(const double *position) {
-    Vector<3> oldPos(this->getPosition());
+void PlatonicSolid<SpecificSolid>::setPosition(const Vector<3> &position) {
+    Vector<3> oldPos = this->getPosition();
     Positioned::setPosition(position);
-    Vector<3> newPos(this->getPosition());
+    Vector<3> newPos = this->getPosition();
     this->translateVertices(newPos - oldPos);
 }
 

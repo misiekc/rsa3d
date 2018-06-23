@@ -39,7 +39,7 @@ namespace
     Results perform_test(RSAShapePairFactory &factory, unsigned long pairsToTest) {
         if (pairsToTest == 0) throw std::runtime_error("pairsToTest == 0");
 
-        MockBC bc;
+        RSAMockBC bc;
         Results results;
         results.tested = pairsToTest;
         results.factoryDesc = factory.getDescription();

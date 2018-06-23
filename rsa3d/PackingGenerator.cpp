@@ -44,9 +44,9 @@ PackingGenerator::PackingGenerator(int seed, Parameters *params) {
 
 
 	if (this->params->boundaryConditions == "free")
-		this->surface = new NBoxFBC(RSA_SPATIAL_DIMENSION, this->params->surfaceSize, gridSize, s->getVoxelSpatialSize());
+		this->surface = new NBoxFBC(this->params->surfaceSize, gridSize, s->getVoxelSpatialSize());
 	else
-		this->surface = new NBoxPBC(RSA_SPATIAL_DIMENSION, this->params->surfaceSize, gridSize, s->getVoxelSpatialSize());
+		this->surface = new NBoxPBC(this->params->surfaceSize, gridSize, s->getVoxelSpatialSize());
 
 	delete s;
 }
@@ -68,14 +68,14 @@ double PackingGenerator::getFactor() {
 }
 
 void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
-	double da[RSA_SPATIAL_DIMENSION];
+	RSAVector da;
 
 	const RSAShape *sn = this->surface->getClosestNeighbour(s->getPosition());
 	if (sn==NULL)
 		sn = this->surface->getClosestNeighbour(s->getPosition(), this->packing.getVector());
 	if (sn!=NULL){
-		double *spos = s->getPosition();
-		double *snpos = sn->getPosition();
+		RSAVector spos = s->getPosition();
+		RSAVector snpos = sn->getPosition();
 
 		double d = sqrt(this->surface->distance2(spos, snpos));
 		if (d < this->params->thresholdDistance){
@@ -90,7 +90,9 @@ void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
 				spos[i] += (d-mindist)*da[i];
 			}
 			this->surface->checkPosition(spos);
-			v = this->voxels->getVoxel(spos, s->getOrientation());
+			double sposarr[RSA_SPATIAL_DIMENSION];
+			spos.copyToArray(sposarr);
+			v = this->voxels->getVoxel(sposarr, s->getOrientation());
 			if (v==NULL){
 				std::cout << "Problem: PackingGenerator - voxel not found: " <<
 				" (" << spos[0] << ", " << spos[1] << ")" << std::endl;
@@ -101,7 +103,7 @@ void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
 }
 
 
-bool PackingGenerator::isInside(double *position, double *orientation){
+bool PackingGenerator::isInside(const RSAVector &position, double *orientation){
 	for(unsigned short i=0; i<RSA_SPATIAL_DIMENSION; i++){
 		if (position[i]>=this->spatialSize || position[i]<0)
 			return false;
@@ -152,7 +154,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 		for(int i = 0; i<loop; i++){
 			RSAShape *sVirtual = ShapeFactory::createShape(aRND[_OMP_THREAD_ID]);
 			Voxel *v;
-			double pos[RSA_SPATIAL_DIMENSION];
+			RSAVector pos;
 			std::array <double, RSA_ANGULAR_DIMENSION> angle{};
 			do{
 				v = this->voxels->getRandomVoxel(aRND[_OMP_THREAD_ID]);
@@ -168,7 +170,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 					std::cout << std::endl << "\t non overlapping shape found " << std::setprecision(10) << sVirtual->toString() << std::endl << std::flush;
 					std::cout << "\t povray: " << std::endl << std::setprecision(10) << sVirtual->toPovray() << std::endl << std::flush;
 				}
-				double *position = sVirtual->getPosition();
+				RSAVector position = sVirtual->getPosition();
 				std::array<double, RSA_ANGULAR_DIMENSION> orientation = sVirtual->getOrientation();
 				double delta = 0.0001;
 				for(unsigned short j = 0; j< RSA_ANGULAR_DIMENSION; j++)
@@ -176,7 +178,9 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 
 				const RSAShape *sCovers = nullptr;
 				std::vector<const RSAShape*> vNeighbours;
-				this->surface->getNeighbours(&vNeighbours, position);
+				double posArray[RSA_SPATIAL_DIMENSION];
+				position.copyToArray(posArray);
+				this->surface->getNeighbours(&vNeighbours, posArray);
 				for(const RSAShape *sTmp : vNeighbours){
 				    auto convexShape = dynamic_cast<const RSAConvexShape*>(sTmp);
 					if (convexShape->pointInside(this->surface, position, orientation, delta)){
@@ -243,7 +247,7 @@ void PackingGenerator::createPacking() {
 		_OMP_PARALLEL_FOR
 		for(int i = 0; i<tmpSplit; i++){
 			sVirtual[i] = ShapeFactory::createShape(aRND[_OMP_THREAD_ID]);
-			double pos[RSA_SPATIAL_DIMENSION];
+			RSAVector pos;
 			std::array <double, RSA_ANGULAR_DIMENSION> angle{};
 			do{
 				aVoxels[i] = this->voxels->getRandomVoxel(aRND[_OMP_THREAD_ID]);

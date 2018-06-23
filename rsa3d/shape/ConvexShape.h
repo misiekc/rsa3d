@@ -21,7 +21,7 @@
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 class ConvexShape : public Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> {
 public:
-    bool voxelInside(BoundaryConditions *bc, const double *voxelPosition,
+    bool voxelInside(BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &voxelPosition,
                      const std::array<double, ANGULAR_DIMENSION> &orientation, double spatialSize,
                      double angularSize) const final;
 
@@ -35,7 +35,7 @@ public:
      * @param orientationRange array of lengths of angle intervals
      * @return false if point is outside, true otherwise
      */
-    virtual bool pointInside(BoundaryConditions *bc, double *position,
+    virtual bool pointInside(BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &position,
                              const std::array<double, ANGULAR_DIMENSION> &orientation,
                              double orientationRange) const = 0;
 
@@ -47,7 +47,8 @@ public:
      * @param da position of a virtual particle of the same size to check
      * @return false if point is outside, true otherwise
      */
-    virtual bool pointInside(BoundaryConditions *bc, double* position) const;
+    virtual bool pointInside(BoundaryConditions<SPATIAL_DIMENSION> *bc,
+                             const Vector<SPATIAL_DIMENSION> &position) const;
 };
 
 using RSAConvexShape = ConvexShape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>;

@@ -13,15 +13,14 @@
 
 class NBoxFBC: public Surface {
 private:
-	static double * getTranslation(double *result, int dim, double s, const double *p1, const double *p2);
+	static RSAVector getTranslation(double s, const RSAVector &p1, const RSAVector &p2);
 
 public:
-	NBoxFBC(int dim, double s, double ndx, double vdx);
-	virtual ~NBoxFBC();
+	NBoxFBC(double s, double ndx, double vdx);
 
-	double getArea();
-	double * getTranslation(double *result, const double *p1, const double *p2);
-	void vector(double *v);
+	double getArea() const override;
+	RSAVector getTranslation(const RSAVector &p1, const RSAVector &p2) const override;
+	RSAVector vector(const RSAVector &v) const override;
 };
 
 #endif /* SURFACES_NBOXFBC_H_ */
