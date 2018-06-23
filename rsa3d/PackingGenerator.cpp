@@ -117,18 +117,12 @@ bool PackingGenerator::isInside(double *position, double *orientation){
 
 void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 
-#ifdef _OPENMP
-	int maxthreads = omp_get_max_threads();
-#else
-	int maxthreads = 1;
-#endif
-
-	int loop = 1000*maxthreads;
+	int loop = 1000*_OMP_MAXTHREADS;
 
 	std::cout.precision(std::numeric_limits< double >::max_digits10);
 
-	std::cout << "[" << this->seed << " PackingGenerator::testPacking] using up to " << maxthreads << " concurrent treads" << std::endl;
-
+	std::cout << "[" << this->seed << " PackingGenerator::testPacking] using up to " << _OMP_MAXTHREADS;
+	std::cout << " concurrent treads" << std::endl;
 
 	RND rnd(this->seed);
 	RSAShape *s = ShapeFactory::createShape(&rnd);
@@ -144,41 +138,32 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 
 	double t = 0;
 
-	RND **aRND = new RND*[maxthreads];
-	for(int i=0; i<maxthreads; i++){
-		aRND[i] = new RND((int)(1000*rnd.nextValue()));
+	RND **aRND = new RND*[_OMP_MAXTHREADS];
+	for(int i=0; i<_OMP_MAXTHREADS; i++){
+		int seed = static_cast<int>(1000 * (i + rnd.nextValue()));
+		aRND[i] = new RND(seed);
 	}
 
 	while (t<maxTime) {
 
 		std::cout << "\r" << "[" << this->seed << " PackingGenerator::testPacking] t=" << std::setprecision(4) << t/maxTime << " choosing " << loop << " shapes..." << std::flush;
 
-		#ifdef _OPENMP
-		#pragma omp parallel for
-		#endif
+		_OMP_PARALLEL_FOR
 		for(int i = 0; i<loop; i++){
-
-			#ifdef _OPENMP
-			int tid = omp_get_thread_num();
-			#else
-			int tid = 0;
-			#endif
-			RSAShape *sVirtual = ShapeFactory::createShape(aRND[tid]);
+			RSAShape *sVirtual = ShapeFactory::createShape(aRND[_OMP_THREAD_ID]);
 			Voxel *v;
 			double pos[RSA_SPATIAL_DIMENSION];
 			std::array <double, RSA_ANGULAR_DIMENSION> angle{};
 			do{
-				v = this->voxels->getRandomVoxel(aRND[tid]);
-				this->voxels->getRandomPositionAndOrientation(pos, angle.data(), v, aRND[tid]);
+				v = this->voxels->getRandomVoxel(aRND[_OMP_THREAD_ID]);
+				this->voxels->getRandomPositionAndOrientation(pos, angle.data(), v, aRND[_OMP_THREAD_ID]);
 			}while(!this->isInside(pos, angle.data()));
 			// setting shape position and orientation
 			sVirtual->translate(pos);
 			sVirtual->rotate(angle);
 			// checking if shape overlaps with any shape in the packing
 			if (this->surface->check(sVirtual)== nullptr){
-				#ifdef _OPENMP
-				#pragma omp critical(stdout)
-				#endif
+				_OMP_CRITICAL(stdout)
 				{
 					std::cout << std::endl << "\t non overlapping shape found " << std::setprecision(10) << sVirtual->toString() << std::endl << std::flush;
 					std::cout << "\t povray: " << std::endl << std::setprecision(10) << sVirtual->toPovray() << std::endl << std::flush;
@@ -200,9 +185,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 					}
 				}
 				if (sCovers!= nullptr)
-				#ifdef _OPENMP
-				#pragma omp critical(stdout)
-				#endif
+				_OMP_CRITICAL(stdout)
 				std::cout << "\t in exclusion zone of " << sCovers->toString() << std::endl;
 			}
 			delete sVirtual;
@@ -211,7 +194,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 		t += dt * loop;
 	} // while
 
-	for(int i=0; i<maxthreads; i++){
+	for(int i=0; i<_OMP_MAXTHREADS; i++){
 		delete aRND[i];
 	}
 	delete[] aRND;
@@ -220,24 +203,16 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 }
 
 
-
-
-#ifdef _OPENMP
-
-
-void PackingGenerator::createPacking(){
-
-	int maxthreads = omp_get_max_threads();
+void PackingGenerator::createPacking() {
 
 	std::cout.precision(std::numeric_limits< double >::max_digits10);
-
-	std::cout << "[" << this->seed << " PackingGenerator::createPacking] using up to " << omp_get_max_threads() << " concurrent treads" << std::endl;
+	std::cout << "[" << this->seed << " PackingGenerator::createPacking] using up to " << _OMP_MAXTHREADS;
+	std::cout << " concurrent treads" << std::endl;
 
 	int checkedAgain = 0;
 	int added = 0;
 	int missCounter = 0;
 	unsigned short depthAnalyze = 0;
-
 
 	RND rnd(this->seed);
 	RSAShape *s = ShapeFactory::createShape(&rnd);
@@ -249,8 +224,8 @@ void PackingGenerator::createPacking(){
 	int tmpSplit = this->params->split, oldTmpSplit = tmpSplit;
 //	int snapshotCounter = 0;
 
-    RND **aRND = new RND*[maxthreads];
-	for(int i=0; i<maxthreads; i++){
+    RND **aRND = new RND*[_OMP_MAXTHREADS];
+	for(int i=0; i<_OMP_MAXTHREADS; i++){
 	    int seed = static_cast<int>(1000 * (i + rnd.nextValue()));
 		aRND[i] = new RND(seed);
 	}
@@ -265,16 +240,14 @@ void PackingGenerator::createPacking(){
 		factor = this->getFactor();
 		factor = (factor < 1.0)?1.0:factor;
 
-		#pragma omp parallel for
+		_OMP_PARALLEL_FOR
 		for(int i = 0; i<tmpSplit; i++){
-			int tid = omp_get_thread_num();
-
-			sVirtual[i] = ShapeFactory::createShape(aRND[tid]);
+			sVirtual[i] = ShapeFactory::createShape(aRND[_OMP_THREAD_ID]);
 			double pos[RSA_SPATIAL_DIMENSION];
 			std::array <double, RSA_ANGULAR_DIMENSION> angle{};
 			do{
-				aVoxels[i] = this->voxels->getRandomVoxel(aRND[tid]);
-				this->voxels->getRandomPositionAndOrientation(pos, angle.data(), aVoxels[i], aRND[tid]);
+				aVoxels[i] = this->voxels->getRandomVoxel(aRND[_OMP_THREAD_ID]);
+				this->voxels->getRandomPositionAndOrientation(pos, angle.data(), aVoxels[i], aRND[_OMP_THREAD_ID]);
 			}while(!this->isInside(pos, angle.data()));
 			// setting shape position and orientation
 			sVirtual[i]->translate(pos);
@@ -308,13 +281,13 @@ void PackingGenerator::createPacking(){
 			t += factor * dt;
 
 			// if there were no intersecting particles in the packing
-			if (sOverlapped[i]==NULL){
+			if (sOverlapped[i]==nullptr){
 				checkedAgain++;
 				// checking overlapping again
 				sOverlapped[i] = this->surface->check(sVirtual[i]);
 
 				// if there is still no overlap sVirtula is added to the packing and corresponding voxel is removed
-				if(sOverlapped[i]==NULL){ // if non overlapping
+				if(sOverlapped[i]== nullptr){ // if non overlapping
 
 					added++;
 					l++;
@@ -341,7 +314,7 @@ void PackingGenerator::createPacking(){
 					this->voxels->removeTopLevelVoxel(aVoxels[i]);
 				}  //second overlapping check
 			} // first overlapping check
-			if (sOverlapped[i]!=NULL){ // removing overlapped virtual shapes
+			if (sOverlapped[i]!= nullptr){ // removing overlapped virtual shapes
 				delete sVirtual[i];
 			}
 		}  // for
@@ -374,15 +347,15 @@ void PackingGenerator::createPacking(){
 			if (v1!=v0){
 				tmpSplit *= ((double)v1 / v0);
 			}else{
-				tmpSplit = 1.1*tmpSplit + omp_get_max_threads();
+				tmpSplit = 1.1*tmpSplit + _OMP_MAXTHREADS;
 			}
 
 			if (tmpSplit > std::max(this->params->maxVoxels/20, 10*this->params->split))
 				tmpSplit = std::max(this->params->maxVoxels/20, 10*this->params->split);
-			if(voxels->getLength()<0.001*this->params->maxVoxels && tmpSplit > 10*omp_get_max_threads())
+			if(voxels->getLength()<0.001*this->params->maxVoxels && tmpSplit > 10*_OMP_MAXTHREADS)
 				tmpSplit /= 10.0;
-			if(tmpSplit < 10*omp_get_max_threads())
-				tmpSplit = 10*omp_get_max_threads();
+			if(tmpSplit < 10*_OMP_MAXTHREADS)
+				tmpSplit = 10*_OMP_MAXTHREADS;
 
 			if (!b && (double)(v0-v1)/v0 < 0.1){ // not much voxels removed
 				depthAnalyze++;
@@ -417,133 +390,13 @@ void PackingGenerator::createPacking(){
 		}
 	} // while
 
-	for(int i=0; i<maxthreads; i++){
+	for(int i=0; i<_OMP_MAXTHREADS; i++){
 		delete aRND[i];
 	}
 	delete[] aRND;
 
 	std::cout << "[" << seed << " PackingGenerator::createPacking] finished after generating " << l << " shapes" << std::endl;
 }
-
-#else
-
-
-void PackingGenerator::createPacking(){
-	std::cout.precision(std::numeric_limits< double >::max_digits10);
-
-	std::cout << "[" << this->seed << " PackingGenerator::createPacking] started" << std::endl;
-	int missCounter = 0;
-
-	RND rnd(this->seed);
-	Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *s = ShapeFactory::createShape(&rnd);
-	double dt = s->getVolume() / this->surface->getArea();
-	delete s;
-
-	int l = 0;
-	double t = 0, factor;
-	int tmpSplit = this->params->split;
-	int depthAnalyze = 0;
-//	int snapshotCounter = 0;
-
-
-	while (!this->isSaturated() && t<params->maxTime && missCounter<params->maxTriesWithoutSuccess) {
-		factor = this->getFactor();
-		factor = (factor<1.0)?1.0:factor;
-		t += factor * dt;
-		s = ShapeFactory::createShape(&rnd);
-
-		Voxel *v;
-		double pos[RSA_SPATIAL_DIMENSION];
-		std::array<double, RSA_ANGULAR_DIMENSION> angle;
-		do{
-			v = this->voxels->getRandomVoxel(&rnd);
-			this->voxels->getRandomPositionAndOrientation(pos, angle.data(), v, &rnd);
-		}while(!this->isInside(pos, angle.data()));
-		s->translate(pos);
-		s->rotate(angle);
-
-		Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *sTmp = this->surface->check(s);
-		if (sTmp==NULL) { // if no overlap detected
-			l++;
-			s->no = l;
-			s->time = t;
-
-
-			if (this->params->modifiedRSA){
-				this->modifiedRSA(s, v);
-			}
-
-
-			if (v!=this->voxels->getVoxel(v->getPosition(), v->getOrientation())){
-				Voxel *v1 = this->voxels->getVoxel(v->getPosition(), v->getOrientation());
-				std::cout << std::endl << "Problem: PackingGenerator - inconsistent voxels positions: [" << v->toString()<< "], [" << v1->toString() << "]" << std::endl;
-				std::cout << "size: " << this->voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << std::endl;
-				std::cout << "shape: " << s->toString() << std::endl;
-			}
-
-			this->surface->add(s);
-			this->packing.addShape(s);
-
-			missCounter = 0;
-			if (depthAnalyze>0)
-				depthAnalyze--;
-//			std::cout << ((Ellipse *)s)->toWolfram() << std::endl;
-		}else{ // overlap detected
-			missCounter++;
-			if (missCounter > tmpSplit) { // v.getMissCounter() % iSplit == 0){ //
-				missCounter = 0;
-				int v0 = this->voxels->getLength(), v1 = v0;
-
-				std::cout << "[" << this->seed << " PackingGenerator::createPacking] splitting " << v0 << " voxels ";
-				std::cout.flush();
-//				this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
-
-				bool b = voxels->splitVoxels(this->params->minDx, this->params->maxVoxels, this->surface->getNeighbourGrid(), this->surface);
-				if (b){
-					v1 = this->voxels->getLength();
-	//				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
-					std::cout << " done. " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << ", factor: " << this->getFactor() << std::endl;
-					missCounter = 0;
-				}else{
-					std::cout << "skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;
-					this->voxels->analyzeVoxels(this->surface, this->surface->getNeighbourGrid(), depthAnalyze);
-					std::cout << " done: " << this->voxels->getLength() << " voxels remained, factor = " << this->getFactor() << std::endl << std::flush;
-					tmpSplit = 1.1*tmpSplit;
-					v1 = this->voxels->getLength();
-				}
-				// if number of voxels has changed
-				if (v1!=v0){
-					tmpSplit *= ((double)v1 / v0);
-				}else{
-					tmpSplit = 1.1*tmpSplit + 10;
-				}
-
-				if (tmpSplit > std::max(this->params->maxVoxels/20, 10*this->params->split))
-					tmpSplit = std::max(this->params->maxVoxels/20, 10*this->params->split);
-				if(voxels->getLength()<0.001*this->params->maxVoxels && tmpSplit > 100)
-					tmpSplit /= 10.0;
-				if(tmpSplit < 100)
-					tmpSplit = 100;
-
-				if (!b && v0==v1){ // if nothing changed with voxels
-					depthAnalyze++;
-				}else{
-					if (depthAnalyze>0)
-						depthAnalyze--;
-				}
-//				this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
-//				this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
-//				this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
-			}
-			delete s;
-		} // else
-	} // while
-	delete this->surface;
-
-	std::cout << "[" << seed << " PackingGenerator::createPacking] finished after generating " << l << " shapes" << std::endl;
-}
-#endif
-
 
 void PackingGenerator::run(){
 	this->createPacking();
@@ -568,7 +421,6 @@ void PackingGenerator::toPovray(const Packing &packing, double size, VoxelList *
 //	file << "  text { ttf \"timrom.ttf\" \"0\" 1, 0 pigment { color Black } scale 1.0 translate < 0, 0, 0.0002> }" << std::endl;
 
 	for (const RSAShape *s : packing) {
-		double *da = s->getPosition();
 //		file << "  text { ttf \"timrom.ttf\" \"" << s->no << "\" 1, 0 pigment { color White } scale 0.2 translate < " << da[0] << ", " << da[1] << ", 0.01> }" << std::endl;
 		file << s->toPovray();
 	}

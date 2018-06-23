@@ -362,20 +362,19 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, Bounda
 	return false;
 }
 
-#ifdef _OPENMP
 
 size_t VoxelList::analyzeVoxels(BoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth) {
 
 	size_t begin = this->length;
 
-	#pragma omp parallel for
+	_OMP_PARALLEL_FOR
 	for (size_t i = 0; i < this->length; i++) {
 		Voxel *v = this->voxels[i];
 		bool bRemove = this->analyzeVoxel(v, nl, bc, depth);
 		if (bRemove){
 			this->voxelNeighbourGrid->remove(v, v->getPosition());
 			delete v;
-			this->voxels[i] = NULL;
+			this->voxels[i] = nullptr;
 		}
 		if (i%10000 == 0){ std::cout << "."; std::cout.flush(); }
 	}
@@ -389,44 +388,6 @@ size_t VoxelList::analyzeVoxels(BoundaryConditions *bc, NeighbourGrid<const RSAS
 	return begin - this->length;
 }
 
-#else
-
-size_t VoxelList::analyzeVoxels(BoundaryConditions *bc, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, unsigned short depth) {
-
-	size_t begin = this->length;
-
-	size_t newListSize = this->length;
-	Voxel** newList = new Voxel*[ newListSize ];
-	for(size_t i=0; i<newListSize; i++){
-		newList[i] = NULL;
-	}
-
-	size_t newIndex = 0;
-	for (size_t i = 0; i < this->length; i++) {
-		Voxel *v = this->voxels[i];
-		bool bRemove = this->analyzeVoxel(v, nl, bc, depth);
-		if (!bRemove) {
-			newList[newIndex] = v;
-			newIndex++;
-		}else{
-			delete v;
-		}
-		if (i%10000 == 0){ std::cout << "."; std::cout.flush(); }
-	}
-
-	delete[] this->voxels;
-
-	this->length = newIndex;
-	this->voxels = newList;
-
-	return begin - this->length;
-}
-
-#endif
-
-
-#ifdef _OPENMP
-
 
 bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, BoundaryConditions *bc){
 	if (this->disabled)
@@ -439,7 +400,7 @@ bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const 
 	int newListSize = voxelsFactor*(this->length);
 	Voxel** newList = new Voxel*[ newListSize ];
 	for(int i=0; i<newListSize; i++){
-		newList[i] = NULL;
+		newList[i] = nullptr;
 	}
 
 	this->spatialVoxelSize = (this->spatialVoxelSize/2.0)*this->dxFactor;
@@ -450,26 +411,24 @@ bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const 
 	delete this->angularDistribution;
 	this->angularDistribution = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize);
 
-	int maxthreads = omp_get_max_threads();
-	Voxel ***aVoxels = new Voxel**[maxthreads];
-	for(int i=0; i<maxthreads; i++){
+	Voxel ***aVoxels = new Voxel**[_OMP_MAXTHREADS];
+	for(int i=0; i<_OMP_MAXTHREADS; i++){
 		aVoxels[i] = new Voxel*[ voxelsFactor ];
 	}
 
-	#pragma omp parallel for
+	_OMP_PARALLEL_FOR
 	for(size_t i=0; i<this->length; i++){
-		int tid = omp_get_thread_num();
 		if (!this->analyzeVoxel(this->voxels[i], nl, bc)){ // dividing only not overlapping voxels
-			this->splitVoxel(this->voxels[i], this->spatialVoxelSize, this->angularVoxelSize, aVoxels[tid]);
+			this->splitVoxel(this->voxels[i], this->spatialVoxelSize, this->angularVoxelSize, aVoxels[_OMP_THREAD_ID]);
 			for(size_t j=0; j<voxelsFactor; j++){
-				Voxel *v = aVoxels[tid][j];
+				Voxel *v = aVoxels[_OMP_THREAD_ID][j];
 				if(this->isVoxelInsidePacking(v) && ( nl==NULL || bc==NULL || !this->analyzeVoxel(v, nl, bc) ) ){
 					if(this->voxels[i]->depth > 0){
 						v->depth = this->voxels[i]->depth-1;
 					}
 					newList[i*voxelsFactor + j] = v;
 				}else{
-					delete aVoxels[tid][j];
+					delete aVoxels[_OMP_THREAD_ID][j];
 				}
 			}
 		}
@@ -477,7 +436,7 @@ bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const 
 		if (i%10000 == 0){ std::cout << "." << std::flush; }
 	}
 
-	for(int i=0; i<maxthreads; i++){
+	for(int i=0; i<_OMP_MAXTHREADS; i++){
 		delete[] aVoxels[i];
 	}
 	delete[] aVoxels;
@@ -499,64 +458,6 @@ bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const 
 //	this->checkTopLevelVoxels();
 	return true;
 }
-
-#else
-
-
-bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>> *nl, BoundaryConditions *bc){
-	if (this->disabled)
-		return false;
-	int voxelsFactor = (int)round( pow(2, RSA_SPATIAL_DIMENSION+RSA_ANGULAR_DIMENSION) );
-	if ((this->spatialVoxelSize<2*minDx && voxelsFactor*this->length > this->beginningVoxelNumber) || voxelsFactor*this->length > maxVoxels){
-		return false;
-	}
-
-	int newListSize = voxelsFactor*(this->length);
-	Voxel** newList = new Voxel*[ newListSize ];
-
-	this->spatialVoxelSize = (this->spatialVoxelSize/2.0)*this->dxFactor;
-	delete this->spatialDistribution;
-	this->spatialDistribution = new std::uniform_real_distribution<double>(0.0, this->spatialVoxelSize);
-
-	this->angularVoxelSize = this->angularVoxelSize/2.0;
-	delete this->angularDistribution;
-	this->angularDistribution = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize);
-
-	int index = 0;
-
-	Voxel **aVoxels = new Voxel*[voxelsFactor];
-
-	for(size_t i=0; i<this->length; i++){
-
-		this->splitVoxel(this->voxels[i], this->spatialVoxelSize, this->angularVoxelSize, aVoxels);
-		for(int j=0; j<voxelsFactor; j++){
-			if(this->isVoxelInsidePacking(aVoxels[j]) && ( nl==NULL || bc==NULL || !this->analyzeVoxel(aVoxels[j], nl, bc) ) ){
-					if(this->voxels[i]->depth > 0){
-						aVoxels[j]->depth = this->voxels[i]->depth-1;
-					}
-					newList[index] = aVoxels[j];
-					index++;
-			}else{
-				delete aVoxels[j];
-			}
-		}
-		delete this->voxels[i];
-		if (i%10000 == 0){ std::cout << "."; std::cout.flush(); }
-	}
-
-	delete[] this->voxels;
-	this->voxelNeighbourGrid->clear();
-
-	this->length = index;
-	this->voxels = newList;
-	this->fillNeighbourGrid();
-//	this->checkIndexes();
-//	this->checkTopLevelVoxels();
-	return true;
-}
-
-#endif
-
 
 
 Voxel * VoxelList::getRandomVoxel(RND *rnd){

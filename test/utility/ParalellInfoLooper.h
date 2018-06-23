@@ -7,19 +7,7 @@
 
 
 #include <iostream>
-
-
-#define STRINGIFY(x) #x
-
-#ifdef _OPENMP
-    #define _OMP_PARALLEL_FOR   _Pragma("omp parallel for")
-    #define _OMP_ATOMIC         _Pragma("omp atomic")
-    #define _OMP_CRITICAL(x)    _Pragma(STRINGIFY(omp critical(x)))
-#else
-#define _OMP_PARALLEL_FOR
-    #define _OMP_ATOMIC
-    #define _OMP_CRITICAL(x)
-#endif
+#include "../../rsa3d/Utils.h"
 
 
 class ParallelInfoLooper {
