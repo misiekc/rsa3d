@@ -68,8 +68,8 @@ void Packing::restore(const std::string &filename) {
 }
 
 void Packing::expandOnPBC(double linearSize, double expandMargin) {
-    std::size_t oldSize = this->size();
     for (std::size_t i = 0; i < RSA_SPATIAL_DIMENSION; i++) {
+        std::size_t oldSize = this->size();
         for (std::size_t j = 0; j < oldSize; j++) {
             auto shape = (*this)[j];
             RSAVector position = shape->getPosition();
