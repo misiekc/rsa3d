@@ -64,7 +64,7 @@ VoxelList::VoxelList(double packingSpatialSize, double requestedSpatialVoxelSize
 	size_t sa = (size_t)(pow(na, RSA_ANGULAR_DIMENSION)+0.5);
 	this->voxels = new Voxel*[ss*sa];
 	this->activeTopLevelVoxels = new bool[ss];
-	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(RSA_SPATIAL_DIMENSION, this->spatialVoxelSize*ns, ns);
+	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(this->spatialVoxelSize*ns, ns);
 
 	this->initVoxels();
 	for(size_t i = 0; i<ss; i++){
@@ -97,7 +97,7 @@ void VoxelList::disable(){
 void VoxelList::initVoxels(){
 	size_t ns = this->findArraySize(this->spatialRange, this->spatialVoxelSize);
 	size_t na = this->findArraySize(this->angularRange, this->angularVoxelSize);
-	double position[RSA_SPATIAL_DIMENSION];
+	RSAVector position;
 	std::array<double, RSA_ANGULAR_DIMENSION> orientation{};
 	int ins[RSA_SPATIAL_DIMENSION];
 	std::array<int, RSA_ANGULAR_DIMENSION> ina{};
@@ -137,7 +137,7 @@ void VoxelList::fillNeighbourGrid(){
 }
 
 
-void VoxelList::getNeighbours(std::vector<Voxel *> *result, double *da){
+void VoxelList::getNeighbours(std::vector<Voxel *> *result, const RSAVector &da){
 	return this->voxelNeighbourGrid->getNeighbours(result, da);
 }
 
@@ -171,7 +171,7 @@ int VoxelList::getIndexOfTopLevelVoxel(const RSAVector &da){
 void VoxelList::removeTopLevelVoxel(Voxel *v){
 	if (this->disabled)
 		return;
-	this->activeTopLevelVoxels[this->getIndexOfTopLevelVoxel(RSAVector(v->getPosition()))]=false;
+	this->activeTopLevelVoxels[this->getIndexOfTopLevelVoxel(v->getPosition())]=false;
 }
 
 
@@ -179,17 +179,17 @@ void VoxelList::checkTopLevelVoxels(){
 
 	RND rnd;
 	RSAVector pos;
-	std::array<double, RSA_ANGULAR_DIMENSION> angle;
+	std::array<double, RSA_ANGULAR_DIMENSION> angle{};
 
 	for(size_t i=0; i<this->length; i++){
 		Voxel *v = this->voxels[i];
-		this->getRandomPositionAndOrientation(pos, angle.data(), v, &rnd);
+		this->getRandomPositionAndOrientation(pos, angle, v, &rnd);
 		int index = this->getIndexOfTopLevelVoxel(pos);
-		if (this->getIndexOfTopLevelVoxel(RSAVector(v->getPosition()))!=index){
+		if (this->getIndexOfTopLevelVoxel(v->getPosition())!=index){
 			std::cout << "checkTopVoxels problem" << std::endl;
 		}
 		for(int j=0; j<10; j++){
-			this->getRandomPositionAndOrientation(pos, angle.data(), v, &rnd);
+			this->getRandomPositionAndOrientation(pos, angle, v, &rnd);
 			if (this->getIndexOfTopLevelVoxel(pos)!=index){
 				std::cout << "checkTopVoxels problem" << std::endl;
 			}
@@ -198,24 +198,25 @@ void VoxelList::checkTopLevelVoxels(){
 	}
 }
 
-Voxel * VoxelList::getVoxel(double *pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle){
+Voxel *VoxelList::getVoxel(const RSAVector &pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle){
 	std::vector<Voxel *> *vTmp = this->voxelNeighbourGrid->getCell(pos);
 	for(Voxel *v : *vTmp){
 		if (v->isInside(pos, this->spatialVoxelSize, angle, this->angularVoxelSize)){
 			return v;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
-Voxel * VoxelList::findVoxel(Voxel** list, size_t listSize, double *pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle){
+Voxel *VoxelList::findVoxel(Voxel **list, size_t listSize, const RSAVector &pos,
+                            const std::array<double, RSA_ANGULAR_DIMENSION> &angle){
 	for(size_t i=0; i<listSize; i++){
 		Voxel *v = list[i];
-		if (v!=NULL && v->isInside(pos, this->spatialVoxelSize, angle, this->angularVoxelSize)){
+		if (v!=nullptr && v->isInside(pos, this->spatialVoxelSize, angle, this->angularVoxelSize)){
 			return v;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 
@@ -225,12 +226,12 @@ void VoxelList::splitVoxel(Voxel *v, double spatialSize, double angularSize, Vox
 	unsigned short angularLoop = 1 << RSA_ANGULAR_DIMENSION;
 
 	int inpos[RSA_SPATIAL_DIMENSION];
-	double position[RSA_SPATIAL_DIMENSION];
-	std::array<int, RSA_ANGULAR_DIMENSION> inangle;
-	std::array<double, RSA_ANGULAR_DIMENSION> orientation;
+	RSAVector position;
+	std::array<int, RSA_ANGULAR_DIMENSION> inangle{};
+	std::array<double, RSA_ANGULAR_DIMENSION> orientation{};
 
 
-	double* vpos = v->getPosition();
+	RSAVector vpos = v->getPosition();
 	for(ushort j=0; j < RSA_SPATIAL_DIMENSION; j++){
 		inpos[j] = 0;
 		position[j] = vpos[j];
@@ -261,7 +262,7 @@ void VoxelList::splitVoxel(Voxel *v, double spatialSize, double angularSize, Vox
 
 
 bool VoxelList::isVoxelInsidePacking(Voxel *v){
-	double* vpos = v->getPosition();
+	RSAVector vpos = v->getPosition();
 	std::array<double, RSA_ANGULAR_DIMENSION> vangle = v->getOrientation();
 	for(unsigned short i=0; i < RSA_SPATIAL_DIMENSION; i++){
 		if (vpos[i] >= this->spatialRange){
@@ -291,7 +292,7 @@ bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double 
 
 	bool isInside = false;
 	for(const RSAShape *s : *shapes){
-		isInside = s->voxelInside(bc, RSAVector(v->getPosition()), v->getOrientation(), spatialSize, angularSize);
+		isInside = s->voxelInside(bc, v->getPosition(), v->getOrientation(), spatialSize, angularSize);
 		if (isInside)
 			break;
 	}
@@ -330,7 +331,7 @@ bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double 
 bool VoxelList::isTopLevelVoxelActive(Voxel *v){
 
 	// checking if initial voxel containing v is active (do not have a shape inside)
-	int index = this->getIndexOfTopLevelVoxel(RSAVector(v->getPosition()));
+	int index = this->getIndexOfTopLevelVoxel(v->getPosition());
 	return this->activeTopLevelVoxels[index];
 }
 
@@ -340,7 +341,7 @@ bool VoxelList::analyzeVoxel(Voxel *v, const RSAShape *s, RSABoundaryConditions 
 	if (!isTopLevelVoxelActive(v))
 		return true;
 
-	return s->voxelInside(bc, RSAVector(v->getPosition()), v->getOrientation(), this->spatialVoxelSize, this->angularVoxelSize);
+	return s->voxelInside(bc, v->getPosition(), v->getOrientation(), this->spatialVoxelSize, this->angularVoxelSize);
 }
 
 
@@ -481,8 +482,10 @@ Voxel * VoxelList::getVoxel(int i){
 }
 
 
-void VoxelList::getRandomPositionAndOrientation(RSAVector &position, double *orientation, Voxel *v, RND *rnd){
-	double *vpos = v->getPosition();
+void VoxelList::getRandomPositionAndOrientation(RSAVector &position,
+												std::array<double, RSA_ANGULAR_DIMENSION> &orientation, Voxel *v,
+												RND *rnd){
+	RSAVector vpos = v->getPosition();
 	std::array<double, RSA_ANGULAR_DIMENSION> vangle = v->getOrientation();
 
 	for (ushort i=0; i < RSA_SPATIAL_DIMENSION; i++)
@@ -517,7 +520,7 @@ double VoxelList::getVoxelsSurface(){
 	for(size_t i = 0; i< this->length; i++){
 		double s = 1.0;
 		Voxel *v = this->voxels[i];
-		double * position = v->getPosition();
+		RSAVector position = v->getPosition();
 		for(unsigned short j=0; j<RSA_SPATIAL_DIMENSION; j++){
 			if (position[j]+this->spatialVoxelSize > this->spatialRange){
 				s *= this->spatialRange - position[j];
@@ -618,7 +621,7 @@ void VoxelList::restore(std::istream &f){
 		Voxel *v = new Voxel();
 		v->restore(f);
 		this->voxels[i] = v;
-		topIndex = this->getIndexOfTopLevelVoxel(RSAVector(v->getPosition()));
+		topIndex = this->getIndexOfTopLevelVoxel(v->getPosition());
 		this->activeTopLevelVoxels[topIndex] = true;
 	}
 	this->length = size;

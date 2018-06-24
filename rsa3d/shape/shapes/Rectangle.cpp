@@ -70,7 +70,7 @@ double Rectangle::getVolume() const {
 
 // Shape::translate was made non-virtual and one should override Positioned::setPosition instead (see documentation)
 void Rectangle::setPosition(const Vector<2> &position) {
-    Vector<2, double> translation = Vector<2, double>(position) - Vector<2, double>(getPosition());
+    Vector<2> translation = position - getPosition();
     for (int i = 0; i < 5; i++) {
         xs[i] += translation[0];
         ys[i] += translation[1];

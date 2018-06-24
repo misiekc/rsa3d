@@ -37,7 +37,7 @@ public:
 	void clear();
 	void add(const RSAShape *s);
 	const RSAShape *check(const RSAShape *s);
-	void getNeighbours(std::vector<const RSAShape*> *result, double *da);
+	void getNeighbours(std::vector<const RSAShape*> *result, const RSAVector &da);
 	const RSAShape *getClosestNeighbour(const RSAVector &da);
 	const RSAShape *getClosestNeighbour(const RSAVector &da, const std::vector<const RSAShape*> &neighbours);
 	NeighbourGrid<const RSAShape> *getNeighbourGrid();

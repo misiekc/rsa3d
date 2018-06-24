@@ -19,14 +19,14 @@ Voxel::Voxel(){
 }
 
 
-Voxel::Voxel(double* pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle){
-	std::copy(pos, pos+RSA_SPATIAL_DIMENSION, this->position);
+Voxel::Voxel(const RSAVector &pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle){
+	this->position = pos;
 	this->orientation = angle;
 	this->lastAnalyzed = 0;
 	this->depth = 0;
 }
 
-bool Voxel::isInside(double *pos, double size){
+bool Voxel::isInside(const RSAVector &pos, double size){
 	for(int i=0; i<RSA_SPATIAL_DIMENSION; i++){
 		if (pos[i]<this->position[i])
 			return false;
@@ -37,7 +37,8 @@ bool Voxel::isInside(double *pos, double size){
 }
 
 
-bool Voxel::isInside(double *pos, double size, const std::array<double, RSA_ANGULAR_DIMENSION> &angle, double asize){
+bool Voxel::isInside(const RSAVector &pos, double size, const std::array<double, RSA_ANGULAR_DIMENSION> &angle,
+                     double asize) {
 	for(int i=0; i<RSA_SPATIAL_DIMENSION; i++){
 		if (pos[i]<this->position[i])
 			return false;
@@ -57,7 +58,7 @@ bool Voxel::isInside(double *pos, double size, const std::array<double, RSA_ANGU
 
 
 
-double* Voxel::getPosition(){
+const Voxel::RSAVector &Voxel::getPosition(){
 	return this->position;
 }
 
@@ -72,7 +73,7 @@ std::string Voxel::toPovray(double ssize){
 
 	out.precision(std::numeric_limits< double >::max_digits10);
 
-	double *da = this->getPosition();
+	RSAVector da = this->getPosition();
 	double x1 = da[0], x2 = da[0] + ssize;
 	double y1 = da[1], y2 = da[1] + ssize;
 
@@ -99,7 +100,7 @@ std::string Voxel::toWolfram(double ssize, double asize){
 	std::stringstream out;
 	out.precision(std::numeric_limits< double >::max_digits10);
 
-	double *da = this->getPosition();
+	RSAVector da = this->getPosition();
 	double x1 = da[0], x2 = da[0] + ssize;
 	double y1 = da[1], y2 = da[1] + ssize;
 
@@ -142,7 +143,9 @@ void Voxel::store(std::ostream &f) const{
 	f.write((char *)(&sd), sizeof(unsigned char));
 	if (ad>0)
 		f.write((char *)(&ad), sizeof(unsigned char));
-	f.write((char *)(this->position), RSA_SPATIAL_DIMENSION*sizeof(double));
+	double posArray[RSA_SPATIAL_DIMENSION];
+	this->position.copyToArray(posArray);
+	f.write((char *)(posArray), RSA_SPATIAL_DIMENSION*sizeof(double));
 	if (ad>0)
 		f.write((char *)(this->orientation.data()), RSA_ANGULAR_DIMENSION*sizeof(double));
 }
@@ -160,7 +163,9 @@ void Voxel::restore(std::istream &f){
 		std::cout << "[ERROR] cannot restore Voxel: incompatible dimensions: read " << f.gcount() << " bytes." << std::endl;
 		return;
 	}
-	f.read((char *)(this->position), sd*sizeof(double));
+	double posArray[RSA_SPATIAL_DIMENSION];
+	f.read((char *)(posArray), sd*sizeof(double));
+	this->position = RSAVector(posArray);
 	if (ad>0)
 		f.read((char *)(this->orientation.data()), ad*sizeof(double));
 }

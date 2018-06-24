@@ -57,6 +57,7 @@ PACKAGES = rsa3d/analizator/ \
 # executables
 OBJS_COMMON = rsa3d/Config \
        rsa3d/Intersection \
+       rsa3d/Packing \
        rsa3d/PackingGenerator \
        rsa3d/Parameters \
        rsa3d/RND \

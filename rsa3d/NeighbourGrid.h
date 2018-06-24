@@ -20,7 +20,8 @@ template <typename E>
 class NeighbourGrid{
 
 private:
-	unsigned char dimension;
+    using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;
+
 	double linearSize;
 	int n;
 	double dx;
@@ -29,48 +30,44 @@ private:
 	std::vector<std::vector<E * > * > lists;
 	std::vector<std::vector<int> * > neighbouringCells;
 
-	void init(int dim, double size, size_t n){
-		this->dimension = dim;
+	void init(double size, size_t n){
 		this->linearSize = size;
 		this->n = n;
 		this->dx = size/this->n;
-		int length = (int) round(pow(this->n, dim));
+		int length = (int) round(pow(this->n, RSA_SPATIAL_DIMENSION));
 		this->lists.reserve(length);
 		this->neighbouringCells.reserve(length);
 
-		int *in = new int[this->dimension];
-		double *da = new double[this->dimension];
-		int *coords = new int[this->dimension];
+		int in[RSA_SPATIAL_DIMENSION];
+		double da[RSA_SPATIAL_DIMENSION];
+		int coords[RSA_SPATIAL_DIMENSION];
 
 		for(int i=0; i<length; i++){
 			this->lists.push_back(new std::vector<E *>);
 			this->neighbouringCells.push_back(new std::vector<int>);
-			this->neighbouringCells[i]->reserve((1 << this->dimension));
+			this->neighbouringCells[i]->reserve((1 << RSA_SPATIAL_DIMENSION));
 
-			i2position(da, this->dimension, i, this->dx, this->n);
-			for(unsigned char i=0; i<this->dimension; i++){
+			i2position(da, RSA_SPATIAL_DIMENSION, i, this->dx, this->n);
+			for(unsigned char i=0; i<RSA_SPATIAL_DIMENSION; i++){
 				in[i] = 0;
 			}
-			coordinates(coords, da, this->dimension, this->linearSize, this->dx, this->n);
+			coordinates(coords, da, RSA_SPATIAL_DIMENSION, this->linearSize, this->dx, this->n);
 			do{
-				int iCell = neighbour2i(coords, in, this->dimension, 1, this->n);
+				int iCell = neighbour2i(coords, in, RSA_SPATIAL_DIMENSION, 1, this->n);
 				this->neighbouringCells[i]->push_back(iCell);
-			}while(increment(in, this->dimension, 2));
+			}while(increment(in, RSA_SPATIAL_DIMENSION, 2));
 		}
-		delete[] coords;
-		delete[] da;
-		delete[] in;
 	}
 
 public:
 
-	NeighbourGrid(int dim, double size, double dx){
-		this->init(dim, size, (size_t)(size/dx));
+	NeighbourGrid(double size, double dx){
+		this->init(size, (size_t)(size/dx));
 	}
 
 
-	NeighbourGrid(int dim, double size, size_t n){
-		this->init(dim, size, n);
+	NeighbourGrid(double size, size_t n){
+		this->init(size, n);
 	}
 
 	virtual ~NeighbourGrid(){
@@ -80,13 +77,17 @@ public:
 			}
 	}
 
-	void add(E* s, double *da){
-		int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+	void add(E* s, const RSAVector &da){
+	    double array[RSA_SPATIAL_DIMENSION];
+	    da.copyToArray(array);
+		int i = position2i(array, RSA_SPATIAL_DIMENSION, this->linearSize, this->dx, this->n);
 		this->lists[i]->push_back(s);
 	}
 
-	void remove(E* s, double *da){
-		int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+	void remove(E* s, const RSAVector &da){
+	    double array[RSA_SPATIAL_DIMENSION];
+	    da.copyToArray(array);
+		int i = position2i(array, RSA_SPATIAL_DIMENSION, this->linearSize, this->dx, this->n);
 		typename std::vector<E *>::iterator it;
 		if ( (it = std::find(this->lists[i]->begin(), this->lists[i]->end(), s)) != this->lists[i]->end())
 			this->lists[i]->erase(it);
@@ -98,16 +99,20 @@ public:
 		}
 	}
 
-	std::vector<E*> * getCell(double* da){
-		int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+	std::vector<E*> * getCell(const RSAVector &da){
+	    double array[RSA_SPATIAL_DIMENSION];
+	    da.copyToArray(array);
+		int i = position2i(array, RSA_SPATIAL_DIMENSION, this->linearSize, this->dx, this->n);
 		return this->lists[i];
 	}
 
-	void getNeighbours(std::vector<E *> *result, double* da){
+	void getNeighbours(std::vector<E *> *result, const RSAVector &da){
 		result->clear();
 		std::vector<E *> *vTmp;
 
-		int i = position2i(da, this->dimension, this->linearSize, this->dx, this->n);
+		double array[RSA_SPATIAL_DIMENSION];
+		da.copyToArray(array);
+		int i = position2i(array, RSA_SPATIAL_DIMENSION, this->linearSize, this->dx, this->n);
 		for(int iCell : *(this->neighbouringCells[i])){
 			vTmp = (this->lists[iCell]);
 			result->insert(result->end(), vTmp->begin(), vTmp->end());

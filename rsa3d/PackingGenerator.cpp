@@ -71,9 +71,9 @@ void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
 	RSAVector da;
 
 	const RSAShape *sn = this->surface->getClosestNeighbour(s->getPosition());
-	if (sn==NULL)
+	if (sn == nullptr)
 		sn = this->surface->getClosestNeighbour(s->getPosition(), this->packing.getVector());
-	if (sn!=NULL){
+	if (sn != nullptr){
 		RSAVector spos = s->getPosition();
 		RSAVector snpos = sn->getPosition();
 
@@ -90,10 +90,8 @@ void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
 				spos[i] += (d-mindist)*da[i];
 			}
 			this->surface->checkPosition(spos);
-			double sposarr[RSA_SPATIAL_DIMENSION];
-			spos.copyToArray(sposarr);
-			v = this->voxels->getVoxel(sposarr, s->getOrientation());
-			if (v==NULL){
+			v = this->voxels->getVoxel(spos, s->getOrientation());
+			if (v == nullptr){
 				std::cout << "Problem: PackingGenerator - voxel not found: " <<
 				" (" << spos[0] << ", " << spos[1] << ")" << std::endl;
 				exit(0);
@@ -103,7 +101,7 @@ void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
 }
 
 
-bool PackingGenerator::isInside(const RSAVector &position, double *orientation){
+bool PackingGenerator::isInside(const RSAVector &position, std::array<double, RSA_ANGULAR_DIMENSION> &orientation){
 	for(unsigned short i=0; i<RSA_SPATIAL_DIMENSION; i++){
 		if (position[i]>=this->spatialSize || position[i]<0)
 			return false;
@@ -158,8 +156,8 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 			std::array <double, RSA_ANGULAR_DIMENSION> angle{};
 			do{
 				v = this->voxels->getRandomVoxel(aRND[_OMP_THREAD_ID]);
-				this->voxels->getRandomPositionAndOrientation(pos, angle.data(), v, aRND[_OMP_THREAD_ID]);
-			}while(!this->isInside(pos, angle.data()));
+				this->voxels->getRandomPositionAndOrientation(pos, angle, v, aRND[_OMP_THREAD_ID]);
+			}while(!this->isInside(pos, angle));
 			// setting shape position and orientation
 			sVirtual->translate(pos);
 			sVirtual->rotate(angle);
@@ -178,9 +176,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 
 				const RSAShape *sCovers = nullptr;
 				std::vector<const RSAShape*> vNeighbours;
-				double posArray[RSA_SPATIAL_DIMENSION];
-				position.copyToArray(posArray);
-				this->surface->getNeighbours(&vNeighbours, posArray);
+				this->surface->getNeighbours(&vNeighbours, position);
 				for(const RSAShape *sTmp : vNeighbours){
 				    auto convexShape = dynamic_cast<const RSAConvexShape*>(sTmp);
 					if (convexShape->pointInside(this->surface, position, orientation, delta)){
@@ -251,8 +247,8 @@ void PackingGenerator::createPacking() {
 			std::array <double, RSA_ANGULAR_DIMENSION> angle{};
 			do{
 				aVoxels[i] = this->voxels->getRandomVoxel(aRND[_OMP_THREAD_ID]);
-				this->voxels->getRandomPositionAndOrientation(pos, angle.data(), aVoxels[i], aRND[_OMP_THREAD_ID]);
-			}while(!this->isInside(pos, angle.data()));
+				this->voxels->getRandomPositionAndOrientation(pos, angle, aVoxels[i], aRND[_OMP_THREAD_ID]);
+			}while(!this->isInside(pos, angle));
 			// setting shape position and orientation
 			sVirtual[i]->translate(pos);
 			sVirtual[i]->rotate(angle);
@@ -443,7 +439,7 @@ void PackingGenerator::toPovray(const std::string &filename){
 }
 
 
-void PackingGenerator::toWolfram(double *da, const std::string &filename){
+void PackingGenerator::toWolfram(const RSAVector &da, const std::string &filename){
 
 	std::vector<const RSAShape*> vShapes;
 	this->surface->getNeighbours(&vShapes, da);

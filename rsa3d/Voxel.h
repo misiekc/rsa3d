@@ -10,11 +10,14 @@
 
 #include <algorithm>
 #include <array>
+#include "Vector.h"
 
 class Voxel{
 
 private:
-	double position[RSA_SPATIAL_DIMENSION];
+	using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;
+
+	RSAVector position;
 	std::array<double, RSA_ANGULAR_DIMENSION> orientation;
 
 public:
@@ -38,15 +41,16 @@ public:
 	/**
 	 * @brief creates a voxel of a given position and orientation
 	 */
-	Voxel(double* pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle);
+	Voxel(const RSAVector &pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle);
 
 	virtual ~Voxel() = default;
 
-	bool isInside(double *pos, double size);
+	bool isInside(const RSAVector &pos, double size);
 
-	bool isInside(double *pos, double size, const std::array<double, RSA_ANGULAR_DIMENSION> &angle, double asize);
+	bool isInside(const RSAVector &pos, double size, const std::array<double, RSA_ANGULAR_DIMENSION> &angle,
+                  double asize);
 
-	double *getPosition();
+	const RSAVector &getPosition();
 
 	std::array<double, RSA_ANGULAR_DIMENSION> getOrientation();
 

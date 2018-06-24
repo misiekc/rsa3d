@@ -67,7 +67,8 @@ private:
 	void compactVoxelArray(Voxel **list, int &endIndex);
 
 	// finds voxel containing given point - not used - only for debugging
-	Voxel * findVoxel(Voxel**list, size_t listSize, double* pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle);
+	Voxel * findVoxel(Voxel **list, size_t listSize, const RSAVector &pos,
+					  const std::array<double, RSA_ANGULAR_DIMENSION> &angle);
 
 protected:
 	Voxel** voxels;
@@ -108,7 +109,7 @@ public:
 
 	virtual ~VoxelList();
 
-	void getNeighbours(std::vector<Voxel *> *result, double *da);
+	void getNeighbours(std::vector<Voxel *> *result, const RSAVector &da);
 	void removeTopLevelVoxel(Voxel *v);
 
 	bool analyzeVoxel(Voxel *v, const RSAShape *s, RSABoundaryConditions *bc);
@@ -122,8 +123,9 @@ public:
 
 	Voxel *getRandomVoxel(RND *rnd);
 	Voxel *getVoxel(int i);
-	Voxel * getVoxel(double* pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle);
-	void getRandomPositionAndOrientation(RSAVector &position, double *orientation, Voxel *v, RND *rnd);
+	Voxel *getVoxel(const RSAVector &pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle);
+	void getRandomPositionAndOrientation(RSAVector &position, std::array<double, RSA_ANGULAR_DIMENSION> &orientation,
+										 Voxel *v, RND *rnd);
 	double getVoxelSize();
 	double getVoxelAngularSize();
 	Voxel* get(int i);

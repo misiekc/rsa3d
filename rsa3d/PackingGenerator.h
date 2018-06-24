@@ -35,12 +35,12 @@ private:
     void modifiedRSA(RSAShape *s, Voxel *v);
 	bool isSaturated();
 	double getFactor();
-	bool isInside(const RSAVector &position, double *orientation);
+	bool isInside(const RSAVector &position, std::array<double, RSA_ANGULAR_DIMENSION> &orientation);
 	void createPacking();
 
 	void toPovray(const std::string &filename);
 	void toWolfram(const std::string &filename);
-	void toWolfram(double *da, const std::string &filename);
+	void toWolfram(const RSAVector &da, const std::string &filename);
 
 	void printRemainingVoxels(const std::string &prefix);
 
