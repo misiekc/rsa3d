@@ -262,19 +262,6 @@ void PackingGenerator::createPacking() {
 		checkedAgain = 0;
 		added = 0;
 
-/*
-		if(this->voxels->length()<20){
-			std::string filename = "shapes_" + std::to_string(this->voxels->length()) + ".dbg";
-			std::ofstream file(filename, std::ios::binary);
-			file.write((char *)(&tmpSplit), sizeof(int));
-			for(int i=0; i<tmpSplit; i++){
-				sVirtual[i]->store(file);
-			}
-			this->store(file);
-			file.close();
-		}
-*/
-
 		// sequentially processing potentially non overlaping shapes
 		for(int i=0; i<tmpSplit; i++){
 
@@ -310,7 +297,6 @@ void PackingGenerator::createPacking() {
 
 					this->surface->add(sVirtual[i]);
 					this->packing.addShape(sVirtual[i]);
-//					this->voxels->remove(aVoxels[i]);
 					this->voxels->removeTopLevelVoxel(aVoxels[i]);
 				}  //second overlapping check
 			} // first overlapping check
@@ -352,7 +338,7 @@ void PackingGenerator::createPacking() {
 
 			if (tmpSplit > std::max(this->params->maxVoxels/20, 10*this->params->split))
 				tmpSplit = std::max(this->params->maxVoxels/20, 10*this->params->split);
-			if(voxels->getLength()<0.001*this->params->maxVoxels && tmpSplit > 10*_OMP_MAXTHREADS)
+			if(v1<v0 && voxels->getLength()<0.001*this->params->maxVoxels && tmpSplit > 10*_OMP_MAXTHREADS)
 				tmpSplit /= 10.0;
 			if(tmpSplit < 10*_OMP_MAXTHREADS)
 				tmpSplit = 10*_OMP_MAXTHREADS;
@@ -376,13 +362,16 @@ void PackingGenerator::createPacking() {
 
 				oldTmpSplit = tmpSplit;
 			}
+//			this code is for debugging purposes in case of problems with subsequent stages of packing generation
+
 //			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
 //			this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
 //			this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
-//			std::string filename = "snapshot_" + std:::to_string(this->packing.size()) + "_" + std::to_string(this->voxels->length()) + ".dbg";
+//			std::string filename = "snapshot_" + std::to_string(this->packing.size()) + "_" + std::to_string(this->voxels->getLength()) + ".dbg";
 //			std::ofstream file(filename, std::ios::binary);
 //			this->store(file);
 //			file.close();
+
 		}else{
 			missCounter = 0;
 			if (depthAnalyze>0)

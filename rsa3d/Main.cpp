@@ -143,26 +143,33 @@ int simulate(Parameters *params) {
 	file.precision(std::numeric_limits<double>::digits10 + 1);
 
 	int seed = params->from;
-	while(seed < params->from + params->collectors){
-		int i;
-		for(i=0; ( (i < params->generatorProcesses) && ((seed+i) < (params->from + params->collectors)) ); i++){
-			pid = fork();
-			if (pid < 0){
-				std::cout << "fork problem" << std::endl;
-				i--;
-				continue;
+
+	if (params->generatorProcesses>1){
+		while(seed < params->from + params->collectors){
+			int i;
+			for(i=0; ( (i < params->generatorProcesses) && ((seed+i) < (params->from + params->collectors)) ); i++){
+				pid = fork();
+				if (pid < 0){
+					std::cout << "fork problem" << std::endl;
+					i--;
+					continue;
+				}
+				if (pid==0){
+					runSingleSimulation(seed + i, params, file);
+					return 1;
+				}
+				if (pid > 0){
+					continue;
+				}
 			}
-			if (pid==0){
-				runSingleSimulation(seed + i, params, file);
-				return 1;
-			}
-			if (pid > 0){
-				continue;
+			for(int j=0; j<i; j++){
+				wait(NULL);
+				seed++;
 			}
 		}
-		for(int j=0; j<i; j++){
-			wait(NULL);
-			seed++;
+	}else{
+		for(int i=0; i<params->collectors; i++){
+			runSingleSimulation(params->from+i, params, file);
 		}
 	}
 	file.close();

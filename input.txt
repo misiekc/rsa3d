@@ -1,5 +1,6 @@
 # maxTriesWithoutSuccess = std::numeric_limits<int>::max()
-maxVoxels = 40000000
+maxVoxels = 400000
+requestedAngularVoxelSize = 0.3
 minDx = 0.0
 from = 0
 collectors = 1
@@ -8,7 +9,7 @@ collectors = 1
 # maxTime = 1000
 analyze = 200
 split = 1000
-surfaceVolume = 10000.0
+surfaceVolume = 1000.0
 storePackings = true
 
 #modifiedRSA = true

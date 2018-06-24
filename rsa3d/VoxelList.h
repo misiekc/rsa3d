@@ -54,9 +54,6 @@ private:
 	// initialize voxels - used inside a constructor
 	void initVoxels();
 
-	// checks voxels indexes consistency
-//	void checkIndexes();
-
 	// checks if a top level voxel for voxel v is active (if not v should be removed
 	bool isTopLevelVoxelActive(Voxel *v);
 
@@ -64,8 +61,11 @@ private:
 	void checkTopLevelVoxels();
 
 
-	// aeeay of voxels will not have NULLs between pointers to objects - they can appear when splitting or analyze voxels in parallel
+	// voxels array will not have NULLs between pointers to objects - they can appear when splitting or analyze voxels in parallel
 	void compactVoxelArray(Voxel **list, int &endIndex);
+
+	// finds voxel containing given point - not used - only for debugging
+	Voxel * findVoxel(Voxel**list, size_t listSize, double* pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle);
 
 protected:
 	Voxel** voxels;

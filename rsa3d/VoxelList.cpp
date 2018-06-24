@@ -76,8 +76,6 @@ VoxelList::VoxelList(double packingSpatialSize, double requestedSpatialVoxelSize
 	this->beginningVoxelNumber = ss*sa;
 	this->length = this->beginningVoxelNumber;
 	this->fillNeighbourGrid();
-
-//		this.checkIndexes();
 	}
 
 
@@ -202,6 +200,16 @@ Voxel * VoxelList::getVoxel(double *pos, const std::array<double, RSA_ANGULAR_DI
 	std::vector<Voxel *> *vTmp = this->voxelNeighbourGrid->getCell(pos);
 	for(Voxel *v : *vTmp){
 		if (v->isInside(pos, this->spatialVoxelSize, angle, this->angularVoxelSize)){
+			return v;
+		}
+	}
+	return NULL;
+}
+
+Voxel * VoxelList::findVoxel(Voxel** list, size_t listSize, double *pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle){
+	for(size_t i=0; i<listSize; i++){
+		Voxel *v = list[i];
+		if (v!=NULL && v->isInside(pos, this->spatialVoxelSize, angle, this->angularVoxelSize)){
 			return v;
 		}
 	}
@@ -390,6 +398,7 @@ size_t VoxelList::analyzeVoxels(BoundaryConditions *bc, NeighbourGrid<const RSAS
 
 
 bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, BoundaryConditions *bc){
+
 	if (this->disabled)
 		return false;
 	size_t voxelsFactor = (size_t)round( pow(2, RSA_SPATIAL_DIMENSION+RSA_ANGULAR_DIMENSION) );
@@ -403,13 +412,6 @@ bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const 
 		newList[i] = nullptr;
 	}
 
-	this->spatialVoxelSize = (this->spatialVoxelSize/2.0)*this->dxFactor;
-	delete this->spatialDistribution;
-	this->spatialDistribution = new std::uniform_real_distribution<double>(0.0, this->spatialVoxelSize);
-
-	this->angularVoxelSize = (this->angularVoxelSize/2.0)*this->dxFactor;
-	delete this->angularDistribution;
-	this->angularDistribution = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize);
 
 	Voxel ***aVoxels = new Voxel**[_OMP_MAXTHREADS];
 	for(int i=0; i<_OMP_MAXTHREADS; i++){
@@ -419,7 +421,7 @@ bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const 
 	_OMP_PARALLEL_FOR
 	for(size_t i=0; i<this->length; i++){
 		if (!this->analyzeVoxel(this->voxels[i], nl, bc)){ // dividing only not overlapping voxels
-			this->splitVoxel(this->voxels[i], this->spatialVoxelSize, this->angularVoxelSize, aVoxels[_OMP_THREAD_ID]);
+			this->splitVoxel(this->voxels[i], this->spatialVoxelSize/2.0, this->angularVoxelSize/2.0, aVoxels[_OMP_THREAD_ID]);
 			for(size_t j=0; j<voxelsFactor; j++){
 				Voxel *v = aVoxels[_OMP_THREAD_ID][j];
 				if(this->isVoxelInsidePacking(v) && ( nl==NULL || bc==NULL || !this->analyzeVoxel(v, nl, bc) ) ){
@@ -451,10 +453,18 @@ bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const 
 
 	this->voxelNeighbourGrid->clear();
 
+	this->spatialVoxelSize = (this->spatialVoxelSize/2.0)*this->dxFactor;
+	delete this->spatialDistribution;
+	this->spatialDistribution = new std::uniform_real_distribution<double>(0.0, this->spatialVoxelSize);
+
+	this->angularVoxelSize = (this->angularVoxelSize/2.0)*this->dxFactor;
+	delete this->angularDistribution;
+	this->angularDistribution = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize);
+
 	this->length = endIndex+1;
 	this->voxels = newList;
 	this->fillNeighbourGrid();
-//	this->checkIndexes();
+
 //	this->checkTopLevelVoxels();
 	return true;
 }
