@@ -331,7 +331,7 @@ void PackingGenerator::createPacking() {
 			}
 			// if number of voxels has changed
 			if (v1!=v0){
-				tmpSplit *= ((double)v1 / v0);
+				tmpSplit *= ((double)v1 / (double)v0);
 			}else{
 				tmpSplit = 1.1*tmpSplit + _OMP_MAXTHREADS;
 			}
@@ -343,7 +343,7 @@ void PackingGenerator::createPacking() {
 			if(tmpSplit < 10*_OMP_MAXTHREADS)
 				tmpSplit = 10*_OMP_MAXTHREADS;
 
-			if (!b && (double)(v0-v1)/v0 < 0.1){ // not much voxels removed
+			if (!b && (double)(v0-v1)/(double)v0 < 0.1){ // not much voxels removed
 				depthAnalyze++;
 			}else{
 				if (depthAnalyze>0)
@@ -374,8 +374,6 @@ void PackingGenerator::createPacking() {
 
 		}else{
 			missCounter = 0;
-			if (depthAnalyze>0)
-				depthAnalyze--;
 		}
 	} // while
 
