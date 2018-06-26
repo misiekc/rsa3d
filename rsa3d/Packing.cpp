@@ -4,9 +4,8 @@
 
 #include "Packing.h"
 #include "shape/ShapeFactory.h"
+#include "Utils.h"
 #include <fstream>
-
-using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;
 
 Packing::~Packing() {
     for (auto shape : this->packing)

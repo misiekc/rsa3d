@@ -9,6 +9,7 @@
 #ifndef UTILS_C_
 #define UTILS_C_
 
+#include "Vector.h"
 
 #ifdef _OPENMP
     #define __OMP_STRINGIFY__(x) #x
@@ -26,7 +27,12 @@
     #define _OMP_THREAD_ID      0
 #endif
 
-#include "Vector.h"
+using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;
+
+template <std::size_t N>
+using Orientation = std::array<double, N>;
+
+using RSAOrientation = Orientation<RSA_ANGULAR_DIMENSION>;
 
 bool increment(int* in, int inlength, int max);
 int position2i(const double* da, int dalength, double size, double dx, int n);

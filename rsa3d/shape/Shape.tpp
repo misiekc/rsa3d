@@ -71,19 +71,19 @@ double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVolume() const {
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-std::array<double, ANGULAR_DIMENSION> Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation() const{
+Orientation<ANGULAR_DIMENSION> Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getOrientation() const{
     return this->orientation;
 }
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setOrientation(
-		const std::array<double, ANGULAR_DIMENSION> &orientation) {
+		const Orientation<ANGULAR_DIMENSION> &orientation) {
 	this->orientation = orientation;
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::rotate(const std::array<double, ANGULAR_DIMENSION> &v){
-    std::array<double, ANGULAR_DIMENSION> orientation;
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::rotate(const Orientation<ANGULAR_DIMENSION> &v){
+    Orientation<ANGULAR_DIMENSION> orientation;
 	for(unsigned short i=0; i<ANGULAR_DIMENSION; i++)
 		orientation[i] = this->getOrientation()[i] + v[i];
     this->setOrientation(orientation);

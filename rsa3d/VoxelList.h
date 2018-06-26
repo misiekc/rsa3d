@@ -19,9 +19,6 @@
 class VoxelList {
 
 private:
-
-    using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;
-
 	// allows voxels to overlap - only for testing purposes and normally should be set to 1
 	const double dxFactor = 1.0; // 1.0000000001;
 
@@ -68,7 +65,7 @@ private:
 
 	// finds voxel containing given point - not used - only for debugging
 	Voxel * findVoxel(Voxel **list, size_t listSize, const RSAVector &pos,
-					  const std::array<double, RSA_ANGULAR_DIMENSION> &angle);
+					  const RSAOrientation &angle);
 
 protected:
 	Voxel** voxels;
@@ -123,8 +120,8 @@ public:
 
 	Voxel *getRandomVoxel(RND *rnd);
 	Voxel *getVoxel(int i);
-	Voxel *getVoxel(const RSAVector &pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle);
-	void getRandomPositionAndOrientation(RSAVector *position, std::array<double, RSA_ANGULAR_DIMENSION> *orientation,
+	Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle);
+	void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation,
 										 Voxel *v, RND *rnd);
 	double getVoxelSize();
 	double getVoxelAngularSize();

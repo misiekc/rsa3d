@@ -20,8 +20,6 @@ template <typename E>
 class NeighbourGrid{
 
 private:
-    using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;
-
 	double linearSize;
 	int n;
 	double dx;

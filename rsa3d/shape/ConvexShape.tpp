@@ -5,7 +5,7 @@
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 bool ConvexShape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryConditions<SPATIAL_DIMENSION> *bc,
                                                                     const Vector<SPATIAL_DIMENSION> &position) const{
-    std::array<double, ANGULAR_DIMENSION> zeroAngle;
+    Orientation<ANGULAR_DIMENSION> zeroAngle;
     zeroAngle.fill(0);
     return this->pointInside(bc, position, zeroAngle, 2*M_PI);
 }
@@ -13,7 +13,7 @@ bool ConvexShape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryCond
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 bool ConvexShape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelInside(BoundaryConditions<SPATIAL_DIMENSION> *bc,
                                                                     const Vector<SPATIAL_DIMENSION> &voxelPosition,
-                                                                    const std::array<double, ANGULAR_DIMENSION> &orientation,
+                                                                    const Orientation<ANGULAR_DIMENSION> &orientation,
                                                                     double spatialSize, double angularSize) const {
     Vector<SPATIAL_DIMENSION> position;
     int counterSize = 1 << SPATIAL_DIMENSION;

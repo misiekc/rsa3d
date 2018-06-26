@@ -97,7 +97,7 @@ void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
 }
 
 
-bool PackingGenerator::isInside(const RSAVector &position, std::array<double, RSA_ANGULAR_DIMENSION> &orientation){
+bool PackingGenerator::isInside(const RSAVector &position, RSAOrientation &orientation){
 	for(unsigned short i=0; i<RSA_SPATIAL_DIMENSION; i++){
 		if (position[i]>=this->spatialSize || position[i]<0)
 			return false;
@@ -149,7 +149,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 			RSAShape *sVirtual = ShapeFactory::createShape(aRND[_OMP_THREAD_ID]);
 			Voxel *v;
 			RSAVector pos;
-			std::array <double, RSA_ANGULAR_DIMENSION> angle{};
+			RSAOrientation angle{};
 			do{
 				v = this->voxels->getRandomVoxel(aRND[_OMP_THREAD_ID]);
 				this->voxels->getRandomPositionAndOrientation(&pos, &angle, v, aRND[_OMP_THREAD_ID]);
@@ -165,7 +165,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 					std::cout << "\t povray: " << std::endl << std::setprecision(10) << sVirtual->toPovray() << std::endl << std::flush;
 				}
 				RSAVector position = sVirtual->getPosition();
-				std::array<double, RSA_ANGULAR_DIMENSION> orientation = sVirtual->getOrientation();
+				RSAOrientation orientation = sVirtual->getOrientation();
 				double delta = 0.0001;
 				for(unsigned short j = 0; j< RSA_ANGULAR_DIMENSION; j++)
 					orientation[j] -= 0.5*delta;
@@ -240,7 +240,7 @@ void PackingGenerator::createPacking() {
 		for(int i = 0; i<tmpSplit; i++){
 			sVirtual[i] = ShapeFactory::createShape(aRND[_OMP_THREAD_ID]);
 			RSAVector pos;
-			std::array <double, RSA_ANGULAR_DIMENSION> angle{};
+			RSAOrientation angle{};
 			do{
 				aVoxels[i] = this->voxels->getRandomVoxel(aRND[_OMP_THREAD_ID]);
 				this->voxels->getRandomPositionAndOrientation(&pos, &angle, aVoxels[i], aRND[_OMP_THREAD_ID]);

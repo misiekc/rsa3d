@@ -22,7 +22,7 @@ template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 class ConvexShape : public Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> {
 public:
     bool voxelInside(BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &voxelPosition,
-                     const std::array<double, ANGULAR_DIMENSION> &orientation, double spatialSize,
+                     const Orientation<ANGULAR_DIMENSION> &orientation, double spatialSize,
                      double angularSize) const final;
 
     /**
@@ -36,7 +36,7 @@ public:
      * @return false if point is outside, true otherwise
      */
     virtual bool pointInside(BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &position,
-                             const std::array<double, ANGULAR_DIMENSION> &orientation,
+                             const Orientation<ANGULAR_DIMENSION> &orientation,
                              double orientationRange) const = 0;
 
     /**

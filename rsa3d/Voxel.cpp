@@ -6,6 +6,7 @@
  */
 
 #include "Voxel.h"
+#include "Utils.h"
 
 #include <sstream>
 #include <stdexcept>
@@ -19,7 +20,7 @@ Voxel::Voxel(){
 }
 
 
-Voxel::Voxel(const RSAVector &pos, const std::array<double, RSA_ANGULAR_DIMENSION> &angle){
+Voxel::Voxel(const RSAVector &pos, const RSAOrientation &angle){
 	this->position = pos;
 	this->orientation = angle;
 	this->lastAnalyzed = 0;
@@ -37,7 +38,7 @@ bool Voxel::isInside(const RSAVector &pos, double size){
 }
 
 
-bool Voxel::isInside(const RSAVector &pos, double size, const std::array<double, RSA_ANGULAR_DIMENSION> &angle,
+bool Voxel::isInside(const RSAVector &pos, double size, const RSAOrientation &angle,
                      double asize) {
 	for(int i=0; i<RSA_SPATIAL_DIMENSION; i++){
 		if (pos[i]<this->position[i])
@@ -58,12 +59,12 @@ bool Voxel::isInside(const RSAVector &pos, double size, const std::array<double,
 
 
 
-const Voxel::RSAVector &Voxel::getPosition(){
+const RSAVector &Voxel::getPosition(){
 	return this->position;
 }
 
 
-std::array<double, RSA_ANGULAR_DIMENSION> Voxel::getOrientation(){
+RSAOrientation Voxel::getOrientation(){
 	return this->orientation;
 }
 

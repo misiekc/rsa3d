@@ -11,6 +11,7 @@
 #include "../BoundaryConditions.h"
 #include "../Positioned.h"
 #include "../RND.h"
+#include "../Utils.h"
 #include <string>
 #include <ostream>
 #include <istream>
@@ -74,7 +75,7 @@ private:
     static double neighbourListCellSize;
     static create_shape_fun_ptr createShapeImpl;
 
-    std::array<double, ANGULAR_DIMENSION> orientation;
+    Orientation<ANGULAR_DIMENSION> orientation;
 
 protected:
 
@@ -105,7 +106,7 @@ protected:
      * <strong>rotate(double*) method delegates to this, so no orientation changes will be missed.</strong>
      * @param orientation new shape's orientation
      */
-    virtual void setOrientation(const std::array<double, ANGULAR_DIMENSION> &orientation);
+    virtual void setOrientation(const Orientation<ANGULAR_DIMENSION> &orientation);
 
     /**
      * @brief Sets initial size of a voxel.
@@ -209,13 +210,13 @@ public:
      * @brief Returns an array of all angles describing shape's orientation.
      * @return array describing shape's orietation
      */
-    std::array<double, ANGULAR_DIMENSION> getOrientation() const;
+    Orientation<ANGULAR_DIMENSION> getOrientation() const;
 
     /**
      * @brief Increases all shape's angles by respective values from array @a v.
      * @param v an array of angle deltas
      */
-    void rotate(const std::array<double, ANGULAR_DIMENSION> &v);
+    void rotate(const Orientation<ANGULAR_DIMENSION> &v);
 
 	/**
 	 * @brief Checks if there is overlap with the shape pointed by @a s.
@@ -249,7 +250,7 @@ public:
      * @return true if the voxel is fully covered by the exclusion zone of @a this shape, false otherwise.
      */
 	virtual bool voxelInside(BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &voxelPosition,
-                             const std::array<double, ANGULAR_DIMENSION> &orientation, double spatialSize,
+                             const Orientation<ANGULAR_DIMENSION> &orientation, double spatialSize,
                              double angularSize) const = 0;
 
     /**

@@ -17,8 +17,6 @@
 #include "NeighbourGrid.h"
 #include "VoxelList.h"
 
-using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;
-
 class Surface : public BoundaryConditions<RSA_SPATIAL_DIMENSION> {
 
 protected:
