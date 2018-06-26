@@ -183,13 +183,13 @@ void VoxelList::checkTopLevelVoxels(){
 
 	for(size_t i=0; i<this->length; i++){
 		Voxel *v = this->voxels[i];
-		this->getRandomPositionAndOrientation(pos, angle, v, &rnd);
+		this->getRandomPositionAndOrientation(&pos, &angle, v, &rnd);
 		int index = this->getIndexOfTopLevelVoxel(pos);
 		if (this->getIndexOfTopLevelVoxel(v->getPosition())!=index){
 			std::cout << "checkTopVoxels problem" << std::endl;
 		}
 		for(int j=0; j<10; j++){
-			this->getRandomPositionAndOrientation(pos, angle, v, &rnd);
+			this->getRandomPositionAndOrientation(&pos, &angle, v, &rnd);
 			if (this->getIndexOfTopLevelVoxel(pos)!=index){
 				std::cout << "checkTopVoxels problem" << std::endl;
 			}
@@ -482,16 +482,16 @@ Voxel * VoxelList::getVoxel(int i){
 }
 
 
-void VoxelList::getRandomPositionAndOrientation(RSAVector &position,
-												std::array<double, RSA_ANGULAR_DIMENSION> &orientation, Voxel *v,
+void VoxelList::getRandomPositionAndOrientation(RSAVector *position,
+												std::array<double, RSA_ANGULAR_DIMENSION> *orientation, Voxel *v,
 												RND *rnd){
 	RSAVector vpos = v->getPosition();
 	std::array<double, RSA_ANGULAR_DIMENSION> vangle = v->getOrientation();
 
 	for (ushort i=0; i < RSA_SPATIAL_DIMENSION; i++)
-		position[i] = vpos[i] + rnd->nextValue(this->spatialDistribution);
+        (*position)[i] = vpos[i] + rnd->nextValue(this->spatialDistribution);
 	for (ushort i=0; i < RSA_ANGULAR_DIMENSION; i++)
-		orientation[i] = vangle[i] + rnd->nextValue(this->angularDistribution);
+        (*orientation)[i] = vangle[i] + rnd->nextValue(this->angularDistribution);
 }
 
 
