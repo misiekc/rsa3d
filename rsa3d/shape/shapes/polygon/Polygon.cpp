@@ -219,7 +219,7 @@ bool Polygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{
 }
 
 bool Polygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition,
-						  const std::array<double, 1> &voxelOrientation, double spatialSize, double angularSize) const{
+						  const Orientation<1> &voxelOrientation, double spatialSize, double angularSize) const{
 
 	if (voxelOrientation[0] > Shape<2, 1>::getVoxelAngularSize())
 		return true;

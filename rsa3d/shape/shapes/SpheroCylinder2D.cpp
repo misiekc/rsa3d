@@ -67,7 +67,7 @@ bool SpheroCylinder2D::pointInside(BoundaryConditions<2> *bc, const Vector<2> &d
 
     Vector<2> translationVector = bc->getTranslation(this->getPosition(), da);
     Vector<2> thisPos(this->getPosition());
-    Vector<2> pointPos = Vector<2>(da) + translationVector;
+    Vector<2> pointPos = da + translationVector;
     Vector<2> pointPosThisAligned = getAntiRotationMatrix() * (pointPos - thisPos);
     double angleFromAligned = angleFrom - this->getAngle();
     double angleToAligned = angleTo - this->getAngle();

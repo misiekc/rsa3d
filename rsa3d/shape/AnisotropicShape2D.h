@@ -56,7 +56,7 @@ protected:
     /**
      * @brief Delegated to AnisotropicShape2D::setAngle(double). <strong>Override that instead.</strong>
      */
-    void setOrientation(const std::array<double, 1> &orientation) final;
+    void setOrientation(const Orientation<1> &orientation) final;
 
     /**
      * @brief Sets new orientation of a shape. It replaces Shape::setOrientation(double*).
@@ -81,7 +81,7 @@ public:
      * @brief Delegated to AnisotropicShape2D::pointInside(BoundaryConditions*,double*,double,double). <strong>Implement
      * that instead.</strong>
      */
-    bool pointInside(BoundaryConditions<2> *bc, const Vector<2> &position, const std::array<double, 1> &orientation,
+    bool pointInside(BoundaryConditions<2> *bc, const Vector<2> &position, const Orientation<1> &orientation,
                     double orientationRange) const final;
 
     /**

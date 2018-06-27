@@ -16,7 +16,7 @@ double NBoxFBC::getArea() const {
 }
 
 RSAVector NBoxFBC::getTranslation(double s, const RSAVector &p1, const RSAVector &p2) {
-	return RSAVector();
+	return {};
 }
 
 RSAVector NBoxFBC::getTranslation(const RSAVector &p1, const RSAVector &p2) const {

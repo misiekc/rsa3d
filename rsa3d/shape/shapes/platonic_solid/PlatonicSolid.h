@@ -34,7 +34,7 @@ public:
     static void initClass(const std::string &attr);
 
     bool overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const final;
-    bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const std::array<double, 0> &orientation,
+    bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
                     double orientationRange) const override;
     void store(std::ostream &f) const override;
     void restore(std::istream &f) override;

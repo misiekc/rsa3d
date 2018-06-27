@@ -121,8 +121,7 @@ public:
 	Voxel *getRandomVoxel(RND *rnd);
 	Voxel *getVoxel(int i);
 	Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle);
-	void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation,
-										 Voxel *v, RND *rnd);
+	void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd);
 	double getVoxelSize();
 	double getVoxelAngularSize();
 	Voxel* get(int i);

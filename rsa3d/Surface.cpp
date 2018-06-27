@@ -68,8 +68,8 @@ NeighbourGrid<const RSAShape> *Surface::getNeighbourGrid(){
 	return this->list;
 }
 
-void Surface::checkPosition(RSAVector &da) const {
-	// do nothing
+RSAVector Surface::checkPosition(const RSAVector &da) const {
+	return da;	// do nothing
 }
 
 double Surface::distance2(const RSAVector &a1, const RSAVector &a2) const {

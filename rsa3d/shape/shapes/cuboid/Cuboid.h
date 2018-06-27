@@ -71,8 +71,8 @@ public:
 
 	bool overlap(BoundaryConditions<3> *bc, const Shape<3,0> *s) const override;
 	double getVolume() const override;
-	bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const std::array<double, 0> &orientation,
-                    double orientationRange) const override;
+	bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
+                     double orientationRange) const override;
 	std::string toPovray() const override;
 	std::string toWolfram() const override;
 	void store(std::ostream &f) const override;
@@ -88,6 +88,8 @@ public:
 	intersection::polyhedron obtainTris() const;
 
 	Matrix<3, 3> getOrientation() const;
+
+    bool liesInCylinderOnEdge(const Vector<3> &absPointPos, size_t coord1, size_t coord2) const;
 };
 
 

@@ -70,22 +70,18 @@ double PackingGenerator::getFactor() {
 void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
 
 	const RSAShape *sn = this->surface->getClosestNeighbour(s->getPosition());
-	if (sn == nullptr) {
+	if (sn == nullptr)
 		sn = this->surface->getClosestNeighbour(s->getPosition(), this->packing.getVector());
-	}
 	if (sn != nullptr){
 		RSAVector spos = s->getPosition();
 		RSAVector snpos = sn->getPosition();
 
 		double d = sqrt(this->surface->distance2(spos, snpos));
 		if (d < this->params->thresholdDistance){
-			RSAVector da = this->surface->vector(snpos - spos);
+			RSAVector da = this->surface->vector(snpos - spos) / d;
 			double mindist = s->minDistance(sn);
-			for(ushort i=0; i<RSA_SPATIAL_DIMENSION; i++){
-				da[i] = da[i]/d;
-				spos[i] += (d-mindist)*da[i];
-			}
-			this->surface->checkPosition(spos);
+			spos += (d - mindist) * da;
+			spos = this->surface->checkPosition(spos);
 			v = this->voxels->getVoxel(spos, s->getOrientation());
 			if (v == nullptr){
 				std::cout << "Problem: PackingGenerator - voxel not found: " <<
@@ -411,7 +407,7 @@ void PackingGenerator::toPovray(const Packing &packing, double size, VoxelList *
 
 	file << "}" << std::endl;
 
-	if(voxels!=NULL){
+	if(voxels!=nullptr){
 		file << "#declare voxels=union{" << std::endl;
 		file << voxels->toPovray() << std::endl;
 		file << "}" << std::endl;
@@ -419,7 +415,7 @@ void PackingGenerator::toPovray(const Packing &packing, double size, VoxelList *
 	file << "#declare result=union{" << std::endl;
 	file << "  object { layer }" << std::endl;
 
-	if (voxels!=NULL)
+	if (voxels!=nullptr)
 		file << "  object { voxels }" << std::endl;
 	file << "}" << std::endl;
 	file << "object{ result	rotate x*360*clock }" << std::endl;
@@ -447,7 +443,7 @@ void PackingGenerator::toWolfram(const RSAVector &da, const std::string &filenam
 	for (const RSAShape *s : vShapes) {
 		file << ", " << std::endl << s->toWolfram();
 	}
-	if (vVoxels.size()>0){
+	if (!vVoxels.empty()){
 		file << ", Black, " << std::endl;
 		for(Voxel *v: vVoxels){
 			file << v->toWolfram(this->voxels->getVoxelSize(), this->voxels->getVoxelAngularSize());
@@ -483,8 +479,7 @@ void PackingGenerator::toWolfram(const Packing &packing, double size, VoxelList 
 		file << ", " << std::endl << s->toWolfram();
 	}
 
-
-	if(voxels!=NULL){
+	if(voxels!=nullptr){
 		file << ", Black, " << std::endl << voxels->toWolfram();
 	}
 
@@ -505,7 +500,7 @@ void PackingGenerator::store(std::ostream &f) const{
 	f.write((char *)(&sd), sizeof(unsigned char));
 	if (ad>0)
 		f.write((char *)(&ad), sizeof(unsigned char));
-	int size = this->packing.size();
+	std::size_t size = this->packing.size();
 	f.write((char *)(&size), sizeof(int));
 
 	for(const RSAShape *s: this->packing){

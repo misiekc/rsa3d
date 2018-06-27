@@ -51,7 +51,7 @@ public:
 
 	const RSAVector &getPosition();
 
-	RSAOrientation getOrientation();
+	const RSAOrientation &getOrientation();
 
 	std::string toPovray(double ssize);
 	std::string toWolfram(double ssize, double asize);

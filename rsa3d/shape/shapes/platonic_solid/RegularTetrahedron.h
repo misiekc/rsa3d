@@ -40,7 +40,7 @@ public:
 
     interval getProjection(const Vector<3> & axis) const;
 
-    bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const std::array<double, 0> &orientation,
+    bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
                      double orientationRange) const override;
 };
 

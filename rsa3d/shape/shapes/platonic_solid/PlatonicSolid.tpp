@@ -54,7 +54,7 @@ bool PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions<3> *bc, const Shap
 
 template<typename SpecificSolid>
 bool PlatonicSolid<SpecificSolid>::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
-                                              const std::array<double, 0> &orientation, double orientationRange) const {
+                                              const Orientation<0> &orientation, double orientationRange) const {
     return (position - this->getPosition()).norm2() <= 4 * std::pow(SpecificSolid::insphereRadius, 2);
 }
 
@@ -125,8 +125,7 @@ void PlatonicSolid<SpecificSolid>::calculateVerticesAndAxes() {
     thisSpecific->vertices = this->applyOrientation(SpecificSolid::orientedVertices);
     thisSpecific->edgeAxes = this->applyOrientation(SpecificSolid::orientedEdgeAxes);
     thisSpecific->faceAxes = this->applyOrientation(SpecificSolid::orientedFaceAxes);
-    Vector<3> pos(this->getPosition());
-    this->translateVertices(pos);
+    this->translateVertices(this->getPosition());
 }
 
 template<typename SpecificSolid>

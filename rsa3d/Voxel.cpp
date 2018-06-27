@@ -64,7 +64,7 @@ const RSAVector &Voxel::getPosition(){
 }
 
 
-RSAOrientation Voxel::getOrientation(){
+const RSAOrientation &Voxel::getOrientation(){
 	return this->orientation;
 }
 

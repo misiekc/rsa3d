@@ -144,7 +144,7 @@ bool Cuboid::overlap(BoundaryConditions<3> *bc, const Shape *s) const
 bool Cuboid::pointInsideCuboid(const Vector<3> &vertex) const
 {
     for (unsigned short i = 0; i < 3; i++)
-        if (std::abs(vertex[i]) > this->size[i] / 2)
+        if (std::abs(vertex[i]) > Cuboid::size[i] / 2)
             return false;
     return true;
 }
@@ -160,47 +160,55 @@ double Cuboid::getVolume() const
 // Checks whether the point with coordinates da lies inside excluded volume.
 // It is an interior of a set of point which distanse from
 //----------------------------------------------------------------------------
-bool Cuboid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &pos, const std::array<double, 0> &orientation,
+bool Cuboid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &pos, const Orientation<0> &orientation,
                         double orientationRange) const
 {
     // Transform point coordinates to Cuboid coordinate system
-    Vector<3> cuboidTranslation = this->getPosition() + bc->getTranslation(this->getPosition(), pos);
-    Vector<3> pointTranslation = this->orientation.transpose() * (pos - cuboidTranslation);
+    Vector<3> thisBCPos = this->getPosition() + bc->getTranslation(this->getPosition(), pos);
+    Vector<3> pointAligned = this->orientation.transpose() * (pos - thisBCPos);
 
-    double abs_point_coords[3];
+    Vector<3> absPointAligned;
     for (unsigned short i = 0; i < 3; i++)
-        abs_point_coords[i] = std::abs(pointTranslation[i]);
+        absPointAligned[i] = std::abs(pointAligned[i]);
 
     // Map which coords lie in this and which lie in this + minDimension
-    bool liesInSmaller[3];
-    bool liesInBigger[3];
+    bool inThis[3];
+    bool inThisPushed[3];
     for (unsigned short i = 0; i < 3; i++) {
-        liesInSmaller[i] = (abs_point_coords[i] <= this->size[i] / 2);
-        liesInBigger[i] = (abs_point_coords[i] <= this->size[i] / 2 + minDimension);
+        inThis[i] = (absPointAligned[i] <= Cuboid::size[i] / 2);
+        inThisPushed[i] = (absPointAligned[i] <= Cuboid::size[i] / 2 + minDimension);
     }
 
     // Check optimistic cases - "lies in this" and "doesn't lie in this + minDimension"
-    if (!liesInBigger[0] || !liesInBigger[1] || !liesInBigger[2])       return false;
-    if (liesInSmaller[0] && liesInSmaller[1] && liesInSmaller[2])       return true;
+    if (!inThisPushed[0] || !inThisPushed[1] || !inThisPushed[2])       return false;
+    if (inThis[0] && inThis[1] && inThis[2])       return true;
 
     // Check "pushed rectangles"
-    if ((liesInSmaller[0] && liesInSmaller[1]) || (liesInSmaller[1] && liesInSmaller[2]) || (liesInSmaller[2] && liesInSmaller[0]))
+    if ((inThis[0] && inThis[1]) || (inThis[1] && inThis[2]) || (inThis[2] && inThis[0]))
         return true;
 
     // Check cylinders on edges
-    if (liesInSmaller[0] && std::pow(abs_point_coords[1] - this->size[1] / 2, 2) + std::pow(abs_point_coords[2] - this->size[2] / 2, 2) <= std::pow(minDimension, 2))
+    if (inThis[0] && this->liesInCylinderOnEdge(absPointAligned, 1, 2))
         return true;
-    if (liesInSmaller[1] && std::pow(abs_point_coords[2] - this->size[2] / 2, 2) + std::pow(abs_point_coords[0] - this->size[0] / 2, 2) <= std::pow(minDimension, 2))
+    if (inThis[1] && this->liesInCylinderOnEdge(absPointAligned, 2, 0))
         return true;
-    if (liesInSmaller[2] && std::pow(abs_point_coords[0] - this->size[0] / 2, 2) + std::pow(abs_point_coords[1] - this->size[1] / 2, 2) <= std::pow(minDimension, 2))
+    if (inThis[2] && this->liesInCylinderOnEdge(absPointAligned, 0, 1))
         return true;
 
     // Check spheres in vertices
-    if (std::pow(abs_point_coords[0] - this->size[0] / 2, 2) + std::pow(abs_point_coords[1] - this->size[1] / 2, 2) +
-        std::pow(abs_point_coords[2] - this->size[2] / 2, 2) <= std::pow(minDimension, 2))
+    if (std::pow(absPointAligned[0] - this->size[0] / 2, 2) + std::pow(absPointAligned[1] - this->size[1] / 2, 2) +
+        std::pow(absPointAligned[2] - this->size[2] / 2, 2) <= std::pow(minDimension, 2))
         return true;
 
     return false;
+}
+
+/* Cyllinder (actually 4 cyllinders of the same abs coords) placed in (0,0,0) axis oriented cuboid along the side
+ * which coords coord1 coord2 are not zero (so oriented in "coord3" direction) */
+bool Cuboid::liesInCylinderOnEdge(const Vector<3> &absPointPos, std::size_t coord1, std::size_t coord2) const {
+    return std::pow(absPointPos[coord1] - Cuboid::size[coord1]/2, 2)
+           + std::pow(absPointPos[coord2] - Cuboid::size[coord2]/2, 2)
+           <= std::pow(minDimension, 2);
 }
 
 // Returns Cuboid orientation

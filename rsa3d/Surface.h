@@ -43,7 +43,7 @@ public:
 
 	RSAVector getTranslation(const RSAVector &p1, const RSAVector &p2) const override = 0;
 	virtual RSAVector vector(const RSAVector &v) const = 0;
-	virtual void checkPosition(RSAVector &da) const;
+	virtual RSAVector checkPosition(const RSAVector &da) const;
 	virtual double getArea() const = 0;
 
 //	void drawShapes(Graphics g, double scale);
