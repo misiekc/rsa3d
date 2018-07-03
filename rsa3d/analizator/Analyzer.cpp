@@ -18,92 +18,39 @@
 #include <fstream>
 #include <iostream>
 #include <dirent.h>
-#include <string.h>
+#include <cstring>
 #include <string>
 
 #include <cmath>
 
-Analyzer::Analyzer(Parameters *params) {
-	this->params = params;
-}
 
-Analyzer::~Analyzer() {
-}
+void Analyzer::analyzeOrder(const Packing &packing, std::vector<Plot*> *order) {
+    if (!this->isOrderCalculable(packing.front()))     return;
 
+    for(std::size_t i=0; i<packing.size(); i++){
+        for(std::size_t j=i+1; j<packing.size(); j++){
+            double dist = this->getPetiodicDistance(packing[i], packing[j]);
+            if (dist > (*order)[0]->getMax())
+                continue;
 
-double P2(double x){
-	return 0.5*(3*x*x - 1);
-}
-
-double P4(double x){
-	return 0.125*(x*x*(35*x*x-30)+3);
-}
-
-void Analyzer::calculateOrderParameters(double *result, Cuboid *c1, Cuboid *c2){
-	double axisAlignment[3];
-	Matrix<3,3> product = (c1->getOrientation().transpose()) * (c2->getOrientation());
-
-	double tmp = 0, row[2], column[2], prod4 = 0;
-	axisAlignment[0] = 0.0; row[0] = 0; column[0] = 0;
-	for(size_t i = 0; i<3; i++){
-		for(size_t j = 0; j<3; j++){
-			tmp = fabs(product(i, j));
-			prod4 += tmp*tmp*tmp*tmp;
-			if (axisAlignment[0] < tmp){
-				axisAlignment[0] = tmp;
-				row[0] = i;
-				column[0] = j;
-			}
+            auto particle1 = dynamic_cast<const OrderCalculable*>(packing[i]);
+            auto particle2 = dynamic_cast<const OrderCalculable*>(packing[j]);
+            std::vector<double> orderParameters = particle1->calculateOrder(particle2);
+			for(std::size_t k = 0; k < orderParameters.size(); k++)
+                (*order)[k]->add(dist, orderParameters[k]);
 		}
 	}
-	axisAlignment[1] = 0.0; row[1] = 0; column[1] = 0;
-	for(size_t i = 0; i<3; i++){
-		if (i==row[0])
-			continue;
-		for(size_t j = 0; j<3; j++){
-			if (j==column[0])
-				continue;
-			tmp = fabs(product(i, j));
-			if (axisAlignment[1] < tmp){
-				axisAlignment[1] = tmp;
-				row[1] = i;
-				column[1] = j;
-			}
-		}
-	}
-	axisAlignment[2] = fabs(product(3 - row[0] - row[1], 3 - column[0] - column[1]));
-
-	result[0] = P2(axisAlignment[0]);
-	result[1] = ( P2(axisAlignment[0]) + P2(axisAlignment[1]) + P2(axisAlignment[2]) )/3.0;
-	result[2] = P4(axisAlignment[0]);
-	result[3] = ( P4(axisAlignment[0]) + P4(axisAlignment[1]) + P4(axisAlignment[2]) )/3.0;
-	result[4] = (5.0*prod4 - 9.0)/6.0;
 }
 
-void Analyzer::analyzeOrder(const Packing &packing, Plot **order){
-	double da[RSA_SPATIAL_DIMENSION];
-	RSAVector posi, posj;
-	double orderParameters[5];
-	for(uint i=0; i<packing.size(); i++){
-		posi = packing[i]->getPosition();
-		for(uint j=i+1; j<packing.size(); j++){
-			posj = packing[j]->getPosition();
-			double dist = 0.0;
-			for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
-				da[k] = fabs(posi[k] - posj[k]);
-				if (da[k]>0.5*this->params->surfaceSize)
-					da[k] = this->params->surfaceSize - da[k];
-				dist += da[k]*da[k];
-			}
-			dist = sqrt(dist);
-			if (dist > order[0]->getMax())
-				continue;
-			this->calculateOrderParameters(orderParameters, (Cuboid *)(packing[i]), (Cuboid *)(packing[j]) );
-			for(ushort k = 0; k<5; k++){
-				order[k]->add(dist, orderParameters[k]);
-			}
-		}
-	}
+double Analyzer::getPetiodicDistance(const RSAShape *shape1, const RSAShape *shape2) const {
+    RSAVector delta = shape1->getPosition() - shape2->getPosition();
+    RSAVector periodicDelta;
+    for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++) {
+        periodicDelta[k] = fabs(delta[k]);
+        if (periodicDelta[k]>0.5*this->params->surfaceSize)
+            periodicDelta[k] = this->params->surfaceSize - periodicDelta[k];
+    }
+    return periodicDelta.norm();
 }
 
 void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor){
@@ -270,9 +217,10 @@ void Analyzer::printCorrelations(Plot& correlations, std::string filename, int c
 	}
 	delete[] correlationPoints;
 }
-void Analyzer::printOrder(Plot **order, std::string filename){
-	double **orderPoints[5];
-	for (ushort i=0; i<5; i++){
+
+void Analyzer::printOrder(const std::vector<Plot*> &order, const std::string &filename) const {
+	double ***orderPoints = new double**[order.size()];
+	for (ushort i=0; i<order.size(); i++){
 		orderPoints[i] = new double*[order[i]->size()];
 		for(ushort j=0; j<order[i]->size(); j++){
 			orderPoints[i][j] = new double[2];
@@ -284,18 +232,19 @@ void Analyzer::printOrder(Plot **order, std::string filename){
 
 	for (int i = 0; i < order[0]->size()-1; i++) {
 		file << orderPoints[0][i][0];
-		for (ushort j=0; j<5; j++)
+		for (ushort j=0; j<order.size(); j++)
 			file << "\t" << orderPoints[j][i][1];
 		file << std::endl;
 	}
 	file.close();
 
-	for(ushort i=0; i<5; i++){
+	for(ushort i=0; i<order.size(); i++){
 		for(int j=0; j<order[i]->size(); j++){
 			delete[] orderPoints[i][j];
 		}
 		delete[] orderPoints[i];
 	}
+	delete[] orderPoints;
 }
 
 void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double particleSize){
@@ -304,9 +253,7 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 	LogPlot *nvt = new LogPlot(mintime, this->params->maxTime, 200);
 	Plot *asf = new Plot(0.0, 0.6, 200);
 	Plot *correlations = new Plot(0.0, 10.0, 200);
-	Plot *order[5];
-	for(ushort i=0; i<5; i++)
-		order[i] = new Plot(0.0, 10.0, 200);
+	std::vector<Plot*> order = this->getFilledOrderVector();
 
 	double n = 0.0, n2 = 0.0;
 	int counter = 0;
@@ -322,8 +269,7 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 			n2 += packing.size()*packing.size();
 			counter++;
 			this->analyzePacking(packing, nvt, asf, correlations, particleSize/packingSize);
-			if (this->params->particleType.compare("Cuboid")==0)
-				this->analyzeOrder(packing, order);
+			this->analyzeOrder(packing, &order);
 			std::cout << ".";
 			std::cout.flush();
 		}
@@ -349,6 +295,24 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 	delete correlations;
 
 	this->printOrder(order, dirname + "_order.txt");
-	for(ushort i=0; i<5; i++)
-		delete order[i];
+	for (Plot *orderPlot : order)
+		delete orderPlot;
+}
+
+std::vector<Plot*> Analyzer::getFilledOrderVector() const {
+    RND rnd;
+    std::unique_ptr<RSAShape> shape(ShapeFactory::createShape(&rnd));
+    if (!this->isOrderCalculable(shape.get()))
+        return {};
+
+    std::vector<Plot*> result;
+    auto orderCalculable = dynamic_cast<OrderCalculable*>(shape.get());
+    std::size_t paramNum = orderCalculable->getNumOfOrderParameters();
+    for (std::size_t i = 0; i < paramNum; i++)
+        result.push_back(new Plot(0.0, 10.0, 200));
+    return result;
+}
+
+bool Analyzer::isOrderCalculable(const RSAShape *shape) const {
+    return dynamic_cast<const OrderCalculable*>(shape) != nullptr;
 }

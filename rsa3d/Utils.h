@@ -56,4 +56,12 @@ void die(const std::string & reason);
 double getAngleToOrigin(const Vector<2> &point);
 void rotate2D(double* point, double alpha);
 
+inline double P2(double x) {
+    return 0.5*(3*x*x - 1);
+}
+
+inline double P4(double x) {
+    return 0.125*(x*x*(35*x*x-30)+3);
+}
+
 #endif /* UTILS_C_ */

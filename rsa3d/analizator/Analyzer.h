@@ -21,8 +21,8 @@
 
 class Analyzer {
 public:
-	Analyzer(Parameters *params);
-	virtual ~Analyzer();
+	explicit Analyzer(Parameters *params) : params(params) {}
+	virtual ~Analyzer() = default;
 
 	void analyzePackingsInDirectory(char *sdir, double mintime, double particleSize);
 
@@ -30,12 +30,14 @@ private:
 	Parameters *params;
 
 	void analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor);
-	void analyzeOrder(const Packing &packing, Plot **order);
-	void calculateOrderParameters(double *result, Cuboid *c1, Cuboid *c2);
+	void analyzeOrder(const Packing &packing, std::vector<Plot*> *order);
 	double * printNvT(LogPlot &nvt, std::string filename, double *fixedA, double surfaceFactor, double *res);
 	double * printASF(Plot &asf, std::string filename, int counter, double packingFraction, double *res);
 	void printCorrelations(Plot &corr, std::string filename, int counter, double particleSize, double packingFraction);
-	void printOrder(Plot **order, std::string filename);
+	void printOrder(const std::vector<Plot*> &order, const std::string &filename) const;
+	double getPetiodicDistance(const RSAShape *shape1, const RSAShape *shape2) const;
+	std::vector<Plot *> getFilledOrderVector() const;
+	bool isOrderCalculable(const RSAShape *shape) const;
 };
 
 #endif /* ANALIZATOR_ANALYZER_H_ */

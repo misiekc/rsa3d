@@ -15,11 +15,12 @@
 #include "../../OverlapStrategyShape.h"
 #include "../../../Intersection.h"
 #include "../../ConvexShape.h"
+#include "../../OrderCalculable.h"
 
 
 class CuboidOverlapStrategy;
 
-class Cuboid : public ConvexShape<3, 0>, public OverlapStrategyShape<3, 0>
+class Cuboid : public ConvexShape<3, 0>, public OverlapStrategyShape<3, 0>, public OrderCalculable
 {
 private:
 	static double           size[3];
@@ -33,6 +34,7 @@ private:
 	static void calculateRelativeVerties();
     static Shape<3, 0> * create2D(RND *rnd);
     static Shape<3, 0> * create3D(RND *rnd);
+    bool liesInCylinderOnEdge(const Vector<3> &absPointPos, size_t coord1, size_t coord2) const;
 
 public:
 
@@ -83,13 +85,12 @@ public:
 	std::vector<std::string> getSupportedStrategies() const override;
 	OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
 
+	std::vector<double> calculateOrder(const OrderCalculable *other) const override;
+
 	bool pointInsideCuboid(const Vector<3> &vertex) const;
 	void obtainVertices(Vector<3> (&vertices)[8], const Vector<3> &translation) const;
 	intersection::polyhedron obtainTris() const;
-
 	Matrix<3, 3> getOrientation() const;
-
-    bool liesInCylinderOnEdge(const Vector<3> &absPointPos, size_t coord1, size_t coord2) const;
 };
 
 

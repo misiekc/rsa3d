@@ -360,3 +360,49 @@ intersection::polyhedron Cuboid::obtainTris() const
 Shape<3, 0> *Cuboid::clone() const {
     return new Cuboid(*this);
 }
+
+std::vector<double> Cuboid::calculateOrder(const OrderCalculable *other) const {
+    auto &otherCuboid = dynamic_cast<const Cuboid&>(*other);    // use reference so dynamic_cast would throw on error
+    Matrix<3,3> product = this->getOrientation().transpose() * otherCuboid.getOrientation();
+
+    // Cuboids are not rotationally symmetric, so at least two different axes are needed to determine orientation.
+    // "The first" axes are ones which give maximal value of cosine, "the second" are chosen in the same manner from
+    // remaining ones
+    double axisAlignment[3] = {0, 0, 0};
+    double row[2] = {0, 0}, column[2] = {0, 0};
+    double cos4Sum = 0;
+    for(size_t i = 0; i<3; i++){
+        for(size_t j = 0; j<3; j++){
+            double absCos = fabs(product(i, j));
+            cos4Sum += absCos*absCos*absCos*absCos;
+            if (axisAlignment[0] < absCos){
+                axisAlignment[0] = absCos;
+                row[0] = i;
+                column[0] = j;
+            }
+        }
+    }
+    for(size_t i = 0; i<3; i++){
+        if (i==row[0])
+            continue;
+        for(size_t j = 0; j<3; j++){
+            if (j==column[0])
+                continue;
+            double absCos = fabs(product(i, j));
+            if (axisAlignment[1] < absCos){
+                axisAlignment[1] = absCos;
+                row[1] = i;
+                column[1] = j;
+            }
+        }
+    }
+    axisAlignment[2] = fabs(product(3 - row[0] - row[1], 3 - column[0] - column[1]));
+
+    std::vector<double> result(5);
+    result[0] = P2(axisAlignment[0]);
+    result[1] = ( P2(axisAlignment[0]) + P2(axisAlignment[1]) + P2(axisAlignment[2]) )/3.0;
+    result[2] = P4(axisAlignment[0]);
+    result[3] = ( P4(axisAlignment[0]) + P4(axisAlignment[1]) + P4(axisAlignment[2]) )/3.0;
+    result[4] = (5.0*cos4Sum - 9.0)/6.0;
+    return result;
+}
