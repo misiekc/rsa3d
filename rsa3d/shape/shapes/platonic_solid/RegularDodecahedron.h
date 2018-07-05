@@ -7,8 +7,9 @@
 
 
 #include "PlatonicSolid.h"
+#include "../../OrderCalculable.h"
 
-class RegularDodecahedron : public PlatonicSolid<RegularDodecahedron> {
+class RegularDodecahedron : public PlatonicSolid<RegularDodecahedron>, public OrderCalculable {
 private:
     friend PlatonicSolid<RegularDodecahedron>;
 
@@ -37,7 +38,10 @@ public:
     std::array<Vector<3>, 15> getEdgeAxes() const;              /* CRTP implement */
 
     double projectionHalfsize(const Vector<3> &axis) const;     /* CRTP implement */
-    intersection::polyhedron getTriangles() const;              /* CRTP implement */
+    intersection::polyhedron getTriangles() const;
+
+    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
+    /* CRTP implement */
 };
 
 

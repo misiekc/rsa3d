@@ -137,3 +137,22 @@ intersection::polyhedron RegularDodecahedron::getTriangles() const {
             {{this->vertices[9], this->vertices[15], this->vertices[5]}}
     };
 }
+
+std::vector<double> RegularDodecahedron::calculateOrder(const OrderCalculable *other) const {
+    auto &otherDod = dynamic_cast<const RegularDodecahedron&>(*other);
+
+    double cos6sum = 0;
+    double maxAbsCos = 0;
+    for (const auto &a1 : this->faceAxes) {
+        for (const auto &a2 : otherDod.faceAxes) {
+            double absCos = std::abs(a1 * a2);
+            cos6sum += std::pow(absCos, 6);
+            if (absCos > maxAbsCos)
+                maxAbsCos = absCos;
+        }
+    }
+    double nematicOrder = P2(maxAbsCos);
+    double dodecahedralOrder = 25./192 * (7*cos6sum - 36);
+
+    return {nematicOrder, dodecahedralOrder};
+}
