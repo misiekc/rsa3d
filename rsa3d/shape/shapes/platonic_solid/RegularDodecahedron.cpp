@@ -4,12 +4,12 @@
 
 #include "RegularDodecahedron.h"
 
-std::array<Vector<3>, 20> RegularDodecahedron::orientedVertices;
-std::array<Vector<3>, 6> RegularDodecahedron::orientedFaceAxes;
-std::array<Vector<3>, 15> RegularDodecahedron::orientedEdgeAxes;
-
 void RegularDodecahedron::calculateStatic(const std::string &attr) {
-    orientedVertices = {{Vector<3>{{ 1,  1,  1}} * edgeFactor,
+    auto &vertices = PlatonicSolid<RegularDodecahedron>::orientedVertices;
+    auto &edgeAxes = PlatonicSolid<RegularDodecahedron>::orientedEdgeAxes;
+    auto &faceAxes = PlatonicSolid<RegularDodecahedron>::orientedFaceAxes;
+    
+    vertices = {Vector<3>{{ 1,  1,  1}} * edgeFactor,
                          Vector<3>{{-1,  1,  1}} * edgeFactor,
                          Vector<3>{{-1, -1,  1}} * edgeFactor,
                          Vector<3>{{ 1, -1,  1}} * edgeFactor,
@@ -31,46 +31,34 @@ void RegularDodecahedron::calculateStatic(const std::string &attr) {
                          Vector<3>{{ 1/gold, 0,  gold}} * edgeFactor,
                          Vector<3>{{ 1/gold, 0, -gold}} * edgeFactor,
                          Vector<3>{{-1/gold, 0, -gold}} * edgeFactor,
-                         Vector<3>{{-1/gold, 0,  gold}} * edgeFactor}};
+                         Vector<3>{{-1/gold, 0,  gold}} * edgeFactor};
 
-    orientedEdgeAxes = {{orientedVertices[0] - orientedVertices[8],
-                         orientedVertices[0] - orientedVertices[16],
-                         orientedVertices[16] - orientedVertices[3],
-                         orientedVertices[3] - orientedVertices[11],
-                         orientedVertices[8] - orientedVertices[11],
-                         orientedVertices[0] - orientedVertices[12],
-                         orientedVertices[16] - orientedVertices[19],
-                         orientedVertices[3] - orientedVertices[13],
-                         orientedVertices[11] - orientedVertices[7],
-                         orientedVertices[8] - orientedVertices[6],
-                         orientedVertices[7] - orientedVertices[14],
-                         orientedVertices[2] - orientedVertices[13],
-                         orientedVertices[19] - orientedVertices[1],
-                         orientedVertices[12] - orientedVertices[15],
-                         orientedVertices[6] - orientedVertices[17]}};
+    edgeAxes = {vertices[0] - vertices[8],
+                         vertices[0] - vertices[16],
+                         vertices[16] - vertices[3],
+                         vertices[3] - vertices[11],
+                         vertices[8] - vertices[11],
+                         vertices[0] - vertices[12],
+                         vertices[16] - vertices[19],
+                         vertices[3] - vertices[13],
+                         vertices[11] - vertices[7],
+                         vertices[8] - vertices[6],
+                         vertices[7] - vertices[14],
+                         vertices[2] - vertices[13],
+                         vertices[19] - vertices[1],
+                         vertices[12] - vertices[15],
+                         vertices[6] - vertices[17]};
 
-    orientedFaceAxes = {{orientedEdgeAxes[1] ^ orientedEdgeAxes[0],
-                         orientedEdgeAxes[14] ^ orientedEdgeAxes[9],
-                         orientedEdgeAxes[0] ^ orientedEdgeAxes[5],
-                         orientedEdgeAxes[5] ^ orientedEdgeAxes[1],
-                         orientedEdgeAxes[6] ^ orientedEdgeAxes[2],
-                         orientedEdgeAxes[7] ^ orientedEdgeAxes[3]}};
+    faceAxes = {edgeAxes[1] ^ edgeAxes[0],
+                         edgeAxes[14] ^ edgeAxes[9],
+                         edgeAxes[0] ^ edgeAxes[5],
+                         edgeAxes[5] ^ edgeAxes[1],
+                         edgeAxes[6] ^ edgeAxes[2],
+                         edgeAxes[7] ^ edgeAxes[3]};
 }
 
 RegularDodecahedron::RegularDodecahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularDodecahedron>{orientation} {
     this->calculateVerticesAndAxes();
-}
-
-std::array<Vector<3>, 20> RegularDodecahedron::getVertices() const {
-    return this->vertices;
-}
-
-std::array<Vector<3>, 6> RegularDodecahedron::getFaceAxes() const {
-    return this->faceAxes;
-}
-
-std::array<Vector<3>, 15> RegularDodecahedron::getEdgeAxes() const {
-    return this->edgeAxes;
 }
 
 double RegularDodecahedron::projectionHalfsize(const Vector<3> &axis) const {
@@ -86,55 +74,56 @@ double RegularDodecahedron::projectionHalfsize(const Vector<3> &axis) const {
     return std::max(std::max(std::max(cubeHalfsize, xRectHalfsize), yRectHalfsize), zRectHalfsize) * edgeFactor;
 }
 
-intersection::polyhedron RegularDodecahedron::getTriangles() const {
-    return intersection::polyhedron{
-            {{this->vertices[3], this->vertices[0], this->vertices[16]}},
-            {{this->vertices[3], this->vertices[11], this->vertices[0]}},
-            {{this->vertices[11], this->vertices[8], this->vertices[0]}},
+intersection::tri_polyh RegularDodecahedron::getTriangles() const {
+    auto vertices = this->getVertices();
+    return intersection::tri_polyh{
+            {{vertices[3], vertices[0], vertices[16]}},
+            {{vertices[3], vertices[11], vertices[0]}},
+            {{vertices[11], vertices[8], vertices[0]}},
 
-            {{this->vertices[17], this->vertices[6], this->vertices[7]}},
-            {{this->vertices[7], this->vertices[6], this->vertices[8]}},
-            {{this->vertices[7], this->vertices[8], this->vertices[11]}},
+            {{vertices[17], vertices[6], vertices[7]}},
+            {{vertices[7], vertices[6], vertices[8]}},
+            {{vertices[7], vertices[8], vertices[11]}},
 
-            {{this->vertices[15], this->vertices[12], this->vertices[0]}},
-            {{this->vertices[15], this->vertices[0], this->vertices[8]}},
-            {{this->vertices[15], this->vertices[8], this->vertices[6]}},
+            {{vertices[15], vertices[12], vertices[0]}},
+            {{vertices[15], vertices[0], vertices[8]}},
+            {{vertices[15], vertices[8], vertices[6]}},
 
-            {{this->vertices[16], this->vertices[0], this->vertices[12]}},
-            {{this->vertices[16], this->vertices[12], this->vertices[1]}},
-            {{this->vertices[16], this->vertices[1], this->vertices[19]}},
+            {{vertices[16], vertices[0], vertices[12]}},
+            {{vertices[16], vertices[12], vertices[1]}},
+            {{vertices[16], vertices[1], vertices[19]}},
 
-            {{this->vertices[3], this->vertices[16], this->vertices[19]}},
-            {{this->vertices[3], this->vertices[19], this->vertices[2]}},
-            {{this->vertices[3], this->vertices[2], this->vertices[13]}},
+            {{vertices[3], vertices[16], vertices[19]}},
+            {{vertices[3], vertices[19], vertices[2]}},
+            {{vertices[3], vertices[2], vertices[13]}},
 
-            {{this->vertices[11], this->vertices[3], this->vertices[13]}},
-            {{this->vertices[11], this->vertices[13], this->vertices[14]}},
-            {{this->vertices[11], this->vertices[14], this->vertices[7]}},
+            {{vertices[11], vertices[3], vertices[13]}},
+            {{vertices[11], vertices[13], vertices[14]}},
+            {{vertices[11], vertices[14], vertices[7]}},
 
-            {{this->vertices[4], this->vertices[10], this->vertices[9]}},
-            {{this->vertices[4], this->vertices[9], this->vertices[5]}},
-            {{this->vertices[4], this->vertices[5], this->vertices[18]}},
+            {{vertices[4], vertices[10], vertices[9]}},
+            {{vertices[4], vertices[9], vertices[5]}},
+            {{vertices[4], vertices[5], vertices[18]}},
 
-            {{this->vertices[2], this->vertices[19], this->vertices[1]}},
-            {{this->vertices[2], this->vertices[1], this->vertices[9]}},
-            {{this->vertices[2], this->vertices[9], this->vertices[10]}},
+            {{vertices[2], vertices[19], vertices[1]}},
+            {{vertices[2], vertices[1], vertices[9]}},
+            {{vertices[2], vertices[9], vertices[10]}},
 
-            {{this->vertices[4], this->vertices[14], this->vertices[13]}},
-            {{this->vertices[4], this->vertices[13], this->vertices[2]}},
-            {{this->vertices[4], this->vertices[2], this->vertices[10]}},
+            {{vertices[4], vertices[14], vertices[13]}},
+            {{vertices[4], vertices[13], vertices[2]}},
+            {{vertices[4], vertices[2], vertices[10]}},
 
-            {{this->vertices[18], this->vertices[17], this->vertices[7]}},
-            {{this->vertices[18], this->vertices[7], this->vertices[14]}},
-            {{this->vertices[18], this->vertices[14], this->vertices[4]}},
+            {{vertices[18], vertices[17], vertices[7]}},
+            {{vertices[18], vertices[7], vertices[14]}},
+            {{vertices[18], vertices[14], vertices[4]}},
 
-            {{this->vertices[17], this->vertices[18], this->vertices[5]}},
-            {{this->vertices[17], this->vertices[5], this->vertices[15]}},
-            {{this->vertices[17], this->vertices[15], this->vertices[6]}},
+            {{vertices[17], vertices[18], vertices[5]}},
+            {{vertices[17], vertices[5], vertices[15]}},
+            {{vertices[17], vertices[15], vertices[6]}},
 
-            {{this->vertices[9], this->vertices[1], this->vertices[12]}},
-            {{this->vertices[9], this->vertices[12], this->vertices[15]}},
-            {{this->vertices[9], this->vertices[15], this->vertices[5]}}
+            {{vertices[9], vertices[1], vertices[12]}},
+            {{vertices[9], vertices[12], vertices[15]}},
+            {{vertices[9], vertices[15], vertices[5]}}
     };
 }
 
@@ -143,8 +132,10 @@ std::vector<double> RegularDodecahedron::calculateOrder(const OrderCalculable *o
 
     double cos6sum = 0;
     double maxAbsCos = 0;
-    for (const auto &a1 : this->faceAxes) {
-        for (const auto &a2 : otherDod.faceAxes) {
+    auto faceAxes = this->getFaceAxes();
+    auto otherFaceAxes = otherDod.getFaceAxes();
+    for (const auto &a1 : faceAxes) {
+        for (const auto &a2 : otherFaceAxes) {
             double absCos = std::abs(a1 * a2);
             cos6sum += std::pow(absCos, 6);
             if (absCos > maxAbsCos)

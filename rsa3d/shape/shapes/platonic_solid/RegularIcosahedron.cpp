@@ -4,12 +4,12 @@
 
 #include "RegularIcosahedron.h"
 
-std::array<Vector<3>, 20> RegularIcosahedron::orientedVertices;
-std::array<Vector<3>, 10> RegularIcosahedron::orientedFaceAxes;
-std::array<Vector<3>, 15> RegularIcosahedron::orientedEdgeAxes;
-
 void RegularIcosahedron::calculateStatic(const std::string &attr) {
-    orientedVertices = {{Vector<3>{{0,  1,  gold}} * edgeFactor,
+    auto &vertices = PlatonicSolid<RegularIcosahedron>::orientedVertices;
+    auto &edgeAxes = PlatonicSolid<RegularIcosahedron>::orientedEdgeAxes;
+    auto &faceAxes = PlatonicSolid<RegularIcosahedron>::orientedFaceAxes;
+    
+    vertices = {Vector<3>{{0,  1,  gold}} * edgeFactor,
                          Vector<3>{{0, -1,  gold}} * edgeFactor,
                          Vector<3>{{0, -1, -gold}} * edgeFactor,
                          Vector<3>{{0,  1, -gold}} * edgeFactor,
@@ -22,50 +22,38 @@ void RegularIcosahedron::calculateStatic(const std::string &attr) {
                          Vector<3>{{ 1,  gold, 0}} * edgeFactor,
                          Vector<3>{{-1,  gold, 0}} * edgeFactor,
                          Vector<3>{{-1, -gold, 0}} * edgeFactor,
-                         Vector<3>{{ 1, -gold, 0}} * edgeFactor}};
+                         Vector<3>{{ 1, -gold, 0}} * edgeFactor};
 
-    orientedEdgeAxes = {{orientedVertices[0] - orientedVertices[8],
-                         orientedVertices[0] - orientedVertices[9],
-                         orientedVertices[0] - orientedVertices[7],
-                         orientedVertices[0] - orientedVertices[1],
-                         orientedVertices[0] - orientedVertices[4],
-                         orientedVertices[4] - orientedVertices[1],
-                         orientedVertices[8] - orientedVertices[4],
-                         orientedVertices[9] - orientedVertices[8],
-                         orientedVertices[7] - orientedVertices[9],
-                         orientedVertices[1] - orientedVertices[7],
-                         orientedVertices[1] - orientedVertices[11],
-                         orientedVertices[4] - orientedVertices[5],
-                         orientedVertices[8] - orientedVertices[3],
-                         orientedVertices[9] - orientedVertices[6],
-                         orientedVertices[7] - orientedVertices[10]}};
+    edgeAxes = {vertices[0] - vertices[8],
+                         vertices[0] - vertices[9],
+                         vertices[0] - vertices[7],
+                         vertices[0] - vertices[1],
+                         vertices[0] - vertices[4],
+                         vertices[4] - vertices[1],
+                         vertices[8] - vertices[4],
+                         vertices[9] - vertices[8],
+                         vertices[7] - vertices[9],
+                         vertices[1] - vertices[7],
+                         vertices[1] - vertices[11],
+                         vertices[4] - vertices[5],
+                         vertices[8] - vertices[3],
+                         vertices[9] - vertices[6],
+                         vertices[7] - vertices[10]};
 
-    orientedFaceAxes = {{orientedEdgeAxes[5] ^ orientedEdgeAxes[3],
-                         orientedEdgeAxes[6] ^ orientedEdgeAxes[4],
-                         orientedEdgeAxes[7] ^ orientedEdgeAxes[1],
-                         orientedEdgeAxes[8] ^ orientedEdgeAxes[2],
-                         orientedEdgeAxes[9] ^ orientedEdgeAxes[3],
-                         orientedEdgeAxes[5] ^ orientedEdgeAxes[10],
-                         orientedEdgeAxes[6] ^ orientedEdgeAxes[11],
-                         orientedEdgeAxes[7] ^ orientedEdgeAxes[12],
-                         orientedEdgeAxes[8] ^ orientedEdgeAxes[13],
-                         orientedEdgeAxes[9] ^ orientedEdgeAxes[14]}};
+    faceAxes = {edgeAxes[5] ^ edgeAxes[3],
+                         edgeAxes[6] ^ edgeAxes[4],
+                         edgeAxes[7] ^ edgeAxes[1],
+                         edgeAxes[8] ^ edgeAxes[2],
+                         edgeAxes[9] ^ edgeAxes[3],
+                         edgeAxes[5] ^ edgeAxes[10],
+                         edgeAxes[6] ^ edgeAxes[11],
+                         edgeAxes[7] ^ edgeAxes[12],
+                         edgeAxes[8] ^ edgeAxes[13],
+                         edgeAxes[9] ^ edgeAxes[14]};
 }
 
 RegularIcosahedron::RegularIcosahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularIcosahedron>{orientation} {
     this->calculateVerticesAndAxes();
-}
-
-std::array<Vector<3>, 20> RegularIcosahedron::getVertices() const {
-    return this->vertices;
-}
-
-std::array<Vector<3>, 10> RegularIcosahedron::getFaceAxes() const {
-    return this->faceAxes;
-}
-
-std::array<Vector<3>, 15> RegularIcosahedron::getEdgeAxes() const {
-    return this->edgeAxes;
 }
 
 double RegularIcosahedron::projectionHalfsize(const Vector<3> &axis) const {
@@ -80,27 +68,28 @@ double RegularIcosahedron::projectionHalfsize(const Vector<3> &axis) const {
     return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * edgeFactor;
 }
 
-intersection::polyhedron RegularIcosahedron::getTriangles() const {
-    return intersection::polyhedron{
-            {{this->vertices[4], this->vertices[0], this->vertices[1]}},
-            {{this->vertices[8], this->vertices[0], this->vertices[4]}},
-            {{this->vertices[9], this->vertices[0], this->vertices[8]}},
-            {{this->vertices[7], this->vertices[0], this->vertices[9]}},
-            {{this->vertices[1], this->vertices[0], this->vertices[7]}},
-            {{this->vertices[2], this->vertices[6], this->vertices[3]}},
-            {{this->vertices[2], this->vertices[10], this->vertices[6]}},
-            {{this->vertices[2], this->vertices[11], this->vertices[10]}},
-            {{this->vertices[2], this->vertices[5], this->vertices[11]}},
-            {{this->vertices[2], this->vertices[3], this->vertices[5]}},
-            {{this->vertices[11], this->vertices[4], this->vertices[1]}},
-            {{this->vertices[11], this->vertices[5], this->vertices[4]}},
-            {{this->vertices[5], this->vertices[8], this->vertices[4]}},
-            {{this->vertices[5], this->vertices[3], this->vertices[8]}},
-            {{this->vertices[3], this->vertices[9], this->vertices[8]}},
-            {{this->vertices[3], this->vertices[6], this->vertices[9]}},
-            {{this->vertices[6], this->vertices[7], this->vertices[9]}},
-            {{this->vertices[6], this->vertices[10], this->vertices[7]}},
-            {{this->vertices[10], this->vertices[1], this->vertices[7]}},
-            {{this->vertices[10], this->vertices[11], this->vertices[1]}}
+intersection::tri_polyh RegularIcosahedron::getTriangles() const {
+    auto vertices = this->getVertices();
+    return intersection::tri_polyh{
+            {{vertices[4], vertices[0], vertices[1]}},
+            {{vertices[8], vertices[0], vertices[4]}},
+            {{vertices[9], vertices[0], vertices[8]}},
+            {{vertices[7], vertices[0], vertices[9]}},
+            {{vertices[1], vertices[0], vertices[7]}},
+            {{vertices[2], vertices[6], vertices[3]}},
+            {{vertices[2], vertices[10], vertices[6]}},
+            {{vertices[2], vertices[11], vertices[10]}},
+            {{vertices[2], vertices[5], vertices[11]}},
+            {{vertices[2], vertices[3], vertices[5]}},
+            {{vertices[11], vertices[4], vertices[1]}},
+            {{vertices[11], vertices[5], vertices[4]}},
+            {{vertices[5], vertices[8], vertices[4]}},
+            {{vertices[5], vertices[3], vertices[8]}},
+            {{vertices[3], vertices[9], vertices[8]}},
+            {{vertices[3], vertices[6], vertices[9]}},
+            {{vertices[6], vertices[7], vertices[9]}},
+            {{vertices[6], vertices[10], vertices[7]}},
+            {{vertices[10], vertices[1], vertices[7]}},
+            {{vertices[10], vertices[11], vertices[1]}}
     };
 }

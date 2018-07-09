@@ -8,6 +8,28 @@
 #include <sstream>
 
 template<typename SpecificSolid>
+std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedVertices;
+
+template<typename SpecificSolid>
+intersection::face_polyh PlatonicSolid<SpecificSolid>::orientedFaces;
+
+template<typename SpecificSolid>
+intersection::tri_polyh PlatonicSolid<SpecificSolid>::orientedTriangles;
+
+template<typename SpecificSolid>
+std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedFaceAxes;
+
+template<typename SpecificSolid>
+std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedEdgeAxes;
+
+template<typename SpecificSolid>
+std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedVertexAxes;
+
+template<typename SpecificSolid>
+std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedMidedgeAxes;
+
+
+template<typename SpecificSolid>
 void PlatonicSolid<SpecificSolid>::initClass(const std::string &attr) {
     SpecificSolid::calculateStatic(attr);
     normalizeAxes();
@@ -103,29 +125,8 @@ void PlatonicSolid<SpecificSolid>::setOrientationMatrix(const Matrix<3, 3> &orie
 }
 
 template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::setPosition(const Vector<3> &position) {
-    Vector<3> oldPos = this->getPosition();
-    Positioned::setPosition(position);
-    Vector<3> newPos = this->getPosition();
-    this->translateVertices(newPos - oldPos);
-}
-
-template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::translateVertices(const Vector<3> &translation) {
-    auto *thisSpecific = static_cast<SpecificSolid*>(this);
-    std::transform(thisSpecific->vertices.begin(), thisSpecific->vertices.end(), thisSpecific->vertices.begin(),
-                   [&translation](const Vector<3> &vertex) {
-                       return vertex + translation;
-                   });
-}
-
-template<typename SpecificSolid>
 void PlatonicSolid<SpecificSolid>::calculateVerticesAndAxes() {
-    auto *thisSpecific = static_cast<SpecificSolid*>(this);
-    thisSpecific->vertices = this->applyOrientation(SpecificSolid::orientedVertices);
-    thisSpecific->edgeAxes = this->applyOrientation(SpecificSolid::orientedEdgeAxes);
-    thisSpecific->faceAxes = this->applyOrientation(SpecificSolid::orientedFaceAxes);
-    this->translateVertices(this->getPosition());
+
 }
 
 template<typename SpecificSolid>
@@ -163,3 +164,38 @@ Shape<3, 0> *PlatonicSolid<SpecificSolid>::clone() const {
     auto &thisSpecific = static_cast<const SpecificSolid&>(*this);
     return new SpecificSolid(thisSpecific);
 }
+
+template<typename SpecificSolid>
+std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::applyOrientation(const std::vector<Vector<3>> &vectors) const {
+    std::vector<Vector<3>> result;
+    result.reserve(vectors.size());
+    std::transform(vectors.begin(), vectors.end(), std::back_inserter(result), [this](const Vector<3> &vector) {
+        return this->orientation * vector;
+    });
+    return result;
+}
+
+template<typename SpecificSolid>
+std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::applyPosition(const std::vector<Vector<3>> &vectors) const {
+    std::vector<Vector<3>> result;
+    result.reserve(vectors.size());
+    std::transform(vectors.begin(), vectors.end(), std::back_inserter(result), [this](const Vector<3> &vector) {
+        return this->orientation * vector + this->getPosition();
+    });
+    return result;
+}
+
+template<typename SpecificSolid>
+std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::getVertices() const { return applyPosition(orientedVertices); }
+
+template<typename SpecificSolid>
+std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::getEdgeAxes() const { return applyOrientation(orientedEdgeAxes); }
+
+template<typename SpecificSolid>
+std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::getFaceAxes() const { return applyOrientation(orientedFaceAxes); }
+
+template<typename SpecificSolid>
+std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::getVertexAxes() const { return applyOrientation(orientedVertexAxes); }
+
+template<typename SpecificSolid>
+std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::getMidegdeAxes() const { return applyOrientation(orientedMidedgeAxes); }

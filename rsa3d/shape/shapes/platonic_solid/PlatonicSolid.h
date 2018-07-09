@@ -20,15 +20,22 @@ private:
     static void normalizeAxes();
 
 protected:
-    explicit PlatonicSolid(const Matrix<3, 3> &orientation) : orientation(orientation) {};
+    static std::vector<Vector<3>> orientedVertices;
+    static intersection::face_polyh orientedFaces;
+    static intersection::tri_polyh orientedTriangles;
+    static std::vector<Vector<3>> orientedFaceAxes;
+    static std::vector<Vector<3>> orientedEdgeAxes;
+    static std::vector<Vector<3>> orientedVertexAxes;
+    static std::vector<Vector<3>> orientedMidedgeAxes;
 
-    void setPosition(const Vector<3> &position) override;
+    explicit PlatonicSolid(const Matrix<3, 3> &orientation) : orientation(orientation) {};
 
     template <std::size_t SIZE>
     std::array<Vector<3>, SIZE> applyOrientation(const std::array<Vector<3>, SIZE> &vectors) const;
+    inline std::vector<Vector<3>> applyOrientation(const std::vector<Vector<3>> &vectors) const;
+    inline std::vector<Vector<3>> applyPosition(const std::vector<Vector<3>> &vectors) const;
     void calculateVerticesAndAxes();
     void setOrientationMatrix(const Matrix<3, 3> &orientation);
-    void translateVertices(const Vector<3> &translation);
 
 public:
     static void initClass(const std::string &attr);
@@ -46,9 +53,12 @@ public:
 
     OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
 
-    /* std::array<Vector<3>, ?> getVertices() const;                CRTP pure virtual */
-    /* std::array<Vector<3>, ?> getFaceAxes() const;                CRTP pure virtual */
-    /* std::array<Vector<3>, ?> getEdgeAxes() const;                CRTP pure virtual */
+    std::vector<Vector<3>> getVertices() const;
+    std::vector<Vector<3>> getFaceAxes() const;
+    std::vector<Vector<3>> getEdgeAxes() const;
+    std::vector<Vector<3>> getVertexAxes() const;
+    std::vector<Vector<3>> getMidegdeAxes() const;
+
     /* double projectionHalfsize(const Vector<3> &axis) const;      CRTP pure virtual */
     /* intersection::polyhedron getTriangles() const;               CRTP pure virtual */
 

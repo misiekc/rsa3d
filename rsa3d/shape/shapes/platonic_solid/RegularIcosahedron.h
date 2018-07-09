@@ -18,25 +18,13 @@ private:
 
     constexpr static double circumsphereRadius = edge * std::sqrt(gold * std::sqrt(5)) / 2;
     constexpr static double insphereRadius = edge * gold * gold / 2 / std::sqrt(3);
-    
-    static std::array<Vector<3>, 20> orientedVertices;
-    static std::array<Vector<3>, 10> orientedFaceAxes;
-    static std::array<Vector<3>, 15> orientedEdgeAxes;
-
-    std::array<Vector<3>, 20> vertices;
-    std::array<Vector<3>, 10> faceAxes;
-    std::array<Vector<3>, 15> edgeAxes;
-
     static void calculateStatic(const std::string &attr);
 
 public:
     explicit RegularIcosahedron(const Matrix<3, 3> &orientation);
 
-    std::array<Vector<3>, 20> getVertices() const;              /* CRTP implement */
-    std::array<Vector<3>, 10> getFaceAxes() const;              /* CRTP implement */
-    std::array<Vector<3>, 15> getEdgeAxes() const;              /* CRTP implement */
     double projectionHalfsize(const Vector<3> &axis) const;     /* CRTP implement */
-    intersection::polyhedron getTriangles() const;              /* CRTP implement */
+    intersection::tri_polyh getTriangles() const;              /* CRTP implement */
 };
 
 

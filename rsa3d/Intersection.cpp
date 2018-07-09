@@ -16,7 +16,7 @@ namespace intersection
 {
     // Check intersection between two R3 triangles tri1 and tri2
     //--------------------------------------------------------------------------------------------
-    bool tri_tri3D(const triangle3D &tri1, const triangle3D &tri2) {
+    bool tri_tri3D(const tri3D &tri1, const tri3D &tri2) {
         double d1, d2;
         double dtri1[3], dtri2[3];
         double ptri1[3], ptri2[3];
@@ -86,7 +86,7 @@ namespace intersection
         return std::max(t1_tri1, t1_tri2) <= std::min(t2_tri1, t2_tri2);
     }
 
-    bool polyh_polyh(const polyhedron &polyhedron1, const polyhedron &polyhedron2) {
+    bool polyh_polyh(const tri_polyh &polyhedron1, const tri_polyh &polyhedron2) {
         for (const auto &tri1 : polyhedron1)
             for (const auto &tri2 : polyhedron2)
                 if (tri_tri3D(tri1, tri2))

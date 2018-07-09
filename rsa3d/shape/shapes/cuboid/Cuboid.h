@@ -89,7 +89,7 @@ public:
 
 	bool pointInsideCuboid(const Vector<3> &vertex) const;
 	void obtainVertices(Vector<3> (&vertices)[8], const Vector<3> &translation) const;
-	intersection::polyhedron obtainTris() const;
+	intersection::tri_polyh obtainTris() const;
 	Matrix<3, 3> getOrientation() const;
 };
 

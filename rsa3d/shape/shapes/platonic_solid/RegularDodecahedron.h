@@ -20,28 +20,15 @@ private:
     constexpr static double circumsphereRadius = edge * std::sqrt(3.) / 2 * gold;
     constexpr static double insphereRadius = edge * gold * gold / 2 / std::sqrt(3 - gold);
 
-    static std::array<Vector<3>, 20> orientedVertices;
-    static std::array<Vector<3>, 6> orientedFaceAxes;
-    static std::array<Vector<3>, 15> orientedEdgeAxes;
-
-    std::array<Vector<3>, 20> vertices;
-    std::array<Vector<3>, 6> faceAxes;
-    std::array<Vector<3>, 15> edgeAxes;
-
     static void calculateStatic(const std::string &attr);
 
 public:
     explicit RegularDodecahedron(const Matrix<3, 3> &orientation);
 
-    std::array<Vector<3>, 20> getVertices() const;              /* CRTP implement */
-    std::array<Vector<3>, 6> getFaceAxes() const;               /* CRTP implement */
-    std::array<Vector<3>, 15> getEdgeAxes() const;              /* CRTP implement */
-
     double projectionHalfsize(const Vector<3> &axis) const;     /* CRTP implement */
-    intersection::polyhedron getTriangles() const;
+    intersection::tri_polyh getTriangles() const;              /* CRTP implement */
 
     std::vector<double> calculateOrder(const OrderCalculable *other) const override;
-    /* CRTP implement */
 };
 
 
