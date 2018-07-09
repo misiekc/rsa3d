@@ -6,31 +6,11 @@
 
 
 void RegularTetrahedron::calculateStatic(const std::string &attr) {
-    auto &vertices = PlatonicSolid<RegularTetrahedron>::orientedVertices;
-    auto &edgeAxes = PlatonicSolid<RegularTetrahedron>::orientedEdgeAxes;
-    auto &faceAxes = PlatonicSolid<RegularTetrahedron>::orientedFaceAxes;
+    PlatonicSolid<RegularTetrahedron>::orientedVertices =
+            {Vector<3>{{1, 1, 1}}, Vector<3>{{1, -1, -1}}, Vector<3>{{-1, 1, -1}}, Vector<3>{{-1, -1, 1}}};
     
-    constexpr double edgeFactor = std::pow(3, 1./3) / 2;
-    vertices = {Vector<3>{{1, 1, 1}} * edgeFactor,
-                         Vector<3>{{1, -1, -1}} * edgeFactor,
-                         Vector<3>{{-1, 1, -1}} * edgeFactor,
-                         Vector<3>{{-1, -1, 1}} * edgeFactor};
-
-    edgeAxes = {vertices[0] - vertices[3],
-                         vertices[0] - vertices[1],
-                         vertices[0] - vertices[2],
-                         vertices[2] - vertices[1],
-                         vertices[1] - vertices[3],
-                         vertices[3] - vertices[2]};
-
-    faceAxes = {edgeAxes[3] ^ edgeAxes[4],
-                         edgeAxes[2] ^ edgeAxes[0],
-                         edgeAxes[0] ^ edgeAxes[1],
-                         edgeAxes[1] ^ edgeAxes[2]};
-}
-
-RegularTetrahedron::RegularTetrahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularTetrahedron>{orientation} {
-    this->calculateVerticesAndAxes();
+    PlatonicSolid<RegularTetrahedron>::orientedFaces = 
+            {{3, 2, 1}, {3, 0, 2}, {0, 3, 1}, {0, 1, 2}};
 }
 
 double RegularTetrahedron::projectionHalfsize(const Vector<3> &axis) const {
@@ -58,16 +38,6 @@ RegularTetrahedron::interval RegularTetrahedron::getProjection(const Vector<3> &
             projInterval.second = proj;
     }
     return projInterval;
-}
-
-intersection::tri_polyh RegularTetrahedron::getTriangles() const {
-    auto vertices = this->getVertices();
-    return intersection::tri_polyh{
-            {{vertices[3], vertices[2], vertices[1]}},
-            {{vertices[3], vertices[0], vertices[2]}},
-            {{vertices[0], vertices[3], vertices[1]}},
-            {{vertices[0], vertices[1], vertices[2]}}
-    };
 }
 
 bool RegularTetrahedron::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,

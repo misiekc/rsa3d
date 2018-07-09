@@ -64,6 +64,8 @@ namespace
     }
 
     Result perform_test(unsigned long max_tries) {
+        std::cout << "[INFO] Performing test for " << max_tries << " pairs" << std::endl;
+
         Result result;
         RND rnd;
         InfoLooper looper(max_tries, 10000, "pairs tested...");

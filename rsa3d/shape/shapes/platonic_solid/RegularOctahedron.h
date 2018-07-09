@@ -12,17 +12,12 @@ class RegularOctahedron : public PlatonicSolid<RegularOctahedron> {
 private:
     friend PlatonicSolid<RegularOctahedron>;
 
-    constexpr static double circumsphereRadius = std::pow(0.75, 1./3);
-    constexpr static double insphereRadius = std::pow(48, -1./6);
-    constexpr static double edgeFactor = std::pow(0.75, 1./3);
-
     static void calculateStatic(const std::string &attr);
 
 public:
-    explicit RegularOctahedron(const Matrix<3, 3> &orientation);
+    explicit RegularOctahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularOctahedron>{orientation} {};
 
     double projectionHalfsize(const Vector<3> &axis) const;     /* CRTP implement */
-    intersection::tri_polyh getTriangles() const;               /* CRTP implement */
 };
 
 

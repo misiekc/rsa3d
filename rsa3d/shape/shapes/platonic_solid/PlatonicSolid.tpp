@@ -6,33 +6,38 @@
 #include "SATOverlap.h"
 #include "TriTriOverlap.h"
 #include <sstream>
+#include <functional>
+#include <iterator>
 
 template<typename SpecificSolid>
 std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedVertices;
-
 template<typename SpecificSolid>
-intersection::face_polyh PlatonicSolid<SpecificSolid>::orientedFaces;
-
+std::vector<std::vector<std::size_t>> PlatonicSolid<SpecificSolid>::orientedFaces;
 template<typename SpecificSolid>
-intersection::tri_polyh PlatonicSolid<SpecificSolid>::orientedTriangles;
-
+std::vector<std::array<std::size_t, 3>> PlatonicSolid<SpecificSolid>::orientedTriangles;
 template<typename SpecificSolid>
 std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedFaceAxes;
-
 template<typename SpecificSolid>
 std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedEdgeAxes;
-
 template<typename SpecificSolid>
 std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedVertexAxes;
-
 template<typename SpecificSolid>
 std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedMidedgeAxes;
+template<typename SpecificSolid>
+double PlatonicSolid<SpecificSolid>::normalizeFactor;
+template<typename SpecificSolid>
+double PlatonicSolid<SpecificSolid>::circumsphereRadius;
+template<typename SpecificSolid>
+double PlatonicSolid<SpecificSolid>::insphereRadius;
 
 
 template<typename SpecificSolid>
 void PlatonicSolid<SpecificSolid>::initClass(const std::string &attr) {
     SpecificSolid::calculateStatic(attr);
-    normalizeAxes();
+    discoverTriangles();
+    normalizeVolume();
+    calculateRadia();
+    discoverAxes();
 
     Shape::setNeighbourListCellSize(2 * SpecificSolid::circumsphereRadius);
     Shape::setVoxelSpatialSize(2 * SpecificSolid::insphereRadius / std::sqrt(3.));
@@ -43,27 +48,6 @@ void PlatonicSolid<SpecificSolid>::initClass(const std::string &attr) {
                 std::asin(rnd->nextValue() * 2 - 1),
                 rnd->nextValue() * 2 * M_PI));
     });
-}
-
-template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::normalizeAxes() {
-    auto normalizer = [](const Vector<3> &v) {
-        return v / v.norm();
-    };
-    std::transform(SpecificSolid::orientedEdgeAxes.begin(), SpecificSolid::orientedEdgeAxes.end(),
-                   SpecificSolid::orientedEdgeAxes.begin(), normalizer);
-    std::transform(SpecificSolid::orientedFaceAxes.begin(), SpecificSolid::orientedFaceAxes.end(),
-                   SpecificSolid::orientedFaceAxes.begin(), normalizer);
-}
-
-template<typename SpecificSolid>
-template<size_t SIZE>
-std::array<Vector<3>, SIZE> PlatonicSolid<SpecificSolid>::applyOrientation(const std::array<Vector<3>, SIZE> &vectors) const {
-    std::array<Vector<3>, SIZE> result;
-    std::transform(vectors.begin(), vectors.end(), result.begin(), [this](const Vector<3> &v) {
-        return this->orientation * v;
-    });
-    return result;
 }
 
 template<typename SpecificSolid>
@@ -121,12 +105,6 @@ const Matrix<3, 3> &PlatonicSolid<SpecificSolid>::getOrientationMatrix() const {
 template<typename SpecificSolid>
 void PlatonicSolid<SpecificSolid>::setOrientationMatrix(const Matrix<3, 3> &orientation) {
     this->orientation = orientation;
-    calculateVerticesAndAxes();
-}
-
-template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::calculateVerticesAndAxes() {
-
 }
 
 template<typename SpecificSolid>
@@ -146,16 +124,21 @@ OverlapStrategy<3, 0> *PlatonicSolid<SpecificSolid>::createStrategy(const std::s
 
 template<typename SpecificSolid>
 std::string PlatonicSolid<SpecificSolid>::toWolfram() const {
-    auto &thisSpecific = static_cast<const SpecificSolid&>(*this);
-    auto triangles = thisSpecific.getTriangles();
+    auto faces = this->getFaces();
 
     std::stringstream result;
     result << std::fixed;
-    result << "Polygon[{";
-    for (auto it = triangles.begin(); it != triangles.end() - 1; it++)
-        result << "{" << (*it)[0] << ", " << (*it)[1] << ", " << (*it)[2] << "}," << std::endl << "    ";
-    auto lastTri = triangles.back();
-    result << "{" << lastTri[0] << ", " << lastTri[1] << ", " << lastTri[2] << "}}]";
+    result << "Polygon[{ ";
+
+    for (auto face = faces.begin(); face != faces.end(); face++) {
+        result << "{";
+        std::copy(face->begin(), face->end(), std::ostream_iterator<Vector<3>>(result, ", "));
+        result.seekp(-2, std::ios_base::end);
+        result << "}, " << std::endl;
+    }
+    result.seekp(-3, std::ios_base::end);
+    result << " }]";
+
     return result.str();
 }
 
@@ -199,3 +182,135 @@ std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::getVertexAxes() const { ret
 
 template<typename SpecificSolid>
 std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::getMidegdeAxes() const { return applyOrientation(orientedMidedgeAxes); }
+
+template<typename SpecificSolid>
+void PlatonicSolid<SpecificSolid>::discoverTriangles() {
+    for (const auto &face : orientedFaces) {
+        std::size_t numVertices = face.size();
+        if (numVertices < 3)
+            throw std::runtime_error("number of vertices in face < 3");
+        for (std::size_t i = 2; i < numVertices; i++)
+            orientedTriangles.push_back({{face[0], face[i - 1], face[i]}});
+    }
+    std::cout << "[PlatonicSolid::discoverTriangles] Faces: " << orientedFaces.size();
+    std::cout << ", triangles: " << orientedTriangles.size() << std::endl;
+}
+
+template<typename SpecificSolid>
+void PlatonicSolid<SpecificSolid>::normalizeVolume() {
+    double volume = std::accumulate(orientedTriangles.begin(), orientedTriangles.end(), 0.,
+            [](double volume, const std::array<std::size_t, 3> &triIdx) {
+        intersection::tri3D tri{{orientedVertices[triIdx[0]], orientedVertices[triIdx[1]], orientedVertices[triIdx[2]]}};
+        double tetrahedronVolume = 1./6 * tri[0] * ((tri[1] - tri[0]) ^ (tri[2] - tri[0]));
+        return volume + std::abs(tetrahedronVolume);
+    });
+    normalizeFactor = std::pow(volume, -1./3);
+    std::transform(orientedVertices.begin(), orientedVertices.end(), orientedVertices.begin(),
+                   [](const Vector<3> &vertex) {
+        return vertex * normalizeFactor;
+    });
+    std::cout << "[PlatonicSolid::normalizeVolume] Normalizing factor: " << normalizeFactor << std::endl;
+}
+
+template<typename SpecificSolid>
+intersection::tri_polyh PlatonicSolid<SpecificSolid>::getTriangles() const {
+    intersection::tri_polyh result;
+    result.reserve(orientedTriangles.size());
+
+    auto vertices = this->getVertices();
+    std::transform(orientedTriangles.begin(), orientedTriangles.end(), std::back_inserter(result),
+                   [&vertices](const std::array<std::size_t, 3> &tri) {
+        return intersection::tri3D{{vertices[tri[0]], vertices[tri[1]], vertices[tri[2]]}};
+    });
+    return result;
+}
+
+template<typename SpecificSolid>
+intersection::face_polyh PlatonicSolid<SpecificSolid>::getFaces() const {
+    intersection::face_polyh result;
+    result.reserve(orientedFaces.size());
+
+    auto vertices = this->getVertices();
+    std::transform(orientedFaces.begin(), orientedFaces.end(), std::back_inserter(result),
+                   [&vertices](const std::vector<std::size_t> &face) {
+        intersection::face3D faceResult;
+        faceResult.reserve(face.size());
+        std::transform(face.begin(), face.end(), std::back_inserter(faceResult), [&vertices](size_t i) {
+            return vertices[i];
+        });
+        return faceResult;
+    });
+    return result;
+}
+
+template<typename SpecificSolid>
+void PlatonicSolid<SpecificSolid>::calculateRadia() {
+    circumsphereRadius = 0;
+    for (const auto &vertex : orientedVertices) {
+        double vertexDistance = vertex.norm();
+        if (vertexDistance > circumsphereRadius)
+            circumsphereRadius = vertexDistance;
+    }
+
+    insphereRadius = std::numeric_limits<double>::infinity();
+    for (const auto &face : orientedFaces) {
+        Vector<3> edge1 = orientedVertices[face[1]] - orientedVertices[face[0]];
+        Vector<3> edge2 = orientedVertices[face[2]] - orientedVertices[face[0]];
+        Vector<3> normalAxis = edge1 ^ edge2;
+        normalAxis /= normalAxis.norm();
+        double faceDistance = std::abs(orientedVertices[face[0]] * normalAxis);
+        if (faceDistance < insphereRadius)
+            insphereRadius = faceDistance;
+    }
+
+    std::cout << "[PlatonicSolid::calculateRadia] Circumsphere radius: " << circumsphereRadius;
+    std::cout << ", insphere radius: " << insphereRadius << std::endl;
+}
+
+template<typename SpecificSolid>
+void PlatonicSolid<SpecificSolid>::discoverAxes() {
+    using namespace std::placeholders;
+    for (const auto &vertex : orientedVertices) {
+        Vector<3> axis = vertex / vertex.norm();
+        addUniqueAxis(orientedVertexAxes, axis);
+    }
+
+    for (const auto &faceIdx : orientedFaces) {
+        intersection::face3D face(faceIdx.size());
+        std::transform(faceIdx.begin(), faceIdx.end(), face.begin(), [](std::size_t idx) {
+            return orientedVertices[idx];
+        });
+
+        Vector<3> faceAxis = (face[1] - face[0]) ^ (face[2] - face[0]);
+        faceAxis /= faceAxis.norm();
+        addUniqueAxis(orientedFaceAxes, faceAxis);
+
+        for (std::size_t i = 0; i < face.size(); i++) {
+            Vector<3> edgeAxis = face[(i + 1) % face.size()] - face[i];
+            edgeAxis = edgeAxis / edgeAxis.norm();
+            addUniqueAxis(orientedEdgeAxes, edgeAxis);
+
+            Vector<3> midedgeAxis = (face[(i + 1) % face.size()] + face[i]) / 2.;
+            midedgeAxis = midedgeAxis / midedgeAxis.norm();
+            addUniqueAxis(orientedMidedgeAxes, midedgeAxis);
+        }
+    }
+
+    std::cout << "[PlatonicSolid::discoverAxes] Discovered ";
+    std::cout << orientedFaceAxes.size() << " face axes, ";
+    std::cout << orientedEdgeAxes.size() << " edge axes, ";
+    std::cout << orientedVertexAxes.size() << " vertex axes, ";
+    std::cout << orientedMidedgeAxes.size() << " midedge axes" << std::endl;
+}
+
+template<typename SpecificSolid>
+void PlatonicSolid<SpecificSolid>::addUniqueAxis(std::vector<Vector<3>> &axes, const Vector<3> &newAxis) {
+    auto axisCompare = [&newAxis](const Vector<3> axis) {
+        double product = std::abs(axis * newAxis);
+        return std::abs(product - 1) < 0.000000001;
+    };
+    auto it = find_if(axes.begin(), axes.end(), axisCompare);
+    if (it == axes.end())
+        axes.push_back(newAxis);
+}
+

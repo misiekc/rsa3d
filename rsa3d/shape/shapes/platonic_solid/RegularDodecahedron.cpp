@@ -5,60 +5,18 @@
 #include "RegularDodecahedron.h"
 
 void RegularDodecahedron::calculateStatic(const std::string &attr) {
-    auto &vertices = PlatonicSolid<RegularDodecahedron>::orientedVertices;
-    auto &edgeAxes = PlatonicSolid<RegularDodecahedron>::orientedEdgeAxes;
-    auto &faceAxes = PlatonicSolid<RegularDodecahedron>::orientedFaceAxes;
+    PlatonicSolid<RegularDodecahedron>::orientedVertices
+            = {Vector<3>{{ 1,  1,  1}}, Vector<3>{{-1,  1,  1}}, Vector<3>{{-1, -1,  1}}, Vector<3>{{ 1, -1,  1}},
+               Vector<3>{{-1, -1, -1}}, Vector<3>{{-1,  1, -1}}, Vector<3>{{ 1,  1, -1}}, Vector<3>{{ 1, -1, -1}},
+
+               Vector<3>{{gold, 1/gold, 0}}, Vector<3>{{-gold, 1/gold, 0}}, Vector<3>{{-gold, -1/gold, 0}}, Vector<3>{{gold, -1/gold, 0}},
+               Vector<3>{{0, gold, 1/gold}}, Vector<3>{{0, -gold, 1/gold}}, Vector<3>{{0, -gold, -1/gold}}, Vector<3>{{0, gold, -1/gold}},
+               Vector<3>{{1/gold, 0, gold}}, Vector<3>{{1/gold, 0, -gold}}, Vector<3>{{-1/gold, 0, -gold}}, Vector<3>{{-1/gold, 0, gold}}};
     
-    vertices = {Vector<3>{{ 1,  1,  1}} * edgeFactor,
-                         Vector<3>{{-1,  1,  1}} * edgeFactor,
-                         Vector<3>{{-1, -1,  1}} * edgeFactor,
-                         Vector<3>{{ 1, -1,  1}} * edgeFactor,
-                         Vector<3>{{-1, -1, -1}} * edgeFactor,
-                         Vector<3>{{-1,  1, -1}} * edgeFactor,
-                         Vector<3>{{ 1,  1, -1}} * edgeFactor,
-                         Vector<3>{{ 1, -1, -1}} * edgeFactor,
-
-                         Vector<3>{{ gold,  1/gold, 0}} * edgeFactor,
-                         Vector<3>{{-gold,  1/gold, 0}} * edgeFactor,
-                         Vector<3>{{-gold, -1/gold, 0}} * edgeFactor,
-                         Vector<3>{{ gold, -1/gold, 0}} * edgeFactor,
-
-                         Vector<3>{{0,  gold,  1/gold}} * edgeFactor,
-                         Vector<3>{{0, -gold,  1/gold}} * edgeFactor,
-                         Vector<3>{{0, -gold, -1/gold}} * edgeFactor,
-                         Vector<3>{{0,  gold, -1/gold}} * edgeFactor,
-
-                         Vector<3>{{ 1/gold, 0,  gold}} * edgeFactor,
-                         Vector<3>{{ 1/gold, 0, -gold}} * edgeFactor,
-                         Vector<3>{{-1/gold, 0, -gold}} * edgeFactor,
-                         Vector<3>{{-1/gold, 0,  gold}} * edgeFactor};
-
-    edgeAxes = {vertices[0] - vertices[8],
-                         vertices[0] - vertices[16],
-                         vertices[16] - vertices[3],
-                         vertices[3] - vertices[11],
-                         vertices[8] - vertices[11],
-                         vertices[0] - vertices[12],
-                         vertices[16] - vertices[19],
-                         vertices[3] - vertices[13],
-                         vertices[11] - vertices[7],
-                         vertices[8] - vertices[6],
-                         vertices[7] - vertices[14],
-                         vertices[2] - vertices[13],
-                         vertices[19] - vertices[1],
-                         vertices[12] - vertices[15],
-                         vertices[6] - vertices[17]};
-
-    faceAxes = {edgeAxes[1] ^ edgeAxes[0],
-                         edgeAxes[14] ^ edgeAxes[9],
-                         edgeAxes[0] ^ edgeAxes[5],
-                         edgeAxes[5] ^ edgeAxes[1],
-                         edgeAxes[6] ^ edgeAxes[2],
-                         edgeAxes[7] ^ edgeAxes[3]};
-}
-
-RegularDodecahedron::RegularDodecahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularDodecahedron>{orientation} {
-    this->calculateVerticesAndAxes();
+    PlatonicSolid<RegularDodecahedron>::orientedFaces
+            = {{3, 11, 8, 0, 16}, {17, 6, 8, 11, 7}, {15, 12, 0, 8, 6}, {16, 0, 12, 1, 19},
+               {3, 16, 19, 2, 13}, {11, 3, 13, 14, 7}, {4, 10, 9, 5, 18}, {2, 19, 1, 9, 10},
+               {4, 14, 13, 2, 10}, {18, 17, 7, 14, 4}, {17, 18, 5, 15, 6}, {9, 1, 12, 15, 5}};
 }
 
 double RegularDodecahedron::projectionHalfsize(const Vector<3> &axis) const {
@@ -71,60 +29,7 @@ double RegularDodecahedron::projectionHalfsize(const Vector<3> &axis) const {
     double yRectHalfsize = yHalfsize * gold + zHalfsize / gold;
     double zRectHalfsize = zHalfsize * gold + xHalfsize / gold;
 
-    return std::max(std::max(std::max(cubeHalfsize, xRectHalfsize), yRectHalfsize), zRectHalfsize) * edgeFactor;
-}
-
-intersection::tri_polyh RegularDodecahedron::getTriangles() const {
-    auto vertices = this->getVertices();
-    return intersection::tri_polyh{
-            {{vertices[3], vertices[0], vertices[16]}},
-            {{vertices[3], vertices[11], vertices[0]}},
-            {{vertices[11], vertices[8], vertices[0]}},
-
-            {{vertices[17], vertices[6], vertices[7]}},
-            {{vertices[7], vertices[6], vertices[8]}},
-            {{vertices[7], vertices[8], vertices[11]}},
-
-            {{vertices[15], vertices[12], vertices[0]}},
-            {{vertices[15], vertices[0], vertices[8]}},
-            {{vertices[15], vertices[8], vertices[6]}},
-
-            {{vertices[16], vertices[0], vertices[12]}},
-            {{vertices[16], vertices[12], vertices[1]}},
-            {{vertices[16], vertices[1], vertices[19]}},
-
-            {{vertices[3], vertices[16], vertices[19]}},
-            {{vertices[3], vertices[19], vertices[2]}},
-            {{vertices[3], vertices[2], vertices[13]}},
-
-            {{vertices[11], vertices[3], vertices[13]}},
-            {{vertices[11], vertices[13], vertices[14]}},
-            {{vertices[11], vertices[14], vertices[7]}},
-
-            {{vertices[4], vertices[10], vertices[9]}},
-            {{vertices[4], vertices[9], vertices[5]}},
-            {{vertices[4], vertices[5], vertices[18]}},
-
-            {{vertices[2], vertices[19], vertices[1]}},
-            {{vertices[2], vertices[1], vertices[9]}},
-            {{vertices[2], vertices[9], vertices[10]}},
-
-            {{vertices[4], vertices[14], vertices[13]}},
-            {{vertices[4], vertices[13], vertices[2]}},
-            {{vertices[4], vertices[2], vertices[10]}},
-
-            {{vertices[18], vertices[17], vertices[7]}},
-            {{vertices[18], vertices[7], vertices[14]}},
-            {{vertices[18], vertices[14], vertices[4]}},
-
-            {{vertices[17], vertices[18], vertices[5]}},
-            {{vertices[17], vertices[5], vertices[15]}},
-            {{vertices[17], vertices[15], vertices[6]}},
-
-            {{vertices[9], vertices[1], vertices[12]}},
-            {{vertices[9], vertices[12], vertices[15]}},
-            {{vertices[9], vertices[15], vertices[5]}}
-    };
+    return std::max(std::max(std::max(cubeHalfsize, xRectHalfsize), yRectHalfsize), zRectHalfsize) * normalizeFactor;
 }
 
 std::vector<double> RegularDodecahedron::calculateOrder(const OrderCalculable *other) const {
