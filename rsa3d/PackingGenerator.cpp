@@ -369,6 +369,10 @@ void PackingGenerator::createPacking() {
 		}
 	} // while
 
+	delete[] sOverlapped;
+	delete[] sVirtual;
+	delete[] aVoxels;
+
 	for(int i=0; i<_OMP_MAXTHREADS; i++){
 		delete aRND[i];
 	}
