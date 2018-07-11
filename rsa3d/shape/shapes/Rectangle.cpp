@@ -3,6 +3,7 @@
 //
 
 #include "Rectangle.h"
+#include <cmath>
 
 double Rectangle::longer;
 double Rectangle::shorter;
@@ -360,6 +361,21 @@ bool Rectangle::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const {
 
     return 0;
 }
+
+std::vector<double> Rectangle::calculateOrder(const OrderCalculable *other) const {
+    auto &otherRectangle = dynamic_cast<const Rectangle&>(*other);    // use reference so dynamic_cast would throw on error
+    double angle = (this->getOrientation())[0] - (otherRectangle.getOrientation())[0];
+
+    double cosa = std::cos(angle), sina = std::sin(angle);
+
+    std::vector<double> result(2);
+
+    result[0] = 4.0*(cosa*cosa*cosa*cosa + sina*sina*sina*sina) - 3.0;
+    result[1] = 0.5*(3*cosa*cosa - 1.0);
+
+    return result;
+}
+
 
 std::string Rectangle::toWolfram() const {
     std::stringstream out;

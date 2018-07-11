@@ -25,23 +25,36 @@
 
 
 void Analyzer::analyzeOrder(const Packing &packing, std::vector<Plot*> *order) {
-    if (!this->isOrderCalculable(packing.front()))     return;
+    if (!this->isOrderCalculable(packing.front()))
+    	return;
 
-    for(std::size_t i=0; i<packing.size(); i++){
-        for(std::size_t j=i+1; j<packing.size(); j++){
-            double dist = this->getPetiodicDistance(packing[i], packing[j]);
-            if (dist > (*order)[0]->getMax())
-                continue;
-
-            auto particle1 = dynamic_cast<const OrderCalculable*>(packing[i]);
-            auto particle2 = dynamic_cast<const OrderCalculable*>(packing[j]);
-            std::vector<double> orderParameters = particle1->calculateOrder(particle2);
-			for(std::size_t k = 0; k < orderParameters.size(); k++)
-                (*order)[k]->add(dist, orderParameters[k]);
-		}
-	}
+  	double da[RSA_SPATIAL_DIMENSION];
+   	double dMax = (*order)[0]->getMax(), dMax2 = dMax*dMax;
+   	RSAVector posi, posj;
+    for(uint i=0; i<packing.size(); i++){
+    	posi = packing[i]->getPosition();
+    	for(uint j=i+1; j<packing.size(); j++){
+    		posj = packing[j]->getPosition();
+    		double dist2 = 0.0;
+    		for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
+    			da[k] = fabs(posi[k] - posj[k]);
+    			if (da[k]>0.5*this->params->surfaceSize)
+    				da[k] = this->params->surfaceSize - da[k];
+    			dist2 += da[k]*da[k];
+    			if (da[k] > dMax)
+    				break;
+    		}
+    		if (dist2 < dMax2){
+                auto particle1 = dynamic_cast<const OrderCalculable*>(packing[i]);
+                auto particle2 = dynamic_cast<const OrderCalculable*>(packing[j]);
+                std::vector<double> orderParameters = particle1->calculateOrder(particle2);
+    			for(std::size_t k = 0; k < orderParameters.size(); k++)
+                    (*order)[k]->add(std::sqrt(dist2), orderParameters[k]);
+    		}
+    	}
+    }
 }
-
+/*
 double Analyzer::getPetiodicDistance(const RSAShape *shape1, const RSAShape *shape2) const {
     RSAVector delta = shape1->getPosition() - shape2->getPosition();
     RSAVector periodicDelta;
@@ -52,6 +65,7 @@ double Analyzer::getPetiodicDistance(const RSAShape *shape1, const RSAShape *sha
     }
     return periodicDelta.norm();
 }
+*/
 
 void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor){
 	double lastt = 0.0;
@@ -72,19 +86,23 @@ void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, P
 		nvt->addBetween(lastt, nvt->getMax()+1.0, packing.size());
 	if (corr!=NULL){
 		double da[RSA_SPATIAL_DIMENSION];
+		double dMax = corr->getMax(), dMax2 = dMax*dMax;
 		RSAVector posi, posj;
 		for(uint i=0; i<packing.size(); i++){
 			posi = packing[i]->getPosition();
 			for(uint j=i+1; j<packing.size(); j++){
 				posj = packing[j]->getPosition();
-				double dist = 0.0;
+				double dist2 = 0.0;
 				for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
 					da[k] = fabs(posi[k] - posj[k]);
 					if (da[k]>0.5*this->params->surfaceSize)
 						da[k] = this->params->surfaceSize - da[k];
-					dist += da[k]*da[k];
+					dist2 += da[k]*da[k];
+					if (da[k] > dMax)
+						break;
 				}
-				corr->add(sqrt(dist), 1.0);
+				if (dist2 < dMax2)
+					corr->add(std::sqrt(dist2), 1.0);
 			}
 		}
 	}

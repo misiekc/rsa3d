@@ -35,7 +35,7 @@ private:
 	double * printASF(Plot &asf, std::string filename, int counter, double packingFraction, double *res);
 	void printCorrelations(Plot &corr, std::string filename, int counter, double particleSize, double packingFraction);
 	void printOrder(const std::vector<Plot*> &order, const std::string &filename) const;
-	double getPetiodicDistance(const RSAShape *shape1, const RSAShape *shape2) const;
+//	double getPetiodicDistance(const RSAShape *shape1, const RSAShape *shape2) const;
 	std::vector<Plot *> getFilledOrderVector() const;
 	bool isOrderCalculable(const RSAShape *shape) const;
 };

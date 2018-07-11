@@ -9,10 +9,11 @@
 #include "../../RND.h"
 #include "../../BoundaryConditions.h"
 #include "../AnisotropicShape2D.h"
+#include "../OrderCalculable.h"
 #include "../../Vector.h"
 #include <cmath>
 
-class Rectangle: public AnisotropicShape2D {
+class Rectangle: public AnisotropicShape2D, public OrderCalculable {
 private:
     static double longer;
     static double shorter;
@@ -58,6 +59,8 @@ public:
     bool overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const override;
 
     double getVolume() const override;
+
+	std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 
     bool pointInside(BoundaryConditions<2> *bc, const Vector<2> &da) const override;
     bool pointInside(BoundaryConditions<2> *bc, const Vector<2> &da, double angleFrom, double angleTo) const override;
