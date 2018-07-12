@@ -8,14 +8,14 @@
 
 #include "RegularSolid.h"
 
-class Cubeoctahedron : public RegularSolid<Cubeoctahedron> {
+class Cuboctahedron : public RegularSolid<Cuboctahedron> {
 private:
-    friend RegularSolid<Cubeoctahedron>;
+    friend RegularSolid<Cuboctahedron>;
 
     static void calculateStatic(const std::string &attr);
 
 public:
-    explicit Cubeoctahedron(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}
+    explicit Cuboctahedron(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}
 
     double projectionHalfsize(const Vector<3> &axis) const;         /* CRTP implement */
 };

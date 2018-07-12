@@ -71,10 +71,14 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/shape/shapes/cuboid/OptimizedSATOverlap \
        rsa3d/shape/shapes/cuboid/SATOverlap \
        rsa3d/shape/shapes/cuboid/TriTriOverlap \
+       rsa3d/shape/shapes/regular_solid/Cubeoctahedron \
        rsa3d/shape/shapes/regular_solid/Dodecahedron \
        rsa3d/shape/shapes/regular_solid/Icosahedron \
        rsa3d/shape/shapes/regular_solid/Octahedron \
+       rsa3d/shape/shapes/regular_solid/Rhombicuboctahedron.cpp \
        rsa3d/shape/shapes/regular_solid/Tetrahedron \
+       rsa3d/shape/shapes/regular_solid/TruncatedCube \
+       rsa3d/shape/shapes/regular_solid/TruncatedOctahedron \
        rsa3d/shape/shapes/polygon/HBPolygon \
        rsa3d/shape/shapes/polygon/SBPolygon \
        rsa3d/shape/shapes/polygon/Polygon \

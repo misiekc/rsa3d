@@ -22,7 +22,10 @@
 #include "shapes/regular_solid/Icosahedron.h"
 #include "shapes/regular_solid/Octahedron.h"
 #include "shapes/regular_solid/Tetrahedron.h"
-#include "shapes/regular_solid/Cubeoctahedron.h"
+#include "shapes/regular_solid/Cuboctahedron.h"
+#include "shapes/regular_solid/TruncatedCube.h"
+#include "shapes/regular_solid/TruncatedOctahedron.h"
+#include "shapes/regular_solid/Rhombicuboctahedron.h"
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
 
@@ -88,8 +91,17 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
         } else if (sClass == "Icosahedron") {
             RegularSolid<Icosahedron>::initClass(attr);
             return;
-        } else if (sClass == "Cubeoctahedron") {
-            RegularSolid<Cubeoctahedron>::initClass(attr);
+        } else if (sClass == "Cuboctahedron") {
+            RegularSolid<Cuboctahedron>::initClass(attr);
+            return;
+        } else if (sClass == "TruncatedCube") {
+            RegularSolid<TruncatedCube>::initClass(attr);
+            return;
+        } else if (sClass == "TruncatedOctahedron") {
+            RegularSolid<TruncatedOctahedron>::initClass(attr);
+            return;
+        } else if (sClass == "Rhombicuboctahedron") {
+            RegularSolid<Rhombicuboctahedron>::initClass(attr);
             return;
         }
     #endif
