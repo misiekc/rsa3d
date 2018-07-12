@@ -18,7 +18,6 @@ public:
     explicit TruncatedCube(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}
 
     double projectionHalfsize(const Vector<3> &axis) const;         /* CRTP implement */
-
 };
 
 

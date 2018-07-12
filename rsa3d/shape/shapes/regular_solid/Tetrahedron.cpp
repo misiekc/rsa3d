@@ -3,6 +3,7 @@
 //
 
 #include "Tetrahedron.h"
+#include "RegularSolid.h"
 
 
 void Tetrahedron::calculateStatic(const std::string &attr) {
@@ -17,27 +18,8 @@ double Tetrahedron::projectionHalfsize(const Vector<3> &axis) const {
     throw std::runtime_error("unimplemented");
 }
 
-bool Tetrahedron::isSeparatingAxis(const Vector<3> &axis, const Tetrahedron &other,
-                                          const Vector<3> &distance) const {
-    interval thisInterval = this->getProjection(axis);
-    interval otherInterval = other.getProjection(axis);
-
-    // TODO epsilon needed
-    return std::min(thisInterval.second, otherInterval.second) < std::max(thisInterval.first, otherInterval.first);
-}
-
-Tetrahedron::interval Tetrahedron::getProjection(const Vector<3> & axis) const {
-    // Find enpoints of polyhedron projection (multiplied by unknown but const for axis factor)
-    interval projInterval = {std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
-    auto vertices = this->getVertices();
-    for (const auto &v : vertices) {
-        double proj = v * axis;
-        if (proj < projInterval.first)
-            projInterval.first = proj;
-        if (proj > projInterval.second)
-            projInterval.second = proj;
-    }
-    return projInterval;
+bool Tetrahedron::isSeparatingAxis(const Vector<3> &axis, const Tetrahedron &other, const Vector<3> &distance) const {
+    return this->isSeparatingAxisUnoptimized(axis, other, distance);
 }
 
 bool Tetrahedron::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
@@ -59,3 +41,4 @@ bool Tetrahedron::pointInside(BoundaryConditions<3> *bc, const Vector<3> &positi
 
     return false;
 }
+

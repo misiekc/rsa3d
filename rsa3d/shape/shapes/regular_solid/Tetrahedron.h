@@ -15,18 +15,15 @@ private:
     static void calculateStatic(const std::string &attr);
 
 public:
-    using interval = std::pair<double, double>;
-
     explicit Tetrahedron(const Matrix<3, 3> &orientation) : RegularSolid<Tetrahedron>{orientation} {};
 
     double projectionHalfsize(const Vector<3> &axis) const;     /* CRTP implement */
     bool isSeparatingAxis(const Vector<3> &axis, const Tetrahedron &other,
                           const Vector<3> &distance) const;     /* CRTP override */
 
-    interval getProjection(const Vector<3> & axis) const;
-
     bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
                      double orientationRange) const override;
+
 };
 
 

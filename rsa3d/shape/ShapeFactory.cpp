@@ -26,6 +26,8 @@
 #include "shapes/regular_solid/TruncatedCube.h"
 #include "shapes/regular_solid/TruncatedOctahedron.h"
 #include "shapes/regular_solid/Rhombicuboctahedron.h"
+#include "shapes/regular_solid/TruncatedCuboctahedron.h"
+#include "shapes/regular_solid/SnubCube.h"
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
 
@@ -102,6 +104,12 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             return;
         } else if (sClass == "Rhombicuboctahedron") {
             RegularSolid<Rhombicuboctahedron>::initClass(attr);
+            return;
+        } else if (sClass == "TruncatedCuboctahedron") {
+            RegularSolid<TruncatedCuboctahedron>::initClass(attr);
+            return;
+        } else if (sClass == "SnubCube") {
+            RegularSolid<SnubCube>::initClass(attr);
             return;
         }
     #endif

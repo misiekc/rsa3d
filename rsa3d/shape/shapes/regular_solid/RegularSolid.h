@@ -14,6 +14,9 @@
 // CRTP idiom
 template <typename SpecificSolid>
 class RegularSolid : public ConvexShape<3, 0>, public OverlapStrategyShape<3, 0> {
+protected:
+    using interval = std::pair<double, double>;
+
 private:
     Matrix<3, 3> orientation = Matrix<3, 3>::identity();
 
@@ -22,6 +25,8 @@ private:
     static void calculateRadia();
     static void discoverAxes();
     static void addUniqueAxis(std::vector<Vector<3>> &axes, const Vector<3> &newAxis);
+
+    interval getProjection(const Vector<3> & axis) const;
 
 protected:
     static std::vector<Vector<3>> orientedVertices;
@@ -41,6 +46,8 @@ protected:
     inline std::vector<Vector<3>> applyOrientation(const std::vector<Vector<3>> &vectors) const;
     inline std::vector<Vector<3>> applyPosition(const std::vector<Vector<3>> &vectors) const;
     void setOrientationMatrix(const Matrix<3, 3> &orientation);
+
+    bool isSeparatingAxisUnoptimized(const Vector<3> &axis, const SpecificSolid &other, const Vector<3> &distance) const;
 
 public:
     static void initClass(const std::string &attr);
@@ -69,7 +76,7 @@ public:
     /* double projectionHalfsize(const Vector<3> &axis) const; */   /* CRTP pure virtual */
     bool isSeparatingAxis(const Vector<3> &axis, const SpecificSolid &other,
                           const Vector<3> &distance) const;         /* CRTP virtual */
-    static void printNotebookWithVertices();
+    static void printFaceHelperNotebook();
 };
 
 #include "RegularSolid.tpp"
