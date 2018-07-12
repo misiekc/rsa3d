@@ -330,7 +330,7 @@ void RegularSolid<SpecificSolid>::printNotebookWithVertices() {
     std::copy(orientedVertices.begin(), orientedVertices.end(), std::ostream_iterator<const Vector<3>>(file, ", "));
     file.seekp(-2, std::ios_base::end);
     file << "};" << std::endl;
-    file << "labels=Table[Text[i-1,vertices[[i]]],{i,1," << orientedVertices.size() << "}];" << std::endl << std::endl;
+    file << "labels=Table[Text[Style[i-1,Large],vertices[[i]]],{i,1," << orientedVertices.size() << "}];" << std::endl << std::endl;
     file << "(* List here faces in a format of {{vertexIdx1, vertexIdx2, ...}, {face2}, {face3}, ...} *)" << std::endl;
     file << "faces={};" << std::endl << std::endl;
     file << "facesCoord=Map[vertices[[#+1]]&,faces,{2}];" << std::endl;
@@ -341,4 +341,3 @@ void RegularSolid<SpecificSolid>::printNotebookWithVertices() {
     std::cout << "[RegularSolid::printNotebookWithVertices] No faces provided. Vertices printed to goodluck.nb. ";
     std::cout << "Use it to recognize faces manually." << std::endl;
 }
-
