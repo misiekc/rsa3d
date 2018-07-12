@@ -11,10 +11,12 @@
 template <typename SpecificSolid>
 class TriTriOverlap : public OverlapStrategy<3, 0> {
 public:
-    bool overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const override;
+    bool overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const override {
+        auto firstSpecific = dynamic_cast<const SpecificSolid&>(*first);
+        auto secondSpecific = dynamic_cast<const SpecificSolid&>(*second);
+
+        return intersection::polyh_polyh(firstSpecific.getTriangles(), secondSpecific.getTriangles());
+    }
 };
-
-#include "TriTriOverlap.tpp"
-
 
 #endif //RSA3D_TRITRIOVERLAP_H

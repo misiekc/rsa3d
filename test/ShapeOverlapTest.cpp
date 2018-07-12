@@ -120,7 +120,7 @@ namespace
 
         std::cout << "[INFO] Performing " << get_strategy_name(firstStrategy) << " and ";
         std::cout << get_strategy_name(secondStrategy) << " for OverlapStrategy comparison..." << std::endl;
-        InfoLooper looper(maxTries, 10000, "pairs tested...");
+        InfoLooper looper(maxTries, 25000, "pairs tested...");
         while (looper.step()) {
             RSAShapePairFactory::ShapePair pair = factory.generate();
             bool firstIntersected = firstStrategy.overlap(pair.first(), pair.second());

@@ -18,9 +18,7 @@ set(MAIN_SOURCE
         rsa3d/shape/shapes/platonic_solid/RegularDodecahedron.cpp
         rsa3d/shape/shapes/platonic_solid/RegularIcosahedron.cpp
         rsa3d/shape/shapes/platonic_solid/SATOverlap.h
-        rsa3d/shape/shapes/platonic_solid/SATOverlap.tpp
         rsa3d/shape/shapes/platonic_solid/TriTriOverlap.h
-        rsa3d/shape/shapes/platonic_solid/TriTriOverlap.tpp
         rsa3d/shape/shapes/polygon/HBPolygon.cpp
         rsa3d/shape/shapes/polygon/SBPolygon.cpp
         rsa3d/shape/shapes/Ellipse.cpp

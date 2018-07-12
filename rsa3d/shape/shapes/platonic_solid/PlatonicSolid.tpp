@@ -269,7 +269,6 @@ void PlatonicSolid<SpecificSolid>::calculateRadia() {
 
 template<typename SpecificSolid>
 void PlatonicSolid<SpecificSolid>::discoverAxes() {
-    using namespace std::placeholders;
     for (const auto &vertex : orientedVertices) {
         Vector<3> axis = vertex / vertex.norm();
         addUniqueAxis(orientedVertexAxes, axis);

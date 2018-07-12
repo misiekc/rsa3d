@@ -11,9 +11,10 @@ void RegularIcosahedron::calculateStatic(const std::string &attr) {
              Vector<3>{{1, gold, 0}}, Vector<3>{{-1, gold, 0}}, Vector<3>{{-1, -gold, 0}}, Vector<3>{{1, -gold, 0}}};
 
     PlatonicSolid<RegularIcosahedron>::orientedFaces = 
-            {{4,  0,  1}, {8,  0,  4}, {9,  0,  8}, {7,  0,  9}, {1,  0,  7}, {2,  6,  3}, {2,  10, 6}, {2,  11, 10},
-             {2,  5,  11}, {2,  3,  5}, {11, 4,  1}, {11, 5,  4}, {5,  8,  4}, {5,  3,  8}, {3,  9,  8}, {3,  6,  9},
-             {6,  7,  9}, {6,  10, 7}, {10, 1,  7}, {10, 11, 1}};
+            {{ 4,  0,  1}, { 8,  0,  4}, {9,  0,  8}, { 7, 0,  9}, { 1,  0, 7},
+             { 2,  6,  3}, { 2, 10,  6}, {2, 11, 10}, { 2, 5, 11}, { 2,  3, 5},
+             {11,  4,  1}, {11,  5,  4}, {5,  8,  4}, { 5, 3,  8}, { 3,  9, 8},
+             { 3,  6,  9}, { 6,  7,  9}, {6, 10,  7}, {10, 1,  7}, {10, 11, 1}};
 }
 
 double RegularIcosahedron::projectionHalfsize(const Vector<3> &axis) const {

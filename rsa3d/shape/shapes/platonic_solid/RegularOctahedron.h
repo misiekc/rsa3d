@@ -7,8 +7,9 @@
 
 
 #include "PlatonicSolid.h"
+#include "../../OrderCalculable.h"
 
-class RegularOctahedron : public PlatonicSolid<RegularOctahedron> {
+class RegularOctahedron : public PlatonicSolid<RegularOctahedron>, public OrderCalculable {
 private:
     friend PlatonicSolid<RegularOctahedron>;
 
@@ -17,7 +18,9 @@ private:
 public:
     explicit RegularOctahedron(const Matrix<3, 3> &orientation) : PlatonicSolid<RegularOctahedron>{orientation} {};
 
-    double projectionHalfsize(const Vector<3> &axis) const;     /* CRTP implement */
+    double projectionHalfsize(const Vector<3> &axis) const;         /* CRTP implement */
+
+    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 };
 
 
