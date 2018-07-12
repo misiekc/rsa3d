@@ -22,6 +22,7 @@
 #include "shapes/regular_solid/Icosahedron.h"
 #include "shapes/regular_solid/Octahedron.h"
 #include "shapes/regular_solid/Tetrahedron.h"
+#include "shapes/regular_solid/Cubeoctahedron.h"
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
 
@@ -86,6 +87,9 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             return;
         } else if (sClass == "Icosahedron") {
             RegularSolid<Icosahedron>::initClass(attr);
+            return;
+        } else if (sClass == "Cubeoctahedron") {
+            RegularSolid<Cubeoctahedron>::initClass(attr);
             return;
         }
     #endif

@@ -69,6 +69,7 @@ public:
     /* double projectionHalfsize(const Vector<3> &axis) const; */   /* CRTP pure virtual */
     bool isSeparatingAxis(const Vector<3> &axis, const SpecificSolid &other,
                           const Vector<3> &distance) const;         /* CRTP virtual */
+    static void printNotebookWithVertices();
 };
 
 #include "RegularSolid.tpp"

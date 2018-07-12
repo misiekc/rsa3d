@@ -8,6 +8,7 @@
 #include <sstream>
 #include <functional>
 #include <iterator>
+#include <fstream>
 
 template<typename SpecificSolid>
 std::vector<Vector<3>> RegularSolid<SpecificSolid>::orientedVertices;
@@ -34,6 +35,13 @@ double RegularSolid<SpecificSolid>::insphereRadius;
 template<typename SpecificSolid>
 void RegularSolid<SpecificSolid>::initClass(const std::string &attr) {
     SpecificSolid::calculateStatic(attr);
+
+    // No faces provided - generate wolfram notebook to recognize faces manually
+    if (orientedFaces.empty()) {
+        printNotebookWithVertices();
+        exit(EXIT_SUCCESS);
+    }
+
     discoverTriangles();
     normalizeVolume();
     calculateRadia();
@@ -184,6 +192,37 @@ template<typename SpecificSolid>
 std::vector<Vector<3>> RegularSolid<SpecificSolid>::getMidegdeAxes() const { return applyOrientation(orientedMidedgeAxes); }
 
 template<typename SpecificSolid>
+intersection::tri_polyh RegularSolid<SpecificSolid>::getTriangles() const {
+    intersection::tri_polyh result;
+    result.reserve(orientedTriangles.size());
+
+    auto vertices = this->getVertices();
+    std::transform(orientedTriangles.begin(), orientedTriangles.end(), std::back_inserter(result),
+                   [&vertices](const std::array<std::size_t, 3> &tri) {
+                       return intersection::tri3D{{vertices[tri[0]], vertices[tri[1]], vertices[tri[2]]}};
+                   });
+    return result;
+}
+
+template<typename SpecificSolid>
+intersection::face_polyh RegularSolid<SpecificSolid>::getFaces() const {
+    intersection::face_polyh result;
+    result.reserve(orientedFaces.size());
+
+    auto vertices = this->getVertices();
+    std::transform(orientedFaces.begin(), orientedFaces.end(), std::back_inserter(result),
+                   [&vertices](const std::vector<std::size_t> &face) {
+                       intersection::face3D faceResult;
+                       faceResult.reserve(face.size());
+                       std::transform(face.begin(), face.end(), std::back_inserter(faceResult), [&vertices](size_t i) {
+                           return vertices[i];
+                       });
+                       return faceResult;
+                   });
+    return result;
+}
+
+template<typename SpecificSolid>
 void RegularSolid<SpecificSolid>::discoverTriangles() {
     for (const auto &face : orientedFaces) {
         std::size_t numVertices = face.size();
@@ -210,37 +249,6 @@ void RegularSolid<SpecificSolid>::normalizeVolume() {
         return vertex * normalizeFactor;
     });
     std::cout << "[RegularSolid::normalizeVolume] Normalizing factor: " << normalizeFactor << std::endl;
-}
-
-template<typename SpecificSolid>
-intersection::tri_polyh RegularSolid<SpecificSolid>::getTriangles() const {
-    intersection::tri_polyh result;
-    result.reserve(orientedTriangles.size());
-
-    auto vertices = this->getVertices();
-    std::transform(orientedTriangles.begin(), orientedTriangles.end(), std::back_inserter(result),
-                   [&vertices](const std::array<std::size_t, 3> &tri) {
-        return intersection::tri3D{{vertices[tri[0]], vertices[tri[1]], vertices[tri[2]]}};
-    });
-    return result;
-}
-
-template<typename SpecificSolid>
-intersection::face_polyh RegularSolid<SpecificSolid>::getFaces() const {
-    intersection::face_polyh result;
-    result.reserve(orientedFaces.size());
-
-    auto vertices = this->getVertices();
-    std::transform(orientedFaces.begin(), orientedFaces.end(), std::back_inserter(result),
-                   [&vertices](const std::vector<std::size_t> &face) {
-        intersection::face3D faceResult;
-        faceResult.reserve(face.size());
-        std::transform(face.begin(), face.end(), std::back_inserter(faceResult), [&vertices](size_t i) {
-            return vertices[i];
-        });
-        return faceResult;
-    });
-    return result;
 }
 
 template<typename SpecificSolid>
@@ -311,5 +319,26 @@ void RegularSolid<SpecificSolid>::addUniqueAxis(std::vector<Vector<3>> &axes, co
     auto it = find_if(axes.begin(), axes.end(), axisCompare);
     if (it == axes.end())
         axes.push_back(newAxis);
+}
+
+template<typename SpecificSolid>
+void RegularSolid<SpecificSolid>::printNotebookWithVertices() {
+    std::ofstream file("goodluck.nb");
+    if (!file)  die("Cannot open goodluck.nb to store vertices");
+
+    file << "vertices={";
+    std::copy(orientedVertices.begin(), orientedVertices.end(), std::ostream_iterator<const Vector<3>>(file, ", "));
+    file.seekp(-2, std::ios_base::end);
+    file << "};" << std::endl;
+    file << "labels=Table[Text[i-1,vertices[[i]]],{i,1," << orientedVertices.size() << "}];" << std::endl << std::endl;
+    file << "(* List here faces in a format of {{vertexIdx1, vertexIdx2, ...}, {face2}, {face3}, ...} *)" << std::endl;
+    file << "faces={};" << std::endl << std::endl;
+    file << "facesCoord=Map[vertices[[#+1]]&,faces,{2}];" << std::endl;
+    file << "Graphics3D[Join[labels,{Polygon[facesCoord]}]]";
+
+    file.close();
+
+    std::cout << "[RegularSolid::printNotebookWithVertices] No faces provided. Vertices printed to goodluck.nb. ";
+    std::cout << "Use it to recognize faces manually." << std::endl;
 }
 
