@@ -47,6 +47,20 @@ int Plot::getIndex(double x) {
 }
 
 /**
+ * adds point to plot (histogram)
+ *
+ * @param x
+ */
+void Plot::add(double x) {
+	int i = this->getIndex(x);
+	if (i >= 0 && i < this->bins) {
+		this->yValues[i] += 0.0;
+		this->y2Values[i] += 0.0;
+		this->yCounter[i]++;
+	}
+}
+
+/**
  * adds point to plot. Values added for the same x will be averaged
  *
  * @param x
@@ -128,14 +142,14 @@ double** Plot::getAsHistogramPoints(double** points) {
 	int i;
 	for (i = 0; i < this->bins; i++) {
 		x = this->min + i * this->step + this->step / 2;
-		y = this->yValues[i];
+		y = this->yCounter[i];
 		points[i][0] = x;
 		points[i][1] = y;
 	}
 	return points;
 }
 
-int Plot::getTotalNumberOfPoints(){
+int Plot::getTotalNumberOfHistogramPoints(){
 	int res = 0;
 	for (int i = 0; i < this->bins; i++) {
 		res += this->yCounter[i];

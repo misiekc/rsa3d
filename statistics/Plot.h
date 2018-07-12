@@ -23,13 +23,14 @@ public:
 	virtual ~Plot();
 	double getMax();
 	int size();
+	void add(double x);
 	void add(double x, double y);
 	void addBetween(double x0, double x1, double y);
 	virtual double** getAsPoints(double **points);
 	virtual double** getAsPointsWithErrors(double **points);
 
 	double** getAsHistogramPoints(double **points);
-	int getTotalNumberOfPoints();
+	int getTotalNumberOfHistogramPoints();
 };
 
 #endif /* PLOT_H_ */

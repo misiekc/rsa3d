@@ -6,35 +6,30 @@
  */
 
 #include "Analyzer.h"
-#include "../shape/Shape.h"
 #include "../shape/ShapeFactory.h"
-#include "../shape/shapes/cuboid/Cuboid.h"
-#include "../../statistics/Plot.h"
-#include "../../statistics/LogPlot.h"
 #include "../../statistics/LinearRegression.h"
 #include "../../statistics/PowerRegression.h"
 #include "../../statistics/ASFRegression.h"
-#include "../PackingGenerator.h"
 #include <fstream>
 #include <iostream>
 #include <dirent.h>
 #include <cstring>
-#include <string>
-
 #include <cmath>
 
 
-void Analyzer::analyzeOrder(const Packing &packing, std::vector<Plot*> *order) {
+void Analyzer::analyzeOrder(const Packing &packing, NeighbourGrid<const RSAShape> &ng, std::vector<Plot*> *order) {
     if (!this->isOrderCalculable(packing.front()))
     	return;
 
   	double da[RSA_SPATIAL_DIMENSION];
    	double dMax = (*order)[0]->getMax(), dMax2 = dMax*dMax;
+   	std::vector<const RSAShape *> neighbours;
    	RSAVector posi, posj;
-    for(uint i=0; i<packing.size(); i++){
-    	posi = packing[i]->getPosition();
-    	for(uint j=i+1; j<packing.size(); j++){
-    		posj = packing[j]->getPosition();
+    for(const RSAShape *si : packing){
+    	posi = si->getPosition();
+    	ng.getNeighbours(&neighbours, posi);
+    	for(const RSAShape *sj : neighbours){
+    		posj = sj->getPosition();
     		double dist2 = 0.0;
     		for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
     			da[k] = fabs(posi[k] - posj[k]);
@@ -45,14 +40,39 @@ void Analyzer::analyzeOrder(const Packing &packing, std::vector<Plot*> *order) {
     				break;
     		}
     		if (dist2 < dMax2){
-                auto particle1 = dynamic_cast<const OrderCalculable*>(packing[i]);
-                auto particle2 = dynamic_cast<const OrderCalculable*>(packing[j]);
+                auto particle1 = dynamic_cast<const OrderCalculable*>(si);
+                auto particle2 = dynamic_cast<const OrderCalculable*>(sj);
                 std::vector<double> orderParameters = particle1->calculateOrder(particle2);
     			for(std::size_t k = 0; k < orderParameters.size(); k++)
                     (*order)[k]->add(std::sqrt(dist2), orderParameters[k]);
     		}
     	}
     }
+}
+
+void Analyzer::analyzeCorrelations(const Packing &packing, NeighbourGrid<const RSAShape> &ng, Plot *corr){
+	double da[RSA_SPATIAL_DIMENSION];
+	double dMax = corr->getMax(), dMax2 = dMax*dMax;
+   	std::vector<const RSAShape *> neighbours;
+   	RSAVector posi, posj;
+    for(const RSAShape *si : packing){
+    	posi = si->getPosition();
+    	ng.getNeighbours(&neighbours, posi);
+		for(const RSAShape* sj : neighbours){
+			posj = sj->getPosition();
+			double dist2 = 0.0;
+			for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
+				da[k] = fabs(posi[k] - posj[k]);
+				if (da[k]>0.5*this->params->surfaceSize)
+					da[k] = this->params->surfaceSize - da[k];
+				dist2 += da[k]*da[k];
+				if (da[k] > dMax)
+					break;
+			}
+			if (dist2 < dMax2)
+				corr->add(std::sqrt(dist2));
+		}
+	}
 }
 /*
 double Analyzer::getPetiodicDistance(const RSAShape *shape1, const RSAShape *shape2) const {
@@ -67,7 +87,7 @@ double Analyzer::getPetiodicDistance(const RSAShape *shape1, const RSAShape *sha
 }
 */
 
-void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor){
+void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, double surfaceFactor){
 	double lastt = 0.0;
 	for(uint i=0; i<packing.size(); i++){
 		double t = packing[i]->time;
@@ -84,28 +104,6 @@ void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, P
 	}
 	if (nvt != NULL)
 		nvt->addBetween(lastt, nvt->getMax()+1.0, packing.size());
-	if (corr!=NULL){
-		double da[RSA_SPATIAL_DIMENSION];
-		double dMax = corr->getMax(), dMax2 = dMax*dMax;
-		RSAVector posi, posj;
-		for(uint i=0; i<packing.size(); i++){
-			posi = packing[i]->getPosition();
-			for(uint j=i+1; j<packing.size(); j++){
-				posj = packing[j]->getPosition();
-				double dist2 = 0.0;
-				for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
-					da[k] = fabs(posi[k] - posj[k]);
-					if (da[k]>0.5*this->params->surfaceSize)
-						da[k] = this->params->surfaceSize - da[k];
-					dist2 += da[k]*da[k];
-					if (da[k] > dMax)
-						break;
-				}
-				if (dist2 < dMax2)
-					corr->add(std::sqrt(dist2), 1.0);
-			}
-		}
-	}
 }
 
 double * Analyzer::printNvT(LogPlot &nvt, std::string filename, double* fixedA, double surfaceFactor, double *res){
@@ -190,7 +188,7 @@ double * Analyzer::printASF(Plot &asf, std::string filename, int counter, double
 	return res;
 }
 
-void Analyzer::printCorrelations(Plot& correlations, std::string filename, int counter, double particleSize, double packingFraction){
+void Analyzer::printCorrelations(Plot& correlations, std::string filename){
 	double **correlationPoints = new double*[correlations.size()];
 	for(int i=0; i<correlations.size(); i++){
 		correlationPoints[i] = new double[2];
@@ -206,7 +204,7 @@ void Analyzer::printCorrelations(Plot& correlations, std::string filename, int c
 	else
 		return;
 
-	int totalPoints = correlations.getTotalNumberOfPoints();
+	int totalPoints = correlations.getTotalNumberOfHistogramPoints();
 
 	std::ofstream file(filename);
 
@@ -266,12 +264,13 @@ void Analyzer::printOrder(const std::vector<Plot*> &order, const std::string &fi
 }
 
 void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double particleSize){
+	const double correlationsRange = 10.0;
 	dirent *de;
 	char prefix[] = "packing";
 	LogPlot *nvt = new LogPlot(mintime, this->params->maxTime, 200);
 	Plot *asf = new Plot(0.0, 0.6, 200);
-	Plot *correlations = new Plot(0.0, 10.0, 200);
-	std::vector<Plot*> order = this->getFilledOrderVector();
+	Plot *correlations = new Plot(0.0, correlationsRange, 200);
+	std::vector<Plot*> order = this->getFilledOrderVector(correlationsRange);
 
 	double n = 0.0, n2 = 0.0;
 	int counter = 0;
@@ -286,8 +285,13 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 			n += packing.size();
 			n2 += packing.size()*packing.size();
 			counter++;
-			this->analyzePacking(packing, nvt, asf, correlations, particleSize/packingSize);
-			this->analyzeOrder(packing, &order);
+			this->analyzePacking(packing, nvt, asf, particleSize/packingSize);
+			NeighbourGrid<const RSAShape> ng(params->surfaceSize, correlationsRange);
+			for(const RSAShape *s: packing){
+				ng.add(s, s->getPosition());
+			}
+			this->analyzeCorrelations(packing, ng, correlations);
+			this->analyzeOrder(packing, ng, &order);
 			std::cout << ".";
 			std::cout.flush();
 		}
@@ -309,7 +313,7 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 
 	delete asf;
 
-	this->printCorrelations(*correlations, dirname + "_cor.txt", counter, particleSize, packingFraction);
+	this->printCorrelations(*correlations, dirname + "_cor.txt");
 	delete correlations;
 
 	this->printOrder(order, dirname + "_order.txt");
@@ -317,7 +321,7 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 		delete orderPlot;
 }
 
-std::vector<Plot*> Analyzer::getFilledOrderVector() const {
+std::vector<Plot*> Analyzer::getFilledOrderVector(double range) const {
     RND rnd;
     std::unique_ptr<RSAShape> shape(ShapeFactory::createShape(&rnd));
     if (!this->isOrderCalculable(shape.get()))
@@ -327,7 +331,7 @@ std::vector<Plot*> Analyzer::getFilledOrderVector() const {
     auto orderCalculable = dynamic_cast<OrderCalculable*>(shape.get());
     std::size_t paramNum = orderCalculable->getNumOfOrderParameters();
     for (std::size_t i = 0; i < paramNum; i++)
-        result.push_back(new Plot(0.0, 10.0, 200));
+        result.push_back(new Plot(0.0, range, 200));
     return result;
 }
 

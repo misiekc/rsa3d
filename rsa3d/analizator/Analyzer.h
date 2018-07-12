@@ -14,7 +14,9 @@
 
 #include "../../statistics/Plot.h"
 #include "../../statistics/LogPlot.h"
-#include "../Packing.h"
+#include "../PackingGenerator.h"
+#include "../NeighbourGrid.h"
+
 
 #include <string>
 #include <vector>
@@ -29,14 +31,15 @@ public:
 private:
 	Parameters *params;
 
-	void analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, Plot *corr, double surfaceFactor);
-	void analyzeOrder(const Packing &packing, std::vector<Plot*> *order);
+	void analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, double surfaceFactor);
+	void analyzeCorrelations(const Packing &packing, NeighbourGrid<const RSAShape> &ng, Plot *corr);
+	void analyzeOrder(const Packing &packing, NeighbourGrid<const RSAShape> &ng, std::vector<Plot*> *order);
 	double * printNvT(LogPlot &nvt, std::string filename, double *fixedA, double surfaceFactor, double *res);
 	double * printASF(Plot &asf, std::string filename, int counter, double packingFraction, double *res);
-	void printCorrelations(Plot &corr, std::string filename, int counter, double particleSize, double packingFraction);
+	void printCorrelations(Plot &corr, std::string filename);
 	void printOrder(const std::vector<Plot*> &order, const std::string &filename) const;
 //	double getPetiodicDistance(const RSAShape *shape1, const RSAShape *shape2) const;
-	std::vector<Plot *> getFilledOrderVector() const;
+	std::vector<Plot *> getFilledOrderVector(double range) const;
 	bool isOrderCalculable(const RSAShape *shape) const;
 };
 
