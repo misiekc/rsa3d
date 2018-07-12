@@ -45,7 +45,7 @@ PACKAGES = rsa3d/analizator/ \
            rsa3d/shape/ \
            rsa3d/shape/shapes/ \
            rsa3d/shape/shapes/cuboid/ \
-           rsa3d/shape/shapes/platonic_solid/ \
+           rsa3d/shape/shapes/regular_solid/ \
            rsa3d/shape/shapes/polygon/ \
            rsa3d/surfaces/ \
            statistics/ \
@@ -71,10 +71,10 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/shape/shapes/cuboid/OptimizedSATOverlap \
        rsa3d/shape/shapes/cuboid/SATOverlap \
        rsa3d/shape/shapes/cuboid/TriTriOverlap \
-       rsa3d/shape/shapes/platonic_solid/RegularDodecahedron \
-       rsa3d/shape/shapes/platonic_solid/RegularIcosahedron \
-       rsa3d/shape/shapes/platonic_solid/RegularOctahedron \
-       rsa3d/shape/shapes/platonic_solid/RegularTetrahedron \
+       rsa3d/shape/shapes/regular_solid/Dodecahedron \
+       rsa3d/shape/shapes/regular_solid/Icosahedron \
+       rsa3d/shape/shapes/regular_solid/Octahedron \
+       rsa3d/shape/shapes/regular_solid/Tetrahedron \
        rsa3d/shape/shapes/polygon/HBPolygon \
        rsa3d/shape/shapes/polygon/SBPolygon \
        rsa3d/shape/shapes/polygon/Polygon \

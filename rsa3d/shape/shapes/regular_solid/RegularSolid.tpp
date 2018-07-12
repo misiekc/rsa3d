@@ -10,29 +10,29 @@
 #include <iterator>
 
 template<typename SpecificSolid>
-std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedVertices;
+std::vector<Vector<3>> RegularSolid<SpecificSolid>::orientedVertices;
 template<typename SpecificSolid>
-std::vector<std::vector<std::size_t>> PlatonicSolid<SpecificSolid>::orientedFaces;
+std::vector<std::vector<std::size_t>> RegularSolid<SpecificSolid>::orientedFaces;
 template<typename SpecificSolid>
-std::vector<std::array<std::size_t, 3>> PlatonicSolid<SpecificSolid>::orientedTriangles;
+std::vector<std::array<std::size_t, 3>> RegularSolid<SpecificSolid>::orientedTriangles;
 template<typename SpecificSolid>
-std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedFaceAxes;
+std::vector<Vector<3>> RegularSolid<SpecificSolid>::orientedFaceAxes;
 template<typename SpecificSolid>
-std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedEdgeAxes;
+std::vector<Vector<3>> RegularSolid<SpecificSolid>::orientedEdgeAxes;
 template<typename SpecificSolid>
-std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedVertexAxes;
+std::vector<Vector<3>> RegularSolid<SpecificSolid>::orientedVertexAxes;
 template<typename SpecificSolid>
-std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::orientedMidedgeAxes;
+std::vector<Vector<3>> RegularSolid<SpecificSolid>::orientedMidedgeAxes;
 template<typename SpecificSolid>
-double PlatonicSolid<SpecificSolid>::normalizeFactor;
+double RegularSolid<SpecificSolid>::normalizeFactor;
 template<typename SpecificSolid>
-double PlatonicSolid<SpecificSolid>::circumsphereRadius;
+double RegularSolid<SpecificSolid>::circumsphereRadius;
 template<typename SpecificSolid>
-double PlatonicSolid<SpecificSolid>::insphereRadius;
+double RegularSolid<SpecificSolid>::insphereRadius;
 
 
 template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::initClass(const std::string &attr) {
+void RegularSolid<SpecificSolid>::initClass(const std::string &attr) {
     SpecificSolid::calculateStatic(attr);
     discoverTriangles();
     normalizeVolume();
@@ -51,7 +51,7 @@ void PlatonicSolid<SpecificSolid>::initClass(const std::string &attr) {
 }
 
 template<typename SpecificSolid>
-bool PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
+bool RegularSolid<SpecificSolid>::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
     SpecificSolid other = dynamic_cast<const SpecificSolid&>(*s);     // Make a copy
     this->applyBC(bc, &other);
     SATOverlap<SpecificSolid> satOverlap;
@@ -59,13 +59,13 @@ bool PlatonicSolid<SpecificSolid>::overlap(BoundaryConditions<3> *bc, const Shap
 }
 
 template<typename SpecificSolid>
-bool PlatonicSolid<SpecificSolid>::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
+bool RegularSolid<SpecificSolid>::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
                                               const Orientation<0> &orientation, double orientationRange) const {
     return (position - this->getPosition()).norm2() <= 4 * std::pow(SpecificSolid::insphereRadius, 2);
 }
 
 template<typename SpecificSolid>
-bool PlatonicSolid<SpecificSolid>::isSeparatingAxis(const Vector<3> &axis, const SpecificSolid &other,
+bool RegularSolid<SpecificSolid>::isSeparatingAxis(const Vector<3> &axis, const SpecificSolid &other,
                                                     const Vector<3> &distance) const {
     auto &thisSpecific = static_cast<const SpecificSolid&>(*this);
 
@@ -74,7 +74,7 @@ bool PlatonicSolid<SpecificSolid>::isSeparatingAxis(const Vector<3> &axis, const
 }
 
 template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::store(std::ostream &f) const {
+void RegularSolid<SpecificSolid>::store(std::ostream &f) const {
     Shape::store(f);
     double d;
     for (unsigned short i=0; i<3; i++){
@@ -86,7 +86,7 @@ void PlatonicSolid<SpecificSolid>::store(std::ostream &f) const {
 }
 
 template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::restore(std::istream &f) {
+void RegularSolid<SpecificSolid>::restore(std::istream &f) {
     Shape::restore(f);
     double d;
     Matrix<3, 3> orientation;
@@ -100,20 +100,20 @@ void PlatonicSolid<SpecificSolid>::restore(std::istream &f) {
 }
 
 template<typename SpecificSolid>
-const Matrix<3, 3> &PlatonicSolid<SpecificSolid>::getOrientationMatrix() const { return orientation; }
+const Matrix<3, 3> &RegularSolid<SpecificSolid>::getOrientationMatrix() const { return orientation; }
 
 template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::setOrientationMatrix(const Matrix<3, 3> &orientation) {
+void RegularSolid<SpecificSolid>::setOrientationMatrix(const Matrix<3, 3> &orientation) {
     this->orientation = orientation;
 }
 
 template<typename SpecificSolid>
-std::vector<std::string> PlatonicSolid<SpecificSolid>::getSupportedStrategies() const {
+std::vector<std::string> RegularSolid<SpecificSolid>::getSupportedStrategies() const {
     return std::vector<std::string>{"sat", "tri-tri"};
 }
 
 template<typename SpecificSolid>
-OverlapStrategy<3, 0> *PlatonicSolid<SpecificSolid>::createStrategy(const std::string &name) const {
+OverlapStrategy<3, 0> *RegularSolid<SpecificSolid>::createStrategy(const std::string &name) const {
     if (name == "sat")
         return new SATOverlap<SpecificSolid>;
     else if (name == "tri-tri")
@@ -123,7 +123,7 @@ OverlapStrategy<3, 0> *PlatonicSolid<SpecificSolid>::createStrategy(const std::s
 }
 
 template<typename SpecificSolid>
-std::string PlatonicSolid<SpecificSolid>::toWolfram() const {
+std::string RegularSolid<SpecificSolid>::toWolfram() const {
     auto faces = this->getFaces();
 
     std::stringstream result;
@@ -143,13 +143,13 @@ std::string PlatonicSolid<SpecificSolid>::toWolfram() const {
 }
 
 template<typename SpecificSolid>
-Shape<3, 0> *PlatonicSolid<SpecificSolid>::clone() const {
+Shape<3, 0> *RegularSolid<SpecificSolid>::clone() const {
     auto &thisSpecific = static_cast<const SpecificSolid&>(*this);
     return new SpecificSolid(thisSpecific);
 }
 
 template<typename SpecificSolid>
-std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::applyOrientation(const std::vector<Vector<3>> &vectors) const {
+std::vector<Vector<3>> RegularSolid<SpecificSolid>::applyOrientation(const std::vector<Vector<3>> &vectors) const {
     std::vector<Vector<3>> result;
     result.reserve(vectors.size());
     std::transform(vectors.begin(), vectors.end(), std::back_inserter(result), [this](const Vector<3> &vector) {
@@ -159,7 +159,7 @@ std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::applyOrientation(const std:
 }
 
 template<typename SpecificSolid>
-std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::applyPosition(const std::vector<Vector<3>> &vectors) const {
+std::vector<Vector<3>> RegularSolid<SpecificSolid>::applyPosition(const std::vector<Vector<3>> &vectors) const {
     std::vector<Vector<3>> result;
     result.reserve(vectors.size());
     std::transform(vectors.begin(), vectors.end(), std::back_inserter(result), [this](const Vector<3> &vector) {
@@ -169,22 +169,22 @@ std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::applyPosition(const std::ve
 }
 
 template<typename SpecificSolid>
-std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::getVertices() const { return applyPosition(orientedVertices); }
+std::vector<Vector<3>> RegularSolid<SpecificSolid>::getVertices() const { return applyPosition(orientedVertices); }
 
 template<typename SpecificSolid>
-std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::getEdgeAxes() const { return applyOrientation(orientedEdgeAxes); }
+std::vector<Vector<3>> RegularSolid<SpecificSolid>::getEdgeAxes() const { return applyOrientation(orientedEdgeAxes); }
 
 template<typename SpecificSolid>
-std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::getFaceAxes() const { return applyOrientation(orientedFaceAxes); }
+std::vector<Vector<3>> RegularSolid<SpecificSolid>::getFaceAxes() const { return applyOrientation(orientedFaceAxes); }
 
 template<typename SpecificSolid>
-std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::getVertexAxes() const { return applyOrientation(orientedVertexAxes); }
+std::vector<Vector<3>> RegularSolid<SpecificSolid>::getVertexAxes() const { return applyOrientation(orientedVertexAxes); }
 
 template<typename SpecificSolid>
-std::vector<Vector<3>> PlatonicSolid<SpecificSolid>::getMidegdeAxes() const { return applyOrientation(orientedMidedgeAxes); }
+std::vector<Vector<3>> RegularSolid<SpecificSolid>::getMidegdeAxes() const { return applyOrientation(orientedMidedgeAxes); }
 
 template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::discoverTriangles() {
+void RegularSolid<SpecificSolid>::discoverTriangles() {
     for (const auto &face : orientedFaces) {
         std::size_t numVertices = face.size();
         if (numVertices < 3)
@@ -192,12 +192,12 @@ void PlatonicSolid<SpecificSolid>::discoverTriangles() {
         for (std::size_t i = 2; i < numVertices; i++)
             orientedTriangles.push_back({{face[0], face[i - 1], face[i]}});
     }
-    std::cout << "[PlatonicSolid::discoverTriangles] Faces: " << orientedFaces.size();
+    std::cout << "[RegularSolid::discoverTriangles] Faces: " << orientedFaces.size();
     std::cout << ", triangles: " << orientedTriangles.size() << std::endl;
 }
 
 template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::normalizeVolume() {
+void RegularSolid<SpecificSolid>::normalizeVolume() {
     double volume = std::accumulate(orientedTriangles.begin(), orientedTriangles.end(), 0.,
             [](double volume, const std::array<std::size_t, 3> &triIdx) {
         intersection::tri3D tri{{orientedVertices[triIdx[0]], orientedVertices[triIdx[1]], orientedVertices[triIdx[2]]}};
@@ -209,11 +209,11 @@ void PlatonicSolid<SpecificSolid>::normalizeVolume() {
                    [](const Vector<3> &vertex) {
         return vertex * normalizeFactor;
     });
-    std::cout << "[PlatonicSolid::normalizeVolume] Normalizing factor: " << normalizeFactor << std::endl;
+    std::cout << "[RegularSolid::normalizeVolume] Normalizing factor: " << normalizeFactor << std::endl;
 }
 
 template<typename SpecificSolid>
-intersection::tri_polyh PlatonicSolid<SpecificSolid>::getTriangles() const {
+intersection::tri_polyh RegularSolid<SpecificSolid>::getTriangles() const {
     intersection::tri_polyh result;
     result.reserve(orientedTriangles.size());
 
@@ -226,7 +226,7 @@ intersection::tri_polyh PlatonicSolid<SpecificSolid>::getTriangles() const {
 }
 
 template<typename SpecificSolid>
-intersection::face_polyh PlatonicSolid<SpecificSolid>::getFaces() const {
+intersection::face_polyh RegularSolid<SpecificSolid>::getFaces() const {
     intersection::face_polyh result;
     result.reserve(orientedFaces.size());
 
@@ -244,7 +244,7 @@ intersection::face_polyh PlatonicSolid<SpecificSolid>::getFaces() const {
 }
 
 template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::calculateRadia() {
+void RegularSolid<SpecificSolid>::calculateRadia() {
     circumsphereRadius = 0;
     for (const auto &vertex : orientedVertices) {
         double vertexDistance = vertex.norm();
@@ -263,12 +263,12 @@ void PlatonicSolid<SpecificSolid>::calculateRadia() {
             insphereRadius = faceDistance;
     }
 
-    std::cout << "[PlatonicSolid::calculateRadia] Circumsphere radius: " << circumsphereRadius;
+    std::cout << "[RegularSolid::calculateRadia] Circumsphere radius: " << circumsphereRadius;
     std::cout << ", insphere radius: " << insphereRadius << std::endl;
 }
 
 template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::discoverAxes() {
+void RegularSolid<SpecificSolid>::discoverAxes() {
     for (const auto &vertex : orientedVertices) {
         Vector<3> axis = vertex / vertex.norm();
         addUniqueAxis(orientedVertexAxes, axis);
@@ -295,7 +295,7 @@ void PlatonicSolid<SpecificSolid>::discoverAxes() {
         }
     }
 
-    std::cout << "[PlatonicSolid::discoverAxes] Discovered ";
+    std::cout << "[RegularSolid::discoverAxes] Discovered ";
     std::cout << orientedFaceAxes.size() << " face axes, ";
     std::cout << orientedEdgeAxes.size() << " edge axes, ";
     std::cout << orientedVertexAxes.size() << " vertex axes, ";
@@ -303,7 +303,7 @@ void PlatonicSolid<SpecificSolid>::discoverAxes() {
 }
 
 template<typename SpecificSolid>
-void PlatonicSolid<SpecificSolid>::addUniqueAxis(std::vector<Vector<3>> &axes, const Vector<3> &newAxis) {
+void RegularSolid<SpecificSolid>::addUniqueAxis(std::vector<Vector<3>> &axes, const Vector<3> &newAxis) {
     auto axisCompare = [&newAxis](const Vector<3> axis) {
         double product = std::abs(axis * newAxis);
         return std::abs(product - 1) < 0.000000001;

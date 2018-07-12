@@ -2,8 +2,8 @@
 // Created by PKua on 21.04.18.
 //
 
-#ifndef RSA3D_PLATONICSOLID_H
-#define RSA3D_PLATONICSOLID_H
+#ifndef RSA3D_REGULARSOLID_H
+#define RSA3D_REGULARSOLID_H
 
 
 #include "../../../Matrix.h"
@@ -13,7 +13,7 @@
 
 // CRTP idiom
 template <typename SpecificSolid>
-class PlatonicSolid : public ConvexShape<3, 0>, public OverlapStrategyShape<3, 0> {
+class RegularSolid : public ConvexShape<3, 0>, public OverlapStrategyShape<3, 0> {
 private:
     Matrix<3, 3> orientation = Matrix<3, 3>::identity();
 
@@ -36,7 +36,7 @@ protected:
     static double circumsphereRadius;
     static double insphereRadius;
 
-    explicit PlatonicSolid(const Matrix<3, 3> &orientation) : orientation(orientation) {};
+    explicit RegularSolid(const Matrix<3, 3> &orientation) : orientation(orientation) {};
 
     inline std::vector<Vector<3>> applyOrientation(const std::vector<Vector<3>> &vectors) const;
     inline std::vector<Vector<3>> applyPosition(const std::vector<Vector<3>> &vectors) const;
@@ -47,7 +47,7 @@ public:
 
     bool overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const final;
     bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
-                    double orientationRange) const override;
+                     double orientationRange) const override;
     void store(std::ostream &f) const override;
     void restore(std::istream &f) override;
     std::string toWolfram() const override;
@@ -71,6 +71,6 @@ public:
                           const Vector<3> &distance) const;         /* CRTP virtual */
 };
 
-#include "PlatonicSolid.tpp"
+#include "RegularSolid.tpp"
 
-#endif //RSA3D_PLATONICSOLID_H
+#endif //RSA3D_SOLID_H

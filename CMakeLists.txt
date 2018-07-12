@@ -11,14 +11,14 @@ set(MAIN_SOURCE
         rsa3d/shape/shapes/cuboid/OptimizedSATOverlap.cpp
         rsa3d/shape/shapes/cuboid/SATOverlap.cpp
         rsa3d/shape/shapes/cuboid/TriTriOverlap.cpp
-        rsa3d/shape/shapes/platonic_solid/PlatonicSolid.h
-        rsa3d/shape/shapes/platonic_solid/PlatonicSolid.tpp
-        rsa3d/shape/shapes/platonic_solid/RegularTetrahedron.cpp
-        rsa3d/shape/shapes/platonic_solid/RegularOctahedron.cpp
-        rsa3d/shape/shapes/platonic_solid/RegularDodecahedron.cpp
-        rsa3d/shape/shapes/platonic_solid/RegularIcosahedron.cpp
-        rsa3d/shape/shapes/platonic_solid/SATOverlap.h
-        rsa3d/shape/shapes/platonic_solid/TriTriOverlap.h
+        rsa3d/shape/shapes/regular_solid/RegularSolid.h
+        rsa3d/shape/shapes/regular_solid/RegularSolid.tpp
+        rsa3d/shape/shapes/regular_solid/Tetrahedron.cpp
+        rsa3d/shape/shapes/regular_solid/Octahedron.cpp
+        rsa3d/shape/shapes/regular_solid/Dodecahedron.cpp
+        rsa3d/shape/shapes/regular_solid/Icosahedron.cpp
+        rsa3d/shape/shapes/regular_solid/SATOverlap.h
+        rsa3d/shape/shapes/regular_solid/TriTriOverlap.h
         rsa3d/shape/shapes/polygon/HBPolygon.cpp
         rsa3d/shape/shapes/polygon/SBPolygon.cpp
         rsa3d/shape/shapes/Ellipse.cpp

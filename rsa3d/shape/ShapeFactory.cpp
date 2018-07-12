@@ -18,10 +18,10 @@
 #include "shapes/polygon/Polygon.h"
 #include "shapes/polygon/SBPolygon.h"
 #include "shapes/polygon/HBPolygon.h"
-#include "shapes/platonic_solid/RegularDodecahedron.h"
-#include "shapes/platonic_solid/RegularIcosahedron.h"
-#include "shapes/platonic_solid/RegularOctahedron.h"
-#include "shapes/platonic_solid/RegularTetrahedron.h"
+#include "shapes/regular_solid/Dodecahedron.h"
+#include "shapes/regular_solid/Icosahedron.h"
+#include "shapes/regular_solid/Octahedron.h"
+#include "shapes/regular_solid/Tetrahedron.h"
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
 
@@ -75,17 +75,17 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
         if (sClass == "Cuboid") {
             Cuboid::initClass(attr);
             return;
-        } else if (sClass == "RegularTetrahedron") {
-            PlatonicSolid<RegularTetrahedron>::initClass(attr);
+        } else if (sClass == "Tetrahedron") {
+            RegularSolid<Tetrahedron>::initClass(attr);
             return;
-        } else if (sClass == "RegularOctahedron") {
-            PlatonicSolid<RegularOctahedron>::initClass(attr);
+        } else if (sClass == "Octahedron") {
+            RegularSolid<Octahedron>::initClass(attr);
             return;
-        } else if (sClass == "RegularDodecahedron") {
-            PlatonicSolid<RegularDodecahedron>::initClass(attr);
+        } else if (sClass == "Dodecahedron") {
+            RegularSolid<Dodecahedron>::initClass(attr);
             return;
-        } else if (sClass == "RegularIcosahedron") {
-            PlatonicSolid<RegularIcosahedron>::initClass(attr);
+        } else if (sClass == "Icosahedron") {
+            RegularSolid<Icosahedron>::initClass(attr);
             return;
         }
     #endif
