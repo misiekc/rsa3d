@@ -47,8 +47,6 @@ protected:
     inline std::vector<Vector<3>> applyPosition(const std::vector<Vector<3>> &vectors) const;
     void setOrientationMatrix(const Matrix<3, 3> &orientation);
 
-    bool isSeparatingAxisUnoptimized(const Vector<3> &axis, const SpecificSolid &other, const Vector<3> &distance) const;
-
 public:
     static void initClass(const std::string &attr);
 
@@ -74,8 +72,7 @@ public:
     const Matrix<3, 3> &getOrientationMatrix() const;
 
     /* double projectionHalfsize(const Vector<3> &axis) const; */   /* CRTP pure virtual */
-    bool isSeparatingAxis(const Vector<3> &axis, const SpecificSolid &other,
-                          const Vector<3> &distance) const;         /* CRTP virtual */
+
     static void printFaceHelperNotebook();
 };
 

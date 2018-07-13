@@ -73,15 +73,6 @@ bool RegularSolid<SpecificSolid>::pointInside(BoundaryConditions<3> *bc, const V
 }
 
 template<typename SpecificSolid>
-bool RegularSolid<SpecificSolid>::isSeparatingAxis(const Vector<3> &axis, const SpecificSolid &other,
-                                                    const Vector<3> &distance) const {
-    auto &thisSpecific = static_cast<const SpecificSolid&>(*this);
-
-    double distanceProj = std::abs(distance * axis);
-    return distanceProj > thisSpecific.projectionHalfsize(axis) + other.projectionHalfsize(axis);
-}
-
-template<typename SpecificSolid>
 void RegularSolid<SpecificSolid>::store(std::ostream &f) const {
     Shape::store(f);
     double d;
@@ -340,29 +331,4 @@ void RegularSolid<SpecificSolid>::printFaceHelperNotebook() {
 
     std::cout << "[RegularSolid::printFaceHelperNotebook] No faces provided. Vertices printed to goodluck.nb. ";
     std::cout << "Use it to recognize faces manually." << std::endl;
-}
-
-template<typename SpecificSolid>
-typename RegularSolid<SpecificSolid>::interval RegularSolid<SpecificSolid>::getProjection(const Vector<3> & axis) const {
-    // Find enpoints of polyhedron projection (multiplied by unknown but const for axis factor)
-    interval projInterval = {std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
-    auto vertices = this->getVertices();
-    for (const auto &v : vertices) {
-        double proj = v * axis;
-        if (proj < projInterval.first)
-            projInterval.first = proj;
-        if (proj > projInterval.second)
-            projInterval.second = proj;
-    }
-    return projInterval;
-}
-
-template<typename SpecificSolid>
-bool RegularSolid<SpecificSolid>::isSeparatingAxisUnoptimized(const Vector<3> &axis, const SpecificSolid &other,
-                                                              const Vector<3> &distance) const {
-    interval thisInterval = this->getProjection(axis);
-    interval otherInterval = other.getProjection(axis);
-
-    // TODO epsilon needed
-    return std::min(thisInterval.second, otherInterval.second) < std::max(thisInterval.first, otherInterval.first);
 }

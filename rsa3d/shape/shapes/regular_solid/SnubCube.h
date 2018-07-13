@@ -20,8 +20,9 @@ public:
     explicit SnubCube(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}
 
     double projectionHalfsize(const Vector<3> &axis) const;         /* CRTP implement */
-    bool isSeparatingAxis(const Vector<3> &axis, const SnubCube &other,
-                          const Vector<3> &distance) const;     /* CRTP override */
+
+    OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
+    bool overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const override;
 };
 
 

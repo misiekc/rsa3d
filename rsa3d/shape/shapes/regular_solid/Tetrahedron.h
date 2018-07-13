@@ -18,11 +18,11 @@ public:
     explicit Tetrahedron(const Matrix<3, 3> &orientation) : RegularSolid<Tetrahedron>{orientation} {};
 
     double projectionHalfsize(const Vector<3> &axis) const;     /* CRTP implement */
-    bool isSeparatingAxis(const Vector<3> &axis, const Tetrahedron &other,
-                          const Vector<3> &distance) const;     /* CRTP override */
 
     bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
                      double orientationRange) const override;
+    OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
+    bool overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const override;
 
 };
 

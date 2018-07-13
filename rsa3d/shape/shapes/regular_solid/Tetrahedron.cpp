@@ -4,6 +4,7 @@
 
 #include "Tetrahedron.h"
 #include "RegularSolid.h"
+#include "UnoptimizedSATOverlap.h"
 
 
 void Tetrahedron::calculateStatic(const std::string &attr) {
@@ -16,10 +17,6 @@ void Tetrahedron::calculateStatic(const std::string &attr) {
 
 double Tetrahedron::projectionHalfsize(const Vector<3> &axis) const {
     throw std::runtime_error("unimplemented");
-}
-
-bool Tetrahedron::isSeparatingAxis(const Vector<3> &axis, const Tetrahedron &other, const Vector<3> &distance) const {
-    return this->isSeparatingAxisUnoptimized(axis, other, distance);
 }
 
 bool Tetrahedron::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
@@ -40,5 +37,19 @@ bool Tetrahedron::pointInside(BoundaryConditions<3> *bc, const Vector<3> &positi
                 return true;
 
     return false;
+}
+
+OverlapStrategy<3, 0> *Tetrahedron::createStrategy(const std::string &name) const {
+    if (name == "sat")
+        return new UnoptimizedSATOverlap<Tetrahedron>();
+    else
+        return RegularSolid<Tetrahedron>::createStrategy(name);
+}
+
+bool Tetrahedron::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
+    Tetrahedron other = dynamic_cast<const Tetrahedron&>(*s);     // Make a copy
+    this->applyBC(bc, &other);
+    UnoptimizedSATOverlap<Tetrahedron> satOverlap;
+    return satOverlap.overlap(this, &other);
 }
 
