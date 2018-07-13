@@ -12,7 +12,7 @@ class Plot {
 protected:
 	double* yValues;
 	double* y2Values;
-	int* yCounter;
+	unsigned long int* yCounter;
 	int bins;
 	double min, max, step;
 
@@ -30,7 +30,7 @@ public:
 	virtual double** getAsPointsWithErrors(double **points);
 
 	double** getAsHistogramPoints(double **points);
-	int getTotalNumberOfHistogramPoints();
+	unsigned long int getTotalNumberOfHistogramPoints();
 };
 
 #endif /* PLOT_H_ */

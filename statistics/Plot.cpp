@@ -13,7 +13,7 @@ Plot::Plot(double min, double max, int bins) {
 
 	this->yValues = new double[bins];
 	this->y2Values = new double[bins];
-	this->yCounter = new int[bins];
+	this->yCounter = new unsigned long int[bins];
 
 	for(int i=0; i<bins; i++){
 		this->yValues[i] = 0.0;
@@ -149,8 +149,8 @@ double** Plot::getAsHistogramPoints(double** points) {
 	return points;
 }
 
-int Plot::getTotalNumberOfHistogramPoints(){
-	int res = 0;
+unsigned long int Plot::getTotalNumberOfHistogramPoints(){
+	unsigned long int res = 0;
 	for (int i = 0; i < this->bins; i++) {
 		res += this->yCounter[i];
 	}

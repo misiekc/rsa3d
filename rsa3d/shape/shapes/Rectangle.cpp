@@ -371,7 +371,7 @@ std::vector<double> Rectangle::calculateOrder(const OrderCalculable *other) cons
     std::vector<double> result(2);
 
     result[0] = 4.0*(cosa*cosa*cosa*cosa + sina*sina*sina*sina) - 3.0;
-    result[1] = 0.5*(3*cosa*cosa - 1.0);
+    result[1] = 2.0*cosa*cosa - 1.0;
 
     return result;
 }

@@ -23,13 +23,14 @@ void Analyzer::analyzeOrder(const Packing &packing, NeighbourGrid<const RSAShape
 
   	double da[RSA_SPATIAL_DIMENSION];
    	double dMax = (*order)[0]->getMax(), dMax2 = dMax*dMax;
-   	std::vector<const RSAShape *> neighbours;
-   	RSAVector posi, posj;
-    for(const RSAShape *si : packing){
-    	posi = si->getPosition();
+   	_OMP_PARALLEL_FOR
+   	for(size_t i=0; i<packing.size(); i++){
+   		const RSAShape *si = packing[i];
+    	RSAVector posi = si->getPosition();
+   	   	std::vector<const RSAShape *> neighbours;
     	ng.getNeighbours(&neighbours, posi);
     	for(const RSAShape *sj : neighbours){
-    		posj = sj->getPosition();
+    		RSAVector posj = sj->getPosition();
     		double dist2 = 0.0;
     		for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
     			da[k] = fabs(posi[k] - posj[k]);
@@ -43,8 +44,10 @@ void Analyzer::analyzeOrder(const Packing &packing, NeighbourGrid<const RSAShape
                 auto particle1 = dynamic_cast<const OrderCalculable*>(si);
                 auto particle2 = dynamic_cast<const OrderCalculable*>(sj);
                 std::vector<double> orderParameters = particle1->calculateOrder(particle2);
-    			for(std::size_t k = 0; k < orderParameters.size(); k++)
+    			for(std::size_t k = 0; k < orderParameters.size(); k++){
+    				_OMP_CRITICAL(order)
                     (*order)[k]->add(std::sqrt(dist2), orderParameters[k]);
+    			}
     		}
     	}
     }
@@ -53,13 +56,14 @@ void Analyzer::analyzeOrder(const Packing &packing, NeighbourGrid<const RSAShape
 void Analyzer::analyzeCorrelations(const Packing &packing, NeighbourGrid<const RSAShape> &ng, Plot *corr){
 	double da[RSA_SPATIAL_DIMENSION];
 	double dMax = corr->getMax(), dMax2 = dMax*dMax;
-   	std::vector<const RSAShape *> neighbours;
-   	RSAVector posi, posj;
-    for(const RSAShape *si : packing){
-    	posi = si->getPosition();
+	_OMP_PARALLEL_FOR
+   	for(size_t i=0; i<packing.size(); i++){
+   		const RSAShape *si = packing[i];
+    	RSAVector posi = si->getPosition();
+       	std::vector<const RSAShape *> neighbours;
     	ng.getNeighbours(&neighbours, posi);
 		for(const RSAShape* sj : neighbours){
-			posj = sj->getPosition();
+			RSAVector posj = sj->getPosition();
 			double dist2 = 0.0;
 			for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
 				da[k] = fabs(posi[k] - posj[k]);
@@ -69,8 +73,10 @@ void Analyzer::analyzeCorrelations(const Packing &packing, NeighbourGrid<const R
 				if (da[k] > dMax)
 					break;
 			}
-			if (dist2 < dMax2)
+			if (dist2 < dMax2){
+				_OMP_CRITICAL(correlations)
 				corr->add(std::sqrt(dist2));
+			}
 		}
 	}
 }
@@ -89,7 +95,7 @@ double Analyzer::getPetiodicDistance(const RSAShape *shape1, const RSAShape *sha
 
 void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, double surfaceFactor){
 	double lastt = 0.0;
-	for(uint i=0; i<packing.size(); i++){
+	for(size_t i=0; i<packing.size(); i++){
 		double t = packing[i]->time;
 		if (nvt != NULL)
 			nvt->addBetween(lastt, t, i);
@@ -204,7 +210,7 @@ void Analyzer::printCorrelations(Plot& correlations, std::string filename){
 	else
 		return;
 
-	int totalPoints = correlations.getTotalNumberOfHistogramPoints();
+	unsigned long int totalPoints = correlations.getTotalNumberOfHistogramPoints();
 
 	std::ofstream file(filename);
 
