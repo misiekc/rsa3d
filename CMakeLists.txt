@@ -18,6 +18,7 @@ set(MAIN_SOURCE
         rsa3d/shape/shapes/regular_solid/Octahedron.cpp
         rsa3d/shape/shapes/regular_solid/RegularSolid.h
         rsa3d/shape/shapes/regular_solid/RegularSolid.tpp
+        rsa3d/shape/shapes/regular_solid/Rhombicosidodecahedron.cpp
         rsa3d/shape/shapes/regular_solid/Rhombicuboctahedron.cpp
         rsa3d/shape/shapes/regular_solid/SATOverlap.h
         rsa3d/shape/shapes/regular_solid/SnubCube.cpp

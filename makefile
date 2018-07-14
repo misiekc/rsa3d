@@ -76,6 +76,7 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/shape/shapes/regular_solid/Icosahedron \
        rsa3d/shape/shapes/regular_solid/Icosidodecahedron \
        rsa3d/shape/shapes/regular_solid/Octahedron \
+       rsa3d/shape/shapes/regular_solid/Rhombicosidodecahedron.cpp \
        rsa3d/shape/shapes/regular_solid/Rhombicuboctahedron.cpp \
        rsa3d/shape/shapes/regular_solid/Tetrahedron \
        rsa3d/shape/shapes/regular_solid/TruncatedCube \

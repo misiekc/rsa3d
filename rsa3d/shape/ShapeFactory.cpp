@@ -31,6 +31,7 @@
 #include "shapes/regular_solid/Icosidodecahedron.h"
 #include "shapes/regular_solid/TruncatedDodecahedron.h"
 #include "shapes/regular_solid/TruncatedIcosahedron.h"
+#include "shapes/regular_solid/Rhombicosidodecahedron.h"
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
 
@@ -122,6 +123,9 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             return;
         } else if (sClass == "TruncatedIcosahedron") {
             RegularSolid<TruncatedIcosahedron>::initClass(attr);
+            return;
+        } else if (sClass == "Rhombicosidodecahedron") {
+            RegularSolid<Rhombicosidodecahedron>::initClass(attr);
             return;
         }
     #endif
