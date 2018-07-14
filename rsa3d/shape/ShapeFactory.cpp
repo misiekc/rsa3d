@@ -30,6 +30,7 @@
 #include "shapes/regular_solid/SnubCube.h"
 #include "shapes/regular_solid/Icosidodecahedron.h"
 #include "shapes/regular_solid/TruncatedDodecahedron.h"
+#include "shapes/regular_solid/TruncatedIcosahedron.h"
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
 
@@ -118,6 +119,9 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             return;
         } else if (sClass == "TruncatedDodecahedron") {
             RegularSolid<TruncatedDodecahedron>::initClass(attr);
+            return;
+        } else if (sClass == "TruncatedIcosahedron") {
+            RegularSolid<TruncatedIcosahedron>::initClass(attr);
             return;
         }
     #endif

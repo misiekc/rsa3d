@@ -26,6 +26,7 @@ set(MAIN_SOURCE
         rsa3d/shape/shapes/regular_solid/TruncatedCube.cpp
         rsa3d/shape/shapes/regular_solid/TruncatedCuboctahedron.cpp
         rsa3d/shape/shapes/regular_solid/TruncatedDodecahedron.cpp
+        rsa3d/shape/shapes/regular_solid/TruncatedIcosahedron.cpp
         rsa3d/shape/shapes/regular_solid/TruncatedOctahedron.cpp
         rsa3d/shape/shapes/regular_solid/UnoptimizedSATOverlap.h
         rsa3d/shape/shapes/polygon/HBPolygon.cpp
