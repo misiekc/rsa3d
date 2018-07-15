@@ -30,6 +30,8 @@ template<typename SpecificSolid>
 double RegularSolid<SpecificSolid>::circumsphereRadius;
 template<typename SpecificSolid>
 double RegularSolid<SpecificSolid>::insphereRadius;
+template<typename SpecificSolid>
+const SATOverlap<SpecificSolid> RegularSolid<SpecificSolid>::overlapStrategy{};
 
 
 template<typename SpecificSolid>
@@ -60,10 +62,16 @@ void RegularSolid<SpecificSolid>::initClass(const std::string &attr) {
 
 template<typename SpecificSolid>
 bool RegularSolid<SpecificSolid>::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
-    SpecificSolid other = dynamic_cast<const SpecificSolid&>(*s);     // Make a copy
+    SpecificSolid other = dynamic_cast<const SpecificSolid &>(*s);     // Make a copy
     this->applyBC(bc, &other);
-    SATOverlap<SpecificSolid> satOverlap;
-    return satOverlap.overlap(this, &other);
+
+    double distance2 = (this->getPosition() - other.getPosition()).norm2();
+    if (distance2 > 4 * circumsphereRadius * circumsphereRadius)
+        return false;
+    else if (distance2 < 4 * insphereRadius * insphereRadius)
+        return true;
+    else
+        return SpecificSolid::overlapStrategy.overlap(this, &other);
 }
 
 template<typename SpecificSolid>

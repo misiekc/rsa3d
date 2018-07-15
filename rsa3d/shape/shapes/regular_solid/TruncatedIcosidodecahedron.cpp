@@ -55,7 +55,7 @@ void TruncatedIcosidodecahedron::calculateStatic(const std::string &attr) {
              {{-g, -3, gt2}}, {{-g, 3, -gt2}}, {{g, -3, -gt2}}, {{-g, -3, -gt2}},
              {{ 3,  gt2, g}}, { {3, gt2, -g}}, {{3, -gt2,  g}}, {{-3,  gt2,  g}},
              {{-3, -gt2, g}}, {{-3, gt2, -g}}, {{3, -gt2, -g}}, {{-3, -gt2, -g}},
-             {{ gt2,  g, 3}}, {{  gt2, g, -3}}, {{gt2, -g, 3}}, {{-gt2,  g,  3}},
+             {{ gt2,  g, 3}}, {{ gt2, g, -3}}, {{gt2, -g,  3}}, {{-gt2,  g,  3}},
              {{-gt2, -g, 3}}, {{-gt2, g, -3}}, {{gt2, -g, -3}}, {{-gt2, -g, -3}}};
 
     RegularSolid<TruncatedIcosidodecahedron>::orientedFaces =

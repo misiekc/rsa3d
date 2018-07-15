@@ -5,7 +5,9 @@
 #include "Tetrahedron.h"
 #include "RegularSolid.h"
 #include "UnoptimizedSATOverlap.h"
+#include "TriTriOverlap.h"
 
+const TriTriOverlap<Tetrahedron> Tetrahedron::overlapStrategy{};
 
 void Tetrahedron::calculateStatic(const std::string &attr) {
     RegularSolid<Tetrahedron>::orientedVertices =
@@ -44,12 +46,5 @@ OverlapStrategy<3, 0> *Tetrahedron::createStrategy(const std::string &name) cons
         return new UnoptimizedSATOverlap<Tetrahedron>();
     else
         return RegularSolid<Tetrahedron>::createStrategy(name);
-}
-
-bool Tetrahedron::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
-    Tetrahedron other = dynamic_cast<const Tetrahedron&>(*s);     // Make a copy
-    this->applyBC(bc, &other);
-    UnoptimizedSATOverlap<Tetrahedron> satOverlap;
-    return satOverlap.overlap(this, &other);
 }
 

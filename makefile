@@ -71,20 +71,23 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/shape/shapes/cuboid/OptimizedSATOverlap \
        rsa3d/shape/shapes/cuboid/SATOverlap \
        rsa3d/shape/shapes/cuboid/TriTriOverlap \
-       rsa3d/shape/shapes/regular_solid/Cubeoctahedron \
+       rsa3d/shape/shapes/regular_solid/Cuboctahedron \
        rsa3d/shape/shapes/regular_solid/Dodecahedron \
        rsa3d/shape/shapes/regular_solid/Icosahedron \
        rsa3d/shape/shapes/regular_solid/Icosidodecahedron \
        rsa3d/shape/shapes/regular_solid/Octahedron \
-       rsa3d/shape/shapes/regular_solid/Rhombicosidodecahedron.cpp \
-       rsa3d/shape/shapes/regular_solid/Rhombicuboctahedron.cpp \
+       rsa3d/shape/shapes/regular_solid/Rhombicosidodecahedron \
+       rsa3d/shape/shapes/regular_solid/Rhombicuboctahedron \
+       rsa3d/shape/shapes/regular_solid/SnubCube \
+       rsa3d/shape/shapes/regular_solid/SnubDodecahedron \
        rsa3d/shape/shapes/regular_solid/Tetrahedron \
        rsa3d/shape/shapes/regular_solid/TruncatedCube \
        rsa3d/shape/shapes/regular_solid/TruncatedCuboctahedron \
        rsa3d/shape/shapes/regular_solid/TruncatedDodecahedron \
        rsa3d/shape/shapes/regular_solid/TruncatedIcosahedron \
-       rsa3d/shape/shapes/regular_solid/TruncatedIcosidodecahedron.cpp \
+       rsa3d/shape/shapes/regular_solid/TruncatedIcosidodecahedron \
        rsa3d/shape/shapes/regular_solid/TruncatedOctahedron \
+       rsa3d/shape/shapes/regular_solid/TruncatedTetrahedron \
        rsa3d/shape/shapes/polygon/HBPolygon \
        rsa3d/shape/shapes/polygon/SBPolygon \
        rsa3d/shape/shapes/polygon/Polygon \

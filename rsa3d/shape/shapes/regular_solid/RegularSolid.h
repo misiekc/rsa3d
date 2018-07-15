@@ -10,6 +10,7 @@
 #include "../../OverlapStrategyShape.h"
 #include "../../../Intersection.h"
 #include "../../ConvexShape.h"
+#include "SATOverlap.h"
 
 // CRTP idiom
 template <typename SpecificSolid>
@@ -26,8 +27,6 @@ private:
     static void discoverAxes();
     static void addUniqueAxis(std::vector<Vector<3>> &axes, const Vector<3> &newAxis);
 
-    interval getProjection(const Vector<3> & axis) const;
-
 protected:
     static std::vector<Vector<3>> orientedVertices;
     static std::vector<std::vector<std::size_t>> orientedFaces;
@@ -40,6 +39,8 @@ protected:
     static double normalizeFactor;
     static double circumsphereRadius;
     static double insphereRadius;
+
+    static const SATOverlap<SpecificSolid> overlapStrategy;   // SATOverlap is the default
 
     explicit RegularSolid(const Matrix<3, 3> &orientation) : orientation(orientation) {};
 

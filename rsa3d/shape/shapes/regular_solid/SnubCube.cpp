@@ -5,6 +5,8 @@
 #include "SnubCube.h"
 #include "UnoptimizedSATOverlap.h"
 
+const UnoptimizedSATOverlap<SnubCube> SnubCube::overlapStrategy{};
+
 void SnubCube::calculateStatic(const std::string &attr) {
     const double t = SnubCube::tribonacciConstant;
     const double u = 1/t;
@@ -37,11 +39,4 @@ OverlapStrategy<3, 0> *SnubCube::createStrategy(const std::string &name) const {
         return new UnoptimizedSATOverlap<SnubCube>();
     else
         return RegularSolid<SnubCube>::createStrategy(name);
-}
-
-bool SnubCube::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
-    SnubCube other = dynamic_cast<const SnubCube&>(*s);     // Make a copy
-    this->applyBC(bc, &other);
-    UnoptimizedSATOverlap<SnubCube> satOverlap;
-    return satOverlap.overlap(this, &other);
 }

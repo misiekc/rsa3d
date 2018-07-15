@@ -22,6 +22,7 @@
 #include "shapes/regular_solid/Icosahedron.h"
 #include "shapes/regular_solid/Octahedron.h"
 #include "shapes/regular_solid/Tetrahedron.h"
+#include "shapes/regular_solid/TruncatedTetrahedron.h"
 #include "shapes/regular_solid/Cuboctahedron.h"
 #include "shapes/regular_solid/TruncatedCube.h"
 #include "shapes/regular_solid/TruncatedOctahedron.h"
@@ -33,6 +34,7 @@
 #include "shapes/regular_solid/TruncatedIcosahedron.h"
 #include "shapes/regular_solid/Rhombicosidodecahedron.h"
 #include "shapes/regular_solid/TruncatedIcosidodecahedron.h"
+#include "shapes/regular_solid/SnubDodecahedron.h"
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
 
@@ -89,6 +91,9 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
         } else if (sClass == "Tetrahedron") {
             RegularSolid<Tetrahedron>::initClass(attr);
             return;
+        } else if (sClass == "Cube") {
+            Cuboid::initClass("3 1 1 1");
+            return;
         } else if (sClass == "Octahedron") {
             RegularSolid<Octahedron>::initClass(attr);
             return;
@@ -97,6 +102,9 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             return;
         } else if (sClass == "Icosahedron") {
             RegularSolid<Icosahedron>::initClass(attr);
+            return;
+        } else if (sClass == "TruncatedTetrahedron") {
+            RegularSolid<TruncatedTetrahedron>::initClass(attr);
             return;
         } else if (sClass == "Cuboctahedron") {
             RegularSolid<Cuboctahedron>::initClass(attr);
@@ -130,6 +138,9 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             return;
         } else if (sClass == "TruncatedIcosidodecahedron") {
             RegularSolid<TruncatedIcosidodecahedron>::initClass(attr);
+            return;
+        } else if (sClass == "SnubDodecahedron") {
+            RegularSolid<SnubDodecahedron>::initClass(attr);
             return;
         }
     #endif

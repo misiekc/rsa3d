@@ -12,6 +12,8 @@ class Tetrahedron : public RegularSolid<Tetrahedron> {
 private:
     friend RegularSolid<Tetrahedron>;
 
+    const static TriTriOverlap<Tetrahedron> overlapStrategy;
+
     static void calculateStatic(const std::string &attr);
 
 public:
@@ -22,7 +24,6 @@ public:
     bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
                      double orientationRange) const override;
     OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
-    bool overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const override;
 
 };
 
