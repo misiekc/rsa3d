@@ -12,23 +12,23 @@ void TruncatedDodecahedron::calculateStatic(const std::string &attr) {
     double gp1 = goldRatio + 1;
 
     RegularSolid<TruncatedDodecahedron>::orientedVertices =
-            {Vector<3>{{0, gi, gp2}}, Vector<3>{{0, gi, -gp2}}, Vector<3>{{0, -gi, gp2}}, Vector<3>{{0, -gi, -gp2}},
-             Vector<3>{{gi, gp2, 0}}, Vector<3>{{gi, -gp2, 0}}, Vector<3>{{-gi, gp2, 0}}, Vector<3>{{-gi, -gp2, 0}},
-             Vector<3>{{gp2, 0, gi}}, Vector<3>{{gp2, 0, -gi}}, Vector<3>{{-gp2, 0, gi}}, Vector<3>{{-gp2, 0, -gi}},
+            {{{0, gi, gp2}}, {{0, gi, -gp2}}, {{0, -gi, gp2}}, {{0, -gi, -gp2}},
+             {{gi, gp2, 0}}, {{gi, -gp2, 0}}, {{-gi, gp2, 0}}, {{-gi, -gp2, 0}},
+             {{gp2, 0, gi}}, {{gp2, 0, -gi}}, {{-gp2, 0, gi}}, {{-gp2, 0, -gi}},
 
-             Vector<3>{{gi, g, gt2}}, Vector<3>{{gi, g, -gt2}}, Vector<3>{{gi, -g, gt2}}, Vector<3>{{-gi, g, gt2}},
-             Vector<3>{{-gi, -g, gt2}}, Vector<3>{{-gi, g, -gt2}}, Vector<3>{{gi, -g, -gt2}}, Vector<3>{{-gi, -g, -gt2}},
-             Vector<3>{{g, gt2, gi}}, Vector<3>{{g, gt2, -gi}}, Vector<3>{{g, -gt2, gi}}, Vector<3>{{-g, gt2, gi}},
-             Vector<3>{{-g, -gt2, gi}}, Vector<3>{{-g, gt2, -gi}}, Vector<3>{{g, -gt2, -gi}}, Vector<3>{{-g, -gt2, -gi}},
-             Vector<3>{{gt2, gi, g}}, Vector<3>{{gt2, gi, -g}}, Vector<3>{{gt2, -gi, g}}, Vector<3>{{-gt2, gi, g}},
-             Vector<3>{{-gt2, -gi, g}}, Vector<3>{{-gt2, gi, -g}}, Vector<3>{{gt2, -gi, -g}}, Vector<3>{{-gt2, -gi, -g}},
+             {{ gi,  g, gt2}}, {{ gi, g, -gt2}}, {{gi, -g,  gt2}}, {{-gi,  g,  gt2}},
+             {{-gi, -g, gt2}}, {{-gi, g, -gt2}}, {{gi, -g, -gt2}}, {{-gi, -g, -gt2}},
+             {{ g,  gt2, gi}}, {{ g, gt2, -gi}}, {{g, -gt2,  gi}}, {{-g,  gt2,  gi}},
+             {{-g, -gt2, gi}}, {{-g, gt2, -gi}}, {{g, -gt2, -gi}}, {{-g, -gt2, -gi}},
+             {{  gt2, gi, g}}, {{ gt2, gi, -g}}, {{gt2, -gi,  g}}, {{-gt2,  gi,  g}},
+             {{-gt2, -gi, g}}, {{-gt2, gi, -g}}, {{gt2, -gi, -g}}, {{-gt2, -gi, -g}},
 
-             Vector<3>{{g, 2, gp1}}, Vector<3>{{g, 2, -gp1}}, Vector<3>{{g, -2, gp1}}, Vector<3>{{-g, 2, gp1}},
-             Vector<3>{{-g, -2, gp1}}, Vector<3>{{-g, 2, -gp1}}, Vector<3>{{g, -2, -gp1}}, Vector<3>{{-g, -2, -gp1}},
-             Vector<3>{{2, gp1, g}}, Vector<3>{{2, gp1, -g}}, Vector<3>{{2, -gp1, g}}, Vector<3>{{-2, gp1, g}},
-             Vector<3>{{-2, -gp1, g}}, Vector<3>{{-2, gp1, -g}}, Vector<3>{{2, -gp1, -g}}, Vector<3>{{-2, -gp1, -g}},
-             Vector<3>{{gp1, g, 2}}, Vector<3>{{gp1, g, -2}}, Vector<3>{{gp1, -g, 2}}, Vector<3>{{-gp1, g, 2}},
-             Vector<3>{{-gp1, -g, 2}}, Vector<3>{{-gp1, g, -2}}, Vector<3>{{gp1, -g, -2}}, Vector<3>{{-gp1, -g, -2}}};
+             {{ g,  2, gp1}}, {{ g, 2, -gp1}}, {{g, -2,  gp1}}, {{-g,  2,  gp1}},
+             {{-g, -2, gp1}}, {{-g, 2, -gp1}}, {{g, -2, -gp1}}, {{-g, -2, -gp1}},
+             {{ 2,  gp1, g}}, {{ 2, gp1, -g}}, {{2, -gp1,  g}}, {{-2,  gp1,  g}},
+             {{-2, -gp1, g}}, {{-2, gp1, -g}}, {{2, -gp1, -g}}, {{-2, -gp1, -g}},
+             {{ gp1,  g, 2}}, {{ gp1, g, -2}}, {{gp1, -g,  2}}, {{-gp1,  g,  2}},
+             {{-gp1, -g, 2}}, {{-gp1, g, -2}}, {{gp1, -g, -2}}, {{-gp1, -g, -2}}};
 
     RegularSolid<TruncatedDodecahedron>::orientedFaces =
             {{40, 16,  2,  0, 15, 39, 55, 31, 32, 56}, {31, 55, 47, 23, 25, 49, 57, 33, 11, 10}, 

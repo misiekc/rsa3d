@@ -6,9 +6,9 @@
 
 void Icosahedron::calculateStatic(const std::string &attr) {
     RegularSolid<Icosahedron>::orientedVertices =
-            {Vector<3>{{0, 1, gold}}, Vector<3>{{0, -1, gold}}, Vector<3>{{0, -1, -gold}}, Vector<3>{{0, 1, -gold}},
-             Vector<3>{{gold, 0, 1}}, Vector<3>{{gold, 0, -1}}, Vector<3>{{-gold, 0, -1}}, Vector<3>{{-gold, 0, 1}},
-             Vector<3>{{1, gold, 0}}, Vector<3>{{-1, gold, 0}}, Vector<3>{{-1, -gold, 0}}, Vector<3>{{1, -gold, 0}}};
+            {{{0, 1, gold}}, {{0, -1, gold}}, {{0, -1, -gold}}, {{0, 1, -gold}},
+             {{gold, 0, 1}}, {{gold, 0, -1}}, {{-gold, 0, -1}}, {{-gold, 0, 1}},
+             {{1, gold, 0}}, {{-1, gold, 0}}, {{-1, -gold, 0}}, {{1, -gold, 0}}};
 
     RegularSolid<Icosahedron>::orientedFaces =
             {{ 4,  0,  1}, { 8,  0,  4}, {9,  0,  8}, { 7, 0,  9}, { 1,  0, 7},

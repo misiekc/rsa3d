@@ -12,23 +12,23 @@ void TruncatedIcosahedron::calculateStatic(const std::string &attr) {
     double g3 = goldRatio*goldRatio*goldRatio;
 
     RegularSolid<TruncatedIcosahedron>::orientedVertices =
-            {Vector<3>{{0, 1, gt3}}, Vector<3>{{0, 1, -gt3}}, Vector<3>{{0, -1, gt3}}, Vector<3>{{0, -1, -gt3}},
-             Vector<3>{{1, gt3, 0}}, Vector<3>{{1, -gt3, 0}}, Vector<3>{{-1, gt3, 0}}, Vector<3>{{-1, -gt3, 0}},
-             Vector<3>{{gt3, 0, 1}}, Vector<3>{{gt3, 0, -1}}, Vector<3>{{-gt3, 0, 1}}, Vector<3>{{-gt3, 0, -1}},
+            {{{0, 1, gt3}}, {{0, 1, -gt3}}, {{0, -1, gt3}}, {{0, -1, -gt3}},
+             {{1, gt3, 0}}, {{1, -gt3, 0}}, {{-1, gt3, 0}}, {{-1, -gt3, 0}},
+             {{gt3, 0, 1}}, {{gt3, 0, -1}}, {{-gt3, 0, 1}}, {{-gt3, 0, -1}},
 
-             Vector<3>{{1, gp2, gt2}}, Vector<3>{{1, gp2, -gt2}}, Vector<3>{{1, -gp2, gt2}}, Vector<3>{{-1, gp2, gt2}},
-             Vector<3>{{-1, -gp2, gt2}}, Vector<3>{{-1, gp2, -gt2}}, Vector<3>{{1, -gp2, -gt2}}, Vector<3>{{-1, -gp2, -gt2}},
-             Vector<3>{{gp2, gt2, 1}}, Vector<3>{{gp2, gt2, -1}}, Vector<3>{{gp2, -gt2, 1}}, Vector<3>{{-gp2, gt2, 1}},
-             Vector<3>{{-gp2, -gt2, 1}}, Vector<3>{{-gp2, gt2, -1}}, Vector<3>{{gp2, -gt2, -1}}, Vector<3>{{-gp2, -gt2, -1}},
-             Vector<3>{{gt2, 1, gp2}}, Vector<3>{{gt2, 1, -gp2}}, Vector<3>{{gt2, -1, gp2}}, Vector<3>{{-gt2, 1, gp2}},
-             Vector<3>{{-gt2, -1, gp2}}, Vector<3>{{-gt2, 1, -gp2}}, Vector<3>{{gt2, -1, -gp2}}, Vector<3>{{-gt2, -1, -gp2}},
+             {{ 1,  gp2, gt2}}, {{ 1, gp2, -gt2}}, {{1, -gp2,  gt2}}, {{-1,  gp2,  gt2}},
+             {{-1, -gp2, gt2}}, {{-1, gp2, -gt2}}, {{1, -gp2, -gt2}}, {{-1, -gp2, -gt2}},
+             {{ gp2,  gt2, 1}}, {{ gp2, gt2, -1}}, {{gp2, -gt2,  1}}, {{-gp2,  gt2,  1}},
+             {{-gp2, -gt2, 1}}, {{-gp2, gt2, -1}}, {{gp2, -gt2, -1}}, {{-gp2, -gt2, -1}},
+             {{ gt2,  1, gp2}}, {{ gt2, 1, -gp2}}, {{gt2, -1,  gp2}}, {{-gt2,  1,  gp2}},
+             {{-gt2, -1, gp2}}, {{-gt2, 1, -gp2}}, {{gt2, -1, -gp2}}, {{-gt2, -1, -gp2}},
 
-             Vector<3>{{g, 2, g3}}, Vector<3>{{g, 2, -g3}}, Vector<3>{{g, -2, g3}}, Vector<3>{{-g, 2, g3}},
-             Vector<3>{{-g, -2, g3}}, Vector<3>{{-g, 2, -g3}}, Vector<3>{{g, -2, -g3}}, Vector<3>{{-g, -2, -g3}},
-             Vector<3>{{2, g3, g}}, Vector<3>{{2, g3, -g}}, Vector<3>{{2, -g3, g}}, Vector<3>{{-2, g3, g}},
-             Vector<3>{{-2, -g3, g}}, Vector<3>{{-2, g3, -g}}, Vector<3>{{2, -g3, -g}}, Vector<3>{{-2, -g3, -g}},
-             Vector<3>{{g3, g, 2}}, Vector<3>{{g3, g, -2}}, Vector<3>{{g3, -g, 2}}, Vector<3>{{-g3, g, 2}},
-             Vector<3>{{-g3, -g, 2}}, Vector<3>{{-g3, g, -2}}, Vector<3>{{g3, -g, -2}}, Vector<3>{{-g3, -g, -2}}};
+             {{ g,  2, g3}}, {{ g, 2, -g3}}, {{g, -2,  g3}}, {{-g,  2,  g3}},
+             {{-g, -2, g3}}, {{-g, 2, -g3}}, {{g, -2, -g3}}, {{-g, -2, -g3}},
+             {{ 2,  g3, g}}, {{ 2, g3, -g}}, {{2, -g3,  g}}, {{-2,  g3,  g}},
+             {{-2, -g3, g}}, {{-2, g3, -g}}, {{2, -g3, -g}}, {{-2, -g3, -g}},
+             {{ g3,  g, 2}}, {{ g3, g, -2}}, {{g3, -g,  2}}, {{-g3, g ,  2}},
+             {{-g3, -g, 2}}, {{-g3, g, -2}}, {{g3, -g, -2}}, {{-g3, -g, -2}}};
 
     RegularSolid<TruncatedIcosahedron>::orientedFaces =
             {{ 0, 39, 31, 32, 40,  2}, { 4,  6, 47, 15, 12, 44}, {57, 11, 10, 55, 23, 25}, {15, 47, 23, 55, 31, 39}, 

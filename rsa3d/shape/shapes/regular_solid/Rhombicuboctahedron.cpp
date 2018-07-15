@@ -7,14 +7,14 @@
 void Rhombicuboctahedron::calculateStatic(const std::string &attr) {
     double xi = M_SQRT2 + 1;
     RegularSolid<Rhombicuboctahedron>::orientedVertices =
-            {Vector<3>{{1, 1, xi}}, Vector<3>{{1, 1, -xi}}, Vector<3>{{1, -1, xi}}, Vector<3>{{-1, 1, xi}},
-             Vector<3>{{-1, -1, xi}}, Vector<3>{{-1, 1, -xi}}, Vector<3>{{1, -1, -xi}}, Vector<3>{{-1, -1, -xi}},
+            {{{ 1,  1, xi}}, {{ 1, 1, -xi}}, {{1, -1,  xi}}, {{-1,  1,  xi}},
+             {{-1, -1, xi}}, {{-1, 1, -xi}}, {{1, -1, -xi}}, {{-1, -1, -xi}},
 
-             Vector<3>{{1, xi, 1}}, Vector<3>{{1, xi, -1}}, Vector<3>{{1, -xi, 1}}, Vector<3>{{-1, xi, 1}},
-             Vector<3>{{-1, -xi, 1}}, Vector<3>{{-1, xi, -1}}, Vector<3>{{1, -xi, -1}}, Vector<3>{{-1, -xi, -1}},
+             {{ 1,  xi, 1}}, {{ 1, xi, -1}}, {{1, -xi,  1}}, {{-1,  xi, 1}},
+             {{-1, -xi, 1}}, {{-1, xi, -1}}, {{1, -xi, -1}}, {{-1, -xi, -1}},
 
-             Vector<3>{{xi, 1, 1}}, Vector<3>{{xi, 1, -1}}, Vector<3>{{xi, -1, 1}}, Vector<3>{{-xi, 1, 1}},
-             Vector<3>{{-xi, -1, 1}}, Vector<3>{{-xi, 1, -1}}, Vector<3>{{xi, -1, -1}}, Vector<3>{{-xi, -1, -1}}};
+             {{ xi,  1, 1}}, {{ xi, 1, -1}}, {{xi, -1,  1}}, {{-xi,  1,  1}},
+             {{-xi, -1, 1}}, {{-xi, 1, -1}}, {{xi, -1, -1}}, {{-xi, -1, -1}}};
 
     RegularSolid<Rhombicuboctahedron>::orientedFaces =
             {{ 2,  0,  3,  4}, { 0,  8, 11,  3}, { 8,  9, 13, 11}, {  9, 1,  5, 13}, {1,  6,   7,  5}, { 6, 14, 15,  7}, 

@@ -9,23 +9,23 @@ void TruncatedCuboctahedron::calculateStatic(const std::string &attr) {
     double eta = 1 + 2*M_SQRT2;
 
     RegularSolid<TruncatedCuboctahedron>::orientedVertices =
-            {Vector<3>{{1, xi, eta}}, Vector<3>{{1, xi, -eta}}, Vector<3>{{1, -xi, eta}}, Vector<3>{{-1, xi, eta}},
-             Vector<3>{{-1, -xi, eta}}, Vector<3>{{-1, xi, -eta}}, Vector<3>{{1, -xi, -eta}}, Vector<3>{{-1, -xi, -eta}},
+            {{{ 1,  xi, eta}}, {{ 1, xi, -eta}}, {{1, -xi,  eta}}, {{-1,  xi,  eta}},
+             {{-1, -xi, eta}}, {{-1, xi, -eta}}, {{1, -xi, -eta}}, {{-1, -xi, -eta}},
 
-             Vector<3>{{1, eta, xi}}, Vector<3>{{1, eta, -xi}}, Vector<3>{{1, -eta, xi}}, Vector<3>{{-1, eta, xi}},
-             Vector<3>{{-1, -eta, xi}}, Vector<3>{{-1, eta, -xi}}, Vector<3>{{1, -eta, -xi}}, Vector<3>{{-1, -eta, -xi}},
+             {{ 1,  eta, xi}}, {{ 1, eta, -xi}}, {{1, -eta,  xi}}, {{-1,  eta,  xi}},
+             {{-1, -eta, xi}}, {{-1, eta, -xi}}, {{1, -eta, -xi}}, {{-1, -eta, -xi}},
 
-             Vector<3>{{xi, eta, 1}}, Vector<3>{{xi, eta, -1}}, Vector<3>{{xi, -eta, 1}}, Vector<3>{{-xi, eta, 1}},
-             Vector<3>{{-xi, -eta, 1}}, Vector<3>{{-xi, eta, -1}}, Vector<3>{{xi, -eta, -1}}, Vector<3>{{-xi, -eta, -1}},
+             {{ xi,  eta, 1}}, {{ xi, eta, -1}}, {{xi, -eta,  1}}, {{-xi,  eta,  1}},
+             {{-xi, -eta, 1}}, {{-xi, eta, -1}}, {{xi, -eta, -1}}, {{-xi, -eta, -1}},
 
-             Vector<3>{{eta, xi, 1}}, Vector<3>{{eta, xi, -1}}, Vector<3>{{eta, -xi, 1}}, Vector<3>{{-eta, xi, 1}},
-             Vector<3>{{-eta, -xi, 1}}, Vector<3>{{-eta, xi, -1}}, Vector<3>{{eta, -xi, -1}}, Vector<3>{{-eta, -xi, -1}},
+             {{ eta,  xi, 1}}, {{ eta, xi, -1}}, {{eta, -xi,  1}}, {{-eta,  xi,  1}},
+             {{-eta, -xi, 1}}, {{-eta, xi, -1}}, {{eta, -xi, -1}}, {{-eta, -xi, -1}},
 
-             Vector<3>{{eta, 1, xi}}, Vector<3>{{eta, 1, -xi}}, Vector<3>{{eta, -1, xi}}, Vector<3>{{-eta, 1, xi}},
-             Vector<3>{{-eta, -1, xi}}, Vector<3>{{-eta, 1, -xi}}, Vector<3>{{eta, -1, -xi}}, Vector<3>{{-eta, -1, -xi}},
+             {{ eta,  1, xi}}, {{ eta, 1, -xi}}, {{eta, -1,  xi}}, {{-eta,  1,  xi}},
+             {{-eta, -1, xi}}, {{-eta, 1, -xi}}, {{eta, -1, -xi}}, {{-eta, -1, -xi}},
 
-             Vector<3>{{xi, 1, eta}}, Vector<3>{{xi, 1, -eta}}, Vector<3>{{xi, -1, eta}}, Vector<3>{{-xi, 1, eta}},
-             Vector<3>{{-xi, -1, eta}}, Vector<3>{{-xi, 1, -eta}}, Vector<3>{{xi, -1, -eta}}, Vector<3>{{-xi, -1, -eta}}};
+             {{ xi,  1, eta}}, {{ xi, 1, -eta}}, {{xi, -1,  eta}}, {{-xi,  1,  eta}},
+             {{-xi, -1, eta}}, {{-xi, 1, -eta}}, {{xi, -1, -eta}}, {{-xi, -1, -eta}}};
 
     RegularSolid<TruncatedCuboctahedron>::orientedFaces =
             {{ 2, 42, 40,  0,  3, 43, 44,  4}, {11,  8, 16, 17,  9, 13, 21, 19}, {  1, 41, 46, 6,  7, 47, 45,  5},

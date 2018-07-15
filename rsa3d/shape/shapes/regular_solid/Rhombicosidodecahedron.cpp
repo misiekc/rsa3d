@@ -12,23 +12,23 @@ void Rhombicosidodecahedron::calculateStatic(const std::string &attr) {
     double gp2 = goldRatio + 2;
 
     RegularSolid<Rhombicosidodecahedron>::orientedVertices =
-            {Vector<3>{{1, 1, g3}}, Vector<3>{{1, 1, -g3}}, Vector<3>{{1, -1, g3}}, Vector<3>{{-1, 1, g3}},
-             Vector<3>{{-1, -1, g3}}, Vector<3>{{-1, 1, -g3}}, Vector<3>{{1, -1, -g3}}, Vector<3>{{-1, -1, -g3}},
-             Vector<3>{{1, g3, 1}}, Vector<3>{{1, g3, -1}}, Vector<3>{{1, -g3, 1}}, Vector<3>{{-1, g3, 1}},
-             Vector<3>{{-1, -g3, 1}}, Vector<3>{{-1, g3, -1}}, Vector<3>{{1, -g3, -1}}, Vector<3>{{-1, -g3, -1}},
-             Vector<3>{{g3, 1, 1}}, Vector<3>{{g3, 1, -1}}, Vector<3>{{g3, -1, 1}}, Vector<3>{{-g3, 1, 1}},
-             Vector<3>{{-g3, -1, 1}}, Vector<3>{{-g3, 1, -1}}, Vector<3>{{g3, -1, -1}}, Vector<3>{{-g3, -1, -1}},
+            {{{ 1,  1, g3}}, {{ 1, 1, -g3}}, {{1, -1,  g3}}, {{-1,  1,  g3}},
+             {{-1, -1, g3}}, {{-1, 1, -g3}}, {{1, -1, -g3}}, {{-1, -1, -g3}},
+             {{ 1,  g3, 1}}, {{ 1, g3, -1}}, {{1, -g3,  1}}, {{-1,  g3,  1}},
+             {{-1, -g3, 1}}, {{-1, g3, -1}}, {{1, -g3, -1}}, {{-1, -g3, -1}},
+             {{ g3,  1, 1}}, {{ g3, 1, -1}}, {{g3, -1,  1}}, {{-g3,  1,  1}},
+             {{-g3, -1, 1}}, {{-g3, 1, -1}}, {{g3, -1, -1}}, {{-g3, -1, -1}},
 
-             Vector<3>{{g2, g, gt2}}, Vector<3>{{g2, g, -gt2}}, Vector<3>{{g2, -g, gt2}}, Vector<3>{{-g2, g, gt2}},
-             Vector<3>{{-g2, -g, gt2}}, Vector<3>{{-g2, g, -gt2}}, Vector<3>{{g2, -g, -gt2}}, Vector<3>{{-g2, -g, -gt2}},
-             Vector<3>{{g, gt2, g2}}, Vector<3>{{g, gt2, -g2}}, Vector<3>{{g, -gt2, g2}}, Vector<3>{{-g, gt2, g2}},
-             Vector<3>{{-g, -gt2, g2}}, Vector<3>{{-g, gt2, -g2}}, Vector<3>{{g, -gt2, -g2}}, Vector<3>{{-g, -gt2, -g2}},
-             Vector<3>{{gt2, g2, g}}, Vector<3>{{gt2, g2, -g}}, Vector<3>{{gt2, -g2, g}}, Vector<3>{{-gt2, g2, g}},
-             Vector<3>{{-gt2, -g2, g}}, Vector<3>{{-gt2, g2, -g}}, Vector<3>{{gt2, -g2, -g}}, Vector<3>{{-gt2, -g2, -g}},
+             {{ g2,  g, gt2}}, {{ g2, g, -gt2}}, {{g2, -g,  gt2}}, {{-g2,  g,  gt2}},
+             {{-g2, -g, gt2}}, {{-g2, g, -gt2}}, {{g2, -g, -gt2}}, {{-g2, -g, -gt2}},
+             {{ g,  gt2, g2}}, {{ g, gt2, -g2}}, {{g, -gt2,  g2}}, {{-g,  gt2,  g2}},
+             {{-g, -gt2, g2}}, {{-g, gt2, -g2}}, {{g, -gt2, -g2}}, {{-g, -gt2, -g2}},
+             {{ gt2,  g2, g}}, {{ gt2, g2, -g}}, {{gt2, -g2,  g}}, {{-gt2,  g2,  g}},
+             {{-gt2, -g2, g}}, {{-gt2, g2, -g}}, {{gt2, -g2, -g}}, {{-gt2, -g2, -g}},
 
-             Vector<3>{{gp2, 0, g2}}, Vector<3>{{gp2, 0, -g2}}, Vector<3>{{-gp2, 0, g2}}, Vector<3>{{-gp2, 0, -g2}},
-             Vector<3>{{0, g2, gp2}}, Vector<3>{{0, g2, -gp2}}, Vector<3>{{0, -g2, gp2}}, Vector<3>{{0, -g2, -gp2}},
-             Vector<3>{{g2, gp2, 0}}, Vector<3>{{g2, -gp2, 0}}, Vector<3>{{-g2, gp2, 0}}, Vector<3>{{-g2, -gp2, 0}}};
+             {{gp2, 0, g2}}, {{gp2, 0, -g2}}, {{-gp2, 0, g2}}, {{-gp2, 0, -g2}},
+             {{0, g2, gp2}}, {{0, g2, -gp2}}, {{0, -g2, gp2}}, {{0, -g2, -gp2}},
+             {{g2, gp2, 0}}, {{g2, -gp2, 0}}, {{-g2, gp2, 0}}, {{-g2, -gp2, 0}}};
 
     RegularSolid<Rhombicosidodecahedron>::orientedFaces =
             {{ 4,  3, 27, 50, 28}, {52, 32,  8, 11, 35}, {19, 43, 58, 45, 21}, {2, 26, 48, 24,  0},

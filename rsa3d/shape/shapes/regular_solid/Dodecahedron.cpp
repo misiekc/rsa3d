@@ -6,12 +6,12 @@
 
 void Dodecahedron::calculateStatic(const std::string &attr) {
     RegularSolid<Dodecahedron>::orientedVertices =
-            {Vector<3>{{ 1,  1,  1}}, Vector<3>{{-1,  1,  1}}, Vector<3>{{-1, -1,  1}}, Vector<3>{{ 1, -1,  1}},
-             Vector<3>{{-1, -1, -1}}, Vector<3>{{-1,  1, -1}}, Vector<3>{{ 1,  1, -1}}, Vector<3>{{ 1, -1, -1}},
+            {{{ 1,  1,  1}}, {{-1,  1,  1}}, {{-1, -1,  1}}, {{1, -1,  1}},
+             {{-1, -1, -1}}, {{-1,  1, -1}}, {{ 1,  1, -1}}, {{1, -1, -1}},
 
-             Vector<3>{{gold, 1/gold, 0}}, Vector<3>{{-gold, 1/gold, 0}}, Vector<3>{{-gold, -1/gold, 0}}, Vector<3>{{gold, -1/gold, 0}},
-             Vector<3>{{0, gold, 1/gold}}, Vector<3>{{0, -gold, 1/gold}}, Vector<3>{{0, -gold, -1/gold}}, Vector<3>{{0, gold, -1/gold}},
-             Vector<3>{{1/gold, 0, gold}}, Vector<3>{{1/gold, 0, -gold}}, Vector<3>{{-1/gold, 0, -gold}}, Vector<3>{{-1/gold, 0, gold}}};
+             {{gold, 1/gold, 0}}, {{-gold, 1/gold, 0}}, {{-gold, -1/gold, 0}}, {{gold, -1/gold, 0}},
+             {{0, gold, 1/gold}}, {{0, -gold, 1/gold}}, {{0, -gold, -1/gold}}, {{0, gold, -1/gold}},
+             {{1/gold, 0, gold}}, {{1/gold, 0, -gold}}, {{-1/gold, 0, -gold}}, {{-1/gold, 0, gold}}};
     
     RegularSolid<Dodecahedron>::orientedFaces =
             {{3, 11,  8, 0, 16}, {17,  6,  8, 11, 7}, {15, 12, 0,  8,  6}, {16,  0, 12,  1, 19},

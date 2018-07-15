@@ -10,17 +10,16 @@ void Icosidodecahedron::calculateStatic(const std::string &attr) {
     double dg = 2 * goldRatio;
 
     RegularSolid<Icosidodecahedron>::orientedVertices =
-            {Vector<3>{{0, 0, dg}}, Vector<3>{{0, dg, 0}}, Vector<3>{{dg, 0, 0}},
-             Vector<3>{{0, 0, -dg}}, Vector<3>{{0, -dg, 0}}, Vector<3>{{-dg, 0, 0}},
+            {{{0, 0, dg}}, {{0, dg, 0}}, {{dg, 0, 0}}, {{0, 0, -dg}}, {{0, -dg, 0}}, {{-dg, 0, 0}},
 
-             Vector<3>{{1, g, g2}}, Vector<3>{{1, g, -g2}}, Vector<3>{{1, -g, g2}}, Vector<3>{{-1, g, g2}},
-             Vector<3>{{-1, -g, g2}}, Vector<3>{{-1, g, -g2}}, Vector<3>{{1, -g, -g2}}, Vector<3>{{-1, -g, -g2}},
+             {{ 1,  g, g2}}, {{ 1, g, -g2}}, {{1, -g,  g2}}, {{-1,  g,  g2}},
+             {{-1, -g, g2}}, {{-1, g, -g2}}, {{1, -g, -g2}}, {{-1, -g, -g2}},
 
-             Vector<3>{{g, g2, 1}}, Vector<3>{{g, g2, -1}}, Vector<3>{{g, -g2, 1}}, Vector<3>{{-g, g2, 1}},
-             Vector<3>{{-g, -g2, 1}}, Vector<3>{{-g, g2, -1}}, Vector<3>{{g, -g2, -1}}, Vector<3>{{-g, -g2, -1}},
+             {{ g,  g2, 1}}, {{ g, g2, -1}}, {{g, -g2,  1}}, {{-g,  g2,  1}},
+             {{-g, -g2, 1}}, {{-g, g2, -1}}, {{g, -g2, -1}}, {{-g, -g2, -1}},
 
-             Vector<3>{{g2, 1, g}}, Vector<3>{{g2, 1, -g}}, Vector<3>{{g2, -1, g}}, Vector<3>{{-g2, 1, g}},
-             Vector<3>{{-g2, -1, g}}, Vector<3>{{-g2, 1, -g}}, Vector<3>{{g2, -1, -g}}, Vector<3>{{-g2, -1, -g}}};
+             {{ g2,  1, g}}, {{ g2, 1, -g}}, {{g2, -1,  g}}, {{-g2,  1,  g}},
+             {{-g2, -1, g}}, {{-g2, 1, -g}}, {{g2, -1, -g}}, {{-g2, -1, -g}}};
 
     RegularSolid<Icosidodecahedron>::orientedFaces =
             {{ 0, 9, 25, 26, 10}, { 6, 14,  1, 17,  9}, { 8, 24, 22,  6,  0}, { 2, 23, 15, 14, 22}, 

@@ -9,7 +9,7 @@
 
 void Tetrahedron::calculateStatic(const std::string &attr) {
     RegularSolid<Tetrahedron>::orientedVertices =
-            {Vector<3>{{1, 1, 1}}, Vector<3>{{1, -1, -1}}, Vector<3>{{-1, 1, -1}}, Vector<3>{{-1, -1, 1}}};
+            {{{1, 1, 1}}, {{1, -1, -1}}, {{-1, 1, -1}}, {{-1, -1, 1}}};
 
     RegularSolid<Tetrahedron>::orientedFaces =
             {{3, 2, 1}, {3, 0, 2}, {0, 3, 1}, {0, 1, 2}};

@@ -6,9 +6,8 @@
 
 void Cuboctahedron::calculateStatic(const std::string &attr) {
     RegularSolid<Cuboctahedron>::orientedVertices =
-            {Vector<3>{{1, 1, 0}}, Vector<3>{{-1, 1, 0}}, Vector<3>{{-1, -1, 0}}, Vector<3>{{1, -1, 0}},
-             Vector<3>{{0, 1, 1}}, Vector<3>{{0, -1, 1}}, Vector<3>{{0, -1, -1}}, Vector<3>{{0, 1, -1}},
-             Vector<3>{{1, 0, 1}}, Vector<3>{{-1, 0, 1}}, Vector<3>{{-1, 0, -1}}, Vector<3>{{1, 0, -1}}};
+            {{{1,  1,  0}}, {{-1, 1,  0}}, {{-1, -1, 0}}, {{ 1, -1, 0}}, {{ 0, 1,  1}}, {{0, -1,  1}},
+             {{0, -1, -1}}, {{ 0, 1, -1}}, {{ 1,  0, 1}}, {{-1,  0, 1}}, {{-1, 0, -1}}, {{1,  0, -1}}};
 
     RegularSolid<Cuboctahedron>::orientedFaces =
             {{5, 8, 4, 9}, {3, 11, 0, 8}, {0, 7, 1, 4}, {1, 10, 2, 9}, {2, 6, 3, 5}, {7, 11, 6, 10},

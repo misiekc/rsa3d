@@ -10,14 +10,14 @@ void SnubCube::calculateStatic(const std::string &attr) {
     const double u = 1/t;
 
     RegularSolid<SnubCube>::orientedVertices =
-            {Vector<3>{{1, u, t}}, Vector<3>{{1, -u, -t}}, Vector<3>{{-1, u, -t}}, Vector<3>{{-1, -u, t}},
-             Vector<3>{{1, t, -u}}, Vector<3>{{1, -t, u}}, Vector<3>{{-1, t, u}}, Vector<3>{{-1, -t, -u}},
+            {{{1, u,  t}}, {{1, -u, -t}}, {{-1, u, -t}}, {{-1, -u,  t}},
+             {{1, t, -u}}, {{1, -t,  u}}, {{-1, t,  u}}, {{-1, -t, -u}},
 
-             Vector<3>{{u, t, 1}}, Vector<3>{{u, -t, -1}}, Vector<3>{{-u, t, -1}}, Vector<3>{{-u, -t, 1}},
-             Vector<3>{{t, u, -1}}, Vector<3>{{t, -u, 1}}, Vector<3>{{-t, u, 1}}, Vector<3>{{-t, -u, -1}},
+             {{u, t,  1}}, {{u, -t, -1}}, {{-u, t, -1}}, {{-u, -t,  1}},
+             {{t, u, -1}}, {{t, -u,  1}}, {{-t, u,  1}}, {{-t, -u, -1}},
 
-             Vector<3>{{t, 1, u}}, Vector<3>{{t, -1, -u}}, Vector<3>{{-t, 1, -u}}, Vector<3>{{-t, -1, u}},
-             Vector<3>{{u, 1, -t}}, Vector<3>{{u, -1, t}}, Vector<3>{{-u, 1, t}}, Vector<3>{{-u, -1, -t}}};
+             {{t, 1,  u}}, {{t, -1, -u}}, {{-t, 1, -u}}, {{-t, -1,  u}},
+             {{u, 1, -t}}, {{u, -1,  t}}, {{-u, 1,  t}}, {{-u, -1, -t}}};
 
     RegularSolid<SnubCube>::orientedFaces =
             {{0, 22, 3, 21}, {8, 4, 10, 6}, {20, 1, 23, 2}, {9, 5, 11, 7}, {15, 19, 14, 18}, {13, 17, 12, 16},
