@@ -36,6 +36,7 @@ set(MAIN_SOURCE
         rsa3d/shape/shapes/polygon/HBPolygon.cpp
         rsa3d/shape/shapes/polygon/SBPolygon.cpp
         rsa3d/shape/shapes/Ellipse.cpp
+        rsa3d/shape/shapes/Ellipsoid.cpp
         rsa3d/shape/shapes/OrientedCuboid.h
         rsa3d/shape/shapes/OrientedCuboid.tpp
         rsa3d/shape/shapes/polygon/Polygon.cpp

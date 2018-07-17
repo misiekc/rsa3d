@@ -92,6 +92,7 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/shape/shapes/polygon/SBPolygon \
        rsa3d/shape/shapes/polygon/Polygon \
        rsa3d/shape/shapes/Ellipse \
+       rsa3d/shape/shapes/Ellipsoid \
        rsa3d/shape/shapes/Rectangle \
        rsa3d/shape/shapes/SpheroCylinder2D \
        rsa3d/shape/AnisotropicShape2D \
