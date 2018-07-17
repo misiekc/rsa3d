@@ -35,18 +35,10 @@
 #include "shapes/regular_solid/Rhombicosidodecahedron.h"
 #include "shapes/regular_solid/TruncatedIcosidodecahedron.h"
 #include "shapes/regular_solid/SnubDodecahedron.h"
+#include "shapes/Ellipsoid.h"
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
-
-	int in[RSA_SPATIAL_DIMENSION];
-	for(ushort i=0; i<RSA_SPATIAL_DIMENSION; i++)
-		in[i] = 0;
-	int index = 0;
-	do{
-		std::copy(in, in+RSA_SPATIAL_DIMENSION, Positioned<RSA_SPATIAL_DIMENSION>::offset[index]);
-		index++;
-	}while(increment(in, RSA_SPATIAL_DIMENSION, 1));
-
+    RSAPositioned::prepareOffset();
 
     // Shapes for any dimension, without angular dimensions
     #if RSA_ANGULAR_DIMENSION == 0
@@ -141,6 +133,9 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             return;
         } else if (sClass == "SnubDodecahedron") {
             RegularSolid<SnubDodecahedron>::initClass(attr);
+            return;
+        } else if (sClass == "Ellipsoid") {
+            Ellipsoid::initClass(attr);
             return;
         }
     #endif

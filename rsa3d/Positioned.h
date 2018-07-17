@@ -61,6 +61,8 @@ public:
      * @param v a vector to translate by
      */
 	void translate(const Vector<SPATIAL_DIMENSION> &position);
+
+    static void prepareOffset();
 };
 
 using RSAPositioned = Positioned<RSA_SPATIAL_DIMENSION>;

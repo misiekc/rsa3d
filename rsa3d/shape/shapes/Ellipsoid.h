@@ -10,14 +10,14 @@
 
 class Ellipsoid : public ConvexShape<3, 0> {
 private:
-    static void initClass(const std::string &attr);
     static void normalizeVolume();
-
     static double a, b, c;
 
     Matrix<3, 3> orientation;
 
 public:
+    static void initClass(const std::string &attr);
+
     explicit Ellipsoid(const Matrix<3, 3> &orientation) : orientation(orientation) {}
 
     bool overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const override;
