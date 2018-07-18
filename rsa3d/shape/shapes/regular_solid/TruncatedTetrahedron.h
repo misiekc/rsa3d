@@ -7,12 +7,13 @@
 
 
 #include "RegularSolid.h"
+#include "UnoptimizedSATOverlap.h"
 
 class TruncatedTetrahedron : public RegularSolid<TruncatedTetrahedron> {
 private:
     friend RegularSolid<TruncatedTetrahedron>;
 
-    const static TriTriOverlap<TruncatedTetrahedron> overlapStrategy;
+    const static UnoptimizedSATOverlap<TruncatedTetrahedron> overlapStrategy;
 
     static void calculateStatic(const std::string &attr);
 
@@ -22,8 +23,6 @@ public:
     double projectionHalfsize(const Vector<3> &axis) const;     /* CRTP implement */
 
     OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
-    bool overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const override;
-
 };
 
 

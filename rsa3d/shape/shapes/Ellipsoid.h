@@ -26,6 +26,8 @@ public:
     void store(std::ostream &f) const override;
     void restore(std::istream &f) override;
     Shape<3, 0> *clone() const override;
+
+    std::string toPovray() const;
 };
 
 

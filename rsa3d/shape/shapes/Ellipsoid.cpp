@@ -42,9 +42,13 @@ bool Ellipsoid::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
     return false;
 }
 
-bool Ellipsoid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
-                            double orientationRange) const {
-    return false;
+bool Ellipsoid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation, double orientationRange) const {
+    // Transform point coordinates to Ellipsoid coordinate system
+    Vector<3> bcPos = position + bc->getTranslation(this->getPosition(), position);
+    Vector<3> pointAligned = this->orientation.transpose() * (bcPos - this->getPosition());
+
+    double d = pointAligned[0]/((Ellipsoid::a + Ellipsoid::c)*(Ellipsoid::a + Ellipsoid::c)) + pointAligned[1]/((Ellipsoid::b + Ellipsoid::c)*(Ellipsoid::b + Ellipsoid::c)) + pointAligned[2]/(4*Ellipsoid::c*Ellipsoid::c);
+    return (d <= 1.0);
 }
 
 void Ellipsoid::store(std::ostream &f) const {
@@ -71,4 +75,21 @@ void Ellipsoid::restore(std::istream &f) {
 
 Shape<3, 0> *Ellipsoid::clone() const {
     return new Ellipsoid(*this);
+}
+
+std::string Ellipsoid::toPovray() const {
+	std::stringstream out;
+	out.precision(std::numeric_limits< double >::max_digits10);
+    Vector<3> position = this->getPosition();
+	out << "  sphere { < 0, 0, 0 >, 1.0" << std::endl;
+	out << "    scale < " << Ellipsoid::a << ", " << Ellipsoid::b << ", " << Ellipsoid::c << " >" << std::endl;
+	out << "    matrix <" << std::endl;
+	out << "      " << this->orientation(0, 0) << ", " << this->orientation(0, 1) << ", " << this->orientation(0, 2) << ", " << std::endl;
+    out << "      " << this->orientation(1, 0) << ", " << this->orientation(1, 1) << ", " << this->orientation(1, 2) << ", " << std::endl;
+    out << "      " << this->orientation(2, 0) << ", " << this->orientation(2, 1) << ", " << this->orientation(2, 2) << ", " << std::endl;
+    out << "      " << position[0] << ", " << position[1] << ", " << position[2] << std::endl;
+    out << "    >" << std::endl;
+	out << "    texture { pigment { color Red } }" << std::endl;
+	out << "  }" << std::endl;
+	return out.str();
 }

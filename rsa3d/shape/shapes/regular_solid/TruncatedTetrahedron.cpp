@@ -5,7 +5,7 @@
 #include "TruncatedTetrahedron.h"
 #include "UnoptimizedSATOverlap.h"
 
-const TriTriOverlap<TruncatedTetrahedron> TruncatedTetrahedron::overlapStrategy{};
+const UnoptimizedSATOverlap<TruncatedTetrahedron> TruncatedTetrahedron::overlapStrategy{};
 
 void TruncatedTetrahedron::calculateStatic(const std::string &attr) {
     RegularSolid<TruncatedTetrahedron>::orientedVertices = 
@@ -27,11 +27,4 @@ OverlapStrategy<3, 0> *TruncatedTetrahedron::createStrategy(const std::string &n
         return new UnoptimizedSATOverlap<TruncatedTetrahedron>();
     else
         return RegularSolid<TruncatedTetrahedron>::createStrategy(name);
-}
-
-bool TruncatedTetrahedron::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
-    TruncatedTetrahedron other = dynamic_cast<const TruncatedTetrahedron&>(*s);     // Make a copy
-    this->applyBC(bc, &other);
-    UnoptimizedSATOverlap<TruncatedTetrahedron> satOverlap;
-    return satOverlap.overlap(this, &other);
 }

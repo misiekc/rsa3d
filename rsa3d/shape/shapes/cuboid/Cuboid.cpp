@@ -164,8 +164,8 @@ bool Cuboid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &pos, const 
                         double orientationRange) const
 {
     // Transform point coordinates to Cuboid coordinate system
-    Vector<3> thisBCPos = this->getPosition() + bc->getTranslation(this->getPosition(), pos);
-    Vector<3> pointAligned = this->orientation.transpose() * (pos - thisBCPos);
+    Vector<3> bcPos = pos + bc->getTranslation(this->getPosition(), pos);
+    Vector<3> pointAligned = this->orientation.transpose() * (bcPos - this->getPosition());
 
     Vector<3> absPointAligned;
     for (unsigned short i = 0; i < 3; i++)
