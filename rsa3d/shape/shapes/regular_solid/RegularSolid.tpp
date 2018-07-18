@@ -49,14 +49,14 @@ void RegularSolid<SpecificSolid>::initClass(const std::string &attr) {
     calculateRadia();
     discoverAxes();
 
-    Shape::setNeighbourListCellSize(2 * SpecificSolid::circumsphereRadius);
-    Shape::setVoxelSpatialSize(2 * SpecificSolid::insphereRadius / std::sqrt(3.));
+    Shape::setNeighbourListCellSize(2*circumsphereRadius);
+    Shape::setVoxelSpatialSize(2*insphereRadius/std::sqrt(3.));
 
     Shape::setCreateShapeImpl([](RND *rnd) -> Shape* {
         return new SpecificSolid(Matrix<3, 3>::rotation(
-                rnd->nextValue() * 2 * M_PI,
-                std::asin(rnd->nextValue() * 2 - 1),
-                rnd->nextValue() * 2 * M_PI));
+                2*M_PI*rnd->nextValue(),
+                2*std::asin(rnd->nextValue() - 1),
+                2*M_PI*rnd->nextValue()));
     });
 }
 
@@ -66,9 +66,9 @@ bool RegularSolid<SpecificSolid>::overlap(BoundaryConditions<3> *bc, const Shape
     this->applyBC(bc, &other);
 
     double distance2 = (this->getPosition() - other.getPosition()).norm2();
-    if (distance2 > 4 * circumsphereRadius * circumsphereRadius)
+    if (distance2 > 4*circumsphereRadius*circumsphereRadius)
         return false;
-    else if (distance2 < 4 * insphereRadius * insphereRadius)
+    else if (distance2 < 4*insphereRadius*insphereRadius)
         return true;
     else
         return SpecificSolid::overlapStrategy.overlap(this, &other);
@@ -77,7 +77,9 @@ bool RegularSolid<SpecificSolid>::overlap(BoundaryConditions<3> *bc, const Shape
 template<typename SpecificSolid>
 bool RegularSolid<SpecificSolid>::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
                                               const Orientation<0> &orientation, double orientationRange) const {
-    return (position - this->getPosition()).norm2() <= 4 * std::pow(SpecificSolid::insphereRadius, 2);
+    Vector<3> thisPos = this->getPosition();
+    Vector<3> pointDelta = position - thisPos + bc->getTranslation(thisPos, position);
+    return pointDelta.norm2() <= 4*insphereRadius*insphereRadius;
 }
 
 template<typename SpecificSolid>
