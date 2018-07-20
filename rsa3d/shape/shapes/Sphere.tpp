@@ -45,6 +45,7 @@ void Sphere<DIMENSION>::initClass(const std::string &args){
 	Sphere<DIMENSION>::radius = pow(1.0/Sphere::volume(), 1.0/DIMENSION);
 	Shape<DIMENSION, 0>::setNeighbourListCellSize(2.0*Sphere::radius);
 	Shape<DIMENSION, 0>::setVoxelSpatialSize(pow(2.0, 1.0/DIMENSION)*Sphere::radius);
+	Shape<DIMENSION, 0>::setSupportsSaturation(true);
 //	Shape<DIMENSION, 0>::setCreateShapeImpl([](RND *rnd) -> Shape<DIMENSION, 0> {
 //        return new Sphere<DIMENSION, 0>;
 //    });

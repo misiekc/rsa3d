@@ -62,6 +62,7 @@ void Rectangle::initClass(const std::string &args) {
     Shape<2,1>::setVoxelSpatialSize(Rectangle::shorter / 2);
     Shape<2,1>::setNeighbourListCellSize(Rectangle::longer * 2);
     Shape<2,1>::setVoxelAngularSize(M_PI);
+	Shape<2, 1>::setSupportsSaturation(true);
     Shape<2,1>::setDefaultCreateShapeImpl <Rectangle> ();
 }
 

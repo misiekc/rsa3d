@@ -117,6 +117,7 @@ void Polygon::initClass(const std::string &args){
 	Polygon::inscribedCircleRadius = Polygon::getInscribedCircleRadius();
 	Shape<2, 1>::setVoxelSpatialSize(1.4*Polygon::inscribedCircleRadius);
 	Shape<2, 1>::setVoxelAngularSize(2*M_PI);
+	Shape<2, 1>::setSupportsSaturation(true);
 	Shape<2, 1>::setDefaultCreateShapeImpl <Polygon> ();
 }
 

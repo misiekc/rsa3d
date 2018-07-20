@@ -314,12 +314,15 @@ void PackingGenerator::createPacking() {
 //				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
 				std::cout << " done. " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << ", factor: " << this->getFactor() << std::endl;
 				missCounter = 0;
-			}else{
+			}else if(RSAShape::getSupportsSaturation() || rnd.nextValue() < 0.1){
 				std::cout << "skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;
 				this->voxels->analyzeVoxels(this->surface, this->surface->getNeighbourGrid(), depthAnalyze);
 				std::cout << " done: " << this->voxels->getLength() << " voxels remained, factor = " << this->getFactor() << std::endl << std::flush;
 				tmpSplit = 1.1*tmpSplit;
 				v1 = this->voxels->getLength();
+			}else{
+				std::cout << "skipped" << std::endl << std::flush;
+				depthAnalyze = 1;
 			}
 			// if number of voxels has changed
 			if (v1!=v0){

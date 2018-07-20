@@ -73,6 +73,7 @@ private:
     static double voxelSpatialSize;
     static double voxelAngularSize;
     static double neighbourListCellSize;
+    static bool supportsSaturation;
     static create_shape_fun_ptr createShapeImpl;
 
     Orientation<ANGULAR_DIMENSION> orientation;
@@ -137,6 +138,15 @@ protected:
     static void setNeighbourListCellSize(double size);
 
     /**
+     * @brief Sets a flag which inform if the shape supports saturated packing generation.
+     *
+     * Derived Shape classes have to use this method in the initialization method (see class description) to indicate
+     * Whether it is possible to get saturated packings of this shape. It is used by PackingGenerator to skip unnecessary voxel analysis.
+     * @param true is shape supports saturated packings;
+     */
+    static void setSupportsSaturation(bool flag);
+
+    /**
      * @brief Sets a function which will be used to create new shapes.
      *
      * If @a ANGULAR_DIMENSION is zero, but a Shape is not isotropic, a function should choose random orientation from
@@ -199,6 +209,14 @@ public:
      * @return angular size of a voxel
      */
 	static double getVoxelAngularSize();
+
+	/**
+     * @brief Returns flags indicating if the shape supports saturated packing generation.
+     *
+     * Default implementation returns false.
+     * @return angular size of a voxel
+     */
+	static bool getSupportsSaturation();
 
     /**
      * @brief returns a pointer to function for creating shapes - taking RND pointer and returning Shape pointer.
