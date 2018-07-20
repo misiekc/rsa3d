@@ -17,13 +17,13 @@ class Parameters {
 
 public:
 	int maxTriesWithoutSuccess = std::numeric_limits<int>::max();
-	int maxVoxels = 100000000;
+	size_t maxVoxels = 100000000;
 	double requestedAngularVoxelSize = 2*M_PI;
 	double minDx = 0.0;
 	int from = 0;
 	int collectors = 1;
 	double maxTime = std::numeric_limits<double>::infinity();
-	int split = 3000;
+	size_t split = 3000;
 	double surfaceSize = pow(100000.0, 1.0/2.0);
 	bool storePackings = true;
 

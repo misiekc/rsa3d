@@ -59,6 +59,7 @@ set(MAIN_SOURCE
         rsa3d/Config.cpp
         rsa3d/Intersection.cpp
         rsa3d/Matrix.h
+        rsa3d/Matrix.tpp
         rsa3d/NeighbourGrid.h
         rsa3d/Packing.cpp
         rsa3d/PackingGenerator.cpp
@@ -67,6 +68,7 @@ set(MAIN_SOURCE
         rsa3d/Positioned.tpp
         rsa3d/RND.cpp
         rsa3d/Surface.cpp
+        rsa3d/ThreadLocalRND.cpp
         rsa3d/Timer.cpp
         rsa3d/Utils.cpp
         rsa3d/Vector.h

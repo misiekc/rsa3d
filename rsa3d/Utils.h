@@ -10,6 +10,7 @@
 #define UTILS_C_
 
 #include "Vector.h"
+#include <omp.h>
 
 #ifdef _OPENMP
     #define __OMP_STRINGIFY__(x) #x
