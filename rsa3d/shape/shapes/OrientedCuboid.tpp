@@ -38,15 +38,9 @@ void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
     for (unsigned short i = 0; i < DIMENSION; i++) {
         size[i] *= factor;
     }
-        
-    // Calculate static params
-//    volume = std::accumulate(size, size + staticDimension, 1.0, std::multiplies<double>());
- 
+
    	Shape<DIMENSION, 0>::setNeighbourListCellSize(*std::max_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION));
    	Shape<DIMENSION, 0>::setVoxelSpatialSize(0.5*(*std::min_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION)));
-//	Shape<DIMENSION, 0>::setCreateShapeImpl([](RND *rnd) -> Shape<DIMENSION, 0>* {
-//		return new OrientedCuboid<DIMENSION>;
-//	});
 	Shape<DIMENSION, 0>::template setDefaultCreateShapeImpl <OrientedCuboid<DIMENSION>> ();
 }
 
@@ -57,17 +51,13 @@ bool OrientedCuboid<DIMENSION>::overlap(BoundaryConditions<DIMENSION> *bc, const
 
 template <unsigned short DIMENSION>
 bool OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &da) const{
-//    if (OrientedCuboid<DIMENSION>::do2Drotation){
-//    	return Cuboid::pointInside(bc, da);
-//    }else{
-    	Vector<DIMENSION> ta = bc->getTranslation(this->getPosition(), da);
-    	for(unsigned short i=0; i<DIMENSION; i++){
-    		if (std::fabs(this->getPosition()[i] - (da[i] + ta[i])) > size[i]){
-    			return false;
-    		}
-    	}
-    	return true;
-//    }
+	Vector<DIMENSION> ta = bc->getTranslation(this->getPosition(), da);
+	for(unsigned short i=0; i<DIMENSION; i++){
+		if (std::fabs(this->getPosition()[i] - (da[i] + ta[i])) > size[i]){
+			return false;
+		}
+	}
+	return true;
 }
 
 template <unsigned short DIMENSION>
