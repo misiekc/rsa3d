@@ -211,15 +211,15 @@ intersection::face_polyh RegularSolid<SpecificSolid>::getFaces() const {
     result.reserve(orientedFaces.size());
 
     auto vertices = this->getVertices();
-    std::transform(orientedFaces.begin(), orientedFaces.end(), std::back_inserter(result),
-                   [&vertices](const std::vector<std::size_t> &face) {
-                       intersection::face3D faceResult;
-                       faceResult.reserve(face.size());
-                       std::transform(face.begin(), face.end(), std::back_inserter(faceResult), [&vertices](size_t i) {
-                           return vertices[i];
-                       });
-                       return faceResult;
-                   });
+    auto verticesIdxToFace = [&vertices](const std::vector<std::size_t> &face) {
+        intersection::face3D faceResult;
+        faceResult.reserve(face.size());
+        auto idxToVertex = [&vertices](size_t i) { return vertices[i]; };
+        std::transform(face.begin(), face.end(), std::back_inserter(faceResult), idxToVertex);
+        return faceResult;
+    };
+
+    std::transform(orientedFaces.begin(), orientedFaces.end(), std::back_inserter(result), verticesIdxToFace);
     return result;
 }
 
@@ -238,17 +238,16 @@ void RegularSolid<SpecificSolid>::discoverTriangles() {
 
 template<typename SpecificSolid>
 void RegularSolid<SpecificSolid>::normalizeVolume() {
-    double volume = std::accumulate(orientedTriangles.begin(), orientedTriangles.end(), 0.,
-            [](double volume, const std::array<std::size_t, 3> &triIdx) {
+    auto calculateVolume = [](double volume, const std::array<std::size_t, 3> &triIdx) {
         intersection::tri3D tri{{orientedVertices[triIdx[0]], orientedVertices[triIdx[1]], orientedVertices[triIdx[2]]}};
         double tetrahedronVolume = 1./6 * tri[0] * ((tri[1] - tri[0]) ^ (tri[2] - tri[0]));
         return volume + std::abs(tetrahedronVolume);
-    });
+    };
+    double volume = std::accumulate(orientedTriangles.begin(), orientedTriangles.end(), 0., calculateVolume);
+
     normalizeFactor = std::pow(volume, -1./3);
-    std::transform(orientedVertices.begin(), orientedVertices.end(), orientedVertices.begin(),
-                   [](const Vector<3> &vertex) {
-        return vertex * normalizeFactor;
-    });
+    auto normalizeVertex = [](const Vector<3> &vertex) { return vertex * normalizeFactor; };
+    std::transform(orientedVertices.begin(), orientedVertices.end(), orientedVertices.begin(), normalizeVertex);
     std::cout << "[RegularSolid::normalizeVolume] Normalizing factor: " << normalizeFactor << std::endl;
 }
 
@@ -285,9 +284,8 @@ void RegularSolid<SpecificSolid>::discoverAxes() {
 
     for (const auto &faceIdx : orientedFaces) {
         intersection::face3D face(faceIdx.size());
-        std::transform(faceIdx.begin(), faceIdx.end(), face.begin(), [](std::size_t idx) {
-            return orientedVertices[idx];
-        });
+        auto idxToVertex = [](std::size_t idx) { return orientedVertices[idx]; };
+        std::transform(faceIdx.begin(), faceIdx.end(), face.begin(), idxToVertex);
 
         Vector<3> faceAxis = (face[1] - face[0]) ^ (face[2] - face[0]);
         faceAxis /= faceAxis.norm();
@@ -313,11 +311,11 @@ void RegularSolid<SpecificSolid>::discoverAxes() {
 
 template<typename SpecificSolid>
 void RegularSolid<SpecificSolid>::addUniqueAxis(std::vector<Vector<3>> &axes, const Vector<3> &newAxis) {
-    auto axisCompare = [&newAxis](const Vector<3> axis) {
+    auto isNewAxisUnique = [&newAxis](const Vector<3> axis) {
         double product = std::abs(axis * newAxis);
         return std::abs(product - 1) < 0.000000001;
     };
-    auto it = find_if(axes.begin(), axes.end(), axisCompare);
+    auto it = find_if(axes.begin(), axes.end(), isNewAxisUnique);
     if (it == axes.end())
         axes.push_back(newAxis);
 }
