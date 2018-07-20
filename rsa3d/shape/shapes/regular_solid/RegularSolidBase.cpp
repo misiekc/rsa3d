@@ -130,21 +130,18 @@ std::vector<Vector<3>> RegularSolidBase::getVertexAxes() const { return applyOri
 std::vector<Vector<3>> RegularSolidBase::getMidegdeAxes() const { return applyOrientation(orientedMidedgeAxes); }
 
 intersection::tri_polyh RegularSolidBase::getTriangles() const {
-    intersection::tri_polyh result;
-    result.reserve(orientedTriangles.size());
-
     auto vertices = this->getVertices();
-    std::transform(orientedTriangles.begin(), orientedTriangles.end(), std::back_inserter(result),
-                   [&vertices](const std::array<std::size_t, 3> &tri) {
-                       return intersection::tri3D{{vertices[tri[0]], vertices[tri[1]], vertices[tri[2]]}};
-                   });
-    return result;
+    auto verticesIdxToTri = [&vertices](const std::array<std::size_t, 3> &tri) {
+        return intersection::tri3D{{vertices[tri[0]], vertices[tri[1]], vertices[tri[2]]}};
+    };
+
+    intersection::tri_polyh triangles;
+    triangles.reserve(orientedTriangles.size());
+    std::transform(orientedTriangles.begin(), orientedTriangles.end(), std::back_inserter(triangles), verticesIdxToTri);
+    return triangles;
 }
 
 intersection::face_polyh RegularSolidBase::getFaces() const {
-    intersection::face_polyh result;
-    result.reserve(orientedFaces.size());
-
     auto vertices = this->getVertices();
     auto verticesIdxToFace = [&vertices](const std::vector<std::size_t> &face) {
         intersection::face3D faceResult;
@@ -154,8 +151,10 @@ intersection::face_polyh RegularSolidBase::getFaces() const {
         return faceResult;
     };
 
-    std::transform(orientedFaces.begin(), orientedFaces.end(), std::back_inserter(result), verticesIdxToFace);
-    return result;
+    intersection::face_polyh faces;
+    faces.reserve(orientedFaces.size());
+    std::transform(orientedFaces.begin(), orientedFaces.end(), std::back_inserter(faces), verticesIdxToFace);
+    return faces;
 }
 
 void RegularSolidBase::discoverTriangles() {
@@ -171,12 +170,12 @@ void RegularSolidBase::discoverTriangles() {
 }
 
 void RegularSolidBase::normalizeVolume() {
-    auto calculateVolume = [](double volume, const std::array<std::size_t, 3> &triIdx) {
+    auto triangleVolumeAcumulator = [](double volume, const std::array<std::size_t, 3> &triIdx) {
         intersection::tri3D tri{{orientedVertices[triIdx[0]], orientedVertices[triIdx[1]], orientedVertices[triIdx[2]]}};
         double tetrahedronVolume = 1./6 * tri[0] * ((tri[1] - tri[0]) ^ (tri[2] - tri[0]));
         return volume + std::abs(tetrahedronVolume);
     };
-    double volume = std::accumulate(orientedTriangles.begin(), orientedTriangles.end(), 0., calculateVolume);
+    double volume = std::accumulate(orientedTriangles.begin(), orientedTriangles.end(), 0., triangleVolumeAcumulator);
 
     normalizeFactor = std::pow(volume, -1./3);
     auto normalizeVertex = [](const Vector<3> &vertex) { return vertex * normalizeFactor; };
