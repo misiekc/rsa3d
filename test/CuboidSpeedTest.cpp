@@ -14,10 +14,10 @@
 
 #include "CuboidSpeedTest.h"
 #include "utility/MockBC.h"
-#include "../rsa3d/shape/shapes/cuboid/MineOverlap.h"
-#include "../rsa3d/shape/shapes/cuboid/TriTriOverlap.h"
-#include "../rsa3d/shape/shapes/cuboid/SATOverlap.h"
-#include "../rsa3d/shape/shapes/cuboid/OptimizedSATOverlap.h"
+#include "../rsa3d/shape/shapes/cuboid/MineOverlapCB.h"
+#include "../rsa3d/shape/shapes/cuboid/TriTriOverlapCB.h"
+#include "../rsa3d/shape/shapes/cuboid/SATOverlapCB.h"
+#include "../rsa3d/shape/shapes/cuboid/OptimizedSATOverlapCB.h"
 #include "../rsa3d/Timer.h"
 #include "../rsa3d/Utils.h"
 
@@ -28,13 +28,13 @@ namespace
 
     CuboidOverlapStrategy * strategyFromString(const std::string &_name) {
         if (_name == "mine")
-            return new MineOverlap;
+            return new MineOverlapCB;
         else if (_name == "sat")
-            return new SATOverlap;
+            return new SATOverlapCB;
         else if (_name == "optimised_sat")
-            return new OptimizedSATOverlap;
+            return new OptimizedSATOverlapCB;
         else if (_name == "tri_tri")
-            return new TriTriOverlap;
+            return new TriTriOverlapCB;
         else
             throw std::runtime_error("unknown strategy: " + _name);
     }

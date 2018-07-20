@@ -20,7 +20,7 @@ private:
 public:
     explicit Dodecahedron(const Matrix<3, 3> &orientation) : RegularSolid<Dodecahedron>{orientation} {};
 
-    double projectionHalfsize(const Vector<3> &axis) const;     /* CRTP implement */
+    double projectionHalfsize(const Vector<3> &axis) const override;
 
     std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 };

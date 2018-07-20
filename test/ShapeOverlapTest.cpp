@@ -167,11 +167,11 @@ namespace shape_ovtest
 
         BallFactory factory;
         factory.setRadius(ball_radius);
-        std::cout << "[INFO] Performing test with unoriented shapes" << std::endl;
+        std::cout << "[INFO] Performing test with unoriented shapes -------------------------------------" << std::endl;
         if (!perform_test(*osShape, factory, max_tries, "ovtest_anisotropic_dump.nb")) return EXIT_FAILURE;
 
         RSAIsotropicFactory isotropicFactory(factory);
-        std::cout << "[INFO] Performing test with oriented shapes" << std::endl;
+        std::cout << "[INFO] Performing test with oriented shapes ---------------------------------------" << std::endl;
         if (!perform_test(*osShape, isotropicFactory, max_tries, "ovtest_isotropic_dump.nb")) return EXIT_FAILURE;
 
         return EXIT_SUCCESS;

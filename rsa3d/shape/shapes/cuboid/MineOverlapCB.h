@@ -7,7 +7,7 @@
 
 #include "CuboidOverlapStrategy.h"
 
-class MineOverlap : public CuboidOverlapStrategy {
+class MineOverlapCB : public CuboidOverlapStrategy {
 private:
     bool checkSegment(const Cuboid *cube, const Vector<3> &point1, const Vector<3> &point2) const;
 

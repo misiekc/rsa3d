@@ -2,7 +2,7 @@
 // Created by PKua on 05.12.17.
 //
 
-#include "OptimizedSATOverlap.h"
+#include "OptimizedSATOverlapCB.h"
 
 using std::abs;
 
@@ -10,7 +10,7 @@ using std::abs;
 // Optimized SAT algorithm from:
 // http://www.jkh.me/files/tutorials/Separating%20Axis%20Theorem%20for%20Oriented%20Bounding%20Boxes.pdf
 
-bool OptimizedSATOverlap::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
+bool OptimizedSATOverlapCB::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
     auto cube1 = dynamic_cast<const Cuboid*>(first);
     auto cube2 = dynamic_cast<const Cuboid*>(second);
 
@@ -83,11 +83,11 @@ bool OptimizedSATOverlap::overlap(const Shape<3, 0> *first, const Shape<3, 0> *s
     return true;
 }
 
-std::string OptimizedSATOverlap::getName() const {
-    return "OptimizedSATOverlap";
+std::string OptimizedSATOverlapCB::getName() const {
+    return "OptimizedSATOverlapCB";
 }
 
-void OptimizedSATOverlap::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) const {
+void OptimizedSATOverlapCB::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) const {
     Matrix<3, 3> orientation1 = cube1->getOrientation();
     Matrix<3, 3> orientation2 = cube2->getOrientation();
     orientation1 * Vector<3>{{1, 0, 0}};

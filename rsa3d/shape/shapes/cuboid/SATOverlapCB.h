@@ -7,7 +7,7 @@
 
 #include "CuboidOverlapStrategy.h"
 
-class SATOverlap : public CuboidOverlapStrategy {
+class SATOverlapCB : public CuboidOverlapStrategy {
 private:
     typedef std::pair<double, double>   interval;
 

@@ -4,10 +4,10 @@
 
 #include "Tetrahedron.h"
 #include "RegularSolid.h"
-#include "UnoptimizedSATOverlap.h"
-#include "TriTriOverlap.h"
+#include "UnoptimizedSATOverlapRS.h"
+#include "TriTriOverlapRS.h"
 
-const TriTriOverlap<Tetrahedron> Tetrahedron::overlapStrategy{};
+const UnoptimizedSATOverlapRS Tetrahedron::overlapStrategy{};
 
 void Tetrahedron::calculateStatic(const std::string &attr) {
     RegularSolid<Tetrahedron>::orientedVertices =
@@ -15,10 +15,6 @@ void Tetrahedron::calculateStatic(const std::string &attr) {
 
     RegularSolid<Tetrahedron>::orientedFaces =
             {{3, 2, 1}, {3, 0, 2}, {0, 3, 1}, {0, 1, 2}};
-}
-
-double Tetrahedron::projectionHalfsize(const Vector<3> &axis) const {
-    throw std::runtime_error("unimplemented");
 }
 
 bool Tetrahedron::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
@@ -43,7 +39,7 @@ bool Tetrahedron::pointInside(BoundaryConditions<3> *bc, const Vector<3> &positi
 
 OverlapStrategy<3, 0> *Tetrahedron::createStrategy(const std::string &name) const {
     if (name == "sat")
-        return new UnoptimizedSATOverlap<Tetrahedron>();
+        return new UnoptimizedSATOverlapRS();
     else
         return RegularSolid<Tetrahedron>::createStrategy(name);
 }

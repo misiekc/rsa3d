@@ -19,7 +19,7 @@ private:
 public:
     explicit TruncatedDodecahedron(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}
 
-    double projectionHalfsize(const Vector<3> &axis) const;         /* CRTP implement */
+    double projectionHalfsize(const Vector<3> &axis) const override;
 };
 
 

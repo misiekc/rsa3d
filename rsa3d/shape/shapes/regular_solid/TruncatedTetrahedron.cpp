@@ -3,9 +3,9 @@
 //
 
 #include "TruncatedTetrahedron.h"
-#include "UnoptimizedSATOverlap.h"
+#include "UnoptimizedSATOverlapRS.h"
 
-const UnoptimizedSATOverlap<TruncatedTetrahedron> TruncatedTetrahedron::overlapStrategy{};
+const UnoptimizedSATOverlapRS TruncatedTetrahedron::overlapStrategy{};
 
 void TruncatedTetrahedron::calculateStatic(const std::string &attr) {
     RegularSolid<TruncatedTetrahedron>::orientedVertices = 
@@ -18,13 +18,9 @@ void TruncatedTetrahedron::calculateStatic(const std::string &attr) {
              {3, 4, 5}, {2, 0, 1}, {9, 10, 11}, {8, 6, 7}};
 }
 
-double TruncatedTetrahedron::projectionHalfsize(const Vector<3> &axis) const {
-    throw std::runtime_error("unimplemented");
-}
-
 OverlapStrategy<3, 0> *TruncatedTetrahedron::createStrategy(const std::string &name) const {
     if (name == "sat")
-        return new UnoptimizedSATOverlap<TruncatedTetrahedron>();
+        return new UnoptimizedSATOverlapRS();
     else
         return RegularSolid<TruncatedTetrahedron>::createStrategy(name);
 }

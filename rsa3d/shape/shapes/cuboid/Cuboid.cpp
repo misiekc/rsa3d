@@ -5,10 +5,10 @@
 //----------------------------------------------------------------------------
 
 #include "Cuboid.h"
-#include "MineOverlap.h"
-#include "OptimizedSATOverlap.h"
-#include "SATOverlap.h"
-#include "TriTriOverlap.h"
+#include "MineOverlapCB.h"
+#include "OptimizedSATOverlapCB.h"
+#include "SATOverlapCB.h"
+#include "TriTriOverlapCB.h"
 
 #include <algorithm>
 
@@ -21,7 +21,7 @@ double          Cuboid::minDimension;
 Vector<3>       Cuboid::relativeVertices[VERTEX::NUM_OF];
 
 
-CuboidOverlapStrategy * Cuboid::defaultStrategy = new OptimizedSATOverlap;
+CuboidOverlapStrategy * Cuboid::defaultStrategy = new OptimizedSATOverlapCB;
 CuboidOverlapStrategy * Cuboid::strategy = Cuboid::defaultStrategy;
 
 
@@ -323,13 +323,13 @@ std::vector<std::string> Cuboid::getSupportedStrategies() const {
 
 OverlapStrategy<3, 0> *Cuboid::createStrategy(const std::string &name) const {
     if (name == "mine")
-        return new MineOverlap;
+        return new MineOverlapCB;
     else if (name == "sat")
-        return new SATOverlap;
+        return new SATOverlapCB;
     else if (name == "optimised_sat")
-        return new OptimizedSATOverlap;
+        return new OptimizedSATOverlapCB;
     else if (name == "tri_tri")
-        return new TriTriOverlap;
+        return new TriTriOverlapCB;
     else
         throw std::runtime_error("unknown strategy: " + name);
 }

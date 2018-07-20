@@ -2,7 +2,7 @@
 // Created by PKua on 03.12.17.
 //
 
-#include "MineOverlap.h"
+#include "MineOverlapCB.h"
 
 // Define this to disable edge-intersection fix in Cuboid::OverlapStrategy::MINE
 //#define DISABLE_OVERLAP_FIX1
@@ -41,7 +41,7 @@ namespace
 }
 
 
-bool MineOverlap::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
+bool MineOverlapCB::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
     auto cube1 = dynamic_cast<const Cuboid*>(first);
     auto cube2 = dynamic_cast<const Cuboid*>(second);
 
@@ -119,7 +119,7 @@ bool MineOverlap::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) c
 // Checks whether a segment determined by point1 and point2 intersects with
 // Cuboid
 //----------------------------------------------------------------------------
-bool MineOverlap::checkSegment(const Cuboid *cube, const Vector<3> &point1, const Vector<3> &point2) const
+bool MineOverlapCB::checkSegment(const Cuboid *cube, const Vector<3> &point1, const Vector<3> &point2) const
 {
     double size[3];
     cube->getSize(size);
@@ -136,10 +136,10 @@ bool MineOverlap::checkSegment(const Cuboid *cube, const Vector<3> &point1, cons
            checkSegmentFace(-hsize_z, hsize_x, hsize_y, point1[COORD::Z], point1[COORD::X], point1[COORD::Y], point2[COORD::Z], point2[COORD::X], point2[COORD::Y]);
 }
 
-std::string MineOverlap::getName() const {
-    return "MineOverlap";
+std::string MineOverlapCB::getName() const {
+    return "MineOverlapCB";
 }
 
-void MineOverlap::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) const {
+void MineOverlapCB::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) const {
 
 }

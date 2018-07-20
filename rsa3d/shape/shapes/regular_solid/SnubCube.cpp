@@ -3,9 +3,9 @@
 //
 
 #include "SnubCube.h"
-#include "UnoptimizedSATOverlap.h"
+#include "UnoptimizedSATOverlapRS.h"
 
-const UnoptimizedSATOverlap<SnubCube> SnubCube::overlapStrategy{};
+const UnoptimizedSATOverlapRS SnubCube::overlapStrategy{};
 
 void SnubCube::calculateStatic(const std::string &attr) {
     const double t = SnubCube::tribonacciConstant;
@@ -30,13 +30,9 @@ void SnubCube::calculateStatic(const std::string &attr) {
              { 3, 22, 14}, {22,  6, 14}, {14,  6, 18}, { 6, 10, 18}, {18, 10,  2}, {18,  2, 15}, {15,  2, 23}, {15, 23,  7}};
 }
 
-double SnubCube::projectionHalfsize(const Vector<3> &axis) const {
-    throw std::runtime_error("unimplemented");
-}
-
 OverlapStrategy<3, 0> *SnubCube::createStrategy(const std::string &name) const {
     if (name == "sat")
-        return new UnoptimizedSATOverlap<SnubCube>();
+        return new UnoptimizedSATOverlapRS();
     else
         return RegularSolid<SnubCube>::createStrategy(name);
 }

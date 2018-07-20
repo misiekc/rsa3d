@@ -7,10 +7,10 @@ set(MAIN_SOURCE
         rsa3d/analizator/Analyzer.cpp
         rsa3d/shape/shapes/cuboid/Cuboid.cpp
         rsa3d/shape/shapes/cuboid/CuboidOverlapStrategy.h
-        rsa3d/shape/shapes/cuboid/MineOverlap.cpp
-        rsa3d/shape/shapes/cuboid/OptimizedSATOverlap.cpp
-        rsa3d/shape/shapes/cuboid/SATOverlap.cpp
-        rsa3d/shape/shapes/cuboid/TriTriOverlap.cpp
+        rsa3d/shape/shapes/cuboid/MineOverlapCB.cpp
+        rsa3d/shape/shapes/cuboid/OptimizedSATOverlapCB.cpp
+        rsa3d/shape/shapes/cuboid/SATOverlapCB.cpp
+        rsa3d/shape/shapes/cuboid/TriTriOverlapCB.cpp
         rsa3d/shape/shapes/regular_solid/Cuboctahedron.cpp
         rsa3d/shape/shapes/regular_solid/Dodecahedron.cpp
         rsa3d/shape/shapes/regular_solid/Icosahedron.cpp
@@ -18,13 +18,14 @@ set(MAIN_SOURCE
         rsa3d/shape/shapes/regular_solid/Octahedron.cpp
         rsa3d/shape/shapes/regular_solid/RegularSolid.h
         rsa3d/shape/shapes/regular_solid/RegularSolid.tpp
+        rsa3d/shape/shapes/regular_solid/RegularSolidBase.cpp
         rsa3d/shape/shapes/regular_solid/Rhombicosidodecahedron.cpp
         rsa3d/shape/shapes/regular_solid/Rhombicuboctahedron.cpp
-        rsa3d/shape/shapes/regular_solid/SATOverlap.h
+        rsa3d/shape/shapes/regular_solid/SATOverlapRS.cpp
         rsa3d/shape/shapes/regular_solid/SnubCube.cpp
         rsa3d/shape/shapes/regular_solid/SnubDodecahedron.cpp
         rsa3d/shape/shapes/regular_solid/Tetrahedron.cpp
-        rsa3d/shape/shapes/regular_solid/TriTriOverlap.h
+        rsa3d/shape/shapes/regular_solid/TriTriOverlapRS.cpp
         rsa3d/shape/shapes/regular_solid/TruncatedCube.cpp
         rsa3d/shape/shapes/regular_solid/TruncatedCuboctahedron.cpp
         rsa3d/shape/shapes/regular_solid/TruncatedDodecahedron.cpp
@@ -32,7 +33,7 @@ set(MAIN_SOURCE
         rsa3d/shape/shapes/regular_solid/TruncatedIcosidodecahedron.cpp
         rsa3d/shape/shapes/regular_solid/TruncatedOctahedron.cpp
         rsa3d/shape/shapes/regular_solid/TruncatedTetrahedron.cpp
-        rsa3d/shape/shapes/regular_solid/UnoptimizedSATOverlap.h
+        rsa3d/shape/shapes/regular_solid/UnoptimizedSATOverlapRS.cpp
         rsa3d/shape/shapes/polygon/HBPolygon.cpp
         rsa3d/shape/shapes/polygon/SBPolygon.cpp
         rsa3d/shape/shapes/Ellipse.cpp

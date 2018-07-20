@@ -12,14 +12,12 @@ class SnubDodecahedron : public RegularSolid<SnubDodecahedron> {
 private:
     friend RegularSolid<SnubDodecahedron>;
 
-    const static TriTriOverlap<SnubDodecahedron> overlapStrategy;
+    const static TriTriOverlapRS overlapStrategy;
 
     static void calculateStatic(const std::string &attr);
 
 public:
     explicit SnubDodecahedron(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}
-
-    double projectionHalfsize(const Vector<3> &axis) const;         /* CRTP implement */
 
     OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
 };

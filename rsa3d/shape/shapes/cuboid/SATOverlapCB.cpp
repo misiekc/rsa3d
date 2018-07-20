@@ -2,10 +2,10 @@
 // Created by PKua on 03.12.17.
 //
 
-#include "SATOverlap.h"
+#include "SATOverlapCB.h"
 
 
-bool SATOverlap::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
+bool SATOverlapCB::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) const {
     auto cube1 = dynamic_cast<const Cuboid*>(first);
     auto cube2 = dynamic_cast<const Cuboid*>(second);
 
@@ -50,7 +50,7 @@ bool SATOverlap::overlap(const Shape<3, 0> *first, const Shape<3, 0> *second) co
 // Checks whether this and _second projections on axis _axis overlap. If so,
 // returns true
 //----------------------------------------------------------------------------
-bool SATOverlap::checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Vector<3> * _vert2) const
+bool SATOverlapCB::checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1, Vector<3> * _vert2) const
 {
     interval this_int = this->getProjection(_axis, _vert1);
     interval second_int = this->getProjection(_axis, _vert2);
@@ -61,7 +61,7 @@ bool SATOverlap::checkSeparatingAxis(const Vector<3> & _axis, Vector<3> * _vert1
 // Projects polyhedron _polyh on axis _axis and returns interval given by
 // the projection
 //----------------------------------------------------------------------------
-SATOverlap::interval SATOverlap::getProjection(const Vector<3> & _axis, Vector<3> * _vert) const
+SATOverlapCB::interval SATOverlapCB::getProjection(const Vector<3> & _axis, Vector<3> * _vert) const
 {
     interval proj_int = {std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
 
@@ -78,11 +78,11 @@ SATOverlap::interval SATOverlap::getProjection(const Vector<3> & _axis, Vector<3
     return proj_int;
 }
 
-std::string SATOverlap::getName() const {
-    return "SATOverlap";
+std::string SATOverlapCB::getName() const {
+    return "SATOverlapCB";
 }
 
-void SATOverlap::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) const {
+void SATOverlapCB::runOverheadOperations(const Cuboid *cube1, const Cuboid *cube2) const {
     Matrix<3, 3> orientation1 = cube1->getOrientation();
     Matrix<3, 3> orientation2 = cube2->getOrientation();
 

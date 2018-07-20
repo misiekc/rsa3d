@@ -19,7 +19,7 @@ private:
 public:
     explicit Icosahedron(const Matrix<3, 3> &orientation) : RegularSolid<Icosahedron>{orientation} {};
 
-    double projectionHalfsize(const Vector<3> &axis) const;     /* CRTP implement */
+    double projectionHalfsize(const Vector<3> &axis) const override;
 };
 
 

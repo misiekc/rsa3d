@@ -3,9 +3,9 @@
 //
 
 #include "SnubDodecahedron.h"
-#include "UnoptimizedSATOverlap.h"
+#include "UnoptimizedSATOverlapRS.h"
 
-const TriTriOverlap<SnubDodecahedron> SnubDodecahedron::overlapStrategy{};
+const TriTriOverlapRS SnubDodecahedron::overlapStrategy{};
 
 namespace {
     const double phi = (1 + std::sqrt(5)) / 2;
@@ -73,13 +73,9 @@ void SnubDodecahedron::calculateStatic(const std::string &attr) {
              { 7,  5, 41}, { 5, 17, 29}, {29, 33, 17}, {59, 51, 47}, {47, 51, 20}};
 }
 
-double SnubDodecahedron::projectionHalfsize(const Vector<3> &axis) const {
-    throw std::runtime_error("unimplemented");
-}
-
 OverlapStrategy<3, 0> *SnubDodecahedron::createStrategy(const std::string &name) const {
     if (name == "sat")
-        return new UnoptimizedSATOverlap<SnubDodecahedron>();
+        return new UnoptimizedSATOverlapRS();
     else
         return RegularSolid<SnubDodecahedron>::createStrategy(name);
 }
