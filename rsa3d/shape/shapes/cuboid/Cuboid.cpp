@@ -369,7 +369,7 @@ std::vector<double> Cuboid::calculateOrder(const OrderCalculable *other) const {
     // "The first" axes are ones which give maximal value of cosine, "the second" are chosen in the same manner from
     // remaining ones
     double axisAlignment[3] = {0, 0, 0};
-    double row[2] = {0, 0}, column[2] = {0, 0};
+    std::size_t row[2] = {0, 0}, column[2] = {0, 0};
     double cos4Sum = 0;
     for(size_t i = 0; i<3; i++){
         for(size_t j = 0; j<3; j++){

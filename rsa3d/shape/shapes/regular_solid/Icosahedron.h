@@ -7,8 +7,9 @@
 
 
 #include "RegularSolid.h"
+#include "../../OrderCalculable.h"
 
-class Icosahedron : public RegularSolid<Icosahedron> {
+class Icosahedron : public RegularSolid<Icosahedron>, public OrderCalculable {
 private:
     friend RegularSolid<Icosahedron>;
 
@@ -18,6 +19,8 @@ private:
 
 public:
     explicit Icosahedron(const Matrix<3, 3> &orientation) : RegularSolid<Icosahedron>{orientation} {};
+
+    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 
     double projectionHalfsize(const Vector<3> &axis) const override;
 };
