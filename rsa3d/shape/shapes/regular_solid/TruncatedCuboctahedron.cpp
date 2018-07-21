@@ -4,10 +4,12 @@
 
 #include "TruncatedCuboctahedron.h"
 
-void TruncatedCuboctahedron::calculateStatic(const std::string &attr) {
+namespace {
     double xi = 1 + M_SQRT2;
     double eta = 1 + 2*M_SQRT2;
+}
 
+void TruncatedCuboctahedron::calculateStatic(const std::string &attr) {
     RegularSolid<TruncatedCuboctahedron>::orientedVertices =
             {{{ 1,  xi, eta}}, {{ 1, xi, -eta}}, {{1, -xi,  eta}}, {{-1,  xi,  eta}},
              {{-1, -xi, eta}}, {{-1, xi, -eta}}, {{1, -xi, -eta}}, {{-1, -xi, -eta}},
@@ -39,9 +41,6 @@ void TruncatedCuboctahedron::calculateStatic(const std::string &attr) {
 }
 
 double TruncatedCuboctahedron::projectionHalfsize(const Vector<3> &axis) const {
-    double xi = 1 + M_SQRT2;
-    double eta = 1 + 2*M_SQRT2;
-
     double xAxis = std::abs(this->getOrientationMatrix().column(0) * axis);
     double yAxis = std::abs(this->getOrientationMatrix().column(1) * axis);
     double zAxis = std::abs(this->getOrientationMatrix().column(2) * axis);

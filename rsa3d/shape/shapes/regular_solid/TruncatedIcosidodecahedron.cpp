@@ -8,20 +8,20 @@ namespace {
     inline double max(double a, double b, double c, double d, double e) {
         return std::max(std::max(std::max(std::max(a, b), c), d), e);
     }
+
+    const double g = RegularSolidBase::goldRatio;
+    const double gi = 1/g;
+    const double gp3 = g + 3;
+    const double git2 = 2/g;
+    const double gt2p1 = 2*g + 1;
+    const double g2 = g*g;
+    const double gt3m1 = 3*g - 1;
+    const double gt2m1 = 2*g - 1;
+    const double gp2 = g + 2;
+    const double gt2 = 2*g;
 }
 
 void TruncatedIcosidodecahedron::calculateStatic(const std::string &attr) {
-    double g = goldRatio;
-    double gi = 1/goldRatio;
-    double gp3 = goldRatio + 3;
-    double git2 = 2/goldRatio;
-    double gt2p1 = 2*goldRatio + 1;
-    double g2 = goldRatio*goldRatio;
-    double gt3m1 = 3*goldRatio - 1;
-    double gt2m1 = 2*goldRatio - 1;
-    double gp2 = goldRatio + 2;
-    double gt2 = 2*goldRatio;
-
     RegularSolid<TruncatedIcosidodecahedron>::orientedVertices =
             {{{ gi,  gi, gp3}}, {{ gi, gi, -gp3}}, {{gi, -gi,  gp3}}, {{-gi,  gi,  gp3}},
              {{-gi, -gi, gp3}}, {{-gi, gi, -gp3}}, {{gi, -gi, -gp3}}, {{-gi, -gi, -gp3}},
@@ -84,16 +84,6 @@ double TruncatedIcosidodecahedron::projectionHalfsize(const Vector<3> &axis) con
     double xAxis = std::abs(this->getOrientationMatrix().column(0) * axis);
     double yAxis = std::abs(this->getOrientationMatrix().column(1) * axis);
     double zAxis = std::abs(this->getOrientationMatrix().column(2) * axis);
-    double g = goldRatio;
-    double gi = 1/goldRatio;
-    double gp3 = goldRatio + 3;
-    double git2 = 2/goldRatio;
-    double gt2p1 = 2*goldRatio + 1;
-    double g2 = goldRatio*goldRatio;
-    double gt3m1 = 3*goldRatio - 1;
-    double gt2m1 = 2*goldRatio - 1;
-    double gp2 = goldRatio + 2;
-    double gt2 = 2*goldRatio;
 
     double xRectHalfsize = max(gi*(xAxis + yAxis) + gp3*zAxis, git2*xAxis + g*yAxis + gt2p1*zAxis, gi*xAxis + g2*yAxis + gt3m1*zAxis,
                                gt2m1*xAxis + 2*yAxis + gp2*zAxis, g*xAxis + 3*yAxis +gt2*zAxis);

@@ -4,13 +4,15 @@
 
 #include "TruncatedIcosahedron.h"
 
-void TruncatedIcosahedron::calculateStatic(const std::string &attr) {
-    double g = goldRatio;
-    double gt3 = 3*goldRatio;
-    double gp2 = goldRatio + 2;
-    double gt2 = 2*goldRatio;
-    double g3 = goldRatio*goldRatio*goldRatio;
+namespace {
+    const double g = RegularSolidBase::goldRatio;
+    const double gt3 = 3*g;
+    const double gp2 = g + 2;
+    const double gt2 = 2*g;
+    const double g3 = g*g*g;
+}
 
+void TruncatedIcosahedron::calculateStatic(const std::string &attr) {
     RegularSolid<TruncatedIcosahedron>::orientedVertices =
             {{{0, 1, gt3}}, {{0, 1, -gt3}}, {{0, -1, gt3}}, {{0, -1, -gt3}},
              {{1, gt3, 0}}, {{1, -gt3, 0}}, {{-1, gt3, 0}}, {{-1, -gt3, 0}},
@@ -46,11 +48,6 @@ double TruncatedIcosahedron::projectionHalfsize(const Vector<3> &axis) const {
     double xAxis = std::abs(this->getOrientationMatrix().column(0) * axis);
     double yAxis = std::abs(this->getOrientationMatrix().column(1) * axis);
     double zAxis = std::abs(this->getOrientationMatrix().column(2) * axis);
-    double g = goldRatio;
-    double gt3 = 3*goldRatio;
-    double gp2 = goldRatio + 2;
-    double gt2 = 2*goldRatio;
-    double g3 = goldRatio*goldRatio*goldRatio;
 
     double xRectHalfsize = std::max(std::max(yAxis + gt3*zAxis, xAxis + gp2*yAxis + gt2*zAxis), g*xAxis + 2*yAxis + g3*zAxis);
     double yRectHalfsize = std::max(std::max(zAxis + gt3*xAxis, yAxis + gp2*zAxis + gt2*xAxis), g*yAxis + 2*zAxis + g3*xAxis);

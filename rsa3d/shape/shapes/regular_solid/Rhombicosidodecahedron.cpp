@@ -4,13 +4,15 @@
 
 #include "Rhombicosidodecahedron.h"
 
-void Rhombicosidodecahedron::calculateStatic(const std::string &attr) {
-    double g = goldRatio;
-    double g2 = goldRatio*goldRatio;
-    double g3 = goldRatio*goldRatio*goldRatio;
-    double gt2 = 2*goldRatio;
-    double gp2 = goldRatio + 2;
+namespace {
+    const double g = RegularSolidBase::goldRatio;
+    const double g2 = g*g;
+    const double g3 = g*g*g;
+    const double gt2 = 2*g;
+    const double gp2 = g + 2;
+}
 
+void Rhombicosidodecahedron::calculateStatic(const std::string &attr) {
     RegularSolid<Rhombicosidodecahedron>::orientedVertices =
             {{{ 1,  1, g3}}, {{ 1, 1, -g3}}, {{1, -1,  g3}}, {{-1,  1,  g3}},
              {{-1, -1, g3}}, {{-1, 1, -g3}}, {{1, -1, -g3}}, {{-1, -1, -g3}},
@@ -51,11 +53,6 @@ double Rhombicosidodecahedron::projectionHalfsize(const Vector<3> &axis) const {
     double xAxis = std::abs(this->getOrientationMatrix().column(0) * axis);
     double yAxis = std::abs(this->getOrientationMatrix().column(1) * axis);
     double zAxis = std::abs(this->getOrientationMatrix().column(2) * axis);
-    double g = goldRatio;
-    double g2 = goldRatio*goldRatio;
-    double g3 = goldRatio*goldRatio*goldRatio;
-    double gt2 = 2*goldRatio;
-    double gp2 = goldRatio + 2;
 
     double xRectHalfsize = std::max(std::max(xAxis + yAxis + g3*zAxis, g2*xAxis + g*yAxis + gt2*zAxis), gp2*xAxis + g2*zAxis);
     double yRectHalfsize = std::max(std::max(yAxis + zAxis + g3*xAxis, g2*yAxis + g*zAxis + gt2*xAxis), gp2*yAxis + g2*xAxis);

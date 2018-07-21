@@ -4,8 +4,11 @@
 
 #include "Rhombicuboctahedron.h"
 
+namespace {
+    const double xi = M_SQRT2 + 1;
+}
+
 void Rhombicuboctahedron::calculateStatic(const std::string &attr) {
-    double xi = M_SQRT2 + 1;
     RegularSolid<Rhombicuboctahedron>::orientedVertices =
             {{{ 1,  1, xi}}, {{ 1, 1, -xi}}, {{1, -1,  xi}}, {{-1,  1,  xi}},
              {{-1, -1, xi}}, {{-1, 1, -xi}}, {{1, -1, -xi}}, {{-1, -1, -xi}},
@@ -29,7 +32,6 @@ double Rhombicuboctahedron::projectionHalfsize(const Vector<3> &axis) const {
     double yAxis = std::abs(this->getOrientationMatrix().column(1) * axis);
     double zAxis = std::abs(this->getOrientationMatrix().column(2) * axis);
 
-    double xi = M_SQRT2 + 1;
     double xRectHalfsize = xAxis + yAxis + xi*zAxis;
     double yRectHalfsize = xAxis + xi*yAxis + zAxis;
     double zRectHalfsize = xi*xAxis + yAxis + zAxis;

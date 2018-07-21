@@ -4,8 +4,11 @@
 
 #include "TruncatedCube.h"
 
+namespace {
+    const double xi = M_SQRT2 - 1;
+}
+
 void TruncatedCube::calculateStatic(const std::string &attr) {
-    double xi = M_SQRT2 - 1;
     RegularSolid<TruncatedCube>::orientedVertices =
             {{{ xi,  1, 1}}, {{ xi, 1, -1}}, {{xi, -1,  1}}, {{-xi,  1,  1}},
              {{-xi, -1, 1}}, {{-xi, 1, -1}}, {{xi, -1, -1}}, {{-xi, -1, -1}},
@@ -27,7 +30,6 @@ double TruncatedCube::projectionHalfsize(const Vector<3> &axis) const {
     double xAxis = std::abs(this->getOrientationMatrix().column(0) * axis);
     double yAxis = std::abs(this->getOrientationMatrix().column(1) * axis);
     double zAxis = std::abs(this->getOrientationMatrix().column(2) * axis);
-    double xi = M_SQRT2 - 1;
 
     double xRectHalfsize = xi * xAxis + yAxis + zAxis;
     double yRectHalfsize = xAxis + xi * yAxis + zAxis;

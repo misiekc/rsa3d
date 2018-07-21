@@ -4,13 +4,15 @@
 
 #include "TruncatedDodecahedron.h"
 
-void TruncatedDodecahedron::calculateStatic(const std::string &attr) {
-    double g = goldRatio;
-    double gi = 1/goldRatio;
-    double gp2 = goldRatio + 2;
-    double gt2 = 2*goldRatio;
-    double gp1 = goldRatio + 1;
+namespace {
+    const double g = RegularSolidBase::goldRatio;
+    const double gi = 1/g;
+    const double gp2 = g + 2;
+    const double gt2 = 2*g;
+    const double gp1 = g + 1;
+}
 
+void TruncatedDodecahedron::calculateStatic(const std::string &attr) {
     RegularSolid<TruncatedDodecahedron>::orientedVertices =
             {{{0, gi, gp2}}, {{0, gi, -gp2}}, {{0, -gi, gp2}}, {{0, -gi, -gp2}},
              {{gi, gp2, 0}}, {{gi, -gp2, 0}}, {{-gi, gp2, 0}}, {{-gi, -gp2, 0}},
@@ -48,11 +50,6 @@ double TruncatedDodecahedron::projectionHalfsize(const Vector<3> &axis) const {
     double xAxis = std::abs(this->getOrientationMatrix().column(0) * axis);
     double yAxis = std::abs(this->getOrientationMatrix().column(1) * axis);
     double zAxis = std::abs(this->getOrientationMatrix().column(2) * axis);
-    double g = goldRatio;
-    double gi = 1/goldRatio;
-    double gp2 = goldRatio + 2;
-    double gt2 = 2*goldRatio;
-    double gp1 = goldRatio + 1;
 
     double xRectHalfsize = std::max(std::max(gi*yAxis +gp2*zAxis, gi*xAxis + g*yAxis + gt2*zAxis), g*xAxis + 2*yAxis + gp1*zAxis);
     double yRectHalfsize = std::max(std::max(gi*zAxis +gp2*xAxis, gi*yAxis + g*zAxis + gt2*xAxis), g*yAxis + 2*zAxis + gp1*xAxis);

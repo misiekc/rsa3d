@@ -42,6 +42,9 @@ protected:
     void setOrientationMatrix(const Matrix<3, 3> &orientation);
 
 public:
+    constexpr static double goldRatio = (1 + std::sqrt(5.)) / 2;
+    static constexpr double tribonacciConstant = (1 + std::cbrt(19 + 3*std::sqrt(33.)) + std::cbrt(19 - 3*std::sqrt(33.)))/3;
+
     bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
                      double orientationRange) const override;
     void store(std::ostream &f) const override;

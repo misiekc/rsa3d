@@ -6,13 +6,15 @@
 #include "../../OrderParameters.h"
 
 void Dodecahedron::calculateStatic(const std::string &attr) {
+    double g = goldRatio;
+
     RegularSolid<Dodecahedron>::orientedVertices =
             {{{ 1,  1,  1}}, {{-1,  1,  1}}, {{-1, -1,  1}}, {{1, -1,  1}},
              {{-1, -1, -1}}, {{-1,  1, -1}}, {{ 1,  1, -1}}, {{1, -1, -1}},
 
-             {{gold, 1/gold, 0}}, {{-gold, 1/gold, 0}}, {{-gold, -1/gold, 0}}, {{gold, -1/gold, 0}},
-             {{0, gold, 1/gold}}, {{0, -gold, 1/gold}}, {{0, -gold, -1/gold}}, {{0, gold, -1/gold}},
-             {{1/gold, 0, gold}}, {{1/gold, 0, -gold}}, {{-1/gold, 0, -gold}}, {{-1/gold, 0, gold}}};
+             {{g, 1/g, 0}}, {{-g, 1/g, 0}}, {{-g, -1/g, 0}}, {{g, -1/g, 0}},
+             {{0, g, 1/g}}, {{0, -g, 1/g}}, {{0, -g, -1/g}}, {{0, g, -1/g}},
+             {{1/g, 0, g}}, {{1/g, 0, -g}}, {{-1/g, 0, -g}}, {{-1/g, 0, g}}};
     
     RegularSolid<Dodecahedron>::orientedFaces =
             {{3, 11,  8, 0, 16}, {17,  6,  8, 11, 7}, {15, 12, 0,  8,  6}, {16,  0, 12,  1, 19},
@@ -26,9 +28,9 @@ double Dodecahedron::projectionHalfsize(const Vector<3> &axis) const {
     double zHalfsize = std::abs(this->getOrientationMatrix().column(2) * axis);
 
     double cubeHalfsize = xHalfsize + yHalfsize + zHalfsize;
-    double xRectHalfsize = xHalfsize * gold + yHalfsize / gold;
-    double yRectHalfsize = yHalfsize * gold + zHalfsize / gold;
-    double zRectHalfsize = zHalfsize * gold + xHalfsize / gold;
+    double xRectHalfsize = xHalfsize * goldRatio + yHalfsize / goldRatio;
+    double yRectHalfsize = yHalfsize * goldRatio + zHalfsize / goldRatio;
+    double zRectHalfsize = zHalfsize * goldRatio + xHalfsize / goldRatio;
 
     return std::max(std::max(std::max(cubeHalfsize, xRectHalfsize), yRectHalfsize), zRectHalfsize) * normalizeFactor;
 }

@@ -7,9 +7,9 @@
 
 void Icosahedron::calculateStatic(const std::string &attr) {
     RegularSolid<Icosahedron>::orientedVertices =
-            {{{0, 1, gold}}, {{0, -1, gold}}, {{0, -1, -gold}}, {{0, 1, -gold}},
-             {{gold, 0, 1}}, {{gold, 0, -1}}, {{-gold, 0, -1}}, {{-gold, 0, 1}},
-             {{1, gold, 0}}, {{-1, gold, 0}}, {{-1, -gold, 0}}, {{1, -gold, 0}}};
+            {{{0, 1, goldRatio}}, {{0, -1, goldRatio}}, {{0, -1, -goldRatio}}, {{0, 1, -goldRatio}},
+             {{goldRatio, 0, 1}}, {{goldRatio, 0, -1}}, {{-goldRatio, 0, -1}}, {{-goldRatio, 0, 1}},
+             {{1, goldRatio, 0}}, {{-1, goldRatio, 0}}, {{-1, -goldRatio, 0}}, {{1, -goldRatio, 0}}};
 
     RegularSolid<Icosahedron>::orientedFaces =
             {{ 4,  0,  1}, { 8,  0,  4}, {9,  0,  8}, { 7, 0,  9}, { 1,  0, 7},
@@ -23,9 +23,9 @@ double Icosahedron::projectionHalfsize(const Vector<3> &axis) const {
     double yHalfsize = std::abs(this->getOrientationMatrix().column(1) * axis);
     double zHalfsize = std::abs(this->getOrientationMatrix().column(2) * axis);
 
-    double xRectHalfsize = yHalfsize + zHalfsize * gold;
-    double yRectHalfsize = zHalfsize + xHalfsize * gold;
-    double zRectHalfsize = xHalfsize + yHalfsize * gold;
+    double xRectHalfsize = yHalfsize + zHalfsize * goldRatio;
+    double yRectHalfsize = zHalfsize + xHalfsize * goldRatio;
+    double zRectHalfsize = xHalfsize + yHalfsize * goldRatio;
 
     return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * normalizeFactor;
 }

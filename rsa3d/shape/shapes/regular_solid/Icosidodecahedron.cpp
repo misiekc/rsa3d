@@ -4,11 +4,13 @@
 
 #include "Icosidodecahedron.h"
 
-void Icosidodecahedron::calculateStatic(const std::string &attr) {
-    double g = goldRatio;
-    double g2 = goldRatio * goldRatio;
-    double dg = 2 * goldRatio;
+namespace {
+    const double g = RegularSolidBase::goldRatio;
+    const double g2 = g*g;
+    const double dg = 2*g;
+}
 
+void Icosidodecahedron::calculateStatic(const std::string &attr) {
     RegularSolid<Icosidodecahedron>::orientedVertices =
             {{{0, 0, dg}}, {{0, dg, 0}}, {{dg, 0, 0}}, {{0, 0, -dg}}, {{0, -dg, 0}}, {{-dg, 0, 0}},
 
@@ -36,9 +38,6 @@ double Icosidodecahedron::projectionHalfsize(const Vector<3> &axis) const {
     double xAxis = std::abs(this->getOrientationMatrix().column(0) * axis);
     double yAxis = std::abs(this->getOrientationMatrix().column(1) * axis);
     double zAxis = std::abs(this->getOrientationMatrix().column(2) * axis);
-    double g = goldRatio;
-    double g2 = goldRatio * goldRatio;
-    double dg = 2 * goldRatio;
 
     double xRectHalfsize = std::max(dg*xAxis, xAxis + g*yAxis + g2*zAxis);
     double yRectHalfsize = std::max(dg*yAxis, yAxis + g*zAxis + g2*xAxis);

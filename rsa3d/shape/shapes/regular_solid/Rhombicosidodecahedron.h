@@ -12,8 +12,6 @@ class Rhombicosidodecahedron : public RegularSolid<Rhombicosidodecahedron> {
 private:
     friend RegularSolid<Rhombicosidodecahedron>;
 
-    constexpr static double goldRatio = (1 + std::sqrt(5.)) / 2;
-
     static void calculateStatic(const std::string &attr);
 
 public:

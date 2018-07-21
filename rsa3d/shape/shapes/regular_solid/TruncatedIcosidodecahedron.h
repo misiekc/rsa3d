@@ -12,8 +12,6 @@ class TruncatedIcosidodecahedron : public RegularSolid<TruncatedIcosidodecahedro
 private:
     friend RegularSolid<TruncatedIcosidodecahedron>;
 
-    constexpr static double goldRatio = (1 + std::sqrt(5.)) / 2;
-
     static void calculateStatic(const std::string &attr);
 
 public:
