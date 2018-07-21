@@ -333,7 +333,7 @@ bool VoxelList::analyzeVoxel(Voxel *v, const RSAShape *s, RSABoundaryConditions 
 
 
 bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, unsigned short depth){
-	if (!this->disabled && (depth > v->depth || depth==0) ){
+	if (!this->disabled){ // && (depth > v->depth || depth==0) ){
 
 	    if (!isTopLevelVoxelActive(v))
 		    return true;
