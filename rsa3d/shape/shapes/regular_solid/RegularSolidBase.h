@@ -28,18 +28,18 @@ protected:
     static std::vector<Vector<3>> orientedFaceAxes;
     static std::vector<Vector<3>> orientedEdgeAxes;
     static std::vector<Vector<3>> orientedVertexAxes;
-
     static std::vector<Vector<3>> orientedMidedgeAxes;
+
     static double normalizeFactor;
     static double circumsphereRadius;
     static double insphereRadius;
 
     static void initClass(const std::string &attr);
+
     explicit RegularSolidBase(const Matrix<3, 3> &orientation) : orientation(orientation) {};
+
     inline std::vector<Vector<3>> applyOrientation(const std::vector<Vector<3>> &vectors) const;
     inline std::vector<Vector<3>> applyPosition(const std::vector<Vector<3>> &vectors) const;
-
-    void setOrientationMatrix(const Matrix<3, 3> &orientation);
 
 public:
     constexpr static double goldRatio = (1 + std::sqrt(5.)) / 2;
@@ -49,11 +49,10 @@ public:
                      double orientationRange) const override;
     void store(std::ostream &f) const override;
     void restore(std::istream &f) override;
-
     std::string toWolfram() const override;
     std::vector<std::string> getSupportedStrategies() const override;
-
     OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
+
     std::vector<Vector<3>> getVertices() const;
     std::vector<Vector<3>> getFaceAxes() const;
     std::vector<Vector<3>> getEdgeAxes() const;
@@ -63,6 +62,7 @@ public:
     intersection::face_polyh getFaces() const;
 
     const Matrix<3, 3> &getOrientationMatrix() const;
+    void setOrientationMatrix(const Matrix<3, 3> &orientation);
     virtual double projectionHalfsize(const Vector<3> &axis) const;
 };
 

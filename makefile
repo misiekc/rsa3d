@@ -119,6 +119,7 @@ OBJS_TEST = test/utility/BallFactory \
        		test/PackingOverlapsTest \
        		test/CuboidSpeedTest \
        		test/Main \
+       		test/OrderParamTest \
        		test/RectangleCase \
        		test/ShapeOverlapTest \
        		test/ShapePointInsideTest \
