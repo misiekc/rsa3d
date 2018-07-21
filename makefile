@@ -101,6 +101,7 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/shape/shapes/Rectangle \
        rsa3d/shape/shapes/SpheroCylinder2D \
        rsa3d/shape/AnisotropicShape2D \
+       rsa3d/shape/OrderParameters \
        rsa3d/shape/ShapeFactory \
        rsa3d/surfaces/NBoxFBC \
        rsa3d/surfaces/NBoxPBC

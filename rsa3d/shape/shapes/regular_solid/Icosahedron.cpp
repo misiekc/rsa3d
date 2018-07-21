@@ -3,6 +3,7 @@
 //
 
 #include "Icosahedron.h"
+#include "../../OrderParameters.h"
 
 void Icosahedron::calculateStatic(const std::string &attr) {
     RegularSolid<Icosahedron>::orientedVertices =
@@ -31,23 +32,9 @@ double Icosahedron::projectionHalfsize(const Vector<3> &axis) const {
 
 std::vector<double> Icosahedron::calculateOrder(const OrderCalculable *other) const {
     auto &otherIcos = dynamic_cast<const Icosahedron&>(*other);
-
-    double cos6sum = 0;
-    double maxAbsCos = 0;
-    auto faceAxes = this->getFaceAxes();
+    auto thisFaceAxes = this->getFaceAxes();
     auto otherFaceAxes = otherIcos.getFaceAxes();
-    for (const auto &a1 : faceAxes) {
-        for (const auto &a2 : otherFaceAxes) {
-            double absCos = std::abs(a1 * a2);
-            if (absCos > maxAbsCos)
-                maxAbsCos = absCos;
 
-            double cos2 = absCos * absCos;
-            cos6sum += cos2 * cos2 * cos2;
-        }
-    }
-    double nematicOrder = P2(maxAbsCos);
-    double icosahedralOrder = 243./1000 * (7*cos6sum - 100);
-
-    return {nematicOrder, icosahedralOrder};
+    auto params = OrderParameters::nematicAndFull(thisFaceAxes, otherFaceAxes, OrderParameters::CosExp::_6);
+    return {params.nematic, 243./1000*(7*params.full - 100)};
 }

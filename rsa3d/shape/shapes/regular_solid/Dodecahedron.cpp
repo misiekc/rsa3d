@@ -3,6 +3,7 @@
 //
 
 #include "Dodecahedron.h"
+#include "../../OrderParameters.h"
 
 void Dodecahedron::calculateStatic(const std::string &attr) {
     RegularSolid<Dodecahedron>::orientedVertices =
@@ -34,23 +35,9 @@ double Dodecahedron::projectionHalfsize(const Vector<3> &axis) const {
 
 std::vector<double> Dodecahedron::calculateOrder(const OrderCalculable *other) const {
     auto &otherDod = dynamic_cast<const Dodecahedron&>(*other);
-
-    double cos6sum = 0;
-    double maxAbsCos = 0;
-    auto faceAxes = this->getFaceAxes();
+    auto thisFaceAxes = this->getFaceAxes();
     auto otherFaceAxes = otherDod.getFaceAxes();
-    for (const auto &a1 : faceAxes) {
-        for (const auto &a2 : otherFaceAxes) {
-            double absCos = std::abs(a1 * a2);
-            if (absCos > maxAbsCos)
-                maxAbsCos = absCos;
 
-            double cos2 = absCos * absCos;
-            cos6sum += cos2 * cos2 * cos2;
-        }
-    }
-    double nematicOrder = P2(maxAbsCos);
-    double dodecahedralOrder = 25./192 * (7*cos6sum - 36);
-
-    return {nematicOrder, dodecahedralOrder};
+    auto params = OrderParameters::nematicAndFull(thisFaceAxes, otherFaceAxes, OrderParameters::CosExp::_6);
+    return {params.nematic, 25./192*(7*params.full - 36)};
 }

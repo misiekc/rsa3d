@@ -3,6 +3,7 @@
 //
 
 #include "Octahedron.h"
+#include "../../OrderParameters.h"
 
 void Octahedron::calculateStatic(const std::string &attr) {
     RegularSolid<Octahedron>::orientedVertices =
@@ -22,23 +23,9 @@ double Octahedron::projectionHalfsize(const Vector<3> &axis) const {
 
 std::vector<double> Octahedron::calculateOrder(const OrderCalculable *other) const {
     auto &otherOct = dynamic_cast<const Octahedron&>(*other);
-
-    double cos4sum = 0;
-    double maxAbsCos = 0;
-    auto faceAxes = this->getFaceAxes();
+    auto thisFaceAxes = this->getFaceAxes();
     auto otherFaceAxes = otherOct.getFaceAxes();
-    for (const auto &a1 : faceAxes) {
-        for (const auto &a2 : otherFaceAxes) {
-            double absCos = std::abs(a1 * a2);
-            if (absCos > maxAbsCos)
-                maxAbsCos = absCos;
 
-            double cos2 = absCos * absCos;
-            cos4sum += cos2 * cos2;
-        }
-    }
-    double nematicOrder = P2(maxAbsCos);
-    double octahedralOrder = 27./128 * (5*cos4sum - 16);
-
-    return {nematicOrder, octahedralOrder};
+    auto params = OrderParameters::nematicAndFull(thisFaceAxes, otherFaceAxes, OrderParameters::CosExp::_4);
+    return {params.nematic, 27./128*(5*params.full - 16)};
 }

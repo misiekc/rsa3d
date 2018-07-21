@@ -49,6 +49,7 @@ set(MAIN_SOURCE
         rsa3d/shape/ConvexShape.h
         rsa3d/shape/ConvexShape.tpp
         rsa3d/shape/OrderCalculable.h
+        rsa3d/shape/OrderParameters.cpp
         rsa3d/shape/OverlapStrategy.h
         rsa3d/shape/OverlapStrategyShape.h
         rsa3d/shape/Shape.h
