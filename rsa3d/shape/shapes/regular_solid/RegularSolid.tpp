@@ -21,7 +21,7 @@ void RegularSolid<SpecificSolid>::initClass(const std::string &attr) {
     Shape::setCreateShapeImpl([](RND *rnd) -> Shape* {
         return new SpecificSolid(Matrix<3, 3>::rotation(
                 2*M_PI*rnd->nextValue(),
-                2*std::asin(rnd->nextValue() - 1),
+                std::asin(2*rnd->nextValue() - 1),
                 2*M_PI*rnd->nextValue()));
     });
 }
