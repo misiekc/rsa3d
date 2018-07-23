@@ -227,8 +227,12 @@ int main(int argc, char **argv) {
     } else if (mode == "dat") {
         makeDatFileForPackingsInDirectory(&params, argv[3]);
     } else if (mode == "analyze") {
+    	if (argc < 4) die("Usage: ./rsa analyze <input> <directory> (correlations range = 10.0)");
+    	double corrRange = (argc == 5) ? std::stod(argv[4]) : 10.0;
+    	if (corrRange <= 0.0) die("correlatins range <= 0");
+
         Analyzer an(&params);
-        an.analyzePackingsInDirectory(argv[3], 0.01, 1.0);
+        an.analyzePackingsInDirectory(argv[3], 0.01, 1.0, corrRange);
     } else if (mode == "povray") {
         std::string file(argv[3]);
         Packing packing;

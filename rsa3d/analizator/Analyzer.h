@@ -26,7 +26,7 @@ public:
 	explicit Analyzer(Parameters *params) : params(params) {}
 	virtual ~Analyzer() = default;
 
-	void analyzePackingsInDirectory(char *sdir, double mintime, double particleSize);
+	void analyzePackingsInDirectory(char *sdir, double mintime, double particleSize, double correlationsRange);
 
 private:
 	Parameters *params;

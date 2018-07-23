@@ -269,8 +269,7 @@ void Analyzer::printOrder(const std::vector<Plot*> &order, const std::string &fi
 	delete[] orderPoints;
 }
 
-void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double particleSize){
-	const double correlationsRange = 10.0;
+void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double particleSize, double correlationsRange) {
 	dirent *de;
 	char prefix[] = "packing";
 	LogPlot *nvt = new LogPlot(mintime, this->params->maxTime, 200);
