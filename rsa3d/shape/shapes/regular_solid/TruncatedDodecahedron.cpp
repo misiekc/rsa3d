@@ -3,6 +3,7 @@
 //
 
 #include "TruncatedDodecahedron.h"
+#include "Icosahedron.h"
 
 namespace {
     const double g = RegularSolidBase::goldRatio;
@@ -56,4 +57,10 @@ double TruncatedDodecahedron::projectionHalfsize(const Vector<3> &axis) const {
     double zRectHalfsize = std::max(std::max(gi*xAxis +gp2*yAxis, gi*zAxis + g*xAxis + gt2*yAxis), g*zAxis + 2*xAxis + gp1*yAxis);
 
     return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * normalizeFactor;
+}
+
+std::vector<double> TruncatedDodecahedron::calculateOrder(const OrderCalculable *other) const {
+    // Steal information from same oriented Icosahedron
+    Icosahedron icosahedron(this->getOrientationMatrix());
+    return icosahedron.calculateOrder(other);
 }

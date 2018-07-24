@@ -20,6 +20,8 @@ private:
     static void discoverAxes();
     static void addUniqueAxis(std::vector<Vector<3>> &axes, const Vector<3> &newAxis);
     static void printFaceHelperNotebook();
+    static void reportCalculations();
+    static void printAxes(const std::vector<Vector<3>> &axes);
 
 protected:
     static std::vector<Vector<3>> orientedVertices;

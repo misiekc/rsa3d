@@ -3,6 +3,7 @@
 //
 
 #include "TruncatedIcosidodecahedron.h"
+#include "Icosahedron.h"
 
 namespace {
     inline double max(double a, double b, double c, double d, double e) {
@@ -93,4 +94,10 @@ double TruncatedIcosidodecahedron::projectionHalfsize(const Vector<3> &axis) con
                                gt2m1*zAxis + 2*xAxis + gp2*yAxis, g*zAxis + 3*xAxis +gt2*yAxis);
 
     return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * normalizeFactor;
+}
+
+std::vector<double> TruncatedIcosidodecahedron::calculateOrder(const OrderCalculable *other) const {
+    // Steal information from same oriented Icosahedron
+    Icosahedron icosahedron(this->getOrientationMatrix());
+    return icosahedron.calculateOrder(other);
 }

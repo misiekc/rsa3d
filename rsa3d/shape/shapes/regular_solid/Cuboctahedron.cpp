@@ -3,6 +3,7 @@
 //
 
 #include "Cuboctahedron.h"
+#include "Octahedron.h"
 
 void Cuboctahedron::calculateStatic(const std::string &attr) {
     RegularSolid<Cuboctahedron>::orientedVertices =
@@ -25,4 +26,10 @@ double Cuboctahedron::projectionHalfsize(const Vector<3> &axis) const {
     double zRectHalfsize = zAxis + xAxis;
 
     return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * normalizeFactor;
+}
+
+std::vector<double> Cuboctahedron::calculateOrder(const OrderCalculable *other) const {
+    // Steal information from same oriented Octahedron
+    Octahedron octahedron(this->getOrientationMatrix());
+    return octahedron.calculateOrder(other);
 }

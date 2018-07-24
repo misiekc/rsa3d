@@ -4,6 +4,7 @@
 
 #include <iterator>
 #include <fstream>
+#include <iomanip>
 #include "RegularSolidBase.h"
 #include "SATOverlapRS.h"
 #include "TriTriOverlapRS.h"
@@ -20,6 +21,11 @@ double RegularSolidBase::normalizeFactor;
 double RegularSolidBase::circumsphereRadius;
 double RegularSolidBase::insphereRadius;
 
+
+#define PRINT_FACE_AXES
+#define PRINT_VERTEX_AXES
+
+
 void RegularSolidBase::initClass(const std::string &attr) {
     // No faces provided - generate wolfram notebook to recognize faces manually
     if (orientedFaces.empty()) {
@@ -31,6 +37,8 @@ void RegularSolidBase::initClass(const std::string &attr) {
     normalizeVolume();
     calculateRadia();
     discoverAxes();
+
+    reportCalculations();
 
     Shape::setNeighbourListCellSize(2*circumsphereRadius);
     Shape::setVoxelSpatialSize(2*insphereRadius/std::sqrt(3.));
@@ -165,8 +173,6 @@ void RegularSolidBase::discoverTriangles() {
         for (std::size_t i = 2; i < numVertices; i++)
             orientedTriangles.push_back({{face[0], face[i - 1], face[i]}});
     }
-    std::cout << "[RegularSolid::discoverTriangles] Faces: " << orientedFaces.size();
-    std::cout << ", triangles: " << orientedTriangles.size() << std::endl;
 }
 
 void RegularSolidBase::normalizeVolume() {
@@ -180,7 +186,6 @@ void RegularSolidBase::normalizeVolume() {
     normalizeFactor = std::pow(volume, -1./3);
     auto normalizeVertex = [](const Vector<3> &vertex) { return vertex * normalizeFactor; };
     std::transform(orientedVertices.begin(), orientedVertices.end(), orientedVertices.begin(), normalizeVertex);
-    std::cout << "[RegularSolid::normalizeVolume] Normalizing factor: " << normalizeFactor << std::endl;
 }
 
 void RegularSolidBase::calculateRadia() {
@@ -201,9 +206,6 @@ void RegularSolidBase::calculateRadia() {
         if (faceDistance < insphereRadius)
             insphereRadius = faceDistance;
     }
-
-    std::cout << "[RegularSolid::calculateRadia] Circumsphere radius: " << circumsphereRadius;
-    std::cout << ", insphere radius: " << insphereRadius << std::endl;
 }
 
 void RegularSolidBase::discoverAxes() {
@@ -231,12 +233,35 @@ void RegularSolidBase::discoverAxes() {
             addUniqueAxis(orientedMidedgeAxes, midedgeAxis);
         }
     }
+}
 
-    std::cout << "[RegularSolid::discoverAxes] Discovered ";
+void RegularSolidBase::reportCalculations() {
+    std::cout << "[RegularSolid::initClass] Faces: " << orientedFaces.size();
+    std::cout << ", triangles: " << orientedTriangles.size() << std::endl;
+    std::cout << "[RegularSolid::initClass] Normalizing factor: " << normalizeFactor << std::endl;
+    std::cout << "[RegularSolid::initClass] Circumsphere radius: " << circumsphereRadius;
+    std::cout << ", insphere radius: " << insphereRadius << std::endl;
+    std::cout << "[RegularSolid::initClass] Discovered ";
     std::cout << orientedFaceAxes.size() << " face axes, ";
     std::cout << orientedEdgeAxes.size() << " edge axes, ";
     std::cout << orientedVertexAxes.size() << " vertex axes, ";
     std::cout << orientedMidedgeAxes.size() << " midedge axes" << std::endl;
+
+#ifdef PRINT_FACE_AXES
+    std::cout << "[RegularSolid::initClass] Face axes:" << std::endl;
+    printAxes(orientedFaceAxes);
+#endif
+
+#ifdef PRINT_VERTEX_AXES
+    std::cout << "[RegularSolid::initClass] Vertex axes:" << std::endl;
+    printAxes(orientedVertexAxes);
+#endif
+}
+
+void RegularSolidBase::printAxes(const std::vector<Vector<3>> &axes) {
+    std::size_t index = 1;
+    for (const auto &axis : axes)
+        std::cout << std::setw(3) << std::right  << (index++) << ".: " << axis << std::endl;
 }
 
 void RegularSolidBase::addUniqueAxis(std::vector<Vector<3>> &axes, const Vector<3> &newAxis) {

@@ -28,6 +28,7 @@ std::vector<double> Octahedron::calculateOrder(const OrderCalculable *other) con
     auto thisVertexAxes = this->getVertexAxes();
     auto otherVertexAxes = otherOct.getVertexAxes();
 
-    return {OrderParameters::nematic(thisFaceAxes, otherFaceAxes),
-            OrderParameters::cubatic(thisVertexAxes, otherVertexAxes)};
+    return {OrderParameters::cubatic(thisVertexAxes, otherVertexAxes),
+            OrderParameters::nematic(thisFaceAxes, otherFaceAxes),
+            OrderParameters::nematic(thisVertexAxes, otherVertexAxes)};
 }

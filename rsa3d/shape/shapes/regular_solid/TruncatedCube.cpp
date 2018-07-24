@@ -3,6 +3,7 @@
 //
 
 #include "TruncatedCube.h"
+#include "Octahedron.h"
 
 namespace {
     const double xi = M_SQRT2 - 1;
@@ -36,4 +37,10 @@ double TruncatedCube::projectionHalfsize(const Vector<3> &axis) const {
     double zRectHalfsize = xAxis + yAxis + xi * zAxis;
 
     return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * normalizeFactor;
+}
+
+std::vector<double> TruncatedCube::calculateOrder(const OrderCalculable *other) const {
+    // Steal information from same oriented Octahedron
+    Octahedron octahedron(this->getOrientationMatrix());
+    return octahedron.calculateOrder(other);
 }

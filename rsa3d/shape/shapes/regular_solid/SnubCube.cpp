@@ -4,6 +4,7 @@
 
 #include "SnubCube.h"
 #include "UnoptimizedSATOverlapRS.h"
+#include "Octahedron.h"
 
 const UnoptimizedSATOverlapRS SnubCube::overlapStrategy{};
 
@@ -35,4 +36,10 @@ OverlapStrategy<3, 0> *SnubCube::createStrategy(const std::string &name) const {
         return new UnoptimizedSATOverlapRS();
     else
         return RegularSolid<SnubCube>::createStrategy(name);
+}
+
+std::vector<double> SnubCube::calculateOrder(const OrderCalculable *other) const {
+    // Steal information from same oriented Octahedron
+    Octahedron octahedron(this->getOrientationMatrix());
+    return octahedron.calculateOrder(other);
 }

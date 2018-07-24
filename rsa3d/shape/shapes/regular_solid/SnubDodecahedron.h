@@ -7,8 +7,9 @@
 
 
 #include "RegularSolid.h"
+#include "../../OrderCalculable.h"
 
-class SnubDodecahedron : public RegularSolid<SnubDodecahedron> {
+class SnubDodecahedron : public RegularSolid<SnubDodecahedron>, public OrderCalculable {
 private:
     friend RegularSolid<SnubDodecahedron>;
 
@@ -20,6 +21,8 @@ public:
     explicit SnubDodecahedron(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}
 
     OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
+
+    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 };
 
 
