@@ -34,7 +34,9 @@ std::vector<double> Icosahedron::calculateOrder(const OrderCalculable *other) co
     auto &otherIcos = dynamic_cast<const Icosahedron&>(*other);
     auto thisFaceAxes = this->getFaceAxes();
     auto otherFaceAxes = otherIcos.getFaceAxes();
+    auto thisVertexAxes = this->getVertexAxes();
+    auto otherVertexAxes = otherIcos.getVertexAxes();
 
-    auto params = OrderParameters::nematicAndFull(thisFaceAxes, otherFaceAxes, OrderParameters::CosExp::_6);
-    return {params.nematic, 243./1000*(7*params.full - 100)};
+    return {(OrderParameters::nematic(thisFaceAxes, otherFaceAxes)),
+            (OrderParameters::dodecahedral(thisVertexAxes, otherVertexAxes))};
 }

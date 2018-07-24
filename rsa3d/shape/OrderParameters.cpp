@@ -5,30 +5,34 @@
 #include "OrderParameters.h"
 #include "../Utils.h"
 
-OrderParameters::OrderPair
-OrderParameters::nematicAndFull(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes,
-                                CosExp cosExp) {
-    double cosNsum = 0;
-    double maxAbsCos = 0;
-    for (const auto &a1 : firstAxes) {
-        for (const auto &a2 : secondAxes) {
-            double absCos = std::abs(a1 * a2);
-            if (absCos > maxAbsCos)
-                maxAbsCos = absCos;
-            cosNsum += std::pow(absCos, cosExp);
-        }
-    }
-
-    double nematicOrder = P2(maxAbsCos);
-    return {nematicOrder, cosNsum};
-}
-
-double OrderParameters::full(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes,
-                             CosExp cosExp) {
+double OrderParameters::cosNSum(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes,
+                                unsigned char cosExp) {
     double cosNsum = 0;
     for (const auto &a1 : firstAxes)
         for (const auto &a2 : secondAxes)
             cosNsum += std::pow(a1 * a2, cosExp);
 
     return cosNsum;
+}
+
+double OrderParameters::nematic(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {
+    double maxAbsCos = 0;
+    for (const auto &a1 : firstAxes) {
+        for (const auto &a2 : secondAxes) {
+            double absCos = std::abs(a1 * a2);
+            if (absCos > maxAbsCos)
+                maxAbsCos = absCos;
+        }
+    }
+
+    return maxAbsCos;
+}
+
+double OrderParameters::cubatic(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {
+    return 1./6*(5*cosNSum(firstAxes, secondAxes, 4) - 9);
+}
+
+double OrderParameters::dodecahedral(const std::vector<Vector<3>> &firstAxes,
+                                     const std::vector<Vector<3>> &secondAxes) {
+    return 25./192*(7*cosNSum(firstAxes, secondAxes, 6) - 36);
 }

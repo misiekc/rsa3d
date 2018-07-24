@@ -9,23 +9,16 @@
 #include <vector>
 #include "../Vector.h"
 
+
 class OrderParameters {
+private:
+    static double cosNSum(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes,
+                          unsigned char cosExp);
+
 public:
-    struct OrderPair {
-        double nematic;
-        double full;
-    };
-
-    enum CosExp {
-        _2 = 2,
-        _4 = 4,
-        _6 = 6
-    };
-
-    static OrderPair nematicAndFull(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes,
-                                    CosExp cosExp);
-    static double full(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes,
-                       CosExp cosExp);
+    static double nematic(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
+    static double cubatic(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
+    static double dodecahedral(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
 };
 
 

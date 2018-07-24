@@ -25,7 +25,9 @@ std::vector<double> Octahedron::calculateOrder(const OrderCalculable *other) con
     auto &otherOct = dynamic_cast<const Octahedron&>(*other);
     auto thisFaceAxes = this->getFaceAxes();
     auto otherFaceAxes = otherOct.getFaceAxes();
+    auto thisVertexAxes = this->getVertexAxes();
+    auto otherVertexAxes = otherOct.getVertexAxes();
 
-    auto params = OrderParameters::nematicAndFull(thisFaceAxes, otherFaceAxes, OrderParameters::CosExp::_4);
-    return {params.nematic, 27./128*(5*params.full - 16)};
+    return {OrderParameters::nematic(thisFaceAxes, otherFaceAxes),
+            OrderParameters::cubatic(thisVertexAxes, otherVertexAxes)};
 }
