@@ -1,6 +1,9 @@
-//
-// Created by PKua on 17.07.18.
-//
+/*
+* Created by PKua on 17.07.18.
+*
+* Author: Wojciech Nowak
+*
+*/
 
 #include "Ellipsoid.h"
 
@@ -24,14 +27,14 @@ void Ellipsoid::initClass(const std::string &attr) {
 
     Shape::setCreateShapeImpl([](RND *rnd) -> Shape* {
         return new Ellipsoid(Matrix<3, 3>::rotation(
-                2*M_PI*rnd->nextValue(),
-                std::asin(2*rnd->nextValue() - 1),
-                2*M_PI*rnd->nextValue()));
+                2 * M_PI * rnd->nextValue(),
+                std::asin(2 * rnd->nextValue() - 1),
+                2 * M_PI * rnd->nextValue()));
     });
 }
 
 void Ellipsoid::normalizeVolume() {
-    double volume = 4./3*M_PI*a*b*c;
+    double volume = 4./3 * M_PI * a * b * c;
     double factor = 1/std::cbrt(volume);
     a *= factor;
     b *= factor;
@@ -39,7 +42,41 @@ void Ellipsoid::normalizeVolume() {
 }
 
 bool Ellipsoid::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
-    return false;
+    Ellipsoid ellipsoid = dynamic_cast<const Ellipsoid &>(*s);
+    this->applyBC(bc, &ellipsoid);
+
+    Vector<3> rAB = vectorRAB(s->getPosition(), this->getPosition());
+
+    double lambda = INITIAL_GUESS;
+	double fder = 0.0;
+	double sder = 0.0;
+	double derivativeQuotient = 0.0;
+	double fab = 0.0;
+	double previousLambda = 0.0;
+
+	for (int i = 0; i < 20; i++) {
+		try {
+			fder = firstDerivative(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
+            sder = secondDerivative(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
+
+			derivativeQuotient = fder / sder;
+			previousLambda = lambda;
+			lambda = getNewLambda(lambda, derivativeQuotient);
+		}
+		catch (std::overflow_error e) {
+			std::cout << e.what();
+		}
+		if (abs(fder) < 1e-8 /*|| abs(previousLambda - lambda) < 1e-8*/ ) {
+			double fAB = overlapFunction(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
+			if (fAB >= 1) {
+				return false;
+			}
+			else {
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 bool Ellipsoid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation, double orientationRange) const {
@@ -92,4 +129,53 @@ std::string Ellipsoid::toPovray() const {
 	out << "    texture { pigment { color Red } }" << std::endl;
 	out << "  }" << std::endl;
 	return out.str();
+}
+Matrix<3, 3> Ellipsoid::getEllipsoidMatrix() const {
+    return M;
+}
+
+inline Matrix<3, 3> Ellipsoid::matrixC(const Matrix<3, 3> &A, const Matrix<3, 3> &B,  double lambda) const {
+    return (lambda * B + (1 - lambda) * A).inverse();
+}
+
+inline double Ellipsoid::quadraticForm(const Matrix<3, 3> &M, const Vector<3> &v) const {
+	Vector<3> vM = M * v;
+    return v * vM;
+}
+
+inline Vector<3> Ellipsoid::vectorRAB(const Vector<3>& rA, const Vector<3>& rB) const {
+    return rB - rA;
+}
+
+inline double Ellipsoid::overlapFunction(const Matrix<3, 3> &A, const Matrix<3, 3> &B, const Vector<3> &rAB, double lambda) const {
+    return lambda * (1 - lambda) * quadraticForm(matrixC(A, B, lambda), rAB);
+}
+
+inline double Ellipsoid::firstDerivative(const Matrix<3, 3> &A, const Matrix<3, 3> &B, const Vector<3> &rAB, double lambda) const {
+    Matrix<3, 3> M = B - A;
+    return (((1 - 2 * lambda) * ((A + M * lambda).inverse()).transpose() * rAB) + ((lambda*lambda - lambda)*((A + M * lambda).inverse()) * M * ((A + M * lambda).inverse()) * rAB))[0];
+}
+
+inline double Ellipsoid::secondDerivative(const Matrix<3, 3> &A, const Matrix<3, 3> &B, const Vector<3> &rAB, double lambda) const {
+	Matrix<3, 3> C = matrixC(A, B, lambda);
+	Matrix<3, 3> AC = A * C;
+	Matrix<3, 3> CAC = C * AC;
+	Matrix<3, 3> BC = B * C;
+	Matrix<3, 3> CBC = C * BC;
+	Matrix<3, 3> CACBC = CAC * BC;
+	Matrix<3, 3> CBCAC = CBC * AC;
+	double s = 1 - lambda;
+	double s2 = s * s;
+	double lambda2 = lambda * lambda;
+	return -(quadraticForm(CACBC, rAB) + quadraticForm(CBCAC, rAB));
+}
+
+double Ellipsoid::getNewLambda(double lambda, double derivativeQuotient) const {
+    double temp = lambda - derivativeQuotient;
+	if (temp <= 0)
+		return lambda / 2.;
+	else if (temp >= 1)
+		return (lambda + 1.) / 2.;
+	else
+		return temp;
 }
