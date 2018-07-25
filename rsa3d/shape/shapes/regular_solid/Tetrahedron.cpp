@@ -6,6 +6,7 @@
 #include "RegularSolid.h"
 #include "UnoptimizedSATOverlapRS.h"
 #include "TriTriOverlapRS.h"
+#include "../../OrderParameters.h"
 
 const UnoptimizedSATOverlapRS Tetrahedron::overlapStrategy{};
 
@@ -42,5 +43,14 @@ OverlapStrategy<3, 0> *Tetrahedron::createStrategy(const std::string &name) cons
         return new UnoptimizedSATOverlapRS();
     else
         return RegularSolid<Tetrahedron>::createStrategy(name);
+}
+
+std::vector<double> Tetrahedron::calculateOrder(const OrderCalculable *other) const {
+    auto &otherTetr = dynamic_cast<const Tetrahedron&>(*other);
+    auto thisFaceAxes = this->getFaceAxes();
+    auto otherFaceAxes = otherTetr.getFaceAxes();
+
+    return {OrderParameters::tetrahedral(thisFaceAxes, otherFaceAxes),
+            OrderParameters::nematic(thisFaceAxes, otherFaceAxes)};
 }
 

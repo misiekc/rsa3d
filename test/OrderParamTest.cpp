@@ -39,7 +39,7 @@ namespace {
         auto &secondOrderCalc = dynamic_cast<const OrderCalculable&>(secondShape);
         auto orders = firstOrderCalc.calculateOrder(&secondOrderCalc);
 
-        return orders[1];
+        return orders[0];
     }
 
     Boundaries find_boundaries(const RSAShape &firstShape, std::size_t iterations) {

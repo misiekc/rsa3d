@@ -5,8 +5,8 @@
 #include "OrderParameters.h"
 #include "../Utils.h"
 
-double OrderParameters::cosNSum(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes,
-                                unsigned char cosExp) {
+inline double OrderParameters::cosNSum(const std::vector<Vector<3>> &firstAxes,
+                                       const std::vector<Vector<3>> &secondAxes, unsigned char cosExp) {
     double cosNsum = 0;
     for (const auto &a1 : firstAxes)
         for (const auto &a2 : secondAxes)
@@ -26,6 +26,10 @@ double OrderParameters::nematic(const std::vector<Vector<3>> &firstAxes, const s
     }
 
     return maxAbsCos;
+}
+
+double OrderParameters::tetrahedral(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {
+    return 9./32*cosNSum(firstAxes, secondAxes, 3);
 }
 
 double OrderParameters::cubatic(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {

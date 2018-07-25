@@ -8,8 +8,9 @@
 
 #include "RegularSolid.h"
 #include "UnoptimizedSATOverlapRS.h"
+#include "../../OrderCalculable.h"
 
-class Tetrahedron : public RegularSolid<Tetrahedron> {
+class Tetrahedron : public RegularSolid<Tetrahedron>, public OrderCalculable {
 private:
     friend RegularSolid<Tetrahedron>;
 
@@ -23,6 +24,8 @@ public:
     bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
                      double orientationRange) const override;
     OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
+
+    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 
 };
 

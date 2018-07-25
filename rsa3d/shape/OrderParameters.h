@@ -17,6 +17,7 @@ private:
 
 public:
     static double nematic(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
+    static double tetrahedral(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
     static double cubatic(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
     static double dodecahedral(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
 };

@@ -8,8 +8,9 @@
 
 #include "RegularSolid.h"
 #include "UnoptimizedSATOverlapRS.h"
+#include "../../OrderCalculable.h"
 
-class TruncatedTetrahedron : public RegularSolid<TruncatedTetrahedron> {
+class TruncatedTetrahedron : public RegularSolid<TruncatedTetrahedron>, public OrderCalculable {
 private:
     friend RegularSolid<TruncatedTetrahedron>;
 
@@ -21,6 +22,8 @@ public:
     explicit TruncatedTetrahedron(const Matrix<3, 3> &orientation) : RegularSolid<TruncatedTetrahedron>{orientation} {};
 
     OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
+
+    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 };
 
 

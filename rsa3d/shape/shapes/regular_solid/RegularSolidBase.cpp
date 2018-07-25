@@ -22,8 +22,8 @@ double RegularSolidBase::circumsphereRadius;
 double RegularSolidBase::insphereRadius;
 
 
-#define PRINT_FACE_AXES
-#define PRINT_VERTEX_AXES
+//#define PRINT_FACE_AXES
+//#define PRINT_VERTEX_AXES
 
 
 void RegularSolidBase::initClass(const std::string &attr) {
