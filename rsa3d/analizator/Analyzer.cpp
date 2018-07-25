@@ -30,6 +30,9 @@ void Analyzer::analyzeOrder(const Packing &packing, NeighbourGrid<const RSAShape
    	   	std::vector<const RSAShape *> neighbours;
     	ng.getNeighbours(&neighbours, posi);
     	for(const RSAShape *sj : neighbours){
+            if (sj->no <= si->no)
+                continue;
+
     		RSAVector posj = sj->getPosition();
     		double dist2 = 0.0;
     		for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
@@ -63,6 +66,9 @@ void Analyzer::analyzeCorrelations(const Packing &packing, NeighbourGrid<const R
        	std::vector<const RSAShape *> neighbours;
     	ng.getNeighbours(&neighbours, posi);
 		for(const RSAShape* sj : neighbours){
+			if (sj->no <= si->no)
+                continue;
+
 			RSAVector posj = sj->getPosition();
 			double dist2 = 0.0;
 			for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
