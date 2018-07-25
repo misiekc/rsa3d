@@ -51,8 +51,8 @@ bool Ellipsoid::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
 	double fder = 0.0;
 	double sder = 0.0;
 	double derivativeQuotient = 0.0;
-	double fab = 0.0;
-	double previousLambda = 0.0;
+	double fAB = 0.0;
+	//double previousLambda = 0.0;
 
 	for (int i = 0; i < 20; i++) {
 		try {
@@ -60,14 +60,14 @@ bool Ellipsoid::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
             sder = secondDerivative(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
 
 			derivativeQuotient = fder / sder;
-			previousLambda = lambda;
+			//previousLambda = lambda;
 			lambda = getNewLambda(lambda, derivativeQuotient);
 		}
 		catch (std::overflow_error e) {
 			std::cout << e.what();
 		}
 		if (abs(fder) < 1e-8 /*|| abs(previousLambda - lambda) < 1e-8*/ ) {
-			double fAB = overlapFunction(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
+			fAB = overlapFunction(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
 			if (fAB >= 1) {
 				return false;
 			}
@@ -135,7 +135,7 @@ Matrix<3, 3> Ellipsoid::getEllipsoidMatrix() const {
 }
 
 inline Matrix<3, 3> Ellipsoid::matrixC(const Matrix<3, 3> &A, const Matrix<3, 3> &B,  double lambda) const {
-    return (lambda * B + (1 - lambda) * A).inverse();
+    return ((B * lambda) + (A * (1 - lambda))).inverse();
 }
 
 inline double Ellipsoid::quadraticForm(const Matrix<3, 3> &M, const Vector<3> &v) const {
@@ -164,9 +164,6 @@ inline double Ellipsoid::secondDerivative(const Matrix<3, 3> &A, const Matrix<3,
 	Matrix<3, 3> CBC = C * BC;
 	Matrix<3, 3> CACBC = CAC * BC;
 	Matrix<3, 3> CBCAC = CBC * AC;
-	double s = 1 - lambda;
-	double s2 = s * s;
-	double lambda2 = lambda * lambda;
 	return -(quadraticForm(CACBC, rAB) + quadraticForm(CBCAC, rAB));
 }
 

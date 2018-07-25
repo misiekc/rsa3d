@@ -24,7 +24,7 @@
 CC = g++
 
 # Compiler flags
-CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -O3 -fopenmp -DRSA_SPATIAL_DIMENSION=2 -DRSA_ANGULAR_DIMENSION=1
+CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -O3 -fopenmp -DRSA_SPATIAL_DIMENSION=3 -DRSA_ANGULAR_DIMENSION=0
 
 # Linker flags
 LFLAGS = -fopenmp
@@ -68,10 +68,10 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/Voxel \
        rsa3d/VoxelList \
        rsa3d/shape/shapes/cuboid/Cuboid \
-       rsa3d/shape/shapes/cuboid/MineOverlap \
-       rsa3d/shape/shapes/cuboid/OptimizedSATOverlap \
-       rsa3d/shape/shapes/cuboid/SATOverlap \
-       rsa3d/shape/shapes/cuboid/TriTriOverlap \
+       rsa3d/shape/shapes/cuboid/MineOverlapCB \
+       rsa3d/shape/shapes/cuboid/OptimizedSATOverlapCB \
+       rsa3d/shape/shapes/cuboid/SATOverlapCB \
+       rsa3d/shape/shapes/cuboid/TriTriOverlapCB \
        rsa3d/shape/shapes/regular_solid/Cuboctahedron \
        rsa3d/shape/shapes/regular_solid/Dodecahedron \
        rsa3d/shape/shapes/regular_solid/Icosahedron \

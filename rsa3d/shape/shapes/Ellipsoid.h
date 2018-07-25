@@ -35,7 +35,10 @@ private:
 public:
     static void initClass(const std::string &attr);
 
-    explicit Ellipsoid(const Matrix<3, 3> &orientation) : orientation(orientation) {}
+    explicit Ellipsoid(const Matrix<3, 3> &orientation) : orientation(orientation) {
+        X = Matrix<3, 3>({a,0,0,0,b,0,c,0,0});
+        M = (orientation * X) * orientation;
+    }
 
     bool overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const override;
     bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
