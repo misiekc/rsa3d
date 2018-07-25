@@ -14,9 +14,11 @@ class OrderParameters {
 private:
     static double cosNSum(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes,
                           unsigned char cosExp);
+    static double cosOfMaxAbs(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
 
 public:
-    static double nematic(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
+    static double nematicP1(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
+    static double nematicP2(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
     static double tetrahedral(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
     static double cubatic(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
     static double dodecahedral(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);

@@ -43,6 +43,6 @@ std::vector<double> Dodecahedron::calculateOrder(const OrderCalculable *other) c
     auto otherVertexAxes = otherDod.getVertexAxes();
 
     return {OrderParameters::dodecahedral(thisFaceAxes, otherFaceAxes),
-            OrderParameters::nematic(thisFaceAxes, otherFaceAxes),
-            OrderParameters::nematic(thisVertexAxes, otherVertexAxes)};
+            OrderParameters::nematicP2(thisFaceAxes, otherFaceAxes),
+            OrderParameters::nematicP2(thisVertexAxes, otherVertexAxes)};
 }

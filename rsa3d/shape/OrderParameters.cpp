@@ -15,17 +15,30 @@ inline double OrderParameters::cosNSum(const std::vector<Vector<3>> &firstAxes,
     return cosNsum;
 }
 
-double OrderParameters::nematic(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {
+inline double OrderParameters::cosOfMaxAbs(const std::vector<Vector<3>> &firstAxes,
+                                           const std::vector<Vector<3>> &secondAxes) {
     double maxAbsCos = 0;
+    double maxCos = 0;
     for (const auto &a1 : firstAxes) {
         for (const auto &a2 : secondAxes) {
-            double absCos = std::abs(a1 * a2);
-            if (absCos > maxAbsCos)
+            double cos = a1 * a2;
+            double absCos = std::abs(cos);
+            if (absCos > maxAbsCos) {
                 maxAbsCos = absCos;
+                maxCos = cos;
+            }
         }
     }
 
-    return maxAbsCos;
+    return maxCos;
+}
+
+double OrderParameters::nematicP1(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {
+    return P1(cosOfMaxAbs(firstAxes, secondAxes));
+}
+
+double OrderParameters::nematicP2(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {
+    return P2(cosOfMaxAbs(firstAxes, secondAxes));
 }
 
 double OrderParameters::tetrahedral(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {
