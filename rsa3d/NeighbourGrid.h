@@ -60,7 +60,13 @@ private:
 public:
 
 	NeighbourGrid(double size, double dx){
-		this->init(size, (size_t)(size/dx));
+		if (size <= 0 || dx <= 0)
+		    throw std::runtime_error("size <= 0 || dx <= 0");
+
+		size_t n = (size_t)(size/dx);
+		if (n == 0)
+		    throw std::runtime_error("neighbour grid cell too big");
+		this->init(size, n);
 	}
 
 
