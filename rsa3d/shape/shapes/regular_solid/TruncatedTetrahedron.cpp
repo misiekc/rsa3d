@@ -4,7 +4,6 @@
 
 #include "TruncatedTetrahedron.h"
 #include "UnoptimizedSATOverlapRS.h"
-#include "Tetrahedron.h"
 
 const UnoptimizedSATOverlapRS TruncatedTetrahedron::overlapStrategy{};
 
@@ -24,10 +23,4 @@ OverlapStrategy<3, 0> *TruncatedTetrahedron::createStrategy(const std::string &n
         return new UnoptimizedSATOverlapRS();
     else
         return RegularSolid<TruncatedTetrahedron>::createStrategy(name);
-}
-
-std::vector<double> TruncatedTetrahedron::calculateOrder(const OrderCalculable *other) const {
-    // Steal information from same oriented Tetraehdron
-    Tetrahedron tetrahedron(this->getOrientationMatrix());
-    return tetrahedron.calculateOrder(other);
 }

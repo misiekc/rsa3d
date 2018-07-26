@@ -3,7 +3,6 @@
 //
 
 #include "TruncatedIcosahedron.h"
-#include "Icosahedron.h"
 
 namespace {
     const double g = RegularSolidBase::goldRatio;
@@ -55,10 +54,4 @@ double TruncatedIcosahedron::projectionHalfsize(const Vector<3> &axis) const {
     double zRectHalfsize = std::max(std::max(xAxis + gt3*yAxis, zAxis + gp2*xAxis + gt2*yAxis), g*zAxis + 2*xAxis + g3*yAxis);
 
     return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * normalizeFactor;
-}
-
-std::vector<double> TruncatedIcosahedron::calculateOrder(const OrderCalculable *other) const {
-    // Steal information from same oriented Icosahedron
-    Icosahedron icosahedron(this->getOrientationMatrix());
-    return icosahedron.calculateOrder(other);
 }

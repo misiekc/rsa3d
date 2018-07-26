@@ -9,7 +9,7 @@
 #include "RegularSolid.h"
 #include "../../OrderCalculable.h"
 
-class TruncatedOctahedron : public RegularSolid<TruncatedOctahedron>, public OrderCalculable {
+class TruncatedOctahedron : public RegularSolid<TruncatedOctahedron> {
 private:
     friend RegularSolid<TruncatedOctahedron>;
 
@@ -19,8 +19,6 @@ public:
     explicit TruncatedOctahedron(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}
 
     double projectionHalfsize(const Vector<3> &axis) const override;
-
-    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 };
 
 

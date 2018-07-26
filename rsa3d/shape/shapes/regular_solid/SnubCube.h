@@ -10,10 +10,9 @@
 #include "UnoptimizedSATOverlapRS.h"
 #include "../../OrderCalculable.h"
 
-class SnubCube : public RegularSolid<SnubCube>, public OrderCalculable {
+class SnubCube : public RegularSolid<SnubCube> {
 private:
     friend RegularSolid<SnubCube>;
-
 
     const static UnoptimizedSATOverlapRS overlapStrategy;
 
@@ -23,8 +22,6 @@ public:
     explicit SnubCube(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}
 
     OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
-
-    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 };
 
 

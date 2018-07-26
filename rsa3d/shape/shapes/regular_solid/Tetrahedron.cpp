@@ -53,4 +53,3 @@ std::vector<double> Tetrahedron::calculateOrder(const OrderCalculable *other) co
     return {OrderParameters::tetrahedral(thisFaceAxes, otherFaceAxes),
             OrderParameters::nematicP1(thisFaceAxes, otherFaceAxes)};
 }
-

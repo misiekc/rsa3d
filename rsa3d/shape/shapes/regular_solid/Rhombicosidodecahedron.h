@@ -9,7 +9,7 @@
 #include "RegularSolid.h"
 #include "../../OrderCalculable.h"
 
-class Rhombicosidodecahedron : public RegularSolid<Rhombicosidodecahedron>, public OrderCalculable {
+class Rhombicosidodecahedron : public RegularSolid<Rhombicosidodecahedron> {
 private:
     friend RegularSolid<Rhombicosidodecahedron>;
 
@@ -19,8 +19,6 @@ public:
     explicit Rhombicosidodecahedron(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}
 
     double projectionHalfsize(const Vector<3> &axis) const override;
-
-    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 };
 
 

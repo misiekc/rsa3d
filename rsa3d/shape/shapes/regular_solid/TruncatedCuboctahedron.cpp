@@ -3,7 +3,6 @@
 //
 
 #include "TruncatedCuboctahedron.h"
-#include "Octahedron.h"
 
 namespace {
     double xi = 1 + M_SQRT2;
@@ -51,10 +50,4 @@ double TruncatedCuboctahedron::projectionHalfsize(const Vector<3> &axis) const {
     double zRectHalfsize = std::max(zAxis + xi*xAxis + eta*yAxis, zAxis + eta*xAxis + xi*yAxis);
 
     return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * normalizeFactor;
-}
-
-std::vector<double> TruncatedCuboctahedron::calculateOrder(const OrderCalculable *other) const {
-    // Steal information from same oriented Octahedron
-    Octahedron octahedron(this->getOrientationMatrix());
-    return octahedron.calculateOrder(other);
 }

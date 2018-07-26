@@ -4,7 +4,6 @@
 
 #include "SnubDodecahedron.h"
 #include "UnoptimizedSATOverlapRS.h"
-#include "Icosahedron.h"
 
 const TriTriOverlapRS SnubDodecahedron::overlapStrategy{};
 
@@ -79,10 +78,4 @@ OverlapStrategy<3, 0> *SnubDodecahedron::createStrategy(const std::string &name)
         return new UnoptimizedSATOverlapRS();
     else
         return RegularSolid<SnubDodecahedron>::createStrategy(name);
-}
-
-std::vector<double> SnubDodecahedron::calculateOrder(const OrderCalculable *other) const {
-    // Steal information from same oriented Icosahedron
-    Icosahedron icosahedron(this->getOrientationMatrix());
-    return icosahedron.calculateOrder(other);
 }
