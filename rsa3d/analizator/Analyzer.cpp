@@ -247,6 +247,8 @@ void Analyzer::printCorrelations(Plot& correlations, std::string filename){
 }
 
 void Analyzer::printOrder(const std::vector<Plot*> &order, const std::string &filename) const {
+    if (order.empty()) return;
+
 	double ***orderPoints = new double**[order.size()];
 	for (ushort i=0; i<order.size(); i++){
 		orderPoints[i] = new double*[order[i]->size()];
