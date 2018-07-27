@@ -48,6 +48,7 @@ public:
     Shape<3, 0> *clone() const override;
 
     std::string toPovray() const;
+    std::string toWolfram() const;
     Matrix<3, 3> getEllipsoidMatrix() const;
 };
 

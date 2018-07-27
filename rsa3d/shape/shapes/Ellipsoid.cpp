@@ -84,7 +84,7 @@ bool Ellipsoid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position
     Vector<3> bcPos = position + bc->getTranslation(this->getPosition(), position);
     Vector<3> pointAligned = this->orientation.transpose() * (bcPos - this->getPosition());
 
-    double d = pointAligned[0]/((Ellipsoid::a + Ellipsoid::c)*(Ellipsoid::a + Ellipsoid::c)) + pointAligned[1]/((Ellipsoid::b + Ellipsoid::c)*(Ellipsoid::b + Ellipsoid::c)) + pointAligned[2]/(4*Ellipsoid::c*Ellipsoid::c);
+    double d = pointAligned[0]*pointAligned[0]/((Ellipsoid::a + Ellipsoid::c)*(Ellipsoid::a + Ellipsoid::c)) + pointAligned[1]*pointAligned[1]/((Ellipsoid::b + Ellipsoid::c)*(Ellipsoid::b + Ellipsoid::c)) + pointAligned[2]*pointAligned[2]/(4*Ellipsoid::c*Ellipsoid::c);
     return (d <= 1.0);
 }
 
@@ -130,6 +130,19 @@ std::string Ellipsoid::toPovray() const {
 	out << "  }" << std::endl;
 	return out.str();
 }
+
+std::string Ellipsoid::toWolfram() const {
+    std::stringstream out;
+    out << "GeometricTransformation[" << std::endl;
+    out << "    Ellipsoid[{0, 0, 0}, {" << Ellipsoid::a << ", " << Ellipsoid::b << ", " << Ellipsoid::c << "}]," << std::endl;
+    out << "    AffineTransform[" << std::endl;
+    out << "        {{{" << this->orientation(0, 0) << ", " << this->orientation(0, 1) << ", " << this->orientation(0, 2) << "}," << std::endl;
+    out << "          {" << this->orientation(1, 0) << ", " << this->orientation(1, 1) << ", " << this->orientation(1, 2) << "}," << std::endl;
+    out << "          {" << this->orientation(2, 0) << ", " << this->orientation(2, 1) << ", " << this->orientation(2, 2) << "}}," << std::endl;
+    out << "          " << this->getPosition() << "}]]";
+    return out.str();
+}
+
 Matrix<3, 3> Ellipsoid::getEllipsoidMatrix() const {
     return M;
 }

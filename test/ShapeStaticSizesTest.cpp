@@ -22,9 +22,15 @@ namespace
 {
     struct Result {
         std::size_t voxelConflicts{};
+        std::string voxelConflictExample = "";
+
         std::size_t biggerVoxelConflicts{};
+
         std::size_t neighbourListConflicts{};
+        std::string neighbourListConflictExample = "";
+
         std::size_t smallerNeighbourListConflicts{};
+
         
         void print(std::ostream &out) const;
         bool success() const;
@@ -33,17 +39,23 @@ namespace
     /* Presents result on the out ostream */
     void Result::print(std::ostream &out) const {
         out << std::endl;
-        if (voxelConflicts != 0)
+        if (voxelConflicts != 0){
             out << "[FAILED] Voxel size too big. Empty spaces will be produced" << std::endl;
-        else if (biggerVoxelConflicts == 0)
+            out << "Example configuration of two non-overlapping (according to the overlap() method) shapes:" << std::endl << voxelConflictExample << std::endl << std::endl;
+        }
+        else if (biggerVoxelConflicts == 0){
             out << "[WARNING] Voxel size too small, no conflicts found in a slightly bigger. Check more pairs before enlarging" << std::endl;
+        }
         else
             out << "[PASSED] Voxel size correct and optimal" << std::endl;
 
-        if (neighbourListConflicts != 0)
+        if (neighbourListConflicts != 0){
             out << "[FAILED] NeighbourGrid cell to small. Overlapping shapes will occur" << std::endl;
-        else if (smallerNeighbourListConflicts == 0)
+            out << "Example configuration of two overlapping (according to the overlap() method) shapes:" << std::endl << neighbourListConflictExample << std::endl << std::endl;
+        }
+        else if (smallerNeighbourListConflicts == 0){
             out << "[WARNING] NeighbourGrid cell too big, no conflicts found in a slightly smaller. Check more pairs before reducing" << std::endl;
+        }
         else
             out << "[PASSED] NeighbourGrid cell size correct and optimal" << std::endl;
     }
@@ -52,12 +64,14 @@ namespace
         return neighbourListConflicts == 0;
     }
 
+    std::unique_ptr<RSAShape> shape1, shape2;
+
     /* Generates random pair distant on x coordinate by distance and checks overlap */
     bool random_pair_overlap(RND *rnd, double distance) {
         Vector<RSA_SPATIAL_DIMENSION> pos;
         pos[0] = distance / 2;
-        auto shape1 = generate_randomly_oriented_shape(-pos, rnd);
-        auto shape2 = generate_randomly_oriented_shape(pos, rnd);
+        shape1 = generate_randomly_oriented_shape(-pos, rnd);
+        shape2 = generate_randomly_oriented_shape(pos, rnd);
 
         RSAMockBC bc;
         return shape1->overlap(&bc, shape2.get());
@@ -70,14 +84,30 @@ namespace
         RND rnd;
         InfoLooper looper(max_tries, 10000, "pairs tested...");
         while (looper.step()) {
-            if (!random_pair_overlap(&rnd, RSAShape::getVoxelSpatialSize() * 0.9999 * std::sqrt(RSA_SPATIAL_DIMENSION)))
+            if (!random_pair_overlap(&rnd, RSAShape::getVoxelSpatialSize() * 0.9999 * std::sqrt(RSA_SPATIAL_DIMENSION))){
                 result.voxelConflicts++;
-            if (!random_pair_overlap(&rnd, RSAShape::getVoxelSpatialSize() * 1.05 * std::sqrt(RSA_SPATIAL_DIMENSION)))
+                if (result.voxelConflictExample.empty()){
+                	result.voxelConflictExample = "Graphics3D[{ \r\n" +
+                								   shape1->toWolfram() + ", \r\n" +
+												   shape2->toWolfram() +
+												   "\r\n }]" ;
+                }
+            }
+            if (!random_pair_overlap(&rnd, RSAShape::getVoxelSpatialSize() * 1.05 * std::sqrt(RSA_SPATIAL_DIMENSION))){
                 result.biggerVoxelConflicts++;
-            if (random_pair_overlap(&rnd, RSAShape::getNeighbourListCellSize() * 1.0001))
+            }
+            if (random_pair_overlap(&rnd, RSAShape::getNeighbourListCellSize() * 1.0001)){
                 result.neighbourListConflicts++;
-            if (random_pair_overlap(&rnd, RSAShape::getNeighbourListCellSize() * 0.95))
+                if (result.neighbourListConflictExample.empty()){
+                	result.neighbourListConflictExample = "Graphics3D[{ \r\n" +
+                								   shape1->toWolfram() + ", \r\n" +
+												   shape2->toWolfram() +
+												   "\r\n }]" ;
+                }
+            }
+            if (random_pair_overlap(&rnd, RSAShape::getNeighbourListCellSize() * 0.95)){
                 result.smallerNeighbourListConflicts++;
+            }
         }
         return result;
     }
