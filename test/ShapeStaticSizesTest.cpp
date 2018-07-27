@@ -20,61 +20,107 @@
 
 namespace
 {
-    struct Result {
-        std::size_t voxelConflicts{};
-        std::string voxelConflictExample = "";
+    using ShapePair = RSAShapePairFactory::ShapePair;
 
+    class Result {
+    private:
+        RSAMockBC bc;
+
+        std::size_t voxelConflicts{};
         std::size_t biggerVoxelConflicts{};
+        ShapePair voxelConflictExample{};
 
         std::size_t neighbourListConflicts{};
-        std::string neighbourListConflictExample = "";
-
         std::size_t smallerNeighbourListConflicts{};
+        ShapePair neighbourListConflictExample{};
 
-        
+        void printPair(const ShapePair &pair, std::ostream &out) const;
+
+    public:
+        void evaluateForVoxel(const ShapePair &pair);
+        void evaluateForNeighbourList(const ShapePair &pair);
+        void evaluateForBiggerVoxel(const ShapePair &pair);
+        void evaluateForSmallerNeighbourList(const ShapePair &pair);
+
         void print(std::ostream &out) const;
         bool success() const;
     };
 
+    void Result::evaluateForVoxel(const ShapePair &pair) {
+        if (!pair.first()->overlap(&bc, pair.second())) {
+            if (this->voxelConflicts == 0)
+                this->voxelConflictExample = pair;
+            this->voxelConflicts++;
+        }
+    }
+
+    void Result::evaluateForBiggerVoxel(const ShapePair &pair) {
+        if (!pair.first()->overlap(&bc, pair.second()))
+            this->biggerVoxelConflicts++;
+    }
+
+    void Result::evaluateForNeighbourList(const ShapePair &pair) {
+        if (pair.first()->overlap(&bc, pair.second())) {
+            if (this->neighbourListConflicts == 0)
+                this->neighbourListConflictExample = pair;
+            this->neighbourListConflicts++;
+        }
+    }
+
+    void Result::evaluateForSmallerNeighbourList(const ShapePair &pair) {
+        if (pair.first()->overlap(&bc, pair.second()))
+            this->smallerNeighbourListConflicts++;
+    }
+
+    /* Prints Graphics3D with shapes pair on the out ostream */
+    void Result::printPair(const ShapePair &pair, std::ostream &out) const {
+        out << "Graphics3D[{ " << std::endl;
+        out << pair.first()->toWolfram() << ", " << std::endl;
+        out << pair.second()->toWolfram() << std::endl;
+        out << "}]";
+    }
+
     /* Presents result on the out ostream */
     void Result::print(std::ostream &out) const {
         out << std::endl;
-        if (voxelConflicts != 0){
-            out << "[FAILED] Voxel size too big. Empty spaces will be produced" << std::endl;
-            out << "Example configuration of two non-overlapping (according to the overlap() method) shapes:" << std::endl << voxelConflictExample << std::endl << std::endl;
-        }
-        else if (biggerVoxelConflicts == 0){
-            out << "[WARNING] Voxel size too small, no conflicts found in a slightly bigger. Check more pairs before enlarging" << std::endl;
-        }
-        else
+        if (voxelConflicts != 0) {
+            out << "[FAILED] Voxel size too big, or Shape::overlap incorrect. " << std::endl;
+            out << "[INFO] Example configuration of two non-overlapping (according to the overlap() method) shapes:";
+            out << std::endl;
+            this->printPair(voxelConflictExample, out);
+            out << std::endl << std::endl;
+        } else if (biggerVoxelConflicts == 0) {
+            out << "[FAILED] Voxel size too small or Shape::overlap incorrect. TRY UP TO 100000 PAIRS" << std::endl;
+        } else {
             out << "[PASSED] Voxel size correct and optimal" << std::endl;
+        }
 
-        if (neighbourListConflicts != 0){
-            out << "[FAILED] NeighbourGrid cell to small. Overlapping shapes will occur" << std::endl;
-            out << "Example configuration of two overlapping (according to the overlap() method) shapes:" << std::endl << neighbourListConflictExample << std::endl << std::endl;
-        }
-        else if (smallerNeighbourListConflicts == 0){
-            out << "[WARNING] NeighbourGrid cell too big, no conflicts found in a slightly smaller. Check more pairs before reducing" << std::endl;
-        }
-        else
+        if (neighbourListConflicts != 0) {
+            out << "[FAILED] NeighbourGrid cell to small, or Shape::overlap incorrect" << std::endl;
+            out << "[INFO] Example configuration of two overlapping (according to the overlap() method) shapes:";
+            out << std::endl;
+            this->printPair(neighbourListConflictExample, out);
+            out << std::endl << std::endl;
+        } else if (smallerNeighbourListConflicts == 0) {
+            out << "[WARNING] NeighbourGrid cell too big or Shape::overlap incorrect. TRY UP TO 100000 PAIRS" << std::endl;
+        } else {
             out << "[PASSED] NeighbourGrid cell size correct and optimal" << std::endl;
+        }
     }
 
     bool Result::success() const {
-        return neighbourListConflicts == 0;
+        return voxelConflicts == 0 && biggerVoxelConflicts == 0 &&
+               neighbourListConflicts == 0 && smallerNeighbourListConflicts == 0;
     }
 
-    std::unique_ptr<RSAShape> shape1, shape2;
-
     /* Generates random pair distant on x coordinate by distance and checks overlap */
-    bool random_pair_overlap(RND *rnd, double distance) {
+    ShapePair random_pair(RND *rnd, double distance) {
         Vector<RSA_SPATIAL_DIMENSION> pos;
         pos[0] = distance / 2;
-        shape1 = generate_randomly_oriented_shape(-pos, rnd);
-        shape2 = generate_randomly_oriented_shape(pos, rnd);
 
-        RSAMockBC bc;
-        return shape1->overlap(&bc, shape2.get());
+        auto shape1 = generate_randomly_oriented_shape(-pos, rnd);
+        auto shape2 = generate_randomly_oriented_shape(pos, rnd);
+        return ShapePair(std::move(shape1), std::move(shape2));
     }
 
     Result perform_test(unsigned long max_tries) {
@@ -84,30 +130,12 @@ namespace
         RND rnd;
         InfoLooper looper(max_tries, 10000, "pairs tested...");
         while (looper.step()) {
-            if (!random_pair_overlap(&rnd, RSAShape::getVoxelSpatialSize() * 0.9999 * std::sqrt(RSA_SPATIAL_DIMENSION))){
-                result.voxelConflicts++;
-                if (result.voxelConflictExample.empty()){
-                	result.voxelConflictExample = "Graphics3D[{ \r\n" +
-                								   shape1->toWolfram() + ", \r\n" +
-												   shape2->toWolfram() +
-												   "\r\n }]" ;
-                }
-            }
-            if (!random_pair_overlap(&rnd, RSAShape::getVoxelSpatialSize() * 1.05 * std::sqrt(RSA_SPATIAL_DIMENSION))){
-                result.biggerVoxelConflicts++;
-            }
-            if (random_pair_overlap(&rnd, RSAShape::getNeighbourListCellSize() * 1.0001)){
-                result.neighbourListConflicts++;
-                if (result.neighbourListConflictExample.empty()){
-                	result.neighbourListConflictExample = "Graphics3D[{ \r\n" +
-                								   shape1->toWolfram() + ", \r\n" +
-												   shape2->toWolfram() +
-												   "\r\n }]" ;
-                }
-            }
-            if (random_pair_overlap(&rnd, RSAShape::getNeighbourListCellSize() * 0.95)){
-                result.smallerNeighbourListConflicts++;
-            }
+            const double SD_SQRT = std::sqrt(RSA_SPATIAL_DIMENSION);
+
+            result.evaluateForVoxel(random_pair(&rnd, 0.9999*SD_SQRT * RSAShape::getVoxelSpatialSize()));
+            result.evaluateForBiggerVoxel(random_pair(&rnd, 1.05*SD_SQRT * RSAShape::getVoxelSpatialSize()));
+            result.evaluateForNeighbourList(random_pair(&rnd, 1.0001 * RSAShape::getNeighbourListCellSize()));
+            result.evaluateForSmallerNeighbourList(random_pair(&rnd, 0.95 * RSAShape::getNeighbourListCellSize()));
         }
         return result;
     }
@@ -120,7 +148,7 @@ namespace shape_sizetest
 
         ShapeFactory::initShapeClass(argv[2], argv[3]);
         unsigned long max_tries = std::stoul(argv[4]);
-        if (max_tries <= 0)     die("Wrong input. Aborting.");
+        if (max_tries <= 0)     die("[ERROR] max_tries <= 0");
 
         Result result = perform_test(max_tries);
         result.print(std::cout);

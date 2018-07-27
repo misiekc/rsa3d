@@ -113,8 +113,8 @@ set(TEST_SOURCE
 function(register_targets_for_dimensions SD AD)
     set(DIM_SUFFIX ".${SD}.${AD}")
 
-    set(RSA_LIB "librsa${DIM_SUFFIX}")
-    set(TEST_LIB "libtest${DIM_SUFFIX}")
+    set(RSA_LIB "rsa_main${DIM_SUFFIX}")
+    set(TEST_LIB "rsa_test_main${DIM_SUFFIX}")
     set(RSA_EXEC "rsa${DIM_SUFFIX}")
     set(RSA_TEST_EXEC "rsa_test${DIM_SUFFIX}")
 
@@ -126,7 +126,7 @@ function(register_targets_for_dimensions SD AD)
 
     add_executable(${RSA_EXEC} rsa3d/Main.cpp)
     target_include_directories(${RSA_EXEC} PUBLIC statistics)
-    target_link_libraries(${RSA_EXEC} ${RSA_LIB} libstatistics)
+    target_link_libraries(${RSA_EXEC} ${RSA_LIB} statistics)
 
     add_executable(${RSA_TEST_EXEC} test/Main.cpp)
     target_link_libraries(${RSA_TEST_EXEC} ${TEST_LIB} ${RSA_LIB})
@@ -136,7 +136,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -Wall -pedantic")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3")   # -O3 in relase, in debug no optimisations
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp -static")    # link dependencies statically
 
-add_library(libstatistics ${STATISTICS_SOURCE})
+add_library(statistics ${STATISTICS_SOURCE})
 
 # Here come all dimensions for which binaries should be generated
 register_targets_for_dimensions(3 0)    # 3D spheres, cuboids, platonic solids and so on

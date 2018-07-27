@@ -42,11 +42,14 @@ public:
         std::shared_ptr<shape> _second;
 
     public:
+        ShapePair() = default;
         ShapePair(shape *first, shape *second) : _first(first), _second(second) { }
         ShapePair(std::unique_ptr<shape> first, std::unique_ptr<shape> second) : _first(std::move(first)),
                                                                                  _second(std::move(second)) { }
         shape *first() { return _first.get(); }
         shape *second() { return _second.get(); }
+        const shape *first() const { return _first.get(); }
+        const shape *second() const { return _second.get(); }
     };
     
     /**
