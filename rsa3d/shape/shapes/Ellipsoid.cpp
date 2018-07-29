@@ -68,11 +68,11 @@ bool Ellipsoid::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
 		}
 		if (abs(fder) < 1e-8 /*|| abs(previousLambda - lambda) < 1e-8*/ ) {
 			fAB = overlapFunction(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
-			if (fAB >= 1) {
-				return false;
+			if (fAB < 1) {
+				return true;
 			}
 			else {
-				return true;
+				return false;
 			}
 		}
 	}
