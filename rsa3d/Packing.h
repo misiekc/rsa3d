@@ -28,9 +28,8 @@ public:
     virtual ~Packing();
 
     Packing(const Packing &other);
-    Packing &operator=(const Packing &other);
     Packing(Packing &&other) noexcept;
-    Packing &operator=(Packing &&other) noexcept;
+    Packing &operator=(Packing other);
 
     /**
      * @breif Adds given dynamically allocated @a shape to a packing and takes care of deallocation later

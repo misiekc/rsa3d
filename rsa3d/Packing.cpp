@@ -17,22 +17,13 @@ Packing::Packing(const Packing &other) {
         this->addShape(shape->clone());
 }
 
-Packing &Packing::operator=(const Packing &other) {
-    this->clear();
-    for (auto &shape : other.packing)
-        this->addShape(shape->clone());
+Packing &Packing::operator=(Packing other) {
+    std::swap(this->packing, other.packing);
     return *this;
 }
 
 Packing::Packing(Packing &&other) noexcept : packing(std::move(other.packing)) {
     other.packing.clear();
-}
-
-Packing &Packing::operator=(Packing &&other) noexcept {
-    this->clear();
-    this->packing = std::move(other.packing);
-    other.packing.clear();
-    return *this;
 }
 
 void Packing::store(std::ostream &out) const {
