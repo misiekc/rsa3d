@@ -33,8 +33,7 @@ private:
     Matrix<3, 3> orientation = Matrix<3, 3>::identity();
 
     PIResult pointInsideEarlyRejection(const Vector<3> &bcPos) const;
-    PIResult pointInsideFace(const Vector<3> &point, const std::vector<Vector<3>> &vertices,
-                             const std::vector<Vector<3>> &faceNormals) const;
+    PIResult pointInsideFace(const Vector<3> &point, const std::vector<Vector<3>> &vertices) const;
     bool projectionInsideFace(const Vector<3> &point, const std::vector<Vector<3>> &vertices,
                               const std::vector<size_t> &face, const Vector<3> &faceNormal) const;
     bool pointInsideEdge(const Vector<3> &point, const std::vector<Vector<3>> &vertices) const;

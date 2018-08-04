@@ -20,23 +20,7 @@ void Tetrahedron::calculateStatic(const std::string &attr) {
 
 bool Tetrahedron::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
                               double orientationRange) const {
-    if (RegularSolid::pointInside(bc, position, orientation, orientationRange))
-        return true;
-
-    // Additional spheres in vertices
-    auto vertices = this->getVertices();
-    for (auto vertex : vertices)
-        if ((position - vertex).norm2() <= insphereRadius * insphereRadius)
-            return true;
-
-    // Additional spheres in midedges
-    for (auto vi = vertices.begin(); vi != vertices.end(); vi++)
-        for (auto vj = vi; vj != vertices.end(); vj++)
-            if ((position - (*vi + *vj)/2.).norm2() <= insphereRadius * insphereRadius)
-                return true;
-
-    return false;
-    //return this->strictPointInside(bc, position, orientation, orientationRange);
+    return this->strictPointInside(bc, position, orientation, orientationRange);
 }
 
 OverlapStrategy<3, 0> *Tetrahedron::createStrategy(const std::string &name) const {

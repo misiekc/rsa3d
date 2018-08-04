@@ -148,9 +148,8 @@ bool RegularSolidBase::strictPointInside(BoundaryConditions<3> *bc, const Vector
     }
 
     auto vertices = this->getVertices();
-    auto faceNormals = this->getFaceNormals();
 
-    switch (pointInsideFace(bcPos, vertices, faceNormals)) {
+    switch (pointInsideFace(bcPos, vertices)) {
         case TRUE:      return true;
         case FALSE:     return false;
         default:        return pointInsideEdge(bcPos, vertices) || pointInsideVertex(bcPos, vertices);
@@ -168,8 +167,8 @@ inline RegularSolidBase::PIResult RegularSolidBase::pointInsideEarlyRejection(co
 }
 
 inline RegularSolidBase::PIResult
-RegularSolidBase::pointInsideFace(const Vector<3> &point, const std::vector<Vector<3>> &vertices,
-                                  const std::vector<Vector<3>> &faceNormals) const {
+RegularSolidBase::pointInsideFace(const Vector<3> &point, const std::vector<Vector<3>> &vertices) const {
+    auto faceNormals = this->getFaceNormals();
     bool insideSolid = true;
     for (std::size_t faceI = 0; faceI < orientedFaces.size(); faceI++) {
         const auto &face = orientedFaces[faceI];
