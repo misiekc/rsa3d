@@ -18,6 +18,9 @@ private:
 public:
     explicit TruncatedCube(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}
 
+    bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
+                     double orientationRange) const override;
+
     double projectionHalfsize(const Vector<3> &axis) const override;
 };
 

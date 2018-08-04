@@ -24,3 +24,8 @@ OverlapStrategy<3, 0> *TruncatedTetrahedron::createStrategy(const std::string &n
     else
         return RegularSolid<TruncatedTetrahedron>::createStrategy(name);
 }
+
+bool TruncatedTetrahedron::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
+                                       const Orientation<0> &orientation, double orientationRange) const {
+    return this->strictPointInside(bc, position, orientation, orientationRange);
+}

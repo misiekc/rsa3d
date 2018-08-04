@@ -10,13 +10,17 @@
 #include "TriTriOverlapRS.h"
 
 
-std::vector<Vector<3>> RegularSolidBase::orientedVertices;
-std::vector<std::vector<std::size_t>> RegularSolidBase::orientedFaces;
-std::vector<std::array<std::size_t, 3>> RegularSolidBase::orientedTriangles;
+std::vector<Vector<3>>                      RegularSolidBase::orientedVertices;
+std::vector<std::vector<std::size_t>>       RegularSolidBase::orientedFaces;
+std::vector<std::array<std::size_t, 3>>     RegularSolidBase::orientedTriangles;
+std::vector<RegularSolidBase::Edge>         RegularSolidBase::orientedEdges;
+std::vector<Vector<3>>                      RegularSolidBase::orientedFaceNormals;
+
 std::vector<Vector<3>> RegularSolidBase::orientedFaceAxes;
 std::vector<Vector<3>> RegularSolidBase::orientedEdgeAxes;
 std::vector<Vector<3>> RegularSolidBase::orientedVertexAxes;
 std::vector<Vector<3>> RegularSolidBase::orientedMidedgeAxes;
+
 double RegularSolidBase::normalizeFactor;
 double RegularSolidBase::circumsphereRadius;
 double RegularSolidBase::insphereRadius;
@@ -33,6 +37,8 @@ void RegularSolidBase::initClass(const std::string &attr) {
         exit(EXIT_SUCCESS);
     }
 
+    normalizeFacesOrientation();
+    discoverEdges();
     discoverTriangles();
     normalizeVolume();
     calculateRadia();
@@ -45,7 +51,7 @@ void RegularSolidBase::initClass(const std::string &attr) {
 }
 
 bool RegularSolidBase::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
-                                              const Orientation<0> &orientation, double orientationRange) const {
+                                   const Orientation<0> &orientation, double orientationRange) const {
     Vector<3> thisPos = this->getPosition();
     Vector<3> pointDelta = position - thisPos + bc->getTranslation(thisPos, position);
     return pointDelta.norm2() <= 4*insphereRadius*insphereRadius;
@@ -101,9 +107,9 @@ std::string RegularSolidBase::toWolfram() const {
     result << std::fixed;
     result << "Polygon[{ ";
 
-    for (auto face = faces.begin(); face != faces.end(); face++) {
+    for (auto &face : faces) {
         result << "{";
-        std::copy(face->begin(), face->end(), std::ostream_iterator<Vector<3>>(result, ", "));
+        std::copy(face.begin(), face.end(), std::ostream_iterator<Vector<3>>(result, ", "));
         result.seekp(-2, std::ios_base::end);
         result << "}, " << std::endl;
     }
@@ -131,9 +137,101 @@ std::vector<Vector<3>> RegularSolidBase::applyPosition(const std::vector<Vector<
     return result;
 }
 
+bool RegularSolidBase::strictPointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
+                                         const Orientation<0> &orientation, double orientationRange) const {
+    Vector<3> bcPos = position + bc->getTranslation(this->getPosition(), position);
+
+    switch (pointInsideEarlyRejection(bcPos)) {
+        case TRUE:      return true;
+        case FALSE:     return false;
+        default:        break;
+    }
+
+    auto vertices = this->getVertices();
+    auto faceNormals = this->getFaceNormals();
+
+    switch (pointInsideFace(bcPos, vertices, faceNormals)) {
+        case TRUE:      return true;
+        case FALSE:     return false;
+        default:        return pointInsideEdge(bcPos, vertices) || pointInsideVertex(bcPos, vertices);
+    }
+}
+
+inline RegularSolidBase::PIResult RegularSolidBase::pointInsideEarlyRejection(const Vector<3> &bcPos) const {
+    Vector<3> pointDelta = bcPos - this->getPosition();
+    double norm2 = pointDelta.norm2();
+    if (norm2 <= 4*insphereRadius*insphereRadius)
+        return TRUE;
+    else if (norm2 > std::pow(circumsphereRadius + insphereRadius, 2))
+        return FALSE;
+    return UNKNOWN;
+}
+
+inline RegularSolidBase::PIResult
+RegularSolidBase::pointInsideFace(const Vector<3> &point, const std::vector<Vector<3>> &vertices,
+                                  const std::vector<Vector<3>> &faceNormals) const {
+    bool insideSolid = true;
+    for (std::size_t faceI = 0; faceI < orientedFaces.size(); faceI++) {
+        const auto &face = orientedFaces[faceI];
+        Vector<3> faceNormal = faceNormals[faceI];
+        Vector<3> firstVertex = vertices[face[0]];
+        double faceDist = (point - firstVertex) * faceNormal;
+        if (faceDist > 0) {
+            insideSolid = false;
+            if (faceDist > insphereRadius)
+                return FALSE;
+            else if (projectionInsideFace(point, vertices, face, faceNormal))
+                return TRUE;
+        }
+    }
+
+    if (insideSolid)
+        return TRUE;
+
+    return UNKNOWN;
+}
+
+inline bool RegularSolidBase::projectionInsideFace(const Vector<3> &point, const std::vector<Vector<3>> &vertices,
+                                                   const std::vector<size_t> &face, const Vector<3> &faceNormal) const {
+    for (std::size_t vertexI = 0; vertexI < face.size(); vertexI++) {
+        Vector<3> edgeBeg = vertices[face[vertexI]];
+        Vector<3> edgeEnd = vertices[face[(vertexI + 1) % face.size()]];
+        Vector<3> edgeVec = edgeEnd - edgeBeg;
+        Vector<3> posVec = point - edgeBeg;
+        if ((edgeVec ^ faceNormal) * posVec > 0)
+            return false;
+    }
+    return true;
+}
+
+inline bool RegularSolidBase::pointInsideEdge(const Vector<3> &point, const std::vector<Vector<3>> &vertices) const {
+    for (const auto &edge : orientedEdges) {
+        Vector<3> edgeBeg = vertices[edge.first()];
+        Vector<3> edgeEnd = vertices[edge.second()];
+        Vector<3> edgeVec = edgeEnd - edgeBeg;
+        Vector<3> posFromBeg = point - edgeBeg;
+
+        Vector<3> orthPosComponent = posFromBeg - posFromBeg.projectOn(edgeVec);
+        if (orthPosComponent.norm2() <= insphereRadius*insphereRadius) {
+            Vector<3> posFromEnd = point - edgeEnd;
+            if (posFromBeg * edgeVec >= 0 && posFromEnd * edgeVec <= 0)
+                return true;
+        }
+    }
+    return false;
+}
+
+inline bool RegularSolidBase::pointInsideVertex(const Vector<3> &point, const std::vector<Vector<3>> &vertices) const {
+    for (const auto &vertex : vertices)
+        if ((point - vertex).norm2() <= insphereRadius * insphereRadius)
+            return true;
+    return false;
+}
+
 std::vector<Vector<3>> RegularSolidBase::getVertices() const { return applyPosition(orientedVertices); }
 std::vector<Vector<3>> RegularSolidBase::getEdgeAxes() const { return applyOrientation(orientedEdgeAxes); }
 std::vector<Vector<3>> RegularSolidBase::getFaceAxes() const { return applyOrientation(orientedFaceAxes); }
+std::vector<Vector<3>> RegularSolidBase::getFaceNormals() const { return applyOrientation(orientedFaceNormals); }
 std::vector<Vector<3>> RegularSolidBase::getVertexAxes() const { return applyOrientation(orientedVertexAxes); }
 std::vector<Vector<3>> RegularSolidBase::getMidegdeAxes() const { return applyOrientation(orientedMidedgeAxes); }
 
@@ -163,6 +261,32 @@ intersection::face_polyh RegularSolidBase::getFaces() const {
     faces.reserve(orientedFaces.size());
     std::transform(orientedFaces.begin(), orientedFaces.end(), std::back_inserter(faces), verticesIdxToFace);
     return faces;
+}
+
+intersection::face3D RegularSolidBase::faceFromVertexIdx(const std::vector<size_t> &vertexIdx) {
+    intersection::face3D face(vertexIdx.size());
+    auto idxToVertex = [](std::size_t idx) { return orientedVertices[idx]; };
+    transform(vertexIdx.begin(), vertexIdx.end(), face.begin(), idxToVertex);
+    return face;
+}
+
+void RegularSolidBase::normalizeFacesOrientation() {
+    for (auto &faceVertexIdx : orientedFaces) {
+        intersection::face3D face = faceFromVertexIdx(faceVertexIdx);
+        Vector<3> faceAxis = (face[1] - face[0]) ^ (face[2] - face[0]);
+        if (faceAxis * face[0] < 0)
+            std::reverse(faceVertexIdx.begin(), faceVertexIdx.end());
+    }
+}
+
+void RegularSolidBase::discoverEdges() {
+    for (const auto &face : orientedFaces) {
+        for (std::size_t vertexI = 0; vertexI < face.size(); vertexI++) {
+            Edge edge(face[(vertexI + 1) % face.size()], face[vertexI]);
+            if (std::find(orientedEdges.begin(), orientedEdges.end(), edge) == orientedEdges.end())
+                orientedEdges.push_back(edge);
+        }
+    }
 }
 
 void RegularSolidBase::discoverTriangles() {
@@ -209,28 +333,22 @@ void RegularSolidBase::calculateRadia() {
 }
 
 void RegularSolidBase::discoverAxes() {
-    for (const auto &vertex : orientedVertices) {
-        Vector<3> axis = vertex / vertex.norm();
-        addUniqueAxis(orientedVertexAxes, axis);
-    }
+    for (const auto &vertex : orientedVertices)
+        addUniqueAxis(orientedVertexAxes, vertex.normalized());
 
-    for (const auto &faceIdx : orientedFaces) {
-        intersection::face3D face(faceIdx.size());
-        auto idxToVertex = [](std::size_t idx) { return orientedVertices[idx]; };
-        std::transform(faceIdx.begin(), faceIdx.end(), face.begin(), idxToVertex);
+    for (const auto &faceVertexIdx : orientedFaces) {
+        intersection::face3D face = faceFromVertexIdx(faceVertexIdx);
 
-        Vector<3> faceAxis = (face[1] - face[0]) ^ (face[2] - face[0]);
-        faceAxis /= faceAxis.norm();
+        Vector<3> faceAxis = ((face[1] - face[0]) ^ (face[2] - face[0])).normalized();
         addUniqueAxis(orientedFaceAxes, faceAxis);
+        orientedFaceNormals.push_back(faceAxis);
 
         for (std::size_t i = 0; i < face.size(); i++) {
             Vector<3> edgeAxis = face[(i + 1) % face.size()] - face[i];
-            edgeAxis = edgeAxis / edgeAxis.norm();
-            addUniqueAxis(orientedEdgeAxes, edgeAxis);
+            addUniqueAxis(orientedEdgeAxes, edgeAxis.normalized());
 
             Vector<3> midedgeAxis = (face[(i + 1) % face.size()] + face[i]) / 2.;
-            midedgeAxis = midedgeAxis / midedgeAxis.norm();
-            addUniqueAxis(orientedMidedgeAxes, midedgeAxis);
+            addUniqueAxis(orientedMidedgeAxes, midedgeAxis.normalized());
         }
     }
 }

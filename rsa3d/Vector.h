@@ -188,14 +188,23 @@ public:
     {
         return (*this) * (*this);
     }
-    
+
     // Returns projection on vector (for double)
     //---------------------------------------------------------------------------------------
     template <typename _E = E>
     enabled<std::is_same<_E, double>::value, Vector>
-    projectOn(Vector _axis)
+    projectOn(Vector _axis) const
     {
         return (((*this) * _axis) / (_axis * _axis)) * _axis;
+    }
+
+    // Normalized vector
+    //---------------------------------------------------------------------------------------
+    template <typename _E = E>
+    enabled<std::is_same<_E, double>::value, Vector>
+    normalized() const
+    {
+        return *this / this->norm();
     }
 
 

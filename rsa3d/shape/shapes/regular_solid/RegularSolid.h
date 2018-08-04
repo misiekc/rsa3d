@@ -13,11 +13,12 @@
 #include "SATOverlapRS.h"
 #include "RegularSolidBase.h"
 
-// CRTP idiom
+// CRTP idiom - enable concrete solids to provide "polymorphic" initClass static function, an overlap strategy of
+// choice and provide clone method
 template <typename SpecificSolid>
 class RegularSolid : public RegularSolidBase {
 protected:
-    static const SATOverlapRS overlapStrategy;   // SATOverlapCB is the default
+    static const SATOverlapRS overlapStrategy;   // SATOverlapRS is the default
 
     explicit RegularSolid(const Matrix<3, 3> &orientation) : RegularSolidBase{orientation} {};
 
