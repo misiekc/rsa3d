@@ -85,7 +85,7 @@ bool Ellipsoid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position
     Vector<3> bcPos = position + bc->getTranslation(this->getPosition(), position);
     Vector<3> pointAligned = this->orientation.transpose() * (bcPos - this->getPosition());
 
-    double d = pointAligned[0]*pointAligned[0]/((Ellipsoid::a + Ellipsoid::c)*(Ellipsoid::a + Ellipsoid::c)) + pointAligned[1]*pointAligned[1]/((Ellipsoid::b + Ellipsoid::c)*(Ellipsoid::b + Ellipsoid::c)) + pointAligned[2]*pointAligned[2]/(4*Ellipsoid::c*Ellipsoid::c);
+    double d = pointAligned[0]*pointAligned[0]/(4*Ellipsoid::a*Ellipsoid::a) + pointAligned[1]*pointAligned[1]/((Ellipsoid::b + Ellipsoid::a)*(Ellipsoid::b + Ellipsoid::a)) + pointAligned[2]*pointAligned[2]/((Ellipsoid::c + Ellipsoid::a)*(Ellipsoid::c + Ellipsoid::a));
     return (d <= 1.0);
 }
 

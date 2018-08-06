@@ -15,12 +15,24 @@
 
 namespace
 {
-    struct Results {
+
+	using ShapePair = RSAShapePairFactory::ShapePair;
+
+	struct Results {
         std::size_t tested{};
         std::size_t overlapped{};
         std::size_t withPointInside{};
         std::size_t conflicts{};
+        std::string conflictExample;
         std::string factoryDesc;
+
+        /* Prints Graphics3D with shapes pair on the out ostream */
+        void printPair(const ShapePair &pair, std::ostream &out) const {
+            out << "Graphics3D[{ " << std::endl;
+            out << pair.first()->toWolfram() << ", " << std::endl;
+            out << pair.second()->toWolfram() << std::endl;
+            out << "}]";
+        }
 
         /* Prints test results onto given ostream */
         void print(std::ostream &ostr) {
@@ -33,6 +45,13 @@ namespace
             ostr << "with point inside     : " << this->withPointInside << std::endl;
             ostr << "point inside accuracy : " << percentAccuracy << "%" << std::endl;
             ostr << "conflicts             : " << this->conflicts << std::endl;
+            if(this->conflicts>0){
+            	ostr << "[INFO] Example conflict configuration: two non-overlapping (according to the overlap() method) shapes." << std::endl;
+            	ostr << " One of them have a center inside the second pointInside() zone:";
+            	ostr << std::endl;
+            	ostr << this->conflictExample;
+            	ostr << std::endl;
+            }
         }
     };
 
@@ -59,8 +78,14 @@ namespace
             if (pi_first)   results.withPointInside++;
 
             // pointInside and overlap conflict
-            if (!overlap && (pi_first || pi_second))
+            if (!overlap && (pi_first || pi_second)){
+            	if (results.conflicts==0){
+            		std::stringstream sout;
+            		results.printPair(pair, sout);
+            		results.conflictExample = sout.str();
+            	}
                 results.conflicts++;
+            }
         }
         return results;
     }
