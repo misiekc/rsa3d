@@ -45,14 +45,14 @@ bool Ellipsoid::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
     Ellipsoid ellipsoid = dynamic_cast<const Ellipsoid &>(*s);
     this->applyBC(bc, &ellipsoid);
 
-    Vector<3> rAB = vectorRAB(s->getPosition(), this->getPosition());
+    Vector<3> rAB = vectorRAB(this->getPosition(), s->getPosition());
 
     double lambda = INITIAL_GUESS;
 	double fder = 0.0;
 	double sder = 0.0;
 	double derivativeQuotient = 0.0;
 	double fAB = 0.0;
-	//double previousLambda = 0.0;
+	double previousLambda = 0.0;
 
 	for (int i = 0; i < 20; i++) {
 		try {
@@ -60,19 +60,20 @@ bool Ellipsoid::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
             sder = secondDerivative(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
 
 			derivativeQuotient = fder / sder;
-			//previousLambda = lambda;
+			previousLambda = lambda;
 			lambda = getNewLambda(lambda, derivativeQuotient);
 		}
 		catch (std::overflow_error e) {
 			std::cout << e.what();
 		}
-		if (abs(fder) < 1e-8 /*|| abs(previousLambda - lambda) < 1e-8*/ ) {
-			fAB = overlapFunction(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
+		if (std::abs(fder) < 1e-8 || std::abs(lambda - previousLambda) < 1e-8 ) {
+            fAB = overlapFunction(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
+
 			if (fAB < 1) {
-				return true;
+				return true;    // overlap
 			}
 			else {
-				return false;
+				return false;   // disjoint
 			}
 		}
 	}
@@ -166,7 +167,7 @@ inline double Ellipsoid::overlapFunction(const Matrix<3, 3> &A, const Matrix<3, 
 
 inline double Ellipsoid::firstDerivative(const Matrix<3, 3> &A, const Matrix<3, 3> &B, const Vector<3> &rAB, double lambda) const {
     Matrix<3, 3> M = B - A;
-    return (((1 - 2 * lambda) * ((A + M * lambda).inverse()).transpose() * rAB) + ((lambda*lambda - lambda)*((A + M * lambda).inverse()) * M * ((A + M * lambda).inverse()) * rAB))[0];
+    return ((((1 - 2 * lambda) * ((A + M * lambda).inverse())) + ((lambda*lambda - lambda)*((A + M * lambda).inverse()) * M * ((A + M * lambda).inverse()))).transpose()*rAB)*rAB;
 }
 
 inline double Ellipsoid::secondDerivative(const Matrix<3, 3> &A, const Matrix<3, 3> &B, const Vector<3> &rAB, double lambda) const {
@@ -177,8 +178,9 @@ inline double Ellipsoid::secondDerivative(const Matrix<3, 3> &A, const Matrix<3,
 	Matrix<3, 3> CBC = C * BC;
 	Matrix<3, 3> CACBC = CAC * BC;
 	Matrix<3, 3> CBCAC = CBC * AC;
-	return -(quadraticForm(CACBC, rAB) + quadraticForm(CBCAC, rAB));
-}
+
+	return (-1.0)*(quadraticForm(CACBC, rAB) + quadraticForm(CBCAC, rAB));
+ }
 
 double Ellipsoid::getNewLambda(double lambda, double derivativeQuotient) const {
     double temp = lambda - derivativeQuotient;
