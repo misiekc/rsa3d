@@ -45,9 +45,11 @@ namespace
             ostr << "with point inside     : " << this->withPointInside << std::endl;
             ostr << "point inside accuracy : " << percentAccuracy << "%" << std::endl;
             ostr << "conflicts             : " << this->conflicts << std::endl;
-            if(this->conflicts>0){
-            	ostr << "[INFO] Example conflict configuration: two non-overlapping (according to the overlap() method) shapes." << std::endl;
-            	ostr << " One of them have a center inside the second pointInside() zone:";
+
+            if (this->conflicts > 0) {
+            	ostr << "[INFO] Example conflict configuration: two non-overlapping ";
+            	ostr << "(according to the overlap() method) shapes." << std::endl;
+            	ostr << "[INFO] One of them has a center inside the second pointInside() zone:";
             	ostr << std::endl;
             	ostr << this->conflictExample;
             	ostr << std::endl;
@@ -79,7 +81,7 @@ namespace
 
             // pointInside and overlap conflict
             if (!overlap && (pi_first || pi_second)){
-            	if (results.conflicts==0){
+            	if (results.conflicts == 0) {
             		std::stringstream sout;
             		results.printPair(pair, sout);
             		results.conflictExample = sout.str();
