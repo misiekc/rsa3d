@@ -47,6 +47,13 @@ bool Ellipsoid::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
 
     Vector<3> rAB = vectorRAB(this->getPosition(), s->getPosition());
 
+    // Early rejection
+    double rABNorm2 = rAB.norm2();
+    if (rABNorm2 > 4*c*c)
+        return false;
+    else if (rABNorm2 < 4*a*a)
+        return true;
+
     double lambda = INITIAL_GUESS;
 	double fder = 0.0;
 	double sder = 0.0;
