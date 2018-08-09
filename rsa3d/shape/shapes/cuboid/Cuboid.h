@@ -24,8 +24,11 @@ class Cuboid : public ConvexShape<3, 0>, public OverlapStrategyShape<3, 0>, publ
 {
 private:
 	static double           size[3];
-	static double           minDimension;
+	static double           insphereRadius;
+	static double           circumsphereRadius;
+	
 	static Vector<3>        relativeVertices[8];
+	
 	static CuboidOverlapStrategy  *defaultStrategy;
 	static CuboidOverlapStrategy  *strategy;
 
@@ -91,6 +94,8 @@ public:
 	void obtainVertices(Vector<3> (&vertices)[8], const Vector<3> &translation) const;
 	intersection::tri_polyh obtainTris() const;
 	Matrix<3, 3> getOrientation() const;
+
+    static void normalizeVolume();
 };
 
 

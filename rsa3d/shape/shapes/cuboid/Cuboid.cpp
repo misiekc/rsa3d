@@ -17,7 +17,8 @@
 //----------------------------------------------------------------------------
 
 double          Cuboid::size[3];
-double          Cuboid::minDimension;
+double          Cuboid::insphereRadius;
+double          Cuboid::circumsphereRadius;
 Vector<3>       Cuboid::relativeVertices[VERTEX::NUM_OF];
 
 
@@ -36,35 +37,35 @@ Cuboid::Cuboid(const Matrix<3, 3> & orientation) : orientation(orientation)
 
 // Static method for class initialization
 //----------------------------------------------------------------------------
-// args - string arguments. Format: <size x> <size y> <size z>
+// args - string arguments. Format: 3 <size x> <size y> <size z>
 //----------------------------------------------------------------------------
 void Cuboid::initClass(const std::string &args)
 {
     std::stringstream args_stream (args);
     int dimension;  // fetch dimension for backward compatibility
 
-    // Fetch and assert dimensions
     args_stream >> dimension >> size[0] >> size[1] >> size[2];
     if (size[0] <= 0.0 || size[1] <= 0.0 || size[2] <= 0.0)
         throw std::runtime_error("Wrong Cuboid dimensions: " + args);
 
-    // renormailze sizes to obtain unit volume
-    double volume = size[0] * size[1] * size[2];
-    double factor = 1.0 / pow(volume, 1./3.);
-    std::transform(size, size + 3, size, [factor](double d) { return d * factor; });
-
-    // Neighbour list cell size - diagonal length. It satisfies conditions at the least favourable case - Cuboids with
-    // centers near opposite edges of a cell and with diagonals lying on the line connecting their centers
-    Shape<3,0>::setNeighbourListCellSize(std::sqrt(size[0] * size[0] + size[1] * size[1] + size[2] * size[2]));
-
-    // Voxel size. It satisfies conditions at the least favourable case - center of Cuboid lies in the corner of a voxel
-    // and voxel's diagonal is parallel to the smallest Cuboid edge
-    minDimension = *std::min_element(size, size + 3) / 2;
-    Shape<3,0>::setVoxelSpatialSize(2 * minDimension / std::sqrt(3));
-
-    Shape<3,0>::setCreateShapeImpl(&create3D);
-
+    normalizeVolume();
     calculateRelativeVerties();
+
+    insphereRadius = *std::min_element(size, size + 3) / 2;
+    circumsphereRadius = std::sqrt(size[0]*size[0] + size[1]*size[1] + size[2]*size[2]) / 2;
+
+    Shape::setVoxelSpatialSize(2 * insphereRadius / std::sqrt(3));
+    Shape::setNeighbourListCellSize(2 * circumsphereRadius);
+
+    Shape::setCreateShapeImpl(&create3D);
+}
+
+void Cuboid::normalizeVolume() {
+    double volume = size[0] * size[1] * size[2];
+    double factor = 1. / std::cbrt(volume);
+    size[0] *= factor;
+    size[1] *= factor;
+    size[2] *= factor;
 }
 
 void Cuboid::calculateRelativeVerties() {
@@ -136,6 +137,13 @@ bool Cuboid::overlap(BoundaryConditions<3> *bc, const Shape *s) const
 {
     Cuboid other = dynamic_cast<const Cuboid&>(*s);
     this->applyBC(bc, &other);
+
+    double dist2 = (this->getPosition() - other.getPosition()).norm2();
+    if (dist2 > 4*circumsphereRadius*circumsphereRadius)
+        return false;
+    else if (dist2 < 4*insphereRadius*insphereRadius)
+        return true;
+
     return strategy->overlap(this, &other);
 }
 
@@ -176,7 +184,7 @@ bool Cuboid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &pos, const 
     bool inThisPushed[3];
     for (unsigned short i = 0; i < 3; i++) {
         inThis[i] = (absPointAligned[i] <= Cuboid::size[i] / 2);
-        inThisPushed[i] = (absPointAligned[i] <= Cuboid::size[i] / 2 + minDimension);
+        inThisPushed[i] = (absPointAligned[i] <= Cuboid::size[i] / 2 + insphereRadius);
     }
 
     // Check optimistic cases - "lies in this" and "doesn't lie in this + minDimension"
@@ -197,7 +205,7 @@ bool Cuboid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &pos, const 
 
     // Check spheres in vertices
     if (std::pow(absPointAligned[0] - this->size[0] / 2, 2) + std::pow(absPointAligned[1] - this->size[1] / 2, 2) +
-        std::pow(absPointAligned[2] - this->size[2] / 2, 2) <= std::pow(minDimension, 2))
+        std::pow(absPointAligned[2] - this->size[2] / 2, 2) <= std::pow(insphereRadius, 2))
         return true;
 
     return false;
@@ -208,7 +216,7 @@ bool Cuboid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &pos, const 
 bool Cuboid::liesInCylinderOnEdge(const Vector<3> &absPointPos, std::size_t coord1, std::size_t coord2) const {
     return std::pow(absPointPos[coord1] - Cuboid::size[coord1]/2, 2)
            + std::pow(absPointPos[coord2] - Cuboid::size[coord2]/2, 2)
-           <= std::pow(minDimension, 2);
+           <= std::pow(insphereRadius, 2);
 }
 
 // Returns Cuboid orientation
