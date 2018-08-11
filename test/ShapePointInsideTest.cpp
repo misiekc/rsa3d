@@ -7,10 +7,11 @@
 #include "ShapePointInsideTest.h"
 #include "utility/MockBC.h"
 #include "../rsa3d/shape/ShapeFactory.h"
-#include "utility/BallFactory.h"
+#include "utility/IndependentPairFactory.h"
 #include "../rsa3d/Utils.h"
 #include "utility/InfoLooper.h"
 #include "../rsa3d/shape/ConvexShape.h"
+#include "utility/UniformBallDistribution.h"
 
 
 namespace
@@ -106,8 +107,8 @@ namespace shape_pitest
             die("Wrong input. Aborting.");
 
         ShapeFactory::initShapeClass(argv[2], argv[3]);
-        BallFactory factory;
-        factory.setRadius(ballRadius);
+        UniformBallDistribution distribution(ballRadius);
+        IndependentPairFactory factory(distribution);
 
         Results results = perform_test(factory, maxTries);
         std::cout << std::endl;

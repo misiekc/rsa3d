@@ -8,27 +8,21 @@
     #define _BALL_FACTORY_H
 
 #include "ShapePairFactory.h"
+#include "Distrubution.h"
 
-/**
- * @brief ShapePairFactory generating shapes from a hyperball of given radius.
- *
- * A dimension is determined by current @a RSA_SPATIAL_DIMESION.
- */
-class BallFactory : public RSAShapePairFactory
+
+class IndependentPairFactory : public RSAShapePairFactory
 {
 private:
-    double radius{0.5};
-    unsigned int no{};
-
-    /* Helper method. Creates random Cuboid based on objects parameters. Delegate shape creation to the standard
-     * ShapeFactory */
-    std::unique_ptr<RSAShape> randomShape();
-    double randomGaussian();
+    Distribution &distribution;
 
 public:
+    explicit IndependentPairFactory(Distribution &distribution);
+
     ShapePair generate() override;
     std::string getDescription() const override;
-    void setRadius(double _radius);
+
+    Distribution &getDistribution();
 };
 
 #endif // _BALL_FACTORY_H

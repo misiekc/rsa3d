@@ -10,7 +10,7 @@
 
 #include "../rsa3d/Config.h"
 #include "../rsa3d/shape/ShapeFactory.h"
-#include "utility/BallFactory.h"
+#include "utility/IndependentPairFactory.h"
 #include "utility/ShapePairFactory.h"
 #include "utility/Quantity.h"
 #include "../rsa3d/shape/shapes/cuboid/CuboidOverlapStrategy.h"
@@ -75,7 +75,7 @@ namespace cube_speedtest
         std::size_t             numAll{};
 
         AcquiredData(const Context &_context, RSAShapePairFactory &_factory);
-        static std::vector<AcquiredData> initVector(const Context &_context, BallFactory &_factory);
+        static std::vector<AcquiredData> initVector(const Context &_context, IndependentPairFactory &_factory);
         Result generateResult();
         static std::vector<Result> generateResultVector(std::vector<AcquiredData> &_acquiredDatas);
     };

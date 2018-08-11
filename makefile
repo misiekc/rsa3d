@@ -111,8 +111,11 @@ OBJS_MAIN = rsa3d/Main \
        		rsa3d/analizator/Analyzer \
 
 # Objects to be linked only with custom tests executable
-OBJS_TEST = test/utility/BallFactory \
-       		test/utility/BoxFactory \
+OBJS_TEST = test/utility/IndependentPairFactory \
+            test/utility/ParallelPairFactory \
+            test/utility/Quantity \
+            test/utility/UniformBallDistribution \
+            test/utility/UniformBoxDistribution\
        		test/utility/Quantity \
        		test/AnisotropicShape2DExclusionDrawer \
        		test/AnisotropicShape2DExclusionTest \

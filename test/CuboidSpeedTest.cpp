@@ -20,6 +20,7 @@
 #include "../rsa3d/shape/shapes/cuboid/OptimizedSATOverlapCB.h"
 #include "../rsa3d/Timer.h"
 #include "../rsa3d/Utils.h"
+#include "utility/UniformBallDistribution.h"
 
 using namespace std::chrono;
 
@@ -110,7 +111,8 @@ namespace cube_speedtest
 
         Context context;
         context.load(argv[2]);
-        BallFactory factory;
+        UniformBallDistribution distribution;
+        IndependentPairFactory factory(distribution);
         std::vector<AcquiredData> acquiredDatas = AcquiredData::initVector(context, factory);
 
         // Warm up and perform tests
@@ -118,7 +120,7 @@ namespace cube_speedtest
         std::cout << std::endl;
         for (size_t i = 0; i < context.repeats; i++) {
             for (size_t j = 0; j < context.ballRadia.size(); j++) {
-                factory.setRadius(context.ballRadia[j]);
+                distribution.setRadius(context.ballRadia[j]);
                 std::cout << std::endl << ">> Repeat " << (i + 1) << "/" << context.repeats
                           << " for " << factory.getDescription() << "..." << std::endl;
                 test_single_repeat(context, factory, acquiredDatas[j]);
@@ -233,12 +235,13 @@ namespace cube_speedtest
 
     // Inits and returnes a vector for storing data based on _context
     //----------------------------------------------------------------------------------------
-    std::vector<AcquiredData> AcquiredData::initVector(const Context &_context, BallFactory &_factory) {
+    std::vector<AcquiredData> AcquiredData::initVector(const Context &_context, IndependentPairFactory &_factory) {
         std::vector<AcquiredData> acquiredDatas{};
         std::transform(_context.ballRadia.begin(), _context.ballRadia.end(), std::back_inserter(acquiredDatas),
                   [&](double radius) {
-                      _factory.setRadius(radius);
-                      return AcquiredData(_context, _factory);
+                        auto &ballDist = dynamic_cast<UniformBallDistribution&>(_factory.getDistribution());
+                        ballDist.setRadius(radius);
+                        return AcquiredData(_context, _factory);
                   });
         return acquiredDatas;
     }

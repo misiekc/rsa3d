@@ -18,10 +18,11 @@
 #include "ShapeOverlapTest.h"
 #include "../rsa3d/shape/ShapeFactory.h"
 #include "../rsa3d/Utils.h"
-#include "utility/BallFactory.h"
+#include "utility/IndependentPairFactory.h"
 #include "utility/ShapePairFactory.h"
 #include "utility/InfoLooper.h"
-#include "utility/IsotropicFactory.h"
+#include "utility/ParallelPairFactory.h"
+#include "utility/UniformBallDistribution.h"
 
 namespace
 {
@@ -165,12 +166,12 @@ namespace shape_ovtest
         auto osShape = acquire_overlap_strategy_shape();
         verify_shape(argv[2], osShape.get());
 
-        BallFactory factory;
-        factory.setRadius(ball_radius);
+        UniformBallDistribution distribution(ball_radius);
+        IndependentPairFactory factory(distribution);
         std::cout << "[INFO] Performing test with unoriented shapes -------------------------------------" << std::endl;
         if (!perform_test(*osShape, factory, max_tries, "ovtest_anisotropic_dump.nb")) return EXIT_FAILURE;
 
-        RSAIsotropicFactory isotropicFactory(factory);
+        ParallelPairFactory isotropicFactory(distribution);
         std::cout << "[INFO] Performing test with oriented shapes ---------------------------------------" << std::endl;
         if (!perform_test(*osShape, isotropicFactory, max_tries, "ovtest_isotropic_dump.nb")) return EXIT_FAILURE;
 

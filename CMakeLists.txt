@@ -88,15 +88,17 @@ set(STATISTICS_SOURCE
         statistics/PowerRegression.cpp)
 
 set(TEST_SOURCE
-        test/utility/BallFactory.cpp
-        test/utility/BoxFactory.cpp
+        test/utility/Distrubution.h
+        test/utility/IndependentPairFactory.cpp
         test/utility/InfoLooper.h
-        test/utility/IsotropicFactory.h
+        test/utility/ParallelPairFactory.cpp
         test/utility/MockBC.h
         test/utility/ParalellInfoLooper.h
         test/utility/Quantity.cpp
         test/utility/ShapeGenerators.h
         test/utility/ShapePairFactory.h
+        test/utility/UniformBallDistribution.cpp
+        test/utility/UniformBoxDistribution.cpp
         test/AnisotropicShape2DExclusionDrawer.cpp
         test/AnisotropicShape2DExclusionTest.cpp
         test/OrderParamTest.cpp

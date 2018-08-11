@@ -45,7 +45,7 @@ bool Ellipsoid::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
     Ellipsoid ellipsoid = dynamic_cast<const Ellipsoid &>(*s);
     this->applyBC(bc, &ellipsoid);
 
-    Vector<3> rAB = vectorRAB(this->getPosition(), s->getPosition());
+    Vector<3> rAB = vectorRAB(this->getPosition(), ellipsoid.getPosition());
 
     // Early rejection
     double rABNorm2 = rAB.norm2();
@@ -141,6 +141,7 @@ std::string Ellipsoid::toPovray() const {
 
 std::string Ellipsoid::toWolfram() const {
     std::stringstream out;
+    out << std::fixed;
     out << "GeometricTransformation[" << std::endl;
     out << "    Ellipsoid[{0, 0, 0}, {" << Ellipsoid::a << ", " << Ellipsoid::b << ", " << Ellipsoid::c << "}]," << std::endl;
     out << "    AffineTransform[" << std::endl;
