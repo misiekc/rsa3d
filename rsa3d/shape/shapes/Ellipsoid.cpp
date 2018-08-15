@@ -41,6 +41,12 @@ void Ellipsoid::normalizeVolume() {
     c *= factor;
 }
 
+Ellipsoid::Ellipsoid(const Matrix<3, 3> &orientation) : orientation(orientation), X{{a*a,0,0,0,b*b,0,0,0,c*c}},
+                                                        M(matrixM())
+{
+
+}
+
 bool Ellipsoid::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
     Ellipsoid ellipsoid = dynamic_cast<const Ellipsoid &>(*s);
     this->applyBC(bc, &ellipsoid);
@@ -116,6 +122,7 @@ void Ellipsoid::restore(std::istream &f) {
             this->orientation(i, j) = d;
         }
     }
+    this->M = this->matrixM();
 }
 
 Shape<3, 0> *Ellipsoid::clone() const {
@@ -154,6 +161,11 @@ std::string Ellipsoid::toWolfram() const {
 
 Matrix<3, 3> Ellipsoid::getEllipsoidMatrix() const {
     return M;
+}
+
+
+Matrix<3, 3> Ellipsoid::matrixM() const {
+    return (orientation * X) * orientation.transpose();
 }
 
 inline Matrix<3, 3> Ellipsoid::matrixC(const Matrix<3, 3> &A, const Matrix<3, 3> &B,  double lambda) const {

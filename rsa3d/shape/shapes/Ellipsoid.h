@@ -24,6 +24,7 @@ private:
     Matrix<3, 3> X;                 // Matrix with axis length on diagonal (2.5)[1]
     Matrix<3, 3> M;                 // Ellipsoid specific matrix (2.5)[1]
 
+    inline Matrix<3, 3> matrixM() const;
     inline Matrix<3, 3> matrixC(const Matrix<3, 3> &A, const Matrix<3, 3> &B, double lambda) const;
     inline double quadraticForm(const Matrix<3, 3> &M, const Vector<3> &v) const;
     inline Vector<3> vectorRAB(const Vector<3> & rA, const Vector<3> & rB) const;
@@ -35,10 +36,7 @@ private:
 public:
     static void initClass(const std::string &attr);
 
-    explicit Ellipsoid(const Matrix<3, 3> &orientation) : orientation(orientation) {
-        X = Matrix<3, 3>({a*a,0,0,0,b*b,0,0,0,c*c});
-        M = (orientation * X) * orientation.transpose();
-    }
+    explicit Ellipsoid(const Matrix<3, 3> &orientation);
 
     bool overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const override;
     bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
