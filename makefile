@@ -124,6 +124,7 @@ OBJS_TEST = test/utility/IndependentPairFactory \
        		test/Main \
        		test/OrderParamTest \
        		test/RectangleCase \
+       		test/ShapeBCTest \
        		test/ShapeOverlapTest \
        		test/ShapePointInsideTest \
        		test/ShapeStaticSizesTest \

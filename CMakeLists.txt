@@ -103,6 +103,7 @@ set(TEST_SOURCE
         test/AnisotropicShape2DExclusionTest.cpp
         test/OrderParamTest.cpp
         test/PackingOverlapsTest.cpp
+        test/ShapeBCTest.cpp
         test/ShapeOverlapTest.cpp
         test/ShapePointInsideTest.cpp
         test/ShapeStaticSizesTest.cpp

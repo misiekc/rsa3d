@@ -14,6 +14,7 @@
 #include "RectangleCase.h"
 #include "PackingOverlapsTest.h"
 #include "OrderParamTest.h"
+#include "ShapeBCTest.h"
 
 
 int main(int argc, char **argv) {
@@ -29,6 +30,8 @@ int main(int argc, char **argv) {
         return shape_pitest::main(argc, argv);
     else if (mode == "shape_sizetest")
         return shape_sizetest::main(argc, argv);
+    else if (mode == "shape_bctest")
+        return shape_bctest::main(argc, argv);
     else if (mode == "as2d_extest")
         return as2d_extest::main(argc, argv);
     else if (mode == "vec_speedtest")
