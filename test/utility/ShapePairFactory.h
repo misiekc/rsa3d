@@ -50,6 +50,12 @@ public:
         shape *second() { return _second.get(); }
         const shape *first() const { return _first.get(); }
         const shape *second() const { return _second.get(); }
+        void print(std::ostream &out) const {
+            out << "Graphics3D[{ " << std::endl;
+            out << _first->toWolfram() << ", " << std::endl;
+            out << _second->toWolfram() << std::endl;
+            out << "}]";
+        }
     };
     
     /**

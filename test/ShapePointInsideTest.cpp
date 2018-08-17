@@ -27,14 +27,6 @@ namespace
         std::string conflictExample;
         std::string factoryDesc;
 
-        /* Prints Graphics3D with shapes pair on the out ostream */
-        void printPair(const ShapePair &pair, std::ostream &out) const {
-            out << "Graphics3D[{ " << std::endl;
-            out << pair.first()->toWolfram() << ", " << std::endl;
-            out << pair.second()->toWolfram() << std::endl;
-            out << "}]";
-        }
-
         /* Prints test results onto given ostream */
         void print(std::ostream &ostr) {
             std::size_t percentAccuracy = 100 * this->withPointInside / this->overlapped;
@@ -84,7 +76,7 @@ namespace
             if (!overlap && (pi_first || pi_second)){
             	if (results.conflicts == 0) {
             		std::stringstream sout;
-            		results.printPair(pair, sout);
+            		pair.print(sout);
             		results.conflictExample = sout.str();
             	}
                 results.conflicts++;

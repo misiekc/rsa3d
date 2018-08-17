@@ -34,8 +34,6 @@ namespace
         std::size_t smallerNeighbourListConflicts{};
         ShapePair neighbourListConflictExample{};
 
-        void printPair(const ShapePair &pair, std::ostream &out) const;
-
     public:
         void evaluateForVoxel(const ShapePair &pair);
         void evaluateForNeighbourList(const ShapePair &pair);
@@ -72,14 +70,6 @@ namespace
             this->smallerNeighbourListConflicts++;
     }
 
-    /* Prints Graphics3D with shapes pair on the out ostream */
-    void Result::printPair(const ShapePair &pair, std::ostream &out) const {
-        out << "Graphics3D[{ " << std::endl;
-        out << pair.first()->toWolfram() << ", " << std::endl;
-        out << pair.second()->toWolfram() << std::endl;
-        out << "}]";
-    }
-
     /* Presents result on the out ostream */
     void Result::print(std::ostream &out) const {
         out << std::endl;
@@ -87,7 +77,7 @@ namespace
             out << "[FAILED] Voxel size too big, or Shape::overlap incorrect. " << std::endl;
             out << "[INFO] Example configuration of two non-overlapping (according to the overlap() method) shapes:";
             out << std::endl;
-            this->printPair(voxelConflictExample, out);
+            voxelConflictExample.print(out);
             out << std::endl << std::endl;
         } else if (biggerVoxelConflicts == 0) {
             out << "[FAILED] Voxel size too small or Shape::overlap incorrect. TRY UP TO 100000 PAIRS" << std::endl;
@@ -99,7 +89,7 @@ namespace
             out << "[FAILED] NeighbourGrid cell to small, or Shape::overlap incorrect" << std::endl;
             out << "[INFO] Example configuration of two overlapping (according to the overlap() method) shapes:";
             out << std::endl;
-            this->printPair(neighbourListConflictExample, out);
+            neighbourListConflictExample.print(out);
             out << std::endl << std::endl;
         } else if (smallerNeighbourListConflicts == 0) {
             out << "[WARNING] NeighbourGrid cell too big or Shape::overlap incorrect. TRY UP TO 100000 PAIRS" << std::endl;

@@ -164,7 +164,7 @@ Matrix<3, 3> Ellipsoid::getEllipsoidMatrix() const {
 }
 
 
-Matrix<3, 3> Ellipsoid::matrixM() const {
+inline Matrix<3, 3> Ellipsoid::matrixM() const {
     return (orientation * X) * orientation.transpose();
 }
 

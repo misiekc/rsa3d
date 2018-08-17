@@ -15,10 +15,11 @@
 namespace {
     using ShapePair = RSAShapePairFactory::ShapePair;
 
+    /* Conflicts tracker - counts them and stores example to display */
     struct Conflicts {
         std::size_t numOf{};
-        ShapePair pair{};
-        ShapePair pairTranslated{};
+        ShapePair pair;
+        ShapePair pairTranslated;
         RSAVector translation;
 
         void report(const ShapePair &pair, const ShapePair &pairTranslated, RSAVector translation);
@@ -38,6 +39,8 @@ namespace {
         int success() const { return ovConflicts.numOf && piConflicts.numOf == 0 ? EXIT_SUCCESS : EXIT_FAILURE; }
     };
 
+    /* BC returning programmed translation for a given pair. It expects positions of this shapes and returns a proper
+     * translation - with a minus sign or not. If other points are tested, it throws. */
     class TranslatingBC : public RSABoundaryConditions {
     private:
         RSAVector translation;
@@ -69,8 +72,8 @@ namespace {
         else if (this->isFirstShape(p2) && this->isSecondShape(p1))     // translating p1 near p2
             return (p1 - p2 + translation).norm2();
         else
-            die("[ERROR] Unusual use of BoundaryConditions::distance2 - unsupported by shape_bctest");
-        return 0;
+            throw std::runtime_error("[ERROR] Unusual use of BoundaryConditions::distance2"
+                                     " - unsupported by shape_bctest");
     }
 
     RSAVector TranslatingBC::getTranslation(const RSAVector &p1, const RSAVector &p2) const {
@@ -79,8 +82,8 @@ namespace {
         else if (this->isFirstShape(p2) && this->isSecondShape(p1))     // translating p1 near p2
             return -translation;
         else
-            die("[ERROR] Unusual use of BoundaryConditions::getTranslation - unsupported by shape_bctest");
-        return {};
+            throw std::runtime_error("[ERROR] Unusual use of BoundaryConditions::getTranslation"
+                                     " - unsupported by shape_bctest");
     }
 
     void Conflicts::report(const ShapePair &pair, const ShapePair &pairTranslated, RSAVector translation) {
@@ -92,23 +95,15 @@ namespace {
         this->numOf++;
     }
 
-    /* Prints Graphics3D with shapes pair on the out ostream */
-    void printPair(const ShapePair &pair, std::ostream &out) {
-        out << "Graphics3D[{ " << std::endl;
-        out << pair.first()->toWolfram() << ", " << std::endl;
-        out << pair.second()->toWolfram() << std::endl;
-        out << "}]";
-    }
-
     void Conflicts::print(std::ostream &out) const {
         if (this->numOf == 0)   return;
 
         out << "[INFO] Evaluating the function above for this configuration: " << std::endl;
-        printPair(this->pair, out);
+        this->pair.print(out);
         out << std::endl;
         out << "[INFO] using bc translation: " << this->translation << " yields different result" << std::endl;
         out << "[INFO] then for the same configuration with translation already applied:" << std::endl;
-        printPair(this->pairTranslated, out);
+       this->pairTranslated.print(out);
     }
 
     void Result::print(std::ostream &out) const {
@@ -124,6 +119,7 @@ namespace {
         out << std::endl;
         out << "[INFO] " << pointInside << " shapes lie inside pointInside exclusion zone" << std::endl;
 
+        // This part of a test will always be passed if Shape isn't ConvexShape
         if (piConflicts.numOf == 0) {
             out << "[PASSED] ConvexShape::pointInside: No conflicts detected - BC are properly applied" << std::endl;
         } else {
@@ -138,10 +134,10 @@ namespace {
     }
 
     void Result::evaluatePair(const ShapePair &pair, const RSAVector &translation) {
-        ShapePair pairTranslated(pair.first()->clone(), pair.second()->clone());
+        ShapePair pairTranslated{pair.first()->clone(), pair.second()->clone()};
         pairTranslated.second()->translate(translation);
 
-        TranslatingBC translatingBC(translation, pair);
+        TranslatingBC translatingBC{translation, pair};
         RSAMockBC mockBC;
 
         bool bcOverlap = pair.first()->overlap(&translatingBC, pair.second());
@@ -172,7 +168,7 @@ namespace {
         std::cout << "[INFO] Performing test for " << tries << " pairs using " << factory.getDescription() << std::endl;
 
         Result result;
-        InfoLooper looper(tries, 10000, "pairs tested...");
+        InfoLooper looper{tries, 10000, "pairs tested..."};
         Distribution &distribution = factory.getDistribution();
         RND rnd;
         while (looper.step())
@@ -195,8 +191,8 @@ namespace shape_bctest
             die("Wrong input. Aborting.");
 
         ShapeFactory::initShapeClass(argv[2], argv[3]);
-        UniformBallDistribution distribution(ballRadius);
-        IndependentPairFactory factory(distribution);
+        UniformBallDistribution distribution{ballRadius};
+        IndependentPairFactory factory{distribution};
 
         Result results = perform_test(factory, maxTries);
         std::cout << std::endl;
