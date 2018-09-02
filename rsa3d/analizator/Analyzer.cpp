@@ -303,8 +303,8 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 			for(const RSAShape *s: packing){
 				ng.add(s, s->getPosition());
 			}
-			this->analyzeCorrelations(packing, ng, correlations);
-			this->analyzeOrder(packing, ng, &order);
+//			this->analyzeCorrelations(packing, ng, correlations);
+//			this->analyzeOrder(packing, ng, &order);
 			std::cout << ".";
 			std::cout.flush();
 		}

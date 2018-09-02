@@ -1,7 +1,9 @@
 #include "PackingGenerator.h"
 #include "analizator/Analyzer.h"
+#include "analizator/ExclusionZoneVisualizer.h"
 #include "shape/ShapeFactory.h"
 #include "Utils.h"
+
 
 #include <unistd.h>
 #include <sys/wait.h>
@@ -251,6 +253,10 @@ int main(int argc, char **argv) {
         packing.restore(fileIn);
         packing.expandOnPBC(params.surfaceSize, 0.1);
         packing.store(fileOut);
+    } else if (mode == "exclusion_zones"){
+    	std::string packingFile(argv[3]);
+    	std::string outputFile(argv[4]);
+    	ExclusionZoneVisualizer::main(params, packingFile, outputFile);
     } else {
 		std::cerr << "Unknown mode: " << argv[1] << std::endl;
         return EXIT_FAILURE;
