@@ -347,6 +347,7 @@ void PackingGenerator::createPacking() {
 //			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
 //			this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
 //			this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
+			this->toPovray(this->packing, this->params->surfaceSize, nullptr, "test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
 //			std::string filename = "snapshot_" + std::to_string(this->packing.size()) + "_" + std::to_string(this->voxels->getLength()) + ".dbg";
 //			std::ofstream file(filename, std::ios::binary);
 //			this->store(file);

@@ -75,7 +75,7 @@ VoxelList::VoxelList(double packingSpatialSize, double requestedSpatialVoxelSize
 	this->spatialVoxelSize *= this->dxFactor;
 	this->beginningVoxelNumber = ss*sa;
 	this->length = this->beginningVoxelNumber;
-	this->fillNeighbourGrid();
+	this->rebuildNeighbourGrid();
 	}
 
 
@@ -126,7 +126,7 @@ void VoxelList::initVoxels(){
 }
 
 
-void VoxelList::fillNeighbourGrid(){
+void VoxelList::rebuildNeighbourGrid(){
 	this->voxelNeighbourGrid->clear();
 	for(size_t i=0; i<this->length; i++){
 		this->voxelNeighbourGrid->add(this->voxels[i], this->voxels[i]->getPosition());
@@ -432,13 +432,11 @@ bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const 
 
 	delete[] this->voxels;
 
-	int endIndex = newListSize - 1;;
+	int endIndex = newListSize - 1;
 
 	std::cout << " compacting" << std::flush;
 
 	this->compactVoxelArray(newList, endIndex);
-
-	this->voxelNeighbourGrid->clear();
 
 	this->spatialVoxelSize = (this->spatialVoxelSize/2.0)*this->dxFactor;
 	delete this->spatialDistribution;
@@ -450,7 +448,7 @@ bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const 
 
 	this->length = endIndex+1;
 	this->voxels = newList;
-	this->fillNeighbourGrid();
+	this->rebuildNeighbourGrid();
 
 //	this->checkTopLevelVoxels();
 	return true;
@@ -609,5 +607,5 @@ void VoxelList::restore(std::istream &f){
 		this->activeTopLevelVoxels[topIndex] = true;
 	}
 	this->length = size;
-	this->fillNeighbourGrid();
+	this->rebuildNeighbourGrid();
 }

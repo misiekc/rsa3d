@@ -26,6 +26,7 @@ public:
 	PowerRegression();
 	virtual ~PowerRegression();
 
+	void clear();
 	void addXY(double x, double y);
 	void calculate(int from, int to);
 	void calculate();

@@ -17,10 +17,14 @@ PowerRegression::PowerRegression() {
 }
 
 PowerRegression::~PowerRegression() {
-	for(DataElement *d: this->data)
-		delete d;
+	this->clear();
 }
 
+void PowerRegression::clear(){
+	for(DataElement *d: this->data)
+		delete d;
+	this->data.clear();
+}
 
 /**
  * Add data point

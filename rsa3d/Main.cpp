@@ -68,8 +68,8 @@ void makeDatFileForPackingsInDirectory(Parameters *params, char *sdir){
 
 	std::string sFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_") + "_" + size + ".dat";
 	std::ofstream dataFile(sFile);
-    if (!dataFile)
-        die("Cannot open file " + sFile + " to store packing info");
+	if (!dataFile)
+    	die("Cannot open file " + sFile + " to store packing info");
 	dataFile.precision(std::numeric_limits<double>::digits10 + 1);
 
 	DIR *dir = opendir(sdir);
@@ -140,8 +140,8 @@ int simulate(Parameters *params) {
 
 	std::string sFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_") + "_" + size + ".dat";
 	std::ofstream file(sFile);
-    if (!file)
-        die("Cannot open file " + sFile + " to store packing info");
+	if (!file)
+    	die("Cannot open file " + sFile + " to store packing info");
 	file.precision(std::numeric_limits<double>::digits10 + 1);
 
 	int seed = params->from;

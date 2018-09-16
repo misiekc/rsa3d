@@ -27,10 +27,14 @@ LinearRegression::LinearRegression() {
 }
 
 LinearRegression::~LinearRegression() {
-	for(DataElement *d: this->data)
-		delete d;
+	this->clear();
 }
 
+void LinearRegression::clear(){
+	for(DataElement *d: this->data)
+		delete d;
+	this->data.clear();
+}
 
 /**
  * Add data point

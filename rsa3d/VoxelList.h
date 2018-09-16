@@ -45,7 +45,7 @@ private:
 	size_t findArraySize(double range, double cellSize);
 
 	// fills neigbour grid with voxels
-	void fillNeighbourGrid();
+	void rebuildNeighbourGrid();
 
 	// for a given voxel returns index of its root
 	int getIndexOfTopLevelVoxel(const RSAVector &da);

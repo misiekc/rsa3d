@@ -59,7 +59,7 @@ private:
 
 public:
 
-	NeighbourGrid(double size, double dx){
+	NeighbourGrid(double size, double dx){ // @suppress("Class members should be properly initialized")
 		if (size <= 0 || dx <= 0)
 		    throw std::runtime_error("size <= 0 || dx <= 0");
 
@@ -70,7 +70,7 @@ public:
 	}
 
 
-	NeighbourGrid(double size, size_t n){
+	NeighbourGrid(double size, size_t n){ // @suppress("Class members should be properly initialized")
 		this->init(size, n);
 	}
 
@@ -110,7 +110,7 @@ public:
 		return this->lists[i];
 	}
 
-	void getNeighbours(std::vector<E *> *result, const RSAVector &da){
+	void getNeighbours(std::vector<E *> *result, const RSAVector &da) const{
 		result->clear();
 		std::vector<E *> *vTmp;
 

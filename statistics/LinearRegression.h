@@ -29,6 +29,7 @@ public:
 	LinearRegression();
 	virtual ~LinearRegression();
 
+	void clear();
 	void addXY(double x, double y, double sigma);
 	void addXY(double x, double y);
 	void calculate(unsigned int from, unsigned int to);
