@@ -89,7 +89,7 @@ bool Sphere<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, const Vec
 }
 
 template <unsigned short DIMENSION>
-double Sphere<DIMENSION>::minDistance(Shape<DIMENSION, 0> *s) const{
+double Sphere<DIMENSION>::minDistance(const Shape<DIMENSION, 0> *s) const{
 	return 2.0*this->radius;
 }
 
@@ -110,11 +110,12 @@ std::string Sphere<DIMENSION>::toPovray() const{
 			s += std::to_string(this->position[i]) + ", ";
 		s += "0.01>, <0.0, 0.0, 1.0>, " + std::to_string(2*r0) + "\r\n    texture { pigment { color Yellow } }\r\n  }\r\n";
 */
+/*
 		s += "  disc { < ";
 		for(unsigned short i=0; i<DIMENSION; i++)
 			s += std::to_string(position[i]) + ", ";
 		s += "0.03>, <0.0, 0.0, 1.0>, " + std::to_string(2*this->r) + ", " + std::to_string(2*r0) + "\r\n    texture { pigment { color Black } }\r\n  }\r\n";
-
+*/
 /*
 		s += "  text { ttf \"timrom.ttf\" \"" + std::to_string(this->no) + "\" 1, 0 pigment { color Black } scale 0.5 translate < ";
 		for(unsigned char i=0; i<this->dimension; i++)

@@ -38,7 +38,7 @@ public:
 	bool pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &da) const override;
 	bool pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position,
 					 const std::array<double ,0> &orientation, double orientationRange) const override;
-	double minDistance(Shape<DIMENSION, 0> *s) const;
+	double minDistance(const Shape<DIMENSION, 0> *s) const override;
 
 	std::string toPovray() const;
 	void store(std::ostream &f) const;

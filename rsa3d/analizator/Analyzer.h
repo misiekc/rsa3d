@@ -32,9 +32,9 @@ private:
 	Parameters *params;
 
 	void analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, double surfaceFactor);
-	void analyzeCorrelations(const Packing &packing, NeighbourGrid<const RSAShape> &ng, Plot *corr);
-	void analyzeOrder(const Packing &packing, NeighbourGrid<const RSAShape> &ng, std::vector<Plot*> *order);
-	double * printNvT(LogPlot &nvt, std::string filename, double *fixedA, double surfaceFactor, double *res);
+	void analyzeCorrelations(const Packing &packing, const NeighbourGrid<const RSAShape> &ng, Plot *corr);
+	void analyzeOrder(const Packing &packing, const NeighbourGrid<const RSAShape> &ng, std::vector<Plot*> *order);
+	double * printKinetics(LogPlot &nvt, std::string filename, double *fixedA, double surfaceFactor, double *res);
 	double * printASF(Plot &asf, std::string filename, int counter, double packingFraction, double *res);
 	void printCorrelations(Plot &corr, std::string filename);
 	void printOrder(const std::vector<Plot*> &order, const std::string &filename) const;

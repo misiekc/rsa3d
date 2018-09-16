@@ -17,11 +17,11 @@
 #include <cmath>
 
 
-void Analyzer::analyzeOrder(const Packing &packing, NeighbourGrid<const RSAShape> &ng, std::vector<Plot*> *order) {
-    if (!this->isOrderCalculable(packing.front()))
+void Analyzer::analyzeOrder(const Packing &packing, const NeighbourGrid<const RSAShape> &ng, std::vector<Plot*> *order) {
+	if (!this->isOrderCalculable(packing.front()))
     	return;
 
-  	double da[RSA_SPATIAL_DIMENSION];
+	double da[RSA_SPATIAL_DIMENSION];
    	double dMax = (*order)[0]->getMax(), dMax2 = dMax*dMax;
    	_OMP_PARALLEL_FOR
    	for(size_t i=0; i<packing.size(); i++){
@@ -30,8 +30,8 @@ void Analyzer::analyzeOrder(const Packing &packing, NeighbourGrid<const RSAShape
    	   	std::vector<const RSAShape *> neighbours;
     	ng.getNeighbours(&neighbours, posi);
     	for(const RSAShape *sj : neighbours){
-            if (sj->no <= si->no)
-                continue;
+    		if (sj->no <= si->no)
+    			continue;
 
     		RSAVector posj = sj->getPosition();
     		double dist2 = 0.0;
@@ -56,7 +56,7 @@ void Analyzer::analyzeOrder(const Packing &packing, NeighbourGrid<const RSAShape
     }
 }
 
-void Analyzer::analyzeCorrelations(const Packing &packing, NeighbourGrid<const RSAShape> &ng, Plot *corr){
+void Analyzer::analyzeCorrelations(const Packing &packing, const NeighbourGrid<const RSAShape> &ng, Plot *corr){
 	double da[RSA_SPATIAL_DIMENSION];
 	double dMax = corr->getMax(), dMax2 = dMax*dMax;
 	_OMP_PARALLEL_FOR
@@ -118,56 +118,62 @@ void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, d
 		nvt->addBetween(lastt, nvt->getMax()+1.0, packing.size());
 }
 
-double * Analyzer::printNvT(LogPlot &nvt, std::string filename, double* fixedA, double surfaceFactor, double *res){
+double * Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA, double surfaceFactor, double *res){
 	double **points = new double*[nvt.size()];
 	for(int i=0; i<nvt.size(); i++)
 		points[i] = new double[2];
 	nvt.getAsPoints(points);
-	double lastX = points[0][0], lastY = points[0][1], maxX = points[nvt.size()-1][0], diff;
+	int minJ = 0, maxJ = nvt.size()-1;
+	double diff, maxX = points[0][maxJ];
 	PowerRegression pr;
+	LinearRegression lr1;
+	LinearRegression lr2;
 	std::ofstream file(filename);
-	for (int i = 0; i < nvt.size(); i++) {
-		if (points[i][1]!=lastY){
-			diff = (points[i][1] - lastY)/(points[i][0] - lastX);
-			lastX = points[i][0];
-			lastY = points[i][1];
-			if (points[i][0] > maxX/100.0){
-				pr.addXY(points[i][0], diff);
+	for (int i = 1; i < nvt.size(); i++) {
+		diff = (points[i][1] - points[i-1][1])/(points[i][0] - points[i-1][0]);
+		file << points[i][0] << "\t" << points[i][1]*surfaceFactor << "\t" << diff*surfaceFactor;
+		if (points[i][0]>100){
+			maxJ = i;
+			pr.clear();
+			lr1.clear();
+			lr2.clear();
+			maxX = points[i][0];
+			for(int j=minJ; j<maxJ; j++){
+				if (points[j][0] > maxX/100.0){
+					diff = (points[j][1] - points[j-1][1])/(points[j][0] - points[j-1][0]);
+					pr.addXY(points[j][0], diff);
+				}else{
+					minJ++;
+				}
 			}
-			file << points[i][0] << "\t" << points[i][1]*surfaceFactor << "\t" << diff*surfaceFactor << std::endl;
+			pr.calculate();
+			for(int j=minJ; j<maxJ; j++){
+				if (fixedA==NULL){
+					lr1.addXY(pow(points[j][0], pr.getA()+1 + pr.getSA()), points[j][1]);
+					lr2.addXY(pow(points[j][0], pr.getA()+1 - pr.getSA()), points[j][1]);
+				}else{
+					lr1.addXY(pow(points[j][0], fixedA[0] + fixedA[1]), points[j][1]);
+					lr2.addXY(pow(points[j][0], fixedA[0] - fixedA[1]), points[j][1]);
+				}
+			}
+			lr1.calculate();
+			lr2.calculate();
+			double B = (lr1.getB()+lr2.getB())/2.0;
+			double dB = fabs(B - lr1.getB());
+			res[0] = -1.0 / (pr.getA()+1);
+			res[1] = pr.getSA()/pr.getA() * res[0];
+			res[2] = B;
+			res[3] = dB;
+
+			file << "\t" << res[0] << "\t" << res[1] << "\t" << res[2] << "\t" << res[3] << std::endl;
+		}else{
+			file << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << std::endl;
 		}
 	}
 	file.close();
-	pr.calculate();
-	LinearRegression lr1;
-	LinearRegression lr2;
-	for(int i=0; i<nvt.size(); i++){
-		if (points[i][0] > maxX/100.0){
-			if (fixedA==NULL){
-				lr1.addXY(pow(points[i][0], pr.getA()+1 + pr.getSA()), points[i][1]);
-				lr2.addXY(pow(points[i][0], pr.getA()+1 - pr.getSA()), points[i][1]);
-			}else{
-				lr1.addXY(pow(points[i][0], fixedA[0] + fixedA[1]), points[i][1]);
-				lr2.addXY(pow(points[i][0], fixedA[0] - fixedA[1]), points[i][1]);
-			}
-		}
-	}
-
 	for(int i=0; i<nvt.size(); i++)
 		delete[] points[i];
 	delete[] points;
-
-
-
-	lr1.calculate();
-	lr2.calculate();
-//	ps.println();
-	double B = (lr1.getB()+lr2.getB())/2.0;
-	double dB = fabs(B - lr1.getB());
-	res[0] = pr.getA()+1;
-	res[1] = pr.getSA();
-	res[2] = B;
-	res[3] = dB;
 	return res;
 }
 
@@ -315,7 +321,7 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 
 	//	double fixedA[] = {1.0, 0.0};
 
-	this->printNvT(*nvt, (dirname + "_nvt.txt"), NULL, particleSize/packingSize, res);
+	this->printKinetics(*nvt, (dirname + "_kinetics.txt"), NULL, particleSize/packingSize, res);
 	std::cout << sdir << "\t" << n/counter << "\t" << sqrt( (n2/counter - n*n/(counter*counter)) / counter) << "\t" <<
 			 	 res[0] << "\t" << res[1] << "\t" << res[2] << "\t" << res[3] << "\t";
 	delete nvt;
