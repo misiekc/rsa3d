@@ -161,7 +161,7 @@ double * Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fix
 			double B = (lr1.getB()+lr2.getB())/2.0;
 			double dB = fabs(B - lr1.getB());
 			res[0] = -1.0 / (pr.getA()+1);
-			res[1] = pr.getSA()/pr.getA() * res[0];
+			res[1] = -pr.getSA()/(pr.getA()+1) * res[0];
 			res[2] = B;
 			res[3] = dB;
 
