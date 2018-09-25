@@ -20,7 +20,7 @@ Matrix<ROWS, COLS, E>::Matrix(E _fill)
 
 
 template <std::size_t ROWS, std::size_t COLS, typename E>
-Matrix<ROWS, COLS, E>::Matrix(const E **_arr)
+Matrix<ROWS, COLS, E>::Matrix(const E *const *_arr)
 {
     // Alloc an array and copy elements from given
     std::size_t arr_index = 0;

@@ -36,7 +36,7 @@ namespace {
     public:
         void evaluatePair(const ShapePair &pair, const RSAVector &translation);
         void print(std::ostream &out) const;
-        int success() const { return ovConflicts.numOf && piConflicts.numOf == 0 ? EXIT_SUCCESS : EXIT_FAILURE; }
+        int success() const { return ovConflicts.numOf == 0 && piConflicts.numOf == 0 ? EXIT_SUCCESS : EXIT_FAILURE; }
     };
 
     /* BC returning programmed translation for a given pair. It expects positions of this shapes and returns a proper

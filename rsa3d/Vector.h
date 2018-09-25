@@ -230,6 +230,12 @@ public:
     void copyToArray(E * array) const {
         v.copyToArray(array);
     }
+
+    std::string toString() const {
+        std::ostringstream ostr;
+        ostr << *this;
+        return ostr.str();
+    }
 };
 
 

@@ -195,7 +195,7 @@ public:
      * @brief Constructs a matrix from array of pointer to arrays.
      * @param _arr array of pointer to arrays. Successive arrays correspond to matrix rows
      */
-    Matrix(const E **_arr);
+    Matrix(const E *const *_arr);
 
     /**
      * @brief Constructs a matrix from one-dimentional array of matrix elements row by row.

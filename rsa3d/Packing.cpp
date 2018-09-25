@@ -79,3 +79,20 @@ void Packing::expandShapeOnBC(const RSAShape *shape, double translation, size_t 
     shapeClone->translate(trans);
     this->addShape(shapeClone);
 }
+
+void Packing::removeShape(std::size_t index) {
+    delete (*this)[index];  // free range check
+    this->packing.erase(this->packing.begin() + index);
+}
+
+const RSAShape *Packing::operator[](std::size_t index) const {
+    if (index >= this->size())
+        throw std::runtime_error("index >= size");
+    return this->packing[index];
+}
+
+void Packing::clear() {
+    for (auto shape : this->packing)
+        delete shape;
+    this->packing.clear();
+}

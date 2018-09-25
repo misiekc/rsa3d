@@ -44,7 +44,7 @@ public:
      * @param index index of a shape
      * @return a shape of given @a index
      */
-    const RSAShape *operator[](std::size_t index) const { return this->packing[index]; }
+    const RSAShape *operator[](std::size_t index) const;
 
     /**
      * @brief Removes a shape of given @a index from a packing.
@@ -53,7 +53,7 @@ public:
      * @param index index of a shape
      * @param index
      */
-    void removeShape(std::size_t index) { this->packing.erase(this->packing.begin() + index); }
+    void removeShape(std::size_t index);
 
     /**
      * @brief Returns a size of a packing.
@@ -64,7 +64,7 @@ public:
     /**
      * @brief Removes all shapes from a packing.
      */
-    void clear() { this->packing.clear(); }
+    void clear();
 
     /**
      * @brief Returns const view on internal std::vector which stores shapes.
