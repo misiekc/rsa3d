@@ -50,13 +50,6 @@ void RegularSolidBase::initClass(const std::string &attr) {
     Shape::setVoxelSpatialSize(2*insphereRadius/std::sqrt(3.));
 }
 
-/*bool RegularSolidBase::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
-                                   const Orientation<0> &orientation, double orientationRange) const {
-    Vector<3> thisPos = this->getPosition();
-    Vector<3> pointDelta = position - thisPos + bc->getTranslation(thisPos, position);
-    return pointDelta.norm2() <= 4*insphereRadius*insphereRadius;
-}*/
-
 void RegularSolidBase::store(std::ostream &f) const {
     Shape::store(f);
     double d;

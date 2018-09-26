@@ -10,8 +10,12 @@ void CubeToTetrahedron::calculateStatic(const std::string &attr) {
     std::istringstream attrStream(attr);
     double xi;
     attrStream >> xi;
-    if (!attrStream || xi < -1 || xi > 1)
-        throw std::runtime_error("attr must contain xi parameter from [-1, 1]");
+
+    // 0 and 1 excluded - for exact cubes and tetrahedra Cube and Tetrahedron classes should be used instead
+    if (!attrStream || xi <= 0 || xi >= 1)
+        throw std::runtime_error("attr must contain xi parameter in (0, 1)");
+
+    xi = 2*xi - 1;  // 0 means tetraherdon, 1 means cube
 
     RegularSolid<CubeToTetrahedron>::orientedVertices =
             {{{xi,  1,  1}}, {{-xi,  -1,  1}}, {{-xi,  1,  -1}}, {{xi,  -1,  -1}},
