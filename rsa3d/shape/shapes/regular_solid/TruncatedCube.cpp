@@ -37,8 +37,3 @@ double TruncatedCube::projectionHalfsize(const Vector<3> &axis) const {
 
     return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * normalizeFactor;
 }
-
-bool TruncatedCube::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
-                                double orientationRange) const {
-    return strictPointInside(bc, position, orientation, orientationRange);
-}

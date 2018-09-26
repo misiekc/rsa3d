@@ -35,6 +35,7 @@
 #include "shapes/regular_solid/Rhombicosidodecahedron.h"
 #include "shapes/regular_solid/TruncatedIcosidodecahedron.h"
 #include "shapes/regular_solid/SnubDodecahedron.h"
+#include "shapes/regular_solid/CubeToTetrahedron.h"
 #include "shapes/Ellipsoid.h"
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
@@ -137,8 +138,11 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
         } else if (sClass == "Ellipsoid") {
             Ellipsoid::initClass(attr);
             return;
+        } else if (sClass == "CubeToTetrahedron") {
+            RegularSolid<CubeToTetrahedron>::initClass(attr);
+            return;
         }
-    #endif
+#endif
 
     std::cerr << "Unknown shape: " << sClass << " or wrong dimensions: " << RSA_SPATIAL_DIMENSION << ", " << RSA_ANGULAR_DIMENSION << std::endl;
     exit(EXIT_FAILURE);

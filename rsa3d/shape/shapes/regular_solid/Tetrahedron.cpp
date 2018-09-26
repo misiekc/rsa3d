@@ -18,11 +18,6 @@ void Tetrahedron::calculateStatic(const std::string &attr) {
             {{3, 2, 1}, {3, 0, 2}, {0, 3, 1}, {0, 1, 2}};
 }
 
-bool Tetrahedron::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
-                              double orientationRange) const {
-    return this->strictPointInside(bc, position, orientation, orientationRange);
-}
-
 OverlapStrategy<3, 0> *Tetrahedron::createStrategy(const std::string &name) const {
     if (name == "sat")
         return new UnoptimizedSATOverlapRS();

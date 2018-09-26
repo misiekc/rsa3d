@@ -26,6 +26,7 @@ set(STAT_TEST_SOURCE
 function(register_targets_for_dimensions SD AD)
     set(DIM_SUFFIX ".${SD}.${AD}")
     set(STAT_TEST_EXEC "stat_test${DIM_SUFFIX}")
+    set(RSA_LIB "rsa_main${DIM_SUFFIX}")
 
     add_executable(${STAT_TEST_EXEC} ${STAT_TEST_SOURCE})
     target_compile_definitions(${STAT_TEST_EXEC} PUBLIC RSA_SPATIAL_DIMENSION=${SD} RSA_ANGULAR_DIMENSION=${AD})
