@@ -1,16 +1,14 @@
 ################################################
-# COMPILATION AND CONSOLIDATION OF EXECUTABLE: #
-#     make rsa                                 #
-# IT'S THE DEFAULT TARGET, SO ONE CAN USE      #
-#     make                                     #
+# EXECUTABLES:                                 #
+#     rsa, rsa_stat_test, rsa_unit_test        #
 #                                              #
-# C & C OF CUSTOM TEST EXECUTABLE:             #
-#     make rsa_test                            #
+# DEFAULT TARGET:                              #
+#     rsa                                      #
 #                                              #
-# MAKING ALL BINARIES:                         #
-#     make all                                 #
+# DOCUMENTATION:                               #
+#     make doc                                 #
 #                                              #
-# CLEANING ALL BUILD FILES (make-build EXEC):  #
+# CLEANING ALL BUILD FILES:                    #
 #     make clean                               #
 #                                              #
 ################################################
@@ -24,7 +22,7 @@
 CC = g++
 
 # Compiler flags
-CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -O3 -fopenmp -DRSA_SPATIAL_DIMENSION=3 -DRSA_ANGULAR_DIMENSION=0
+CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -I"$(CURDIR)/unit_test/lib" -O3 -fopenmp -DRSA_SPATIAL_DIMENSION=2 -DRSA_ANGULAR_DIMENSION=0
 
 # Linker flags
 LFLAGS = -fopenmp
@@ -49,8 +47,10 @@ PACKAGES = rsa3d/analizator/ \
            rsa3d/shape/shapes/polygon/ \
            rsa3d/surfaces/ \
            statistics/ \
-           test/ \
-           test/utility/
+           stat_test/ \
+           stat_test/utility/ \
+           unit_test/ \
+           unit_test/rsa3d
 
 # Source files list (without extensions) except of the Main.cpp file
 # These objects will be linked with both main executable and test
@@ -73,6 +73,7 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/shape/shapes/cuboid/SATOverlapCB \
        rsa3d/shape/shapes/cuboid/TriTriOverlapCB \
        rsa3d/shape/shapes/regular_solid/Cuboctahedron \
+       rsa3d/shape/shapes/regular_solid/CubeToTetrahedron \
        rsa3d/shape/shapes/regular_solid/Dodecahedron \
        rsa3d/shape/shapes/regular_solid/Icosahedron \
        rsa3d/shape/shapes/regular_solid/Icosidodecahedron \
@@ -109,26 +110,33 @@ OBJS_COMMON = rsa3d/Config \
 # Objects to be linked only with main executable
 OBJS_MAIN = rsa3d/Main \
        		rsa3d/analizator/Analyzer \
+       		rsa3d/analizator/ExclusionZoneVisualizer \
 
-# Objects to be linked only with custom tests executable
-OBJS_TEST = test/utility/IndependentPairFactory \
-            test/utility/ParallelPairFactory \
-            test/utility/Quantity \
-            test/utility/UniformBallDistribution \
-            test/utility/UniformBoxDistribution\
-       		test/utility/Quantity \
-       		test/AnisotropicShape2DExclusionDrawer \
-       		test/AnisotropicShape2DExclusionTest \
-       		test/PackingOverlapsTest \
-       		test/CuboidSpeedTest \
-       		test/Main \
-       		test/OrderParamTest \
-       		test/RectangleCase \
-       		test/ShapeBCTest \
-       		test/ShapeOverlapTest \
-       		test/ShapePointInsideTest \
-       		test/ShapeStaticSizesTest \
-       		test/VectorSpeedTest
+# Objects to be linked only with statistical tests executable
+OBJS_STAT_TEST = stat_test/utility/IndependentPairFactory \
+            stat_test/utility/ParallelPairFactory \
+            stat_test/utility/Quantity \
+            stat_test/utility/UniformBallDistribution \
+            stat_test/utility/UniformBoxDistribution\
+       		stat_test/utility/Quantity \
+       		stat_test/AnisotropicShape2DExclusionDrawer \
+       		stat_test/AnisotropicShape2DExclusionTest \
+       		stat_test/PackingOverlapsTest \
+       		stat_test/CuboidSpeedTest \
+       		stat_test/Main \
+       		stat_test/OrderParamTest \
+       		stat_test/RectangleCase \
+       		stat_test/ShapeBCTest \
+       		stat_test/ShapeOverlapTest \
+       		stat_test/ShapePointInsideTest \
+       		stat_test/ShapeStaticSizesTest \
+       		stat_test/VectorSpeedTest
+
+# Objects to be linked only with unit tests executable
+OBJS_UNIT_TEST = unit_test/rsa3d/MatrixTest \
+			unit_test/rsa3d/VectorTest \
+            unit_test/rsa3d/PackingTest \
+            unit_test/Main \
 
 # Source files list (withous extensions) for statistics lib
 OBJS_STAT = statistics/ASFRegression \
@@ -152,7 +160,8 @@ DOCDIR = doc
 # Map all objects from source file lists to dependency files
 OBJS_COMMON_D = $(OBJS_COMMON:%=$(OBJDIR)/%.o)
 OBJS_MAIN_D = $(OBJS_MAIN:%=$(OBJDIR)/%.o)
-OBJS_TEST_D = $(OBJS_TEST:%=$(OBJDIR)/%.o)
+OBJS_STAT_TEST_D = $(OBJS_STAT_TEST:%=$(OBJDIR)/%.o)
+OBJS_UNIT_TEST_D = $(OBJS_UNIT_TEST:%=$(OBJDIR)/%.o)
 OBJS_STAT_D = $(OBJS_STAT:%=$(OBJDIR)/%.o)
 
 # creating folders
@@ -173,18 +182,21 @@ endef
 # include dependencies
 -include $(OBJS_COMMON:%=$(DEPSDIR)/%.d)
 -include $(OBJS_MAIN:%=$(DEPSDIR)/%.d)
--include $(OBJS_TEST:%=$(DEPSDIR)/%.d)
+-include $(OBJS_STAT_TEST:%=$(DEPSDIR)/%.d)
+-include $(OBJS_UNIT_TEST:%=$(DEPSDIR)/%.d)
 -include $(OBJS_STAT:%=$(DEPSDIR)/%.d)
 
 # *.c and *.cpp compilation, generating dependency files
 # make sure all necessary diractories are created before compilation
 $(OBJDIR)/%.o: %.c
 	$(make_dirs)
-	$(CC) $(CFLAGS) -c $*.c -o $@ -MMD -MF $(DEPSDIR)/$*.d -MT '$@'
+	@echo Compiling $*.c ...
+	@$(CC) $(CFLAGS) -c $*.c -o $@ -MMD -MF $(DEPSDIR)/$*.d -MT '$@'
 
 $(OBJDIR)/%.o: %.cpp
 	$(make_dirs)
-	$(CC) $(CFLAGS) -c $*.cpp -o $@ -MMD -MF $(DEPSDIR)/$*.d -MT '$@'
+	@echo Compiling $*.cpp ...
+	@$(CC) $(CFLAGS) -c $*.cpp -o $@ -MMD -MF $(DEPSDIR)/$*.d -MT '$@'
 
 ####################
 # TARGETS          #
@@ -192,27 +204,32 @@ $(OBJDIR)/%.o: %.cpp
 
 # main executable
 $(EXEC): $(OBJS_COMMON_D) $(OBJS_MAIN_D) $(LIBSTAT)
-	@echo '## LINKING $(EXEC)'
-	$(CC) -o $@ $^ $(LFLAGS)
+	@echo 'Linking binary $@'
+	@$(CC) -o $@ $^ $(LFLAGS)
 
-# custom test executable
-$(EXEC)_test: $(OBJS_COMMON_D) $(OBJS_TEST_D)
-	@echo '## LINKING $(EXEC)_test'
-	$(CC) -o $@ $^ $(LFLAGS)
+# statistical test executable
+$(EXEC)_stat_test: $(OBJS_COMMON_D) $(OBJS_STAT_TEST_D)
+	@echo 'Linking binary $@'
+	@$(CC) -o $@ $^ $(LFLAGS)
+
+# unit test executable
+$(EXEC)_unit_test: $(OBJS_COMMON_D) $(OBJS_UNIT_TEST_D)
+	@echo 'Linking binary $@'
+	@$(CC) -o $@ $^ $(LFLAGS)
 
 # statistics library
 $(LIBSTAT): $(OBJS_STAT_D)
-	@echo '## MAKING $(LIBSTAT)'
-	ar crf $@ $^
+	@echo 'Linking library $@'
+	@ar crf $@ $^
 
 .PHONY: all clean doc
 
 # all executables
-all: $(EXEC) $(EXEC)_test
+all: $(EXEC) $(EXEC)_stat_test $(EXEC)_unit_test
 
 # cleaning compilation results
 clean:
-	rm -rf $(EXEC) $(EXEC)_test $(LIBSTAT) $(BUILD) $(DOCDIR)
+	rm -rf $(EXEC) $(EXEC)_stat_test $(EXEC)_unit_test $(LIBSTAT) $(BUILD) $(DOCDIR)
 	
 # documentation
 doc:

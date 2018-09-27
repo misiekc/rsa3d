@@ -1,7 +1,8 @@
 /make-build/
 /doc/
 /rsa
-/rsa_test
+/rsa_stat_test
+/rsa_unit_test
 /libstat.a
 *.nb
 *.dat
