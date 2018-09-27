@@ -149,8 +149,8 @@ namespace cube_speedtest
             die("Error opening " + std::string(_filename) + " file to read");
         auto config = Config::parse(input);
 
-        this->pairs = config->getUnsignedInt("pairs");
-        this->repeats = config->getUnsignedInt("repeats");
+        this->pairs = config->getUnsignedLong("pairs");
+        this->repeats = config->getUnsignedLong("repeats");
 
         // Load strategies
         std::istringstream strategiesStream(config->getString("strategies"));
