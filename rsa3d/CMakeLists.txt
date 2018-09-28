@@ -8,6 +8,7 @@ set(RSA_SOURCE
         shape/shapes/cuboid/SATOverlapCB.cpp
         shape/shapes/cuboid/TriTriOverlapCB.cpp
         shape/shapes/regular_solid/Cuboctahedron.cpp
+        shape/shapes/regular_solid/CubeToTetrahedron.cpp
         shape/shapes/regular_solid/Dodecahedron.cpp
         shape/shapes/regular_solid/Icosahedron.cpp
         shape/shapes/regular_solid/Icosidodecahedron.cpp
@@ -36,6 +37,7 @@ set(RSA_SOURCE
         shape/shapes/Ellipsoid.cpp
         shape/shapes/OrientedCuboid.h
         shape/shapes/OrientedCuboid.tpp
+        shape/shapes/Polydisk.cpp
         shape/shapes/polygon/Polygon.cpp
         shape/shapes/Rectangle.cpp
         shape/shapes/Sphere.h

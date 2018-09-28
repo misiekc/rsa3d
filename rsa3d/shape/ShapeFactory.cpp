@@ -15,6 +15,7 @@
 #include "shapes/SpheroCylinder2D.h"
 #include "shapes/Ellipse.h"
 #include "shapes/Rectangle.h"
+#include "shapes/Polydisk.h"
 #include "shapes/polygon/Polygon.h"
 #include "shapes/polygon/SBPolygon.h"
 #include "shapes/polygon/HBPolygon.h"
@@ -35,6 +36,7 @@
 #include "shapes/regular_solid/Rhombicosidodecahedron.h"
 #include "shapes/regular_solid/TruncatedIcosidodecahedron.h"
 #include "shapes/regular_solid/SnubDodecahedron.h"
+#include "shapes/regular_solid/CubeToTetrahedron.h"
 #include "shapes/Ellipsoid.h"
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
@@ -71,9 +73,12 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             	HBPolygon::initClass(attr);
             	return;
             } else if (sClass == "Polygon") {
-            	Polygon::initClass(attr);
-            	return;
-            }
+              	Polygon::initClass(attr);
+              	return;
+            } else if (sClass == "Polydisk") {
+              	Polydisk::initClass(attr);
+              	return;
+              }
         #endif
 
     #elif RSA_SPATIAL_DIMENSION == 3 && RSA_ANGULAR_DIMENSION == 0
@@ -137,8 +142,11 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
         } else if (sClass == "Ellipsoid") {
             Ellipsoid::initClass(attr);
             return;
+        } else if (sClass == "CubeToTetrahedron") {
+            RegularSolid<CubeToTetrahedron>::initClass(attr);
+            return;
         }
-    #endif
+#endif
 
     std::cerr << "Unknown shape: " << sClass << " or wrong dimensions: " << RSA_SPATIAL_DIMENSION << ", " << RSA_ANGULAR_DIMENSION << std::endl;
     exit(EXIT_FAILURE);

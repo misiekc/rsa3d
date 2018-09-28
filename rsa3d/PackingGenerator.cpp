@@ -164,9 +164,8 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 				std::vector<const RSAShape*> vNeighbours;
 				this->surface->getNeighbours(&vNeighbours, position);
 				for(const RSAShape *sTmp : vNeighbours){
-				    auto convexShape = dynamic_cast<const RSAConvexShape*>(sTmp);
-					if (convexShape->pointInside(this->surface, position, orientation, delta)){
-						sCovers = convexShape;
+					if (sTmp->voxelInside(this->surface, position, orientation, 0.0001, delta)){
+						sCovers = sTmp;
 						break;
 					}
 				}

@@ -113,7 +113,6 @@ void Polygon::initClass(const std::string &args){
 	}
 
 	Shape<2, 1>::setNeighbourListCellSize(2.0*Polygon::getCircumscribedCircleRadius());
-	Shape<2, 1>::setNeighbourListCellSize(2*Polygon::getCircumscribedCircleRadius());
 	Polygon::inscribedCircleRadius = Polygon::getInscribedCircleRadius();
 	Shape<2, 1>::setVoxelSpatialSize(1.4*Polygon::inscribedCircleRadius);
 	Shape<2, 1>::setVoxelAngularSize(2*M_PI);
@@ -331,5 +330,5 @@ Vector<2> Polygon::getVertexPosition(std::size_t index) const {
 
 void Polygon::vertexToPovray(std::size_t index, std::ostream &out) const {
     Vector<2> position = this->getVertexPosition(index);
-    out << "< " << position[0] << ", " << position[1] << ", 0.0002> ,";
+    out << "< " << position[0] << ", " << position[1] << ", 0.0002>";
 }

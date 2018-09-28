@@ -108,7 +108,7 @@ double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::minDistance(const Shape *s) 
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 std::string Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::toString() const{
-	return "";
+	return std::to_string(this->no);
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>

@@ -7,90 +7,76 @@
 #include "Config.h"
 #include "Utils.h"
 
+#include <memory>
 
-// Parses configuration parameters from given istream
-//--------------------------------------------------------------------------------------------
-Config * Config::parse(std::istream & _file, char _delim)
-{
-    std::string line;
-    std::string field, value;
+
+Config *Config::parse(std::istream & in, char delim) {
+    if (delim == '#')
+        throw std::invalid_argument("delim == #");
+
+    auto result = std::unique_ptr<Config>(new Config());    // auto clean-up after throw
     std::size_t line_num = 0;
-    std::size_t pos;
-    
-    Config * result = new Config();
-    
-    // Parse line by line
-    while (std::getline(_file, line)) {
+    std::string line;
+    while (std::getline(in, line)) {
         line_num++;
-        if (line.empty() || line[0] == '#')
+        stripComment(line);
+        if (line.empty())
             continue;
-        
-        // Split key from value
-        pos = line.find(_delim);
-        if (pos == std::string::npos)
-            throw ConfigParseException("No '" + std::to_string(_delim) + "' sign in line " + std::to_string(line_num));
-        
-        field = line.substr(0, pos);
-        trim(field);
-        if (result->hasParam(field))
-            throw ConfigParseException("Redefinition of field \"" + field + "\" in line " + std::to_string(line_num));
-        
-        value = (pos == line.length() - 1) ? "" : line.substr(pos + 1);
-        trim(value);
-        
-        // Store key and value
-        result->fieldMap[field] = value;
-        result->keys.push_back(field);
+
+        auto field = splitField(line, delim, line_num);
+        if (result->hasParam(field.key))
+            throw ConfigParseException("Redefinition of field \"" + field.key + "\" in line " + std::to_string(line_num));
+
+        result->fieldMap[field.key] = field.value;
+        result->keys.push_back(field.key);
     }
 
-    return result;   
+    return result.release();
 }
 
-// Returns parameter value for given field name as string, or throws ConfigNoFieldException
-// if not defined
-//--------------------------------------------------------------------------------------------    
-std::string Config::getString(const std::string & _field) const
-{
-    auto iter = this->fieldMap.find(_field);
+Config::Field Config::splitField(const std::string &line, char delim, std::size_t line_num) {
+    Field keyValue;
+    std::size_t pos = line.find(delim);
+    if (pos == std::string::npos)
+        throw ConfigParseException("No '" + std::to_string(delim) + "' sign in line " + std::to_string(line_num));
+
+    keyValue.key = line.substr(0, pos);
+    trim(keyValue.key);
+    keyValue.value = (pos == line.length() - 1) ? "" : line.substr(pos + 1);
+    trim(keyValue.value);
+    return keyValue;
+}
+
+void Config::stripComment(std::string &line) {
+    std::size_t pos = line.find('#');
+    if (pos != std::string::npos)
+        line.erase(pos);
+}
+
+std::string Config::getString(const std::string & field) const {
+    auto iter = this->fieldMap.find(field);
     if (iter == this->fieldMap.end())
-        throw ConfigNoFieldException("No \"" + _field + "\" field in config");
+        throw ConfigNoFieldException("No \"" + field + "\" field in config");
     return (*iter).second;
 }
 
-// Other param getters parsing string to a specific type. They may throw some std:: exceptions
-// while parsing
-//-------------------------------------------------------------------------------------------- 
-int Config::getInt(const std::string & _field) const
-{
-    return std::stoi(this->getString(_field));
+int Config::getInt(const std::string & field) const {
+    return std::stoi(this->getString(field));
 }
 
-unsigned int Config::getUnsignedInt(const std::string & _field) const
-{
-    return std::stoul(this->getString(_field));
+unsigned long Config::getUnsignedLong(const std::string & field) const {
+    auto str = this->getString(field);
+    if (std::stoi(str) < 0)
+        throw std::invalid_argument("unsigned long field negative");
+    return std::stoul(str);
 }
 
-double Config::getDouble(const std::string & _field) const
-{
-    return std::stod(this->getString(_field));
+double Config::getDouble(const std::string & field) const {
+    return std::stod(this->getString(field));
 }
 
-float Config::getFloat(const std::string & _field) const
+float Config::getFloat(const std::string & field) const
 {
-    return std::stof(this->getString(_field));
-}
-
-// Returns true if a field of given name exists, false otherwise
-//--------------------------------------------------------------------------------------------
-bool Config::hasParam(const std::string & _field) const
-{
-    return this->fieldMap.find(_field) != this->fieldMap.end();
-}
-
-// Returns a vector containing all keys in config
-//--------------------------------------------------------------------------------------------
-std::vector<std::string> Config::getKeys() const
-{
-    return this->keys;
+    return std::stof(this->getString(field));
 }
 

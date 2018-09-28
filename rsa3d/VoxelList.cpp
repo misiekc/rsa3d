@@ -273,8 +273,8 @@ bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double 
 										   std::vector<const RSAShape *> *shapes, RSABoundaryConditions *bc,
                                            unsigned short depth){
 	// if voxel is outside the packing it is inside exclusion zone
-	if (!this->isVoxelInsidePacking(v))
-		return true;
+//	if (!this->isVoxelInsidePacking(v))
+//		return true;
 	// otherwise checking
 
 	bool isInside = false;
@@ -325,7 +325,7 @@ bool VoxelList::isTopLevelVoxelActive(Voxel *v){
 
 bool VoxelList::analyzeVoxel(Voxel *v, const RSAShape *s, RSABoundaryConditions *bc){
 
-	if (!isTopLevelVoxelActive(v))
+    if (!isTopLevelVoxelActive(v) || !this->isVoxelInsidePacking(v) )
 		return true;
 
 	return s->voxelInside(bc, v->getPosition(), v->getOrientation(), this->spatialVoxelSize, this->angularVoxelSize);
@@ -335,8 +335,8 @@ bool VoxelList::analyzeVoxel(Voxel *v, const RSAShape *s, RSABoundaryConditions 
 bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, unsigned short depth){
 	if (!this->disabled){ // && (depth > v->depth || depth==0) ){
 
-	    if (!isTopLevelVoxelActive(v))
-		    return true;
+	    if (!isTopLevelVoxelActive(v) || !this->isVoxelInsidePacking(v) )
+			return true;
 
 	    std::vector<const RSAShape*> tmpShapes, shapes;
 		    nl->getNeighbours(&tmpShapes, v->getPosition());
@@ -411,7 +411,8 @@ bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const 
 			this->splitVoxel(this->voxels[i], this->spatialVoxelSize/2.0, this->angularVoxelSize/2.0, aVoxels[_OMP_THREAD_ID]);
 			for(size_t j=0; j<voxelsFactor; j++){
 				Voxel *v = aVoxels[_OMP_THREAD_ID][j];
-				if(this->isVoxelInsidePacking(v) && ( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc) ) ){
+//				if(this->isVoxelInsidePacking(v) && ( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc) ) ){
+				if( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc) ){
 					if(this->voxels[i]->depth > 0){
 						v->depth = this->voxels[i]->depth-1;
 					}

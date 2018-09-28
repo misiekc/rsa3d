@@ -30,8 +30,7 @@ const RSAShape* Surface::check(const RSAShape *s){
 	std::vector<const RSAShape *> neighbours;
 	this->list->getNeighbours(&neighbours, s->getPosition());
 
-	for(const RSAPositioned *positioned: neighbours) {
-	    auto shape = dynamic_cast<const RSAShape*>(positioned);
+	for(const RSAShape *shape: neighbours) {
 		if (shape->overlap(this, s))
 			return shape;
 	}

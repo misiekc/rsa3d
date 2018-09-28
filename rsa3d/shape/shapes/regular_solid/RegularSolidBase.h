@@ -75,8 +75,6 @@ protected:
 
     inline std::vector<Vector<3>> applyOrientation(const std::vector<Vector<3>> &vectors) const;
     inline std::vector<Vector<3>> applyPosition(const std::vector<Vector<3>> &vectors) const;
-    bool strictPointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
-                           double orientationRange) const;
 
 public:
     constexpr static double goldRatio = (1 + std::sqrt(5.)) / 2;

@@ -58,6 +58,11 @@ void Packing::restore(const std::string &filename) {
 }
 
 void Packing::expandOnPBC(double linearSize, double expandMargin) {
+    if (linearSize <= 0.0)
+        throw std::runtime_error("linearSize <= 0.0)");
+    if (expandMargin <= 0.0 || expandMargin >= 0.5)
+        throw std::runtime_error("expandMargin <= 0.0 || expandMargin >= 0.5");
+
     for (std::size_t i = 0; i < RSA_SPATIAL_DIMENSION; i++) {
         std::size_t oldSize = this->size();
         for (std::size_t j = 0; j < oldSize; j++) {

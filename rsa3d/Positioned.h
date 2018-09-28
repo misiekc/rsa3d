@@ -54,13 +54,15 @@ public:
 	 * @brief Returns position of a Positioned.
 	 * @return position of a Positioned
 	 */
-	const Vector<SPATIAL_DIMENSION> &getPosition() const;
+	virtual const Vector<SPATIAL_DIMENSION> &getPosition() const;
 
     /**
      * @brief Translates positioned by a given vector @a v.
+     *
+     * It uses setPosition, so it is enough to override only that method to keep track of position.
      * @param v a vector to translate by
      */
-	void translate(const Vector<SPATIAL_DIMENSION> &position);
+	virtual void translate(const Vector<SPATIAL_DIMENSION> &position);
 
     static void prepareOffset();
 };

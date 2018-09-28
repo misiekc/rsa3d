@@ -9,9 +9,8 @@
 
 
 #include <map>
-#include <string>    
-#include <istream>
 #include <stdexcept>
+#include <iosfwd>
 #include <vector>
 
 
@@ -19,7 +18,7 @@
 class ConfigParseException : public std::runtime_error
 {
 public:
-    ConfigParseException(const std::string & _what) : std::runtime_error(_what)
+    explicit ConfigParseException(const std::string & _what) : std::runtime_error(_what)
     {}
 };
 
@@ -28,27 +27,75 @@ public:
 class ConfigNoFieldException : public std::runtime_error
 {
 public:
-    ConfigNoFieldException(const std::string & _what) : std::runtime_error(_what)
+    explicit ConfigNoFieldException(const std::string & _what) : std::runtime_error(_what)
     {}
 };
 
 
+/**
+ * @brief A key=value config file parser
+ *
+ * File format:
+ * \code
+ * key1=value1
+ * # standalone comment
+ * key2=value2 # end-line comment;
+ *
+ * # empty lines are omitted
+ * key3 = value3 # whitespace is trimmed
+ * # key3 = value3 - duplicate fields are forbidden
+ * \endcode
+ */
 class Config
 {
 private:
     std::map<std::string, std::string>  fieldMap;
     std::vector<std::string>            keys;
-    
+
+    struct Field {
+        std::string key;
+        std::string value;
+    };
+
+    static void stripComment(std::string &line);
+    static Field splitField(const std::string &line, char delim, std::size_t line_num);
+
 public:
-    static Config * parse(std::istream & _file, char _delim = '=');
-    
-    std::string getString(const std::string & _field) const;
-    int getInt(const std::string & _field) const;
-    unsigned int getUnsignedInt(const std::string & _field) const;
-    double getDouble(const std::string & _field) const;
-    float getFloat(const std::string & _field) const;
-    bool hasParam(const std::string & _field) const;
-    std::vector<std::string> getKeys() const;
+
+    /**
+     * @brief Parses given stream.
+     *
+     * Format:
+     * \code
+     * key1=value1
+     * # standalone comment
+     * key2=value2 # end-line comment;
+     *
+     * # empty lines are omitted
+     * key3 = value3 # whitespace is trimmed
+     * # key3 = value3 - duplicate fields are forbidden
+     * \endcode
+     *
+     * @param in stream to parse from
+     * @param delim delimiter for key, value; defaults to '='
+     * @throws ConfigParseException on parse error (no delimiter of a duplicate field)
+     * @throws std::invalid_argument when delim = '#' (comment)
+     * @return Config object to be deleted manualy after use
+     */
+    static Config * parse(std::istream &in, char delim = '=');
+
+    bool hasParam(const std::string &field) const { return this->fieldMap.find(field) != this->fieldMap.end(); };
+    std::string getString(const std::string &field) const;
+    int getInt(const std::string &field) const;
+    unsigned long getUnsignedLong(const std::string &field) const;
+    double getDouble(const std::string &field) const;
+    float getFloat(const std::string &field) const;
+
+    /**
+     * Returns keys in a config, preserving order from an input
+     * @return keys in a config, preserving order from an input
+     */
+    std::vector<std::string> getKeys() const { return this->keys; };
 };
 
     

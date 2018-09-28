@@ -54,6 +54,9 @@ private:
 				int iCell = neighbour2i(coords, in, RSA_SPATIAL_DIMENSION, 1, this->n);
 				this->neighbouringCells[i]->push_back(iCell);
 			}while(increment(in, RSA_SPATIAL_DIMENSION, 2));
+			// sort and erase to avoid duplicates - important for small packings
+			std::sort( neighbouringCells[i]->begin(), neighbouringCells[i]->end() );
+			neighbouringCells[i]->erase( std::unique( neighbouringCells[i]->begin(), neighbouringCells[i]->end() ), neighbouringCells[i]->end() );
 		}
 	}
 
