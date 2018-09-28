@@ -1,0 +1,11 @@
+particle = Rectangle
+attr = 2.5
+mode = overlap
+first_x = 20
+first_y = 5.6
+first_angle = 30
+second_angle = 130
+box_width = 5
+box_height = 4
+points = 5000
+append = true

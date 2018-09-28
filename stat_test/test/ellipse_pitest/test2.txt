@@ -1,0 +1,12 @@
+particle = Ellipse
+attr = 4
+mode = point_inside
+first_x = 30
+first_y = -15.6
+first_angle = 190
+from_angle = 130
+to_angle = 210
+box_width = 5
+box_height = 4
+points = 15000
+append = true
