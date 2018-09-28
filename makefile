@@ -14,22 +14,19 @@
 ################################################
 
 
-#####################
-# COMPILER SETTINGS #
-#####################
-
-# Compiler to use
-CC = g++
-
-# Compiler flags
-CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -I"$(CURDIR)/unit_test/lib" -O3 -fopenmp -DRSA_SPATIAL_DIMENSION=2 -DRSA_ANGULAR_DIMENSION=0
-
-# Linker flags
-LFLAGS = -fopenmp
-
 ####################
 # PROJECT SETTINGS #
 ####################
+
+# RSA dimensions
+RSA_SPATIAL_DIMENSION = 2
+RSA_ANGULAR_DIMENSION = 0
+
+# Compiler flags
+CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -I"$(CURDIR)/unit_test/lib" -O3 -fopenmp -DRSA_SPATIAL_DIMENSION=$(RSA_SPATIAL_DIMENSION) -DRSA_ANGULAR_DIMENSION=$(RSA_ANGULAR_DIMENSION)
+
+# Linker flags
+LFLAGS = -fopenmp
 
 # Executable name
 EXEC = rsa
@@ -99,6 +96,7 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/shape/shapes/polygon/Polygon \
        rsa3d/shape/shapes/Ellipse \
        rsa3d/shape/shapes/Ellipsoid \
+       rsa3d/shape/shapes/Polydisk \
        rsa3d/shape/shapes/Rectangle \
        rsa3d/shape/shapes/SpheroCylinder2D \
        rsa3d/shape/AnisotropicShape2D \
@@ -186,17 +184,12 @@ endef
 -include $(OBJS_UNIT_TEST:%=$(DEPSDIR)/%.d)
 -include $(OBJS_STAT:%=$(DEPSDIR)/%.d)
 
-# *.c and *.cpp compilation, generating dependency files
+# compilation, generating dependency files
 # make sure all necessary diractories are created before compilation
-$(OBJDIR)/%.o: %.c
-	$(make_dirs)
-	@echo Compiling $*.c ...
-	@$(CC) $(CFLAGS) -c $*.c -o $@ -MMD -MF $(DEPSDIR)/$*.d -MT '$@'
-
 $(OBJDIR)/%.o: %.cpp
 	$(make_dirs)
 	@echo Compiling $*.cpp ...
-	@$(CC) $(CFLAGS) -c $*.cpp -o $@ -MMD -MF $(DEPSDIR)/$*.d -MT '$@'
+	@g++ $(CFLAGS) -c $*.cpp -o $@ -MMD -MF $(DEPSDIR)/$*.d -MT '$@'
 
 ####################
 # TARGETS          #
@@ -205,17 +198,17 @@ $(OBJDIR)/%.o: %.cpp
 # main executable
 $(EXEC): $(OBJS_COMMON_D) $(OBJS_MAIN_D) $(LIBSTAT)
 	@echo 'Linking binary $@'
-	@$(CC) -o $@ $^ $(LFLAGS)
+	@g++ -o $@ $^ $(LFLAGS)
 
 # statistical test executable
 $(EXEC)_stat_test: $(OBJS_COMMON_D) $(OBJS_STAT_TEST_D)
 	@echo 'Linking binary $@'
-	@$(CC) -o $@ $^ $(LFLAGS)
+	@g++ -o $@ $^ $(LFLAGS)
 
 # unit test executable
 $(EXEC)_unit_test: $(OBJS_COMMON_D) $(OBJS_UNIT_TEST_D)
 	@echo 'Linking binary $@'
-	@$(CC) -o $@ $^ $(LFLAGS)
+	@g++ -o $@ $^ $(LFLAGS)
 
 # statistics library
 $(LIBSTAT): $(OBJS_STAT_D)
