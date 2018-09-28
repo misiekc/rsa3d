@@ -1,5 +1,6 @@
 set(UNIT_TEST_SOURCE
 
+        rsa3d/ConfigTest.cpp
         rsa3d/MatrixTest.cpp
         rsa3d/PackingTest.cpp
         rsa3d/VectorTest.cpp)
