@@ -7,86 +7,57 @@
 
 #include "Parameters.h"
 #include "Utils.h"
+#include "Config.h"
 #include <iostream>
 #include <fstream>
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 
-Parameters::Parameters() {
-//	dimension = 2;
-	maxTriesWithoutSuccess = std::numeric_limits<int>::max();
-	maxVoxels = 40000000;
-	minDx = 0.0;
-	from = 0;
-	collectors = 1;
-	maxTime = std::numeric_limits<double>::infinity();
-	split = 500;
-	surfaceSize = pow(1000.0, 1.0/RSA_SPATIAL_DIMENSION);
-	storePackings = true;
 
-	modifiedRSA = false;
-	thresholdDistance = 0.0;
-
-	boundaryConditions = "periodic";
-	particleType = "Sphere";
-	particleAttributes = "2";
-	generatorProcesses = 1;
-#ifdef _OPENMP
-	ompThreads =  omp_get_max_threads();
-#else
-	ompThreads = 1;
-#endif
-
-}
-
-Parameters::Parameters(const std::string& sFile) : Parameters(){
+Parameters::Parameters(const std::string& sFile) {
 	std::ifstream file(sFile, std::ios::in);
-	if (!file) {
-        std::cerr << "Cannot open configuration file: " + sFile << std::endl;
-        exit(1);
-    }
-
-	std::string sLine;
-	while( std::getline(file, sLine) ){
-		if (sLine.length()==0 || sLine[0]=='#')
-			continue;
-		size_t pos;
-		if( (pos=sLine.find("="))==std::string::npos)
-			continue;
-		std::string sKey = sLine.substr(0, pos);
-		std::string sValue = sLine.substr(pos+1, sLine.length()-pos-1);
-		trim(sKey);
-		trim(sValue);
-
-		if (sKey.compare("maxTriesWithoutSuccess")==0) 	this->maxTriesWithoutSuccess = std::stoi(sValue);
-		else if (sKey.compare("maxVoxels")==0)					this->maxVoxels = std::stoi(sValue);
-		else if (sKey.compare("requestedAngularVoxelSize")==0)	this->requestedAngularVoxelSize = std::stod(sValue);
-		else if (sKey.compare("minDx")==0)						this->minDx = std::stod(sValue);
-		else if (sKey.compare("maxTime")==0) 					this->maxTime = std::stod(sValue);
-		else if (sKey.compare("split")==0) 						this->split = std::stoi(sValue);
-		else if (sKey.compare("surfaceVolume")==0) 				this->surfaceSize = pow(std::stod(sValue), 1.0/RSA_SPATIAL_DIMENSION);
-		else if (sKey.compare("storePackings")==0)	 			this->storePackings = (sValue.compare("false")==0)?false:true;
-		else if (sKey.compare("modifiedRSA")==0)		 		this->modifiedRSA = (sValue.compare("false")==0)?false:true;
-		else if (sKey.compare("thresholdDistance")==0) 			this->thresholdDistance = std::stod(sValue);
-		else if (sKey.compare("boundaryConditions")==0) 		this->boundaryConditions = sValue;
-		else if (sKey.compare("particleType")==0) 				this->particleType = sValue;
-		else if (sKey.compare("particleAttributes")==0)			this->particleAttributes = sValue;
-
-		else if (sKey.compare("from")==0) 						this->from = std::stoi(sValue);
-		else if (sKey.compare("collectors")==0) 				this->collectors = std::stoi(sValue);
-		else if (sKey.compare("generatorProcesses")==0) 		this->generatorProcesses = std::stoi(sValue);
-		else if (sKey.compare("ompThreads")==0) 				this->ompThreads = std::stoi(sValue);
-	}
+	if (!file)
+	    throw std::runtime_error("Cannot open configuration file: " + sFile);
+	auto config = Config::parse(file);
 	file.close();
+
+	for (const auto &key : config.getKeys()){
+		if (key == "maxTriesWithoutSuccess") 	        this->maxTriesWithoutSuccess = config.getUnsignedLong(key);
+		else if (key == "maxVoxels")					this->maxVoxels = config.getUnsignedLong(key);
+		else if (key == "requestedAngularVoxelSize")	this->requestedAngularVoxelSize = config.getDouble(key);
+		else if (key == "minDx")						this->minDx = config.getDouble(key);
+		else if (key == "maxTime") 					    this->maxTime = config.getDouble(key);
+		else if (key == "split") 						this->split = config.getUnsignedLong(key);
+		else if (key == "surfaceVolume") 				this->surfaceSize = pow(config.getDouble(key), 1.0/RSA_SPATIAL_DIMENSION);
+		else if (key == "storePackings")	 			this->storePackings = config.getString(key) != "false";
+		else if (key == "modifiedRSA")		 		    this->modifiedRSA = config.getString(key) != "false";
+		else if (key == "thresholdDistance") 			this->thresholdDistance = config.getDouble(key);
+		else if (key == "boundaryConditions") 		    this->boundaryConditions = config.getString(key);
+		else if (key == "particleType") 				this->particleType = config.getString(key);
+		else if (key == "particleAttributes")			this->particleAttributes = config.getString(key);
+
+		else if (key == "from") 						this->from = config.getUnsignedLong(key);
+		else if (key == "collectors") 				    this->collectors = config.getUnsignedLong(key);
+		else if (key == "generatorProcesses") 		    this->generatorProcesses = config.getUnsignedLong(key);
+		else if (key == "ompThreads") 				    this->ompThreads = config.getInt(key);
+	}
+
+	this->validateData();
 
 	#ifdef _OPENMP
 	omp_set_num_threads(this->ompThreads);
 	#endif
-
 }
 
-Parameters::~Parameters() {
-	// TODO Auto-generated destructor stub
+void Parameters::validateData() {
+    Ensure(maxTriesWithoutSuccess > 0);
+    Ensure(maxVoxels > 0);
+    Ensure(requestedAngularVoxelSize > 0);
+    Ensure(minDx >= 0.0);
+    Ensure(from >= 0);
+    Ensure(collectors > 0);
+    Ensure(maxTime > 0);
+    Ensure(split > 0);
+    Ensure(!std::isnan(surfaceSize) && surfaceSize > 0);
+    Ensure(thresholdDistance >= 0.0);
+    Ensure(generatorProcesses > 0);
+    Ensure(ompThreads > 0);
 }
-

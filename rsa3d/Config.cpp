@@ -10,11 +10,11 @@
 #include <memory>
 
 
-Config *Config::parse(std::istream & in, char delim) {
+Config Config::parse(std::istream & in, char delim) {
     if (delim == '#')
         throw std::invalid_argument("delim == #");
 
-    auto result = std::unique_ptr<Config>(new Config());    // auto clean-up after throw
+    Config result;
     std::size_t line_num = 0;
     std::string line;
     while (std::getline(in, line)) {
@@ -24,14 +24,14 @@ Config *Config::parse(std::istream & in, char delim) {
             continue;
 
         auto field = splitField(line, delim, line_num);
-        if (result->hasParam(field.key))
+        if (result.hasParam(field.key))
             throw ConfigParseException("Redefinition of field \"" + field.key + "\" in line " + std::to_string(line_num));
 
-        result->fieldMap[field.key] = field.value;
-        result->keys.push_back(field.key);
+        result.fieldMap[field.key] = field.value;
+        result.keys.push_back(field.key);
     }
 
-    return result.release();
+    return result;
 }
 
 Config::Field Config::splitField(const std::string &line, char delim, std::size_t line_num) {

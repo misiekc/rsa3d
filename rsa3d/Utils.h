@@ -10,9 +10,9 @@
 #define UTILS_C_
 
 #include "Vector.h"
-#include <omp.h>
 
 #ifdef _OPENMP
+    #include <omp.h>
     #define __OMP_STRINGIFY__(x) #x
 
     #define _OMP_PARALLEL_FOR   _Pragma("omp parallel for")
@@ -27,6 +27,8 @@
     #define _OMP_MAXTHREADS     1
     #define _OMP_THREAD_ID      0
 #endif
+
+#define Ensure(cond) if (!(cond)) throw std::runtime_error(#cond " failed");
 
 using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;
 
