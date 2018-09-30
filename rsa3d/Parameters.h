@@ -40,8 +40,9 @@ public:
 	std::size_t generatorProcesses = 1;
 	int ompThreads = _OMP_MAXTHREADS;
 
-	Parameters() = default;
-	explicit Parameters(const std::string & sFile);
+	Parameters();
+	explicit Parameters(std::istream &stream);
+    explicit Parameters(const std::string &fileName);
 };
 
 #endif /* PARAMETERS_H_ */

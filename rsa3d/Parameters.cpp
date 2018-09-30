@@ -12,13 +12,8 @@
 #include <fstream>
 
 
-Parameters::Parameters(const std::string& sFile) {
-	std::ifstream file(sFile, std::ios::in);
-	if (!file)
-	    throw std::runtime_error("Cannot open configuration file: " + sFile);
-	auto config = Config::parse(file);
-	file.close();
-
+Parameters::Parameters(std::istream &stream) {
+	auto config = Config::parse(stream);
 	for (const auto &key : config.getKeys()){
 		if (key == "maxTriesWithoutSuccess") 	        this->maxTriesWithoutSuccess = config.getUnsignedLong(key);
 		else if (key == "maxVoxels")					this->maxVoxels = config.getUnsignedLong(key);
@@ -47,6 +42,14 @@ Parameters::Parameters(const std::string& sFile) {
 	#endif
 }
 
+Parameters::Parameters(const std::string &fileName) {
+    std::ifstream input(fileName, std::ios::in);
+    if (!input)
+        throw std::runtime_error("Cannot open configuration file: " + fileName);
+
+    (*this) = Parameters{input};    // Yes, it is possible ;)
+}
+
 void Parameters::validateData() {
     Ensure(maxTriesWithoutSuccess > 0);
     Ensure(maxVoxels > 0);
@@ -60,4 +63,9 @@ void Parameters::validateData() {
     Ensure(thresholdDistance >= 0.0);
     Ensure(generatorProcesses > 0);
     Ensure(ompThreads > 0);
+    Ensure(!particleType.empty());
+}
+
+Parameters::Parameters() {
+    this->validateData();       // Make sure default construction is valid
 }

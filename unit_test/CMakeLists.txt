@@ -3,6 +3,7 @@ set(UNIT_TEST_SOURCE
         rsa3d/ConfigTest.cpp
         rsa3d/MatrixTest.cpp
         rsa3d/PackingTest.cpp
+        rsa3d/ParametersTest.cpp
         rsa3d/VectorTest.cpp)
 
 add_library(unit_test_runner lib/catch.hpp lib/fakeit.hpp Main.cpp)

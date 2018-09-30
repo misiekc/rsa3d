@@ -221,11 +221,11 @@ int main(int argc, char **argv) {
         Packing packing;
         packing.restore(filename);
         PackingGenerator pg(1, &params);
-        pg.testPacking(packing, atof(argv[4]));
+        pg.testPacking(packing, std::stod(argv[4]));
     } else if (mode == "debug") {
         debug(&params, argv[3]);
     } else if (mode == "boundaries") {
-        boundaries(&params, atof(argv[3]));
+        boundaries(&params, std::stoul(argv[3]));
     } else if (mode == "dat") {
         makeDatFileForPackingsInDirectory(&params, argv[3]);
     } else if (mode == "analyze") {
