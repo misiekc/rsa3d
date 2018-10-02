@@ -33,11 +33,11 @@ public:
      * @brief Initializes a shape class based on passed name and attributes.
      *
      * It invokes specific shape initialization method (see Shape class description) determined by @a sClass and
-     * passes @a attr attributes. Parameters of the shape are then calculated and the shape class provides appropriate
+     * passes @a attr attributes. %Parameters of the shape are then calculated and the shape class provides appropriate
      * function for creating shapes to be used in a factory.
      *
-     * A list of available shapes depends on @a RSA_SPATIAL_DIMENSION and @a RSA_ANGULAR_DIMENSION parameters (see
-     * Parameters.h):
+     * A list of available shapes depends on @a RSA_SPATIAL_DIMENSION and @a RSA_ANGULAR_DIMENSION preprocessor
+     * constants:
      * <ul>
      * <li> `RSA_SPATIAL_DIMENSION == any && RSA_ANGULAR_DIMENSION == 0`:
      *     <ul>

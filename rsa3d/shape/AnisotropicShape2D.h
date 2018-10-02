@@ -15,9 +15,11 @@
  * This class specializes a bit more general Shape class and acts as a base for all anisotropic 2D shapes. Derived
  * classes can now operate on angles, not arrays of angles and automatic normalizataion is introduced (see setAngle()).
  *
- * Note, that Shape::pointInside(BoundaryConditions*,double*,double*,double) and Shape::setOrientation(double*) now
- * delegate to AnisotropicShape2D::pointInside(BoundaryConditions*,double*,double,double) and
- * AnisotripicShape2D::setAngle(double). See those methods' documentation for more information.
+ * Note, that
+ * ConvexShape::pointInside(BoundaryConditions*,const Vector<SPATIAL_DIMENSION>&,const Orientation<ANGULAR_DIMENSION>&,double) const
+ * and Shape::setOrientation now delegate to
+ * AnisotropicShape2D::pointInside(BoundaryConditions<2>*,const Vector<2>&,double,double) const and
+ * AnisotropicShape2D::setAngle. See those methods documentation for more information.
  */
 class AnisotropicShape2D : public ConvexShape<2, 1> {
 

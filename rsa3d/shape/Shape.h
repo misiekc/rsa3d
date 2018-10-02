@@ -25,14 +25,14 @@
  *
  * Derived classes should also provide:
  * <ul>
- * <li>a method for initializing parameters of generated shapes' from a string, which is non-empty if the class
+ * <li>a method for initializing parameters of generated shapes from a string, which is non-empty if the class
  * describes the whole family of shapes of a specific kind, for example ellipses (they can have different axes ratio).
  * Signature:
  * @code
  * void (*)(const std::string &attr)
  * @endcode
- * The parameters are then stored in a global state and are used when generating shapes with a static method described
- * earlier. Moreover, <strong>this method is obliged to invoke setNeighbourListCellSize(), setVoxelSpatialSize(),
+ * The parameters are then stored in a global state and are used when generating shapes (see setCreateShapeImpl()).
+ * Moreover, <strong>this method is obliged to invoke setNeighbourListCellSize(), setVoxelSpatialSize(),
  * setVoxelAngularSize() and setCreateShapeImpl() (or setDefaultCreateShapeImpl())</strong> with appropriate arguments
  * every time it is called (after shape change or @a attr change).</li>
  * </ul>
@@ -147,7 +147,7 @@ protected:
     static void setSupportsSaturation(bool flag);
 
     /**
-     * @brief Sets a function which will be used to create new shapes.
+     * @brief Sets a function which will be used to create new shapes by ShapeFactory.
      *
      * If @a ANGULAR_DIMENSION is zero, but a Shape is not isotropic, a function should choose random orientation from
      * supplied random number generator, usually with isotropic distribution. All generated shapes must be identical
