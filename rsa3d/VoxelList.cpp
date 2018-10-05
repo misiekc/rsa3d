@@ -46,7 +46,12 @@ inline size_t VoxelList::findArraySize(double range, double cellSize){
 }
 
 VoxelList::VoxelList(double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange, double requestedAngularVoxelSize){
-	this->spatialRange = packingSpatialSize;
+	if (packingSpatialSize <= 0.0)  throw std::runtime_error("packingSpatialSize <= 0.0");
+    if (requestedSpatialVoxelSize <= 0.0)  throw std::runtime_error("requestedSpatialVoxelSize <= 0.0");
+    if (shapeAngularRange <= 0.0)  throw std::runtime_error("shapeAngularRange <= 0.0");
+    if (requestedAngularVoxelSize <= 0.0)  throw std::runtime_error("requestedAngularVoxelSize <= 0.0");
+
+    this->spatialRange = packingSpatialSize;
 	this->spatialVoxelSize = this->findFloorSize(requestedSpatialVoxelSize);
 	this->initialVoxelSize = this->spatialVoxelSize;
 
@@ -322,17 +327,7 @@ bool VoxelList::isTopLevelVoxelActive(Voxel *v){
 	return this->activeTopLevelVoxels[index];
 }
 
-
-bool VoxelList::analyzeVoxel(Voxel *v, const RSAShape *s, RSABoundaryConditions *bc){
-
-    if (!isTopLevelVoxelActive(v) || !this->isVoxelInsidePacking(v) )
-		return true;
-
-	return s->voxelInside(bc, v->getPosition(), v->getOrientation(), this->spatialVoxelSize, this->angularVoxelSize);
-}
-
-
-bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, unsigned short depth){
+bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, double angularSize, unsigned short depth){
 	if (!this->disabled){ // && (depth > v->depth || depth==0) ){
 
 	    if (!isTopLevelVoxelActive(v) || !this->isVoxelInsidePacking(v) )
@@ -350,7 +345,7 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABou
 			}
 		}
 
-		bool isInside = this->isVoxelInsideExclusionZone(v, this->spatialVoxelSize, this->angularVoxelSize, &shapes, bc, depth);
+		bool isInside = this->isVoxelInsideExclusionZone(v, spatialSize, angularSize, &shapes, bc, depth);
 
 		v->depth = depth;
 		v->lastAnalyzed = maxNo;
@@ -367,7 +362,7 @@ size_t VoxelList::analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const R
 	_OMP_PARALLEL_FOR
 	for (size_t i = 0; i < this->length; i++) {
 		Voxel *v = this->voxels[i];
-		bool bRemove = this->analyzeVoxel(v, nl, bc, depth);
+		bool bRemove = this->analyzeVoxel(v, nl, bc, this->spatialVoxelSize, this->angularVoxelSize, depth);
 		if (bRemove){
 			this->voxelNeighbourGrid->remove(v, v->getPosition());
 			delete v;
@@ -407,12 +402,12 @@ bool VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const 
 
 	_OMP_PARALLEL_FOR
 	for(size_t i=0; i<this->length; i++){
-		if (!this->analyzeVoxel(this->voxels[i], nl, bc)){ // dividing only not overlapping voxels
+		if (!this->analyzeVoxel(this->voxels[i], nl, bc, this->spatialVoxelSize, this->angularVoxelSize)){ // dividing only not overlapping voxels
 			this->splitVoxel(this->voxels[i], this->spatialVoxelSize/2.0, this->angularVoxelSize/2.0, aVoxels[_OMP_THREAD_ID]);
 			for(size_t j=0; j<voxelsFactor; j++){
 				Voxel *v = aVoxels[_OMP_THREAD_ID][j];
 //				if(this->isVoxelInsidePacking(v) && ( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc) ) ){
-				if( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc) ){
+				if( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc, this->spatialVoxelSize/2.0, this->angularVoxelSize/2.0) ){
 					if(this->voxels[i]->depth > 0){
 						v->depth = this->voxels[i]->depth-1;
 					}

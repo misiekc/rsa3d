@@ -90,6 +90,7 @@ protected:
 
 	void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes);
 
+	bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, double angularSize, unsigned short depth = 0);
 
 public:
 
@@ -108,10 +109,6 @@ public:
 
 	void getNeighbours(std::vector<Voxel *> *result, const RSAVector &da);
 	void removeTopLevelVoxel(Voxel *v);
-
-	bool analyzeVoxel(Voxel *v, const RSAShape *s, RSABoundaryConditions *bc);
-//	bool analyzeVoxel(Voxel *v, std::vector<Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION> *> *neighbours, BoundaryConditions *bc);
-	bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, unsigned short depth = 0);
 
 	size_t analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth);
 
