@@ -466,9 +466,9 @@ void VoxelList::getRandomPositionAndOrientation(RSAVector *position, RSAOrientat
 	RSAVector vpos = v->getPosition();
 	RSAOrientation vangle = v->getOrientation();
 
-	for (ushort i=0; i < RSA_SPATIAL_DIMENSION; i++)
+	for (unsigned short i=0; i < RSA_SPATIAL_DIMENSION; i++)
         (*position)[i] = vpos[i] + rnd->nextValue(this->spatialDistribution);
-	for (ushort i=0; i < RSA_ANGULAR_DIMENSION; i++)
+	for (unsigned short i=0; i < RSA_ANGULAR_DIMENSION; i++)
         (*orientation)[i] = vangle[i] + rnd->nextValue(this->angularDistribution);
 }
 

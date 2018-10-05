@@ -256,9 +256,9 @@ void Analyzer::printOrder(const std::vector<Plot*> &order, const std::string &fi
     if (order.empty()) return;
 
 	double ***orderPoints = new double**[order.size()];
-	for (ushort i=0; i<order.size(); i++){
+	for (unsigned short i=0; i<order.size(); i++){
 		orderPoints[i] = new double*[order[i]->size()];
-		for(ushort j=0; j<order[i]->size(); j++){
+		for(unsigned short j=0; j<order[i]->size(); j++){
 			orderPoints[i][j] = new double[2];
 		}
 		order[i]->getAsPoints(orderPoints[i]);
@@ -268,13 +268,13 @@ void Analyzer::printOrder(const std::vector<Plot*> &order, const std::string &fi
 
 	for (int i = 0; i < order[0]->size()-1; i++) {
 		file << orderPoints[0][i][0];
-		for (ushort j=0; j<order.size(); j++)
+		for (unsigned short j=0; j<order.size(); j++)
 			file << "\t" << orderPoints[j][i][1];
 		file << std::endl;
 	}
 	file.close();
 
-	for(ushort i=0; i<order.size(); i++){
+	for(unsigned short i=0; i<order.size(); i++){
 		for(int j=0; j<order[i]->size(); j++){
 			delete[] orderPoints[i][j];
 		}
