@@ -8,39 +8,41 @@
 #ifndef PARAMETERS_H_
 #define PARAMETERS_H_
 
-#include <climits>
 #include <limits>
 #include <string>
 #include <cmath>
 
+#include "Utils.h"
+
 class Parameters {
+private:
+    void validateData();
 
 public:
-	int maxTriesWithoutSuccess = std::numeric_limits<int>::max();
-	size_t maxVoxels = 100000000;
+	std::size_t maxTriesWithoutSuccess = std::numeric_limits<std::size_t>::max();
+	std::size_t maxVoxels = 40000000;
 	double requestedAngularVoxelSize = 2*M_PI;
 	double minDx = 0.0;
-	int from = 0;
-	int collectors = 1;
+	std::size_t from = 0;
+	std::size_t collectors = 1;
 	double maxTime = std::numeric_limits<double>::infinity();
-	size_t split = 3000;
-	double surfaceSize = pow(100000.0, 1.0/2.0);
+	std::size_t split = 5000;
+	double surfaceSize = pow(100000.0, 1.0/RSA_SPATIAL_DIMENSION);
 	bool storePackings = true;
 
 	bool modifiedRSA = false;
 	double thresholdDistance = 0.0;
 
-	std::string boundaryConditions;
-	std::string particleType;
+	std::string boundaryConditions = "periodic";
+	std::string particleType = "Sphere";
 	std::string particleAttributes;
 
-	int generatorProcesses = 1;
-	int ompThreads = 1;
-
+	std::size_t generatorProcesses = 1;
+	int ompThreads = _OMP_MAXTHREADS;
 
 	Parameters();
-	Parameters(const std::string & sFile);
-	virtual ~Parameters();
+	explicit Parameters(std::istream &stream);
+    explicit Parameters(const std::string &fileName);
 };
 
 #endif /* PARAMETERS_H_ */

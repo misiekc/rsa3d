@@ -144,11 +144,11 @@ int simulate(Parameters *params) {
     	die("Cannot open file " + sFile + " to store packing info");
 	file.precision(std::numeric_limits<double>::digits10 + 1);
 
-	int seed = params->from;
+	std::size_t seed = params->from;
 
 	if (params->generatorProcesses>1){
 		while(seed < params->from + params->collectors){
-			int i;
+			std::size_t i;
 			for(i=0; ( (i < params->generatorProcesses) && ((seed+i) < (params->from + params->collectors)) ); i++){
 				pid = fork();
 				if (pid < 0){
@@ -157,21 +157,21 @@ int simulate(Parameters *params) {
 					continue;
 				}
 				if (pid==0){
-					runSingleSimulation(seed + i, params, file);
+					runSingleSimulation(static_cast<int>(seed + i), params, file);
 					return 1;
 				}
 				if (pid > 0){
 					continue;
 				}
 			}
-			for(int j=0; j<i; j++){
-				wait(NULL);
+			for(std::size_t j=0; j<i; j++){
+				wait(nullptr);
 				seed++;
 			}
 		}
 	}else{
-		for(int i=0; i<params->collectors; i++){
-			runSingleSimulation(params->from+i, params, file);
+		for(std::size_t i=0; i<params->collectors; i++){
+			runSingleSimulation(static_cast<int>(params->from + i), params, file);
 		}
 	}
 	file.close();
@@ -221,11 +221,11 @@ int main(int argc, char **argv) {
         Packing packing;
         packing.restore(filename);
         PackingGenerator pg(1, &params);
-        pg.testPacking(packing, atof(argv[4]));
+        pg.testPacking(packing, std::stod(argv[4]));
     } else if (mode == "debug") {
         debug(&params, argv[3]);
     } else if (mode == "boundaries") {
-        boundaries(&params, atof(argv[3]));
+        boundaries(&params, std::stoul(argv[3]));
     } else if (mode == "dat") {
         makeDatFileForPackingsInDirectory(&params, argv[3]);
     } else if (mode == "analyze") {

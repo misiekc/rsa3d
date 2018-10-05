@@ -60,6 +60,8 @@ private:
     static void stripComment(std::string &line);
     static Field splitField(const std::string &line, char delim, std::size_t line_num);
 
+    Config() = default;
+
 public:
 
     /**
@@ -82,7 +84,7 @@ public:
      * @throws std::invalid_argument when delim = '#' (comment)
      * @return Config object to be deleted manualy after use
      */
-    static Config * parse(std::istream &in, char delim = '=');
+    static Config parse(std::istream &in, char delim = '=');
 
     bool hasParam(const std::string &field) const { return this->fieldMap.find(field) != this->fieldMap.end(); };
     std::string getString(const std::string &field) const;

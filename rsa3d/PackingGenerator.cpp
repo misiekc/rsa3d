@@ -189,9 +189,9 @@ void PackingGenerator::createPacking() {
 	std::cout << "[" << this->seed << " PackingGenerator::createPacking] using up to " << _OMP_MAXTHREADS;
 	std::cout << " concurrent treads" << std::endl;
 
-	int checkedAgain = 0;
-	int added = 0;
-	int missCounter = 0;
+	std::size_t checkedAgain = 0;
+	std::size_t added = 0;
+	std::size_t missCounter = 0;
 	unsigned short depthAnalyze = 0;
 
 	RND rnd(this->seed);

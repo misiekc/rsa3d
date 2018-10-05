@@ -42,7 +42,6 @@ public:
     /**
      * @brief Checks if a virtual particle of the same size is within excluded volume for any orientation of it.
      *
-	 * If @a s of `this` has a different size than from a global state is may lead to an unexpected behaviour.
      * @param bc boundary conditions to take into account
      * @param da position of a virtual particle of the same size to check
      * @return false if point is outside, true otherwise

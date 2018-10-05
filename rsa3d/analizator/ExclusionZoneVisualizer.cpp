@@ -37,7 +37,7 @@ bool ExclusionZoneVisualizer::voxelInsideShapeExclusionZone(Voxel *v, const RSAS
     bool isInside = true;
     for(int i=0; i<counterSize; i++){
         for(unsigned short j=0; j<RSA_SPATIAL_DIMENSION; j++){
-            position[j] = voxelPosition[j] + Positioned<RSA_SPATIAL_DIMENSION>::offset[i][j]*this->voxelSize;
+            position[j] = voxelPosition[j] + RSAPositioned::offset[i][j]*this->voxelSize;
         }
         trialShape->translate(position - trialShape->getPosition());
         if(!shape->overlap(this->surface, trialShape)){

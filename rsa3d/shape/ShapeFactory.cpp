@@ -40,8 +40,6 @@
 #include "shapes/Ellipsoid.h"
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
-    RSAPositioned::prepareOffset();
-
     // Shapes for any dimension, without angular dimensions
     #if RSA_ANGULAR_DIMENSION == 0
         if (sClass == "Sphere") {

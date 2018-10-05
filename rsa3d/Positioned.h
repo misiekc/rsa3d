@@ -27,6 +27,19 @@ class Positioned {
 private:
     Vector<SPATIAL_DIMENSION> position;
 
+    /* Helper class computing voxel offsets. Usage of std::array gives free range check */
+    class Offset {
+    private:
+        using specific_vertex_offset = std::array<int, SPATIAL_DIMENSION>;
+
+        std::array<specific_vertex_offset, 1 << SPATIAL_DIMENSION> offsets;
+
+    public:
+        Offset();
+
+        const specific_vertex_offset &operator[](std::size_t vertex) const;
+    };
+
 protected:
 
 	/**
@@ -46,7 +59,14 @@ protected:
 
 public:
 
-    static int offset[(1 << SPATIAL_DIMENSION)][SPATIAL_DIMENSION];
+    /**
+     * @brief Offsets of vertices of a voxel.
+     *
+     * Technically it behaves like int[2 ^ SPATIAL_DIMENSION][SPATIAL_DIMENSION] array. The first index is index of
+     * vertex of a voxel, the latter is coordinate index. Coordinates represent a hypercubic voxel of size 1 with the
+     * first vertex in the origin.
+     */
+    static const Offset offset;
 
 	virtual ~Positioned() = default;
 
@@ -59,12 +79,10 @@ public:
     /**
      * @brief Translates positioned by a given vector @a v.
      *
-     * It uses setPosition, so it is enough to override only that method to keep track of position.
+     * Default implementation uses setPosition, so it is enough to override only that method to keep track of position.
      * @param v a vector to translate by
      */
-	virtual void translate(const Vector<SPATIAL_DIMENSION> &position);
-
-    static void prepareOffset();
+	virtual void translate(const Vector<SPATIAL_DIMENSION> &v);
 };
 
 using RSAPositioned = Positioned<RSA_SPATIAL_DIMENSION>;

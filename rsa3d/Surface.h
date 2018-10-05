@@ -8,14 +8,11 @@
 #ifndef SURFACE_H_
 #define SURFACE_H_
 
-#include "Parameters.h"
-#include "shape/Shape.h"
+
 #include <vector>
-#include <unordered_set>
-#include "RND.h"
-#include "Voxel.h"
+
+#include "shape/Shape.h"
 #include "NeighbourGrid.h"
-#include "VoxelList.h"
 
 class Surface : public BoundaryConditions<RSA_SPATIAL_DIMENSION> {
 

@@ -18,12 +18,13 @@ double Polydisk::area;
 
 /**
  * @param args contains information about coordinates of each vertex of the Polydisk. Adjacent vertices are connected.
- * Data should be separated by only spaces, and should be: number_of_vertices [xy/rt] c01 c02 c11 c12 c21 c22 ...
+ * Data should be separated by only spaces, and should be:
+ * number_of_vertices [xy/rt] c01 c02 r0 c11 c12 r1 c21 c22 r2 ...
  * xy means cartesian coordinates, and rt means polar coordinates
  * Example format of coordinates
- * 4 xy 1 1 1 -1 -1 -1 -1 1 0
+ * 4 xy 1 1 1.5 1 -1 1.5 -1 -1 1.5 -1 1 1.5
  * or equivalently
- * 4 rt 1.4142 0.7854 1.4142 2.3562 1.4142 3.9270 1.4142 5.4978 0
+ * 4 rt 1.4142 0.7854 1.5 1.4142 2.3562 1.5 1.4142 3.9270 1.5 1.4142 5.4978 1.5
  */
 void Polydisk::initClass(const std::string &args){
 	std::istringstream in(args);
@@ -34,10 +35,13 @@ void Polydisk::initClass(const std::string &args){
 	in >> format;
 	double r, t;
 	for (size_t i=0; i<n; i++){
-		double c1, c2, c3;
+		double c1, c2, diskR_;
 		in >> c1;
 		in >> c2;
-		in >> c3;
+		in >> diskR_;
+		if (diskR_ <= 0.0)
+		    throw std::runtime_error("diskR <= 0 for " + std::to_string(i) + " coord");
+
 		if(format == "xy"){
 			r = std::sqrt(c1*c1 + c2*c2);
 			t = std::atan2(c2, c1);
@@ -49,7 +53,7 @@ void Polydisk::initClass(const std::string &args){
 		}
 		Polydisk::diskCentreR.push_back(r);
 		Polydisk::diskCentreTheta.push_back(t);
-		Polydisk::diskR.push_back(c3);
+		Polydisk::diskR.push_back(diskR_);
 	}
 
 	Polydisk::normalizeArea(100000000);
@@ -80,7 +84,8 @@ double Polydisk::mcArea(size_t mcTrials){
 	RND rnd(12345);
 	double x, y, dx, dy;
 	size_t inside = 0;
-	for (size_t i=0; i<mcTrials; i++){
+
+    for (size_t i=0; i<mcTrials; i++){
 		x = (2.0*rnd.nextValue()-1.0)*maxSize;
 		y = (2.0*rnd.nextValue()-1.0)*maxSize;
 		for(size_t disk = 0; disk < Polydisk::diskR.size(); disk++){
