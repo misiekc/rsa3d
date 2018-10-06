@@ -94,16 +94,16 @@ TEST_CASE("Config: parsing errors") {
     SECTION("no delimiter") {
         std::istringstream str("a=1\nb2\n");
 
-        REQUIRE_THROWS(Config::parse(str));
+        //REQUIRE_THROWS(Config::parse(str));
         // Somehow this breaks When(Method(...)).Return(...) in FakeIt (OMG WTF???)
-        //REQUIRE_THROWS_WITH(Config::parse(str), Contains("line") && Contains("2"));
+        REQUIRE_THROWS_WITH(Config::parse(str), Contains("=") && Contains("line") && Contains("2"));
     }
 
     SECTION("field redefinition") {
         std::istringstream str("a=1\nb=2\na=3");
 
-        REQUIRE_THROWS(Config::parse(str));
-        //REQUIRE_THROWS_WITH(Config::parse(str), Contains("a") && Contains("line") && Contains("3"));
+        //REQUIRE_THROWS(Config::parse(str));
+        REQUIRE_THROWS_WITH(Config::parse(str), Contains("a") && Contains("line") && Contains("3"));
     }
 }
 

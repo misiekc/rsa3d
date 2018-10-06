@@ -38,7 +38,7 @@ Config::Field Config::splitField(const std::string &line, char delim, std::size_
     Field keyValue;
     std::size_t pos = line.find(delim);
     if (pos == std::string::npos)
-        throw ConfigParseException("No '" + std::to_string(delim) + "' sign in line " + std::to_string(line_num));
+        throw ConfigParseException("No '" + std::string(1, delim) + "' sign in line " + std::to_string(line_num));
 
     keyValue.key = line.substr(0, pos);
     trim(keyValue.key);
