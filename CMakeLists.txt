@@ -10,7 +10,7 @@ if(UNIX AND NOT APPLE)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static") # link dependencies statically (on Linux)
 endif()
 
-add_subdirectory(statistics)
-add_subdirectory(rsa3d)
-add_subdirectory(stat_test)
-add_subdirectory(unit_test)
+add_subdirectory(statistics)    # statistics library
+add_subdirectory(rsa3d)         # common rsa code and rsa executable
+add_subdirectory(stat_test)     # statistical tests
+add_subdirectory(unit_test)     # unit tests
