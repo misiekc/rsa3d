@@ -28,7 +28,18 @@
     #define _OMP_THREAD_ID      0
 #endif
 
-#define Ensure(cond) if (!(cond)) throw std::runtime_error(#cond " failed");
+// Cpp Core Guidelines-style assertions for programming by contract
+// https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i6-prefer-expects-for-expressing-preconditions
+
+// Preconditions check (argument validation)
+#define Expects(cond) if (!(cond)) throw std::invalid_argument("Expactation " #cond " failed")
+
+// Postconditions check (results assertion)
+#define Ensures(cond) if (!(cond)) throw std::runtime_error("Assertion " #cond " failed")
+
+// Additional macro for validation things different than function arguments, for example input from file
+// std::domain_error can be easily catched to handle bad input errors (or left unchecked)
+#define Validate(cond) if (!(cond)) throw std::domain_error("Validation " #cond " failed")
 
 using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;
 

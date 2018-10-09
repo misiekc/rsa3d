@@ -46,10 +46,10 @@ inline size_t VoxelList::findArraySize(double range, double cellSize){
 }
 
 VoxelList::VoxelList(double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange, double requestedAngularVoxelSize){
-	if (packingSpatialSize <= 0.0)  throw std::runtime_error("packingSpatialSize <= 0.0");
-    if (requestedSpatialVoxelSize <= 0.0)  throw std::runtime_error("requestedSpatialVoxelSize <= 0.0");
-    if (shapeAngularRange <= 0.0)  throw std::runtime_error("shapeAngularRange <= 0.0");
-    if (requestedAngularVoxelSize <= 0.0)  throw std::runtime_error("requestedAngularVoxelSize <= 0.0");
+	Expects(packingSpatialSize > 0.0);
+	Expects(requestedSpatialVoxelSize > 0.0);
+	Expects(shapeAngularRange > 0.0);
+	Expects(requestedAngularVoxelSize > 0.0);
 
     this->spatialRange = packingSpatialSize;
 	this->spatialVoxelSize = this->findFloorSize(requestedSpatialVoxelSize);

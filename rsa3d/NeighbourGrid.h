@@ -63,8 +63,8 @@ private:
 public:
 
 	NeighbourGrid(double size, double dx){ // @suppress("Class members should be properly initialized")
-		if (size <= 0 || dx <= 0)
-		    throw std::runtime_error("size <= 0 || dx <= 0");
+		Expects(size > 0);
+		Expects(dx > 0);
 
 		size_t n = (size_t)(size/dx);
 		if (n == 0)

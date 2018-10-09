@@ -51,19 +51,19 @@ Parameters::Parameters(const std::string &fileName) {
 }
 
 void Parameters::validateData() {
-    Ensure(maxTriesWithoutSuccess > 0);
-    Ensure(maxVoxels > 0);
-    Ensure(requestedAngularVoxelSize > 0);
-    Ensure(minDx >= 0.0);
-    Ensure(from >= 0);
-    Ensure(collectors > 0);
-    Ensure(maxTime > 0);
-    Ensure(split > 0);
-    Ensure(!std::isnan(surfaceSize) && surfaceSize > 0);
-    Ensure(thresholdDistance >= 0.0);
-    Ensure(generatorProcesses > 0);
-    Ensure(ompThreads > 0);
-    Ensure(!particleType.empty());
+    Validate(maxTriesWithoutSuccess > 0);
+	Validate(maxVoxels > 0);
+	Validate(requestedAngularVoxelSize > 0);
+	Validate(minDx >= 0.0);
+	Validate(from >= 0);
+	Validate(collectors > 0);
+	Validate(maxTime > 0);
+	Validate(split > 0);
+	Validate(!std::isnan(surfaceSize) && surfaceSize > 0);
+	Validate(thresholdDistance >= 0.0);
+	Validate(generatorProcesses > 0);
+	Validate(ompThreads > 0);
+	Validate(!particleType.empty());
 }
 
 Parameters::Parameters() {

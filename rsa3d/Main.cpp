@@ -216,7 +216,7 @@ int main(int argc, char **argv) {
     if (mode == "simulate") {
         simulate(&params);
     } else if (mode == "test") {
-        if (argc < 5)   die("Usage: ./rsa test <config> <file in> <max time>");
+        if (argc < 5)   die("Usage: ./rsa test <input> <file in> <max time>");
         std::string filename(argv[3]);
         Packing packing;
         packing.restore(filename);
@@ -231,16 +231,17 @@ int main(int argc, char **argv) {
     } else if (mode == "analyze") {
     	if (argc < 4) die("Usage: ./rsa analyze <input> <directory> (correlations range = 10.0)");
     	double corrRange = (argc == 5) ? std::stod(argv[4]) : 10.0;
-    	if (corrRange <= 0.0) die("correlatins range <= 0");
-
+    	Validate(corrRange > 0);
         Analyzer an(&params);
         an.analyzePackingsInDirectory(argv[3], 0.01, 1.0, corrRange);
     } else if (mode == "povray") {
+        if (argc < 4)   die("Usage: ./rsa povray <input> <file in>");
         std::string file(argv[3]);
         Packing packing;
         packing.restore(file);
         PackingGenerator::toPovray(packing, params.surfaceSize, nullptr, file + ".pov");
     } else if (mode == "wolfram") {
+        if (argc < 4)   die("Usage: ./rsa wolfram <input> <file in>");
         std::string file(argv[3]);
         Packing packing;
         packing.restore(file);
@@ -254,6 +255,7 @@ int main(int argc, char **argv) {
         packing.expandOnPBC(params.surfaceSize, 0.1);
         packing.store(fileOut);
     } else if (mode == "exclusion_zones"){
+        if (argc < 5)   die("Usage: ./rsa test <input> <packign file> <output file>");
     	std::string packingFile(argv[3]);
     	std::string outputFile(argv[4]);
     	ExclusionZoneVisualizer::main(params, packingFile, outputFile);
