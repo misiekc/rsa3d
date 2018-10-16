@@ -20,6 +20,8 @@ protected:
 public:
 	LogPlot(double min, double max, int bins);
 	LogPlot(double max, int bins);
+	LogPlot(const LogPlot &other) = delete;
+	LogPlot &operator=(const LogPlot &other) = delete;
 	virtual ~LogPlot();
 
 	virtual double** getAsPoints(double **points) override;

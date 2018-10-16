@@ -20,6 +20,9 @@ protected:
 
 public:
 	Plot(double min, double max, int bins);
+	Plot(const Plot &other) = delete;
+	Plot &operator=(const Plot &other) = delete;
+
 	virtual ~Plot();
 	double getMax();
 	int size();

@@ -25,6 +25,8 @@ private:
 
 public:
 	ASFRegression();
+	ASFRegression(const ASFRegression &other) = delete;
+	ASFRegression &operator=(const ASFRegression &other) = delete;
 	virtual ~ASFRegression();
 
 	void addXY(double x, double y);

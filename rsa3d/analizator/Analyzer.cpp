@@ -284,11 +284,15 @@ void Analyzer::printOrder(const std::vector<Plot*> &order, const std::string &fi
 }
 
 void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double particleSize, double correlationsRange) {
+    Expects(mintime > 0);
+    Expects(particleSize > 0);
+    Expects(correlationsRange >= 0);
+
 	dirent *de;
 	char prefix[] = "packing";
-	LogPlot *nvt = new LogPlot(mintime, this->params->maxTime, 200);
-	Plot *asf = new Plot(0.0, 0.6, 200);
-	Plot *correlations = new Plot(0.0, correlationsRange, 200);
+    LogPlot nvt(mintime, this->params->maxTime, 200);
+    Plot asf(0.0, 0.6, 200);
+    Plot correlations(0.0, correlationsRange, 200);
 	std::vector<Plot*> order = this->getFilledOrderVector(correlationsRange);
 
 	double n = 0.0, n2 = 0.0;
@@ -296,7 +300,7 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 	double packingSize = pow(params->surfaceSize, RSA_SPATIAL_DIMENSION);
 	DIR *dir = opendir(sdir);
 	std::string dirname(sdir);
-	while ((de = readdir(dir)) != NULL){
+	while ((de = readdir(dir)) != nullptr){
 		if (strncmp(prefix, de->d_name, strlen(prefix))==0){
 			std::string filename(de->d_name);
 			Packing packing;
@@ -304,38 +308,34 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 			n += packing.size();
 			n2 += packing.size()*packing.size();
 			counter++;
-			this->analyzePacking(packing, nvt, asf, particleSize/packingSize);
+			this->analyzePacking(packing, &nvt, &asf, particleSize/packingSize);
 			NeighbourGrid<const RSAShape> ng(params->surfaceSize, correlationsRange);
 			for(const RSAShape *s: packing){
 				ng.add(s, s->getPosition());
 			}
-//			this->analyzeCorrelations(packing, ng, correlations);
-//			this->analyzeOrder(packing, ng, &order);
+			if (correlationsRange > 0) {
+                this->analyzeCorrelations(packing, ng, &correlations);
+                this->analyzeOrder(packing, ng, &order);
+            }
 			std::cout << ".";
 			std::cout.flush();
 		}
 	}
 	(void)closedir(dir);
 	std::cout << std::endl;
+
 	double res[4];
-
-	//	double fixedA[] = {1.0, 0.0};
-
-	this->printKinetics(*nvt, (dirname + "_kinetics.txt"), NULL, particleSize/packingSize, res);
+	this->printKinetics(nvt, (dirname + "_kinetics.txt"), nullptr, particleSize/packingSize, res);
 	std::cout << sdir << "\t" << n/counter << "\t" << sqrt( (n2/counter - n*n/(counter*counter)) / counter) << "\t" <<
 			 	 res[0] << "\t" << res[1] << "\t" << res[2] << "\t" << res[3] << "\t";
-	delete nvt;
 	double packingFraction = res[2]*particleSize / packingSize;
-	this->printASF(*asf, dirname + "_asf.txt", counter, packingFraction, res);
-
+	this->printASF(asf, dirname + "_asf.txt", counter, packingFraction, res);
 	std::cout << res[0] << "\t" << res[1] << "\t" << res[2] << "\t" << res[3] <<  std::endl;
 
-	delete asf;
-
-	this->printCorrelations(*correlations, dirname + "_cor.txt");
-	delete correlations;
-
-	this->printOrder(order, dirname + "_order.txt");
+	if (correlationsRange > 0) {
+        this->printCorrelations(correlations, dirname + "_cor.txt");
+        this->printOrder(order, dirname + "_order.txt");
+    }
 	for (Plot *orderPlot : order)
 		delete orderPlot;
 }

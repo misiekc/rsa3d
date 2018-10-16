@@ -229,11 +229,11 @@ int main(int argc, char **argv) {
     } else if (mode == "dat") {
         makeDatFileForPackingsInDirectory(&params, argv[3]);
     } else if (mode == "analyze") {
-    	if (argc < 4) die("Usage: ./rsa analyze <input> <directory> (correlations range = 10.0)");
+    	if (argc < 5) die("Usage: ./rsa analyze <input> <directory> (correlations range = 10; 0 - no corr output)");
     	double corrRange = (argc == 5) ? std::stod(argv[4]) : 10.0;
-    	Validate(corrRange > 0);
+    	Validate(corrRange >= 0);
         Analyzer an(&params);
-        an.analyzePackingsInDirectory(argv[3], 0.01, 1.0, corrRange);
+		an.analyzePackingsInDirectory(argv[3], 0.01, 1.0, corrRange);
     } else if (mode == "povray") {
         if (argc < 4)   die("Usage: ./rsa povray <input> <file in>");
         std::string file(argv[3]);
