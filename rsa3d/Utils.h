@@ -28,17 +28,23 @@
     #define _OMP_THREAD_ID      0
 #endif
 
-// Cpp Core Guidelines-style assertions for programming by contract
+// Cpp Core Guidelines-style assertions for design by contract
 // https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i6-prefer-expects-for-expressing-preconditions
 
 // Preconditions check (argument validation)
-#define Expects(cond) if (!(cond)) throw std::invalid_argument("Expactation " #cond " failed")
+#define Expects(cond) if (!(cond)) throw std::invalid_argument("Precondition " #cond " failed")
 
 // Postconditions check (results assertion)
-#define Ensures(cond) if (!(cond)) throw std::runtime_error("Assertion " #cond " failed")
+#define Ensures(cond) if (!(cond)) throw std::runtime_error("Postcondition " #cond " failed")
 
-// Additional macro for validation things different than function arguments, for example input from file
-// std::domain_error can be easily catched to handle bad input errors (or left unchecked)
+// Runtime assertion. Why duplicate assert from cassert? Because we don't want to disable is in release mode and
+// be more C++ and throw exception
+#define Assert(cond) if (!(cond)) throw std::runtime_error("Assertion " #cond " failed")
+
+// Additional macro for validating things like input from file - wrong input shouldn't be considered as assertion fail,
+// because it is not programmer's fault ;)
+// std::domain_error can be easily caught to handle bad input errors (or left unchecked) and it doesn't capture
+// exceptions thrown by neither Expects, Ensures nor Assert
 #define Validate(cond) if (!(cond)) throw std::domain_error("Validation " #cond " failed")
 
 using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;

@@ -7,6 +7,7 @@
 #include "../rsa3d/shape/ShapeFactory.h"
 #include "utility/ParalellInfoLooper.h"
 #include "../rsa3d/Utils.h"
+#include "../rsa3d/Parameters.h"
 
 
 bool pack_ovtest::test_packing_overlaps(const Packing &packing) {

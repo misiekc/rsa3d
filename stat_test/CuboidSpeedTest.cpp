@@ -149,23 +149,22 @@ namespace cube_speedtest
             die("Error opening " + std::string(_filename) + " file to read");
         auto config = Config::parse(input);
 
-        this->pairs = config->getUnsignedLong("pairs");
-        this->repeats = config->getUnsignedLong("repeats");
+        this->pairs = config.getUnsignedLong("pairs");
+        this->repeats = config.getUnsignedLong("repeats");
 
         // Load strategies
-        std::istringstream strategiesStream(config->getString("strategies"));
+        std::istringstream strategiesStream(config.getString("strategies"));
         std::string strategyName;
         while (strategiesStream >> strategyName)
             this->strategies.push_back(strategyFromString(strategyName));
 
         // Load ball radia
-        std::istringstream ballRadiaStream(config->getString("ball_radia"));
+        std::istringstream ballRadiaStream(config.getString("ball_radia"));
         std::copy(std::istream_iterator<double>(ballRadiaStream),
                   std::istream_iterator<double>(),
                   std::back_inserter(this->ballRadia));
 
-        ShapeFactory::initShapeClass("Cuboid", "3 " + config->getString("cuboid_size"));
-        delete config;
+        ShapeFactory::initShapeClass("Cuboid", "3 " + config.getString("cuboid_size"));
     }
 
     Context::~Context() {

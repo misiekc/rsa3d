@@ -64,30 +64,30 @@ namespace
         std::ifstream input(filename);
         if (!input)     die("Error opening " + std::string(filename) + " file to read");
 
-        auto config = std::unique_ptr<Config>(Config::parse(input));
-        this->particle = config->getString("particle");
-        this->attributes = config->getString("attr");
+        auto config = Config::parse(input);
+        this->particle = config.getString("particle");
+        this->attributes = config.getString("attr");
         ShapeFactory::initShapeClass(this->particle, this->attributes);
 
-        this->firstPos = Vector<2>{{config->getDouble("first_x"), config->getDouble("first_y")}};
-        this->firstAngle = config->getDouble("first_angle") * M_PI / 180;
+        this->firstPos = Vector<2>{{config.getDouble("first_x"), config.getDouble("first_y")}};
+        this->firstAngle = config.getDouble("first_angle") * M_PI / 180;
 
-        std::string modeStr = config->getString("mode");
+        std::string modeStr = config.getString("mode");
         if (modeStr == "overlap") {
             this->mode = Mode::OVERLAP;
-            this->secondAngle = config->getDouble("second_angle") * M_PI / 180;
+            this->secondAngle = config.getDouble("second_angle") * M_PI / 180;
         } else if (modeStr == "point_inside") {
             this->mode = Mode::POINT_INSIDE;
-            this->fromAngle = config->getDouble("from_angle") * M_PI / 180;
-            this->toAngle = config->getDouble("to_angle") * M_PI / 180;
+            this->fromAngle = config.getDouble("from_angle") * M_PI / 180;
+            this->toAngle = config.getDouble("to_angle") * M_PI / 180;
         } else {
             die("Unknown test mode: " + modeStr);
         }
 
-        this->box_width = config->getDouble("box_width");
-        this->box_height = config->getDouble("box_height");
-        this->points = config->getDouble("points");
-        this->append = config->getString("append") == "true";
+        this->box_width = config.getDouble("box_width");
+        this->box_height = config.getDouble("box_height");
+        this->points = config.getDouble("points");
+        this->append = config.getString("append") == "true";
         this->wolframSupported = !generate_shape<2, 1>(Vector<2>(), {{0}})->toWolfram().empty();
         if (!this->wolframSupported)
             std::cout << "[WARNING] " << this->particle << " has no toWolfram(). Shapes will not be drawn." << std::endl;
