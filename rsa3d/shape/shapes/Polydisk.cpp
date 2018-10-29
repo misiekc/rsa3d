@@ -17,14 +17,16 @@ std::vector<double> Polydisk::diskR;
 double Polydisk::area;
 
 /**
- * @param args contains information about coordinates of each vertex of the Polydisk. Adjacent vertices are connected.
+ * @param args contains information about coordinates of each disk of the Polydisk.
  * Data should be separated by only spaces, and should be:
- * number_of_vertices [xy/rt] c01 c02 r0 c11 c12 r1 c21 c22 r2 ...
+ * number_of_disks [xy|rt] c01 c02 r0 c11 c12 r1 c21 c22 r2 ... area
  * xy means cartesian coordinates, and rt means polar coordinates
  * Example format of coordinates
- * 4 xy 1 1 1.5 1 -1 1.5 -1 -1 1.5 -1 1 1.5
+ * 2 xy -1 0 1 1 0 1 6.28318530718
  * or equivalently
- * 4 rt 1.4142 0.7854 1.5 1.4142 2.3562 1.5 1.4142 3.9270 1.5 1.4142 5.4978 1.5
+ * 4 rt 1 0 1 1 3.1415927 1 6.28318530718
+ * if provided area == 0 then it is calculated using Monte-Carlo method.
+ * Shape is automatically rescaled to have unit area.
  */
 void Polydisk::initClass(const std::string &args){
 	std::istringstream in(args);
@@ -55,9 +57,12 @@ void Polydisk::initClass(const std::string &args){
 		Polydisk::diskCentreTheta.push_back(t);
 		Polydisk::diskR.push_back(diskR_);
 	}
+	in >> Polydisk::area;
 
-	Polydisk::normalizeArea(100000000);
-	Polydisk::area = 1.0;
+	if (Polydisk::area==0.0){
+		Polydisk::area = Polydisk::mcArea(100000000);
+	}
+	Polydisk::normalizeArea(Polydisk::area);
 
 	double nlCellSize = 0;
 	double vSize = Polydisk::diskR[0];
@@ -100,13 +105,14 @@ double Polydisk::mcArea(size_t mcTrials){
 	return ((double)inside/(double)mcTrials)*4.0*maxSize*maxSize;
 }
 
-void Polydisk::normalizeArea(size_t mcTrials){
-	double denominator = std::sqrt(Polydisk::mcArea(mcTrials));
+void Polydisk::normalizeArea(double area){
+	double denominator = std::sqrt(area);
 
 	for(size_t disk = 0; disk < Polydisk::diskR.size(); disk++){
 		Polydisk::diskCentreR[disk] /= denominator;
 		Polydisk::diskR[disk] /= denominator;
 	}
+	Polydisk::area = 1.0;
 }
 
 bool Polydisk::diskDiskIntersect(size_t disk0, const Vector<2> shape0Position, const Orientation<1> shape0Orientation,
@@ -247,15 +253,6 @@ bool Polydisk::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosi
 				return true;
 		}
 	}
-/*
-	Polydisk pol(*this);
-	pol.setPosition(voxelPosition);
-	pol.setOrientation(voxelOrientation);
-	int res = this->overlap(bc, &pol);
-	if (res == true){
-		int no = this->no;
-	}
-*/
 	return false;
 }
 

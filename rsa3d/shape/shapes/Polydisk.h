@@ -19,10 +19,16 @@ class Polydisk : public Shape<2, 1> {
 
 private:
 
+	// finds shape area using Monte-Carlo sampling
 	static double mcArea(size_t mcTrials);
-	static void normalizeArea(size_t mcTrials);
 
+	// normalize shape to have unit area
+	static void normalizeArea(double area);
+
+	// finds minimum and maximum value of cosine function in [theta, theta+dt]
 	static Vector<2> minmaxCos(double theta, double dt);
+
+	// finds minimum and maximum value of sine function in [theta, theta+dt]
 	static Vector<2> minmaxSin(double theta, double dt);
 
 	//test if line segment from point 1 to 2 intersects with line segment from point 3 to 4
@@ -33,9 +39,6 @@ private:
 	static bool diskVoxelIntersect(size_t disk0, const Vector<2> disk0Position, const Orientation<1> disk0Orientation,
 			 	 	 	 	 	   size_t disk1, const Vector<2> disk1Position, const Orientation<1> disk1Orientation,
 								   double spatialSize, double angularSize);
-
-	Vector<2> getVertexPosition(std::size_t index) const;
-	void vertexToPovray(std::size_t index, std::ostream &out) const;
 
 protected:
 	//polar coordinates of all disks
