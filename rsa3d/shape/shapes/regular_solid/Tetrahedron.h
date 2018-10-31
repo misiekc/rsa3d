@@ -9,10 +9,12 @@
 #include "RegularSolid.h"
 #include "UnoptimizedSATOverlapRS.h"
 #include "../../OrderCalculable.h"
+#include "CubeToTetrahedron.h"
 
 class Tetrahedron : public RegularSolid<Tetrahedron>, public OrderCalculable {
 private:
     friend RegularSolid<Tetrahedron>;
+    friend CubeToTetrahedron;
 
     const static UnoptimizedSATOverlapRS overlapStrategy;
 

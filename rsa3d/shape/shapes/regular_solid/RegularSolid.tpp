@@ -16,6 +16,7 @@ const SATOverlapRS RegularSolid<SpecificSolid>::overlapStrategy{};
 template<typename SpecificSolid>
 void RegularSolid<SpecificSolid>::initClass(const std::string &attr) {
     SpecificSolid::calculateStatic(attr);
+    Assert(!orientedVertices.empty());
     RegularSolidBase::initClass(attr);
 
     Shape::setCreateShapeImpl([](RND *rnd) -> Shape* {
