@@ -16,6 +16,12 @@ void Tetrahedron::calculateStatic(const std::string &attr) {
 
     RegularSolid<Tetrahedron>::orientedFaces =
             {{3, 2, 1}, {3, 0, 2}, {0, 3, 1}, {0, 1, 2}};
+
+    // Dual tetrahedron - (-1, -1, -1) as one of vertices; CubeToTetrahedron uses it
+    if (attr == "dual") {
+        std::transform(orientedVertices.begin(), orientedVertices.end(), orientedVertices.begin(),
+                       std::negate<Vector<3>>());
+    }
 }
 
 OverlapStrategy<3, 0> *Tetrahedron::createStrategy(const std::string &name) const {

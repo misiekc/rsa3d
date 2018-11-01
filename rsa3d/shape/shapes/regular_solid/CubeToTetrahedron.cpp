@@ -6,10 +6,12 @@
 #include "Tetrahedron.h"
 #include "Octahedron.h"
 
-static const double EPSILON = 1e-10;
+namespace {
+    const double EPSILON = 1e-10;
 
-inline bool approx_equal(double a, double b) {
-    return std::abs(a - b) < EPSILON;
+    inline bool approx_equal(double a, double b) {
+        return std::abs(a - b) < EPSILON;
+    }
 }
 
 const UnoptimizedSATOverlapRS CubeToTetrahedron::overlapStrategy{};
@@ -18,7 +20,7 @@ void CubeToTetrahedron::calculateStatic(const std::string &attr) {
     double aa, ac;
     std::istringstream attrStream(attr);
     attrStream >> aa >> ac;
-    //Validate(attrStream.good());
+    Validate(attrStream);
     Validate(aa >= 0 && aa <= 1);
     Validate(ac >= 0 && ac <= 1);
     
@@ -27,7 +29,7 @@ void CubeToTetrahedron::calculateStatic(const std::string &attr) {
     if (approx_equal(aa, 1) && approx_equal(ac, 1))
         throw std::runtime_error("aa = 1, ac = 1; a cube isn't RegularSolid, cannot handle; use Cube instead");
     else if (approx_equal(ac, 1) && approx_equal(aa, 0))
-        Tetrahedron::calculateStatic("");
+        Tetrahedron::calculateStatic("dual");   // Use a dual to preserve continuity and be backwards compatible
     else if (approx_equal(aa, 0) && approx_equal(ac, 0))
         Octahedron::calculateStatic("");
     else if (approx_equal(aa, 0))
@@ -51,8 +53,8 @@ OverlapStrategy<3, 0> *CubeToTetrahedron::createStrategy(const std::string &name
 
 void CubeToTetrahedron::calculateTruncatedTetrahedron(double ac) {
     RegularSolid<CubeToTetrahedron>::orientedVertices =
-            {{{ 1,  ac, ac}}, {{ac,  1,  ac}}, {{ ac, ac,  1}}, {{ 1, -ac, -ac}}, {{-ac,  1, -ac}}, {{-ac, -ac,  1}},
-             {{-1, -ac, ac}}, {{ac, -1, -ac}}, {{-ac, ac, -1}}, {{-1,  ac, -ac}}, {{-ac, -1,  ac}}, {{ ac, -ac, -1}}};
+            {{{-1, -ac, -ac}}, {{-ac, -1, -ac}}, {{-ac, -ac, -1}}, {{-1,  ac, ac}}, {{ac, -1,  ac}}, {{ ac, ac, -1}},
+             {{ 1,  ac, -ac}}, {{-ac,  1,  ac}}, {{ ac, -ac,  1}}, {{ 1, -ac, ac}}, {{ac,  1, -ac}}, {{-ac, ac,  1}}};
 
     RegularSolid<CubeToTetrahedron>::orientedFaces =
             {{10, 7, 3, 0, 2, 5}, {1, 4, 9, 6, 5, 2}, {10, 6, 9, 8, 11, 7}, {8, 4, 1, 0, 3, 11},
@@ -115,10 +117,11 @@ void CubeToTetrahedron::calculateIntersectingTruncations(double aa, double ac) {
     double m = ac - aa;
 
     RegularSolid<CubeToTetrahedron>::orientedVertices =
-            {{{1, p, m}}, {{1, m, p}}, {{p, m, 1}}, {{m, p, 1}}, {{m, 1, p}}, {{p, 1, m}},
-             {{ 1, -p, -m}}, {{ 1, -m, -p}}, {{-p, -m,  1}}, {{-m, -p,  1}}, {{-m,  1, -p}}, {{-p,  1, -m}},
-             {{-1,  p, -m}}, {{-1, -m,  p}}, {{ p, -m, -1}}, {{-m,  p, -1}}, {{-m, -1,  p}}, {{ p, -1, -m}},
-             {{-1, -p,  m}}, {{-1,  m, -p}}, {{-p,  m, -1}}, {{ m, -p, -1}}, {{ m, -1, -p}}, {{-p, -1,  m}}};
+            {{{-1, -p, -m}}, {{-1, -m, -p}}, {{-p, -m, -1}}, {{-m, -p, -1}}, {{-m, -1, -p}}, {{-p, -1, -m}},
+             {{-1,  p,  m}}, {{-1,  m,  p}}, {{ p,  m, -1}}, {{ m,  p, -1}}, {{ m, -1,  p}}, {{ p, -1,  m}},
+             {{ 1, -p,  m}}, {{ 1,  m, -p}}, {{-p,  m,  1}}, {{ m, -p,  1}}, {{ m,  1, -p}}, {{-p,  1,  m}},
+             {{ 1,  p, -m}}, {{ 1, -m,  p}}, {{ p, -m,  1}}, {{-m,  p,  1}}, {{-m,  1,  p}}, {{ p,  1, -m}}};
+
     RegularSolid<CubeToTetrahedron>::orientedFaces =
             {{ 5,  4,  3,  2, 1, 0}, { 0,  7, 14, 15, 10, 5}, {11, 12, 13, 8, 3,  4}, {15, 20, 19, 12, 11, 10},
              {13, 18, 23, 16, 9, 8}, {16, 17,  6,  1,  2, 9}, {22, 21, 14, 7, 6, 17}, {23, 18, 19, 20, 21, 22},
