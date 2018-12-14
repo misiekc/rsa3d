@@ -14,6 +14,7 @@
 #include "shapes/OrientedCuboid.h"
 #include "shapes/SpheroCylinder2D.h"
 #include "shapes/Ellipse.h"
+#include "shapes/Ellipse1Dim.h"
 #include "shapes/Rectangle.h"
 #include "shapes/Polydisk.h"
 #include "shapes/polygon/Polygon.h"
@@ -49,10 +50,17 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             OrientedCuboid<RSA_SPATIAL_DIMENSION>::initClass(attr);
             return;
         }
-    #endif
 
     // Shapes of specific dimensions
-    #if RSA_SPATIAL_DIMENSION == 2
+    #elif RSA_SPATIAL_DIMENSION == 1
+    // 1D shapes with angular dimension
+        #if RSA_ANGULAR_DIMENSION == 1
+            if (sClass == "Ellipse1Dim") {
+                Ellipse1Dim::initClass(attr);
+                return;
+            }
+        #endif
+    #elif RSA_SPATIAL_DIMENSION == 2
         // 2D shapes with angular dimension
         #if RSA_ANGULAR_DIMENSION == 1
             if (sClass == "SpheroCylinder2D") {

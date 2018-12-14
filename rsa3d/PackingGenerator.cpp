@@ -454,12 +454,14 @@ void PackingGenerator::printRemainingVoxels(const std::string &prefix){
 void PackingGenerator::toWolfram(const Packing &packing, double size, VoxelList *voxels, const std::string &filename){
 	std::ofstream file(filename);
 
-#if RSA_SPATIAL_DIMENSION == 2
+#if RSA_SPATIAL_DIMENSION == 1
+		file << "Graphics[{Red";
+#elif RSA_SPATIAL_DIMENSION == 2
 	    file << "Graphics[{Red";
 #elif RSA_SPATIAL_DIMENSION == 3
         file << "Graphics3D[{Red";
 #else
-        die("Only 2D and 3D shapes are supported");
+        die("Only 1D, 2D and 3D shapes are supported");
 #endif
 
 	for (const RSAShape *s : packing) {

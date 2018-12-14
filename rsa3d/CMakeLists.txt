@@ -34,6 +34,7 @@ set(RSA_SOURCE
         shape/shapes/polygon/HBPolygon.cpp
         shape/shapes/polygon/SBPolygon.cpp
         shape/shapes/Ellipse.cpp
+        shape/shapes/Ellipse1Dim.cpp
         shape/shapes/Ellipsoid.cpp
         shape/shapes/OrientedCuboid.h
         shape/shapes/OrientedCuboid.tpp
