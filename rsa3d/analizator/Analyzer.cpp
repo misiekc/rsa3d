@@ -309,7 +309,7 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 			n2 += packing.size()*packing.size();
 			counter++;
 			this->analyzePacking(packing, &nvt, &asf, particleSize/packingSize);
-			NeighbourGrid<const RSAShape> ng(params->surfaceSize, correlationsRange);
+			NeighbourGrid<const RSAShape> ng(params->surfaceDimension, params->surfaceSize, correlationsRange);
 			for(const RSAShape *s: packing){
 				ng.add(s, s->getPosition());
 			}

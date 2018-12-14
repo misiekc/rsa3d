@@ -36,7 +36,7 @@ PackingGenerator::PackingGenerator(int seed, Parameters *params) {
 	if (this->params->requestedAngularVoxelSize > this->angularSize)
 		this->params->requestedAngularVoxelSize = this->angularSize;
 
-	this->voxels = new VoxelList(this->spatialSize, RSAShape::getVoxelSpatialSize(), this->angularSize, this->params->requestedAngularVoxelSize);
+	this->voxels = new VoxelList(this->params->surfaceDimension, this->spatialSize, RSAShape::getVoxelSpatialSize(), this->angularSize, this->params->requestedAngularVoxelSize);
 
 	double gridSize = RSAShape::getNeighbourListCellSize();
 	if (gridSize < this->params->thresholdDistance)
@@ -44,9 +44,9 @@ PackingGenerator::PackingGenerator(int seed, Parameters *params) {
 
 
 	if (this->params->boundaryConditions == "free")
-		this->surface = new NBoxFBC(this->params->surfaceSize, gridSize, RSAShape::getVoxelSpatialSize());
+		this->surface = new NBoxFBC(this->params->surfaceDimension, this->params->surfaceSize, gridSize, RSAShape::getVoxelSpatialSize());
 	else
-		this->surface = new NBoxPBC(this->params->surfaceSize, gridSize, RSAShape::getVoxelSpatialSize());
+		this->surface = new NBoxPBC(this->params->surfaceDimension, this->params->surfaceSize, gridSize, RSAShape::getVoxelSpatialSize());
 }
 
 
@@ -454,12 +454,14 @@ void PackingGenerator::printRemainingVoxels(const std::string &prefix){
 void PackingGenerator::toWolfram(const Packing &packing, double size, VoxelList *voxels, const std::string &filename){
 	std::ofstream file(filename);
 
-#if RSA_SPATIAL_DIMENSION == 2
+#if RSA_SPATIAL_DIMENSION == 1
+		file << "Graphics[{Red";
+#elif RSA_SPATIAL_DIMENSION == 2
 	    file << "Graphics[{Red";
 #elif RSA_SPATIAL_DIMENSION == 3
         file << "Graphics3D[{Red";
 #else
-        die("Only 2D and 3D shapes are supported");
+        die("Only 1D, 2D and 3D shapes are supported");
 #endif
 
 	for (const RSAShape *s : packing) {

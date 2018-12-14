@@ -21,7 +21,8 @@ Parameters::Parameters(std::istream &stream) {
 		else if (key == "minDx")						this->minDx = config.getDouble(key);
 		else if (key == "maxTime") 					    this->maxTime = config.getDouble(key);
 		else if (key == "split") 						this->split = config.getUnsignedLong(key);
-		else if (key == "surfaceVolume") 				this->surfaceSize = pow(config.getDouble(key), 1.0/RSA_SPATIAL_DIMENSION);
+		else if (key == "surfaceDimension") 			this->surfaceDimension = config.getInt(key);
+		else if (key == "surfaceVolume") 				this->surfaceSize = pow(config.getDouble(key), 1.0/this->surfaceDimension);
 		else if (key == "storePackings")	 			this->storePackings = config.getString(key) != "false";
 		else if (key == "modifiedRSA")		 		    this->modifiedRSA = config.getString(key) != "false";
 		else if (key == "thresholdDistance") 			this->thresholdDistance = config.getDouble(key);
@@ -64,6 +65,7 @@ void Parameters::validateData() {
 	Validate(generatorProcesses > 0);
 	Validate(ompThreads > 0);
 	Validate(!particleType.empty());
+	Validate(surfaceDimension > 0);
 }
 
 Parameters::Parameters() {

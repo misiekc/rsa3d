@@ -8,9 +8,9 @@
 #include "Surface.h"
 #include <iostream>
 
-Surface::Surface(double s, double ndx, double vdx) : BoundaryConditions() {
+Surface::Surface(int dim, double s, double ndx, double vdx) : BoundaryConditions() {
 	this->size = s;
-	this->list = new NeighbourGrid<const RSAShape>(s, ndx);
+	this->list = new NeighbourGrid<const RSAShape>(dim, s, ndx);
 }
 
 Surface::~Surface() {

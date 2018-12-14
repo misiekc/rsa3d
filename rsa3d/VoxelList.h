@@ -68,6 +68,7 @@ private:
 					  const RSAOrientation &angle);
 
 protected:
+	int surfaceDimension;
 	Voxel** voxels;
 	size_t length;
 
@@ -101,7 +102,7 @@ public:
 	 * @param shapeAngularRange typpically 2*M_PI. Can be smaller for shapes with rotational symmetry. For example for squares it should be M_PI/2.0, and for ellipses, sherocylinders or rectangles M_PI.
 	 * @param requestedAngularVoxelSize suggested initial angular size of a voxel. Initial angular size of allocaced voxels will not be larger than requested one.
 	 */
-	VoxelList(double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange, double requestedAngularVoxelSize);
+	VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange, double requestedAngularVoxelSize);
 
 	void disable();
 

@@ -20,6 +20,7 @@ template <typename E>
 class NeighbourGrid{
 
 private:
+	int surfaceDimension;
 	double linearSize;
 	int n;
 	double dx;
@@ -32,7 +33,7 @@ private:
 		this->linearSize = size;
 		this->n = n;
 		this->dx = size/this->n;
-		int length = (int) round(pow(this->n, RSA_SPATIAL_DIMENSION));
+		int length = (int) round(pow(this->n, this->surfaceDimension));
 		this->lists.reserve(length);
 		this->neighbouringCells.reserve(length);
 
@@ -43,17 +44,17 @@ private:
 		for(int i=0; i<length; i++){
 			this->lists.push_back(new std::vector<E *>);
 			this->neighbouringCells.push_back(new std::vector<int>);
-			this->neighbouringCells[i]->reserve((1 << RSA_SPATIAL_DIMENSION));
+			this->neighbouringCells[i]->reserve((1 << this->surfaceDimension));
 
-			i2position(da, RSA_SPATIAL_DIMENSION, i, this->dx, this->n);
+			i2position(da, this->surfaceDimension, i, this->dx, this->n);
 			for(unsigned char i=0; i<RSA_SPATIAL_DIMENSION; i++){
 				in[i] = 0;
 			}
-			coordinates(coords, da, RSA_SPATIAL_DIMENSION, this->linearSize, this->dx, this->n);
+			coordinates(coords, da, this->surfaceDimension, this->linearSize, this->dx, this->n);
 			do{
-				int iCell = neighbour2i(coords, in, RSA_SPATIAL_DIMENSION, 1, this->n);
+				int iCell = neighbour2i(coords, in, this->surfaceDimension, 1, this->n);
 				this->neighbouringCells[i]->push_back(iCell);
-			}while(increment(in, RSA_SPATIAL_DIMENSION, 2));
+			}while(increment(in, this->surfaceDimension, 2));
 			// sort and erase to avoid duplicates - important for small packings
 			std::sort( neighbouringCells[i]->begin(), neighbouringCells[i]->end() );
 			neighbouringCells[i]->erase( std::unique( neighbouringCells[i]->begin(), neighbouringCells[i]->end() ), neighbouringCells[i]->end() );
@@ -62,10 +63,13 @@ private:
 
 public:
 
-	NeighbourGrid(double size, double dx){ // @suppress("Class members should be properly initialized")
+	NeighbourGrid(int surfaceDim, double size, double dx){ // @suppress("Class members should be properly initialized")
+		Expects(surfaceDim > 0);
+		Expects(surfaceDim <= RSA_SPATIAL_DIMENSION);
 		Expects(size > 0);
 		Expects(dx > 0);
 
+		this->surfaceDimension = surfaceDim;
 		size_t n = (size_t)(size/dx);
 		if (n == 0)
 		    throw std::runtime_error("neighbour grid cell too big");
@@ -73,7 +77,13 @@ public:
 	}
 
 
-	NeighbourGrid(double size, size_t n){ // @suppress("Class members should be properly initialized")
+	NeighbourGrid(int surfaceDim, double size, size_t n){ // @suppress("Class members should be properly initialized")
+		Expects(surfaceDim > 0);
+		Expects(surfaceDim <= RSA_SPATIAL_DIMENSION);
+		Expects(size > 0);
+		Expects(n > 0);
+
+		this->surfaceDimension = surfaceDim;
 		this->init(size, n);
 	}
 
@@ -87,14 +97,14 @@ public:
 	void add(E* s, const RSAVector &da){
 	    double array[RSA_SPATIAL_DIMENSION];
 	    da.copyToArray(array);
-		int i = position2i(array, RSA_SPATIAL_DIMENSION, this->linearSize, this->dx, this->n);
+		int i = position2i(array, this->surfaceDimension, this->linearSize, this->dx, this->n);
 		this->lists[i]->push_back(s);
 	}
 
 	void remove(E* s, const RSAVector &da){
 	    double array[RSA_SPATIAL_DIMENSION];
 	    da.copyToArray(array);
-		int i = position2i(array, RSA_SPATIAL_DIMENSION, this->linearSize, this->dx, this->n);
+		int i = position2i(array, this->surfaceDimension, this->linearSize, this->dx, this->n);
 		typename std::vector<E *>::iterator it;
 		if ( (it = std::find(this->lists[i]->begin(), this->lists[i]->end(), s)) != this->lists[i]->end())
 			this->lists[i]->erase(it);
@@ -109,7 +119,7 @@ public:
 	std::vector<E*> * getCell(const RSAVector &da){
 	    double array[RSA_SPATIAL_DIMENSION];
 	    da.copyToArray(array);
-		int i = position2i(array, RSA_SPATIAL_DIMENSION, this->linearSize, this->dx, this->n);
+		int i = position2i(array, this->surfaceDimension, this->linearSize, this->dx, this->n);
 		return this->lists[i];
 	}
 
@@ -119,7 +129,7 @@ public:
 
 		double array[RSA_SPATIAL_DIMENSION];
 		da.copyToArray(array);
-		int i = position2i(array, RSA_SPATIAL_DIMENSION, this->linearSize, this->dx, this->n);
+		int i = position2i(array, this->surfaceDimension, this->linearSize, this->dx, this->n);
 		for(int iCell : *(this->neighbouringCells[i])){
 			vTmp = (this->lists[iCell]);
 			result->insert(result->end(), vTmp->begin(), vTmp->end());

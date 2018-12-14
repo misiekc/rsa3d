@@ -16,7 +16,7 @@ private:
 	static RSAVector getTranslation(double s, const RSAVector &p1, const RSAVector &p2);
 
 public:
-	NBoxPBC(double s, double ndx, double vdx);
+	NBoxPBC(int dim, double s, double ndx, double vdx);
 
 	double getArea() const override;
 	RSAVector getTranslation(const RSAVector &p1, const RSAVector &p2) const override;

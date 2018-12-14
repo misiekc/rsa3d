@@ -7,7 +7,7 @@
 
 #include "NBoxFBC.h"
 
-NBoxFBC::NBoxFBC(double s, double ndx, double vdx) : Surface(s, ndx, vdx) {
+NBoxFBC::NBoxFBC(int dim, double s, double ndx, double vdx) : Surface(dim, s, ndx, vdx) {
 	// TODO Auto-generated constructor stub
 }
 

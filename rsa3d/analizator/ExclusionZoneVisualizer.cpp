@@ -15,7 +15,7 @@
 
 ExclusionZoneVisualizer::ExclusionZoneVisualizer(Parameters &params) {
 	this->params = &params;
-	this->surface = new NBoxPBC(this->params->surfaceSize, RSAShape::getNeighbourListCellSize(), RSAShape::getVoxelSpatialSize());
+	this->surface = new NBoxPBC(this->params->surfaceDimension, this->params->surfaceSize, RSAShape::getNeighbourListCellSize(), RSAShape::getVoxelSpatialSize());
 	this->voxelSize = this->params->surfaceSize/800;
 }
 
