@@ -46,24 +46,19 @@ void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
 
 template <unsigned short DIMENSION>
 bool OrientedCuboid<DIMENSION>::overlap(BoundaryConditions<DIMENSION> *bc, const Shape<DIMENSION, 0> *s) const{
-    return this->pointInside(bc, s->getPosition());
-}
-
-template <unsigned short DIMENSION>
-bool OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &da) const{
-	Vector<DIMENSION> ta = bc->getTranslation(this->getPosition(), da);
-	for(unsigned short i=0; i<DIMENSION; i++){
-		if (std::fabs(this->getPosition()[i] - (da[i] + ta[i])) > size[i]){
-			return false;
-		}
-	}
-	return true;
+    return this->pointInside(bc, s->getPosition(), s->getOrientation(), 0.0);
 }
 
 template <unsigned short DIMENSION>
 bool OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position,
 										   const Orientation<0> &orientation, double orientationRange) const{
-	return 0;
+	Vector<DIMENSION> ta = bc->getTranslation(this->getPosition(), position);
+	for(unsigned short i=0; i<DIMENSION; i++){
+		if (std::fabs(this->getPosition()[i] - (position[i] + ta[i])) > size[i]){
+			return false;
+		}
+	}
+	return true;
 }
 
 template <unsigned short DIMENSION>

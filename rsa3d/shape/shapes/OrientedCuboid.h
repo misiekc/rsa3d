@@ -22,7 +22,6 @@ public:
 	static void initClass(const std::string &args);
 
     bool overlap(BoundaryConditions<DIMENSION> *bc, const Shape<DIMENSION, 0> *s) const override;
-    bool pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &da) const override;
 	bool pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position,
 					 const Orientation<0> &orientation, double orientationRange) const override;
     double getVolume() const;
