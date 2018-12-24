@@ -50,16 +50,18 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             OrientedCuboid<RSA_SPATIAL_DIMENSION>::initClass(attr);
             return;
         }
+    #endif
 
     // Shapes of specific dimensions
-    #elif RSA_SPATIAL_DIMENSION == 1
-    // 1D shapes with angular dimension
+    #if RSA_SPATIAL_DIMENSION == 1
+        // 1D shapes with angular dimension
         #if RSA_ANGULAR_DIMENSION == 1
             if (sClass == "Ellipse1Dim") {
                 Ellipse1Dim::initClass(attr);
                 return;
             }
         #endif
+
     #elif RSA_SPATIAL_DIMENSION == 2
         // 2D shapes with angular dimension
         #if RSA_ANGULAR_DIMENSION == 1
@@ -152,7 +154,7 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             RegularSolid<CubeToTetrahedron>::initClass(attr);
             return;
         }
-#endif
+    #endif
 
     std::cerr << "Unknown shape: " << sClass << " or wrong dimensions: " << RSA_SPATIAL_DIMENSION << ", " << RSA_ANGULAR_DIMENSION << std::endl;
     exit(EXIT_FAILURE);
