@@ -6,6 +6,7 @@
 */
 
 #include "Ellipsoid.h"
+#include "../../Utils.h"
 
 double Ellipsoid::a{};
 double Ellipsoid::b{};
@@ -136,9 +137,9 @@ std::string Ellipsoid::toPovray() const {
 	out << "  sphere { < 0, 0, 0 >, 1.0" << std::endl;
 	out << "    scale < " << Ellipsoid::a << ", " << Ellipsoid::b << ", " << Ellipsoid::c << " >" << std::endl;
 	out << "    matrix <" << std::endl;
-	out << "      " << this->orientation(0, 0) << ", " << this->orientation(0, 1) << ", " << this->orientation(0, 2) << ", " << std::endl;
-    out << "      " << this->orientation(1, 0) << ", " << this->orientation(1, 1) << ", " << this->orientation(1, 2) << ", " << std::endl;
-    out << "      " << this->orientation(2, 0) << ", " << this->orientation(2, 1) << ", " << this->orientation(2, 2) << ", " << std::endl;
+	out << "      " << this->orientation(0, 0) << ", " << this->orientation(1, 0) << ", " << this->orientation(2, 0) << ", " << std::endl;
+    out << "      " << this->orientation(0, 1) << ", " << this->orientation(1, 1) << ", " << this->orientation(2, 1) << ", " << std::endl;
+    out << "      " << this->orientation(0, 2) << ", " << this->orientation(1, 2) << ", " << this->orientation(2, 2) << ", " << std::endl;
     out << "      " << position[0] << ", " << position[1] << ", " << position[2] << std::endl;
     out << "    >" << std::endl;
 	out << "    texture { pigment { color Red } }" << std::endl;
@@ -210,4 +211,19 @@ double Ellipsoid::getNewLambda(double lambda, double derivativeQuotient) const {
 		return (lambda + 1.) / 2.;
 	else
 		return temp;
+}
+
+std::vector<double> Ellipsoid::calculateOrder(const OrderCalculable *other) const {
+    auto &otherEllipsoid = dynamic_cast<const Ellipsoid&>(*other);    // use reference so dynamic_cast would throw on error
+    Matrix<3,3> product = this->orientation.transpose() * otherEllipsoid.orientation;
+
+    double v = product(0,0);
+    if(a==b){
+    	v = product(2,2);
+    }
+
+    std::vector<double> result(5);
+    result[0] = P2(v);
+    result[1] = (product(0, 0) + product(1, 1) + product(2, 2));
+    return result;
 }

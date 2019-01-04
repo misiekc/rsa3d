@@ -50,7 +50,7 @@ double ** LogPlot::getAsPoints(double **points){
 		if (this->yCounter[i]!=0)
 			y = this->yValues[i] / this->yCounter[i];
 		else
-			y = 0.0;
+			y = 0;
 		points[i][0] = x;
 		points[i][1] = y;
 	}

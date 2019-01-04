@@ -97,7 +97,7 @@ template <unsigned short DIMENSION>
 std::string Sphere<DIMENSION>::toPovray() const{
 	std::string s;
     Vector<DIMENSION> position = this->getPosition();
-	double r0 = this->r - 0.01;
+//	double r0 = this->r - 0.01;
 
 	if (DIMENSION==2){
 		s = "  disc { < ";

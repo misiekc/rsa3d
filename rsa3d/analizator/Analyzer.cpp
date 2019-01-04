@@ -129,43 +129,59 @@ double * Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fix
 	LinearRegression lr1;
 	LinearRegression lr2;
 	std::ofstream file(filename);
-	for (int i = 1; i < nvt.size(); i++) {
-		diff = (points[i][1] - points[i-1][1])/(points[i][0] - points[i-1][0]);
+    file.precision(std::numeric_limits<double>::digits10 + 1);
+	for (int i = 1, lasti =0; i < nvt.size(); i++) {
+		if (points[i][1]==0) // no data
+			continue;
+		diff = (points[i][1] - points[lasti][1])/(points[i][0] - points[lasti][0]);
+		if (diff==0) // no change in data
+			continue;
+		lasti = i;
 		file << points[i][0] << "\t" << points[i][1]*surfaceFactor << "\t" << diff*surfaceFactor;
-		if (points[i][0]>100){
+		if (points[i][0]>100){ // calculate slope for times in (points[i][0]/100, points[i][0])
 			maxJ = i;
 			pr.clear();
 			lr1.clear();
 			lr2.clear();
-			maxX = points[i][0];
-			for(int j=minJ; j<maxJ; j++){
-				if (points[j][0] > maxX/100.0){
-					diff = (points[j][1] - points[j-1][1])/(points[j][0] - points[j-1][0]);
-					pr.addXY(points[j][0], diff);
-				}else{
-					minJ++;
-				}
+			maxX = points[maxJ][0];
+			int j=minJ, lastj;
+			while( !(points[j][0] > 0.01*maxX || (maxX>1.0e+10 && points[j][0] > 0.0000001*maxX)) ){
+				j++;
 			}
-			pr.calculate();
-			for(int j=minJ; j<maxJ; j++){
-				if (fixedA==NULL){
-					lr1.addXY(pow(points[j][0], pr.getA()+1 + pr.getSA()), points[j][1]);
-					lr2.addXY(pow(points[j][0], pr.getA()+1 - pr.getSA()), points[j][1]);
-				}else{
-					lr1.addXY(pow(points[j][0], fixedA[0] + fixedA[1]), points[j][1]);
-					lr2.addXY(pow(points[j][0], fixedA[0] - fixedA[1]), points[j][1]);
-				}
+			minJ = j;
+			for(j=minJ, lastj=minJ-1; j<maxJ; j++){
+				diff = (points[j][1] - points[lastj][1])/(points[j][0] - points[lastj][0]);
+				if(diff==0.0)
+					continue;
+				pr.addXY(points[j][0], diff);
+				lastj = j;
 			}
-			lr1.calculate();
-			lr2.calculate();
-			double B = (lr1.getB()+lr2.getB())/2.0;
-			double dB = fabs(B - lr1.getB());
-			res[0] = -1.0 / (pr.getA()+1);
-			res[1] = -pr.getSA()/(pr.getA()+1) * res[0];
-			res[2] = B;
-			res[3] = dB;
+			if (pr.size()>=10){
+				pr.calculate();
+				for(int j=minJ; j<maxJ; j++){
+					if (points[j][0]!=0){
+						if (fixedA==NULL){
+							lr1.addXY(pow(points[j][0], pr.getA()+1 + pr.getSA()), points[j][1]);
+							lr2.addXY(pow(points[j][0], pr.getA()+1 - pr.getSA()), points[j][1]);
+						}else{
+							lr1.addXY(pow(points[j][0], fixedA[0] + fixedA[1]), points[j][1]);
+							lr2.addXY(pow(points[j][0], fixedA[0] - fixedA[1]), points[j][1]);
+						}
+					}
+				}
+				lr1.calculate();
+				lr2.calculate();
+				double B = (lr1.getB()+lr2.getB())/2.0;
+				double dB = fabs(B - lr1.getB());
+				res[0] = -1.0 / (pr.getA()+1);
+				res[1] = -pr.getSA()/(pr.getA()+1) * res[0];
+				res[2] = B;
+				res[3] = dB;
 
-			file << "\t" << res[0] << "\t" << res[1] << "\t" << res[2] << "\t" << res[3] << std::endl;
+				file << "\t" << res[0] << "\t" << res[1] << "\t" << res[2] << "\t" << res[3] << std::endl;
+			}else{
+				file << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << std::endl;
+			}
 		}else{
 			file << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << std::endl;
 		}
@@ -290,6 +306,8 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 
 	dirent *de;
 	char prefix[] = "packing";
+	if (this->params->maxTime == std::numeric_limits<double>::infinity())
+		this->params->maxTime = 1.0e+25;
     LogPlot nvt(mintime, this->params->maxTime, 200);
     Plot asf(0.0, 0.6, 200);
     Plot correlations(0.0, correlationsRange, 200);
@@ -309,11 +327,11 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 			n2 += packing.size()*packing.size();
 			counter++;
 			this->analyzePacking(packing, &nvt, &asf, particleSize/packingSize);
-			NeighbourGrid<const RSAShape> ng(params->surfaceDimension, params->surfaceSize, correlationsRange);
-			for(const RSAShape *s: packing){
-				ng.add(s, s->getPosition());
-			}
-			if (correlationsRange > 0) {
+			if (correlationsRange>0.0){
+				NeighbourGrid<const RSAShape> ng(params->surfaceDimension, params->surfaceSize, correlationsRange);
+				for(const RSAShape *s: packing){
+					ng.add(s, s->getPosition());
+				}
                 this->analyzeCorrelations(packing, ng, &correlations);
                 this->analyzeOrder(packing, ng, &order);
             }

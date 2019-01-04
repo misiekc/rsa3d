@@ -12,10 +12,11 @@
 #define RSA3D_ELLIPSOID_H
 
 #include "../ConvexShape.h"
+#include "../OrderCalculable.h"
 
 const double INITIAL_GUESS = 0.5;	// suggested by A.Donev [2] initial guess evaluation is not applicable in our case as we have the same ellipsoids
 
-class Ellipsoid : public ConvexShape<3, 0> {
+class Ellipsoid : public ConvexShape<3, 0>, public OrderCalculable {
 private:
     static void normalizeVolume();
     static double a, b, c;
@@ -45,9 +46,12 @@ public:
     void restore(std::istream &f) override;
     Shape<3, 0> *clone() const override;
 
+    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
+
     std::string toPovray() const;
     std::string toWolfram() const;
     Matrix<3, 3> getEllipsoidMatrix() const;
+
 };
 
 #endif //RSA3D_ELLIPSOID_H
