@@ -50,6 +50,7 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             OrientedCuboid<RSA_SPATIAL_DIMENSION>::initClass(attr);
             return;
         }
+    #endif
 
 		#if RSA_SPATIAL_DIMENSION == 3
         	if (sClass == "Cuboid") {
@@ -119,14 +120,15 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
 		#endif
 
     // Shapes of specific dimensions
-    #elif RSA_SPATIAL_DIMENSION == 1
-    // 1D shapes with angular dimension
+    #if RSA_SPATIAL_DIMENSION == 1
+        // 1D shapes with angular dimension
         #if RSA_ANGULAR_DIMENSION == 1
             if (sClass == "Ellipse1Dim") {
                 Ellipse1Dim::initClass(attr);
                 return;
             }
         #endif
+
     #elif RSA_SPATIAL_DIMENSION == 2
         // 2D shapes with angular dimension
         #if RSA_ANGULAR_DIMENSION == 1
@@ -154,7 +156,76 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
               }
         #endif
 
+<<<<<<< HEAD
 	#endif
+=======
+    #elif RSA_SPATIAL_DIMENSION == 3 && RSA_ANGULAR_DIMENSION == 0
+        if (sClass == "Cuboid") {
+            Cuboid::initClass(attr);
+            return;
+        } else if (sClass == "Tetrahedron") {
+            RegularSolid<Tetrahedron>::initClass(attr);
+            return;
+        } else if (sClass == "Cube") {
+            Cuboid::initClass("3 1 1 1");
+            return;
+        } else if (sClass == "Octahedron") {
+            RegularSolid<Octahedron>::initClass(attr);
+            return;
+        } else if (sClass == "Dodecahedron") {
+            RegularSolid<Dodecahedron>::initClass(attr);
+            return;
+        } else if (sClass == "Icosahedron") {
+            RegularSolid<Icosahedron>::initClass(attr);
+            return;
+        } else if (sClass == "TruncatedTetrahedron") {
+            RegularSolid<TruncatedTetrahedron>::initClass(attr);
+            return;
+        } else if (sClass == "Cuboctahedron") {
+            RegularSolid<Cuboctahedron>::initClass(attr);
+            return;
+        } else if (sClass == "TruncatedCube") {
+            RegularSolid<TruncatedCube>::initClass(attr);
+            return;
+        } else if (sClass == "TruncatedOctahedron") {
+            RegularSolid<TruncatedOctahedron>::initClass(attr);
+            return;
+        } else if (sClass == "Rhombicuboctahedron") {
+            RegularSolid<Rhombicuboctahedron>::initClass(attr);
+            return;
+        } else if (sClass == "TruncatedCuboctahedron") {
+            RegularSolid<TruncatedCuboctahedron>::initClass(attr);
+            return;
+        } else if (sClass == "SnubCube") {
+            RegularSolid<SnubCube>::initClass(attr);
+            return;
+        } else if (sClass == "Icosidodecahedron") {
+            RegularSolid<Icosidodecahedron>::initClass(attr);
+            return;
+        } else if (sClass == "TruncatedDodecahedron") {
+            RegularSolid<TruncatedDodecahedron>::initClass(attr);
+            return;
+        } else if (sClass == "TruncatedIcosahedron") {
+            RegularSolid<TruncatedIcosahedron>::initClass(attr);
+            return;
+        } else if (sClass == "Rhombicosidodecahedron") {
+            RegularSolid<Rhombicosidodecahedron>::initClass(attr);
+            return;
+        } else if (sClass == "TruncatedIcosidodecahedron") {
+            RegularSolid<TruncatedIcosidodecahedron>::initClass(attr);
+            return;
+        } else if (sClass == "SnubDodecahedron") {
+            RegularSolid<SnubDodecahedron>::initClass(attr);
+            return;
+        } else if (sClass == "Ellipsoid") {
+            Ellipsoid::initClass(attr);
+            return;
+        } else if (sClass == "CubeToTetrahedron") {
+            RegularSolid<CubeToTetrahedron>::initClass(attr);
+            return;
+        }
+    #endif
+>>>>>>> refs/remotes/origin/master
 
     std::cerr << "Unknown shape: " << sClass << " or wrong dimensions: " << RSA_SPATIAL_DIMENSION << ", " << RSA_ANGULAR_DIMENSION << std::endl;
     exit(EXIT_FAILURE);

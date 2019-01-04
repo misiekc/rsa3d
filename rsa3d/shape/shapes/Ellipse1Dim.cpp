@@ -31,7 +31,7 @@ void Ellipse1Dim::initClass(const std::string &args){
 	Ellipse1Dim::shortSemiAxis = sqrt(1.0/(M_PI*ratio));
 	Ellipse1Dim::longSemiAxis = ratio*shortSemiAxis;
 	Shape::setNeighbourListCellSize(2*longSemiAxis);
-	Shape::setVoxelSpatialSize(1.4*shortSemiAxis);
+	Shape::setVoxelSpatialSize(2*shortSemiAxis);
 	Shape::setVoxelAngularSize(M_PI);
 	Shape::setSupportsSaturation(true);
 	Shape::setDefaultCreateShapeImpl <Ellipse1Dim> ();
