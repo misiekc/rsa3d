@@ -33,6 +33,7 @@ protected:
 	//assume vertex (VertexR.size()-1) is linked to vertex 0
 	static std::vector<double> vertexR;
 	static std::vector<double> vertexTheta;
+	static std::vector<std::pair<size_t, size_t>> segments;
 	static std::vector<std::pair<size_t, size_t>> helperSegments;
 
 	static double inscribedCircleRadius;
@@ -41,8 +42,8 @@ protected:
 
 	static double getInscribedCircleRadius();
 
-	//calculate the area of the triangle made from the origin, vertex i, and vertex (i+1)
-	static double getTriangleArea(size_t i);
+	//calculate the area of the triangle made from the origin, vertex i, and vertex j
+	static double getTriangleArea(size_t i, size_t j);
 
 
 public:
