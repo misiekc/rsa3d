@@ -242,12 +242,25 @@ public:
 	 * If @a s of `this` has a different size than from a global state is may lead to an unexpected behaviour.
 	 * @param bc boundary conditions to take into account
 	 * @param s the second shape
-	 * @return 0 if there is no overlap, nonzero number otherwise
+	 * @return false if there is no overlap, true otherwise
 	 */
 	virtual bool overlap(BoundaryConditions<SPATIAL_DIMENSION> *bc,
                          const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const = 0;
 
-    /**
+
+	/**
+	 * @brief Checks if there is overlap with any shape inside vector @a shapes.
+	 *
+	 * If @a s of `this` has a different size than from a global state is may lead to an unexpected behaviour.
+	 * @param bc boundary conditions to take into account
+	 * @param shapes vector of shapes
+	 * @return pointer to overlapping shape or nullptr in no overlap detected
+	 */
+	virtual const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>*
+				overlap(BoundaryConditions<SPATIAL_DIMENSION> *bc,
+						std::vector<const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *shapes) const;
+
+	/**
      * @brief Returns a volume of the shape.
      *
      * Default implementation returns 1. If derived class supports shapes of volume other than 1 this method should be overriden.

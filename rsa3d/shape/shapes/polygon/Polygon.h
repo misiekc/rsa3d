@@ -45,6 +45,16 @@ protected:
 	//calculate the area of the triangle made from the origin, vertex i, and vertex j
 	static double getTriangleArea(size_t i, size_t j);
 
+	static float *d_vertices;
+	static float *d_angles;
+	static std::pair<unsigned int, unsigned int> *d_segments;
+	static std::pair<unsigned int, unsigned int> *d_helperSegments;
+
+#ifdef CUDA_ENABLED
+	static void cuInit();
+	static void cuFree();
+#endif
+
 
 public:
 
@@ -53,9 +63,14 @@ public:
 	~Polygon() override = default;
 
 	Shape<2, 1> *clone() const override;
-	double getVolume();
+	double getVolume() const override;
 
 	bool overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const override;
+
+#ifdef CUDA_ENABLED
+	const Shape<2,1> * overlap(BoundaryConditions<2> *bc, std::vector<const Shape<2, 1> *> *shapes) const;
+#endif
+
 	bool voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition, const Orientation<1> &voxelOrientation,
 					 double spatialSize, double angularSize) const override;
 	std::string toPovray() const override;

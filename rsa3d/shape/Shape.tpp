@@ -78,6 +78,20 @@ Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape() : Positioned<SPATIAL_DIMENS
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *
+	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::overlap(BoundaryConditions<SPATIAL_DIMENSION> *bc,
+						std::vector<const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *shapes) const{
+
+	for(const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s: *shapes)
+		if (this->overlap(bc, s))
+			return s;
+
+	return nullptr;
+}
+
+
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVolume() const {
     return 1.;
 }

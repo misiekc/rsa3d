@@ -9,36 +9,50 @@
 #include "../Positioned.h"
 #include "../Utils.h"
 
-#include "shapes/Sphere.h"
-#include "shapes/cuboid/Cuboid.h"
-#include "shapes/OrientedCuboid.h"
-#include "shapes/SpheroCylinder2D.h"
-#include "shapes/Ellipse.h"
-#include "shapes/Ellipse1Dim.h"
-#include "shapes/Rectangle.h"
-#include "shapes/Polydisk.h"
-#include "shapes/polygon/Polygon.h"
-#include "shapes/polygon/SBPolygon.h"
-#include "shapes/polygon/HBPolygon.h"
-#include "shapes/regular_solid/Dodecahedron.h"
-#include "shapes/regular_solid/Icosahedron.h"
-#include "shapes/regular_solid/Octahedron.h"
-#include "shapes/regular_solid/Tetrahedron.h"
-#include "shapes/regular_solid/TruncatedTetrahedron.h"
-#include "shapes/regular_solid/Cuboctahedron.h"
-#include "shapes/regular_solid/TruncatedCube.h"
-#include "shapes/regular_solid/TruncatedOctahedron.h"
-#include "shapes/regular_solid/Rhombicuboctahedron.h"
-#include "shapes/regular_solid/TruncatedCuboctahedron.h"
-#include "shapes/regular_solid/SnubCube.h"
-#include "shapes/regular_solid/Icosidodecahedron.h"
-#include "shapes/regular_solid/TruncatedDodecahedron.h"
-#include "shapes/regular_solid/TruncatedIcosahedron.h"
-#include "shapes/regular_solid/Rhombicosidodecahedron.h"
-#include "shapes/regular_solid/TruncatedIcosidodecahedron.h"
-#include "shapes/regular_solid/SnubDodecahedron.h"
-#include "shapes/regular_solid/CubeToTetrahedron.h"
-#include "shapes/Ellipsoid.h"
+#if RSA_ANGULAR_DIMENSION == 0
+	#include "shapes/Sphere.h"
+	#include "shapes/OrientedCuboid.h"
+
+	#if RSA_SPATIAL_DIMENSION == 3
+		#include "shapes/cuboid/Cuboid.h"
+		#include "shapes/regular_solid/Dodecahedron.h"
+		#include "shapes/regular_solid/Icosahedron.h"
+		#include "shapes/regular_solid/Octahedron.h"
+		#include "shapes/regular_solid/Tetrahedron.h"
+		#include "shapes/regular_solid/TruncatedTetrahedron.h"
+		#include "shapes/regular_solid/Cuboctahedron.h"
+		#include "shapes/regular_solid/TruncatedCube.h"
+		#include "shapes/regular_solid/TruncatedOctahedron.h"
+		#include "shapes/regular_solid/Rhombicuboctahedron.h"
+		#include "shapes/regular_solid/TruncatedCuboctahedron.h"
+		#include "shapes/regular_solid/SnubCube.h"
+		#include "shapes/regular_solid/Icosidodecahedron.h"
+		#include "shapes/regular_solid/TruncatedDodecahedron.h"
+		#include "shapes/regular_solid/TruncatedIcosahedron.h"
+		#include "shapes/regular_solid/Rhombicosidodecahedron.h"
+		#include "shapes/regular_solid/TruncatedIcosidodecahedron.h"
+		#include "shapes/regular_solid/SnubDodecahedron.h"
+		#include "shapes/regular_solid/CubeToTetrahedron.h"
+		#include "shapes/Ellipsoid.h"
+	#endif
+#endif
+
+#if RSA_SPATIAL_DIMENSION == 1
+	#if RSA_ANGULAR_DIMENSION == 1
+		#include "shapes/Ellipse1Dim.h"
+	#endif
+#elif RSA_SPATIAL_DIMENSION == 2
+	// 2D shapes with angular dimension
+	#if RSA_ANGULAR_DIMENSION == 1
+		#include "shapes/SpheroCylinder2D.h"
+		#include "shapes/Ellipse.h"
+		#include "shapes/Rectangle.h"
+		#include "shapes/Polydisk.h"
+		#include "shapes/polygon/Polygon.h"
+		#include "shapes/polygon/SBPolygon.h"
+		#include "shapes/polygon/HBPolygon.h"
+	#endif
+#endif
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
     // Shapes for any dimension, without angular dimensions

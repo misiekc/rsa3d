@@ -13,7 +13,6 @@ Vector<DIM, E> operator+(const Vector<DIM, E> & _v1, const Vector<DIM, E> & _v2)
     return Vector<DIM, E>(std::move(_v1.v + _v2.v));
 }
 
-
 // Subtration
 //--------------------------------------------------------------------------------------------
 template <std::size_t DIM, typename E>
@@ -88,7 +87,7 @@ bool operator!=(const Vector<DIM, E> & _v1, const Vector<DIM, E> & _v2)
     return (_v1.v != _v2.v);
 }
 
-
+/*
 // Cross product
 //--------------------------------------------------------------------------------------------
 template <std::size_t DIM, typename E>
@@ -100,7 +99,18 @@ operator^(const Vector<DIM, E> & _v1, const Vector<DIM, E> & _v2)
         _v1._get(2) * _v2._get(0) - _v1._get(0) * _v2._get(2),
         _v1._get(0) * _v2._get(1) - _v1._get(1) * _v2._get(0) });
 }
+*/
 
+// Cross product
+//--------------------------------------------------------------------------------------------
+template <std::size_t DIM, typename E>
+Vector<DIM, E> operator^(const Vector<DIM, E> & _v1, const Vector<DIM, E> & _v2)
+{
+    return Vector<3, E>({
+        _v1._get(1) * _v2._get(2) - _v1._get(2) * _v2._get(1),
+        _v1._get(2) * _v2._get(0) - _v1._get(0) * _v2._get(2),
+        _v1._get(0) * _v2._get(1) - _v1._get(1) * _v2._get(0) });
+}
 
 // Print vector to _ostr output stream
 //-----------------------------------------------------------------------------------------

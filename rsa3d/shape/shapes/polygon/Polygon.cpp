@@ -134,6 +134,10 @@ void Polygon::initClass(const std::string &args){
 	Shape<2, 1>::setVoxelAngularSize(2*M_PI);
 	Shape<2, 1>::setSupportsSaturation(true);
 	Shape<2, 1>::setDefaultCreateShapeImpl <Polygon> ();
+
+	#ifdef CUDA_ENABLED
+		Polygon::cuInit();
+	#endif
 }
 
 
@@ -172,7 +176,7 @@ bool Polygon::lineVoxelIntersect(double x1, double y1, double x2, double y2, dou
 		return false;
 }
 
-double Polygon::getVolume(){
+double Polygon::getVolume() const{
 	double result = 0.0;
 	for (size_t i = 0; i < Polygon::segments.size(); i++){
 		std::pair<size_t, size_t> segment = Polygon::segments[i];
@@ -180,6 +184,8 @@ double Polygon::getVolume(){
 	}
 	return result;
 }
+
+#ifndef CUDA_ENABLED
 
 bool Polygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{
 	Polygon pol = dynamic_cast<const Polygon&>(*s);
@@ -231,6 +237,7 @@ bool Polygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{
 	}
 	return false;
 }
+#endif
 
 bool Polygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition,
 						  const Orientation<1> &voxelOrientation, double spatialSize, double angularSize) const{

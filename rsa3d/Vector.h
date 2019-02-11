@@ -44,6 +44,9 @@ template <std::size_t DIM1, std::size_t DIM2, typename E>
 Vector<DIM2, E> operator*(const Matrix<DIM2, DIM1, E> & _m, const Vector<DIM1, E> & _v);
 
 template <std::size_t DIM, typename E>
+Vector<DIM, E> operator^(const Vector<DIM, E> & _v1, const Vector<DIM, E> & _v2);
+
+template <std::size_t DIM, typename E>
 bool operator==(const Vector<DIM, E> & _v1, const Vector<DIM, E> & _v2);
 
 template <std::size_t DIM, typename E>
@@ -72,7 +75,7 @@ private:
     Matrix<DIM, 1, E> v;        // Backing matrix
     
     template<bool _COND, typename _T>
-    using enabled = typename std::enable_if<_COND, _T>::type;     // Enabled-if type alias 
+    using enabled = typename std::enable_if<_COND, _T>::type;     // Enabled-if type alias
     
     
     // Private access
@@ -121,6 +124,7 @@ public:
     friend Vector operator* <> (E _x, const Vector & _v);
     friend Vector operator/ <> (const Vector & _v, E _x);                   // Scalar division
     friend E operator* <> (const Vector & _v1, const Vector & _v2);         // Scalar product
+    friend Vector operator^ <>(const Vector & _v1, const Vector & _v2);
     friend bool operator== <> (const Vector & _v1, const Vector & _v2);     // Equality
     friend bool operator!= <> (const Vector & _v1, const Vector & _v2);     // Inequality
     
@@ -129,10 +133,12 @@ public:
    
     friend std::ostream & operator<< <> (std::ostream & _ostr, const Vector & _v);      // Stream insertion
     
+/*
     template <std::size_t _DIM, typename _E>
     friend
     enabled<_DIM == 3, Vector<_DIM, _E>>
     operator^(const Vector<_DIM, _E> & _v1, const Vector<_DIM, _E> & _v2);          // Vector product
+*/
 
     
     // Assignment and othem member operators 
