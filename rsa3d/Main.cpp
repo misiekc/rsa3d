@@ -63,7 +63,7 @@ void makeDatFileForPackingsInDirectory(Parameters *params, char *sdir){
 	char prefix[] = "packing";
 
 	char buf[20];
-	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
+	std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->surfaceDimension));
 	std::string size(buf);
 	std::string sFile;
 
@@ -101,7 +101,7 @@ void makeDatFileForPackingsInDirectory(Parameters *params, char *sdir){
 void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 	char buf[20];
 	double vm, rss;
-	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
+	std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->surfaceDimension));
 	std::string size(buf);
 
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -128,7 +128,7 @@ void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 void debug(Parameters *params, char *cfile){
 	std::string filename(cfile);
 	char buf[20];
-	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
+	std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->surfaceDimension));
 	std::string size(buf);
 
 	std::ifstream file(filename, std::ios::binary);
@@ -143,7 +143,7 @@ void debug(Parameters *params, char *cfile){
 int simulate(Parameters *params) {
 	int pid = 0;
 	char buf[20];
-	std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
+	std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->surfaceDimension));
 	std::string size(buf);
 
 
@@ -199,7 +199,7 @@ void boundaries(Parameters *params, unsigned long max) {
 	char buf[20];
     unsigned long counter = 0;;
     int seed = 0;
-    std::sprintf(buf, "%.0f", pow(params->surfaceSize, RSA_SPATIAL_DIMENSION));
+    std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->surfaceDimension));
     std::string size(buf);
     std::string sFile;
     if (params->particleAttributes.length()<100)
