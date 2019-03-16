@@ -10,6 +10,7 @@
 
 
 #include <vector>
+//#include "DeviceNeighbourGrid.cu"
 
 #include "shape/Shape.h"
 #include "NeighbourGrid.h"

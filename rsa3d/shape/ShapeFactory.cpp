@@ -11,6 +11,7 @@
 
 #if RSA_ANGULAR_DIMENSION == 0
 	#include "shapes/Sphere.h"
+	#include "shapes/Spherocylinder.h"
 	#include "shapes/OrientedCuboid.h"
 
 	#if RSA_SPATIAL_DIMENSION == 3
@@ -60,7 +61,10 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
         if (sClass == "Sphere") {
             Sphere<RSA_SPATIAL_DIMENSION>::initClass(attr);
             return;
-        } else if (sClass == "OrientedCuboid") {
+        } else if (sClass == "Spherocylinder") {
+             Spherocylinder<RSA_SPATIAL_DIMENSION>::initClass(attr);
+             return;
+         } else if (sClass == "OrientedCuboid") {
             OrientedCuboid<RSA_SPATIAL_DIMENSION>::initClass(attr);
             return;
         }
