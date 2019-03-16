@@ -14,6 +14,30 @@ double Spherocylinder<DIMENSION>::radius;
 template<unsigned short DIMENSION>
 double Spherocylinder<DIMENSION>::lenght;
 
+template <unsigned short DIMENSION>
+double Spherocylinder<DIMENSION>::gamma(unsigned short dim){
+	double result;
+	if(dim % 2==0){
+		result = Spherocylinder<DIMENSION>::g20;
+		for (unsigned short i=4; i<=dim; i+=2){
+			result = (i/2.0)*result;
+		}
+	}else{ // d%2==1
+		result = Spherocylinder<DIMENSION>::g15;
+		for (unsigned short i=3; i<=dim; i+=2){
+			result = (i/2.0)*result;
+		}
+	}
+	return result;
+}
+
+template <unsigned short DIMENSION>
+double Spherocylinder<DIMENSION>::volume() {
+	double v1 = pow(Spherocylinder<DIMENSION>::radius, DIMENSION)*pow(M_PI, DIMENSION/2.0) / Spherocylinder<DIMENSION>::gamma(DIMENSION);
+	double v2 = Spherocylinder<DIMENSION>::lenght * pow(Spherocylinder<DIMENSION>::radius, DIMENSION-1)*pow(M_PI, (DIMENSION-1)/2.0) / Spherocylinder<DIMENSION>::gamma(DIMENSION-1);
+	return v1 + v2;
+}
+
 
 template<unsigned short DIMENSION>
 void Spherocylinder<DIMENSION>::initClass(const std::string &attr) {
@@ -22,16 +46,24 @@ void Spherocylinder<DIMENSION>::initClass(const std::string &attr) {
 
     attrStream >> ratio;
     if (!attrStream)    throw std::runtime_error("Wrong attr format");
-    Spherocylinder<DIMENSION>::radius = std::pow(M_PI*(2.0*(ratio - 1.0) + 4.0/3.0), -1.0/3.0);
+    Spherocylinder<DIMENSION>::radius = 1.0;
     Spherocylinder<DIMENSION>::lenght = 2*Spherocylinder<DIMENSION>::radius*(ratio - 1.0);
+    double scaleFactor = pow(Spherocylinder<DIMENSION>::volume(), 1.0/DIMENSION);
+    Spherocylinder<DIMENSION>::radius /= scaleFactor;
+    Spherocylinder<DIMENSION>::lenght /= scaleFactor;
     Shape<DIMENSION, 0>::setNeighbourListCellSize(2.0*Spherocylinder<DIMENSION>::radius + Spherocylinder<DIMENSION>::lenght);
     Shape<DIMENSION, 0>::setVoxelSpatialSize(M_SQRT2 * Spherocylinder<DIMENSION>::radius);
 
     Shape<DIMENSION, 0>::setCreateShapeImpl([](RND *rnd) -> Shape<DIMENSION, 0>* {
+	#if (RSA_SPATIAL_DIMENSION == 2)
+    	return new Spherocylinder<DIMENSION>(Matrix<DIMENSION, DIMENSION>::rotation(
+                2 * M_PI * rnd->nextValue()));
+	#elif (RSA_SPATIAL_DIMENSION == 3)
         return new Spherocylinder<DIMENSION>(Matrix<DIMENSION, DIMENSION>::rotation(
                 2 * M_PI * rnd->nextValue(),
                 std::asin(2 * rnd->nextValue() - 1),
                 2 * M_PI * rnd->nextValue()));
+	#endif
     });
 }
 
@@ -179,8 +211,8 @@ template<unsigned short DIMENSION>
 void Spherocylinder<DIMENSION>::store(std::ostream &f) const {
     Shape<DIMENSION, 0>::store(f);
     double d;
-    for (unsigned short i=0; i<3; i++){
-        for (unsigned short j=0; j<3; j++){
+    for (unsigned short i=0; i<DIMENSION; i++){
+        for (unsigned short j=0; j<DIMENSION; j++){
             d = this->orientation(i, j);
             f.write((char *)(&d), sizeof(double));
         }
@@ -191,8 +223,8 @@ template<unsigned short DIMENSION>
 void Spherocylinder<DIMENSION>::restore(std::istream &f) {
     Shape<DIMENSION, 0>::restore(f);
     double d;
-    for (unsigned short i=0; i<3; i++){
-        for (unsigned short j=0; j<3; j++){
+    for (unsigned short i=0; i<DIMENSION; i++){
+        for (unsigned short j=0; j<DIMENSION; j++){
             f.read((char *)&d, sizeof(double));
             this->orientation(i, j) = d;
         }
@@ -211,14 +243,26 @@ std::string Spherocylinder<DIMENSION>::toPovray() const {
 	Vector<DIMENSION> t1, t2;
 	this->getEnd(-1, &t1);
 	this->getEnd(1, &t2);
-	out << "  cylinder { < " << t1[0] << ", " << t1[1] << ", " << t1[2] << ">, < " << t2[0] << ", " << t2[1] << ", " << t2[2] << ">, " << Spherocylinder<DIMENSION>::radius << std::endl;
-	out << "             texture { pigment { color Red } }" << std::endl;
-	out << "  }" << std::endl;
-	out << "  sphere { < " << t1[0] << ", " << t1[1] << ", " << t1[2] << ">, " << Spherocylinder<DIMENSION>::radius << std::endl;
-	out << "             texture { pigment { color Red } }" << std::endl;
-	out << "  }" << std::endl;
-	out << "  sphere { < " << t2[0] << ", " << t2[1] << ", " << t2[2] << ">, " << Spherocylinder<DIMENSION>::radius << std::endl;
-	out << "             texture { pigment { color Red } }" << std::endl;
-	out << "  }" << std::endl;
+	#if (RSA_SPATIAL_DIMENSION==2)
+		out << "  cylinder { < " << t1[0] << ", " << t1[1] << ", 0.0 >, < " << t2[0] << ", " << t2[1] << ", 0.0 >, " << Spherocylinder<DIMENSION>::radius << std::endl;
+		out << "             texture { pigment { color Red } }" << std::endl;
+		out << "  }" << std::endl;
+		out << "  sphere { < " << t1[0] << ", " << t1[1] << ", 0.0 >, " << Spherocylinder<DIMENSION>::radius << std::endl;
+		out << "             texture { pigment { color Red } }" << std::endl;
+		out << "  }" << std::endl;
+		out << "  sphere { < " << t2[0] << ", " << t2[1] << ", 0.0 >, " << Spherocylinder<DIMENSION>::radius << std::endl;
+		out << "             texture { pigment { color Red } }" << std::endl;
+		out << "  }" << std::endl;
+	#elif (RSA_SPATIAL_DIMENSION==3)
+		out << "  cylinder { < " << t1[0] << ", " << t1[1] << ", " << t1[2] << ">, < " << t2[0] << ", " << t2[1] << ", " << t2[2] << ">, " << Spherocylinder<DIMENSION>::radius << std::endl;
+		out << "             texture { pigment { color Red } }" << std::endl;
+		out << "  }" << std::endl;
+		out << "  sphere { < " << t1[0] << ", " << t1[1] << ", " << t1[2] << ">, " << Spherocylinder<DIMENSION>::radius << std::endl;
+		out << "             texture { pigment { color Red } }" << std::endl;
+		out << "  }" << std::endl;
+		out << "  sphere { < " << t2[0] << ", " << t2[1] << ", " << t2[2] << ">, " << Spherocylinder<DIMENSION>::radius << std::endl;
+		out << "             texture { pigment { color Red } }" << std::endl;
+		out << "  }" << std::endl;
+	#endif
 	return out.str();
 }
