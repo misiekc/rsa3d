@@ -5,7 +5,7 @@
 //--------------------------------------------------------------------------------------------
 
 #include "ShapePointInsideTest.h"
-#include "utility/MockBC.h"
+#include "../rsa3d/FreeBC.h"
 #include "../rsa3d/shape/ShapeFactory.h"
 #include "utility/IndependentPairFactory.h"
 #include "../rsa3d/Utils.h"
@@ -53,7 +53,7 @@ namespace
     Results perform_test(RSAShapePairFactory &factory, unsigned long pairsToTest) {
         if (pairsToTest == 0) throw std::runtime_error("pairsToTest == 0");
 
-        RSAMockBC bc;
+        RSAFreeBC bc;
         Results results;
         results.tested = pairsToTest;
         results.factoryDesc = factory.getDescription();

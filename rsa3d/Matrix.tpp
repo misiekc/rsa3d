@@ -364,6 +364,19 @@ Matrix<ROWS, COLS, E>::det() const
 
 
 template <std::size_t ROWS, std::size_t COLS, typename E>
+template <std::size_t _ROWS, std::size_t _COLS>
+typename std::enable_if<_ROWS == _COLS, E>::type
+Matrix<ROWS, COLS, E>::tr() const
+{
+    // Laplace expansion
+    E result = E(0);
+    for (std::size_t i = 0; i < ROWS; i++)
+        result += _get(i, i);
+    return result;
+}
+
+
+template <std::size_t ROWS, std::size_t COLS, typename E>
 template <std::size_t _ROWS, std::size_t _COLS, typename _E>
 typename std::enable_if<_ROWS == 2 && _COLS == 2 && std::is_same<_E, double>::value, Matrix<ROWS, COLS, E>>::type
 Matrix<ROWS, COLS, E>::rotation(double _a)

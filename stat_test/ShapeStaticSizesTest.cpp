@@ -14,7 +14,7 @@
 #include "ShapeStaticSizesTest.h"
 #include "../rsa3d/shape/ShapeFactory.h"
 #include "../rsa3d/Utils.h"
-#include "utility/MockBC.h"
+#include "../rsa3d/FreeBC.h"
 #include "utility/InfoLooper.h"
 #include "utility/ShapeGenerators.h"
 
@@ -24,7 +24,7 @@ namespace
 
     class Result {
     private:
-        RSAMockBC bc;
+        RSAFreeBC bc;
 
         std::size_t voxelConflicts{};
         std::size_t biggerVoxelConflicts{};

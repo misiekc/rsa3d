@@ -9,7 +9,7 @@
 #include "AnisotropicShape2DExclusionDrawer.h"
 #include "../rsa3d/Utils.h"
 #include "../rsa3d/shape/ShapeFactory.h"
-#include "utility/MockBC.h"
+#include "../rsa3d/FreeBC.h"
 #include "utility/ShapeGenerators.h"
 
 
@@ -123,7 +123,7 @@ namespace as2d_exdrawer
     }
 
     Polygon zone_for_angle(const Shape<2, 1> &shape, double angle, std::size_t resolution) {
-        MockBC<2> bc;
+        FreeBC<2> bc;
         auto overlapFunct = [&](const Vector<2> &pos) {
             auto secondShape = generate_shape<2, 1>(pos, {{angle}}, nullptr);
             return shape.overlap(&bc, secondShape.get());
@@ -133,7 +133,7 @@ namespace as2d_exdrawer
     }
 
     Polygon zone_for_two_angles(const Shape<2, 1> &shape, double angle1, double angle2, std::size_t resolution) {
-        MockBC<2> bc;
+        FreeBC<2> bc;
         auto overlapFunct = [&](const Vector<2> &pos) {
             auto secondShape1 = generate_shape<2, 1>(pos, {{angle1}}, nullptr);
             auto secondShape2 = generate_shape<2, 1>(pos, {{angle2}}, nullptr);
@@ -145,7 +145,7 @@ namespace as2d_exdrawer
 
     Polygon zone_for_angle_range(const Shape<2, 1> &shape, double angleFrom, double angleTo,
                                  std::size_t resolution) {
-        MockBC<2> bc;
+        FreeBC<2> bc;
         auto overlapFunct = [&](const Vector<2> &pos) {
             double posArray[2];
             pos.copyToArray(posArray);

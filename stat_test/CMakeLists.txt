@@ -3,7 +3,6 @@ set(STAT_TEST_SOURCE
         utility/IndependentPairFactory.cpp
         utility/InfoLooper.h
         utility/ParallelPairFactory.cpp
-        utility/MockBC.h
         utility/ParalellInfoLooper.h
         utility/Quantity.cpp
         utility/ShapeGenerators.h

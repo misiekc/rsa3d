@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <iomanip>
 #include "SpheroCylinder2D.h"
-#include "../../Utils.h"
+#include "../../../Utils.h"
 
 static const double EPSILON = 0.0000000001;
 
@@ -13,21 +13,24 @@ double SpheroCylinder2D::radius;
 double SpheroCylinder2D::halfDistance;
 Vector<2> SpheroCylinder2D::centerVector;
 
-
-void SpheroCylinder2D::initClass(const std::string &attr) {
+void SpheroCylinder2D::calculateStatic(const std::string &attr) {
     double ratio = std::stod(attr);
     if (ratio < 1) throw std::runtime_error("SpheroCylinder2D::initClass: ratio < 1");
 
     double normalization = std::sqrt(4 * (ratio - 1) + M_PI);
     radius = 1 / normalization;
     halfDistance = (ratio - 1) / normalization;
+    centerVector = Vector<2>{{halfDistance , 0}};
+}
+
+void SpheroCylinder2D::initClass(const std::string &attr) {
+    SpheroCylinder2D::calculateStatic(attr);
+
     Shape::setNeighbourListCellSize((halfDistance + radius) * 2);
     Shape::setVoxelSpatialSize(M_SQRT2 * radius);
     Shape::setVoxelAngularSize(M_PI);
 	Shape::setSupportsSaturation(true);
     Shape::setDefaultCreateShapeImpl <SpheroCylinder2D> ();
-
-    centerVector = Vector<2>{{halfDistance , 0}};
 }
 
 double SpheroCylinder2D::getVolume() const {

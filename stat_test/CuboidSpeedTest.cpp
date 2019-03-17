@@ -13,7 +13,7 @@
 #include <iterator>
 
 #include "CuboidSpeedTest.h"
-#include "utility/MockBC.h"
+#include "../rsa3d/FreeBC.h"
 #include "../rsa3d/shape/shapes/cuboid/MineOverlapCB.h"
 #include "../rsa3d/shape/shapes/cuboid/TriTriOverlapCB.h"
 #include "../rsa3d/shape/shapes/cuboid/SATOverlapCB.h"
@@ -59,7 +59,7 @@ namespace cube_speedtest
     {
         SingleTestAcquiredData result{};
         CuboidOverlapStrategy * strategy = Cuboid::getOverlapStrategy();
-        RSAMockBC bc;
+        RSAFreeBC bc;
         Timer timer;
 
         std::cout << std::setw(20) << std::left << Cuboid::getOverlapStrategy()->getName() << " test... " << std::flush;

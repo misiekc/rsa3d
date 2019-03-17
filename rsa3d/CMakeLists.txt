@@ -31,6 +31,11 @@ set(RSA_SOURCE
         shape/shapes/regular_solid/TruncatedOctahedron.cpp
         shape/shapes/regular_solid/TruncatedTetrahedron.cpp
         shape/shapes/regular_solid/UnoptimizedSATOverlapRS.cpp
+        shape/shapes/spherocylinder/OwnOverlapSC.h
+        shape/shapes/spherocylinder/SpheroCylinder2D.cpp
+        shape/shapes/spherocylinder/Spherocylinder.h
+        shape/shapes/spherocylinder/Spherocylinder.tpp
+        shape/shapes/spherocylinder/Stolen2DOverlapSC.cpp
         shape/shapes/polygon/HBPolygon.cpp
         shape/shapes/polygon/SBPolygon.cpp
         shape/shapes/Ellipse.cpp
@@ -43,7 +48,6 @@ set(RSA_SOURCE
         shape/shapes/Rectangle.cpp
         shape/shapes/Sphere.h
         shape/shapes/Sphere.tpp
-        shape/shapes/SpheroCylinder2D.cpp
         shape/AnisotropicShape2D.cpp
         shape/ConvexShape.h
         shape/ConvexShape.tpp
@@ -58,6 +62,7 @@ set(RSA_SOURCE
         surfaces/NBoxPBC.cpp
         BoundaryConditions.h
         Config.cpp
+        FreeBC.h
         Intersection.cpp
         Matrix.h
         Matrix.tpp

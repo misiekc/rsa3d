@@ -9,7 +9,7 @@
 #include "../rsa3d/Config.h"
 #include "../rsa3d/shape/ShapeFactory.h"
 #include "../rsa3d/Utils.h"
-#include "utility/MockBC.h"
+#include "../rsa3d/FreeBC.h"
 #include "utility/ShapeGenerators.h"
 
 namespace
@@ -97,7 +97,7 @@ namespace
     /* Performs inttest based on context and returns result */
     Result perform_inttest(const Context &context, std::ostream &out) {
         RND rnd;
-        MockBC<2> mockBC;
+        FreeBC<2> mockBC;
         Result result;
 
         context.printInfo(out);
@@ -117,7 +117,7 @@ namespace
 
     /* Performs pitest based on context and returns result */
     Result perform_pitest(const Context &context, std::ostream &out) {
-        MockBC<2> mockBC;
+        FreeBC<2> mockBC;
         RND rnd;
         Result result;
 
@@ -227,7 +227,7 @@ namespace
 
 /* Uses pointInside method when dealing with ConvexShape or voxelInside with zero spatial size for normal Shape */
 bool as2d_extest::point_inside(const Shape<2, 1> &shape, const Vector<2> &point, double angleFrom, double angleTo) {
-    MockBC<2> bc;
+    FreeBC<2> bc;
 
     try {
         auto &convexShape = dynamic_cast<const ConvexShape<2, 1>&>(shape);

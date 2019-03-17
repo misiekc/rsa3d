@@ -6,7 +6,7 @@
  */
 
 #include "../rsa3d/shape/shapes/Rectangle.h"
-#include "utility/MockBC.h"
+#include "../rsa3d/FreeBC.h"
 #include  <iostream>
 
 namespace rectanglecase
@@ -14,7 +14,7 @@ namespace rectanglecase
 	int main(int argc, char **argv){
 
 		Rectangle::initClass("1");
-		MockBC<2> bc;
+		FreeBC<2> bc;
 
 		Rectangle r1, r2;
 		double a1 = 3.11356;

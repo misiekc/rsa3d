@@ -23,7 +23,7 @@ RSA_SPATIAL_DIMENSION = 2
 RSA_ANGULAR_DIMENSION = 0
 
 # Compiler flags
-CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -I"$(CURDIR)/unit_test/lib" -O3 -fopenmp -DRSA_SPATIAL_DIMENSION=$(RSA_SPATIAL_DIMENSION) -DRSA_ANGULAR_DIMENSION=$(RSA_ANGULAR_DIMENSION)
+CFLAGS = -Wall -pedantic -std=c++17 -I"$(CURDIR)/statistics" -I"$(CURDIR)/unit_test/lib" -O3 -fopenmp -DRSA_SPATIAL_DIMENSION=$(RSA_SPATIAL_DIMENSION) -DRSA_ANGULAR_DIMENSION=$(RSA_ANGULAR_DIMENSION)
 
 # Linker flags
 LFLAGS = -fopenmp
@@ -40,8 +40,9 @@ PACKAGES = rsa3d/analizator/ \
            rsa3d/shape/ \
            rsa3d/shape/shapes/ \
            rsa3d/shape/shapes/cuboid/ \
-           rsa3d/shape/shapes/regular_solid/ \
            rsa3d/shape/shapes/polygon/ \
+           rsa3d/shape/shapes/regular_solid/ \
+           rsa3d/shape/shapes/spherocylinder/ \
            rsa3d/surfaces/ \
            statistics/ \
            stat_test/ \
@@ -91,6 +92,8 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/shape/shapes/regular_solid/TruncatedOctahedron \
        rsa3d/shape/shapes/regular_solid/TruncatedTetrahedron \
        rsa3d/shape/shapes/regular_solid/UnoptimizedSATOverlapRS \
+       rsa3d/shape/shapes/spherocylinder/SpheroCylinder2D \
+       rsa3d/shape/shapes/spherocylinder/Stolen2DOverlapSC \
        rsa3d/shape/shapes/polygon/HBPolygon \
        rsa3d/shape/shapes/polygon/SBPolygon \
        rsa3d/shape/shapes/polygon/Polygon \
@@ -98,7 +101,6 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/shape/shapes/Ellipsoid \
        rsa3d/shape/shapes/Polydisk \
        rsa3d/shape/shapes/Rectangle \
-       rsa3d/shape/shapes/SpheroCylinder2D \
        rsa3d/shape/AnisotropicShape2D \
        rsa3d/shape/OrderParameters \
        rsa3d/shape/ShapeFactory \

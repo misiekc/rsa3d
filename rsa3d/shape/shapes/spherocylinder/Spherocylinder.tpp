@@ -5,7 +5,8 @@
  *      Author: Michal Ciesla
  */
 
-#include "../../Vector.h"
+#include "OwnOverlapSC.h"
+#include "Stolen2DOverlapSC.h"
 
 static const double EPSILON = 0.0000000001;
 
@@ -65,6 +66,10 @@ void Spherocylinder<DIMENSION>::initClass(const std::string &attr) {
                 2 * M_PI * rnd->nextValue()));
 	#endif
     });
+
+    // Calculate SpheroCylinder2D params for Stolen2DOverlapSC
+    if constexpr (DIMENSION == 2)
+        SpheroCylinder2D::calculateStatic(attr);
 }
 
 template<unsigned short DIMENSION>
@@ -90,7 +95,7 @@ Vector<DIMENSION> Spherocylinder<DIMENSION>::getEnd(short beginOrEnd) const {
 // liable for any real or imagined damage resulting from its use.
 // Users of this code must verify correctness for their application.
 template<unsigned short DIMENSION>
-double Spherocylinder<DIMENSION>::distanceFrom(Spherocylinder *s) const{
+double Spherocylinder<DIMENSION>::distanceFrom(const Spherocylinder *s) const{
 	Vector<DIMENSION> t1 = this->getEnd(-1);
 	Vector<DIMENSION> t2 = this->getEnd(1);
 	Vector<DIMENSION> s1 = s->getEnd(-1);
@@ -180,7 +185,8 @@ template<unsigned short DIMENSION>
 bool Spherocylinder<DIMENSION>::overlap(BoundaryConditions<DIMENSION> *bc, const Shape<DIMENSION, 0> *s) const {
     Spherocylinder<DIMENSION> other = dynamic_cast<const Spherocylinder<DIMENSION>&>(*s);
     this->applyBC(bc, &other);
-    return this->distanceFrom(&other) < 2*Spherocylinder<DIMENSION>::radius;
+
+	return this->distanceFrom(&other) < 2*Spherocylinder<DIMENSION>::getRadius();
 }
 
 template<unsigned short DIMENSION>
@@ -283,4 +289,39 @@ std::string Spherocylinder<DIMENSION>::toWolfram() const {
 	}
 
     return out.str();
+}
+
+template<unsigned short DIMENSION>
+std::vector<std::string> Spherocylinder<DIMENSION>::getSupportedStrategies() const {
+    if (DIMENSION == 2)
+        return {"own", "stolen_from_sc2d"};
+    else
+        return {"own"};
+}
+
+template<unsigned short DIMENSION>
+OverlapStrategy<DIMENSION, 0> *Spherocylinder<DIMENSION>::createStrategy(const std::string &name) const {
+    if constexpr (DIMENSION == 2)
+        if (name == "stolen_from_sc2d")
+            return new Stolen2DOverlapSC;
+
+    if (name == "own")
+        return new OwnOverlapSC<DIMENSION>;
+
+    return nullptr;
+}
+
+template<unsigned short DIMENSION>
+double Spherocylinder<DIMENSION>::getLength() {
+    return length;
+}
+
+template<unsigned short DIMENSION>
+double Spherocylinder<DIMENSION>::getRadius() {
+    return radius;
+}
+
+template<unsigned short DIMENSION>
+double Spherocylinder<DIMENSION>::getAngle() const {
+    return std::atan2(this->orientation(1, 0), this->orientation(0, 0));
 }

@@ -8,7 +8,7 @@
 #include "../rsa3d/shape/ShapeFactory.h"
 #include "utility/UniformBallDistribution.h"
 #include "utility/IndependentPairFactory.h"
-#include "utility/MockBC.h"
+#include "../rsa3d/FreeBC.h"
 #include "utility/InfoLooper.h"
 #include "../rsa3d/shape/ConvexShape.h"
 
@@ -138,7 +138,7 @@ namespace {
         pairTranslated.second()->translate(translation);
 
         TranslatingBC translatingBC{translation, pair};
-        RSAMockBC mockBC;
+        RSAFreeBC mockBC;
 
         bool bcOverlap = pair.first()->overlap(&translatingBC, pair.second());
         bool transOverlap = pairTranslated.first()->overlap(&mockBC, pairTranslated.second());

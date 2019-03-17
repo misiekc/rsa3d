@@ -3,7 +3,7 @@
 //
 
 #include "PackingOverlapsTest.h"
-#include "utility/MockBC.h"
+#include "../rsa3d/FreeBC.h"
 #include "../rsa3d/shape/ShapeFactory.h"
 #include "utility/ParalellInfoLooper.h"
 #include "../rsa3d/Utils.h"
@@ -16,7 +16,7 @@ bool pack_ovtest::test_packing_overlaps(const Packing &packing) {
     std::cout << "[INFO] Checking " << size << " shapes, " << total << " checks required..." << std::endl;
 
     std::size_t overlaps = 0;
-    RSAMockBC bc;
+    RSAFreeBC bc;
     ParallelInfoLooper infoLooper(10000000);
 
     _OMP_PARALLEL_FOR

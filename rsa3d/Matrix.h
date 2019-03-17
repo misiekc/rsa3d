@@ -342,6 +342,15 @@ public:
     template<std::size_t _ROWS = ROWS, std::size_t _COLS = COLS>
     static typename std::enable_if<_ROWS == _COLS, Matrix<ROWS, COLS, E>>::type 
     identity();
+
+    /**
+     * @brief Returns trace of a matrix. Enabled for square matrices.
+     *
+     * @return trace of a matrix
+     */
+    template <std::size_t _ROWS = ROWS, std::size_t _COLS = COLS>
+    typename std::enable_if<_ROWS == _COLS, E>::type
+    tr() const;
     
     // Family of det methods
     //----------------------------------------------------------------------------------------

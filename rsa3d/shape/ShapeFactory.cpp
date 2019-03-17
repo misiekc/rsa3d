@@ -11,7 +11,7 @@
 
 #if RSA_ANGULAR_DIMENSION == 0
 	#include "shapes/Sphere.h"
-	#include "shapes/Spherocylinder.h"
+	#include "shapes/spherocylinder/Spherocylinder.h"
 	#include "shapes/OrientedCuboid.h"
 
 	#if RSA_SPATIAL_DIMENSION == 3
