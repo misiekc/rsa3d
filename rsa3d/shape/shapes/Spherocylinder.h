@@ -22,12 +22,12 @@ private:
 	static double gamma(unsigned short dim);
 	static double volume();
 
-	static double lenght;
+	static double length;
 	static double radius;
 
 	Matrix<DIMENSION, DIMENSION> orientation;
 
-	void getEnd(short beginOrEnd, Vector<DIMENSION> *result) const;
+	Vector<DIMENSION> getEnd(short beginOrEnd) const;
 
 	double distanceFrom(Spherocylinder *s) const;
 	double distanceFrom(Vector<DIMENSION> *v) const;
@@ -47,6 +47,8 @@ public:
     std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 
     std::string toPovray() const;
+
+	std::string toWolfram() const override;
 //    std::string toWolfram() const;
 };
 

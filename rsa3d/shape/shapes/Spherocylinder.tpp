@@ -12,7 +12,7 @@ static const double EPSILON = 0.0000000001;
 template<unsigned short DIMENSION>
 double Spherocylinder<DIMENSION>::radius;
 template<unsigned short DIMENSION>
-double Spherocylinder<DIMENSION>::lenght;
+double Spherocylinder<DIMENSION>::length;
 
 template <unsigned short DIMENSION>
 double Spherocylinder<DIMENSION>::gamma(unsigned short dim){
@@ -34,7 +34,7 @@ double Spherocylinder<DIMENSION>::gamma(unsigned short dim){
 template <unsigned short DIMENSION>
 double Spherocylinder<DIMENSION>::volume() {
 	double v1 = pow(Spherocylinder<DIMENSION>::radius, DIMENSION)*pow(M_PI, DIMENSION/2.0) / Spherocylinder<DIMENSION>::gamma(DIMENSION);
-	double v2 = Spherocylinder<DIMENSION>::lenght * pow(Spherocylinder<DIMENSION>::radius, DIMENSION-1)*pow(M_PI, (DIMENSION-1)/2.0) / Spherocylinder<DIMENSION>::gamma(DIMENSION-1);
+	double v2 = Spherocylinder<DIMENSION>::length * pow(Spherocylinder<DIMENSION>::radius, DIMENSION-1)*pow(M_PI, (DIMENSION-1)/2.0) / Spherocylinder<DIMENSION>::gamma(DIMENSION-1);
 	return v1 + v2;
 }
 
@@ -47,12 +47,12 @@ void Spherocylinder<DIMENSION>::initClass(const std::string &attr) {
     attrStream >> ratio;
     if (!attrStream)    throw std::runtime_error("Wrong attr format");
     Spherocylinder<DIMENSION>::radius = 1.0;
-    Spherocylinder<DIMENSION>::lenght = 2*Spherocylinder<DIMENSION>::radius*(ratio - 1.0);
+    Spherocylinder<DIMENSION>::length = 2*Spherocylinder<DIMENSION>::radius*(ratio - 1.0);
     double scaleFactor = pow(Spherocylinder<DIMENSION>::volume(), 1.0/DIMENSION);
     Spherocylinder<DIMENSION>::radius /= scaleFactor;
-    Spherocylinder<DIMENSION>::lenght /= scaleFactor;
-    Shape<DIMENSION, 0>::setNeighbourListCellSize(2.0*Spherocylinder<DIMENSION>::radius + Spherocylinder<DIMENSION>::lenght);
-    Shape<DIMENSION, 0>::setVoxelSpatialSize(M_SQRT2 * Spherocylinder<DIMENSION>::radius);
+    Spherocylinder<DIMENSION>::length /= scaleFactor;
+    Shape<DIMENSION, 0>::setNeighbourListCellSize(2.0*Spherocylinder<DIMENSION>::radius + Spherocylinder<DIMENSION>::length);
+    Shape<DIMENSION, 0>::setVoxelSpatialSize(2*Spherocylinder<DIMENSION>::radius / std::sqrt(DIMENSION));
 
     Shape<DIMENSION, 0>::setCreateShapeImpl([](RND *rnd) -> Shape<DIMENSION, 0>* {
 	#if (RSA_SPATIAL_DIMENSION == 2)
@@ -72,12 +72,14 @@ Spherocylinder<DIMENSION>::Spherocylinder(const Matrix<DIMENSION, DIMENSION> &or
 }
 
 template<unsigned short DIMENSION>
-void Spherocylinder<DIMENSION>::getEnd(short beginOrEnd, Vector<DIMENSION> *result) const {
-	(*result)[0] = 1.0;
+Vector<DIMENSION> Spherocylinder<DIMENSION>::getEnd(short beginOrEnd) const {
+	Vector<DIMENSION> result;
+	result[0] = 1.0;
 	for (unsigned short i = 1; i < DIMENSION; i++)
-		(*result)[i] = 0.0;
-	*result = (this->getPosition())
-			+ (this->orientation * (*result)) * (0.5 * beginOrEnd * Spherocylinder<DIMENSION>::lenght);
+		result[i] = 0.0;
+	result = (this->getPosition())
+			+ (this->orientation * result) * (0.5 * beginOrEnd * Spherocylinder<DIMENSION>::length);
+	return result;
 }
 
 // Based on
@@ -89,11 +91,10 @@ void Spherocylinder<DIMENSION>::getEnd(short beginOrEnd, Vector<DIMENSION> *resu
 // Users of this code must verify correctness for their application.
 template<unsigned short DIMENSION>
 double Spherocylinder<DIMENSION>::distanceFrom(Spherocylinder *s) const{
-	Vector<DIMENSION> t1, t2, s1, s2;
-	this->getEnd(-1, &t1);
-	this->getEnd(1, &t2);
-	s->getEnd(-1, &s1);
-	s->getEnd(1, &s2);
+	Vector<DIMENSION> t1 = this->getEnd(-1);
+	Vector<DIMENSION> t2 = this->getEnd(1);
+	Vector<DIMENSION> s1 = s->getEnd(-1);
+	Vector<DIMENSION> s2 = s->getEnd(1);
 
 	Vector<DIMENSION> u = t2 - t1;
 	Vector<DIMENSION> v = s2 - s1;
@@ -160,9 +161,8 @@ double Spherocylinder<DIMENSION>::distanceFrom(Spherocylinder *s) const{
 
 template<unsigned short DIMENSION>
 double Spherocylinder<DIMENSION>::distanceFrom(Vector<DIMENSION> *v) const{
-	Vector<DIMENSION> t1, t2;
-	this->getEnd(-1, &t1);
-	this->getEnd(1, &t2);
+	Vector<DIMENSION> t1 = this->getEnd(-1);
+	Vector<DIMENSION> t2 = this->getEnd(1);
 
 	Vector<DIMENSION> a = t2 - t1;
 	Vector<DIMENSION> b = *v - t1;
@@ -195,15 +195,10 @@ template<unsigned short DIMENSION>
 std::vector<double> Spherocylinder<DIMENSION>::calculateOrder(const OrderCalculable *other) const {
     auto &s = dynamic_cast<const Spherocylinder<DIMENSION>&>(*other);    // use reference so dynamic_cast would throw on error
 
-	Vector<DIMENSION> t1, t2, s1, s2;
-	this->getEnd(-1, &t1);
-	this->getEnd(1, &t2);
-	s.getEnd(-1, &s1);
-	s.getEnd(1, &s2);
+	Vector<DIMENSION> thisAxis = this->getEnd(1) - this->getEnd(-1);
+	Vector<DIMENSION> otherAxis = s.getEnd(1) - s.getEnd(-1);
 
-    std::vector<double> result(1);
-    result[0] = P2((t2-t1)*(s2-s1));
-    return result;
+    return { P2(thisAxis*otherAxis) };
 }
 
 
@@ -240,9 +235,9 @@ template<unsigned short DIMENSION>
 std::string Spherocylinder<DIMENSION>::toPovray() const {
 	std::stringstream out;
 	out.precision(std::numeric_limits< double >::max_digits10);
-	Vector<DIMENSION> t1, t2;
-	this->getEnd(-1, &t1);
-	this->getEnd(1, &t2);
+	Vector<DIMENSION> t1 = this->getEnd(-1);
+	Vector<DIMENSION> t2 = this->getEnd(1);
+
 	#if (RSA_SPATIAL_DIMENSION==2)
 		out << "  cylinder { < " << t1[0] << ", " << t1[1] << ", 0.0 >, < " << t2[0] << ", " << t2[1] << ", 0.0 >, " << Spherocylinder<DIMENSION>::radius << std::endl;
 		out << "             texture { pigment { color Red } }" << std::endl;
@@ -265,4 +260,27 @@ std::string Spherocylinder<DIMENSION>::toPovray() const {
 		out << "  }" << std::endl;
 	#endif
 	return out.str();
+}
+
+template<unsigned short DIMENSION>
+std::string Spherocylinder<DIMENSION>::toWolfram() const {
+    std::stringstream out;
+    out << std::fixed;
+
+	if constexpr (DIMENSION == 2) {
+        out << "GeometricTransformation[{Rectangle[{-" << length/2 << ", -" << radius << "}, {" << length/2 << ", " << radius << "}]," << std::endl;
+        out << "    Disk[{-" << length/2 << ", 0}, " << radius << "]," << std::endl;
+        out << "    Disk[{" << length/2 << ", 0}, " << radius << "]}," << std::endl;
+        out << "    {{{" << this->orientation(0, 0) << ", " << this->orientation(0, 1) << "}, ";
+        out << "{" << this->orientation(1, 0) << ", " << this->orientation(1, 1) << "}}, ";
+        out << this->getPosition() << "}]";
+	} else if constexpr (DIMENSION == 3) {
+        Vector<3> beg = this->getEnd(-1);
+        Vector<3> end = this->getEnd(1);
+		out << "CapsuleShape[{" << beg << ", " << end << "}, " << Spherocylinder::radius << "]";
+	} else {
+		throw std::runtime_error("Spherocylinder::toWolfram() supported only for 2D and 3D");
+	}
+
+    return out.str();
 }
