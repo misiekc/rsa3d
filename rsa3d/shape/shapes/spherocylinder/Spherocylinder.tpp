@@ -68,8 +68,9 @@ void Spherocylinder<DIMENSION>::initClass(const std::string &attr) {
     });
 
     // Calculate SpheroCylinder2D params for Stolen2DOverlapSC
-    if constexpr (DIMENSION == 2)
+	#if (RSA_SPATIAL_DIMENSION == 2)
         SpheroCylinder2D::calculateStatic(attr);
+	#endif
 }
 
 template<unsigned short DIMENSION>
@@ -273,20 +274,20 @@ std::string Spherocylinder<DIMENSION>::toWolfram() const {
     std::stringstream out;
     out << std::fixed;
 
-	if constexpr (DIMENSION == 2) {
+	#if (RSA_SPATIAL_DIMENSION == 2)
         out << "GeometricTransformation[{Rectangle[{-" << length/2 << ", -" << radius << "}, {" << length/2 << ", " << radius << "}]," << std::endl;
         out << "    Disk[{-" << length/2 << ", 0}, " << radius << "]," << std::endl;
         out << "    Disk[{" << length/2 << ", 0}, " << radius << "]}," << std::endl;
         out << "    {{{" << this->orientation(0, 0) << ", " << this->orientation(0, 1) << "}, ";
         out << "{" << this->orientation(1, 0) << ", " << this->orientation(1, 1) << "}}, ";
         out << this->getPosition() << "}]";
-	} else if constexpr (DIMENSION == 3) {
+	#elif (RSA_SPATIAL_DIMENSION == 3)
         Vector<3> beg = this->getEnd(-1);
         Vector<3> end = this->getEnd(1);
 		out << "CapsuleShape[{" << beg << ", " << end << "}, " << Spherocylinder::radius << "]";
-	} else {
+	#else
 		throw std::runtime_error("Spherocylinder::toWolfram() supported only for 2D and 3D");
-	}
+    #endif
 
     return out.str();
 }
@@ -301,9 +302,10 @@ std::vector<std::string> Spherocylinder<DIMENSION>::getSupportedStrategies() con
 
 template<unsigned short DIMENSION>
 OverlapStrategy<DIMENSION, 0> *Spherocylinder<DIMENSION>::createStrategy(const std::string &name) const {
-    if constexpr (DIMENSION == 2)
+	#if (RSA_SPATIAL_DIMENSION == 2)
         if (name == "stolen_from_sc2d")
             return new Stolen2DOverlapSC;
+    #endif
 
     if (name == "own")
         return new OwnOverlapSC<DIMENSION>;

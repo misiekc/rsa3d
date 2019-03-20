@@ -23,7 +23,7 @@ RSA_SPATIAL_DIMENSION = 2
 RSA_ANGULAR_DIMENSION = 0
 
 # Compiler flags
-CFLAGS = -Wall -pedantic -std=c++17 -I"$(CURDIR)/statistics" -I"$(CURDIR)/unit_test/lib" -O3 -fopenmp -DRSA_SPATIAL_DIMENSION=$(RSA_SPATIAL_DIMENSION) -DRSA_ANGULAR_DIMENSION=$(RSA_ANGULAR_DIMENSION)
+CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -I"$(CURDIR)/unit_test/lib" -O3 -fopenmp -DRSA_SPATIAL_DIMENSION=$(RSA_SPATIAL_DIMENSION) -DRSA_ANGULAR_DIMENSION=$(RSA_ANGULAR_DIMENSION)
 
 # Linker flags
 LFLAGS = -fopenmp

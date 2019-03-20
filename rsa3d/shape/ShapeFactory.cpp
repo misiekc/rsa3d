@@ -45,7 +45,7 @@
 #elif RSA_SPATIAL_DIMENSION == 2
 	// 2D shapes with angular dimension
 	#if RSA_ANGULAR_DIMENSION == 1
-		#include "shapes/SpheroCylinder2D.h"
+		#include "shapes/spherocylinder/SpheroCylinder2D.h"
 		#include "shapes/Ellipse.h"
 		#include "shapes/Rectangle.h"
 		#include "shapes/Polydisk.h"
