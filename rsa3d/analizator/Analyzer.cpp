@@ -17,6 +17,17 @@
 #include <cmath>
 
 
+std::ostream &operator<<(std::ostream &out, Analyzer::Quantity quantity) {
+	out << quantity.value << "\t" << quantity.error;
+	return out;
+}
+
+void Analyzer::Result::print(std::ostream &out) {
+	out << "dir\ttheta\td(theta)\td\td(d)\ttheta_inf\td(theta_inf)\tC1\td(C1)\tC2\td(C2)" << std::endl;
+	out << dir << "\t" << theta << "\t" << d << "\t" << thetaInf << "\t" << C1 << "\t" << C2 << std::endl;
+}
+
+
 void Analyzer::analyzeOrder(const Packing &packing, const NeighbourGrid<const RSAShape> &ng, std::vector<Plot*> *order) {
 	if (!this->isOrderCalculable(packing.front()))
     	return;
@@ -118,7 +129,7 @@ void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, d
 		nvt->addBetween(lastt, nvt->getMax()+1.0, packing.size());
 }
 
-double * Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA, double surfaceFactor, double *res){
+void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA, double surfaceFactor, Result *res){
 	double **points = new double*[nvt.size()];
 	for(int i=0; i<nvt.size(); i++)
 		points[i] = new double[2];
@@ -160,7 +171,7 @@ double * Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fix
 				pr.calculate();
 				for(int j=minJ; j<maxJ; j++){
 					if (points[j][0]!=0){
-						if (fixedA==NULL){
+						if (fixedA== nullptr){
 							lr1.addXY(pow(points[j][0], pr.getA()+1 + pr.getSA()), points[j][1]);
 							lr2.addXY(pow(points[j][0], pr.getA()+1 - pr.getSA()), points[j][1]);
 						}else{
@@ -173,12 +184,12 @@ double * Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fix
 				lr2.calculate();
 				double B = (lr1.getB()+lr2.getB())/2.0;
 				double dB = fabs(B - lr1.getB());
-				res[0] = -1.0 / (pr.getA()+1);
-				res[1] = -pr.getSA()/(pr.getA()+1) * res[0];
-				res[2] = B;
-				res[3] = dB;
+				res->d.value = -1.0 / (pr.getA()+1);
+				res->d.error = -pr.getSA()/(pr.getA()+1) * res->d.value;
+				res->thetaInf.value = B;
+				res->thetaInf.error = dB;
 
-				file << "\t" << res[0] << "\t" << res[1] << "\t" << res[2] << "\t" << res[3] << std::endl;
+				file << "\t" << res->d << "\t" << res->thetaInf << std::endl;
 			}else{
 				file << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << std::endl;
 			}
@@ -190,10 +201,9 @@ double * Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fix
 	for(int i=0; i<nvt.size(); i++)
 		delete[] points[i];
 	delete[] points;
-	return res;
 }
 
-double * Analyzer::printASF(Plot &asf, std::string filename, int counter, double packingFraction, double *res){
+void Analyzer::printASF(Plot &asf, std::string filename, int counter, double packingFraction, Result *res){
 	double **points = new double*[asf.size()];
 	for(int i=0; i<asf.size(); i++)
 		points[i] = new double[2];
@@ -214,12 +224,10 @@ double * Analyzer::printASF(Plot &asf, std::string filename, int counter, double
 		delete[] points[i];
 	delete[] points;
 	asfreg.calculate();
-	res[0] = asfreg.getC1();
-	res[1] = asfreg.getSC1();
-	res[2] = asfreg.getC2();
-	res[3] = asfreg.getSC2();
-
-	return res;
+	res->C1.value = asfreg.getC1();
+	res->C1.error = asfreg.getSC1();
+	res->C2.value = asfreg.getC2();
+	res->C2.error = asfreg.getSC2();
 }
 
 void Analyzer::printCorrelations(Plot& correlations, std::string filename){
@@ -342,13 +350,17 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 	(void)closedir(dir);
 	std::cout << std::endl;
 
-	double res[4];
-	this->printKinetics(nvt, (dirname + "_kinetics.txt"), nullptr, particleSize/packingSize, res);
-	std::cout << sdir << "\t" << n/counter << "\t" << sqrt( (n2/counter - n*n/(counter*counter)) / counter) << "\t" <<
-			 	 res[0] << "\t" << res[1] << "\t" << res[2] << "\t" << res[3] << "\t";
-	double packingFraction = res[2]*particleSize / packingSize;
-	this->printASF(asf, dirname + "_asf.txt", counter, packingFraction, res);
-	std::cout << res[0] << "\t" << res[1] << "\t" << res[2] << "\t" << res[3] <<  std::endl;
+	Result result;
+
+	this->printKinetics(nvt, (dirname + "_kinetics.txt"), nullptr, particleSize/packingSize, &result);
+	double packingFraction = result.thetaInf.value * particleSize / packingSize;
+	this->printASF(asf, dirname + "_asf.txt", counter, packingFraction, &result);
+
+	result.dir = sdir;
+	result.theta.value = n/counter;
+	result.theta.error = sqrt( (n2/counter - n*n/(counter*counter)) / counter);
+
+	result.print(std::cout);
 
 	if (correlationsRange > 0) {
         this->printCorrelations(correlations, dirname + "_cor.txt");
