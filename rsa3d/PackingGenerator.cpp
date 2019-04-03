@@ -529,7 +529,7 @@ void PackingGenerator::restore(std::istream &f){
 	this->voxels->restore(f);
 }
 
-std::vector<std::string> PackingGenerator::searchDirForPackings(const std::string &dirName) {
+std::vector<std::string> PackingGenerator::findPackingsInDir(const std::string &dirName) {
     std::string prefix = "packing";
     std::string suffix = ".bin";
 
@@ -539,7 +539,7 @@ std::vector<std::string> PackingGenerator::searchDirForPackings(const std::strin
     while ((de = readdir(dir)) != nullptr) {
         std::string filename = de->d_name;
         if (startsWith(filename, prefix) && endsWith(filename, suffix))
-            filenames.push_back(filename);
+            filenames.push_back(dirName + "/" + filename);
     }
     (void) closedir(dir);
     return filenames;

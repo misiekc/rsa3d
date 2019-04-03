@@ -22,7 +22,7 @@ std::ostream &operator<<(std::ostream &out, Analyzer::Quantity quantity) {
 }
 
 void Analyzer::Result::print(std::ostream &out) {
-	out << "dir\ttheta\td(theta)\td\td(d)\ttheta_inf\td(theta_inf)\tC1\td(C1)\tC2\td(C2)" << std::endl;
+	out << "dir\tN\td(N)\td\td(d)\tN_inf\td(N_inf)\tC1\td(C1)\tC2\td(C2)" << std::endl;
 	out << dir << "\t" << theta << "\t" << d << "\t" << thetaInf << "\t" << C1 << "\t" << C2 << std::endl;
 }
 
@@ -312,20 +312,23 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
     Expects(particleSize > 0);
     Expects(correlationsRange >= 0);
 
-    double maxTime = this->calculateMaxTime();
+    auto packingPaths = PackingGenerator::findPackingsInDir(dirName);
+
+    double maxTime = this->findMaxTime(packingPaths);
+
     LogPlot nvt(mintime, maxTime, 200);
     Plot asf(0.0, 0.6, 200);
     Plot correlations(0.0, correlationsRange, 200);
-	std::vector<Plot*> order = this->getFilledOrderVector(correlationsRange);
+    std::vector<Plot*> order = this->getFilledOrderVector(correlationsRange);
 
-	double n = 0.0, n2 = 0.0;
-	int counter = 0;
-	double packingSize = pow(params->surfaceSize, RSA_SPATIAL_DIMENSION);
+    double n = 0.0, n2 = 0.0;
+    int counter = 0;
+    double packingSize = pow(params->surfaceSize, RSA_SPATIAL_DIMENSION);
 
-	auto filename = PackingGenerator::searchDirForPackings(dirName);
-	for (const auto &packingName : filename) {
+    std::cout << "[Analyzer::analyzePackingsInDirectory] " << std::flush;
+	for (const auto &packingPath : packingPaths) {
         Packing packing;
-        packing.restore(dirName + "/" + packingName);
+        packing.restore(packingPath);
         n += packing.size();
         n2 += packing.size()*packing.size();
         counter++;
@@ -381,8 +384,22 @@ bool Analyzer::isOrderCalculable(const RSAShape *shape) const {
     return dynamic_cast<const OrderCalculable*>(shape) != nullptr;
 }
 
-double Analyzer::calculateMaxTime() {
+double Analyzer::findMaxTime(const std::vector<std::string> &packingPaths) {
     if (this->params->maxTime < std::numeric_limits<double>::infinity())
         return this->params->maxTime;
 
+    double maxTime = 0;
+    std::cout << "[Analyzer::findMaxTime] " << std::flush;
+    for (const auto &packingFilename : packingPaths) {
+        Packing packing;
+        packing.restore(packingFilename);
+
+        double packingMaxTime = packing.back()->time;
+        if (packingMaxTime > maxTime)
+            maxTime = packingMaxTime;
+
+        std::cout << "." << std::flush;
+    }
+    std::cout << " time found: " << maxTime << std::endl;
+    return maxTime;
 }

@@ -75,14 +75,14 @@ void makeDatFileForPackingsInDirectory(Parameters *params, const std::string &di
     	die("Cannot open file " + sFile + " to store packing info");
 	dataFile.precision(std::numeric_limits<double>::digits10 + 1);
 
-	auto filenames = PackingGenerator::searchDirForPackings(dirName);
+	auto filenames = PackingGenerator::findPackingsInDir(dirName);
 	for (const auto &filename : filenames) {
         int no1 = lastIndexOf(filename, '_');
         int no2 = lastIndexOf(filename, '.');
         std::string seed = filename.substr(no1 + 1, no2 - no1 - 1);
 
         Packing packing;
-        packing.restore(dirName + "/" + filename);
+        packing.restore(filename);
 
         dataFile << seed << "\t" << packing.back()->no << "\t"<< packing.back()->time << std::endl;
         std::cout << ".";

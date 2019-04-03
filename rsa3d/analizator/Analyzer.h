@@ -60,7 +60,7 @@ private:
 	std::vector<Plot *> getFilledOrderVector(double range) const;
 	bool isOrderCalculable(const RSAShape *shape) const;
 
-    double calculateMaxTime();
+    double findMaxTime(const std::vector<std::string> &packingPaths);
 };
 
 #endif /* ANALIZATOR_ANALYZER_H_ */
