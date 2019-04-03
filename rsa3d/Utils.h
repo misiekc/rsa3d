@@ -47,11 +47,10 @@
 // exceptions thrown by neither Expects, Ensures nor Assert
 #define Validate(cond) if (!(cond)) throw std::domain_error("Validation " #cond " failed")
 
-using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;
-
 template <std::size_t N>
 using Orientation = std::array<double, N>;
 
+using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;
 using RSAOrientation = Orientation<RSA_ANGULAR_DIMENSION>;
 
 bool increment(int* in, int inlength, int max);
@@ -68,8 +67,9 @@ std::string &rtrim(std::string &s);
 std::string &trim(std::string &s);
 // replaces all occurences of search in source by replace
 std::string replaceAll(std::string source, const std::string& search, const std::string& replace);
-
-int lastIndexOf(const char * s, char target);
+bool endsWith(const std::string& str, const std::string& suffix);
+bool startsWith(const std::string& str, const std::string& prefix);
+int lastIndexOf(const std::string &s, char target);
 
 void die(const std::string & reason);
 

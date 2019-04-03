@@ -156,6 +156,15 @@ std::string &trim(std::string &s) {
     return ltrim(rtrim(s));
 }
 
+bool endsWith(const std::string &str, const std::string &suffix) {
+    return str.size() >= suffix.size() && 0 == str.compare(str.size()-suffix.size(), suffix.size(), suffix);
+}
+
+bool startsWith(const std::string &str, const std::string &prefix) {
+    return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix);
+}
+
+
 std::string replaceAll(std::string source, const std::string& search, const std::string& replace) {
     size_t pos = 0;
     while ((pos = source.find(search, pos)) != std::string::npos) {
@@ -165,7 +174,7 @@ std::string replaceAll(std::string source, const std::string& search, const std:
     return source;
 }
 
-int lastIndexOf(const char * s, char target){
+int lastIndexOf(const std::string &s, char target){
 	int ret = -1;
 	int curIdx = 0;
 	while(s[curIdx] != '\0'){

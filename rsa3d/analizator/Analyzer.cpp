@@ -12,7 +12,6 @@
 #include "../../statistics/ASFRegression.h"
 #include <fstream>
 #include <iostream>
-#include <dirent.h>
 #include <cstring>
 #include <cmath>
 
@@ -114,9 +113,9 @@ void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, d
 	double lastt = 0.0;
 	for(size_t i=0; i<packing.size(); i++){
 		double t = packing[i]->time;
-		if (nvt != NULL)
+		if (nvt != nullptr)
 			nvt->addBetween(lastt, t, i);
-		if (asf != NULL){
+		if (asf != nullptr){
 			double packingFraction = i*surfaceFactor;
 			double tries = (t-lastt)/surfaceFactor;
 			if (tries<1.0)
@@ -125,7 +124,7 @@ void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, d
 		}
 		lastt = t;
 	}
-	if (nvt != NULL)
+	if (nvt != nullptr)
 		nvt->addBetween(lastt, nvt->getMax()+1.0, packing.size());
 }
 
@@ -307,16 +306,14 @@ void Analyzer::printOrder(const std::vector<Plot*> &order, const std::string &fi
 	delete[] orderPoints;
 }
 
-void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double particleSize, double correlationsRange) {
+void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double mintime, double particleSize,
+                                          double correlationsRange) {
     Expects(mintime > 0);
     Expects(particleSize > 0);
     Expects(correlationsRange >= 0);
 
-	dirent *de;
-	char prefix[] = "packing";
-	if (this->params->maxTime == std::numeric_limits<double>::infinity())
-		this->params->maxTime = 1.0e+25;
-    LogPlot nvt(mintime, this->params->maxTime, 200);
+    double maxTime = this->calculateMaxTime();
+    LogPlot nvt(mintime, maxTime, 200);
     Plot asf(0.0, 0.6, 200);
     Plot correlations(0.0, correlationsRange, 200);
 	std::vector<Plot*> order = this->getFilledOrderVector(correlationsRange);
@@ -324,47 +321,43 @@ void Analyzer::analyzePackingsInDirectory(char *sdir, double mintime, double par
 	double n = 0.0, n2 = 0.0;
 	int counter = 0;
 	double packingSize = pow(params->surfaceSize, RSA_SPATIAL_DIMENSION);
-	DIR *dir = opendir(sdir);
-	std::string dirname(sdir);
-	while ((de = readdir(dir)) != nullptr){
-		if (strncmp(prefix, de->d_name, strlen(prefix))==0){
-			std::string filename(de->d_name);
-			Packing packing;
-			packing.restore(dirname + "/" + filename);
-			n += packing.size();
-			n2 += packing.size()*packing.size();
-			counter++;
-			this->analyzePacking(packing, &nvt, &asf, particleSize/packingSize);
-			if (correlationsRange>0.0){
-				NeighbourGrid<const RSAShape> ng(params->surfaceDimension, params->surfaceSize, correlationsRange);
-				for(const RSAShape *s: packing){
-					ng.add(s, s->getPosition());
-				}
-                this->analyzeCorrelations(packing, ng, &correlations);
-                this->analyzeOrder(packing, ng, &order);
+
+	auto filename = PackingGenerator::searchDirForPackings(dirName);
+	for (const auto &packingName : filename) {
+        Packing packing;
+        packing.restore(dirName + "/" + packingName);
+        n += packing.size();
+        n2 += packing.size()*packing.size();
+        counter++;
+        this->analyzePacking(packing, &nvt, &asf, particleSize/packingSize);
+        if (correlationsRange>0.0){
+            NeighbourGrid<const RSAShape> ng(params->surfaceDimension, params->surfaceSize, correlationsRange);
+            for(const RSAShape *s: packing){
+                ng.add(s, s->getPosition());
             }
-			std::cout << ".";
-			std::cout.flush();
-		}
+            this->analyzeCorrelations(packing, ng, &correlations);
+            this->analyzeOrder(packing, ng, &order);
+        }
+        std::cout << ".";
+        std::cout.flush();
 	}
-	(void)closedir(dir);
 	std::cout << std::endl;
 
 	Result result;
 
-	this->printKinetics(nvt, (dirname + "_kinetics.txt"), nullptr, particleSize/packingSize, &result);
+	this->printKinetics(nvt, (dirName + "_kinetics.txt"), nullptr, particleSize / packingSize, &result);
 	double packingFraction = result.thetaInf.value * particleSize / packingSize;
-	this->printASF(asf, dirname + "_asf.txt", counter, packingFraction, &result);
+	this->printASF(asf, dirName + "_asf.txt", counter, packingFraction, &result);
 
-	result.dir = sdir;
+	result.dir = dirName;
 	result.theta.value = n/counter;
 	result.theta.error = sqrt( (n2/counter - n*n/(counter*counter)) / counter);
 
 	result.print(std::cout);
 
 	if (correlationsRange > 0) {
-        this->printCorrelations(correlations, dirname + "_cor.txt");
-        this->printOrder(order, dirname + "_order.txt");
+        this->printCorrelations(correlations, dirName + "_cor.txt");
+        this->printOrder(order, dirName + "_order.txt");
     }
 	for (Plot *orderPlot : order)
 		delete orderPlot;
@@ -386,4 +379,10 @@ std::vector<Plot*> Analyzer::getFilledOrderVector(double range) const {
 
 bool Analyzer::isOrderCalculable(const RSAShape *shape) const {
     return dynamic_cast<const OrderCalculable*>(shape) != nullptr;
+}
+
+double Analyzer::calculateMaxTime() {
+    if (this->params->maxTime < std::numeric_limits<double>::infinity())
+        return this->params->maxTime;
+
 }

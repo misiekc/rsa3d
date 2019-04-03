@@ -12,7 +12,6 @@
 #include <chrono>
 #include <fstream>
 #include <memory>
-#include <dirent.h>
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -59,8 +58,7 @@ void process_mem_usage(double& vm_usage, double& resident_set)
    resident_set = rss * page_size_kb / 1024.0 / 1024.0;
 }
 
-void makeDatFileForPackingsInDirectory(Parameters *params, char *sdir){
-	char prefix[] = "packing";
+void makeDatFileForPackingsInDirectory(Parameters *params, const std::string &dirName){
 
 	char buf[20];
 	std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->surfaceDimension));
@@ -71,30 +69,25 @@ void makeDatFileForPackingsInDirectory(Parameters *params, char *sdir){
 	    sFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_") + "_" + size + ".dat";
 	else
         sFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_").substr(0, 100) + "_" + size + ".dat";
+
 	std::ofstream dataFile(sFile);
 	if (!dataFile)
     	die("Cannot open file " + sFile + " to store packing info");
 	dataFile.precision(std::numeric_limits<double>::digits10 + 1);
 
-	DIR *dir = opendir(sdir);
-	dirent *de;
-	std::string dirname(sdir);
-	while ((de = readdir(dir)) != nullptr){
-		if (std::strncmp(prefix, de->d_name, strlen(prefix))==0){
-			int no1 = lastIndexOf(de->d_name, '_');
-			int no2 = lastIndexOf(de->d_name, '.');
-			char seed[10];
-			strncpy(seed, de->d_name+no1+1, no2-no1-1);
-			seed[no2-no1-1] = '\0';
-			std::string filename(de->d_name);
-			Packing packing;
-			packing.restore(dirname + "/" + filename);
-			dataFile << seed << "\t" << packing.back()->no << "\t"	<< packing.back()->time  <<  std::endl;
-			std::cout << ".";
-			std::cout.flush();
-		}
+	auto filenames = PackingGenerator::searchDirForPackings(dirName);
+	for (const auto &filename : filenames) {
+        int no1 = lastIndexOf(filename, '_');
+        int no2 = lastIndexOf(filename, '.');
+        std::string seed = filename.substr(no1 + 1, no2 - no1 - 1);
+
+        Packing packing;
+        packing.restore(dirName + "/" + filename);
+
+        dataFile << seed << "\t" << packing.back()->no << "\t"<< packing.back()->time << std::endl;
+        std::cout << ".";
+        std::cout.flush();
 	}
-	(void)closedir(dir);
 	std::cout << std::endl;
 }
 
@@ -244,6 +237,7 @@ int main(int argc, char **argv) {
     } else if (mode == "boundaries") {
         boundaries(&params, std::stoul(argv[3]));
     } else if (mode == "dat") {
+        if (argc < 4) die("Usage: ./rsa dat <input> <directory>");
         makeDatFileForPackingsInDirectory(&params, argv[3]);
     } else if (mode == "analyze") {
     	if (argc < 4) die("Usage: ./rsa analyze <input> <directory> (correlations range = 10; 0 - no corr output)");

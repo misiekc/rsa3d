@@ -20,6 +20,8 @@
 
 #ifdef _OPENMP
 #include <omp.h>
+#include <dirent.h>
+
 #endif
 
 
@@ -525,4 +527,20 @@ void PackingGenerator::restore(std::istream &f){
 		this->packing.addShape(s);
 	}
 	this->voxels->restore(f);
+}
+
+std::vector<std::string> PackingGenerator::searchDirForPackings(const std::string &dirName) {
+    std::string prefix = "packing";
+    std::string suffix = ".bin";
+
+    DIR *dir = opendir(dirName.c_str());
+    dirent *de;
+    std::vector<std::string> filenames;
+    while ((de = readdir(dir)) != nullptr) {
+        std::string filename = de->d_name;
+        if (startsWith(filename, prefix) && endsWith(filename, suffix))
+            filenames.push_back(filename);
+    }
+    (void) closedir(dir);
+    return filenames;
 }

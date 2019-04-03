@@ -26,7 +26,8 @@ public:
 	explicit Analyzer(Parameters *params) : params(params) {}
 	virtual ~Analyzer() = default;
 
-	void analyzePackingsInDirectory(char *sdir, double mintime, double particleSize, double correlationsRange);
+	void analyzePackingsInDirectory(const std::string &dirName, double mintime, double particleSize,
+                                    double correlationsRange);
 
 private:
 	Parameters *params;
@@ -58,6 +59,8 @@ private:
 //	double getPetiodicDistance(const RSAShape *shape1, const RSAShape *shape2) const;
 	std::vector<Plot *> getFilledOrderVector(double range) const;
 	bool isOrderCalculable(const RSAShape *shape) const;
+
+    double calculateMaxTime();
 };
 
 #endif /* ANALIZATOR_ANALYZER_H_ */
