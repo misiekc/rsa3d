@@ -342,7 +342,7 @@ void accuracy(const ProgramArguments &arguments) {
     } while (seed < 2 || packingFraction.error > accuracy);
 
     std::string filename = positionalArguments[1];
-    std::ofstream file(filename);
+    std::ofstream file(filename, std::ios_base::app);
     if (!file)
         die("Cannot open " + filename + " file to store packing fraction");
     file.precision(std::numeric_limits<double>::digits10 + 1);
