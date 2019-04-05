@@ -46,6 +46,7 @@ public:
     explicit Parameters(const std::string &fileName);
 
     std::string getPackingSignature() const;
+    double sufraceVolume() const;
 };
 
 #endif /* PARAMETERS_H_ */

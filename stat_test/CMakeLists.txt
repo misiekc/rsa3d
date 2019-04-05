@@ -4,7 +4,6 @@ set(STAT_TEST_SOURCE
         utility/InfoLooper.h
         utility/ParallelPairFactory.cpp
         utility/ParalellInfoLooper.h
-        utility/Quantity.cpp
         utility/ShapeGenerators.h
         utility/ShapePairFactory.h
         utility/UniformBallDistribution.cpp

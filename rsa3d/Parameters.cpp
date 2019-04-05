@@ -88,3 +88,7 @@ std::string Parameters::getPackingSignature() const {
 
     return "packing_" + this->particleType + "_" + particleAttributes + "_" + size;
 }
+
+double Parameters::sufraceVolume() const {
+    return std::pow(this->surfaceSize, this->surfaceDimension);
+}

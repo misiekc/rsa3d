@@ -12,7 +12,7 @@
 #include "../rsa3d/shape/ShapeFactory.h"
 #include "utility/IndependentPairFactory.h"
 #include "utility/ShapePairFactory.h"
-#include "utility/Quantity.h"
+#include "../rsa3d/Quantity.h"
 #include "../rsa3d/shape/shapes/cuboid/CuboidOverlapStrategy.h"
 
 #include <vector>

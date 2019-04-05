@@ -3,6 +3,7 @@
 #include "analizator/ExclusionZoneVisualizer.h"
 #include "shape/ShapeFactory.h"
 #include "Utils.h"
+#include "Quantity.h"
 
 
 #include <unistd.h>
@@ -234,11 +235,8 @@ void boundaries(const ProgramArguments &arguments) {
 
     Parameters params = arguments.getParameters();
     unsigned long max1 = std::stoul(positionalArguments[0]);
-    char buf[20];
-    unsigned long counter = 0;;
+    unsigned long counter = 0;
     int seed = 0;
-    sprintf(buf, "%.0f", pow(params.surfaceSize, params.surfaceDimension));
-    std::string size(buf);
     std::string sFile = params.getPackingSignature() + ".dat";
     std::ofstream file(sFile);
     file.precision(std::numeric_limits<double>::digits10 + 1);
@@ -320,6 +318,39 @@ void exclusionZones(const ProgramArguments &arguments) {
     ExclusionZoneVisualizer::main(arguments.getParameters(), packingFile, outputFile);
 }
 
+void accuracy(const ProgramArguments &arguments) {
+    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+    if (positionalArguments.empty())
+        die(arguments.formatUsage("<accuracy> <out file>"));
+    double accuracy = std::stod(positionalArguments[0]);
+    Expects(accuracy > 0);
+
+    Parameters params = arguments.getParameters();
+    int seed = 0;
+    std::vector<double> packingFractions;
+    Quantity packingFraction;
+
+    do {
+        PackingGenerator pg(seed, &params);
+        pg.run();
+        const Packing &packing = pg.getPacking();
+
+        packingFractions.push_back(static_cast<double>(packing.size()) / params.sufraceVolume());
+        packingFraction = Quantity::fromSamples(packingFractions);
+
+        seed++;
+    } while (seed < 2 || packingFraction.error > accuracy);
+
+    std::string filename = positionalArguments[1];
+    std::ofstream file(filename);
+    if (!file)
+        die("Cannot open " + filename + " file to store packing fraction");
+    file.precision(std::numeric_limits<double>::digits10 + 1);
+    file << packingFraction.value << "\t" << packingFraction.error << "\t" << params.particleType;
+    file << "\t" << params.particleAttributes << std::endl;
+    file.close();
+}
+
 int main(int argc, char **argv) {
     ProgramArguments arguments(argc, argv);
     Parameters params = arguments.getParameters();
@@ -334,6 +365,8 @@ int main(int argc, char **argv) {
         debug(arguments);
     else if (mode == "boundaries")
         boundaries(arguments);
+    else if (mode == "accuracy")
+        accuracy(arguments);
     else if (mode == "dat")
         dat(arguments);
     else if (mode == "analyze")

@@ -15,11 +15,11 @@ struct Quantity {
 
     Quantity() = default;
 
-    Quantity(double _value, double _error) : value(_value), error(_error)
+    Quantity(double value, double error) : value(value), error(error)
     { }
 
-    static Quantity fromSamples(const std::vector<double> & _samples);
-    friend std::ostream & operator<<(std::ostream & _stream, const Quantity & _quantity);
+    static Quantity fromSamples(const std::vector<double> &samples);
+    friend std::ostream & operator<<(std::ostream & _stream, const Quantity &quantity);
 };
 
 #endif //RSA3D_QUANTITY_H
