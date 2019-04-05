@@ -118,7 +118,7 @@ void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
 	std::cout << "T:" << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "; VM: " << vm << "; RSS: " << rss << std::endl;
 }
 
-void debug(Parameters *params, char *cfile){
+void debug(Parameters *params, const char *cfile){
 	std::string filename(cfile);
 	char buf[20];
 	std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->surfaceDimension));
@@ -215,63 +215,113 @@ void boundaries(Parameters *params, unsigned long max) {
 }
 
 
-int main(int argc, char **argv) {
-    if (argc < 3)
-        die("Usage: ./rsa <mode> <config> (additional parameters)");
+class ProgramArguments {
+private:
+    Parameters parameters;
+    std::string cmd;
+    std::string mode;
+    std::vector<std::string> additionalArguments;
 
-    Parameters params(argv[2]);
+public:
+    ProgramArguments(int argc, char **argv) : cmd{argv[0]} {
+        if (argc < 2)
+            die("Usage: " + cmd + " <mode> (additional parameters)");
+
+        mode = argv[1];
+
+        std::stringstream input;
+        for (int i = 2; i < argc; i++) {
+            std::string arg = argv[i];
+            if (arg == "-f") {
+                if (++i == argc)
+                    die("Expected input file after -f. Aborting.");
+
+                std::string inputFileName = argv[i];
+                std::ifstream inputFile(inputFileName);
+                if (!inputFile)
+                    die("Cannot open input file " + inputFileName + "to read. Aborting.");
+
+                input << inputFile.rdbuf() << std::endl;
+            } else if (arg == "-i") {
+                input << std::cin.rdbuf() << std::endl;
+            } else if (arg.length() > 1 && arg[0] == '-') {
+                input << arg.substr(1) << std::endl;
+            } else {
+                additionalArguments.push_back(arg);
+            }
+        }
+
+        parameters = Parameters(input);
+    }
+
+    Parameters getParameters() const { return parameters; }
+    std::string getCmd() const { return cmd; }
+    std::string getMode() const { return mode; }
+    std::vector<std::string> getAdditionalArguments() const { return additionalArguments; }
+};
+
+
+int main(int argc, char **argv) {
+    ProgramArguments arguments(argc, argv);
+
+    std::string cmd = arguments.getCmd();
+    std::string mode = arguments.getMode();
+    std::string usage = "Usage: " + cmd + " " + mode + " ";
+    auto additionalArguments = arguments.getAdditionalArguments();
+    Parameters params = arguments.getParameters();
+
     ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
 
-    std::string mode(argv[1]);
     if (mode == "simulate") {
         simulate(&params);
     } else if (mode == "test") {
-        if (argc < 5)   die("Usage: ./rsa test <input> <file in> <max time>");
-        std::string filename(argv[3]);
+        if (additionalArguments.size() < 2)   die(usage + "<file in> <max time>");
         Packing packing;
-        packing.restore(filename);
+        packing.restore(additionalArguments[0]);
         PackingGenerator pg(1, &params);
-        pg.testPacking(packing, std::stod(argv[4]));
+        pg.testPacking(packing, std::stod(additionalArguments[1]));
     } else if (mode == "debug") {
-        debug(&params, argv[3]);
+        if (additionalArguments.empty())    die(usage + "<packing generator file>");
+        debug(&params, additionalArguments[0].c_str());
     } else if (mode == "boundaries") {
-        boundaries(&params, std::stoul(argv[3]));
+        if (additionalArguments.empty())    die(usage + "<number of particles>");
+        boundaries(&params, std::stoul(additionalArguments[0]));
     } else if (mode == "dat") {
-        if (argc < 4) die("Usage: ./rsa dat <input> <directory>");
-        makeDatFileForPackingsInDirectory(&params, argv[3]);
+        if (additionalArguments.empty())    die(usage + "<directory>");
+        makeDatFileForPackingsInDirectory(&params, additionalArguments[0]);
     } else if (mode == "analyze") {
-    	if (argc < 4) die("Usage: ./rsa analyze <input> <directory> (correlations range = 10; 0 - no corr output)");
-    	double corrRange = (argc >= 5) ? std::stod(argv[4]) : 10.0;
+    	if (additionalArguments.size() < 2) die(usage + "<directory> (correlations range = 10; 0 - no corr output)");
+    	double corrRange = (additionalArguments.size() >= 2) ? std::stod(additionalArguments[1]) : 10.0;
     	Validate(corrRange >= 0);
         Analyzer an(&params);
-		an.analyzePackingsInDirectory(argv[3], 0.01, 1.0, corrRange);
+		an.analyzePackingsInDirectory(additionalArguments[0], 0.01, 1.0, corrRange);
     } else if (mode == "povray") {
-        if (argc < 4)   die("Usage: ./rsa povray <input> <file in>");
-        std::string file(argv[3]);
+        if (additionalArguments.empty())    die(usage + "<file in>");
+        std::string file(additionalArguments[0]);
         Packing packing;
         packing.restore(file);
         PackingGenerator::toPovray(packing, params.surfaceSize, nullptr, file + ".pov");
     } else if (mode == "wolfram") {
-        if (argc < 4)   die("Usage: ./rsa wolfram <input> <file in>");
-        std::string file(argv[3]);
+        if (additionalArguments.empty())    die(usage + "<file in>");
+        std::string file(additionalArguments[0]);
         Packing packing;
         packing.restore(file);
         PackingGenerator::toWolfram(packing, params.surfaceSize, nullptr, file + ".nb");
     } else if (mode == "bc_expand") {
-        if (argc < 4)   die("Usage: ./rsa bc_expand <config> <file in> (file out = file in)");
-        std::string fileIn(argv[3]);
-        std::string fileOut = (argc < 5 ? fileIn : argv[4]);
+        if (additionalArguments.size() < 2)    die(usage + "<file in> (file out = file in)");
+        std::string fileIn(additionalArguments[0]);
+        std::string fileOut = (additionalArguments.size() < 2 ? fileIn : additionalArguments[1]);
         Packing packing;
         packing.restore(fileIn);
         packing.expandOnPBC(params.surfaceSize, 0.1);
         packing.store(fileOut);
     } else if (mode == "exclusion_zones"){
-        if (argc < 5)   die("Usage: ./rsa test <input> <packign file> <output file>");
-    	std::string packingFile(argv[3]);
-    	std::string outputFile(argv[4]);
+        if (additionalArguments.size() < 2)   die(usage + "<packing file> <output file>");
+    	std::string packingFile(additionalArguments[0]);
+    	std::string outputFile(additionalArguments[1]);
     	ExclusionZoneVisualizer::main(params, packingFile, outputFile);
     } else {
-		std::cerr << "Unknown mode: " << argv[1] << std::endl;
+		std::cerr << "Unknown mode: " << mode << std::endl;
         return EXIT_FAILURE;
 	}
 	return EXIT_SUCCESS;

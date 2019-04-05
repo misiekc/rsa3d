@@ -12,6 +12,7 @@
 #include <stdexcept>
 #include <iosfwd>
 #include <vector>
+#include <algorithm>
 
 
 // Parse exception class
@@ -84,9 +85,9 @@ public:
      * @throws std::invalid_argument when delim = '#' (comment)
      * @return Config object to be deleted manualy after use
      */
-    static Config parse(std::istream &in, char delim = '=');
+    static Config parse(std::istream &in, char delim = '=', bool allowRedefinition = false);
 
-    bool hasParam(const std::string &field) const { return this->fieldMap.find(field) != this->fieldMap.end(); };
+    bool hasParam(const std::string &field) const { return std::find(keys.begin(), keys.end(), field) != keys.end(); };
     std::string getString(const std::string &field) const;
     int getInt(const std::string &field) const;
     unsigned long getUnsignedLong(const std::string &field) const;

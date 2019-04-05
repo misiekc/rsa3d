@@ -13,7 +13,7 @@
 
 
 Parameters::Parameters(std::istream &stream) {
-	auto config = Config::parse(stream);
+	auto config = Config::parse(stream, '=', true);
 	for (const auto &key : config.getKeys()){
 		if (key == "maxTriesWithoutSuccess") 	        this->maxTriesWithoutSuccess = config.getUnsignedLong(key);
 		else if (key == "maxVoxels")					this->maxVoxels = config.getUnsignedLong(key);
@@ -34,6 +34,8 @@ Parameters::Parameters(std::istream &stream) {
 		else if (key == "collectors") 				    this->collectors = config.getUnsignedLong(key);
 		else if (key == "generatorProcesses") 		    this->generatorProcesses = config.getUnsignedLong(key);
 		else if (key == "ompThreads") 				    this->ompThreads = config.getInt(key);
+		else
+		    std::cerr << "[Parameters::Parameters] Warning: unknown parameter " << key << std::endl;
 	}
 
 	this->validateData();

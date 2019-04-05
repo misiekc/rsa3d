@@ -10,7 +10,7 @@
 #include <memory>
 
 
-Config Config::parse(std::istream & in, char delim) {
+Config Config::parse(std::istream & in, char delim, bool allowRedefinition) {
     if (delim == '#')
         throw std::invalid_argument("delim == #");
 
@@ -24,11 +24,12 @@ Config Config::parse(std::istream & in, char delim) {
             continue;
 
         auto field = splitField(line, delim, line_num);
-        if (result.hasParam(field.key))
+        if (result.hasParam(field.key) && !allowRedefinition)
             throw ConfigParseException("Redefinition of field \"" + field.key + "\" in line " + std::to_string(line_num));
 
         result.fieldMap[field.key] = field.value;
-        result.keys.push_back(field.key);
+        if (!result.hasParam(field.key))
+            result.keys.push_back(field.key);
     }
 
     return result;
