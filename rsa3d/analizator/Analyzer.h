@@ -23,14 +23,14 @@
 
 class Analyzer {
 public:
-	explicit Analyzer(Parameters *params) : params(params) {}
+	explicit Analyzer(const Parameters *params) : params(params) {}
 	virtual ~Analyzer() = default;
 
 	void analyzePackingsInDirectory(const std::string &dirName, double mintime, double particleSize,
                                     double correlationsRange);
 
 private:
-	Parameters *params;
+	const Parameters *params;
 
 	struct Quantity {
 		double value{};

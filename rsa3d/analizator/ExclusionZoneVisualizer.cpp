@@ -13,7 +13,7 @@
 #include "../Vector.h"
 #include <fstream>
 
-ExclusionZoneVisualizer::ExclusionZoneVisualizer(Parameters &params) {
+ExclusionZoneVisualizer::ExclusionZoneVisualizer(const Parameters &params) {
 	this->params = &params;
 	this->surface = new NBoxPBC(this->params->surfaceDimension, this->params->surfaceSize, RSAShape::getNeighbourListCellSize(), RSAShape::getVoxelSpatialSize());
 	this->voxelSize = this->params->surfaceSize/800;
@@ -130,7 +130,7 @@ void ExclusionZoneVisualizer::normalizeShapeOrientation(RSAShape &shape){
 	shape.rotate(orientation);
 }
 
-void ExclusionZoneVisualizer::main(Parameters &params, std::string &packingFile, std::string &outputFile){
+void ExclusionZoneVisualizer::main(const Parameters &params, std::string &packingFile, std::string &outputFile){
 	ExclusionZoneVisualizer xzv(params);
 	xzv.initPacking(packingFile);
 

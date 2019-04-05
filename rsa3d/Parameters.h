@@ -44,6 +44,8 @@ public:
 	Parameters();
 	explicit Parameters(std::istream &stream);
     explicit Parameters(const std::string &fileName);
+
+    std::string getPackingSignature() const;
 };
 
 #endif /* PARAMETERS_H_ */

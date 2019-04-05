@@ -28,27 +28,27 @@
 double PackingGenerator::FACTOR_LIMIT = 5.0;
 
 
-PackingGenerator::PackingGenerator(int seed, Parameters *params) {
-	this->params = params;
+PackingGenerator::PackingGenerator(int seed, const Parameters *params) {
+	this->params = *params;
 	this->seed = seed;
 	RND rnd(this->seed);
 
-	this->spatialSize = this->params->surfaceSize;
+	this->spatialSize = this->params.surfaceSize;
 	this->angularSize = RSAShape::getVoxelAngularSize();
-	if (this->params->requestedAngularVoxelSize > this->angularSize)
-		this->params->requestedAngularVoxelSize = this->angularSize;
+	if (this->params.requestedAngularVoxelSize > this->angularSize)
+		this->params.requestedAngularVoxelSize = this->angularSize;
 
-	this->voxels = new VoxelList(this->params->surfaceDimension, this->spatialSize, RSAShape::getVoxelSpatialSize(), this->angularSize, this->params->requestedAngularVoxelSize);
+	this->voxels = new VoxelList(this->params.surfaceDimension, this->spatialSize, RSAShape::getVoxelSpatialSize(), this->angularSize, this->params.requestedAngularVoxelSize);
 
 	double gridSize = RSAShape::getNeighbourListCellSize();
-	if (gridSize < this->params->thresholdDistance)
-		gridSize = this->params->thresholdDistance;
+	if (gridSize < this->params.thresholdDistance)
+		gridSize = this->params.thresholdDistance;
 
 
-	if (this->params->boundaryConditions == "free")
-		this->surface = new NBoxFBC(this->params->surfaceDimension, this->params->surfaceSize, gridSize, RSAShape::getVoxelSpatialSize());
+	if (this->params.boundaryConditions == "free")
+		this->surface = new NBoxFBC(this->params.surfaceDimension, this->params.surfaceSize, gridSize, RSAShape::getVoxelSpatialSize());
 	else
-		this->surface = new NBoxPBC(this->params->surfaceDimension, this->params->surfaceSize, gridSize, RSAShape::getVoxelSpatialSize());
+		this->surface = new NBoxPBC(this->params.surfaceDimension, this->params.surfaceSize, gridSize, RSAShape::getVoxelSpatialSize());
 }
 
 
@@ -77,7 +77,7 @@ void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
 		RSAVector snpos = sn->getPosition();
 
 		double d = sqrt(this->surface->distance2(spos, snpos));
-		if (d < this->params->thresholdDistance){
+		if (d < this->params.thresholdDistance){
 			RSAVector da = this->surface->vector(snpos - spos) / d;
 			double mindist = s->minDistance(sn);
 			spos += (d - mindist) * da;
@@ -203,7 +203,7 @@ void PackingGenerator::createPacking() {
 
 	int l = 0;
 	double t = 0, factor = 1;
-	std::size_t tmpSplit = this->params->split, oldTmpSplit = tmpSplit;
+	std::size_t tmpSplit = this->params.split, oldTmpSplit = tmpSplit;
 //	int snapshotCounter = 0;
 
     ThreadLocalRND threadRND(rnd);
@@ -212,7 +212,7 @@ void PackingGenerator::createPacking() {
 	RSAShape **sVirtual = new RSAShape*[tmpSplit];
 	Voxel **aVoxels = new Voxel *[tmpSplit];
 
-	while (!this->isSaturated() && t<params->maxTime && missCounter<params->maxTriesWithoutSuccess) {
+	while (!this->isSaturated() && t<this->params.maxTime && missCounter<this->params.maxTriesWithoutSuccess) {
 
 		std::cout << "[" << this->seed << " PackingGenerator::createPacking] choosing " << tmpSplit << " shapes..." << std::flush;
 		factor = this->getFactor();
@@ -260,7 +260,7 @@ void PackingGenerator::createPacking() {
 					sVirtual[i]->time = t;
 
 
-					if (this->params->modifiedRSA){
+					if (this->params.modifiedRSA){
 						this->modifiedRSA(sVirtual[i], aVoxels[i]);
 					}
 
@@ -294,7 +294,7 @@ void PackingGenerator::createPacking() {
 			std::cout.flush();
 //						this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
 
-			bool b = voxels->splitVoxels(this->params->minDx, this->params->maxVoxels, this->surface->getNeighbourGrid(), this->surface);
+			bool b = voxels->splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface);
 			if (b){
 				v1 = this->voxels->getLength();
 //				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
@@ -317,9 +317,9 @@ void PackingGenerator::createPacking() {
 				tmpSplit = (int)1.1*tmpSplit + _OMP_MAXTHREADS;
 			}
 
-			if (tmpSplit > std::max(this->params->maxVoxels/20, 10*this->params->split))
-				tmpSplit = std::max(this->params->maxVoxels/20, 10*this->params->split);
-			if(v1<v0 && voxels->getLength()<0.001*this->params->maxVoxels && tmpSplit > 10ul*_OMP_MAXTHREADS)
+			if (tmpSplit > std::max(this->params.maxVoxels/20, 10*this->params.split))
+				tmpSplit = std::max(this->params.maxVoxels/20, 10*this->params.split);
+			if(v1<v0 && voxels->getLength()<0.001*this->params.maxVoxels && tmpSplit > 10ul*_OMP_MAXTHREADS)
 				tmpSplit /= 10.0;
 			if(tmpSplit < 10ul*_OMP_MAXTHREADS)
 				tmpSplit = 10ul*_OMP_MAXTHREADS;
@@ -348,7 +348,7 @@ void PackingGenerator::createPacking() {
 //			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
 //			this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
 //			this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
-//			this->toPovray(this->packing, this->params->surfaceSize, nullptr, "test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
+//			this->toPovray(this->packing, this->params.surfaceSize, nullptr, "test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
 //			std::string filename = "snapshot_" + std::to_string(this->packing.size()) + "_" + std::to_string(this->voxels->getLength()) + ".dbg";
 //			std::ofstream file(filename, std::ios::binary);
 //			this->store(file);
@@ -416,7 +416,7 @@ void PackingGenerator::toPovray(const Packing &packing, double size, VoxelList *
 
 
 void PackingGenerator::toPovray(const std::string &filename){
-	PackingGenerator::toPovray(this->packing, this->params->surfaceSize, this->voxels, filename);
+	PackingGenerator::toPovray(this->packing, this->params.surfaceSize, this->voxels, filename);
 }
 
 
@@ -483,7 +483,7 @@ void PackingGenerator::toWolfram(const Packing &packing, double size, VoxelList 
 
 
 void PackingGenerator::toWolfram(const std::string &filename){
-	PackingGenerator::toWolfram(this->packing, this->params->surfaceSize, this->voxels, filename);
+	PackingGenerator::toWolfram(this->packing, this->params.surfaceSize, this->voxels, filename);
 }
 
 

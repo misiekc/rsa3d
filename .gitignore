@@ -4,6 +4,9 @@
 /rsa_stat_test
 /rsa_unit_test
 /libstat.a
+.idea/
+cmake-build-debug/
+cmake-build-release/
 *.nb
 *.dat
 *.bin

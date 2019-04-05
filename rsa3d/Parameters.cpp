@@ -73,3 +73,18 @@ void Parameters::validateData() {
 Parameters::Parameters() {
     this->validateData();       // Make sure default construction is valid
 }
+
+std::string Parameters::getPackingSignature() const {
+    std::string sPackingFile;
+    char buf[20];
+    sprintf(buf, "%.0f", pow(this->surfaceSize, this->surfaceDimension));
+    std::string size(buf);
+
+    std::string particleAttributes;
+    if (this->particleAttributes.length() < 100)
+        particleAttributes = replaceAll(this->particleAttributes, " ", "_");
+    else
+        particleAttributes = replaceAll(this->particleAttributes, " ", "_").substr(0, 100);
+
+    return "packing_" + this->particleType + "_" + particleAttributes + "_" + size;
+}

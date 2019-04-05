@@ -18,7 +18,7 @@
 
 class ExclusionZoneVisualizer {
 private:
-	Parameters *params;
+	const Parameters *params;
 	Packing packing;
 	Surface *surface;
 	double voxelSize;
@@ -29,12 +29,12 @@ private:
 	void normalizeShapeOrientation(RSAShape &shape);
 
 public:
-	ExclusionZoneVisualizer(Parameters &params);
+	ExclusionZoneVisualizer(const Parameters &params);
 	void initPacking(std::string &packingFile);
 	virtual ~ExclusionZoneVisualizer();
 	void toPovray(const std::string &filename, RSAShape *trialShape);
 
-	static void main(Parameters &params, std::string &packingFile, std::string &outputFile);
+	static void main(const Parameters &params, std::string &packingFile, std::string &outputFile);
 };
 
 #endif /* ANALIZATOR_EXCLUSIONZONEVISUALIZER_H_ */

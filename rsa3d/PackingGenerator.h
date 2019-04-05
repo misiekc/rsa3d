@@ -24,7 +24,7 @@ private:
 	static double FACTOR_LIMIT;
 
 	int seed;
-	Parameters *params;
+	Parameters params;
 	Packing packing;
 	VoxelList *voxels;
 	Surface *surface;
@@ -47,7 +47,7 @@ private:
 	void store(std::ostream &f) const;
 
 public:
-    PackingGenerator(int seed, Parameters *params);
+    PackingGenerator(int seed, const Parameters *params);
 
 	virtual ~PackingGenerator();
     void run();

@@ -37,6 +37,10 @@ namespace {
         void evaluatePair(const ShapePair &pair, const RSAVector &translation);
         void print(std::ostream &out) const;
         int success() const { return ovConflicts.numOf == 0 && piConflicts.numOf == 0 ? EXIT_SUCCESS : EXIT_FAILURE; }
+
+        void evaluateOverlap(const ShapePair &pair, const ShapePair &pairTranslated, const RSAVector &translation);
+
+        void evaluatePointInside(const ShapePair &pair, const ShapePair &pairTranslated, const RSAVector &translation);
     };
 
     /* BC returning programmed translation for a given pair. It expects positions of this shapes and returns a proper
@@ -137,6 +141,12 @@ namespace {
         ShapePair pairTranslated{pair.first()->clone(), pair.second()->clone()};
         pairTranslated.second()->translate(translation);
 
+        evaluateOverlap(pair, pairTranslated, translation);
+        if (isConvexShape(pair.first()))
+            evaluatePointInside(pair, pairTranslated, translation);
+    }
+
+    void Result::evaluateOverlap(const ShapePair &pair, const ShapePair &pairTranslated, const RSAVector &translation) {
         TranslatingBC translatingBC{translation, pair};
         RSAFreeBC mockBC;
 
@@ -144,24 +154,28 @@ namespace {
         bool transOverlap = pairTranslated.first()->overlap(&mockBC, pairTranslated.second());
 
         if (bcOverlap)
-            this->overlapped++;
+            overlapped++;
         if (bcOverlap != transOverlap)
-            this->ovConflicts.report(pair, pairTranslated, translation);
+            ovConflicts.report(pair, pairTranslated, translation);
+    }
 
-        if (isConvexShape(pair.first())) {
-            auto &firstConvex = dynamic_cast<const RSAConvexShape&>(*pair.first());
-            auto &secondConvex = dynamic_cast<const RSAConvexShape&>(*pair.second());
-            auto &firstConvexTrans = dynamic_cast<const RSAConvexShape&>(*pairTranslated.first());
-            auto &secondConvexTrans = dynamic_cast<const RSAConvexShape&>(*pairTranslated.second());
+    void Result::evaluatePointInside(const ShapePair &pair, const ShapePair &pairTranslated,
+                                     const RSAVector &translation) {
+        TranslatingBC translatingBC{translation, pair};
+        RSAFreeBC mockBC;
 
-            bool bcPointInside = firstConvex.pointInside(&translatingBC, secondConvex.getPosition());
-            bool transPointInside = firstConvexTrans.pointInside(&mockBC, secondConvexTrans.getPosition());
+        auto &firstConvex = dynamic_cast<const RSAConvexShape &>(*pair.first());
+        auto &secondConvex = dynamic_cast<const RSAConvexShape &>(*pair.second());
+        auto &firstConvexTrans = dynamic_cast<const RSAConvexShape &>(*pairTranslated.first());
+        auto &secondConvexTrans = dynamic_cast<const RSAConvexShape &>(*pairTranslated.second());
 
-            if (bcPointInside)
-                this->pointInside++;
-            if (bcPointInside != transPointInside)
-                this->piConflicts.report(pair, pairTranslated, translation);
-        }
+        bool bcPointInside = firstConvex.pointInside(&translatingBC, secondConvex.getPosition());
+        bool transPointInside = firstConvexTrans.pointInside(&mockBC, secondConvexTrans.getPosition());
+
+        if (bcPointInside)
+            pointInside++;
+        if (bcPointInside != transPointInside)
+            piConflicts.report(pair, pairTranslated, translation);
     }
 
     Result perform_test(IndependentPairFactory &factory, unsigned long tries) {

@@ -13,6 +13,57 @@
 #include <fstream>
 #include <memory>
 
+
+class ProgramArguments {
+private:
+    Parameters parameters;
+    std::string cmd;
+    std::string mode;
+    std::vector<std::string> positionalArguments;
+
+public:
+    ProgramArguments(int argc, char **argv);
+
+    const Parameters &getParameters() const { return parameters; }
+    const std::string &getMode() const { return mode; }
+    const std::vector<std::string> &getPositionalArguments() const { return positionalArguments; }
+    std::string formatUsage(const std::string &additionalArgs) const { return "Usage: " + cmd + " " + mode + " " + additionalArgs; }
+};
+
+ProgramArguments::ProgramArguments(int argc, char **argv) : cmd{argv[0]} {
+    if (argc < 2)
+        die("Usage: " + cmd + " <mode> (additional parameters)");
+
+    std::stringstream input;
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+        if (arg == "-f") {
+            if (++i == argc)
+                die("Expected input file after -f. Aborting.");
+
+            std::string inputFileName = argv[i];
+            std::ifstream inputFile(inputFileName);
+            if (!inputFile)
+                die("Cannot open input file " + inputFileName + "to read. Aborting.");
+
+            input << inputFile.rdbuf() << std::endl;
+        } else if (arg == "-i") {
+            input << std::cin.rdbuf() << std::endl;
+        } else if (arg.length() > 1 && arg[0] == '-') {
+            input << arg.substr(1) << std::endl;
+        } else {
+            positionalArguments.push_back(arg);
+        }
+    }
+
+    if (positionalArguments.empty())
+        die("No mode parameter. Aborting.");
+    mode = positionalArguments[0];
+    positionalArguments.erase(positionalArguments.begin());
+
+    parameters = Parameters(input);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // process_mem_usage(double &, double &) - takes two doubles by reference,
@@ -20,63 +71,51 @@
 // size and resident set size, and return the results in KB.
 //
 // On failure, returns 0.0, 0.0
+void process_mem_usage(double &vm_usage, double &resident_set) {
+    using std::ios_base;
+    using std::ifstream;
+    using std::string;
 
-void process_mem_usage(double& vm_usage, double& resident_set)
-{
-   using std::ios_base;
-   using std::ifstream;
-   using std::string;
+    vm_usage = 0.0;
+    resident_set = 0.0;
 
-   vm_usage     = 0.0;
-   resident_set = 0.0;
+    // 'file' stat seems to give the most reliable results
+    //
+    ifstream stat_stream("/proc/self/stat", ios_base::in);
 
-   // 'file' stat seems to give the most reliable results
-   //
-   ifstream stat_stream("/proc/self/stat",ios_base::in);
+    // dummy vars for leading entries in stat that we don't care about
+    //
+    string pid, comm, state, ppid, pgrp, session, tty_nr;
+    string tpgid, flags, minflt, cminflt, majflt, cmajflt;
+    string utime, stime, cutime, cstime, priority, nice;
+    string O, itrealvalue, starttime;
 
-   // dummy vars for leading entries in stat that we don't care about
-   //
-   string pid, comm, state, ppid, pgrp, session, tty_nr;
-   string tpgid, flags, minflt, cminflt, majflt, cmajflt;
-   string utime, stime, cutime, cstime, priority, nice;
-   string O, itrealvalue, starttime;
+    // the two fields we want
+    //
+    unsigned long vsize;
+    long rss;
 
-   // the two fields we want
-   //
-   unsigned long vsize;
-   long rss;
+    stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
+                >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
+                >> utime >> stime >> cutime >> cstime >> priority >> nice
+                >> O >> itrealvalue >> starttime >> vsize >> rss; // don't care about the rest
 
-   stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
-               >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
-               >> utime >> stime >> cutime >> cstime >> priority >> nice
-               >> O >> itrealvalue >> starttime >> vsize >> rss; // don't care about the rest
+    stat_stream.close();
 
-   stat_stream.close();
-
-   long page_size_kb = sysconf(_SC_PAGE_SIZE); // in case x86-64 is configured to use 2MB pages
-   vm_usage     = vsize / 1024.0 / 1024.0;
-   resident_set = rss * page_size_kb / 1024.0 / 1024.0;
+    long page_size_kb = sysconf(_SC_PAGE_SIZE); // in case x86-64 is configured to use 2MB pages
+    vm_usage = vsize / 1024.0 / 1024.0;
+    resident_set = rss * page_size_kb / 1024.0 / 1024.0;
 }
 
-void makeDatFileForPackingsInDirectory(Parameters *params, const std::string &dirName){
+void makeDatFileForPackingsInDirectory(const Parameters *params, const std::string &dirName) {
+    std::string sFile = params->getPackingSignature() + ".dat";
+    std::ofstream dataFile(sFile);
+    if (!dataFile)
+        die("Cannot open file " + sFile + " to store packing info");
+    dataFile.precision(std::numeric_limits<double>::digits10 + 1);
 
-	char buf[20];
-	std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->surfaceDimension));
-	std::string size(buf);
-	std::string sFile;
-
-	if (params->particleAttributes.length()<100)
-	    sFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_") + "_" + size + ".dat";
-	else
-        sFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_").substr(0, 100) + "_" + size + ".dat";
-
-	std::ofstream dataFile(sFile);
-	if (!dataFile)
-    	die("Cannot open file " + sFile + " to store packing info");
-	dataFile.precision(std::numeric_limits<double>::digits10 + 1);
-
-	auto filenames = PackingGenerator::findPackingsInDir(dirName);
-	for (const auto &filename : filenames) {
+    auto filenames = PackingGenerator::findPackingsInDir(dirName);
+    for (const auto &filename : filenames) {
         int no1 = lastIndexOf(filename, '_');
         int no2 = lastIndexOf(filename, '.');
         std::string seed = filename.substr(no1 + 1, no2 - no1 - 1);
@@ -84,245 +123,231 @@ void makeDatFileForPackingsInDirectory(Parameters *params, const std::string &di
         Packing packing;
         packing.restore(filename);
 
-        dataFile << seed << "\t" << packing.back()->no << "\t"<< packing.back()->time << std::endl;
+        dataFile << seed << "\t" << packing.back()->no << "\t" << packing.back()->time << std::endl;
         std::cout << ".";
         std::cout.flush();
-	}
-	std::cout << std::endl;
+    }
+    std::cout << std::endl;
 }
 
-void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile){
-	char buf[20];
-	double vm, rss;
-	std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->surfaceDimension));
-	std::string size(buf);
+void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile) {
+    double vm, rss;
 
-	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-	PackingGenerator pg(seed, params);
-	pg.run();
-	const Packing &packing = pg.getPacking();
+    PackingGenerator pg(seed, params);
+    pg.run();
+    const Packing &packing = pg.getPacking();
 
-	if (params->storePackings) {
-        std::string sPackingFile;
-        if (params->particleAttributes.length()<100)
-    		sPackingFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_") + "_" + size + "_" + std::to_string(seed) + ".bin";
-        else
-            sPackingFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_").substr(0, 100) + "_" + size + "_" + std::to_string(seed) + ".bin";
-		pg.getPacking().store(sPackingFile);
-	}
-	std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
-	process_mem_usage(vm, rss);
-	dataFile << seed << "\t" << packing.size() << "\t"	<< packing.back()->time << std::endl;
-	dataFile.flush();
-	std::cout << "T:" << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "; VM: " << vm << "; RSS: " << rss << std::endl;
+    if (params->storePackings) {
+        std::string sPackingFile = params->getPackingSignature() + "_" + std::to_string(seed) + ".bin";
+        pg.getPacking().store(sPackingFile);
+    }
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    process_mem_usage(vm, rss);
+    dataFile << seed << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;
+    dataFile.flush();
+    std::cout << "T:" << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "; VM: " << vm
+              << "; RSS: " << rss << std::endl;
 }
 
-void debug(Parameters *params, const char *cfile){
-	std::string filename(cfile);
-	char buf[20];
-	std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->surfaceDimension));
-	std::string size(buf);
+int simulate(const ProgramArguments &arguments) {
+    Parameters params = arguments.getParameters();
 
-	std::ifstream file(filename, std::ios::binary);
-	if (!file)
-		die("Cannot open file " + filename + " to restore packing generator");
-
-	PackingGenerator pg(0, params);
-	pg.restore(file);
-	pg.run();
-}
-
-int simulate(Parameters *params) {
-	int pid = 0;
-	char buf[20];
-	std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->surfaceDimension));
-	std::string size(buf);
-
-
-    std::string sFile;
-    if (params->particleAttributes.length()<100)
-        sFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_") + "_" + size + ".dat";
-    else
-        sFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_").substr(0, 100) + "_" + size + ".dat";
+    std::string sFile = params.getPackingSignature() + ".dat";
     std::ofstream file(sFile);
-	if (!file)
-    	die("Cannot open file " + sFile + " to store packing info");
-	file.precision(std::numeric_limits<double>::digits10 + 1);
+    if (!file)
+        die("Cannot open file " + sFile + " to store packing info");
+    file.precision(std::numeric_limits<double>::digits10 + 1);
 
-	std::size_t seed = params->from;
-
-	if (params->generatorProcesses>1){
-		while(seed < params->from + params->collectors){
-			std::size_t i;
-			for(i=0; ( (i < params->generatorProcesses) && ((seed+i) < (params->from + params->collectors)) ); i++){
-				pid = fork();
-				if (pid < 0){
-					std::cout << "fork problem" << std::endl;
-					i--;
-					continue;
-				}
-				if (pid==0){
-					runSingleSimulation(static_cast<int>(seed + i), params, file);
-					return 1;
-				}
-				if (pid > 0){
-					continue;
-				}
-			}
-			for(std::size_t j=0; j<i; j++){
-				wait(nullptr);
-				seed++;
-			}
-		}
-	}else{
-		for(std::size_t i=0; i<params->collectors; i++){
-			runSingleSimulation(static_cast<int>(params->from + i), params, file);
-		}
-	}
-	file.close();
-	return 1;
+    std::size_t seed = params.from;
+    if (params.generatorProcesses > 1) {
+        while (seed < params.from + params.collectors) {
+            std::size_t i;
+            for (i = 0; ((i < params.generatorProcesses) &&
+                         ((seed + i) < (params.from + params.collectors))); i++) {
+                int pid = fork();
+                if (pid < 0) {
+                    std::cout << "fork problem" << std::endl;
+                    i--;
+                    continue;
+                }
+                if (pid == 0) {
+                    runSingleSimulation(static_cast<int>(seed + i), &params, file);
+                    return 1;
+                }
+                if (pid > 0) {
+                    continue;
+                }
+            }
+            for (std::size_t j = 0; j < i; j++) {
+                wait(nullptr);
+                seed++;
+            }
+        }
+    } else {
+        for (std::size_t i = 0; i < params.collectors; i++) {
+            runSingleSimulation(static_cast<int>(params.from + i), &params, file);
+        }
+    }
+    file.close();
+    return 1;
 }
 
 
-/**
- * @brief Creates packing until the total number of shapes (in all packings) does not exceed @a max
- */
-void boundaries(Parameters *params, unsigned long max) {
-	char buf[20];
+void test(const ProgramArguments &arguments) {
+    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+    if (positionalArguments.size() < 2)
+        die(arguments.formatUsage("<file in> <max time>"));
+
+    Packing packing;
+    packing.restore(positionalArguments[0]);
+    PackingGenerator pg(1, &arguments.getParameters());
+    pg.testPacking(packing, std::stod(positionalArguments[1]));
+}
+
+void debug(const ProgramArguments &arguments) {
+    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+    if (positionalArguments.empty())
+        die(arguments.formatUsage("<packing generator file>"));
+
+    Parameters params = arguments.getParameters();
+    const char *cfile = positionalArguments[0].c_str();
+    std::string filename(cfile);
+    char buf[20];
+    sprintf(buf, "%.0f", pow(params.surfaceSize, params.surfaceDimension));
+    std::string size(buf);
+
+    std::ifstream file(filename, std::ios::binary);
+    if (!file)
+        die("Cannot open file " + filename + " to restore packing generator");
+
+    PackingGenerator pg(0, &params);
+    pg.restore(file);
+    pg.run();
+}
+
+void boundaries(const ProgramArguments &arguments) {
+    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+    if (positionalArguments.empty())
+        die(arguments.formatUsage("<number of particles>"));
+
+    Parameters params = arguments.getParameters();
+    unsigned long max1 = std::stoul(positionalArguments[0]);
+    char buf[20];
     unsigned long counter = 0;;
     int seed = 0;
-    std::sprintf(buf, "%.0f", pow(params->surfaceSize, params->surfaceDimension));
+    sprintf(buf, "%.0f", pow(params.surfaceSize, params.surfaceDimension));
     std::string size(buf);
-    std::string sFile;
-    if (params->particleAttributes.length()<100)
-        sFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_") + "_" + size + ".dat";
-    else
-        sFile = "packing_" + params->particleType + "_" + replaceAll(params->particleAttributes, " ", "_").substr(0, 100) + "_" + size + ".dat";
+    std::string sFile = params.getPackingSignature() + ".dat";
     std::ofstream file(sFile);
     file.precision(std::numeric_limits<double>::digits10 + 1);
     do {
-        PackingGenerator pg(seed, params);
+        PackingGenerator pg(seed, &params);
         pg.run();
         const Packing &packing = pg.getPacking();
-		file << seed << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;
-		file.flush();
-		counter += packing.size();
-		std::cout << (double) counter / (double) max << std::endl;
-		seed++;
-	} while (counter < max);
-	file.close();
+        file << seed << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;
+        file.flush();
+        counter += packing.size();
+        std::cout << (double) counter / (double) max1 << std::endl;
+        seed++;
+    } while (counter < max1);
+    file.close();
 }
 
+void dat(const ProgramArguments &arguments) {
+    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+    if (positionalArguments.empty())
+        die(arguments.formatUsage("<directory>"));
 
-class ProgramArguments {
-private:
-    Parameters parameters;
-    std::string cmd;
-    std::string mode;
-    std::vector<std::string> additionalArguments;
+    std::string directory = positionalArguments[0];
+    makeDatFileForPackingsInDirectory(&arguments.getParameters(), directory);
+}
 
-public:
-    ProgramArguments(int argc, char **argv) : cmd{argv[0]} {
-        if (argc < 2)
-            die("Usage: " + cmd + " <mode> (additional parameters)");
+void analyze(const ProgramArguments &arguments) {
+    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+    if (positionalArguments.size() < 2)
+        die(arguments.formatUsage("<directory> (correlations range = 10; 0 - no corr output)"));
 
-        mode = argv[1];
+    double corrRange = (positionalArguments.size() >= 2) ? std::stod(positionalArguments[1]) : 10.0;
+    Validate(corrRange >= 0);
+    Analyzer an(&arguments.getParameters());
+    an.analyzePackingsInDirectory(positionalArguments[0], 0.01, 1.0, corrRange);
+}
 
-        std::stringstream input;
-        for (int i = 2; i < argc; i++) {
-            std::string arg = argv[i];
-            if (arg == "-f") {
-                if (++i == argc)
-                    die("Expected input file after -f. Aborting.");
+void povray(const ProgramArguments &arguments) {
+    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+    if (positionalArguments.empty())
+        die(arguments.formatUsage("<file in>"));
 
-                std::string inputFileName = argv[i];
-                std::ifstream inputFile(inputFileName);
-                if (!inputFile)
-                    die("Cannot open input file " + inputFileName + "to read. Aborting.");
+    std::string file(positionalArguments[0]);
+    Packing packing;
+    packing.restore(file);
+    PackingGenerator::toPovray(packing, arguments.getParameters().surfaceSize, nullptr, file + ".pov");
+}
 
-                input << inputFile.rdbuf() << std::endl;
-            } else if (arg == "-i") {
-                input << std::cin.rdbuf() << std::endl;
-            } else if (arg.length() > 1 && arg[0] == '-') {
-                input << arg.substr(1) << std::endl;
-            } else {
-                additionalArguments.push_back(arg);
-            }
-        }
+void wolfram(const ProgramArguments &arguments) {
+    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+    if (positionalArguments.empty())
+        die(arguments.formatUsage("<file in>"));
 
-        parameters = Parameters(input);
-    }
+    std::string file(positionalArguments[0]);
+    Packing packing;
+    packing.restore(file);
+    PackingGenerator::toWolfram(packing, arguments.getParameters().surfaceSize, nullptr, file + ".nb");
+}
 
-    Parameters getParameters() const { return parameters; }
-    std::string getCmd() const { return cmd; }
-    std::string getMode() const { return mode; }
-    std::vector<std::string> getAdditionalArguments() const { return additionalArguments; }
-};
+void bcExpand(const ProgramArguments &arguments) {
+    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+    if (positionalArguments.size() < 2)
+        die(arguments.formatUsage("<file in> (file out = file in)"));
 
+    std::string fileIn(positionalArguments[0]);
+    std::string fileOut = (positionalArguments.size() < 2 ? fileIn : positionalArguments[1]);
+    Packing packing;
+    packing.restore(fileIn);
+    packing.expandOnPBC(arguments.getParameters().surfaceSize, 0.1);
+    packing.store(fileOut);
+}
+
+void exclusionZones(const ProgramArguments &arguments) {
+    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+    if (positionalArguments.size() < 2)
+        die(arguments.formatUsage("<packing file> <output file>"));
+
+    std::string packingFile(positionalArguments[0]);
+    std::string outputFile(positionalArguments[1]);
+    ExclusionZoneVisualizer::main(arguments.getParameters(), packingFile, outputFile);
+}
 
 int main(int argc, char **argv) {
     ProgramArguments arguments(argc, argv);
-
-    std::string cmd = arguments.getCmd();
-    std::string mode = arguments.getMode();
-    std::string usage = "Usage: " + cmd + " " + mode + " ";
-    auto additionalArguments = arguments.getAdditionalArguments();
     Parameters params = arguments.getParameters();
-
     ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
 
-    if (mode == "simulate") {
-        simulate(&params);
-    } else if (mode == "test") {
-        if (additionalArguments.size() < 2)   die(usage + "<file in> <max time>");
-        Packing packing;
-        packing.restore(additionalArguments[0]);
-        PackingGenerator pg(1, &params);
-        pg.testPacking(packing, std::stod(additionalArguments[1]));
-    } else if (mode == "debug") {
-        if (additionalArguments.empty())    die(usage + "<packing generator file>");
-        debug(&params, additionalArguments[0].c_str());
-    } else if (mode == "boundaries") {
-        if (additionalArguments.empty())    die(usage + "<number of particles>");
-        boundaries(&params, std::stoul(additionalArguments[0]));
-    } else if (mode == "dat") {
-        if (additionalArguments.empty())    die(usage + "<directory>");
-        makeDatFileForPackingsInDirectory(&params, additionalArguments[0]);
-    } else if (mode == "analyze") {
-    	if (additionalArguments.size() < 2) die(usage + "<directory> (correlations range = 10; 0 - no corr output)");
-    	double corrRange = (additionalArguments.size() >= 2) ? std::stod(additionalArguments[1]) : 10.0;
-    	Validate(corrRange >= 0);
-        Analyzer an(&params);
-		an.analyzePackingsInDirectory(additionalArguments[0], 0.01, 1.0, corrRange);
-    } else if (mode == "povray") {
-        if (additionalArguments.empty())    die(usage + "<file in>");
-        std::string file(additionalArguments[0]);
-        Packing packing;
-        packing.restore(file);
-        PackingGenerator::toPovray(packing, params.surfaceSize, nullptr, file + ".pov");
-    } else if (mode == "wolfram") {
-        if (additionalArguments.empty())    die(usage + "<file in>");
-        std::string file(additionalArguments[0]);
-        Packing packing;
-        packing.restore(file);
-        PackingGenerator::toWolfram(packing, params.surfaceSize, nullptr, file + ".nb");
-    } else if (mode == "bc_expand") {
-        if (additionalArguments.size() < 2)    die(usage + "<file in> (file out = file in)");
-        std::string fileIn(additionalArguments[0]);
-        std::string fileOut = (additionalArguments.size() < 2 ? fileIn : additionalArguments[1]);
-        Packing packing;
-        packing.restore(fileIn);
-        packing.expandOnPBC(params.surfaceSize, 0.1);
-        packing.store(fileOut);
-    } else if (mode == "exclusion_zones"){
-        if (additionalArguments.size() < 2)   die(usage + "<packing file> <output file>");
-    	std::string packingFile(additionalArguments[0]);
-    	std::string outputFile(additionalArguments[1]);
-    	ExclusionZoneVisualizer::main(params, packingFile, outputFile);
-    } else {
-		std::cerr << "Unknown mode: " << mode << std::endl;
-        return EXIT_FAILURE;
-	}
-	return EXIT_SUCCESS;
+    std::string mode = arguments.getMode();
+    if (mode == "simulate")
+        simulate(arguments);
+    else if (mode == "test")
+        test(arguments);
+    else if (mode == "debug")
+        debug(arguments);
+    else if (mode == "boundaries")
+        boundaries(arguments);
+    else if (mode == "dat")
+        dat(arguments);
+    else if (mode == "analyze")
+        analyze(arguments);
+    else if (mode == "povray")
+        povray(arguments);
+    else if (mode == "wolfram")
+        wolfram(arguments);
+    else if (mode == "bc_expand")
+        bcExpand(arguments);
+    else if (mode == "exclusion_zones")
+        exclusionZones(arguments);
+    else
+        die("Unknown mode: " + mode);
+
+    return EXIT_SUCCESS;
 }
