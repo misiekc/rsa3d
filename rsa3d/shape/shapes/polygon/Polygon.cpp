@@ -18,9 +18,11 @@ double Polygon::inscribedCircleRadius;
 
 double Polygon::getCircumscribedCircleRadius(){
 	double result = 0.0;
-	for(double r: Polygon::vertexR){
-		if (result < r)
-			result = r;
+	for(std::pair<size_t, size_t> segment: Polygon::segments){
+		if (result < Polygon::vertexR[segment.first])
+			result = Polygon::vertexR[segment.first];
+		if (result < Polygon::vertexR[segment.second])
+			result = Polygon::vertexR[segment.second];
 	}
 	return result;
 }
@@ -59,6 +61,36 @@ double Polygon::getTriangleArea(size_t i, size_t j){
 }
 
 /**
+ * moves the center of the polygon to (0,0)
+ */
+void Polygon::centerPolygon(){
+	double cx = 0.0, cy = 0.0;
+	for (size_t i=0; i<Polygon::vertexR.size(); i++){
+		cx += Polygon::vertexR[i]*std::cos(Polygon::vertexTheta[i]);
+		cy += Polygon::vertexR[i]*std::sin(Polygon::vertexTheta[i]);
+	}
+	cx /= Polygon::vertexR.size();
+	cy /= Polygon::vertexR.size();
+	double x, y;
+	for (size_t i=0; i<Polygon::vertexR.size(); i++){
+		x = Polygon::vertexR[i]*std::cos(Polygon::vertexTheta[i]) - cx;
+		y = Polygon::vertexR[i]*std::sin(Polygon::vertexTheta[i]) - cy;
+		Polygon::vertexR[i] = std::sqrt(x*x + y*y);
+		Polygon::vertexTheta[i] = std::atan2(y, x);
+	}
+}
+
+void Polygon::createStarHelperSegments(){
+	Polygon::helperSegments.clear();
+	Polygon::vertexR.push_back(0.0);
+	Polygon::vertexTheta.push_back(0.0);
+	for (size_t i=0; i<Polygon::vertexR.size()-1; i++){
+		std::pair<size_t, size_t> segment(i, Polygon::vertexR.size()-1);
+		Polygon::helperSegments.push_back(segment);
+	}
+}
+
+/**
  * @param args contains information about coordinates of each vertex of the polygon. Adjacent vertices are connected.
  * Data should be separated by only spaces, and should be: number_of_vertices [xy/rt] c01 c02 c11 c12 c21 c22 ...
  * xy means cartesian coordinates, and rt means polar coordinates
@@ -92,6 +124,7 @@ void Polygon::initClass(const std::string &args){
 		Polygon::vertexR.push_back(r);
 		Polygon::vertexTheta.push_back(t);
 	}
+
 	in >> n;
 	// reading segments
 	for(size_t i = 0; i<n; i++){
@@ -105,17 +138,22 @@ void Polygon::initClass(const std::string &args){
 		Polygon::segments.push_back(segment);
 	}
 
-	in >> n;
-	// reading helper segments
-	for(size_t i = 0; i<n; i++){
-		size_t i1, i2;
-		in >> i1;
-		in >> i2;
-		if (i1>Polygon::vertexR.size() || i1>Polygon::vertexR.size()){
-			throw std::runtime_error("Wrong vertex number in helper segment");
+	if (args.find("starHelperSegments")!=std::string::npos){
+		Polygon::centerPolygon();
+		Polygon::createStarHelperSegments();
+	}else{
+		in >> n;
+		// reading helper segments
+		for(size_t i = 0; i<n; i++){
+			size_t i1, i2;
+			in >> i1;
+			in >> i2;
+			if (i1>Polygon::vertexR.size() || i1>Polygon::vertexR.size()){
+				throw std::runtime_error("Wrong vertex number in helper segment");
+			}
+			std::pair<size_t, size_t> segment(i1, i2);
+			Polygon::helperSegments.push_back(segment);
 		}
-		std::pair<size_t, size_t> segment(i1, i2);
-		Polygon::helperSegments.push_back(segment);
 	}
 
 	double area = 0.0;

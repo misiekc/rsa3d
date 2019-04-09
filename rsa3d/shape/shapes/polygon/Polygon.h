@@ -42,6 +42,9 @@ protected:
 
 	static double getInscribedCircleRadius();
 
+	static void centerPolygon();
+	static void createStarHelperSegments();
+
 	//calculate the area of the triangle made from the origin, vertex i, and vertex j
 	static double getTriangleArea(size_t i, size_t j);
 

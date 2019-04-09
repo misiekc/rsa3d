@@ -16,11 +16,11 @@
 #include "ThreadLocalRND.h"
 #include <fstream>
 #include <iomanip>
+#include <dirent.h>
 
 
 #ifdef _OPENMP
 #include <omp.h>
-#include <dirent.h>
 
 #endif
 
