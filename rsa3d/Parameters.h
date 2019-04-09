@@ -41,7 +41,11 @@ public:
 	std::size_t generatorProcesses = 1;
 	int ompThreads = _OMP_MAXTHREADS;
 
-	Parameters();
+    bool operator==(const Parameters &rhs) const;
+
+    bool operator!=(const Parameters &rhs) const;
+
+    Parameters();
 	explicit Parameters(std::istream &stream);
     explicit Parameters(const std::string &fileName);
 

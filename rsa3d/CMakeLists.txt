@@ -72,6 +72,7 @@ set(RSA_SOURCE
         Parameters.cpp
         Positioned.h
         Positioned.tpp
+        ProgramArguments.cpp
         Quantity.cpp
         RND.cpp
         Surface.cpp

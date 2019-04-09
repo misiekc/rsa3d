@@ -4,6 +4,7 @@
 #include "shape/ShapeFactory.h"
 #include "Utils.h"
 #include "Quantity.h"
+#include "ProgramArguments.h"
 
 
 #include <unistd.h>
@@ -14,56 +15,6 @@
 #include <fstream>
 #include <memory>
 
-
-class ProgramArguments {
-private:
-    Parameters parameters;
-    std::string cmd;
-    std::string mode;
-    std::vector<std::string> positionalArguments;
-
-public:
-    ProgramArguments(int argc, char **argv);
-
-    const Parameters &getParameters() const { return parameters; }
-    const std::string &getMode() const { return mode; }
-    const std::vector<std::string> &getPositionalArguments() const { return positionalArguments; }
-    std::string formatUsage(const std::string &additionalArgs) const { return "Usage: " + cmd + " " + mode + " " + additionalArgs; }
-};
-
-ProgramArguments::ProgramArguments(int argc, char **argv) : cmd{argv[0]} {
-    if (argc < 2)
-        die("Usage: " + cmd + " <mode> (additional parameters)");
-
-    std::stringstream input;
-    for (int i = 1; i < argc; i++) {
-        std::string arg = argv[i];
-        if (arg == "-f") {
-            if (++i == argc)
-                die("Expected input file after -f. Aborting.");
-
-            std::string inputFileName = argv[i];
-            std::ifstream inputFile(inputFileName);
-            if (!inputFile)
-                die("Cannot open input file " + inputFileName + "to read. Aborting.");
-
-            input << inputFile.rdbuf() << std::endl;
-        } else if (arg == "-i") {
-            input << std::cin.rdbuf() << std::endl;
-        } else if (arg.length() > 1 && arg[0] == '-') {
-            input << arg.substr(1) << std::endl;
-        } else {
-            positionalArguments.push_back(arg);
-        }
-    }
-
-    if (positionalArguments.empty())
-        die("No mode parameter. Aborting.");
-    mode = positionalArguments[0];
-    positionalArguments.erase(positionalArguments.begin());
-
-    parameters = Parameters(input);
-}
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -295,7 +246,7 @@ void wolfram(const ProgramArguments &arguments) {
     PackingGenerator::toWolfram(packing, arguments.getParameters().surfaceSize, nullptr, file + ".nb");
 }
 
-void bcExpand(const ProgramArguments &arguments) {
+void bc_expand(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() < 2)
         die(arguments.formatUsage("<file in> (file out = file in)"));
@@ -308,7 +259,7 @@ void bcExpand(const ProgramArguments &arguments) {
     packing.store(fileOut);
 }
 
-void exclusionZones(const ProgramArguments &arguments) {
+void exclusion_zones(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() < 2)
         die(arguments.formatUsage("<packing file> <output file>"));
@@ -352,33 +303,39 @@ void accuracy(const ProgramArguments &arguments) {
 }
 
 int main(int argc, char **argv) {
-    ProgramArguments arguments(argc, argv);
-    Parameters params = arguments.getParameters();
+    std::unique_ptr<ProgramArguments> arguments;
+    try {
+        arguments = std::unique_ptr<ProgramArguments>(new ProgramArguments(argc, argv));
+    } catch (InvalidArgumentsException &e) {
+        die (e.what());
+    }
+
+    Parameters params = arguments->getParameters();
     ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
 
-    std::string mode = arguments.getMode();
+    std::string mode = arguments->getMode();
     if (mode == "simulate")
-        simulate(arguments);
+        simulate(*arguments);
     else if (mode == "test")
-        test(arguments);
+        test(*arguments);
     else if (mode == "debug")
-        debug(arguments);
+        debug(*arguments);
     else if (mode == "boundaries")
-        boundaries(arguments);
+        boundaries(*arguments);
     else if (mode == "accuracy")
-        accuracy(arguments);
+        accuracy(*arguments);
     else if (mode == "dat")
-        dat(arguments);
+        dat(*arguments);
     else if (mode == "analyze")
-        analyze(arguments);
+        analyze(*arguments);
     else if (mode == "povray")
-        povray(arguments);
+        povray(*arguments);
     else if (mode == "wolfram")
-        wolfram(arguments);
+        wolfram(*arguments);
     else if (mode == "bc_expand")
-        bcExpand(arguments);
+        bc_expand(*arguments);
     else if (mode == "exclusion_zones")
-        exclusionZones(arguments);
+        exclusion_zones(*arguments);
     else
         die("Unknown mode: " + mode);
 

@@ -92,3 +92,28 @@ std::string Parameters::getPackingSignature() const {
 double Parameters::sufraceVolume() const {
     return std::pow(this->surfaceSize, this->surfaceDimension);
 }
+
+bool Parameters::operator==(const Parameters &rhs) const {
+    return maxTriesWithoutSuccess == rhs.maxTriesWithoutSuccess &&
+           maxVoxels == rhs.maxVoxels &&
+           requestedAngularVoxelSize == rhs.requestedAngularVoxelSize &&
+           minDx == rhs.minDx &&
+           from == rhs.from &&
+           collectors == rhs.collectors &&
+           maxTime == rhs.maxTime &&
+           split == rhs.split &&
+           surfaceDimension == rhs.surfaceDimension &&
+           surfaceSize == rhs.surfaceSize &&
+           storePackings == rhs.storePackings &&
+           modifiedRSA == rhs.modifiedRSA &&
+           thresholdDistance == rhs.thresholdDistance &&
+           boundaryConditions == rhs.boundaryConditions &&
+           particleType == rhs.particleType &&
+           particleAttributes == rhs.particleAttributes &&
+           generatorProcesses == rhs.generatorProcesses &&
+           ompThreads == rhs.ompThreads;
+}
+
+bool Parameters::operator!=(const Parameters &rhs) const {
+    return !(rhs == *this);
+}

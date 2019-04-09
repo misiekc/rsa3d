@@ -105,6 +105,14 @@ TEST_CASE("Config: parsing errors") {
         //REQUIRE_THROWS(Config::parse(str));
         REQUIRE_THROWS_WITH(Config::parse(str), Contains("a") && Contains("line") && Contains("3"));
     }
+
+    SECTION("permitted field redefinition") {
+        std::istringstream str("a=1\nb=2\na=3");
+
+        auto config = Config::parse(str, '=', true);
+
+        REQUIRE(config.getInt("a") == 3);
+    }
 }
 
 TEST_CASE("Config: field access") {
