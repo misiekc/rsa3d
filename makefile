@@ -20,7 +20,7 @@
 
 # RSA dimensions
 RSA_SPATIAL_DIMENSION = 2
-RSA_ANGULAR_DIMENSION = 0
+RSA_ANGULAR_DIMENSION = 1
 
 # Compiler flags
 CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -I"$(CURDIR)/unit_test/lib" -O3 -fopenmp -DRSA_SPATIAL_DIMENSION=$(RSA_SPATIAL_DIMENSION) -DRSA_ANGULAR_DIMENSION=$(RSA_ANGULAR_DIMENSION)
@@ -29,7 +29,7 @@ CFLAGS = -Wall -pedantic -std=c++11 -I"$(CURDIR)/statistics" -I"$(CURDIR)/unit_t
 LFLAGS = -fopenmp
 
 # Executable name
-EXEC = rsa
+EXEC = rsa.$(RSA_SPATIAL_DIMENSION).$(RSA_ANGULAR_DIMENSION)
 .DEFAULT_GOAL := $(EXEC)
 
 # Statistics library name
@@ -58,7 +58,9 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/Packing \
        rsa3d/PackingGenerator \
        rsa3d/Parameters \
+       rsa3d/ProgramArguments \
        rsa3d/RND \
+       rsa3d/Quantity \
        rsa3d/Surface \
        rsa3d/ThreadLocalRND \
        rsa3d/Timer \
@@ -97,6 +99,7 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/shape/shapes/polygon/HBPolygon \
        rsa3d/shape/shapes/polygon/SBPolygon \
        rsa3d/shape/shapes/polygon/Polygon \
+       rsa3d/shape/shapes/polygon/Triangle \
        rsa3d/shape/shapes/Ellipse \
        rsa3d/shape/shapes/Ellipsoid \
        rsa3d/shape/shapes/Polydisk \
@@ -118,7 +121,6 @@ OBJS_STAT_TEST = stat_test/utility/IndependentPairFactory \
             stat_test/utility/Quantity \
             stat_test/utility/UniformBallDistribution \
             stat_test/utility/UniformBoxDistribution\
-       		stat_test/utility/Quantity \
        		stat_test/AnisotropicShape2DExclusionDrawer \
        		stat_test/AnisotropicShape2DExclusionTest \
        		stat_test/PackingOverlapsTest \
