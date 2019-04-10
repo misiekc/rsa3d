@@ -39,7 +39,6 @@ protected:
 	static double inscribedCircleRadius;
 
 	static double getCircumscribedCircleRadius();
-
 	static double getInscribedCircleRadius();
 
 	static void centerPolygon();
@@ -77,9 +76,7 @@ public:
 	bool voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition, const Orientation<1> &voxelOrientation,
 					 double spatialSize, double angularSize) const override;
 	std::string toPovray() const override;
-
 	std::string toString() const override;
-
 	std::string toWolfram() const override;
 };
 

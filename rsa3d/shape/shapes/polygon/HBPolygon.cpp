@@ -7,11 +7,6 @@
 
 #include "HBPolygon.h"
 
-HBPolygon::HBPolygon() : Polygon(){
-}
-
-HBPolygon::~HBPolygon() {
-}
 
 void HBPolygon::initClass(const std::string &args){
 	std::istringstream in(args);

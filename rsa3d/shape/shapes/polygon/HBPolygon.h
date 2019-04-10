@@ -12,8 +12,7 @@
 
 class HBPolygon : public Polygon{
 public:
-	HBPolygon();
-	virtual ~HBPolygon();
+	~HBPolygon() override = default;
 
 	static void initClass(const std::string &args);
 };

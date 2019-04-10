@@ -9,11 +9,6 @@
 
 #include <cmath>
 
-SBPolygon::SBPolygon() : Polygon(){
-}
-
-SBPolygon::~SBPolygon() {
-}
 
 void SBPolygon::initClass(const std::string &args){
 	std::istringstream in(args);

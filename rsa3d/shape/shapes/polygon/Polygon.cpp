@@ -371,10 +371,8 @@ std::string Polygon::toWolfram() const {
     out.precision(std::numeric_limits<double>::max_digits10);
     out << "Polygon[{";
     out << this->getVertexPosition(Polygon::segments[0].first);
-    for (std::size_t i = 0; i < segments.size() - 1; i++){
-        out << this->getVertexPosition(Polygon::segments[i].second) << " ,";
-    }
-    out << this->getVertexPosition(Polygon::segments[Polygon::segments.size()-1].second);
+    for (std::size_t i = 1; i < segments.size(); i++)
+        out << ", " << this->getVertexPosition(Polygon::segments[i].first);
     out << "}]";
     return out.str();
 }

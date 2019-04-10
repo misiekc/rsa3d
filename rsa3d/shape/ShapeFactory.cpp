@@ -52,7 +52,8 @@
 		#include "shapes/polygon/Polygon.h"
 		#include "shapes/polygon/SBPolygon.h"
 		#include "shapes/polygon/HBPolygon.h"
-	#endif
+        #include "shapes/polygon/Triangle.h"
+    #endif
 #endif
 
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
@@ -165,13 +166,16 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
             } else if (sClass == "HBPolygon") {
             	HBPolygon::initClass(attr);
             	return;
+            } else if (sClass == "Triangle") {
+                Triangle::initClass(attr);
+                return;
             } else if (sClass == "Polygon") {
-              	Polygon::initClass(attr);
-              	return;
+                Polygon::initClass(attr);
+                return;
             } else if (sClass == "Polydisk") {
               	Polydisk::initClass(attr);
               	return;
-              }
+            }
         #endif
 
 	#endif

@@ -38,6 +38,7 @@ set(RSA_SOURCE
         shape/shapes/spherocylinder/Stolen2DOverlapSC.cpp
         shape/shapes/polygon/HBPolygon.cpp
         shape/shapes/polygon/SBPolygon.cpp
+        shape/shapes/polygon/Triangle.cpp
         shape/shapes/Ellipse.cpp
         shape/shapes/Ellipse1Dim.cpp
         shape/shapes/Ellipsoid.cpp

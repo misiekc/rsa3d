@@ -12,11 +12,9 @@
 
 class SBPolygon: public Polygon {
 public:
-	SBPolygon();
-	virtual ~SBPolygon();
+	~SBPolygon() override = default;
 
 	static void initClass(const std::string &args);
-
 };
 
 #endif /* SHAPES_POLYGONS_SBPOLYGON_H_ */
