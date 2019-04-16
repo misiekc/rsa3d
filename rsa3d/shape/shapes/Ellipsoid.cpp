@@ -20,6 +20,7 @@ void Ellipsoid::initClass(const std::string &attr) {
     // Axes of increasing size a <= b <= c - the largest axis lies on z-axis
     if (a > b) std::swap(a, b);
     if (b > c) std::swap(b, c);
+    if (a > c) std::swap(a, c);
 
     normalizeVolume();
 
