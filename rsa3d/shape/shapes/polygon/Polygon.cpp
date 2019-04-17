@@ -289,8 +289,8 @@ bool Polygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosit
     if (voxelInsideEasyCheck(spatialCenter, halfSpatialSize))
 		return true;
 
-    //if (voxelInsideFullAngleCheck(spatialCenter, halfSpatialSize))
-    //    return true;
+    if (voxelInsideFullAngleCheck(spatialCenter, halfSpatialSize))
+        return true;
 
     double halfAngularSize = 0.5*angularSize;
     double angularCenter = voxelOrientation[0] + halfAngularSize;
@@ -313,21 +313,29 @@ bool Polygon::voxelInsideFullAngleCheck(const Vector<2> &spatialCenter, double h
     double pushDistance = Polygon::inscribedCircleRadius - halfSpatialSize * M_SQRT2;
     Assert(pushDistance >= 0);
 
-    return this->pointInsidePushed(spatialCenter, pushDistance);
+    return this->pointInsidePushedVertices(spatialCenter, pushDistance)
+        || this->pointInsidePushedEdges(spatialCenter, pushDistance)
+        || this->pointInsidePolygon(spatialCenter);
 }
 
-bool Polygon::pointInsidePushed(const Vector<2> &point, double pushDistance) const {
-    return pointInsidePushedBoundary(point, pushDistance) || this->pointInsidePolygon(point);
+bool Polygon::pointInsidePushedVertices(const Vector<2> &point, double pushDistance) const {
+    for (std::size_t i = 0; i < Polygon::vertexR.size(); i++) {
+        Vector<2> vertex = Polygon::getVertexPosition(i);
+        if ((vertex - point).norm2() <= pushDistance*pushDistance)
+            return true;
+    }
+
+    return false;
 }
 
-bool Polygon::pointInsidePushedBoundary(const Vector<2> &point, double pushDistance) const {
+bool Polygon::pointInsidePushedEdges(const Vector<2> &point, double pushDistance) const {
     for (auto segment : segments) {
         Vector<2> s1 = getVertexPosition(segment.first);
         Vector<2> s2 = getVertexPosition(segment.second);
 
         Vector<2> p1 = point - s1;
         Vector<2> p2 = point - s2;
-        Vector<2> s = p2 - p1;
+        Vector<2> s = s2 - s1;
 
         if (p1 * s < 0 || p2 * s > 0)
             continue;

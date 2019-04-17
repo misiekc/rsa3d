@@ -32,9 +32,9 @@ private:
                                  double halfAngularSize) const;
     bool voxelInsideFullAngleCheck(const Vector<2> &spatialCenter, double halfSpatialSize) const;
 
-    bool pointInsidePushed(const Vector<2> &point, double pushDistance) const;
+    bool pointInsidePushedVertices(const Vector<2> &point, double pushDistance) const;
+    bool pointInsidePushedEdges(const Vector<2> &point, double pushDistance) const;
     bool pointInsidePolygon(const Vector<2> &point) const;
-    bool pointInsidePushedBoundary(const Vector<2> &point, double pushDistance) const;
 
 protected:
 	//polar coordinates of all vertices
