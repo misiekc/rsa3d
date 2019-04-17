@@ -78,6 +78,11 @@ public:
 	std::string toPovray() const override;
 	std::string toString() const override;
 	std::string toWolfram() const override;
+
+    bool voxelInsideEasyCheck(const Vector<2> &spatialCenter, double halfSpatialSize) const;
+
+    bool voxelInsideComplexCheck(const Vector<2> &spatialCenter, double halfSpatialSize, double angularCenter,
+                                 double halfAngularSize) const;
 };
 
 #endif /* SHAPES_POLYGONS_POLYGON_H_ */
