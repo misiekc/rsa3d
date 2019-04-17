@@ -289,6 +289,9 @@ bool Polygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosit
     if (voxelInsideEasyCheck(spatialCenter, halfSpatialSize))
 		return true;
 
+    if (voxelInsideFullAngleCheck(spatialCenter, halfSpatialSize))
+        return true;
+
     double halfAngularSize = 0.5*angularSize;
     double angularCenter = voxelOrientation[0] + halfAngularSize;
 
@@ -304,6 +307,44 @@ bool Polygon::voxelInsideEasyCheck(const Vector<2> &spatialCenter, double halfSp
             voxelDistance[j] -= halfSpatialSize;
     }
     return voxelDistance.norm2() < 4*inscribedCircleRadius*inscribedCircleRadius;
+}
+
+bool Polygon::voxelInsideFullAngleCheck(const Vector<2> &spatialCenter, double halfSpatialSize) const {
+    double pushDistance = Polygon::inscribedCircleRadius - halfSpatialSize * M_SQRT2;
+    Assert(pushDistance >= 0);
+
+    return this->pointInsidePushed(spatialCenter, pushDistance);
+}
+
+bool Polygon::pointInsidePushed(const Vector<2> &point, double pushDistance) const {
+    if (this->pointInsidePolygon(point))
+        return true;
+
+    return false;
+}
+
+bool Polygon::pointInsidePolygon(const Vector<2> &point) const {
+    std::vector<double> segmentXIntersections;
+
+    for (auto segment : Polygon::segments) {
+        Vector<2> s1 = Polygon::getVertexPosition(segment.first);
+        Vector<2> s2 = Polygon::getVertexPosition(segment.second);
+
+        if (s1[1] > s2[1])
+            std::swap(s1, s2);
+
+        if (point[1] > s2[1] || point[1] < s1[1])
+            continue;
+
+        double xIntersection = (s2[0] * (point[1] - s1[1]) - s2[0] * (point[1] - s1[1])) / (s2[1] - s1[1]);
+        segmentXIntersections.push_back(xIntersection);
+    }
+
+    double px = point[0];
+    auto onLeft = [px](double x0) { return x0 < px; };
+    std::size_t intersectionsOnLeft = std::count_if(segmentXIntersections.begin(), segmentXIntersections.end(), onLeft);
+
+    return intersectionsOnLeft % 2 == 1;
 }
 
 bool Polygon::voxelInsideComplexCheck(const Vector<2> &spatialCenter, double halfSpatialSize, double angularCenter,
