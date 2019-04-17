@@ -126,17 +126,22 @@ void Polygon::initClass(const std::string &args){
 	}
 
 	in >> n;
+	size_t segBeg;
+	in >> segBeg;
+    if (segBeg > Polygon::vertexR.size()){
+        throw std::runtime_error("Wrong vertex number in segment");
+    }
 	// reading segments
-	for(size_t i = 0; i<n; i++){
-		size_t i1, i2;
-		in >> i1;
-		in >> i2;
-		if (i1>Polygon::vertexR.size() || i1>Polygon::vertexR.size()){
+	for(size_t i = 1; i<n; i++){
+		size_t segEnd;
+		in >> segEnd;
+		if (segEnd >Polygon::vertexR.size()){
 			throw std::runtime_error("Wrong vertex number in segment");
 		}
-		std::pair<size_t, size_t> segment(i1, i2);
-		Polygon::segments.push_back(segment);
+		Polygon::segments.emplace_back(segBeg, segEnd);
+		segBeg = segEnd;
 	}
+	Polygon::segments.emplace_back(Polygon::segments.back().second, Polygon::segments.front().first);
 
 	if (args.find("starHelperSegments")!=std::string::npos){
 		Polygon::centerPolygon();
@@ -151,20 +156,15 @@ void Polygon::initClass(const std::string &args){
 			if (i1>Polygon::vertexR.size() || i1>Polygon::vertexR.size()){
 				throw std::runtime_error("Wrong vertex number in helper segment");
 			}
-			std::pair<size_t, size_t> segment(i1, i2);
-			Polygon::helperSegments.push_back(segment);
+			Polygon::helperSegments.emplace_back(i1, i2);
 		}
 	}
 
 	double area = 0.0;
-	for (size_t i = 0; i < Polygon::segments.size(); i++){
-		std::pair<size_t, size_t> segment = Polygon::segments[i];
-		area += Polygon::getTriangleArea(segment.first, segment.second);
-	}
-
-	for(size_t i = 0; i<Polygon::vertexR.size(); i++){
-		Polygon::vertexR[i] /= std::sqrt(area);
-	}
+	for (auto segment : Polygon::segments)
+	    area += Polygon::getTriangleArea(segment.first, segment.second);
+	for (double & vR : Polygon::vertexR)
+		vR /= std::sqrt(area);
 
 	Shape<2, 1>::setNeighbourListCellSize(2.0*Polygon::getCircumscribedCircleRadius());
 	Polygon::inscribedCircleRadius = Polygon::getInscribedCircleRadius();
