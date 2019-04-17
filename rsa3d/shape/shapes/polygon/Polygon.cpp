@@ -289,8 +289,8 @@ bool Polygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosit
     if (voxelInsideEasyCheck(spatialCenter, halfSpatialSize))
 		return true;
 
-    if (voxelInsideFullAngleCheck(spatialCenter, halfSpatialSize))
-        return true;
+    //if (voxelInsideFullAngleCheck(spatialCenter, halfSpatialSize))
+    //    return true;
 
     double halfAngularSize = 0.5*angularSize;
     double angularCenter = voxelOrientation[0] + halfAngularSize;
