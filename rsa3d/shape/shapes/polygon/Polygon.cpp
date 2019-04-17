@@ -317,15 +317,30 @@ bool Polygon::voxelInsideFullAngleCheck(const Vector<2> &spatialCenter, double h
 }
 
 bool Polygon::pointInsidePushed(const Vector<2> &point, double pushDistance) const {
-    if (this->pointInsidePolygon(point))
-        return true;
+    return pointInsidePushedBoundary(point, pushDistance) || this->pointInsidePolygon(point);
+}
 
+bool Polygon::pointInsidePushedBoundary(const Vector<2> &point, double pushDistance) const {
+    for (auto segment : segments) {
+        Vector<2> s1 = getVertexPosition(segment.first);
+        Vector<2> s2 = getVertexPosition(segment.second);
+
+        Vector<2> p1 = point - s1;
+        Vector<2> p2 = point - s2;
+        Vector<2> s = p2 - p1;
+
+        if (p1 * s < 0 || p2 * s > 0)
+            continue;
+
+        Vector<2> N{{-s[1], s[0]}};
+        if (std::pow(p1 * N, 2) <= pushDistance * pushDistance * N.norm2())
+            return true;
+    }
     return false;
 }
 
 bool Polygon::pointInsidePolygon(const Vector<2> &point) const {
-    std::vector<double> segmentXIntersections;
-
+    std::size_t intersectionsOnLeft = 0;
     for (auto segment : Polygon::segments) {
         Vector<2> s1 = Polygon::getVertexPosition(segment.first);
         Vector<2> s2 = Polygon::getVertexPosition(segment.second);
@@ -336,13 +351,10 @@ bool Polygon::pointInsidePolygon(const Vector<2> &point) const {
         if (point[1] > s2[1] || point[1] < s1[1])
             continue;
 
-        double xIntersection = (s2[0] * (point[1] - s1[1]) - s2[0] * (point[1] - s1[1])) / (s2[1] - s1[1]);
-        segmentXIntersections.push_back(xIntersection);
+        double xIntersection = (s2[0] * (point[1] - s1[1]) - s1[0] * (point[1] - s2[1])) / (s2[1] - s1[1]);
+        if (xIntersection < point[0])
+            intersectionsOnLeft++;
     }
-
-    double px = point[0];
-    auto onLeft = [px](double x0) { return x0 < px; };
-    std::size_t intersectionsOnLeft = std::count_if(segmentXIntersections.begin(), segmentXIntersections.end(), onLeft);
 
     return intersectionsOnLeft % 2 == 1;
 }

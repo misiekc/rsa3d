@@ -34,6 +34,7 @@ private:
 
     bool pointInsidePushed(const Vector<2> &point, double pushDistance) const;
     bool pointInsidePolygon(const Vector<2> &point) const;
+    bool pointInsidePushedBoundary(const Vector<2> &point, double pushDistance) const;
 
 protected:
 	//polar coordinates of all vertices
