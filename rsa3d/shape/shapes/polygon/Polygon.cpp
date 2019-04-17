@@ -126,17 +126,22 @@ void Polygon::initClass(const std::string &args){
 	}
 
 	in >> n;
+	size_t segBeg;
+	in >> segBeg;
+    if (segBeg > Polygon::vertexR.size()){
+        throw std::runtime_error("Wrong vertex number in segment");
+    }
 	// reading segments
-	for(size_t i = 0; i<n; i++){
-		size_t i1, i2;
-		in >> i1;
-		in >> i2;
-		if (i1>Polygon::vertexR.size() || i1>Polygon::vertexR.size()){
+	for(size_t i = 1; i<n; i++){
+		size_t segEnd;
+		in >> segEnd;
+		if (segEnd >Polygon::vertexR.size()){
 			throw std::runtime_error("Wrong vertex number in segment");
 		}
-		std::pair<size_t, size_t> segment(i1, i2);
-		Polygon::segments.push_back(segment);
+		Polygon::segments.emplace_back(segBeg, segEnd);
+		segBeg = segEnd;
 	}
+	Polygon::segments.emplace_back(Polygon::segments.back().second, Polygon::segments.front().first);
 
 	if (args.find("starHelperSegments")!=std::string::npos){
 		Polygon::centerPolygon();
@@ -151,20 +156,15 @@ void Polygon::initClass(const std::string &args){
 			if (i1>Polygon::vertexR.size() || i1>Polygon::vertexR.size()){
 				throw std::runtime_error("Wrong vertex number in helper segment");
 			}
-			std::pair<size_t, size_t> segment(i1, i2);
-			Polygon::helperSegments.push_back(segment);
+			Polygon::helperSegments.emplace_back(i1, i2);
 		}
 	}
 
 	double area = 0.0;
-	for (size_t i = 0; i < Polygon::segments.size(); i++){
-		std::pair<size_t, size_t> segment = Polygon::segments[i];
-		area += Polygon::getTriangleArea(segment.first, segment.second);
-	}
-
-	for(size_t i = 0; i<Polygon::vertexR.size(); i++){
-		Polygon::vertexR[i] /= std::sqrt(area);
-	}
+	for (auto segment : Polygon::segments)
+	    area += Polygon::getTriangleArea(segment.first, segment.second);
+	for (double & vR : Polygon::vertexR)
+		vR /= std::sqrt(area);
 
 	Shape<2, 1>::setNeighbourListCellSize(2.0*Polygon::getCircumscribedCircleRadius());
 	Polygon::inscribedCircleRadius = Polygon::getInscribedCircleRadius();
@@ -278,69 +278,122 @@ bool Polygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{
 #endif
 
 bool Polygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition,
-						  const Orientation<1> &voxelOrientation, double spatialSize, double angularSize) const{
-
-	if (voxelOrientation[0] > Shape<2, 1>::getVoxelAngularSize())
+						  const Orientation<1> &voxelOrientation, double spatialSize, double angularSize) const {
+    if (voxelOrientation[0] > Shape<2, 1>::getVoxelAngularSize())
 		return true;
 
-	double position[2];
-	this->getPosition().copyToArray(position);
-	double translation[2];
-	bc->getTranslation(voxelPosition, this->getPosition()).copyToArray(translation);
-
-	double spatialCenter[2];
 	double halfSpatialSize = 0.5*spatialSize;
-	for(unsigned short i = 0; i<2; i++){
-		spatialCenter[i] = voxelPosition[i] + halfSpatialSize;
-	}
+	Vector<2> voxelTranslation = bc->getTranslation(this->getPosition(), voxelPosition);
+	Vector<2> spatialCenter = voxelPosition + voxelTranslation + Vector<2>{{halfSpatialSize, halfSpatialSize}};
 
-	//easy check
-	double d2 = 0, tmp;
-	for (unsigned short j = 0; j<2; j++){
-		tmp = position[j] + translation[j] - spatialCenter[j];
-		if (tmp>0)
-			tmp += 0.5*spatialSize;
-		else
-			tmp -= 0.5*spatialSize;
-		d2 += tmp*tmp;
-	}
-	if (std::sqrt(d2) < 2.0*Polygon::inscribedCircleRadius)
+    if (voxelInsideEasyCheck(spatialCenter, halfSpatialSize))
 		return true;
 
-	double halfAngularSize = 0.5*angularSize;
-	double angularCenter = voxelOrientation[0] + halfAngularSize;
+    //if (voxelInsideFullAngleCheck(spatialCenter, halfSpatialSize))
+    //    return true;
 
-	double angle = this->getOrientation()[0];
-	//complex check
-	for (size_t i = 0; i < Polygon::segments.size() + Polygon::helperSegments.size(); i++){
-		std::pair<size_t, size_t> segment;
-		if (i<Polygon::segments.size()){
-			segment = Polygon::segments[i];
-		}else{
-			segment = Polygon::helperSegments[i-Polygon::segments.size()];
-		}
+    double halfAngularSize = 0.5*angularSize;
+    double angularCenter = voxelOrientation[0] + halfAngularSize;
 
-		double x1 = position[0] + translation[0] + Polygon::vertexR[segment.first] * std::cos(Polygon::vertexTheta[segment.first] + angle);
-		double y1 = position[1] + translation[1] + Polygon::vertexR[segment.first] * std::sin(Polygon::vertexTheta[segment.first] + angle);
-		double x2 = position[0] + translation[0] + Polygon::vertexR[segment.second] * std::cos(Polygon::vertexTheta[segment.second] + angle);
-		double y2 = position[1] + translation[1] + Polygon::vertexR[segment.second] * std::sin(Polygon::vertexTheta[segment.second] + angle);
+    return voxelInsideComplexCheck(spatialCenter, halfSpatialSize, angularCenter, halfAngularSize);
+}
 
-		for (size_t j = 0; j < Polygon::segments.size() + Polygon::helperSegments.size(); j++){
-			std::pair<size_t, size_t> vsegment;
-			if (j<Polygon::segments.size()){
-				vsegment = Polygon::segments[j];
-			}else{
-				vsegment = Polygon::helperSegments[j-Polygon::segments.size()];
-			}
-			double x3 = spatialCenter[0] + Polygon::vertexR[vsegment.first] * std::cos(Polygon::vertexTheta[vsegment.first] + angularCenter);
-			double y3 = spatialCenter[1] + Polygon::vertexR[vsegment.first] * std::sin(Polygon::vertexTheta[vsegment.first] + angularCenter);
-			double x4 = spatialCenter[0] + Polygon::vertexR[vsegment.second] * std::cos(Polygon::vertexTheta[vsegment.second] + angularCenter);
-			double y4 = spatialCenter[1] + Polygon::vertexR[vsegment.second] * std::sin(Polygon::vertexTheta[vsegment.second] + angularCenter);
-			if (Polygon::lineVoxelIntersect(x1, y1, x2, y2, x3, y3, x4, y4, halfSpatialSize, halfAngularSize, Polygon::vertexR[vsegment.first], Polygon::vertexR[vsegment.second]))
-				return true;
-		}
-	}
-	return false;
+bool Polygon::voxelInsideEasyCheck(const Vector<2> &spatialCenter, double halfSpatialSize) const {
+    Vector<2> voxelDistance = this->getPosition() - spatialCenter;
+    for (unsigned short j = 0; j < 2; j++) {
+        if (voxelDistance[j] > 0)
+            voxelDistance[j] += halfSpatialSize;
+        else
+            voxelDistance[j] -= halfSpatialSize;
+    }
+    return voxelDistance.norm2() < 4*inscribedCircleRadius*inscribedCircleRadius;
+}
+
+bool Polygon::voxelInsideFullAngleCheck(const Vector<2> &spatialCenter, double halfSpatialSize) const {
+    double pushDistance = Polygon::inscribedCircleRadius - halfSpatialSize * M_SQRT2;
+    Assert(pushDistance >= 0);
+
+    return this->pointInsidePushed(spatialCenter, pushDistance);
+}
+
+bool Polygon::pointInsidePushed(const Vector<2> &point, double pushDistance) const {
+    return pointInsidePushedBoundary(point, pushDistance) || this->pointInsidePolygon(point);
+}
+
+bool Polygon::pointInsidePushedBoundary(const Vector<2> &point, double pushDistance) const {
+    for (auto segment : segments) {
+        Vector<2> s1 = getVertexPosition(segment.first);
+        Vector<2> s2 = getVertexPosition(segment.second);
+
+        Vector<2> p1 = point - s1;
+        Vector<2> p2 = point - s2;
+        Vector<2> s = p2 - p1;
+
+        if (p1 * s < 0 || p2 * s > 0)
+            continue;
+
+        Vector<2> N{{-s[1], s[0]}};
+        if (std::pow(p1 * N, 2) <= pushDistance * pushDistance * N.norm2())
+            return true;
+    }
+    return false;
+}
+
+bool Polygon::pointInsidePolygon(const Vector<2> &point) const {
+    std::size_t intersectionsOnLeft = 0;
+    for (auto segment : Polygon::segments) {
+        Vector<2> s1 = Polygon::getVertexPosition(segment.first);
+        Vector<2> s2 = Polygon::getVertexPosition(segment.second);
+
+        if (s1[1] > s2[1])
+            std::swap(s1, s2);
+
+        if (point[1] > s2[1] || point[1] < s1[1])
+            continue;
+
+        double xIntersection = (s2[0] * (point[1] - s1[1]) - s1[0] * (point[1] - s2[1])) / (s2[1] - s1[1]);
+        if (xIntersection < point[0])
+            intersectionsOnLeft++;
+    }
+
+    return intersectionsOnLeft % 2 == 1;
+}
+
+bool Polygon::voxelInsideComplexCheck(const Vector<2> &spatialCenter, double halfSpatialSize, double angularCenter,
+                                      double halfAngularSize) const {
+    Vector<2> position = this->getPosition();
+    double angle = getOrientation()[0];
+    for (size_t i = 0; i < segments.size() + helperSegments.size(); i++) {
+        std::pair<size_t, size_t> segment;
+        if (i < segments.size()) {
+            segment = segments[i];
+        } else {
+            segment = helperSegments[i - segments.size()];
+        }
+
+        double x1 = position[0] + vertexR[segment.first] * cos(vertexTheta[segment.first] + angle);
+        double y1 = position[1] + vertexR[segment.first] * sin(vertexTheta[segment.first] + angle);
+        double x2 = position[0] + vertexR[segment.second] * cos(vertexTheta[segment.second] + angle);
+        double y2 = position[1] + vertexR[segment.second] * sin(vertexTheta[segment.second] + angle);
+
+        for (size_t j = 0; j < segments.size() + helperSegments.size(); j++) {
+            std::pair<size_t, size_t> vsegment;
+            if (j < segments.size()) {
+                vsegment = segments[j];
+            } else {
+                vsegment = helperSegments[j - segments.size()];
+            }
+            double x3 = spatialCenter[0] + vertexR[vsegment.first] * cos(vertexTheta[vsegment.first] + angularCenter);
+            double y3 = spatialCenter[1] + vertexR[vsegment.first] * sin(vertexTheta[vsegment.first] + angularCenter);
+            double x4 = spatialCenter[0] + vertexR[vsegment.second] * cos(vertexTheta[vsegment.second] + angularCenter);
+            double y4 = spatialCenter[1] + vertexR[vsegment.second] * sin(vertexTheta[vsegment.second] + angularCenter);
+            if (lineVoxelIntersect(x1, y1, x2, y2, x3, y3, x4, y4, halfSpatialSize, halfAngularSize,
+                                   vertexR[vsegment.first], vertexR[vsegment.second])) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 Shape<2, 1> *Polygon::clone() const {

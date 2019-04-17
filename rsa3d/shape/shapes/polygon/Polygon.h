@@ -27,6 +27,15 @@ private:
 	Vector<2> getVertexPosition(std::size_t index) const;
 	void vertexToPovray(std::size_t index, std::ostream &out) const;
 
+    bool voxelInsideEasyCheck(const Vector<2> &spatialCenter, double halfSpatialSize) const;
+    bool voxelInsideComplexCheck(const Vector<2> &spatialCenter, double halfSpatialSize, double angularCenter,
+                                 double halfAngularSize) const;
+    bool voxelInsideFullAngleCheck(const Vector<2> &spatialCenter, double halfSpatialSize) const;
+
+    bool pointInsidePushed(const Vector<2> &point, double pushDistance) const;
+    bool pointInsidePolygon(const Vector<2> &point) const;
+    bool pointInsidePushedBoundary(const Vector<2> &point, double pushDistance) const;
+
 protected:
 	//polar coordinates of all vertices
 	//assume vertex 0 is linked to vertex 1, vertex 1 is linked to vertex 2, vertex 2 is linked to vertex 3, etc.
