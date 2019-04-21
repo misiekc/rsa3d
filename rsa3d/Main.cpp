@@ -307,12 +307,12 @@ int main(int argc, char **argv) {
     try {
         arguments = std::unique_ptr<ProgramArguments>(new ProgramArguments(argc, argv));
     } catch (InvalidArgumentsException &e) {
-        die (e.what());
+        die(e.what());
     }
 
     Parameters params = arguments->getParameters();
     ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
-
+    
     std::string mode = arguments->getMode();
     if (mode == "simulate")
         simulate(*arguments);

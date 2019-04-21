@@ -24,17 +24,15 @@ std::string Triangle::preparePolygonAttributes(const std::string &triangleAttr) 
 void Triangle::parseAttributes(const std::string &args, double &a, double &b, double &c) {
     std::istringstream in(args);
     in >> a >> b >> c;
-    if (!in) throw std::domain_error("Expected 3 doubles as side lengths");
+    ValidateMsg(in, "Expected 3 doubles as side lengths");
 
     // Ensure order a <= b <= c
     if (a > b) std::swap(a, b);
     if (b > c) std::swap(b, c);
     if (a > c) std::swap(a, c);
 
-    Validate(a > 0);
-    Validate(b > 0);
-    Validate(c > 0);
-    Validate(a + b > c);        // Triangle inequality
+    ValidateMsg(a > 0 && b > 0 && c > 0, "Triangle side lengths should be positive");
+    ValidateMsg(a + b > c, "Triangle inequality violated");
 }
 
 /* Calculates the coordinates of the third triangle vertex assuming that its base is on X axis. It assumes that

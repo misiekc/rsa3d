@@ -43,9 +43,13 @@
 
 // Additional macro for validating things like input from file - wrong input shouldn't be considered as assertion fail,
 // because it is not programmer's fault ;)
-// std::domain_error can be easily caught to handle bad input errors (or left unchecked) and it doesn't capture
-// exceptions thrown by neither Expects, Ensures nor Assert
-#define Validate(cond) if (!(cond)) throw std::domain_error("Validation " #cond " failed")
+
+struct ValidationException : public std::domain_error {
+    explicit ValidationException(const std::string &msg) : std::domain_error{msg} { }
+};
+
+#define Validate(cond) if (!(cond)) throw ValidationException("Validation " #cond " failed")
+#define ValidateMsg(cond, msg) if (!(cond)) throw ValidationException(msg)
 
 template <std::size_t N>
 using Orientation = std::array<double, N>;

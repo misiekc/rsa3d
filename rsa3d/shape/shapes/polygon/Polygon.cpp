@@ -6,7 +6,6 @@
  */
 
 #include "Polygon.h"
-#include "../../ShapeFactory.h"
 #include <cmath>
 #include <sstream>
 
@@ -127,7 +126,7 @@ void Polygon::parseVertices(std::istringstream &in) {
 
     in >> n;
     in >> format;
-    Validate(n >= 3);
+    ValidateMsg(n >= 3, "At least 3 vertices should be specified");
 
     for (size_t i=0; i<n; i++){
         double c1, c2;
@@ -142,7 +141,7 @@ void Polygon::parseVertices(std::istringstream &in) {
             r = c1;
             t = c2;
         }else{
-            throw std::runtime_error("Wrong coordinate format. Use rt or xy");
+            throw ValidationException("Wrong coordinate format. Use rt or xy");
         }
         Polygon::vertexR.push_back(r);
         Polygon::vertexTheta.push_back(t);
@@ -152,26 +151,24 @@ void Polygon::parseVertices(std::istringstream &in) {
 void Polygon::parseSegments(std::istringstream &in) {
     std::size_t n;
     in >> n;
-    Validate(n >= 3 && n <= vertexR.size());
+    ValidateMsg(n >= 3 && n <= vertexR.size(), "Number of segments should be in [3, numOfVertice] range");
 
     size_t i1;
     in >> i1;
-    if (i1 > Polygon::vertexR.size()){
-        throw std::runtime_error("Wrong vertex number in segment");
-    }
+    ValidateMsg(i1 < Polygon::vertexR.size(), "Wrong vertex number in segment");
+
     // reading segments
     for(size_t i = 1; i<n; i++){
         size_t i2;
         in >> i2;
-        Validate(i2 != i1);
+        ValidateMsg(i2 != i1, "Two identical adjacent vertices in the boundary");
+        ValidateMsg(i2 < Polygon::vertexR.size(), "Wrong vertex number in segment");
 
-        if (i2 >Polygon::vertexR.size()){
-            throw std::runtime_error("Wrong vertex number in segment");
-        }
         Polygon::segments.emplace_back(i1, i2);
         i1 = i2;
     }
-    Validate(Polygon::segments.back().second != Polygon::segments.front().first);
+    ValidateMsg(Polygon::segments.back().second != Polygon::segments.front().first,
+            "Two identical adjacent vertices in the boundary");
     Polygon::segments.emplace_back(Polygon::segments.back().second, Polygon::segments.front().first);
 }
 
@@ -187,9 +184,7 @@ void Polygon::parseHelperSegments(std::istringstream &in) {
             size_t i1, i2;
             in >> i1;
             in >> i2;
-            if (i1>Polygon::vertexR.size() || i1>Polygon::vertexR.size()){
-                throw std::runtime_error("Wrong vertex number in helper segment");
-            }
+            ValidateMsg(i1 < Polygon::vertexR.size() && i2 < Polygon::vertexR.size(), "Wrong vertex number in helper segment");
             Polygon::helperSegments.emplace_back(i1, i2);
         }
     }

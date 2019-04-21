@@ -56,7 +56,28 @@
     #endif
 #endif
 
+struct UnknownShapeException : public std::domain_error {
+    UnknownShapeException() : domain_error("") { }
+};
+
 void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &attr) {
+    std::ostringstream error;
+    error << "[ShapeFactory::initShapeClass] ";
+    try {
+        ShapeFactory::initShapeClass0(sClass, attr);
+        return;
+    } catch (UnknownShapeException &e) {
+        error << "Unknown shape: " << sClass << " or wrong dimensions: " << RSA_SPATIAL_DIMENSION << ", " << RSA_ANGULAR_DIMENSION;
+    } catch (ValidationException &e) {
+        error << sClass << " attributes:" << std::endl;
+        error << "    " << attr << std::endl;
+        error << "malformed. Reason:" << std::endl;
+        error << "    " << e.what();
+    }
+    die(error.str());
+}
+
+void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string &attr) {
     // Shapes for any dimension, without angular dimensions
     #if RSA_ANGULAR_DIMENSION == 0
         if (sClass == "Sphere") {
@@ -180,8 +201,7 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
 
 	#endif
 
-    std::cerr << "Unknown shape: " << sClass << " or wrong dimensions: " << RSA_SPATIAL_DIMENSION << ", " << RSA_ANGULAR_DIMENSION << std::endl;
-    exit(EXIT_FAILURE);
+	throw UnknownShapeException();
 }
 
 RSAShape *ShapeFactory::createShape(RND *rnd) {

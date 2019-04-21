@@ -45,8 +45,8 @@ void Cuboid::initClass(const std::string &args)
     int dimension;  // fetch dimension for backward compatibility
 
     args_stream >> dimension >> size[0] >> size[1] >> size[2];
-    if (size[0] <= 0.0 || size[1] <= 0.0 || size[2] <= 0.0)
-        throw std::runtime_error("Wrong Cuboid dimensions: " + args);
+    ValidateMsg(args_stream, "Wrong attributes format");
+    ValidateMsg(size[0] > 0 && size[1] > 0 && size[2] > 0, "Cuboid dimensions should be positive");
 
     normalizeVolume();
     calculateRelativeVerties();

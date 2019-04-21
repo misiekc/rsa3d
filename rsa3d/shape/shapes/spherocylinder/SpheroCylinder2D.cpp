@@ -15,7 +15,7 @@ Vector<2> SpheroCylinder2D::centerVector;
 
 void SpheroCylinder2D::calculateStatic(const std::string &attr) {
     double ratio = std::stod(attr);
-    if (ratio < 1) throw std::runtime_error("SpheroCylinder2D::initClass: ratio < 1");
+    ValidateMsg(ratio >= 1, "Ratio has to be >= 1");
 
     double normalization = std::sqrt(4 * (ratio - 1) + M_PI);
     radius = 1 / normalization;

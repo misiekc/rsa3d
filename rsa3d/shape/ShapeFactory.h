@@ -18,6 +18,9 @@
  * @brief A class providing a way to create shapes of a type determined at the runtime.
  */
 class ShapeFactory {
+private:
+    static void initShapeClass0(const std::string &sClass, const std::string &attr);
+
 public:
     /**
      * @brief Creates a shape using a function provided by a specific shape class which was chosen in the last

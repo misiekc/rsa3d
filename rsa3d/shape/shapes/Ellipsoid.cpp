@@ -16,7 +16,9 @@ void Ellipsoid::initClass(const std::string &attr) {
     std::istringstream attrStream(attr);
 
     attrStream >> a >> b >> c;
-    if (!attrStream)    throw std::runtime_error("Wrong attr format");
+    if (!attrStream)    throw ValidationException("Wrong attr format");
+    ValidateMsg(a > 0 && b > 0 && c > 0, "Ellipsoid semiaxes should be positive");
+
     // Axes of increasing size a <= b <= c - the largest axis lies on z-axis
     if (a > b) std::swap(a, b);
     if (b > c) std::swap(b, c);

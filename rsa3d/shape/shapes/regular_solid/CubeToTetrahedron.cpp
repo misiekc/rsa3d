@@ -20,14 +20,14 @@ void CubeToTetrahedron::calculateStatic(const std::string &attr) {
     double aa, ac;
     std::istringstream attrStream(attr);
     attrStream >> aa >> ac;
-    Validate(attrStream);
-    Validate(aa >= 0 && aa <= 1);
-    Validate(ac >= 0 && ac <= 1);
+    ValidateMsg(attrStream, "Expected 2 cut parameters");
+    ValidateMsg(aa >= 0 && aa <= 1, "aa should be in [0, 1] range");
+    ValidateMsg(ac >= 0 && ac <= 1, "ac should be in [0, 1] range");
     
     if (ac < aa)    std::swap(ac, aa);
     
     if (approx_equal(aa, 1) && approx_equal(ac, 1))
-        throw std::runtime_error("aa = 1, ac = 1; a cube isn't RegularSolid, cannot handle; use Cube instead");
+        throw ValidationException("aa = 1, ac = 1; this class doesn't support cubes; use Cube instead");
     else if (approx_equal(ac, 1) && approx_equal(aa, 0))
         Tetrahedron::calculateStatic("dual");   // Use a dual to preserve continuity and be backwards compatible
     else if (approx_equal(aa, 0) && approx_equal(ac, 0))
