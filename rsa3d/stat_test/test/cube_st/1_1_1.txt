@@ -1,7 +1,0 @@
-cuboid_size = 1 1 1
-#pairs = 100000
-pairs = 10000
-repeats = 10
-#ball_radia = 6 4 3 2.6 2 1.67 1.47 1.32 1.20 1.09 0.99 0.88 0.6
-ball_radia = 2 1.09
-strategies = mine optimised_sat tri_tri
