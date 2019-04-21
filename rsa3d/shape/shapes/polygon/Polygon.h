@@ -18,6 +18,12 @@
 class Polygon : public Shape<2, 1> {
 
 private:
+    static void parseVertices(std::istringstream &in);
+    static void parseSegments(std::istringstream &in);
+    static void parseHelperSegments(std::istringstream &in);
+
+    static Vector<2> getStaticVertexPosition(std::size_t index);
+
 	//test if line segment from point 1 to 2 intersects with line segment from point 3 to 4
 	static bool lineLineIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
 

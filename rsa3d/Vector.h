@@ -213,6 +213,12 @@ public:
         return *this / this->norm();
     }
 
+    template <std::size_t _DIM = DIM, typename _E = E>
+    enabled<_DIM == 2 && std::is_same<_E, double>::value, double>
+    angle() {
+        return std::atan2(this->v(1, 0), this->v(0, 0));
+    }
+
 
     // Public access operators
     //---------------------------------------------------------------------------------------

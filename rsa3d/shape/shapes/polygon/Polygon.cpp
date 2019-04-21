@@ -6,8 +6,12 @@
  */
 
 #include "Polygon.h"
+#include "../../ShapeFactory.h"
 #include <cmath>
 #include <sstream>
+
+
+#define VOXEL_INSIDE_FULL_ANGLE_ONLY_VERTICES
 
 
 std::vector<double> Polygon::vertexR;
@@ -28,19 +32,11 @@ double Polygon::getCircumscribedCircleRadius(){
 }
 
 double Polygon::getInscribedCircleRadius(){
-	if (Polygon::vertexR.size() < 3){
-		return 0.0;
-	}
-
 	double result = Polygon::vertexR[Polygon::segments[0].first];
-	for (size_t i = 0; i < Polygon::segments.size(); i++){
-		std::pair<size_t, size_t> segment = Polygon::segments[i];
-		double x3 = Polygon::vertexR[segment.first] * std::cos(Polygon::vertexTheta[segment.first]);
-		double y3 = Polygon::vertexR[segment.first] * std::sin(Polygon::vertexTheta[segment.first]);
-		double x4 = Polygon::vertexR[segment.second] * std::cos(Polygon::vertexTheta[segment.second]);
-		double y4 = Polygon::vertexR[segment.second] * std::sin(Polygon::vertexTheta[segment.second]);
-		double t = (x4 - x3) / (y4 - y3);
-		double d = std::abs(t*y3 - x3) / std::sqrt(1.0 + t*t);
+	for (auto segment : Polygon::segments) {
+        Vector<2> v3 = Polygon::getStaticVertexPosition(segment.first);
+        Vector<2> v4 = Polygon::getStaticVertexPosition(segment.second);
+		double d = std::abs(v3[0]*v4[1] - v3[1]*v4[0]) / (v4 - v3).norm();
 		result = std::min(result, d);
 	}
 	return result;
@@ -48,35 +44,25 @@ double Polygon::getInscribedCircleRadius(){
 
 //calculate the area of the triangle made from the origin, vertex i, and vertex j
 double Polygon::getTriangleArea(size_t i, size_t j){
+    Vector<2> vI = Polygon::getStaticVertexPosition(i);
+    Vector<2> vJ = Polygon::getStaticVertexPosition(j);
 
-	//a, b, and c are the side lengths of the triangle
-	double a = Polygon::vertexR[i];
-	double b = Polygon::vertexR[j];
-	double dxc = Polygon::vertexR[i] * std::cos(Polygon::vertexTheta[i]) - Polygon::vertexR[j] * std::cos(Polygon::vertexTheta[j]);
-	double dyc = Polygon::vertexR[i] * std::sin(Polygon::vertexTheta[i]) - Polygon::vertexR[j] * std::sin(Polygon::vertexTheta[j]);
-	double c = std::sqrt(dxc*dxc + dyc*dyc);
-
-	double s = 0.5*(a + b + c);
-	return std::sqrt(s*(s - a)*(s - b)*(s - c));
+    return 0.5*std::abs(vI[0]*vJ[1] - vI[1]*vJ[0]);
 }
 
 /**
  * moves the center of the polygon to (0,0)
  */
 void Polygon::centerPolygon(){
-	double cx = 0.0, cy = 0.0;
+	Vector<2> cm;
+	for (size_t i=0; i<Polygon::vertexR.size(); i++)
+	    cm += Polygon::getStaticVertexPosition(i);
+	cm /= Polygon::vertexR.size();
+
 	for (size_t i=0; i<Polygon::vertexR.size(); i++){
-		cx += Polygon::vertexR[i]*std::cos(Polygon::vertexTheta[i]);
-		cy += Polygon::vertexR[i]*std::sin(Polygon::vertexTheta[i]);
-	}
-	cx /= Polygon::vertexR.size();
-	cy /= Polygon::vertexR.size();
-	double x, y;
-	for (size_t i=0; i<Polygon::vertexR.size(); i++){
-		x = Polygon::vertexR[i]*std::cos(Polygon::vertexTheta[i]) - cx;
-		y = Polygon::vertexR[i]*std::sin(Polygon::vertexTheta[i]) - cy;
-		Polygon::vertexR[i] = std::sqrt(x*x + y*y);
-		Polygon::vertexTheta[i] = std::atan2(y, x);
+	    Vector<2> newV = Polygon::getStaticVertexPosition(i) + cm;
+		Polygon::vertexR[i] = newV.norm();
+		Polygon::vertexTheta[i] = newV.angle();
 	}
 }
 
@@ -84,81 +70,38 @@ void Polygon::createStarHelperSegments(){
 	Polygon::helperSegments.clear();
 	Polygon::vertexR.push_back(0.0);
 	Polygon::vertexTheta.push_back(0.0);
-	for (size_t i=0; i<Polygon::vertexR.size()-1; i++){
-		std::pair<size_t, size_t> segment(i, Polygon::vertexR.size()-1);
-		Polygon::helperSegments.push_back(segment);
-	}
+	for (size_t i=0; i<Polygon::vertexR.size()-1; i++)
+		Polygon::helperSegments.emplace_back(i, Polygon::vertexR.size()-1);
 }
 
 /**
- * @param args contains information about coordinates of each vertex of the polygon. Adjacent vertices are connected.
- * Data should be separated by only spaces, and should be: number_of_vertices [xy/rt] c01 c02 c11 c12 c21 c22 ...
+ * @param args contains information about polygon
+ *
+ * Data should be separated by only spaces, and should be:
+ * nv [xy/rt] v_01 v_02 ... v_(nv-1),1 v_(nv-1),2 ns si_0 ... si_(ns-1) [starHelperSegments / nhs hsi_01 hsi_02 ... hsi_(nhs-1),1 hsi_(nhs-1),2]
+ *
  * xy means cartesian coordinates, and rt means polar coordinates
+ * nv - number of vertices
+ * v_01 v_02 ... v_(nv-1),1 v_(nv-1),2 - subsequent pair of their coordinates, indexed from 0 to ns-1
+ * ns - number of segments - some vertices may be reserved exclusively for helper segments
+ * si_0 ... si_(ns-1) - indexes of vertices to create segments from; segments are created cyclicly, meaning their ends
+ *      will be (si_0, si_1), (si_1, si_2), ... (si_(ns-1), si_0)
+ * starHelperSegments - helper segments will be creating automatically from centre of mass to each vertex
+ * nhs - number of helper segments, when being specified manually; can be 0
+ * hsi_01 hsi_02 ... hsi_(nhs-1),1 hsi_(nhs-1),2 - subsequent pairs of indexes of vertices to create helper segments
+ *      from; the first index from pair is segment beginning, the second is segment end
+ *
  * Example format of coordinates
- * 4 xy 1 1 1 -1 -1 -1 -1 1 4 0 1 1 2 2 3 3 0 0
+ * 4 xy 1 1 1 -1 -1 -1 -1 1 4 0 1 2 3 starHelperSegments
  * or equivalently
- * 4 rt 1.4142 0.7854 1.4142 2.3562 1.4142 3.9270 1.4142 5.4978 4 0 1 1 2 2 3 3 0 0
+ * 4 rt 1.4142 0.7854 1.4142 2.3562 1.4142 3.9270 1.4142 5.4978 4 0 1 2 3 starHelperSegments
  */
 void Polygon::initClass(const std::string &args){
 	std::istringstream in(args);
 
-	size_t n;
-	in >> n;
-	std::string format;
-	in >> format;
-	double r, t;
-	// reading vertices
-	for (size_t i=0; i<n; i++){
-		double c1, c2;
-		in >> c1;
-		in >> c2;
-		if(format == "xy"){
-			r = std::sqrt(c1*c1 + c2*c2);
-			t = std::atan2(c2, c1);
-		}else if (format == "rt"){
-			r = c1;
-			t = c2;
-		}else{
-			throw std::runtime_error("Wrong coordinate format. Use rt or xy");
-		}
-		Polygon::vertexR.push_back(r);
-		Polygon::vertexTheta.push_back(t);
-	}
-
-	in >> n;
-	size_t segBeg;
-	in >> segBeg;
-    if (segBeg > Polygon::vertexR.size()){
-        throw std::runtime_error("Wrong vertex number in segment");
-    }
-	// reading segments
-	for(size_t i = 1; i<n; i++){
-		size_t segEnd;
-		in >> segEnd;
-		if (segEnd >Polygon::vertexR.size()){
-			throw std::runtime_error("Wrong vertex number in segment");
-		}
-		Polygon::segments.emplace_back(segBeg, segEnd);
-		segBeg = segEnd;
-	}
-	Polygon::segments.emplace_back(Polygon::segments.back().second, Polygon::segments.front().first);
-
-	if (args.find("starHelperSegments")!=std::string::npos){
-		Polygon::centerPolygon();
-		Polygon::createStarHelperSegments();
-	}else{
-		in >> n;
-		// reading helper segments
-		for(size_t i = 0; i<n; i++){
-			size_t i1, i2;
-			in >> i1;
-			in >> i2;
-			if (i1>Polygon::vertexR.size() || i1>Polygon::vertexR.size()){
-				throw std::runtime_error("Wrong vertex number in helper segment");
-			}
-			Polygon::helperSegments.emplace_back(i1, i2);
-		}
-	}
+    Polygon::parseVertices(in);
+    Polygon::parseSegments(in);
+    Polygon::parseHelperSegments(in);
 
 	double area = 0.0;
 	for (auto segment : Polygon::segments)
@@ -176,6 +119,80 @@ void Polygon::initClass(const std::string &args){
 	#ifdef CUDA_ENABLED
 		Polygon::cuInit();
 	#endif
+}
+
+void Polygon::parseVertices(std::istringstream &in) {
+    std::size_t n;
+    std::string format;
+
+    in >> n;
+    in >> format;
+    Validate(n >= 3);
+
+    for (size_t i=0; i<n; i++){
+        double c1, c2;
+        in >> c1;
+        in >> c2;
+
+        double r, t;
+        if(format == "xy"){
+            r = std::sqrt(c1*c1 + c2*c2);
+            t = std::atan2(c2, c1);
+        }else if (format == "rt") {
+            r = c1;
+            t = c2;
+        }else{
+            throw std::runtime_error("Wrong coordinate format. Use rt or xy");
+        }
+        Polygon::vertexR.push_back(r);
+        Polygon::vertexTheta.push_back(t);
+    }
+}
+
+void Polygon::parseSegments(std::istringstream &in) {
+    std::size_t n;
+    in >> n;
+    Validate(n >= 3 && n <= vertexR.size());
+
+    size_t i1;
+    in >> i1;
+    if (i1 > Polygon::vertexR.size()){
+        throw std::runtime_error("Wrong vertex number in segment");
+    }
+    // reading segments
+    for(size_t i = 1; i<n; i++){
+        size_t i2;
+        in >> i2;
+        Validate(i2 != i1);
+
+        if (i2 >Polygon::vertexR.size()){
+            throw std::runtime_error("Wrong vertex number in segment");
+        }
+        Polygon::segments.emplace_back(i1, i2);
+        i1 = i2;
+    }
+    Validate(Polygon::segments.back().second != Polygon::segments.front().first);
+    Polygon::segments.emplace_back(Polygon::segments.back().second, Polygon::segments.front().first);
+}
+
+void Polygon::parseHelperSegments(std::istringstream &in) {
+    std::size_t n;
+    if (in.str().find("starHelperSegments")!=std::string::npos){
+        Polygon::centerPolygon();
+        Polygon::createStarHelperSegments();
+    }else{
+        in >> n;
+        // reading helper segments
+        for(size_t i = 0; i<n; i++){
+            size_t i1, i2;
+            in >> i1;
+            in >> i2;
+            if (i1>Polygon::vertexR.size() || i1>Polygon::vertexR.size()){
+                throw std::runtime_error("Wrong vertex number in helper segment");
+            }
+            Polygon::helperSegments.emplace_back(i1, i2);
+        }
+    }
 }
 
 
@@ -216,10 +233,8 @@ bool Polygon::lineVoxelIntersect(double x1, double y1, double x2, double y2, dou
 
 double Polygon::getVolume() const{
 	double result = 0.0;
-	for (size_t i = 0; i < Polygon::segments.size(); i++){
-		std::pair<size_t, size_t> segment = Polygon::segments[i];
-		result += Polygon::getTriangleArea(segment.first, segment.second);
-	}
+	for (auto segment : Polygon::segments)
+	    result += Polygon::getTriangleArea(segment.first, segment.second);
 	return result;
 }
 
@@ -313,9 +328,15 @@ bool Polygon::voxelInsideFullAngleCheck(const Vector<2> &spatialCenter, double h
     double pushDistance = Polygon::inscribedCircleRadius - halfSpatialSize * M_SQRT2;
     Assert(pushDistance >= 0);
 
-    return this->pointInsidePushedVertices(spatialCenter, pushDistance)
-        || this->pointInsidePushedEdges(spatialCenter, pushDistance)
-        || this->pointInsidePolygon(spatialCenter);
+    // For small polygons full check yields faster generation, while for larger (like 20-gons) checking only vertices
+    // is better
+    #ifdef VOXEL_INSIDE_FULL_ANGLE_ONLY_VERTICES
+        return this->pointInsidePushedVertices(spatialCenter, pushDistance);
+    #else
+        return this->pointInsidePushedVertices(spatialCenter, pushDistance)
+            || this->pointInsidePushedEdges(spatialCenter, pushDistance)
+            || this->pointInsidePolygon(spatialCenter);
+    #endif
 }
 
 bool Polygon::pointInsidePushedVertices(const Vector<2> &point, double pushDistance) const {
@@ -444,6 +465,14 @@ Vector<2> Polygon::getVertexPosition(std::size_t index) const {
     return Vector<2>{{
         position[0] + Polygon::vertexR[index] * std::cos(angle),
         position[1] + Polygon::vertexR[index] * std::sin(angle)
+    }};
+}
+
+
+Vector<2> Polygon::getStaticVertexPosition(std::size_t index) {
+    return Vector<2>{{
+        Polygon::vertexR[index] * std::cos(Polygon::vertexTheta[index]),
+        Polygon::vertexR[index] * std::sin(Polygon::vertexTheta[index])
     }};
 }
 

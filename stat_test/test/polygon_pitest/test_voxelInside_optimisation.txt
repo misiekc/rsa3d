@@ -1,6 +1,8 @@
 particle = Polygon
-attr = 4 xy 2 1 -2 1 -2 -1 2 -1 4 0 1 2 3 starHelperSegments
+#attr = 4 xy 2 1 -2 1 -2 -1 2 -1 4 0 1 2 3 starHelperSegments
 #attr = 5 xy 2 1 0.5 0.5 -2 1 -2 -1 2 -1 5 0 1 2 3 4 starHelperSegments
+#attr = 11 rt  1 0  0.7 0.6  0.5 1.2  0.4 1.8  0.6 2.5  0.9 3.0  0.6 3.6  0.4 4.2  0.5 4.8  0.7 5.4  1 6.0  11 0 1 2 3 4 5 6 7 8 9 10 starHelperSegments
+attr = 21 rt  1 0  0.85 0.3  0.7 0.6  0.6 0.9  0.5 1.2  0.45 1.5  0.4 1.8  0.5 2.1  0.6 2.4  0.75 2.6  0.9 3.0  0.75 3.3  0.6 3.6  0.5 3.9  0.4 4.2  0.45 4.5  0.5 4.8  0.6 5.1  0.7 5.4  0.85 5.7  1 6.0  21 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 starHelperSegments0
 mode = point_inside
 first_x = 10
 first_y = -5.6
