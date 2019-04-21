@@ -115,7 +115,7 @@ std::string RegularSolidBase::toWolfram() const {
 std::vector<Vector<3>> RegularSolidBase::applyOrientation(const std::vector<Vector<3>> &vectors) const {
     std::vector<Vector<3>> result;
     result.reserve(vectors.size());
-    std::transform(vectors.begin(), vectors.end(), std::back_inserter(result), [this](const Vector<3> &vector) {
+    std::transform(vectors.begin(), vectors.end(), std::back_inserter(result), [this](auto &vector) {
         return this->orientation * vector;
     });
     return result;
@@ -124,7 +124,7 @@ std::vector<Vector<3>> RegularSolidBase::applyOrientation(const std::vector<Vect
 std::vector<Vector<3>> RegularSolidBase::applyPosition(const std::vector<Vector<3>> &vectors) const {
     std::vector<Vector<3>> result;
     result.reserve(vectors.size());
-    std::transform(vectors.begin(), vectors.end(), std::back_inserter(result), [this](const Vector<3> &vector) {
+    std::transform(vectors.begin(), vectors.end(), std::back_inserter(result), [this](auto &vector) {
         return this->orientation * vector + this->getPosition();
     });
     return result;
@@ -375,7 +375,7 @@ void RegularSolidBase::printAxes(const std::vector<Vector<3>> &axes) {
 }
 
 void RegularSolidBase::addUniqueAxis(std::vector<Vector<3>> &axes, const Vector<3> &newAxis) {
-    auto isNewAxisUnique = [&newAxis](const Vector<3> axis) {
+    auto isNewAxisUnique = [&newAxis](const Vector<3> &axis) {
         double product = std::abs(axis * newAxis);
         return std::abs(product - 1) < 0.000000001;
     };

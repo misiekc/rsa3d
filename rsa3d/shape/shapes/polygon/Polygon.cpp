@@ -227,10 +227,9 @@ bool Polygon::lineVoxelIntersect(double x1, double y1, double x2, double y2, dou
 }
 
 double Polygon::getVolume() const{
-	double result = 0.0;
-	for (auto segment : Polygon::segments)
-	    result += Polygon::getTriangleArea(segment.first, segment.second);
-	return result;
+	return std::accumulate(Polygon::segments.begin(), Polygon::segments.end(), 0, [](auto vol, auto seg) {
+	    return vol + Polygon::getTriangleArea(seg.first, seg.second);
+	});
 }
 
 #ifndef CUDA_ENABLED

@@ -305,7 +305,7 @@ void accuracy(const ProgramArguments &arguments) {
 int main(int argc, char **argv) {
     std::unique_ptr<ProgramArguments> arguments;
     try {
-        arguments = std::unique_ptr<ProgramArguments>(new ProgramArguments(argc, argv));
+        arguments = std::make_unique<ProgramArguments>(argc, argv);
     } catch (InvalidArgumentsException &e) {
         die(e.what());
     }
