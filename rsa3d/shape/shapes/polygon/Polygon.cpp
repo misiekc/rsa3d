@@ -59,7 +59,7 @@ void Polygon::centerPolygon(){
 	cm /= Polygon::vertexR.size();
 
 	for (size_t i=0; i<Polygon::vertexR.size(); i++){
-	    Vector<2> newV = Polygon::getStaticVertexPosition(i) + cm;
+	    Vector<2> newV = Polygon::getStaticVertexPosition(i) - cm;
 		Polygon::vertexR[i] = newV.norm();
 		Polygon::vertexTheta[i] = newV.angle();
 	}

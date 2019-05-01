@@ -17,7 +17,7 @@ std::string Triangle::preparePolygonAttributes(const std::string &triangleAttr) 
 
     std::ostringstream out;
     out << "3 xy " << -c/2 << " 0 " << c/2 << " 0 " << thirdVertex[0] << " " << thirdVertex[1];
-    out << " 3 0 1 1 2 2 0 starHelperSegments";
+    out << " 3 0 1 2 0 starHelperSegments";
     return out.str();
 }
 
