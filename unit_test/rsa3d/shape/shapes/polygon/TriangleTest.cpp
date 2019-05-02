@@ -5,10 +5,10 @@ using namespace Catch;
 
 TEST_CASE("Triangle: calculation") {
 
-    SECTION("5 x 13 x 16 triangle output") {
+    SECTION("25 x 29 x 36 triangle output") {
         std::istringstream attr(Triangle::preparePolygonAttributes("25 29 36"));
 
-        // expected output: 3 xy (-18) 0 (18) 0 (-3) (20) 3 0 1 2 0 starHelperSegments  ;  things in ( ) may be approx
+        // expected output: 3 xy (-18) 0 (18) 0 (3) (20) 3 0 1 2 0 starHelperSegments  ;  things in ( ) may be approx
         int numV;
         std::string coordType, theRest;
         double v[6];

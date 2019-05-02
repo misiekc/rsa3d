@@ -248,11 +248,11 @@ void wolfram(const ProgramArguments &arguments) {
 
 void bc_expand(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() < 2)
+    if (positionalArguments.empty())
         die(arguments.formatUsage("<file in> (file out = file in)"));
 
     std::string fileIn(positionalArguments[0]);
-    std::string fileOut = (positionalArguments.size() < 2 ? fileIn : positionalArguments[1]);
+    std::string fileOut = (positionalArguments.size() == 1 ? fileIn : positionalArguments[1]);
     Packing packing;
     packing.restore(fileIn);
     packing.expandOnPBC(arguments.getParameters().surfaceSize, 0.1);

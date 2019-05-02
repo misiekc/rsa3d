@@ -142,8 +142,7 @@ namespace {
         pairTranslated.second()->translate(translation);
 
         evaluateOverlap(pair, pairTranslated, translation);
-        if (isConvexShape(pair.first()))
-            evaluatePointInside(pair, pairTranslated, translation);
+        evaluatePointInside(pair, pairTranslated, translation);
     }
 
     void Result::evaluateOverlap(const ShapePair &pair, const ShapePair &pairTranslated, const RSAVector &translation) {
@@ -164,13 +163,26 @@ namespace {
         TranslatingBC translatingBC{translation, pair};
         RSAFreeBC mockBC;
 
-        auto &firstConvex = dynamic_cast<const RSAConvexShape &>(*pair.first());
-        auto &secondConvex = dynamic_cast<const RSAConvexShape &>(*pair.second());
-        auto &firstConvexTrans = dynamic_cast<const RSAConvexShape &>(*pairTranslated.first());
-        auto &secondConvexTrans = dynamic_cast<const RSAConvexShape &>(*pairTranslated.second());
+        bool bcPointInside;
+        bool transPointInside;
 
-        bool bcPointInside = firstConvex.pointInside(&translatingBC, secondConvex.getPosition());
-        bool transPointInside = firstConvexTrans.pointInside(&mockBC, secondConvexTrans.getPosition());
+        if (isConvexShape(pair.first())) {
+            auto &firstConvex = dynamic_cast<const RSAConvexShape &>(*pair.first());
+            auto &secondConvex = dynamic_cast<const RSAConvexShape &>(*pair.second());
+            auto &firstConvexTrans = dynamic_cast<const RSAConvexShape &>(*pairTranslated.first());
+            auto &secondConvexTrans = dynamic_cast<const RSAConvexShape &>(*pairTranslated.second());
+
+            bcPointInside = firstConvex.pointInside(&translatingBC, secondConvex.getPosition());
+            transPointInside = firstConvexTrans.pointInside(&mockBC, secondConvexTrans.getPosition());
+        } else {
+            RSAOrientation zeroOrientation;
+            zeroOrientation.fill(0);
+
+            bcPointInside = pair.first()->voxelInside(&translatingBC, pair.second()->getPosition(), zeroOrientation, 0,
+                    RSAShape::getVoxelAngularSize());
+            transPointInside = pairTranslated.first()->voxelInside(&mockBC, pairTranslated.second()->getPosition(),
+                    zeroOrientation, 0, RSAShape::getVoxelAngularSize());
+        }
 
         if (bcPointInside)
             pointInside++;

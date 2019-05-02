@@ -1,0 +1,12 @@
+particle = Triangle
+attr = 0.5 1 1.3
+mode = point_inside
+first_x = 10
+first_y = -5.6
+first_angle = 10
+from_angle = 30
+to_angle = 50
+box_width = 5
+box_height = 5
+points = 2500
+append = false
