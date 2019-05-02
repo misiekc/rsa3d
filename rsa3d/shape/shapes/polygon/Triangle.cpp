@@ -28,8 +28,8 @@ void Triangle::parseAttributes(const std::string &args, double &a, double &b, do
 
     // Ensure order a <= b <= c
     if (a > b) std::swap(a, b);
-    if (b > c) std::swap(b, c);
     if (a > c) std::swap(a, c);
+    if (b > c) std::swap(b, c);
 
     ValidateMsg(a > 0 && b > 0 && c > 0, "Triangle side lengths should be positive");
     ValidateMsg(a + b > c, "Triangle inequality violated");

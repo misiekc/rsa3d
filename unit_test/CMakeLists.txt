@@ -5,7 +5,8 @@ set(UNIT_TEST_SOURCE
         rsa3d/PackingTest.cpp
         rsa3d/ParametersTest.cpp
         rsa3d/ProgramArgumentsTest.cpp
-        rsa3d/VectorTest.cpp)
+        rsa3d/VectorTest.cpp
+        rsa3d/shape/shapes/polygon/TriangleTest.cpp)
 
 add_library(unit_test_runner lib/catch.hpp lib/fakeit.hpp Main.cpp)
 target_include_directories(unit_test_runner PUBLIC lib)
