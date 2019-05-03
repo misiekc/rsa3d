@@ -18,6 +18,8 @@
 class Polygon : public Shape<2, 1> {
 
 private:
+
+    static void clearOldData();
     static void parseVertices(std::istringstream &in);
     static void parseSegments(std::istringstream &in);
     static void parseHelperSegments(std::istringstream &in);
@@ -44,28 +46,22 @@ private:
 
 protected:
 	//polar coordinates of all vertices
-	//assume vertex 0 is linked to vertex 1, vertex 1 is linked to vertex 2, vertex 2 is linked to vertex 3, etc.
-	//assume vertex (VertexR.size()-1) is linked to vertex 0
 	static std::vector<double> vertexR;
 	static std::vector<double> vertexTheta;
 	static std::vector<std::pair<size_t, size_t>> segments;
 	static std::vector<std::pair<size_t, size_t>> helperSegments;
 
 	static double inscribedCircleRadius;
+    static double circumscribedCircleRadius;
 
-	static double getCircumscribedCircleRadius();
-	static double getInscribedCircleRadius();
+	static double calculateCircumscribedCircleRadius();
+	static double calculateInscribedCircleRadius();
 
 	static void centerPolygon();
 	static void createStarHelperSegments();
 
 	//calculate the area of the triangle made from the origin, vertex i, and vertex j
 	static double getTriangleArea(size_t i, size_t j);
-
-	static float *d_vertices;
-	static float *d_angles;
-	static std::pair<unsigned int, unsigned int> *d_segments;
-	static std::pair<unsigned int, unsigned int> *d_helperSegments;
 
 #ifdef CUDA_ENABLED
 	static void cuInit();
@@ -77,7 +73,14 @@ public:
 
 	static void initClass(const std::string &args);
 
-	~Polygon() override = default;
+    static const std::vector<double> &getVertexR() { return vertexR; }
+    static const std::vector<double> &getVertexTheta() { return vertexTheta; }
+    static const std::vector<std::pair<size_t, size_t>> &getSegments() { return segments; }
+    static const std::vector<std::pair<size_t, size_t>> &getHelperSegments() { return helperSegments; }
+    static double getInscribedCircleRadius() { return inscribedCircleRadius; }
+    static double getCircumscribedCircleRadius() { return circumscribedCircleRadius; }
+
+    ~Polygon() override = default;
 
 	Shape<2, 1> *clone() const override;
 	double getVolume() const override;

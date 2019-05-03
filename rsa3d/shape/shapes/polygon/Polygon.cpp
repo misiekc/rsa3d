@@ -17,9 +17,10 @@ std::vector<double> Polygon::vertexR;
 std::vector<double> Polygon::vertexTheta;
 std::vector<std::pair<size_t, size_t>> Polygon::segments;
 std::vector<std::pair<size_t, size_t>> Polygon::helperSegments;
-double Polygon::inscribedCircleRadius;
+double Polygon::inscribedCircleRadius{};
+double Polygon::circumscribedCircleRadius{};
 
-double Polygon::getCircumscribedCircleRadius(){
+double Polygon::calculateCircumscribedCircleRadius(){
 	double result = 0.0;
 	for(std::pair<size_t, size_t> segment: Polygon::segments){
 		if (result < Polygon::vertexR[segment.first])
@@ -30,7 +31,7 @@ double Polygon::getCircumscribedCircleRadius(){
 	return result;
 }
 
-double Polygon::getInscribedCircleRadius(){
+double Polygon::calculateInscribedCircleRadius(){
 	double result = Polygon::vertexR[Polygon::segments[0].first];
 	for (auto segment : Polygon::segments) {
         Vector<2> v3 = Polygon::getStaticVertexPosition(segment.first);
@@ -96,8 +97,9 @@ void Polygon::createStarHelperSegments(){
  * 4 rt 1.4142 0.7854 1.4142 2.3562 1.4142 3.9270 1.4142 5.4978 4 0 1 2 3 starHelperSegments
  */
 void Polygon::initClass(const std::string &args){
-	std::istringstream in(args);
+    clearOldData();
 
+	std::istringstream in(args);
     Polygon::parseVertices(in);
     Polygon::parseSegments(in);
     Polygon::parseHelperSegments(in);
@@ -108,8 +110,10 @@ void Polygon::initClass(const std::string &args){
 	for (double & vR : Polygon::vertexR)
 		vR /= std::sqrt(area);
 
-	Shape<2, 1>::setNeighbourListCellSize(2.0*Polygon::getCircumscribedCircleRadius());
-	Polygon::inscribedCircleRadius = Polygon::getInscribedCircleRadius();
+    Polygon::inscribedCircleRadius = Polygon::calculateInscribedCircleRadius();
+    Polygon::circumscribedCircleRadius = Polygon::calculateCircumscribedCircleRadius();
+
+    Shape<2, 1>::setNeighbourListCellSize(2.0*Polygon::circumscribedCircleRadius);
 	Shape<2, 1>::setVoxelSpatialSize(1.4*Polygon::inscribedCircleRadius);
 	Shape<2, 1>::setVoxelAngularSize(2*M_PI);
 	Shape<2, 1>::setSupportsSaturation(true);
@@ -118,6 +122,15 @@ void Polygon::initClass(const std::string &args){
 	#ifdef CUDA_ENABLED
 		Polygon::cuInit();
 	#endif
+}
+
+void Polygon::clearOldData() {
+    vertexR.clear();
+    vertexTheta.clear();
+    segments.clear();
+    helperSegments.clear();
+    inscribedCircleRadius = 0;
+    circumscribedCircleRadius = 0;
 }
 
 void Polygon::parseVertices(std::istringstream &in) {
