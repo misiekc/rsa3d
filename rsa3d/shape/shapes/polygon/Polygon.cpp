@@ -103,12 +103,7 @@ void Polygon::initClass(const std::string &args){
     Polygon::parseVertices(in);
     Polygon::parseSegments(in);
     Polygon::parseHelperSegments(in);
-
-	double area = 0.0;
-	for (auto segment : Polygon::segments)
-	    area += Polygon::getTriangleArea(segment.first, segment.second);
-	for (double & vR : Polygon::vertexR)
-		vR /= std::sqrt(area);
+    Polygon::normalizeVolume();
 
     Polygon::inscribedCircleRadius = Polygon::calculateInscribedCircleRadius();
     Polygon::circumscribedCircleRadius = Polygon::calculateCircumscribedCircleRadius();
@@ -122,6 +117,13 @@ void Polygon::initClass(const std::string &args){
 	#ifdef CUDA_ENABLED
 		Polygon::cuInit();
 	#endif
+}
+
+void Polygon::normalizeVolume() {
+    double area = std::accumulate(segments.begin(), segments.end(), 0.0, [](auto a, auto seg) {
+        return a + getTriangleArea(seg.first, seg.second);
+    });
+    std::for_each(vertexR.begin(), vertexR.end(), [area](auto &vR) { vR /= sqrt(area); });
 }
 
 void Polygon::clearOldData() {

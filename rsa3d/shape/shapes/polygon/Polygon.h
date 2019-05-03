@@ -23,6 +23,7 @@ private:
     static void parseVertices(std::istringstream &in);
     static void parseSegments(std::istringstream &in);
     static void parseHelperSegments(std::istringstream &in);
+    static void normalizeVolume();
 
     static Vector<2> getStaticVertexPosition(std::size_t index);
 
@@ -54,9 +55,8 @@ protected:
 	static double inscribedCircleRadius;
     static double circumscribedCircleRadius;
 
-	static double calculateCircumscribedCircleRadius();
-	static double calculateInscribedCircleRadius();
-
+    static double calculateCircumscribedCircleRadius();
+    static double calculateInscribedCircleRadius();
 	static void centerPolygon();
 	static void createStarHelperSegments();
 
