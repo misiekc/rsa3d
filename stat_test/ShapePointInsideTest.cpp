@@ -19,13 +19,64 @@ namespace
 
 	using ShapePair = RSAShapePairFactory::ShapePair;
 
-	struct Results {
+	class Results {
+	private:
+	    RSAFreeBC bc;
+
+	public:
         std::size_t tested{};
         std::size_t overlapped{};
         std::size_t withPointInside{};
         std::size_t conflicts{};
         std::string conflictExample;
         std::string factoryDesc;
+
+        bool hasPointInside(const RSAShape *shape) {
+            return dynamic_cast<const RSAConvexShape *>(shape) != nullptr;
+        }
+
+        auto isPointInside(const ShapePair &pair) {
+            bool secondInsideFirst, firstInsideSecond;
+            if (hasPointInside(pair.first())) {
+                auto &firstConvex = dynamic_cast<const RSAConvexShape &>(*pair.first());
+                auto &secondConvex = dynamic_cast<const RSAConvexShape &>(*pair.second());
+
+                secondInsideFirst = firstConvex.pointInside(&bc, secondConvex.getPosition());
+                firstInsideSecond = secondConvex.pointInside(&bc, firstConvex.getPosition());
+            } else {
+                RSAOrientation zeroOrientation;
+                zeroOrientation.fill(0);
+
+                secondInsideFirst = pair.first()->voxelInside(&bc, pair.second()->getPosition(), zeroOrientation, 0,
+                        RSAShape::getVoxelAngularSize());
+                firstInsideSecond = pair.second()->voxelInside(&bc, pair.first()->getPosition(), zeroOrientation, 0,
+                        RSAShape::getVoxelAngularSize());
+            }
+            return std::make_pair(secondInsideFirst, firstInsideSecond);
+        }
+
+        void checkConflict(const ShapePair &pair, bool secondInsideFirst, bool firstInsideSecond, bool overlap) {
+            if (!overlap && (secondInsideFirst || firstInsideSecond)) {
+                if (conflicts == 0) {
+                    std::stringstream sout;
+                    pair.print(sout);
+                    conflictExample = sout.str();
+                }
+                conflicts++;
+            }
+        }
+
+        void evaluatePair(const ShapePair &pair) {
+            auto [secondInsideFirst, firstInsideSecond] = isPointInside(pair);
+            if (secondInsideFirst)
+                withPointInside++;
+
+            bool overlap = pair.first()->overlap(&bc, pair.second());
+            if (overlap)
+                overlapped++;
+
+            checkConflict(pair, secondInsideFirst, firstInsideSecond, overlap);
+        }
 
         /* Prints test results onto given ostream */
         void print(std::ostream &ostr) {
@@ -51,37 +102,18 @@ namespace
     };
 
     Results perform_test(RSAShapePairFactory &factory, unsigned long pairsToTest) {
-        if (pairsToTest == 0) throw std::runtime_error("pairsToTest == 0");
+        if (pairsToTest == 0)
+            throw std::runtime_error("pairsToTest == 0");
 
-        RSAFreeBC bc;
         Results results;
         results.tested = pairsToTest;
         results.factoryDesc = factory.getDescription();
 
         std::cout << ">> Starting..." << std::endl;
         InfoLooper looper(pairsToTest, 10000, "pairs tested...");
-        while(looper.step()) {
-            auto pair = factory.generate();
-            auto &first = dynamic_cast<RSAConvexShape&>(*pair.first());
-            auto &second = dynamic_cast<RSAConvexShape&>(*pair.second());
-            
-            bool overlap = first.overlap(&bc, &second);
-            bool pi_first = first.pointInside(&bc, second.getPosition());
-            bool pi_second = second.pointInside(&bc, first.getPosition());
+        while(looper.step())
+            results.evaluatePair(factory.generate());
 
-            if (overlap)    results.overlapped++;
-            if (pi_first)   results.withPointInside++;
-
-            // pointInside and overlap conflict
-            if (!overlap && (pi_first || pi_second)){
-            	if (results.conflicts == 0) {
-            		std::stringstream sout;
-            		pair.print(sout);
-            		results.conflictExample = sout.str();
-            	}
-                results.conflicts++;
-            }
-        }
         return results;
     }
 }
