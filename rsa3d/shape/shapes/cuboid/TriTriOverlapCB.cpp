@@ -9,7 +9,7 @@ bool TriTriOverlapCB::overlap(const Shape<3, 0> *first, const Shape<3, 0> *secon
     auto cube1 = dynamic_cast<const Cuboid*>(first);
     auto cube2 = dynamic_cast<const Cuboid*>(second);
 
-    return intersection::polyh_polyh(cube1->obtainTris(), cube2->obtainTris());
+    return collision::polyh_polyh(cube1->obtainTris(), cube2->obtainTris());
 }
 
 std::string TriTriOverlapCB::getName() const {

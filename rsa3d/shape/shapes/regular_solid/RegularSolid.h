@@ -6,9 +6,9 @@
 #define RSA3D_REGULARSOLID_H
 
 
-#include "../../../Matrix.h"
+#include "../../../geometry/Matrix.h"
 #include "../../OverlapStrategyShape.h"
-#include "../../../Intersection.h"
+#include "../../../geometry/Geometry.h"
 #include "../../ConvexShape.h"
 #include "SATOverlapRS.h"
 #include "RegularSolidBase.h"

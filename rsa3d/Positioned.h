@@ -11,7 +11,7 @@
 // #include "Vector.h"
 
 #include <array>
-#include "Vector.h"
+#include "geometry/Vector.h"
 
 /**
  * @brief An object located in @a SPATIAL_DIMENSION dimensional space.

@@ -13,7 +13,7 @@
 #include <cstddef>
 
 #include "../AnisotropicShape2D.h"
-#include "../../Vector.h"
+#include "../../geometry/Vector.h"
 
 class Polydisk : public Shape<2, 1> {
 

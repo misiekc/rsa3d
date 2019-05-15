@@ -11,7 +11,7 @@
 #define RSA3D_SHAPEGENERATORS_H
 
 #include "../../rsa3d/shape/ShapeFactory.h"
-#include "../../rsa3d/Vector.h"
+#include "../../rsa3d/geometry/Vector.h"
 #include "../../rsa3d/Utils.h"
 #include <memory>
 

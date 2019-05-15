@@ -10,7 +10,7 @@
 
 #include <algorithm>
 #include <array>
-#include "Vector.h"
+#include "geometry/Vector.h"
 #include "Utils.h"
 
 class Voxel{

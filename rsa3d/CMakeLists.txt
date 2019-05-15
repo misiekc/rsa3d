@@ -1,6 +1,11 @@
 set(RSA_SOURCE
         analizator/Analyzer.cpp
         analizator/ExclusionZoneVisualizer.cpp
+        geometry/Geometry.cpp
+        geometry/Matrix.h
+        geometry/Matrix.tpp
+        geometry/Vector.h
+        geometry/Vector.tpp
         shape/shapes/cuboid/Cuboid.cpp
         shape/shapes/cuboid/CuboidOverlapStrategy.h
         shape/shapes/cuboid/MineOverlapCB.cpp
@@ -64,9 +69,6 @@ set(RSA_SOURCE
         BoundaryConditions.h
         Config.cpp
         FreeBC.h
-        Intersection.cpp
-        Matrix.h
-        Matrix.tpp
         NeighbourGrid.h
         Packing.cpp
         PackingGenerator.cpp
@@ -80,8 +82,6 @@ set(RSA_SOURCE
         ThreadLocalRND.cpp
         Timer.cpp
         Utils.cpp
-        Vector.h
-        Vector.tpp
         Voxel.h
         Voxel.cpp
         VoxelList.h

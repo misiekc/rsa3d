@@ -10,10 +10,10 @@
 
 //#define CUBOID_DEBUG        // Used for debbuging output
 
-#include "../../../Matrix.h"
-#include "../../../Vector.h"
+#include "../../../geometry/Matrix.h"
+#include "../../../geometry/Vector.h"
 #include "../../OverlapStrategyShape.h"
-#include "../../../Intersection.h"
+#include "../../../geometry/Geometry.h"
 #include "../../ConvexShape.h"
 #include "../../OrderCalculable.h"
 
@@ -92,7 +92,7 @@ public:
 
 	bool pointInsideCuboid(const Vector<3> &vertex) const;
 	void obtainVertices(Vector<3> (&vertices)[8], const Vector<3> &translation) const;
-	intersection::tri_polyh obtainTris() const;
+	PolyhedronTriangulation obtainTris() const;
 	Matrix<3, 3> getOrientation() const;
 
     static void normalizeVolume();

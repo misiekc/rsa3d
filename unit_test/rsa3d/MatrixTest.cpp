@@ -4,8 +4,8 @@
 
 #include <iostream>
 #include "catch.hpp"
-#include "../../rsa3d/Matrix.h"
-#include "../../rsa3d/Vector.h"
+#include "../../rsa3d/geometry/Matrix.h"
+#include "../../rsa3d/geometry/Vector.h"
 
 TEST_CASE("Matrix: constructors and generators") {
     SECTION("zero") {

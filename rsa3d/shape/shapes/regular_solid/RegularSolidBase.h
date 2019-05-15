@@ -8,7 +8,7 @@
 
 #include "../../ConvexShape.h"
 #include "../../OverlapStrategyShape.h"
-#include "../../../Intersection.h"
+#include "../../../geometry/Geometry.h"
 
 class RegularSolidBase : public ConvexShape<3, 0>, public OverlapStrategyShape<3, 0> {
 private:
@@ -26,7 +26,7 @@ private:
     static void calculateRadia();
     static void discoverAxes();
     static void reportCalculations();
-    static intersection::face3D faceFromVertexIdx(const std::vector<size_t> &vertexIdx);
+    static Face3D faceFromVertexIdx(const std::vector<size_t> &vertexIdx);
     static void addUniqueAxis(std::vector<Vector<3>> &axes, const Vector<3> &newAxis);
     static void printAxes(const std::vector<Vector<3>> &axes);
 
@@ -93,8 +93,8 @@ public:
     std::vector<Vector<3>> getEdgeAxes() const;
     std::vector<Vector<3>> getVertexAxes() const;
     std::vector<Vector<3>> getMidegdeAxes() const;
-    intersection::tri_polyh getTriangles() const;
-    intersection::face_polyh getFaces() const;
+    PolyhedronTriangulation getTriangulation() const;
+    PolyhedronFaces getFaces() const;
     std::vector<Vector<3>> getFaceNormals() const;
 
     const Matrix<3, 3> &getOrientationMatrix() const;

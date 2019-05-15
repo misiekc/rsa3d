@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include "../rsa3d/shape/AnisotropicShape2D.h"
-#include "../rsa3d/Vector.h"
+#include "../rsa3d/geometry/Vector.h"
 
 
 /**

@@ -10,7 +10,7 @@
 #include "../RND.h"
 #include "../shape/ShapeFactory.h"
 #include "../Voxel.h"
-#include "../Vector.h"
+#include "../geometry/Vector.h"
 #include <fstream>
 
 ExclusionZoneVisualizer::ExclusionZoneVisualizer(const Parameters &params) {

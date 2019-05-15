@@ -8,7 +8,7 @@
 #ifndef BOUNDARYCONDITIONS_H_
 #define BOUNDARYCONDITIONS_H_
 
-#include "Vector.h"
+#include "geometry/Vector.h"
 
 template <unsigned short SPATIAL_DIMENSION>
 class BoundaryConditions {

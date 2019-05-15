@@ -9,14 +9,14 @@
 #include <algorithm>
 #include <iostream>
 
-#include "Intersection.h"
+#include "Geometry.h"
 
 
-namespace intersection
+namespace collision
 {
     // Check intersection between two R3 triangles tri1 and tri2
     //--------------------------------------------------------------------------------------------
-    bool tri_tri3D(const tri3D &tri1, const tri3D &tri2) {
+    bool tri3D_tri3D(const Triangle3D &tri1, const Triangle3D &tri2) {
         double d1, d2;
         double dtri1[3], dtri2[3];
         double ptri1[3], ptri2[3];
@@ -86,10 +86,10 @@ namespace intersection
         return std::max(t1_tri1, t1_tri2) <= std::min(t2_tri1, t2_tri2);
     }
 
-    bool polyh_polyh(const tri_polyh &polyhedron1, const tri_polyh &polyhedron2) {
+    bool polyh_polyh(const PolyhedronTriangulation &polyhedron1, const PolyhedronTriangulation &polyhedron2) {
         for (const auto &tri1 : polyhedron1)
             for (const auto &tri2 : polyhedron2)
-                if (tri_tri3D(tri1, tri2))
+                if (tri3D_tri3D(tri1, tri2))
                     return true;
         return false;
     }
@@ -128,7 +128,9 @@ namespace intersection
             return false;
         }
     }
+}
 
+namespace intersection {
     Vector<2> line_line(const Vector<2> &line1, double line1Angle, const Vector<2> &line2, double line2Angle)
     {
         double a = tan(line1Angle);

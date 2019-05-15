@@ -3,7 +3,7 @@
 //
 
 #include "catch.hpp"
-#include "../../rsa3d/Vector.h"
+#include "../../rsa3d/geometry/Vector.h"
 
 TEST_CASE("Vector: constructors") {
     SECTION("zero") {

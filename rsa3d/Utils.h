@@ -9,7 +9,7 @@
 #ifndef UTILS_C_
 #define UTILS_C_
 
-#include "Vector.h"
+#include "geometry/Vector.h"
 
 #ifdef _OPENMP
     #include <omp.h>

@@ -344,12 +344,12 @@ OverlapStrategy<3, 0> *Cuboid::createStrategy(const std::string &name) const {
 
 // Helper method. Obtains and saves triangles from cuboid's faces
 //--------------------------------------------------------------------------------------------
-intersection::tri_polyh Cuboid::obtainTris() const
+PolyhedronTriangulation Cuboid::obtainTris() const
 {
     Vector<3> vert[Cuboid::NUM_OF];
     this->obtainVertices(vert, Vector<3>());
 
-    return intersection::tri_polyh{
+    return PolyhedronTriangulation{
         {{vert[0], vert[1], vert[2]}},
         {{vert[2], vert[1], vert[6]}},
         {{vert[0], vert[2], vert[3]}},

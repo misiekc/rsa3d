@@ -7,7 +7,7 @@
 
 #include "Ellipse1Dim.h"
 #include "../../Utils.h"
-#include "../../Intersection.h"
+#include "../../geometry/Geometry.h"
 
 
 static const double EPSILON = 0.0000000001;
@@ -196,13 +196,13 @@ bool Ellipse1Dim::circleCollision(const Vector<2> &p, double tMin, double tMax) 
 {
     Vector<2> start{{cos(tMin) * a, sin(tMin) * b}};
     Vector<2> end{{cos(tMax) * a, sin(tMax) * b}};
-    if (intersection::line_circle(p, b, start, end))
+    if (collision::line_circle(p, b, start, end))
         return true;
 
     double slope1 = atan2(a * sin(tMin), b * cos(tMin)) + M_PI/2;
     double slope2 = atan2(a * sin(tMax), b * cos(tMax)) + M_PI/2;
     Vector<2> intersect = intersection::line_line(start, slope1, end, slope2);
-	if (!intersection::line_circle(p, b, start, intersect) && !intersection::line_circle(p, b, intersect, end))
+	if (!collision::line_circle(p, b, start, intersect) && !collision::line_circle(p, b, intersect, end))
 		return false;
 
 	return circleCollision(p, tMin, (tMin + tMax) / 2) || circleCollision(p, (tMin + tMax) / 2, tMax);

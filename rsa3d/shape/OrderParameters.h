@@ -7,7 +7,7 @@
 
 
 #include <vector>
-#include "../Vector.h"
+#include "../geometry/Vector.h"
 
 
 class OrderParameters {

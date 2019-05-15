@@ -9,5 +9,5 @@ bool TriTriOverlapRS::overlap(const Shape<3, 0> *first, const Shape<3, 0> *secon
     auto &firstSpecific = dynamic_cast<const RegularSolidBase&>(*first);
     auto &secondSpecific = dynamic_cast<const RegularSolidBase&>(*second);
 
-    return intersection::polyh_polyh(firstSpecific.getTriangles(), secondSpecific.getTriangles());
+    return collision::polyh_polyh(firstSpecific.getTriangulation(), secondSpecific.getTriangulation());
 }

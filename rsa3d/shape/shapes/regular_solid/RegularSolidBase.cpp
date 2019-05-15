@@ -227,36 +227,36 @@ std::vector<Vector<3>> RegularSolidBase::getFaceNormals() const { return applyOr
 std::vector<Vector<3>> RegularSolidBase::getVertexAxes() const { return applyOrientation(orientedVertexAxes); }
 std::vector<Vector<3>> RegularSolidBase::getMidegdeAxes() const { return applyOrientation(orientedMidedgeAxes); }
 
-intersection::tri_polyh RegularSolidBase::getTriangles() const {
+PolyhedronTriangulation RegularSolidBase::getTriangulation() const {
     auto vertices = this->getVertices();
     auto verticesIdxToTri = [&vertices](const std::array<std::size_t, 3> &tri) {
-        return intersection::tri3D{{vertices[tri[0]], vertices[tri[1]], vertices[tri[2]]}};
+        return Triangle3D{{vertices[tri[0]], vertices[tri[1]], vertices[tri[2]]}};
     };
 
-    intersection::tri_polyh triangles;
+    PolyhedronTriangulation triangles;
     triangles.reserve(orientedTriangles.size());
     std::transform(orientedTriangles.begin(), orientedTriangles.end(), std::back_inserter(triangles), verticesIdxToTri);
     return triangles;
 }
 
-intersection::face_polyh RegularSolidBase::getFaces() const {
+PolyhedronFaces RegularSolidBase::getFaces() const {
     auto vertices = this->getVertices();
     auto verticesIdxToFace = [&vertices](const std::vector<std::size_t> &face) {
-        intersection::face3D faceResult;
+        Face3D faceResult;
         faceResult.reserve(face.size());
         auto idxToVertex = [&vertices](size_t i) { return vertices[i]; };
         std::transform(face.begin(), face.end(), std::back_inserter(faceResult), idxToVertex);
         return faceResult;
     };
 
-    intersection::face_polyh faces;
+    PolyhedronFaces faces;
     faces.reserve(orientedFaces.size());
     std::transform(orientedFaces.begin(), orientedFaces.end(), std::back_inserter(faces), verticesIdxToFace);
     return faces;
 }
 
-intersection::face3D RegularSolidBase::faceFromVertexIdx(const std::vector<size_t> &vertexIdx) {
-    intersection::face3D face(vertexIdx.size());
+Face3D RegularSolidBase::faceFromVertexIdx(const std::vector<size_t> &vertexIdx) {
+    Face3D face(vertexIdx.size());
     auto idxToVertex = [](std::size_t idx) { return orientedVertices[idx]; };
     transform(vertexIdx.begin(), vertexIdx.end(), face.begin(), idxToVertex);
     return face;
@@ -264,7 +264,7 @@ intersection::face3D RegularSolidBase::faceFromVertexIdx(const std::vector<size_
 
 void RegularSolidBase::normalizeFacesOrientation() {
     for (auto &faceVertexIdx : orientedFaces) {
-        intersection::face3D face = faceFromVertexIdx(faceVertexIdx);
+        Face3D face = faceFromVertexIdx(faceVertexIdx);
         Vector<3> faceAxis = (face[1] - face[0]) ^ (face[2] - face[0]);
         if (faceAxis * face[0] < 0)
             std::reverse(faceVertexIdx.begin(), faceVertexIdx.end());
@@ -293,7 +293,7 @@ void RegularSolidBase::discoverTriangles() {
 
 void RegularSolidBase::normalizeVolume() {
     auto triangleVolumeAcumulator = [](double volume, const std::array<std::size_t, 3> &triIdx) {
-        intersection::tri3D tri{{orientedVertices[triIdx[0]], orientedVertices[triIdx[1]], orientedVertices[triIdx[2]]}};
+        Triangle3D tri{{orientedVertices[triIdx[0]], orientedVertices[triIdx[1]], orientedVertices[triIdx[2]]}};
         double tetrahedronVolume = 1./6 * tri[0] * ((tri[1] - tri[0]) ^ (tri[2] - tri[0]));
         return volume + std::abs(tetrahedronVolume);
     };
@@ -329,7 +329,7 @@ void RegularSolidBase::discoverAxes() {
         addUniqueAxis(orientedVertexAxes, vertex.normalized());
 
     for (const auto &faceVertexIdx : orientedFaces) {
-        intersection::face3D face = faceFromVertexIdx(faceVertexIdx);
+        Face3D face = faceFromVertexIdx(faceVertexIdx);
 
         Vector<3> faceAxis = ((face[1] - face[0]) ^ (face[2] - face[0])).normalized();
         addUniqueAxis(orientedFaceAxes, faceAxis);

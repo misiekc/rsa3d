@@ -6,7 +6,7 @@
 #define RSA3D_VECTORSPEEDTEST_H
 
 #include "../rsa3d/Timer.h"
-#include "../rsa3d/Vector.h"
+#include "../rsa3d/geometry/Vector.h"
 
 namespace vec_speedtest {
     int main(int argc, char **argv);

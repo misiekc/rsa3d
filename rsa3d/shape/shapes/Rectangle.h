@@ -10,7 +10,7 @@
 #include "../../BoundaryConditions.h"
 #include "../AnisotropicShape2D.h"
 #include "../OrderCalculable.h"
-#include "../../Vector.h"
+#include "../../geometry/Vector.h"
 #include <cmath>
 
 class Rectangle: public AnisotropicShape2D, public OrderCalculable {
