@@ -11,7 +11,7 @@
 #include <algorithm>
 #include <array>
 #include "geometry/Vector.h"
-#include "Utils.h"
+#include "utils/Utils.h"
 
 class Voxel{
 

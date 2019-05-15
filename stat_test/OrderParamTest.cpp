@@ -6,7 +6,7 @@
 #include <memory>
 
 #include "OrderParamTest.h"
-#include "../rsa3d/Utils.h"
+#include "../rsa3d/utils/Utils.h"
 #include "../rsa3d/shape/ShapeFactory.h"
 #include "../rsa3d/shape/shapes/regular_solid/RegularSolidBase.h"
 #include "../rsa3d/shape/OrderCalculable.h"

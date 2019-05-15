@@ -17,12 +17,12 @@
 
 #include "ShapeOverlapTest.h"
 #include "../rsa3d/shape/ShapeFactory.h"
-#include "../rsa3d/Utils.h"
-#include "utility/IndependentPairFactory.h"
-#include "utility/ShapePairFactory.h"
-#include "utility/InfoLooper.h"
-#include "utility/ParallelPairFactory.h"
-#include "utility/UniformBallDistribution.h"
+#include "../rsa3d/utils/Utils.h"
+#include "utils/IndependentPairFactory.h"
+#include "utils/ShapePairFactory.h"
+#include "utils/InfoLooper.h"
+#include "utils/ParallelPairFactory.h"
+#include "utils/UniformBallDistribution.h"
 
 namespace
 {

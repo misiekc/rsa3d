@@ -5,7 +5,7 @@
 #ifndef RSA3D_DISTRUBUTION_H
 #define RSA3D_DISTRUBUTION_H
 
-#include "../../rsa3d/Utils.h"
+#include "../../rsa3d/utils/Utils.h"
 #include "../../rsa3d/RND.h"
 
 class Distribution {

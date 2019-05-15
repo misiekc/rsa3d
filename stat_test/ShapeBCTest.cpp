@@ -3,14 +3,13 @@
 //
 
 #include "ShapeBCTest.h"
-#include <utility>
-#include "../rsa3d/Utils.h"
+#include "../rsa3d/utils/Utils.h"
 #include "../rsa3d/shape/ShapeFactory.h"
-#include "utility/UniformBallDistribution.h"
-#include "utility/IndependentPairFactory.h"
 #include "../rsa3d/FreeBC.h"
-#include "utility/InfoLooper.h"
 #include "../rsa3d/shape/ConvexShape.h"
+#include "utils/UniformBallDistribution.h"
+#include "utils/IndependentPairFactory.h"
+#include "utils/InfoLooper.h"
 
 namespace {
     using ShapePair = RSAShapePairFactory::ShapePair;

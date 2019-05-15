@@ -10,10 +10,8 @@
 #include <algorithm>
 
 #include "VoxelList.h"
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
+#include "utils/OMPMacros.h"
+#include "utils/Assertions.h"
 
 
 /**

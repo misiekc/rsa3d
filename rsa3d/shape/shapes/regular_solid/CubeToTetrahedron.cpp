@@ -5,6 +5,7 @@
 #include "CubeToTetrahedron.h"
 #include "Tetrahedron.h"
 #include "Octahedron.h"
+#include "../../../utils/Assertions.h"
 
 namespace {
     const double EPSILON = 1e-10;

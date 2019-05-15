@@ -2,13 +2,15 @@
 // Created by PKua on 21.04.18.
 //
 
-#include "../../../geometry/Vector.h"
-#include "SATOverlapRS.h"
-#include "TriTriOverlapRS.h"
 #include <sstream>
 #include <functional>
 #include <iterator>
 #include <fstream>
+
+#include "../../../geometry/Vector.h"
+#include "SATOverlapRS.h"
+#include "TriTriOverlapRS.h"
+#include "../../../utils/Assertions.h"
 
 template<typename SpecificSolid>
 const SATOverlapRS RegularSolid<SpecificSolid>::overlapStrategy{};

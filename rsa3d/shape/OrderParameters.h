@@ -24,5 +24,22 @@ public:
     static double dodecahedral(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
 };
 
+namespace legendre {
+    inline double P1(double x) {
+        return x;
+    }
+
+    inline double P2(double x) {
+        return 0.5 * (3 * x * x - 1);
+    }
+
+    inline double P3(double x) {
+        return 0.5 * (5 * x * x * x - 3 * x);
+    }
+
+    inline double P4(double x) {
+        return 0.125 * (x * x * (35 * x * x - 30) + 3);
+    }
+}
 
 #endif //RSA3D_ORDERCALCULATORS_H

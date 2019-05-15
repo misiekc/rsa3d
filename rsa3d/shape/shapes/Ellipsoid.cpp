@@ -6,7 +6,8 @@
 */
 
 #include "Ellipsoid.h"
-#include "../../Utils.h"
+#include "../../utils/Assertions.h"
+#include "../OrderParameters.h"
 
 double Ellipsoid::a{};
 double Ellipsoid::b{};
@@ -226,7 +227,7 @@ std::vector<double> Ellipsoid::calculateOrder(const OrderCalculable *other) cons
     }
 
     std::vector<double> result(5);
-    result[0] = P2(v);
+    result[0] = legendre::P2(v);
     result[1] = (product(0, 0) + product(1, 1) + product(2, 2));
     return result;
 }

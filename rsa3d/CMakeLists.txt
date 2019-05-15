@@ -66,6 +66,11 @@ set(RSA_SOURCE
         shape/ShapeFactory.cpp
         surfaces/NBoxFBC.cpp
         surfaces/NBoxPBC.cpp
+        utils/Assertions.h
+        utils/OMPMacros.h
+        utils/Quantity.cpp
+        utils/Timer.cpp
+        utils/Utils.cpp
         BoundaryConditions.h
         Config.cpp
         FreeBC.h
@@ -76,12 +81,9 @@ set(RSA_SOURCE
         Positioned.h
         Positioned.tpp
         ProgramArguments.cpp
-        Quantity.cpp
         RND.cpp
         Surface.cpp
         ThreadLocalRND.cpp
-        Timer.cpp
-        Utils.cpp
         Voxel.h
         Voxel.cpp
         VoxelList.h

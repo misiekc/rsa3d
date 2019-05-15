@@ -10,6 +10,9 @@
 #include "../../statistics/LinearRegression.h"
 #include "../../statistics/PowerRegression.h"
 #include "../../statistics/ASFRegression.h"
+#include "../utils/OMPMacros.h"
+#include "../utils/Assertions.h"
+
 #include <fstream>
 #include <iostream>
 #include <cstring>

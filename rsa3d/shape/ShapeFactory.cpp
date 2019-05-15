@@ -7,7 +7,7 @@
 
 #include "ShapeFactory.h"
 #include "../Positioned.h"
-#include "../Utils.h"
+#include "../utils/Assertions.h"
 
 #if RSA_ANGULAR_DIMENSION == 0
 	#include "shapes/Sphere.h"
@@ -41,7 +41,8 @@
 #if RSA_SPATIAL_DIMENSION == 1
 	#if RSA_ANGULAR_DIMENSION == 1
 		#include "shapes/Ellipse1Dim.h"
-	#endif
+
+#endif
 #elif RSA_SPATIAL_DIMENSION == 2
 	// 2D shapes with angular dimension
 	#if RSA_ANGULAR_DIMENSION == 1

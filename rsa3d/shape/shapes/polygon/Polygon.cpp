@@ -6,6 +6,7 @@
  */
 
 #include "Polygon.h"
+#include "../../../utils/Assertions.h"
 #include <cmath>
 #include <sstream>
 

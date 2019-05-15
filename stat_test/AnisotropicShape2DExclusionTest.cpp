@@ -3,14 +3,14 @@
 //
 
 #include <fstream>
-#include <bits/unique_ptr.h>
 #include <memory>
+
 #include "AnisotropicShape2DExclusionTest.h"
 #include "../rsa3d/Config.h"
 #include "../rsa3d/shape/ShapeFactory.h"
-#include "../rsa3d/Utils.h"
+#include "../rsa3d/utils/Utils.h"
 #include "../rsa3d/FreeBC.h"
-#include "utility/ShapeGenerators.h"
+#include "utils/ShapeGenerators.h"
 
 namespace
 {

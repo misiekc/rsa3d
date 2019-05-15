@@ -3,7 +3,7 @@
 //
 
 #include "ThreadLocalRND.h"
-#include "Utils.h"
+#include "utils/OMPMacros.h"
 
 ThreadLocalRND::ThreadLocalRND(RND &randomSeeds) {
     this->rnds.reserve(static_cast<std::size_t>(_OMP_MAXTHREADS));

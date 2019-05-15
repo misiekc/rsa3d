@@ -11,7 +11,7 @@
 #include <iterator>
 #include <iomanip>
 #include <algorithm>
-#include "geometry/Vector.h"
+#include "../geometry/Vector.h"
 
 bool increment(int* in, int inlength, int max){
 	if(inlength==0)

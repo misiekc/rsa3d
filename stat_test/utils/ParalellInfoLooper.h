@@ -7,7 +7,7 @@
 
 
 #include <iostream>
-#include "../../rsa3d/Utils.h"
+#include "../../rsa3d/utils/OMPMacros.h"
 
 
 class ParallelInfoLooper {

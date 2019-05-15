@@ -5,9 +5,9 @@
 #include "PackingOverlapsTest.h"
 #include "../rsa3d/FreeBC.h"
 #include "../rsa3d/shape/ShapeFactory.h"
-#include "utility/ParalellInfoLooper.h"
-#include "../rsa3d/Utils.h"
 #include "../rsa3d/Parameters.h"
+#include "../rsa3d/utils/OMPMacros.h"
+#include "utils/ParalellInfoLooper.h"
 
 
 bool pack_ovtest::test_packing_overlaps(const Packing &packing) {

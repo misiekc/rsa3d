@@ -6,7 +6,7 @@
  */
 
 #include "Ellipse1Dim.h"
-#include "../../Utils.h"
+#include "../../utils/Utils.h"
 #include "../../geometry/Geometry.h"
 
 

@@ -6,7 +6,7 @@
  */
 
 #include<algorithm>
-#include "Utils.h"
+#include "utils/Utils.h"
 
 
 template <unsigned short SPATIAL_DIMENSION>

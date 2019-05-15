@@ -6,9 +6,10 @@
     
 #include <ostream> 
 #include <vector>
+
 #include "../rsa3d/Parameters.h"
 #include "../rsa3d/shape/OverlapStrategy.h"
-#include "utility/ShapePairFactory.h"
+#include "utils/ShapePairFactory.h"
 
 /**
  * @brief A simple program testing voxel and neighbour grid cell sizes if they meet the Shape contract.

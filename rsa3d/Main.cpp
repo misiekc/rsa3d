@@ -2,8 +2,8 @@
 #include "analizator/Analyzer.h"
 #include "analizator/ExclusionZoneVisualizer.h"
 #include "shape/ShapeFactory.h"
-#include "Utils.h"
-#include "Quantity.h"
+#include "utils/Quantity.h"
+#include "utils/Assertions.h"
 #include "ProgramArguments.h"
 
 

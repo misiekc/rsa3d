@@ -13,7 +13,8 @@
 #include <algorithm>
 
 #include "BoundaryConditions.h"
-#include "Utils.h"
+#include "utils/Utils.h"
+#include "utils/Assertions.h"
 
 
 template <typename E>

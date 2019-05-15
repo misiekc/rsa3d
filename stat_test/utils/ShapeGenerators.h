@@ -12,7 +12,7 @@
 
 #include "../../rsa3d/shape/ShapeFactory.h"
 #include "../../rsa3d/geometry/Vector.h"
-#include "../../rsa3d/Utils.h"
+#include "../../rsa3d/utils/Utils.h"
 #include <memory>
 
 /**

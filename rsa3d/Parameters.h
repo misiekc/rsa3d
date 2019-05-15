@@ -12,7 +12,8 @@
 #include <string>
 #include <cmath>
 
-#include "Utils.h"
+#include "utils/Utils.h"
+#include "utils/OMPMacros.h"
 
 class Parameters {
 private:

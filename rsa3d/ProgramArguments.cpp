@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "ProgramArguments.h"
+#include "utils/Assertions.h"
 
 ProgramArguments::ProgramArguments(int argc, char **argv) {
     Expects(argc >= 1);     // valid program arguments have at least 1 arg - cmd

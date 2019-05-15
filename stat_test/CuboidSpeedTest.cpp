@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
-#include <bits/unique_ptr.h>
+#include <memory>
 #include <fstream>
 #include <iterator>
 
@@ -18,15 +18,14 @@
 #include "../rsa3d/shape/shapes/cuboid/TriTriOverlapCB.h"
 #include "../rsa3d/shape/shapes/cuboid/SATOverlapCB.h"
 #include "../rsa3d/shape/shapes/cuboid/OptimizedSATOverlapCB.h"
-#include "../rsa3d/Timer.h"
-#include "../rsa3d/Utils.h"
-#include "utility/UniformBallDistribution.h"
+#include "../rsa3d/utils/Timer.h"
+#include "../rsa3d/utils/Utils.h"
+#include "utils/UniformBallDistribution.h"
 
 using namespace std::chrono;
 
 namespace
 {
-
     CuboidOverlapStrategy * strategyFromString(const std::string &_name) {
         if (_name == "mine")
             return new MineOverlapCB;

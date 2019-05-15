@@ -1,13 +1,13 @@
 set(STAT_TEST_SOURCE
-        utility/Distrubution.h
-        utility/IndependentPairFactory.cpp
-        utility/InfoLooper.h
-        utility/ParallelPairFactory.cpp
-        utility/ParalellInfoLooper.h
-        utility/ShapeGenerators.h
-        utility/ShapePairFactory.h
-        utility/UniformBallDistribution.cpp
-        utility/UniformBoxDistribution.cpp
+        utils/Distrubution.h
+        utils/IndependentPairFactory.cpp
+        utils/InfoLooper.h
+        utils/ParallelPairFactory.cpp
+        utils/ParalellInfoLooper.h
+        utils/ShapeGenerators.h
+        utils/ShapePairFactory.h
+        utils/UniformBallDistribution.cpp
+        utils/UniformBoxDistribution.cpp
         AnisotropicShape2DExclusionDrawer.cpp
         AnisotropicShape2DExclusionTest.cpp
         Main.cpp

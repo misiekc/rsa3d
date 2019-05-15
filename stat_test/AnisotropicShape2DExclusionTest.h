@@ -7,7 +7,7 @@
 
 #include "../rsa3d/geometry/Vector.h"
 #include "../rsa3d/shape/AnisotropicShape2D.h"
-#include "utility/ShapePairFactory.h"
+#include "utils/ShapePairFactory.h"
 #include <memory>
 
 /**

@@ -7,6 +7,7 @@
 
 #include "OwnOverlapSC.h"
 #include "Stolen2DOverlapSC.h"
+#include "../../OrderParameters.h"
 
 static const double EPSILON = 0.0000000001;
 
@@ -205,7 +206,7 @@ std::vector<double> Spherocylinder<DIMENSION>::calculateOrder(const OrderCalcula
 	Vector<DIMENSION> thisAxis = this->getEnd(1) - this->getEnd(-1);
 	Vector<DIMENSION> otherAxis = s.getEnd(1) - s.getEnd(-1);
 
-    return { P2(thisAxis*otherAxis) };
+    return { legendre::P2(thisAxis*otherAxis) };
 }
 
 

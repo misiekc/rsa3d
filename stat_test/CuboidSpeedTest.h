@@ -10,10 +10,10 @@
 
 #include "../rsa3d/Config.h"
 #include "../rsa3d/shape/ShapeFactory.h"
-#include "utility/IndependentPairFactory.h"
-#include "utility/ShapePairFactory.h"
-#include "../rsa3d/Quantity.h"
+#include "../rsa3d/utils/Quantity.h"
 #include "../rsa3d/shape/shapes/cuboid/CuboidOverlapStrategy.h"
+#include "utils/IndependentPairFactory.h"
+#include "utils/ShapePairFactory.h"
 
 #include <vector>
 #include <ostream>

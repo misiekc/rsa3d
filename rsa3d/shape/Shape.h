@@ -11,7 +11,7 @@
 #include "../BoundaryConditions.h"
 #include "../Positioned.h"
 #include "../RND.h"
-#include "../Utils.h"
+#include "../utils/Utils.h"
 #include <string>
 #include <ostream>
 #include <istream>

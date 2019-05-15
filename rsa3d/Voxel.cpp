@@ -6,7 +6,7 @@
  */
 
 #include "Voxel.h"
-#include "Utils.h"
+#include "utils/Utils.h"
 
 #include <sstream>
 #include <stdexcept>

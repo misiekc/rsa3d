@@ -3,7 +3,7 @@
 //
 
 #include "OrderParameters.h"
-#include "../Utils.h"
+#include "../utils/Utils.h"
 
 inline double OrderParameters::cosNSum(const std::vector<Vector<3>> &firstAxes,
                                        const std::vector<Vector<3>> &secondAxes, unsigned char cosExp) {
@@ -34,11 +34,11 @@ inline double OrderParameters::cosOfMaxAbs(const std::vector<Vector<3>> &firstAx
 }
 
 double OrderParameters::nematicP1(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {
-    return P1(cosOfMaxAbs(firstAxes, secondAxes));
+    return legendre::P1(cosOfMaxAbs(firstAxes, secondAxes));
 }
 
 double OrderParameters::nematicP2(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {
-    return P2(cosOfMaxAbs(firstAxes, secondAxes));
+    return legendre::P2(cosOfMaxAbs(firstAxes, secondAxes));
 }
 
 double OrderParameters::tetrahedral(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {

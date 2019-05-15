@@ -8,21 +8,17 @@
 #include <memory>
 #include <chrono>
 #include <cstring>
+#include <fstream>
+#include <iomanip>
+#include <dirent.h>
+
 #include "PackingGenerator.h"
 #include "surfaces/NBoxPBC.h"
 #include "surfaces/NBoxFBC.h"
 #include "shape/ShapeFactory.h"
 #include "shape/ConvexShape.h"
 #include "ThreadLocalRND.h"
-#include <fstream>
-#include <iomanip>
-#include <dirent.h>
-
-
-#ifdef _OPENMP
-#include <omp.h>
-
-#endif
+#include "utils/OMPMacros.h"
 
 
 double PackingGenerator::FACTOR_LIMIT = 5.0;

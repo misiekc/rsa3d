@@ -3,6 +3,7 @@
 //
 
 #include "Triangle.h"
+#include "../../../utils/Assertions.h"
 
 void Triangle::initClass(const std::string &args) {
     std::string attr = Triangle::preparePolygonAttributes(args);

@@ -3,7 +3,7 @@
 //
 
 #include <cstdlib>
-#include "../rsa3d/Utils.h"
+#include "../rsa3d/utils/Utils.h"
 #include "CuboidSpeedTest.h"
 #include "ShapeOverlapTest.h"
 #include "ShapePointInsideTest.h"

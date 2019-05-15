@@ -5,12 +5,12 @@
 #include <memory>
 #include <fstream>
 #include <functional>
+
 #include "AnisotropicShape2DExclusionTest.h"
 #include "AnisotropicShape2DExclusionDrawer.h"
-#include "../rsa3d/Utils.h"
 #include "../rsa3d/shape/ShapeFactory.h"
 #include "../rsa3d/FreeBC.h"
-#include "utility/ShapeGenerators.h"
+#include "utils/ShapeGenerators.h"
 
 
 namespace
