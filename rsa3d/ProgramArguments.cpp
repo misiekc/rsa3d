@@ -8,11 +8,34 @@
 #include "ProgramArguments.h"
 #include "utils/Assertions.h"
 
+namespace {
+    /* The obvious implementation of reading data from file. It is extracted only for testability (mocking of reading
+     * from file. */
+    class ParametersFileReaderImpl : public ParametersFileReader {
+    public:
+        ~ParametersFileReaderImpl() override = default;
+
+        /* It just opens file with name filename and stores it into output stream. */
+        void readFromFile(const std::string &filename, std::ostream &output) override {
+            std::ifstream inputFile(filename);
+            if (!inputFile)
+                throw InvalidArgumentsException("Cannot open input file " + filename + "to read. Aborting.");
+
+            output << inputFile.rdbuf() << std::endl;
+        }
+    };
+}
+
 ProgramArguments::ProgramArguments(int argc, char **argv) {
-    Expects(argc >= 1);     // valid program arguments have at least 1 arg - cmd
+    ParametersFileReaderImpl pfr;
+    *this = ProgramArguments(argc, argv, pfr);
+}
+
+ProgramArguments::ProgramArguments(int argc, char **argv, ParametersFileReader &pfr) {
+    Expects(argc >= 1);     // valid program arguments have at least 1 arg - cmd; assertion error otherwise
     cmd = argv[0];
 
-    // Now valid program arguments, but we assume we always have mode indicator
+    // Now valid program arguments, we use InvalidArgumentsException from now on
     if (argc < 2)
         throw InvalidArgumentsException("Usage: " + cmd + " <mode> (additional parameters)");
 
@@ -22,28 +45,28 @@ ProgramArguments::ProgramArguments(int argc, char **argv) {
         if (arg == "-f") {
             if (++i == argc)
                 throw InvalidArgumentsException("Expected input file after -f. Aborting.");
-
-            std::string inputFileName = argv[i];
-            std::ifstream inputFile(inputFileName);
-            if (!inputFile)
-                throw InvalidArgumentsException("Cannot open input file " + inputFileName + "to read. Aborting.");
-
-            input << inputFile.rdbuf() << std::endl;
+            pfr.readFromFile(argv[i], input);
+            input << std::endl;
         } else if (arg == "-i") {
             input << std::cin.rdbuf() << std::endl;
-        } else if (arg.length() > 1 && arg[0] == '-') {
+        } else if (startsWithMinus(arg)) {
             input << arg.substr(1) << std::endl;
         } else {
             positionalArguments.push_back(arg);
         }
     }
 
-    if (positionalArguments.empty())
-        throw std::runtime_error("No mode parameter. Aborting.");
+    fetchModeArgument();
+    parameters = Parameters(input);
+}
+
+bool ProgramArguments::startsWithMinus(const std::string &arg) const {
+    return arg.length() > 1 && arg[0] == '-';
+}
+
+void ProgramArguments::fetchModeArgument() {
     mode = positionalArguments[0];
     positionalArguments.erase(positionalArguments.begin());
-
-    parameters = Parameters(input);
 }
 
 std::string ProgramArguments::formatUsage(const std::string &additionalArgs) const {

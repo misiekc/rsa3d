@@ -10,6 +10,15 @@
 
 #include "Parameters.h"
 
+
+/* Class needed for mocking reading parameters from file in tests */
+class ParametersFileReader {
+public:
+    virtual ~ParametersFileReader() = default;
+
+    virtual void readFromFile(const std::string &filename, std::ostream &output) = 0;
+};
+
 class InvalidArgumentsException : public std::runtime_error {
 public:
     explicit InvalidArgumentsException(const std::string &msg) : runtime_error{msg} {}
@@ -22,7 +31,11 @@ private:
     std::string mode;
     std::vector<std::string> positionalArguments;
 
+    void fetchModeArgument();
+    bool startsWithMinus(const std::string &arg) const;
+
 public:
+    ProgramArguments(int argc, char **argv, ParametersFileReader &pfr);
     ProgramArguments(int argc, char **argv);
 
     const std::string &getCmd() const { return cmd; }
@@ -32,5 +45,6 @@ public:
 
     std::string formatUsage(const std::string &additionalArgs) const;
 };
+
 
 #endif //RSA3D_PROGRAMARGUMENTS_H
