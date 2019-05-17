@@ -1,4 +1,4 @@
-set(STAT_TEST_SOURCE
+set(STAT_TEST_COMMON_SOURCE
         utils/Distrubution.h
         utils/IndependentPairFactory.cpp
         utils/InfoLooper.h
@@ -11,24 +11,32 @@ set(STAT_TEST_SOURCE
         AnisotropicShape2DExclusionDrawer.cpp
         AnisotropicShape2DExclusionTest.cpp
         Main.cpp
-        OrderParamTest.cpp
         PackingOverlapsTest.cpp
         ShapeBCTest.cpp
         ShapeOverlapTest.cpp
         ShapePointInsideTest.cpp
         ShapeStaticSizesTest.cpp
-        CuboidSpeedTest.cpp
-        RectangleCase.cpp
         VectorSpeedTest.cpp)
+
+set(STAT_TEST_SOURCE.3.0
+        OrderParamTest.cpp
+        CuboidSpeedTest.cpp)
 
 function(register_targets_for_dimensions SD AD)
     set(DIM_SUFFIX ".${SD}.${AD}")
     set(STAT_TEST_EXEC "stat_test${DIM_SUFFIX}")
     set(RSA_LIB "rsa_main${DIM_SUFFIX}")
+    set(SHAPES_LIB "shapes${DIM_SUFFIX}")
+    set(ADDITIONAL_SOURCE "STAT_TEST_SOURCE${DIM_SUFFIX}")
 
-    add_executable(${STAT_TEST_EXEC} ${STAT_TEST_SOURCE})
+    if(DEFINED ${ADDITIONAL_SOURCE})
+        add_executable(${STAT_TEST_EXEC} ${STAT_TEST_COMMON_SOURCE} ${${ADDITIONAL_SOURCE}})
+    else()
+        add_executable(${STAT_TEST_EXEC} ${STAT_TEST_COMMON_SOURCE})
+    endif()
+
     target_compile_definitions(${STAT_TEST_EXEC} PUBLIC RSA_SPATIAL_DIMENSION=${SD} RSA_ANGULAR_DIMENSION=${AD})
-    target_link_libraries(${STAT_TEST_EXEC} ${RSA_LIB})
+    target_link_libraries(${STAT_TEST_EXEC} ${SHAPES_LIB} ${RSA_LIB})
 endfunction()
 
 register_targets_for_dimensions(3 0)    # 3D spheres, cuboids, platonic solids and so on

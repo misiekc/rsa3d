@@ -1,0 +1,85 @@
+set(SHAPE_BASE_SOURCE
+        AnisotropicShape2D.cpp
+        ConvexShape.h
+        ConvexShape.tpp
+        OrderCalculable.h
+        OrderParameters.cpp
+        OverlapStrategy.h
+        OverlapStrategyShape.h
+        Shape.h
+        Shape.tpp
+        ShapeFactory.cpp)
+
+add_library(shapes.1.1
+        ${SHAPE_BASE_SOURCE}
+        shapes/Ellipse1Dim.cpp)
+target_compile_definitions(shapes.1.1 PUBLIC RSA_SPATIAL_DIMENSION=1 RSA_ANGULAR_DIMENSION=1)
+
+add_library(shapes.2.0
+        ${SHAPE_BASE_SOURCE}
+        shapes/spherocylinder/OwnOverlapSC.h
+        shapes/spherocylinder/SpheroCylinder2D.cpp
+        shapes/spherocylinder/Spherocylinder.h
+        shapes/spherocylinder/Spherocylinder.tpp
+        shapes/spherocylinder/Stolen2DOverlapSC.cpp
+        shapes/OrientedCuboid.h
+        shapes/OrientedCuboid.tpp
+        shapes/Sphere.h
+        shapes/Sphere.tpp)
+target_compile_definitions(shapes.2.0 PUBLIC RSA_SPATIAL_DIMENSION=2 RSA_ANGULAR_DIMENSION=0)
+
+add_library(shapes.2.1
+        ${SHAPE_BASE_SOURCE}
+        shapes/spherocylinder/SpheroCylinder2D.cpp
+        shapes/polygon/HBPolygon.cpp
+        shapes/polygon/Polygon.cpp
+        shapes/polygon/SBPolygon.cpp
+        shapes/polygon/Triangle.cpp
+        shapes/Ellipse.cpp
+        shapes/Polydisk.cpp
+        shapes/Rectangle.cpp)
+target_compile_definitions(shapes.2.1 PUBLIC RSA_SPATIAL_DIMENSION=2 RSA_ANGULAR_DIMENSION=1)
+
+add_library(shapes.3.0
+        ${SHAPE_BASE_SOURCE}
+        shapes/cuboid/Cuboid.cpp
+        shapes/cuboid/CuboidOverlapStrategy.h
+        shapes/cuboid/MineOverlapCB.cpp
+        shapes/cuboid/OptimizedSATOverlapCB.cpp
+        shapes/cuboid/SATOverlapCB.cpp
+        shapes/cuboid/TriTriOverlapCB.cpp
+        shapes/regular_solid/Cuboctahedron.cpp
+        shapes/regular_solid/CubeToTetrahedron.cpp
+        shapes/regular_solid/Dodecahedron.cpp
+        shapes/regular_solid/Icosahedron.cpp
+        shapes/regular_solid/Icosidodecahedron.cpp
+        shapes/regular_solid/Octahedron.cpp
+        shapes/regular_solid/RegularSolid.h
+        shapes/regular_solid/RegularSolid.tpp
+        shapes/regular_solid/RegularSolidBase.cpp
+        shapes/regular_solid/Rhombicosidodecahedron.cpp
+        shapes/regular_solid/Rhombicuboctahedron.cpp
+        shapes/regular_solid/SATOverlapRS.cpp
+        shapes/regular_solid/SnubCube.cpp
+        shapes/regular_solid/SnubDodecahedron.cpp
+        shapes/regular_solid/Tetrahedron.cpp
+        shapes/regular_solid/TriTriOverlapRS.cpp
+        shapes/regular_solid/TruncatedCube.cpp
+        shapes/regular_solid/TruncatedCuboctahedron.cpp
+        shapes/regular_solid/TruncatedDodecahedron.cpp
+        shapes/regular_solid/TruncatedIcosahedron.cpp
+        shapes/regular_solid/TruncatedIcosidodecahedron.cpp
+        shapes/regular_solid/TruncatedOctahedron.cpp
+        shapes/regular_solid/TruncatedTetrahedron.cpp
+        shapes/regular_solid/UnoptimizedSATOverlapRS.cpp
+        shapes/spherocylinder/OwnOverlapSC.h
+        shapes/spherocylinder/SpheroCylinder2D.cpp
+        shapes/spherocylinder/Spherocylinder.h
+        shapes/spherocylinder/Spherocylinder.tpp
+        shapes/spherocylinder/Stolen2DOverlapSC.cpp
+        shapes/Ellipsoid.cpp
+        shapes/OrientedCuboid.h
+        shapes/OrientedCuboid.tpp
+        shapes/Sphere.h
+        shapes/Sphere.tpp)
+target_compile_definitions(shapes.3.0 PUBLIC RSA_SPATIAL_DIMENSION=3 RSA_ANGULAR_DIMENSION=0)
