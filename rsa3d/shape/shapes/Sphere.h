@@ -41,7 +41,9 @@ public:
 	double minDistance(const Shape<DIMENSION, 0> *s) const override;
 
 	std::string toPovray() const;
-	void store(std::ostream &f) const;
+    std::string toWolfram() const override;
+
+    void store(std::ostream &f) const;
 	void restore(std::istream &f);
 
 	Shape<DIMENSION, 0> *clone() const override;
