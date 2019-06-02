@@ -148,3 +148,14 @@ Shape<DIMENSION, 0> *Sphere<DIMENSION>::clone() const {
     return new Sphere(*this);
 }
 
+template<unsigned short DIMENSION>
+std::string Sphere<DIMENSION>::toWolfram() const {
+    std::ostringstream out;
+    out.precision(std::numeric_limits<double>::digits10 + 1);
+    out << std::fixed;
+
+    // Dimension independent Mathematica primitive
+    out << "Ball[" << this->getPosition() << ", " << Sphere<DIMENSION>::radius << "]";
+    return out.str();
+}
+

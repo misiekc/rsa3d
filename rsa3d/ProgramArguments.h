@@ -35,7 +35,7 @@ private:
     bool startsWithMinus(const std::string &arg) const;
 
 public:
-    ProgramArguments(int argc, char **argv, ParametersFileReader &pfr);
+    ProgramArguments(int argc, char **argv, ParametersFileReader &pfr, std::istream &inputStream);
     ProgramArguments(int argc, char **argv);
 
     const std::string &getCmd() const { return cmd; }
