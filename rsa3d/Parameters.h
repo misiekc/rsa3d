@@ -28,7 +28,7 @@ public:
 	std::size_t collectors = 1;
 	double maxTime = std::numeric_limits<double>::infinity();
 	std::size_t split = 5000;
-	int surfaceDimension = RSA_SPATIAL_DIMENSION;
+	unsigned short surfaceDimension = RSA_SPATIAL_DIMENSION;
 	double surfaceSize = pow(100000.0, 1.0/surfaceDimension);
 	bool storePackings = true;
 

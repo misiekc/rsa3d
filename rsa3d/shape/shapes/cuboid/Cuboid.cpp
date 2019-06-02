@@ -162,7 +162,7 @@ bool Cuboid::pointInsideCuboid(const Vector<3> &vertex) const
 
 // Returns volume of the Cuboid determined during class initialization
 //----------------------------------------------------------------------------
-double Cuboid::getVolume() const
+double Cuboid::getVolume(unsigned short dim) const
 {
     return 1.;
 }

@@ -25,7 +25,7 @@ public:
     static void initClass(const std::string & attr);
     static void calculateStatic(const std::string &attr);
 
-    double getVolume() const override;
+    double getVolume(unsigned short dim) const override;
 
     Shape<2, 1> *clone() const override;
 

@@ -65,6 +65,8 @@ void Spherocylinder<DIMENSION>::initClass(const std::string &attr) {
                 2 * M_PI * rnd->nextValue(),
                 std::asin(2 * rnd->nextValue() - 1),
                 2 * M_PI * rnd->nextValue()));
+	#else
+        return nullptr;
 	#endif
     });
 

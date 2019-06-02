@@ -261,12 +261,12 @@ public:
 						std::vector<const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *shapes) const;
 
 	/**
-     * @brief Returns a volume of the shape.
+     * @brief Returns a volume of the shape. dim is a packing dimension which can be snaller than shape dimension. Then the Volume should be an intersection of shape and packing subvolume
      *
      * Default implementation returns 1. If derived class supports shapes of volume other than 1 this method should be overriden.
      * @return a volume of the shape
      */
-	virtual double getVolume() const;
+	virtual double getVolume(unsigned short dim) const;
 
     /**
      * @brief Checks if whole voxel is inside an exclusion zone of @this shape.

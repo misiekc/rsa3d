@@ -38,7 +38,7 @@ void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
     for (unsigned short i = 0; i < DIMENSION; i++) {
         size[i] *= factor;
     }
-
+    Shape<DIMENSION, 0>::setSupportsSaturation(true);
    	Shape<DIMENSION, 0>::setNeighbourListCellSize(*std::max_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION));
    	Shape<DIMENSION, 0>::setVoxelSpatialSize(0.5*(*std::min_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION)));
 	Shape<DIMENSION, 0>::template setDefaultCreateShapeImpl <OrientedCuboid<DIMENSION>> ();

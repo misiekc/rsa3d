@@ -42,7 +42,7 @@ public:
 	Ellipse();
 	~Ellipse() override = default;
 
-    double getVolume() const override;
+    double getVolume(unsigned short dim) const override;
     void setAngle(double angle) override;
     bool overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const override;
     //bool pointInside(BoundaryConditions *bc, double* da) const override;

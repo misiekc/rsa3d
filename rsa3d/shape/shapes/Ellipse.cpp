@@ -9,6 +9,7 @@
 #include "../../utils/Utils.h"
 #include "../../geometry/Geometry.h"
 
+#include <cmath>
 
 static const double EPSILON = 0.0000000001;
 
@@ -65,8 +66,19 @@ bool Ellipse::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const {
 	return true;
 }
 
-double Ellipse::getVolume() const {
-	return M_PI*this->a*this->b;
+double Ellipse::getVolume(unsigned short dim) const {
+	switch (dim){
+	case 2:
+		return M_PI*this->a*this->b;
+		break;
+	case 1:
+		return 2 * Ellipse::longSemiAxis * Ellipse::shortSemiAxis /
+				std::sqrt(Ellipse::longSemiAxis * Ellipse::longSemiAxis * std::sin(this->getAngle()) * std::sin(this->getAngle()) + Ellipse::shortSemiAxis * Ellipse::shortSemiAxis * std::cos(this->getAngle()) * std::cos(this->getAngle()));
+		break;
+	default:
+		return 1.0;
+		break;
+	}
 }
 
 // TODO not working properly

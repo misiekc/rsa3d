@@ -242,7 +242,7 @@ bool Polygon::lineVoxelIntersect(double x1, double y1, double x2, double y2, dou
 		return false;
 }
 
-double Polygon::getVolume() const{
+double Polygon::getVolume(unsigned short dim) const{
 	return std::accumulate(Polygon::segments.begin(), Polygon::segments.end(), 0.0, [](auto vol, auto seg) {
 	    return vol + Polygon::getTriangleArea(seg.first, seg.second);
 	});

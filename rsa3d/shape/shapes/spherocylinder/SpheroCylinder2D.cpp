@@ -33,8 +33,34 @@ void SpheroCylinder2D::initClass(const std::string &attr) {
     Shape::setDefaultCreateShapeImpl <SpheroCylinder2D> ();
 }
 
-double SpheroCylinder2D::getVolume() const {
-    return 1;
+double SpheroCylinder2D::getVolume(unsigned short dim) const {
+	switch (dim){
+	case 2:
+		return 4*SpheroCylinder2D::halfDistance*SpheroCylinder2D::radius +
+				M_PI*SpheroCylinder2D::radius*SpheroCylinder2D::radius;
+		break;
+	case 1:
+	{
+		double diameter = 2*SpheroCylinder2D::radius;
+		double distance = 2*SpheroCylinder2D::halfDistance;
+		double angle = this->getAngle();
+		double vertexAngle = std::atan(diameter / distance);
+	    if (angle < vertexAngle)
+	        return distance * std::cos(angle) + std::sqrt(diameter * diameter - distance * distance * std::sin(angle) * std::sin(angle));
+	    else if (angle < M_PI - vertexAngle)
+	        return diameter / std::sin(angle);
+	    else if (angle < M_PI + vertexAngle)
+	        return -distance * std::cos(angle) + std::sqrt(diameter * diameter - distance * distance * std::sin(angle) * std::sin(angle));
+	    else if (angle < 2 * M_PI - vertexAngle)
+	        return -diameter / std::sin(angle);
+//	    else
+	        return distance * std::cos(angle) + std::sqrt(diameter * diameter - distance * distance * std::sin(angle) * std::sin(angle));
+		break;
+	}
+	default:
+		return 1;
+		break;
+	}
 }
 
 bool SpheroCylinder2D::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const {

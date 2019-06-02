@@ -92,7 +92,7 @@ const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *
 
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVolume() const {
+double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVolume(unsigned short dim) const {
     return 1.;
 }
 

@@ -65,7 +65,7 @@ bool Sphere<DIMENSION>::overlap(BoundaryConditions<DIMENSION> *bc, const Shape<D
 }
 
 template <unsigned short DIMENSION>
-double Sphere<DIMENSION>::getVolume() const {
+double Sphere<DIMENSION>::getVolume(unsigned short dim) const {
 	return Sphere<DIMENSION>::volume()*pow(this->r, DIMENSION);
 }
 

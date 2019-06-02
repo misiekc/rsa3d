@@ -58,7 +58,7 @@ public:
 
     bool overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const override;
 
-    double getVolume() const override;
+    double getVolume(unsigned short dim) const override;
 
 	std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 

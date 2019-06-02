@@ -75,7 +75,7 @@ public:
 	static CuboidOverlapStrategy * getOverlapStrategy();
 
 	bool overlap(BoundaryConditions<3> *bc, const Shape<3,0> *s) const override;
-	double getVolume() const override;
+	double getVolume(unsigned short dim) const override;
 	bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
                      double orientationRange) const override;
 	std::string toPovray() const override;

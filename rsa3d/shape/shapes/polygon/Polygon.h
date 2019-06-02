@@ -83,7 +83,7 @@ public:
     ~Polygon() override = default;
 
 	Shape<2, 1> *clone() const override;
-	double getVolume() const override;
+	double getVolume(unsigned short dim) const override;
 
 	bool overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const override;
 

@@ -114,7 +114,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 
 	RND rnd(this->seed);
 	RSAShape *s = ShapeFactory::createShape(&rnd);
-	double dt = s->getVolume() / this->surface->getArea();
+	double dt = s->getVolume(RSA_SPATIAL_DIMENSION) / this->surface->getArea();
 	delete s;
 
 	this->packing = packing;
@@ -194,7 +194,7 @@ void PackingGenerator::createPacking() {
 
 	RND rnd(this->seed);
 	RSAShape *s = ShapeFactory::createShape(&rnd);
-	double dt = s->getVolume() / this->surface->getArea();
+	double dt = s->getVolume(this->params.surfaceDimension) / this->surface->getArea();
 	delete s;
 
 	int l = 0;

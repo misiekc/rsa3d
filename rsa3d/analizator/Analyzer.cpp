@@ -100,7 +100,7 @@ void Analyzer::analyzeCorrelations(const Packing &packing, const NeighbourGrid<c
 	}
 }
 /*
-double Analyzer::getPetiodicDistance(const RSAShape *shape1, const RSAShape *shape2) const {
+double Analyzer::getPeriodicDistance(const RSAShape *shape1, const RSAShape *shape2) const {
     RSAVector delta = shape1->getPosition() - shape2->getPosition();
     RSAVector periodicDelta;
     for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++) {
@@ -111,7 +111,7 @@ double Analyzer::getPetiodicDistance(const RSAShape *shape1, const RSAShape *sha
     return periodicDelta.norm();
 }
 */
-
+/*
 void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, double surfaceFactor){
 	double lastt = 0.0;
 	for(size_t i=0; i<packing.size(); i++){
@@ -130,6 +130,29 @@ void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, d
 	if (nvt != nullptr)
 		nvt->addBetween(lastt, nvt->getMax()+1.0, packing.size());
 }
+*/
+void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, double surfaceFactor){
+	double lastt = 0.0;
+	double sumOfParticlesVolume = 0.0;
+	for(size_t i=0; i<packing.size(); i++){
+		double t = packing[i]->time;
+		if (nvt != nullptr)
+			nvt->addBetween(lastt, t, sumOfParticlesVolume);
+		if (asf != nullptr){
+			double packingFraction = sumOfParticlesVolume*surfaceFactor;
+			double tries = (t-lastt)/surfaceFactor;
+			if (tries<1.0)
+				tries = 1.0;
+			asf->add(packingFraction, tries);
+		}
+		double particleVolume = packing[i]->getVolume(this->params->surfaceDimension);
+		sumOfParticlesVolume += particleVolume;
+		lastt = t;
+	}
+	if (nvt != nullptr)
+		nvt->addBetween(lastt, nvt->getMax()+1.0, sumOfParticlesVolume);
+}
+
 
 void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA, double surfaceFactor, Result *res){
 	double **points = new double*[nvt.size()];
@@ -318,6 +341,7 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
     auto packingPaths = PackingGenerator::findPackingsInDir(dirName);
 
     double maxTime = this->findMaxTime(packingPaths);
+//    double maxTime = 1.0e+15;
 
     LogPlot nvt(mintime, maxTime, 200);
     Plot asf(0.0, 0.6, 200);
@@ -326,7 +350,7 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
 
     double n = 0.0, n2 = 0.0;
     int counter = 0;
-    double packingSize = pow(params->surfaceSize, RSA_SPATIAL_DIMENSION);
+    double packingSize = pow(this->params->surfaceSize, this->params->surfaceDimension);
 
     std::cout << "[Analyzer::analyzePackingsInDirectory] " << std::flush;
 	for (const auto &packingPath : packingPaths) {
