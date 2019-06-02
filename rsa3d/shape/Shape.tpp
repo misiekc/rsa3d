@@ -89,10 +89,11 @@ const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *
 	return nullptr;
 }
 
-
-
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVolume(unsigned short dim) const {
+    // By default, particles have unity volume and do not support packings in dimensions other than their own
+    if (dim != SPATIAL_DIMENSION)
+        throw std::runtime_error (" supports only " + std::to_string(SPATIAL_DIMENSION) + "D packings");
     return 1.;
 }
 

@@ -66,7 +66,9 @@ bool Sphere<DIMENSION>::overlap(BoundaryConditions<DIMENSION> *bc, const Shape<D
 
 template <unsigned short DIMENSION>
 double Sphere<DIMENSION>::getVolume(unsigned short dim) const {
-	return Sphere<DIMENSION>::volume()*pow(this->r, DIMENSION);
+    if (dim != DIMENSION)
+        throw std::runtime_error("Sphere supports only " + std::to_string(DIMENSION) + "D packings");
+    return Sphere<DIMENSION>::volume()*pow(this->r, DIMENSION);
 }
 
 template <unsigned short DIMENSION>

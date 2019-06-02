@@ -159,14 +159,6 @@ bool Cuboid::pointInsideCuboid(const Vector<3> &vertex) const
     return true;
 }
 
-
-// Returns volume of the Cuboid determined during class initialization
-//----------------------------------------------------------------------------
-double Cuboid::getVolume(unsigned short dim) const
-{
-    return 1.;
-}
-
 // Checks whether the point with coordinates da lies inside excluded volume.
 // It is an interior of a set of point which distanse from
 //----------------------------------------------------------------------------

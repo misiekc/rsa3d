@@ -142,14 +142,14 @@ TEST_CASE("Polygon: getVolume") {
     SECTION("getVolume should always give 1") {
         Polygon::initClass("4 xy 0.5 0.5 -0.5 0.5 -0.5 -0.5 0.5 -0.5 4 0 1 2 3 0");
         Polygon polygon1;
-        REQUIRE(polygon1.getVolume() == Approx(1));
+        REQUIRE(polygon1.getVolume(2) == Approx(1));
 
         Polygon::initClass("4 xy 0.6 0.7 -0.4 0.7 -0.4 -0.3 0.6 -0.3 4 0 1 2 3 0");
         Polygon polygon2;
-        REQUIRE(polygon2.getVolume() == Approx(1));
+        REQUIRE(polygon2.getVolume(2) == Approx(1));
 
         Polygon::initClass("4 xy 0.6 0.9 -0.5 0.7 -0.4 -0.2 0.6 -0.3 4 0 1 2 3 0");
         Polygon polygon3;
-        REQUIRE(polygon3.getVolume() == Approx(1));
+        REQUIRE(polygon3.getVolume(2) == Approx(1));
     }
 }

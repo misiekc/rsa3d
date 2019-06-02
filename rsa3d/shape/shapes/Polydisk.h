@@ -55,7 +55,7 @@ public:
 	~Polydisk() override = default;
 
 	Shape<2, 1> *clone() const override;
-	double getVolume();
+	double getVolume(unsigned short dim) const override;
 
 	bool overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const override;
 	bool voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition, const Orientation<1> &voxelOrientation,

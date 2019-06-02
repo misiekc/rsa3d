@@ -47,7 +47,7 @@ public:
 	Ellipse1Dim();
 	~Ellipse1Dim() override = default;
 
-    double getVolume() const override;
+    double getVolume(unsigned short dim) const override;
     bool overlap(BoundaryConditions<1> *bc, const Shape<1, 1> *s) const override;
     //bool pointInside(BoundaryConditions *bc, double* da) const override;
     bool pointInside(BoundaryConditions<1> *bc, const Vector<1> &da, double angleFrom, double angleTo) const;

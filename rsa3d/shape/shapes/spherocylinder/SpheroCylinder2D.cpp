@@ -58,7 +58,7 @@ double SpheroCylinder2D::getVolume(unsigned short dim) const {
 		break;
 	}
 	default:
-		return 1;
+        throw std::runtime_error ("SpheroCylinder2D supports only 2D and 1D packings");
 		break;
 	}
 }

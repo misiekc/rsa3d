@@ -62,8 +62,10 @@ bool OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, c
 }
 
 template <unsigned short DIMENSION>
-double OrientedCuboid<DIMENSION>::getVolume() const{
-	return std::accumulate(size, size + DIMENSION, 1.0, std::multiplies<double>());
+double OrientedCuboid<DIMENSION>::getVolume(unsigned short dim) const{
+    if (dim != DIMENSION)
+        throw std::runtime_error("OrientedCuboid supports only " + std::to_string(DIMENSION) + "D packings");
+    return std::accumulate(size, size + DIMENSION, 1.0, std::multiplies<double>());
 }
 
 template <unsigned short DIMENSION>

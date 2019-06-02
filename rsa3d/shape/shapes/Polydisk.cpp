@@ -211,8 +211,11 @@ bool Polydisk::diskVoxelIntersect(size_t disk0, const Vector<2> shape0Position, 
 }
 
 
-double Polydisk::getVolume(){
-	return Polydisk::area;
+double Polydisk::getVolume(unsigned short dim) const {
+    if (dim != 2)
+        throw std::runtime_error ("Polydisk supports only 2D packings");
+
+    return Polydisk::area;
 }
 
 bool Polydisk::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{

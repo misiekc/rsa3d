@@ -68,8 +68,11 @@ bool Ellipse1Dim::overlap(BoundaryConditions<1> *bc, const Shape<1, 1> *s) const
 	return true;
 }
 
-double Ellipse1Dim::getVolume() const {
-	return M_PI*this->a*this->b;
+double Ellipse1Dim::getVolume(unsigned short dim) const {
+    if (dim != 1)
+        throw std::runtime_error ("Ellipse1Dim supports only 1D packings");
+
+    return M_PI*this->a*this->b;
 }
 
 // TODO not working properly

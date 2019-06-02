@@ -76,7 +76,7 @@ double Ellipse::getVolume(unsigned short dim) const {
 				std::sqrt(Ellipse::longSemiAxis * Ellipse::longSemiAxis * std::sin(this->getAngle()) * std::sin(this->getAngle()) + Ellipse::shortSemiAxis * Ellipse::shortSemiAxis * std::cos(this->getAngle()) * std::cos(this->getAngle()));
 		break;
 	default:
-		return 1.0;
+        throw std::runtime_error("Ellipse supports only 2D and 1D packings");
 		break;
 	}
 }
