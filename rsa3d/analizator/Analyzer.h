@@ -49,7 +49,9 @@ private:
 		void print(std::ostream &out);
 	};
 
-	void analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, double surfaceFactor);
+
+	/* returns packing fraction */
+	double analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, double surfaceFactor);
 	void analyzeCorrelations(const Packing &packing, const NeighbourGrid<const RSAShape> &ng, Plot *corr);
 	void analyzeOrder(const Packing &packing, const NeighbourGrid<const RSAShape> &ng, std::vector<Plot*> *order);
 	void printKinetics(LogPlot &nvt, std::string filename, double *fixedA, double surfaceFactor, Result *res);

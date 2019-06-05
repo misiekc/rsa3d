@@ -24,6 +24,14 @@ std::ostream &operator<<(std::ostream &out, Analyzer::Quantity quantity) {
 	return out;
 }
 
+/*
+void Analyzer::print(std::ostream &out, double value, double error) {
+	int precision =
+	out << "dir\tN\td(N)\td\td(d)\tN_inf\td(N_inf)\tC1\td(C1)\tC2\td(C2)" << std::endl;
+	out << dir << "\t" << theta << "\t" << d << "\t" << thetaInf << "\t" << C1 << "\t" << C2 << std::endl;
+}
+*/
+
 void Analyzer::Result::print(std::ostream &out) {
 	out << "dir\tN\td(N)\td\td(d)\tN_inf\td(N_inf)\tC1\td(C1)\tC2\td(C2)" << std::endl;
 	out << dir << "\t" << theta << "\t" << d << "\t" << thetaInf << "\t" << C1 << "\t" << C2 << std::endl;
@@ -131,7 +139,7 @@ void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, d
 		nvt->addBetween(lastt, nvt->getMax()+1.0, packing.size());
 }
 */
-void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, double surfaceFactor){
+double Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, double surfaceFactor){
 	double lastt = 0.0;
 	double sumOfParticlesVolume = 0.0;
 	for(size_t i=0; i<packing.size(); i++){
@@ -146,11 +154,13 @@ void Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, d
 			asf->add(packingFraction, tries);
 		}
 		double particleVolume = packing[i]->getVolume(this->params->surfaceDimension);
+//		double particleVolume = packing[i]->getVolume(RSA_SPATIAL_DIMENSION);
 		sumOfParticlesVolume += particleVolume;
 		lastt = t;
 	}
 	if (nvt != nullptr)
 		nvt->addBetween(lastt, nvt->getMax()+1.0, sumOfParticlesVolume);
+	return sumOfParticlesVolume*surfaceFactor;
 }
 
 
@@ -348,7 +358,7 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
     Plot correlations(0.0, correlationsRange, 200);
     std::vector<Plot*> order = this->getFilledOrderVector(correlationsRange);
 
-    double n = 0.0, n2 = 0.0;
+    double spf = 0.0, spf2 = 0.0;
     int counter = 0;
     double packingSize = pow(this->params->surfaceSize, this->params->surfaceDimension);
 
@@ -356,10 +366,10 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
 	for (const auto &packingPath : packingPaths) {
         Packing packing;
         packing.restore(packingPath);
-        n += packing.size();
-        n2 += packing.size()*packing.size();
+        double pf = this->analyzePacking(packing, &nvt, &asf, particleSize/packingSize);
+        spf += pf;
+        spf2 += pf*pf;
         counter++;
-        this->analyzePacking(packing, &nvt, &asf, particleSize/packingSize);
         if (correlationsRange>0.0){
             NeighbourGrid<const RSAShape> ng(params->surfaceDimension, params->surfaceSize, correlationsRange);
             for(const RSAShape *s: packing){
@@ -380,8 +390,8 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
 	this->printASF(asf, dirName + "_asf.txt", counter, packingFraction, &result);
 
 	result.dir = dirName;
-	result.theta.value = n/counter;
-	result.theta.error = sqrt( (n2/counter - n*n/(counter*counter)) / counter);
+	result.theta.value = spf/counter;
+	result.theta.error = sqrt( (spf2/counter - spf*spf/(counter*counter)) / counter);
 
 	result.print(std::cout);
 
