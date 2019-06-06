@@ -26,7 +26,7 @@ void Analyzer::print(std::ostream &out, double value, double error) {
 }
 */
 
-void Analyzer::Result::print(std::ostream &out) {
+void Analyzer::Result::print(std::ostream &out) const {
 	out << "dir\tN\td(N)\td\td(d)\tN_inf\td(N_inf)\tC1\td(C1)\tC2\td(C2)" << std::endl;
 	out << dir << "\t" << theta << "\t" << d << "\t" << thetaInf << "\t" << C1 << "\t" << C2 << std::endl;
 }

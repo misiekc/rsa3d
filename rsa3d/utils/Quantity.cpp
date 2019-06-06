@@ -33,16 +33,13 @@ Quantity Quantity::fromSamples(const std::vector<double> &samples)
 
 std::ostream &operator<<(std::ostream &stream, const Quantity &quantity)
 {
-    std::string value, error;
     if (!quantity.significantDigitsBasedOnError) {
-        value = std::to_string(quantity.value);
-        error = std::to_string(quantity.error);
-        stream << value << quantity.getSeparatorString() << error;
+        stream << quantity.value << quantity.getSeparatorString() << quantity.error;
     } else {
-        /* Here goes the implementation */
     	int errorPrecision = 3; // hardcoded error precision
     	int valuePrecision = errorPrecision + (int)(std::log10(quantity.value/quantity.error));
-    	stream << std::setprecision(valuePrecision) << quantity.value << quantity.getSeparatorString() << std::setprecision(valuePrecision) << quantity.value;
+    	stream << std::setprecision(valuePrecision) << quantity.value << quantity.getSeparatorString();
+    	stream << std::setprecision(valuePrecision) << quantity.error;
     }
     return stream;
 }

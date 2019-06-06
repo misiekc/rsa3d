@@ -41,7 +41,7 @@ private:
 		Quantity C1;
 		Quantity C2;
 
-		void print(std::ostream &out);
+		void print(std::ostream &out) const;
 	};
 
 

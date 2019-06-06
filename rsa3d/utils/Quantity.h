@@ -42,7 +42,7 @@ public:
     /**
      * @brief It set true, the number of significant digits will be based on error. If false, default double printing.
      */
-    bool significantDigitsBasedOnError = false;
+    bool significantDigitsBasedOnError = true;
 
     Quantity() = default;
     Quantity(double value, double error) : value(value), error(error) { }

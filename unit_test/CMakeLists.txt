@@ -7,7 +7,8 @@ add_executable(unit_test.2.0
         rsa3d/PackingTest.cpp
         rsa3d/ParametersTest.cpp
         rsa3d/ProgramArgumentsTest.cpp
-        rsa3d/VectorTest.cpp)
+        rsa3d/VectorTest.cpp
+        rsa3d/utils/QuantityTest.cpp)
 target_compile_definitions(unit_test.2.0 PUBLIC RSA_SPATIAL_DIMENSION=2 RSA_ANGULAR_DIMENSION=0)
 target_link_libraries(unit_test.2.0 unit_test_runner rsa_main.2.0 shapes.2.0)
 
