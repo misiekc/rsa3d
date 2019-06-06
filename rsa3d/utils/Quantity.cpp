@@ -48,14 +48,11 @@ std::ostream &operator<<(std::ostream &stream, const Quantity &quantity)
 }
 
 std::string Quantity::getSeparatorString() const {
-    std::string separatorString;
     switch (this->separator) {
-        case Quantity::TABULATOR:
-            separatorString = "\t";
-            break;
-        case Quantity::PLUS_MINUS:
-            separatorString = " +- ";
-            break;
+        case TABULATOR:
+            return "\t";
+        case PLUS_MINUS:
+            return " +- ";
     }
-    return separatorString;
+    return "";
 }
