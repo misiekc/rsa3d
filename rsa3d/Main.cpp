@@ -215,7 +215,7 @@ void dat(const ProgramArguments &arguments) {
 
 void analyze(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() < 2)
+    if (positionalArguments.empty())
         die(arguments.formatUsage("<directory> (correlations range = 10; 0 - no corr output)"));
 
     double corrRange = (positionalArguments.size() >= 2) ? std::stod(positionalArguments[1]) : 10.0;

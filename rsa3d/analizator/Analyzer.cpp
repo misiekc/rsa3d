@@ -18,12 +18,6 @@
 #include <cstring>
 #include <cmath>
 
-
-std::ostream &operator<<(std::ostream &out, Analyzer::Quantity quantity) {
-	out << quantity.value << "\t" << quantity.error;
-	return out;
-}
-
 /*
 void Analyzer::print(std::ostream &out, double value, double error) {
 	int precision =

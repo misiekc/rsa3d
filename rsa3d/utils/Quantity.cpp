@@ -11,8 +11,7 @@
 #include <numeric>
 #include <cmath>
 
-// Returns Quantity computed from vector of samples
-//----------------------------------------------------------------------------------------
+
 Quantity Quantity::fromSamples(const std::vector<double> &samples)
 {
     if (samples.empty())
@@ -32,10 +31,31 @@ Quantity Quantity::fromSamples(const std::vector<double> &samples)
     return result;
 }
 
-// Friend stream insertion operator
-//----------------------------------------------------------------------------------------
 std::ostream &operator<<(std::ostream &stream, const Quantity &quantity)
 {
-    stream << quantity.value << " +- " << quantity.error;
+    std::string value, error;
+    if (!quantity.significantDigitsBasedOnError) {
+        value = std::to_string(quantity.value);
+        error = std::to_string(quantity.error);
+    } else {
+
+        /* Here goes the implementation */
+
+    }
+
+    stream << value << quantity.getSeparatorString() << error;
     return stream;
+}
+
+std::string Quantity::getSeparatorString() const {
+    std::string separatorString;
+    switch (this->separator) {
+        case Quantity::TABULATOR:
+            separatorString = "\t";
+            break;
+        case Quantity::PLUS_MINUS:
+            separatorString = " +- ";
+            break;
+    }
+    return separatorString;
 }

@@ -16,6 +16,7 @@
 #include "../../statistics/LogPlot.h"
 #include "../PackingGenerator.h"
 #include "../NeighbourGrid.h"
+#include "../utils/Quantity.h"
 
 
 #include <string>
@@ -31,12 +32,6 @@ public:
 
 private:
 	const Parameters *params;
-
-	struct Quantity {
-		double value{};
-		double error{};
-	};
-	friend std::ostream &operator<<(std::ostream &out, Quantity quantity);
 
 	struct Result {
 		std::string dir;
