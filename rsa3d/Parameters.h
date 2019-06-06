@@ -42,6 +42,8 @@ public:
 	std::size_t generatorProcesses = 1;
 	int ompThreads = _OMP_MAXTHREADS;
 
+	bool coverageByNumber = false;
+
     bool operator==(const Parameters &rhs) const;
 
     bool operator!=(const Parameters &rhs) const;

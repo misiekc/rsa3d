@@ -139,7 +139,7 @@ double Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf,
 	for(size_t i=0; i<packing.size(); i++){
 		double t = packing[i]->time;
 		if (nvt != nullptr)
-			nvt->addBetween(lastt, t, sumOfParticlesVolume);
+			nvt->addBetween(lastt, t, sumOfParticlesVolume*surfaceFactor);
 		if (asf != nullptr){
 			double packingFraction = sumOfParticlesVolume*surfaceFactor;
 			double tries = (t-lastt)/surfaceFactor;
@@ -147,13 +147,16 @@ double Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf,
 				tries = 1.0;
 			asf->add(packingFraction, tries);
 		}
-		double particleVolume = packing[i]->getVolume(this->params->surfaceDimension);
-//		double particleVolume = packing[i]->getVolume(RSA_SPATIAL_DIMENSION);
+		double particleVolume;
+		if (this->params->coverageByNumber)
+			particleVolume = packing[i]->getVolume(this->params->surfaceDimension);
+		else
+			particleVolume = packing[i]->getVolume(RSA_SPATIAL_DIMENSION);
 		sumOfParticlesVolume += particleVolume;
 		lastt = t;
 	}
 	if (nvt != nullptr)
-		nvt->addBetween(lastt, nvt->getMax()+1.0, sumOfParticlesVolume);
+		nvt->addBetween(lastt, nvt->getMax()+1.0, sumOfParticlesVolume*surfaceFactor);
 	return sumOfParticlesVolume*surfaceFactor;
 }
 
@@ -177,7 +180,7 @@ void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA,
 		if (diff==0) // no change in data
 			continue;
 		lasti = i;
-		file << points[i][0] << "\t" << points[i][1]*surfaceFactor << "\t" << diff*surfaceFactor;
+		file << points[i][0] << "\t" << points[i][1] << "\t" << diff;
 		if (points[i][0]>100){ // calculate slope for times in (points[i][0]/100, points[i][0])
 			maxJ = i;
 			pr.clear();
@@ -348,7 +351,7 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
 //    double maxTime = 1.0e+15;
 
     LogPlot nvt(mintime, maxTime, 200);
-    Plot asf(0.0, 0.6, 200);
+    Plot asf(0.0, 1.0, 200);
     Plot correlations(0.0, correlationsRange, 200);
     std::vector<Plot*> order = this->getFilledOrderVector(correlationsRange);
 
@@ -380,7 +383,7 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
 	Result result;
 
 	this->printKinetics(nvt, (dirName + "_kinetics.txt"), nullptr, particleSize / packingSize, &result);
-	double packingFraction = result.thetaInf.value * particleSize / packingSize;
+	double packingFraction = result.thetaInf.value;
 	this->printASF(asf, dirName + "_asf.txt", counter, packingFraction, &result);
 
 	result.dir = dirName;

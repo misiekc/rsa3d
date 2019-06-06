@@ -34,6 +34,8 @@ Parameters::Parameters(std::istream &stream) {
 		else if (key == "collectors") 				    this->collectors = config.getUnsignedLong(key);
 		else if (key == "generatorProcesses") 		    this->generatorProcesses = config.getUnsignedLong(key);
 		else if (key == "ompThreads") 				    this->ompThreads = config.getInt(key);
+
+		else if (key == "coverageByNumber")				this->coverageByNumber = config.getString(key) != "false";
 		else
 		    std::cerr << "[Parameters::Parameters] Warning: unknown parameter " << key << std::endl;
 	}
