@@ -36,10 +36,10 @@ std::ostream &operator<<(std::ostream &stream, const Quantity &quantity)
     if (!quantity.significantDigitsBasedOnError) {
         stream << quantity.value << quantity.getSeparatorString() << quantity.error;
     } else {
-    	int errorPrecision = 3; // hardcoded error precision
+    	int errorPrecision = 4; // hardcoded error precision
     	int valuePrecision = errorPrecision + (int)(std::log10(quantity.value/quantity.error));
     	stream << std::setprecision(valuePrecision) << quantity.value << quantity.getSeparatorString();
-    	stream << std::setprecision(valuePrecision) << quantity.error;
+    	stream << std::setprecision(errorPrecision) << quantity.error;
     }
     return stream;
 }

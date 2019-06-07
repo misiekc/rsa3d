@@ -10,6 +10,7 @@
 #include "../../statistics/LinearRegression.h"
 #include "../../statistics/PowerRegression.h"
 #include "../../statistics/ASFRegression.h"
+#include "../../statistics/ArrayFunction.h"
 #include "../utils/OMPMacros.h"
 #include "../utils/Assertions.h"
 
@@ -166,6 +167,7 @@ void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA,
 	for(int i=0; i<nvt.size(); i++)
 		points[i] = new double[2];
 	nvt.getAsPoints(points);
+	ArrayFunction theta(points, nvt.size());
 	int minJ = 0, maxJ = nvt.size()-1;
 	double diff, maxX = points[0][maxJ];
 	PowerRegression pr;
@@ -180,7 +182,7 @@ void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA,
 		if (diff==0) // no change in data
 			continue;
 		lasti = i;
-		file << points[i][0] << "\t" << points[i][1] << "\t" << diff;
+		file << points[i][0] << "\t" << points[i][1] << "\t" << diff << "\t" << theta.get(2.0*points[i][0]) - theta.get(points[i][0]);
 		if (points[i][0]>100){ // calculate slope for times in (points[i][0]/100, points[i][0])
 			maxJ = i;
 			pr.clear();
@@ -347,10 +349,11 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
 
     auto packingPaths = PackingGenerator::findPackingsInDir(dirName);
 
-    double maxTime = this->findMaxTime(packingPaths);
+    double minmaxTimes[2];
+    this->findMinMaxTimes(minmaxTimes, packingPaths);
 //    double maxTime = 1.0e+15;
 
-    LogPlot nvt(mintime, maxTime, 200);
+    LogPlot nvt(mintime, minmaxTimes[0], 200);
     Plot asf(0.0, 1.0, 200);
     Plot correlations(0.0, correlationsRange, 200);
     std::vector<Plot*> order = this->getFilledOrderVector(correlationsRange);
@@ -418,22 +421,28 @@ bool Analyzer::isOrderCalculable(const RSAShape *shape) const {
     return dynamic_cast<const OrderCalculable*>(shape) != nullptr;
 }
 
-double Analyzer::findMaxTime(const std::vector<std::string> &packingPaths) {
-    if (this->params->maxTime < std::numeric_limits<double>::infinity())
-        return this->params->maxTime;
+void Analyzer::findMinMaxTimes(double* minmaxTimes, const std::vector<std::string> &packingPaths) {
+    if (this->params->maxTime < std::numeric_limits<double>::infinity()){
+        minmaxTimes[0] = this->params->maxTime;
+        minmaxTimes[1] = this->params->maxTime;
+        return;
+    }
 
-    double maxTime = 0;
-    std::cout << "[Analyzer::findMaxTime] " << std::flush;
+    minmaxTimes[1] = 0;
+    minmaxTimes[0] = std::numeric_limits<double>::infinity();
+
+    std::cout << "[Analyzer::findMinMaxTime] " << std::flush;
     for (const auto &packingFilename : packingPaths) {
         Packing packing;
         packing.restore(packingFilename);
 
-        double packingMaxTime = packing.back()->time;
-        if (packingMaxTime > maxTime)
-            maxTime = packingMaxTime;
+        double packingTime = packing.back()->time;
+        if (packingTime > minmaxTimes[1])
+            minmaxTimes[1] = packingTime;
+        if (packingTime < minmaxTimes[0])
+        	minmaxTimes[0] = packingTime;
 
         std::cout << "." << std::flush;
     }
-    std::cout << " time found: " << maxTime << std::endl;
-    return maxTime;
+    std::cout << " times found: " << minmaxTimes[0] << "\t" << minmaxTimes[1] << std::endl;
 }
