@@ -6,6 +6,7 @@ set(STAT_TEST_COMMON_SOURCE
         utils/ParalellInfoLooper.h
         utils/ShapeGenerators.h
         utils/ShapePairFactory.h
+        utils/TestExitCodes.h
         utils/UniformBallDistribution.cpp
         utils/UniformBoxDistribution.cpp
         AnisotropicShape2DExclusionDrawer.cpp
@@ -16,6 +17,7 @@ set(STAT_TEST_COMMON_SOURCE
         ShapeOverlapTest.cpp
         ShapePointInsideTest.cpp
         ShapeStaticSizesTest.cpp
+        ShapeUltimateTest.cpp
         VectorSpeedTest.cpp)
 
 set(STAT_TEST_SOURCE.3.0

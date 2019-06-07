@@ -17,6 +17,7 @@
 #include "../rsa3d/FreeBC.h"
 #include "utils/InfoLooper.h"
 #include "utils/ShapeGenerators.h"
+#include "utils/TestExitCodes.h"
 
 namespace
 {
@@ -99,8 +100,8 @@ namespace
     }
 
     bool Result::success() const {
-        return voxelConflicts == 0 && biggerVoxelConflicts == 0 &&
-               neighbourListConflicts == 0 && smallerNeighbourListConflicts == 0;
+        return voxelConflicts == 0 && biggerVoxelConflicts != 0 &&
+               neighbourListConflicts == 0 && smallerNeighbourListConflicts != 0;
     }
 
     /* Generates random pair distant on x coordinate by distance and checks overlap */
@@ -134,14 +135,20 @@ namespace
 namespace shape_sizetest
 {
     int main(int argc, char **argv) {
-        if (argc < 5)   die("Usage: ./rsa_test shape_sizetest [particle] [attibutes] [max_tries]");
+        if (argc < 5) {
+            std::cerr << "Usage: ./rsa_test shape_sizetest [particle] [attibutes] [max_tries]" << std::endl;
+            return TEST_ERROR;
+        }
 
         ShapeFactory::initShapeClass(argv[2], argv[3]);
         unsigned long max_tries = std::stoul(argv[4]);
-        if (max_tries <= 0)     die("[ERROR] max_tries <= 0");
+        if (max_tries <= 0) {
+            std::cerr << "[ERROR] max_tries <= 0" << std::endl;
+            return TEST_ERROR;
+        }
 
         Result result = perform_test(max_tries);
         result.print(std::cout);
-        return result.success() ? EXIT_SUCCESS : EXIT_FAILURE;
+        return result.success() ? TEST_SUCCESS : TEST_FAILURE;
     }
 }

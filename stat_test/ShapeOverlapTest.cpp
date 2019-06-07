@@ -23,6 +23,7 @@
 #include "utils/InfoLooper.h"
 #include "utils/ParallelPairFactory.h"
 #include "utils/UniformBallDistribution.h"
+#include "utils/TestExitCodes.h"
 
 namespace
 {
@@ -90,11 +91,16 @@ namespace
     }
 
     /* Check if a shape created by acquire_overlap_strategy_shape is valid for this test */
-    void verify_shape(const std::string &name, const RSAOverlapStrategyShape *osShape) {
-        if (osShape == nullptr)
-            die(name + " is not OverlapStrategyShape");
-        else if (osShape->getSupportedStrategies().size() < 2)
-            die(name + " does not support at least 2 strategies");
+    bool is_shape_supported(const std::string &name, const RSAOverlapStrategyShape *osShape) {
+        if (osShape == nullptr) {
+            std::cerr << name << " is not OverlapStrategyShape" << std::endl;
+            return false;
+        } else if (osShape->getSupportedStrategies().size() < 2) {
+            std::cerr << name << " does not support at least 2 strategies" << std::endl;
+            return false;
+        } else {
+            return true;
+        }
     }
 
     /* Wraps some ugliness */
@@ -153,28 +159,35 @@ namespace
 namespace shape_ovtest
 {
     int main(int argc, char **argv) {
-        if (argc < 6)
-            die("Usage: ./rsa_test shape_ovtest [particle] [attibutes] [ball_radius] [max_tries]");
+        if (argc < 6) {
+            std::cerr << "Usage: ./rsa_test shape_ovtest [particle] [attibutes] [ball_radius] [max_tries]" << std::endl;
+            return TEST_ERROR;
+        }
 
         double ball_radius = std::stod(argv[4]);
         unsigned long max_tries = std::stoul(argv[5]);
-        if (ball_radius <= 0 || max_tries <= 0)
-            die("Wrong input. Aborting.");
+        if (ball_radius <= 0 || max_tries <= 0) {
+            std::cerr << "Wrong input. Aborting." << std::endl;
+            return TEST_ERROR;
+        }
 
         ShapeFactory::initShapeClass(argv[2], argv[3]);
 
         auto osShape = acquire_overlap_strategy_shape();
-        verify_shape(argv[2], osShape.get());
+        if (!is_shape_supported(argv[2], osShape.get()))
+            return TEST_UNSUPPORTED;
 
         UniformBallDistribution distribution(ball_radius);
         IndependentPairFactory factory(distribution);
         std::cout << "[INFO] Performing test with unoriented shapes -------------------------------------" << std::endl;
-        if (!perform_test(*osShape, factory, max_tries, "ovtest_anisotropic_dump.nb")) return EXIT_FAILURE;
+        if (!perform_test(*osShape, factory, max_tries, "ovtest_anisotropic_dump.nb"))
+            return TEST_FAILURE;
 
         ParallelPairFactory isotropicFactory(distribution);
         std::cout << "[INFO] Performing test with oriented shapes ---------------------------------------" << std::endl;
-        if (!perform_test(*osShape, isotropicFactory, max_tries, "ovtest_isotropic_dump.nb")) return EXIT_FAILURE;
+        if (!perform_test(*osShape, isotropicFactory, max_tries, "ovtest_isotropic_dump.nb"))
+            return TEST_FAILURE;
 
-        return EXIT_SUCCESS;
+        return TEST_SUCCESS;
     }
 }

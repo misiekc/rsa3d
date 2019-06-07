@@ -13,6 +13,7 @@
 #include "AnisotropicShape2DExclusionDrawer.h"
 #include "PackingOverlapsTest.h"
 #include "ShapeBCTest.h"
+#include "ShapeUltimateTest.h"
 
 #if RSA_SPATIAL_DIMENSION == 3 && RSA_ANGULAR_DIMENSION == 0
     #include "CuboidSpeedTest.h"
@@ -40,6 +41,8 @@ int main(int argc, char **argv) {
         return as2d_exdrawer::main(argc, argv);
     else if (mode == "pack_ovtest")
         return pack_ovtest::main(argc, argv);
+    else if (mode == "shape_ultitest")
+        return shape_ultitest::main(argc, argv);
 
     #if RSA_SPATIAL_DIMENSION == 3 && RSA_ANGULAR_DIMENSION == 0
         if (mode == "cube_speedtest")
