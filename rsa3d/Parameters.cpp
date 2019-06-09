@@ -113,7 +113,8 @@ bool Parameters::operator==(const Parameters &rhs) const {
            particleType == rhs.particleType &&
            particleAttributes == rhs.particleAttributes &&
            generatorProcesses == rhs.generatorProcesses &&
-           ompThreads == rhs.ompThreads;
+           ompThreads == rhs.ompThreads &&
+		   coverageByNumber == rhs.coverageByNumber;
 }
 
 bool Parameters::operator!=(const Parameters &rhs) const {

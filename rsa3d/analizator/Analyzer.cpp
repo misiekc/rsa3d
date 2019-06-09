@@ -150,9 +150,9 @@ double Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf,
 		}
 		double particleVolume;
 		if (this->params->coverageByNumber)
-			particleVolume = packing[i]->getVolume(this->params->surfaceDimension);
-		else
 			particleVolume = packing[i]->getVolume(RSA_SPATIAL_DIMENSION);
+		else
+			particleVolume = packing[i]->getVolume(this->params->surfaceDimension);
 		sumOfParticlesVolume += particleVolume;
 		lastt = t;
 	}
@@ -174,14 +174,14 @@ void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA,
 	LinearRegression lr1;
 	LinearRegression lr2;
 	std::ofstream file(filename);
-    file.precision(std::numeric_limits<double>::digits10 + 1);
-	for (int i = 1, lasti =0; i < nvt.size(); i++) {
+ 	for (int i = 1, lasti =0; i < nvt.size(); i++) {
 		if (points[i][1]==0) // no data
 			continue;
 		diff = (points[i][1] - points[lasti][1])/(points[i][0] - points[lasti][0]);
 		if (diff==0) // no change in data
 			continue;
 		lasti = i;
+	    file.precision(std::numeric_limits<double>::digits10 + 1);
 		file << points[i][0] << "\t" << points[i][1] << "\t" << diff << "\t" << theta.get(2.0*points[i][0]) - theta.get(points[i][0]);
 		if (points[i][0]>100){ // calculate slope for times in (points[i][0]/100, points[i][0])
 			maxJ = i;
