@@ -10,6 +10,7 @@
 #include "utils/UniformBallDistribution.h"
 #include "utils/IndependentPairFactory.h"
 #include "utils/InfoLooper.h"
+#include "utils/TestExitCodes.h"
 
 namespace {
     using ShapePair = RSAShapePairFactory::ShapePair;
@@ -35,7 +36,7 @@ namespace {
     public:
         void evaluatePair(const ShapePair &pair, const RSAVector &translation);
         void print(std::ostream &out) const;
-        int success() const { return ovConflicts.numOf == 0 && piConflicts.numOf == 0 ? EXIT_SUCCESS : EXIT_FAILURE; }
+        bool success() const { return ovConflicts.numOf == 0 && piConflicts.numOf == 0; }
 
         void evaluateOverlap(const ShapePair &pair, const ShapePair &pairTranslated, const RSAVector &translation);
 
@@ -207,13 +208,17 @@ namespace shape_bctest
 {
     int main(int argc, char **argv)
     {
-        if (argc < 6)
-            die("Usage: ./rsa shape_bctest [particle] [attr] [ball_radius] [max_tries]");
+        if (argc < 6) {
+            std::cerr << "Usage: ./rsa shape_bctest [particle] [attr] [ball_radius] [max_tries]" << std::endl;
+            return TEST_ERROR;
+        }
 
         double ballRadius = std::stod(argv[4]);
         unsigned long maxTries = std::stoul(argv[5]);
-        if (ballRadius <= 0 || maxTries <= 0)
-            die("Wrong input. Aborting.");
+        if (ballRadius <= 0 || maxTries <= 0) {
+            std::cerr << "Wrong input. Aborting." << std::endl;
+            return TEST_ERROR;
+        }
 
         ShapeFactory::initShapeClass(argv[2], argv[3]);
         UniformBallDistribution distribution{ballRadius};
@@ -223,6 +228,6 @@ namespace shape_bctest
         std::cout << std::endl;
         results.print(std::cout);
 
-        return results.success();
+        return results.success() ? TEST_SUCCESS : TEST_FAILURE;
     }
 }

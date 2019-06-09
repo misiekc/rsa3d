@@ -15,7 +15,7 @@ TEST_CASE("Quantity: rounding based on error") {
         REQUIRE(result.str() == "34.34\t2.56");
     }
 
-    SECTION("negativeDecimal") {
+    SECTION("negative decimal") {
         std::ostringstream result;
 
         result << Quantity(-34.344, 2.559);
