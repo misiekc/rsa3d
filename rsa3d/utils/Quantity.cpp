@@ -1,4 +1,4 @@
-//
+//re
 // Created by PKua on 25.12.17.
 //
 
@@ -11,6 +11,26 @@
 #include <numeric>
 #include <cmath>
 
+
+namespace {
+    /* Rounds a value to a specific order, ex. 1.254 -> 1.3 if order = -1 or 1233.435 -> 1200 if order = 2 */
+    std::string format_up_to_order(double value, int roundOrder) {
+        if (roundOrder > 0) {
+            double shiftingPow = std::pow(10, roundOrder);
+            int result = static_cast<int>(std::round(value / shiftingPow) * shiftingPow);
+            return std::to_string(result);
+        } else {
+            std::ostringstream result;
+            result << std::fixed << std::setprecision(-roundOrder) << value;
+            return result.str();
+        }
+    }
+
+    /* Finds the order of a value, ex. 123.34 -> 2, 1.123 -> 1, 0.0345 -> -2 */
+    int find_order(double value) {
+        return static_cast<int>(std::floor(std::log10(std::abs(value))));
+    }
+}
 
 Quantity Quantity::fromSamples(const std::vector<double> &samples)
 {
@@ -33,14 +53,23 @@ Quantity Quantity::fromSamples(const std::vector<double> &samples)
 
 std::ostream &operator<<(std::ostream &stream, const Quantity &quantity)
 {
-    if (!quantity.significantDigitsBasedOnError) {
-        stream << quantity.value << quantity.getSeparatorString() << quantity.error;
+    if (!quantity.significantDigitsBasedOnError || quantity.error == 0) {
+        std::stringstream out;      // isolate stream std::fixed and std::scientific flags
+        out << quantity.value << quantity.getSeparatorString() << std::abs(quantity.error);
+        stream << out.rdbuf();
     } else {
-    	int errorPrecision = 4; // hardcoded error precision
-    	int valuePrecision = errorPrecision + (int)(std::log10(quantity.value/quantity.error));
-    	stream << std::setprecision(valuePrecision) << quantity.value << quantity.getSeparatorString();
-    	stream << std::setprecision(errorPrecision) << quantity.error;
+    	int errorEndOrder = find_order(quantity.error) - quantity.errorDigits + 1;
+        int valueEndOrder = errorEndOrder;
+
+        // If error is bigger than value, value will have one significant digit
+        int valueStartOrder = find_order(quantity.value);
+        if (errorEndOrder > valueStartOrder)
+            valueEndOrder = valueStartOrder;
+
+        stream << format_up_to_order(quantity.value, valueEndOrder) << quantity.getSeparatorString();
+        stream << format_up_to_order(std::abs(quantity.error), errorEndOrder);
     }
+
     return stream;
 }
 

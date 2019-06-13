@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <iosfwd>
+#include "Assertions.h"
 
 /**
  * @brief A simple class representing physical quantity with error.
@@ -45,7 +46,9 @@ public:
     bool significantDigitsBasedOnError = true;
 
     Quantity() = default;
-    Quantity(double value, double error) : value(value), error(error) { }
+    Quantity(double value, double error, int errorDigits = 4) : value(value), error(error), errorDigits(errorDigits) {
+        Expects(errorDigits > 0 && errorDigits < 16);
+    }
 
     /**
      * @brief Creates the quantity as a mean of samples, with estimated error of the mean.
@@ -64,6 +67,8 @@ public:
     friend std::ostream &operator<<(std::ostream &stream, const Quantity &quantity);
 
 private:
+    const int errorDigits = 4;
+
     std::string getSeparatorString() const;
 };
 
