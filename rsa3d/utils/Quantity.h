@@ -55,7 +55,7 @@ public:
      * @param samples A vector of doubles to calculate the quantity from
      * @return the quantity from samples
      */
-    static Quantity fromSamples(const std::vector<double> &samples);
+    void fromSamples(const std::vector<double> &samples);
 
     /**
      * @brief Prints the quantity on given @a std::ostream The behaviour can be manipulated via Quantity::separator and

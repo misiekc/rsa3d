@@ -32,23 +32,23 @@ namespace {
     }
 }
 
-Quantity Quantity::fromSamples(const std::vector<double> &samples)
+void Quantity::fromSamples(const std::vector<double> &samples)
 {
-    if (samples.empty())
-        return Quantity();
-    else if (samples.size() == 1)
-        return Quantity(samples[0], 0);
+    if (samples.empty()){
+        this->value = 0;
+        this->error = 0;
+    }
+    else if (samples.size() == 1){
+        this->value = samples[0];
+    	this->error = 0;
+    }else{
+    	this->value = std::accumulate(samples.begin(), samples.end(), 0.0) / samples.size();
 
-    Quantity result;
-
-    result.value = std::accumulate(samples.begin(), samples.end(), 0.0) / samples.size();
-
-    auto squareDev = [&](double s, double next) { return s + std::pow(result.value - next, 2); } ;
-    result.error = std::accumulate(samples.begin(), samples.end(), 0.0, squareDev);
-    result.error = result.error / samples.size() / (samples.size() - 1);
-    result.error = std::sqrt(result.error);
-
-    return result;
+    	auto squareDev = [&](double s, double next) { return s + std::pow(this->value - next, 2); } ;
+    	this->error = std::accumulate(samples.begin(), samples.end(), 0.0, squareDev);
+    	this->error = this->error / samples.size() / (samples.size() - 1);
+    	this->error = std::sqrt(this->error);
+    }
 }
 
 std::ostream &operator<<(std::ostream &stream, const Quantity &quantity)

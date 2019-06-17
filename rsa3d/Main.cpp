@@ -287,7 +287,7 @@ void accuracy(const ProgramArguments &arguments) {
         const Packing &packing = pg.getPacking();
 
         packingFractions.push_back(static_cast<double>(packing.size()) / params.sufraceVolume());
-        packingFraction = Quantity::fromSamples(packingFractions);
+        packingFraction.fromSamples(packingFractions);
 
         seed++;
     } while (seed < 2 || packingFraction.error > accuracy);
