@@ -7,68 +7,10 @@
 
 #include <iostream>
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelSpatialSize = 0;
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelAngularSize = 2*M_PI;
+ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION> Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::shapeStaticInfo;
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::neighbourListCellSize = 0;
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::supportsSaturation = false;
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::create_shape_fun_ptr
-        Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createShapeImpl = nullptr;
-
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setVoxelSpatialSize(double size) {
-	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelSpatialSize = size;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setVoxelAngularSize(double size) {
-	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelAngularSize = size;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setNeighbourListCellSize(double size) {
-	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::neighbourListCellSize = size;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setSupportsSaturation(bool flag){
-	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::supportsSaturation = flag;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelSpatialSize() {
-	return Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelSpatialSize;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelAngularSize() {
-	return Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelAngularSize;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getNeighbourListCellSize() {
-	return Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::neighbourListCellSize;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getSupportsSaturation() {
-	return Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::supportsSaturation;
-}
-
-template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-const typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::create_shape_fun_ptr
-Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getCreateShapeImpl() {
-    return createShapeImpl;
-}
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape() : Positioned<SPATIAL_DIMENSION>(){
@@ -104,7 +46,7 @@ Orientation<ANGULAR_DIMENSION> Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getO
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setOrientation(
-		const Orientation<ANGULAR_DIMENSION> &orientation) {
+        const Orientation<ANGULAR_DIMENSION> &orientation) {
 	this->orientation = orientation;
 }
 
@@ -190,14 +132,80 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::applyBC(BoundaryConditions<SPA
 }
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setCreateShapeImpl(Shape *(*const fptr)(RND *)) {
-    createShapeImpl = fptr;
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setShapeStaticInfo(
+        ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION> shapeStaticInfo) {
+    shapeStaticInfo.throwIfIncomplete();
+    Shape::shapeStaticInfo = shapeStaticInfo;
 }
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-template<typename SPECIFIC_SHAPE>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setDefaultCreateShapeImpl() {
-    createShapeImpl = [](RND *rnd) {
-        return static_cast<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *>(new SPECIFIC_SHAPE());
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setCircumsphereRadius(double circumsphereRadius) {
+    Expects(circumsphereRadius > 0);
+    Expects(circumsphereRadius < std::numeric_limits<double>::infinity());
+    this->circumsphereRadius = circumsphereRadius;
+    if (this->neighbourListCellSize == NOT_SPECIFIED)
+        this->neighbourListCellSize = 2*circumsphereRadius;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setInsphereRadius(double insphereRadius) {
+    Expects(insphereRadius > 0);
+    Expects(insphereRadius < std::numeric_limits<double>::infinity());
+    this->insphereRadius = insphereRadius;
+    if (this->voxelSpatialSize == NOT_SPECIFIED)
+        this->voxelSpatialSize = 2*insphereRadius/std::sqrt(SPATIAL_DIMENSION);
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setNeighbourListCellSize(double neighbourListCellSize) {
+    Expects(neighbourListCellSize > 0);
+    Expects(neighbourListCellSize < std::numeric_limits<double>::infinity());
+    ShapeStaticInfo::neighbourListCellSize = neighbourListCellSize;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setVoxelSpatialSize(double voxelSpatialSize) {
+    Expects(voxelSpatialSize > 0);
+    Expects(voxelSpatialSize < std::numeric_limits<double>::infinity());
+    ShapeStaticInfo::voxelSpatialSize = voxelSpatialSize;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setVoxelAngularSize(double voxelAngularSize) {
+    Expects(voxelAngularSize > 0);
+    Expects(voxelAngularSize <= 2*M_PI);
+    ShapeStaticInfo::voxelAngularSize = voxelAngularSize;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setSupportsSaturation(bool supportsSaturation) {
+    ShapeStaticInfo::supportsSaturation = supportsSaturation;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setCreateShapeImpl(
+        ShapeStaticInfo::create_shape_fun_ptr createShapeImpl) {
+    ShapeStaticInfo::createShapeImpl = createShapeImpl;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+template<typename ConcreteShape>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setDefaultCreateShapeImpl() {
+    this->createShapeImpl = [](RND *rnd) {
+        return static_cast<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *>(new ConcreteShape());
     };
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::throwIfIncomplete() const {
+    if (this->circumsphereRadius == NOT_SPECIFIED)
+        throw std::runtime_error("Circumsphere radius has not been set!");
+    else if (this->insphereRadius == NOT_SPECIFIED)
+        throw std::runtime_error("Insphere radius has not been set!");
+    else if (this->voxelSpatialSize == NOT_SPECIFIED)
+        throw std::runtime_error("Voxel spatial size has not been set!");
+    else if (this->neighbourListCellSize == NOT_SPECIFIED)
+        throw std::runtime_error("Neighbour list cell size has not been set!");
+    else if (this->createShapeImpl == nullptr)
+        throw std::runtime_error("Create shape function implementation radius has not been set!");
 }

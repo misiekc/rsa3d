@@ -38,10 +38,23 @@ void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
     for (unsigned short i = 0; i < DIMENSION; i++) {
         size[i] *= factor;
     }
-    Shape<DIMENSION, 0>::setSupportsSaturation(true);
-   	Shape<DIMENSION, 0>::setNeighbourListCellSize(*std::max_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION));
-   	Shape<DIMENSION, 0>::setVoxelSpatialSize(0.5*(*std::min_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION)));
-	Shape<DIMENSION, 0>::template setDefaultCreateShapeImpl <OrientedCuboid<DIMENSION>> ();
+
+    double diagonal = std::accumulate(size, size + DIMENSION, 0.0, [](auto squareSum, auto size) {
+        return squareSum + size*size;
+    });
+    diagonal = std::sqrt(diagonal);
+    double minSize = *std::min_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION);
+    double maxSize = *std::max_element(OrientedCuboid<DIMENSION>::size, OrientedCuboid<DIMENSION>::size + DIMENSION);
+
+    ShapeStaticInfo<DIMENSION, 0> shapeInfo;
+    shapeInfo.setCircumsphereRadius(diagonal / 2);
+    shapeInfo.setInsphereRadius(minSize / 2);
+    shapeInfo.setNeighbourListCellSize(maxSize);
+    shapeInfo.setVoxelSpatialSize(minSize / 2);
+    shapeInfo.setSupportsSaturation(true);
+	shapeInfo.template setDefaultCreateShapeImpl <OrientedCuboid<DIMENSION>> ();
+
+	Shape<DIMENSION, 0>::setShapeStaticInfo(shapeInfo);
 }
 
 template <unsigned short DIMENSION>

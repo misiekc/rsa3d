@@ -31,11 +31,15 @@ void Ellipse::initClass(const std::string &args){
 	double ratio = std::stod(args);
 	Ellipse::shortSemiAxis = sqrt(1.0/(M_PI*ratio));
 	Ellipse::longSemiAxis = ratio*shortSemiAxis;
-	Shape::setNeighbourListCellSize(2*longSemiAxis);
-	Shape::setVoxelSpatialSize(1.4*shortSemiAxis);
-	Shape::setVoxelAngularSize(M_PI);
-	Shape::setSupportsSaturation(true);
-	Shape::setDefaultCreateShapeImpl <Ellipse> ();
+
+    ShapeStaticInfo<2, 1> shapeInfo;
+    shapeInfo.setCircumsphereRadius(longSemiAxis);
+    shapeInfo.setInsphereRadius(shortSemiAxis);
+    shapeInfo.setVoxelAngularSize(M_PI);
+    shapeInfo.setSupportsSaturation(true);
+    shapeInfo.setDefaultCreateShapeImpl <Ellipse> ();
+    
+    Shape::setShapeStaticInfo(shapeInfo);
 }
 
 double Ellipse::calculateF(double* r, double g) const {

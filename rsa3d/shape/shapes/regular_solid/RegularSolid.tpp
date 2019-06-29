@@ -21,12 +21,17 @@ void RegularSolid<SpecificSolid>::initClass(const std::string &attr) {
     Assert(!orientedVertices.empty());
     RegularSolidBase::initClass(attr);
 
-    Shape::setCreateShapeImpl([](RND *rnd) -> Shape* {
+    ShapeStaticInfo<3, 0> shapeInfo;
+    shapeInfo.setCircumsphereRadius(circumsphereRadius);
+    shapeInfo.setInsphereRadius(insphereRadius);
+    shapeInfo.setCreateShapeImpl([](RND *rnd) -> Shape* {
         return new SpecificSolid(Matrix<3, 3>::rotation(
                 2*M_PI*rnd->nextValue(),
                 std::asin(2*rnd->nextValue() - 1),
                 2*M_PI*rnd->nextValue()));
     });
+
+    Shape::setShapeStaticInfo(shapeInfo);
 }
 
 template<typename SpecificSolid>

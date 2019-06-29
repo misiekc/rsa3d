@@ -8,14 +8,21 @@
 #ifndef SHAPE_H_
 #define SHAPE_H_
 
-#include "../BoundaryConditions.h"
-#include "../Positioned.h"
-#include "../RND.h"
-#include "../utils/Utils.h"
+
 #include <string>
 #include <ostream>
 #include <istream>
 #include <array>
+
+#include "../BoundaryConditions.h"
+#include "../Positioned.h"
+#include "../RND.h"
+#include "../utils/Utils.h"
+#include "../utils/Assertions.h"
+
+
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+class ShapeStaticInfo;
 
 /**
  * @brief A @a SPATIAL_DIMENSION dimensional shape providing facilities to generate RSA packings.
@@ -70,15 +77,18 @@ public:
 
 private:
 
-    static double voxelSpatialSize;
-    static double voxelAngularSize;
-    static double neighbourListCellSize;
-    static bool supportsSaturation;
-    static create_shape_fun_ptr createShapeImpl;
+    static ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION> shapeStaticInfo;
 
     Orientation<ANGULAR_DIMENSION> orientation;
 
 protected:
+
+    /**
+     * @brief Sets the static information about the shape after validating it.
+     *
+     * @param shapeStaticInfo the static information about the shape
+     */
+    static void setShapeStaticInfo(ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION> shapeStaticInfo);
 
     /**
      * @brief Translates @a second if it is required by @a bc.
@@ -109,63 +119,6 @@ protected:
      */
     virtual void setOrientation(const Orientation<ANGULAR_DIMENSION> &orientation);
 
-    /**
-     * @brief Sets initial size of a voxel.
-     *
-     * Derived Shape classes have to use this method in the initialization method (see class description) to indicate
-     * the largest possible voxel size that is fully covered by the exclusion zone of the shape placed in it.
-     * @param size size of a voxel
-     */
-    static void setVoxelSpatialSize(double size);
-
-    /**
-     * @brief Sets initial angular size of a voxel.
-     *
-     * Derived Shape classes have to use this method in the initialization method (see class description) to indicate
-     * the range of angular variable [0, size). By default, the angular size is 2*M_PI
-     * @param size angular size of a voxel
-     */
-    static void setVoxelAngularSize(double size);
-
-    /**
-     * @brief Sets size of a cell in neighbour grid.
-     *
-     * Derived Shape classes have to use this method in the initialization method (see class description) to indicate
-     * the linear size of the call in them neighbour grid. The size should be as small as possible, but shapes from not
-     * neighbouring cells must not overlap.
-     * @param size size of a cell in neighbour grid
-     */
-    static void setNeighbourListCellSize(double size);
-
-    /**
-     * @brief Sets a flag which inform if the shape supports saturated packing generation.
-     *
-     * Derived Shape classes have to use this method in the initialization method (see class description) to indicate
-     * Whether it is possible to get saturated packings of this shape. It is used by PackingGenerator to skip unnecessary voxel analysis.
-     * @param true is shape supports saturated packings;
-     */
-    static void setSupportsSaturation(bool flag);
-
-    /**
-     * @brief Sets a function which will be used to create new shapes by ShapeFactory.
-     *
-     * If @a ANGULAR_DIMENSION is zero, but a Shape is not isotropic, a function should choose random orientation from
-     * supplied random number generator, usually with isotropic distribution. All generated shapes must be identical
-     * (disregarding orientation).
-     *
-     * If a function simply returns dynamically allocated default-constructed shape, setDefaultCreateShapeImpl() can be
-     * used.
-     * @param fptr a pointer to function with signature `Shape* (*)(RND *rnd)`
-     */
-    static void setCreateShapeImpl(create_shape_fun_ptr fptr);
-
-    /**
-     * @brief Sets a function which will be used to create new shapes using default constructor.
-     * @tparam SPECIFIC_SHAPE derived Shape class to instantiate
-     */
-    template<typename SPECIFIC_SHAPE>
-    static void setDefaultCreateShapeImpl();
-
 
 public:
     /**
@@ -191,7 +144,9 @@ public:
      * cells that are not neighbours.
      * @return linear size of a cell in a NeighbourGrid
      */
-	static double getNeighbourListCellSize();
+	static double getNeighbourListCellSize() {
+        return shapeStaticInfo.getNeighbourListCellSize();
+	}
 
     /**
      * @brief Returns initial linear size of a (cubic) voxel.
@@ -199,7 +154,9 @@ public:
      * This size should be as big as possible but shape with the center inside the voxel have to cover the whole voxel.
      * @return initial linear size of a (cubic) voxel
      */
-	static double getVoxelSpatialSize();
+	static double getVoxelSpatialSize() {
+        return shapeStaticInfo.getVoxelSpatialSize();
+	}
 
     /**
      * @brief Returns angular size of a voxel.
@@ -208,7 +165,9 @@ public:
      * (0, getVoxelAngularSize()) describes all possible shape's orientations.
      * @return angular size of a voxel
      */
-	static double getVoxelAngularSize();
+	static double getVoxelAngularSize() {
+        return shapeStaticInfo.getVoxelAngularSize();
+	}
 
 	/**
      * @brief Returns flags indicating if the shape supports saturated packing generation.
@@ -216,13 +175,17 @@ public:
      * Default implementation returns false.
      * @return angular size of a voxel
      */
-	static bool getSupportsSaturation();
+	static bool getSupportsSaturation() {
+        return shapeStaticInfo.getSupportsSaturation();
+	}
 
     /**
      * @brief returns a pointer to function for creating shapes - taking RND pointer and returning Shape pointer.
      * @return a pointer to function for creating shapes - taking RND pointer and returning Shape pointer
      */
-    static const create_shape_fun_ptr getCreateShapeImpl();
+    static const create_shape_fun_ptr getCreateShapeImpl() {
+        return shapeStaticInfo.getCreateShapeImpl();
+    }
 
     /**
      * @brief Returns an array of all angles describing shape's orientation.
@@ -261,16 +224,19 @@ public:
 						std::vector<const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *shapes) const;
 
 	/**
-     * @brief Returns a volume of the shape. dim is a packing dimension which can be snaller than shape dimension. Then the Volume should be an intersection of shape and packing subvolume
+     * @brief Returns a volume of the shape. dim is a packing dimension which can be smaller than shape dimension. Then
+     * the Volume should be an intersection of shape and packing subvolume.
      *
-     * Default implementation returns 1. If derived class supports shapes of volume other than 1 this method should be overriden.
+     * Default implementation returns 1. If derived class supports shapes of volume other than 1 this method should be
+     * overriden.
      * @return a volume of the shape
      */
 	virtual double getVolume(unsigned short dim) const;
 
     /**
      * @brief Checks if whole voxel is inside an exclusion zone of @this shape.
-     * Specifically, the procedure returns true any virtual paricle with a center and orientation within the voxel will overlap with @a this shape
+     * Specifically, the procedure returns true any virtual paricle with a center and orientation within the voxel will
+     * overlap with @a this shape.
      * Default implementation bases on pointInside() and assumes that the excluded volume of @a this is convex.
      *
      * @param bc boundary conditions to take into account
@@ -361,10 +327,186 @@ public:
     virtual Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *clone() const = 0;
 };
 
+
+/**
+ * @brief A helper class that manages static Shape data, like voxel size, etc.
+ *
+ * It makes shure that data are correct and everything has been set.
+ *
+ * @tparam @see Shape
+ * @tparam @see Shape
+ */
+template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+class ShapeStaticInfo {
+private:
+    using create_shape_fun_ptr = typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::create_shape_fun_ptr;
+    static constexpr double NOT_SPECIFIED = std::numeric_limits<double>::infinity();
+
+    double circumsphereRadius = NOT_SPECIFIED;
+    double insphereRadius = NOT_SPECIFIED;
+    double neighbourListCellSize = NOT_SPECIFIED;
+    double voxelSpatialSize = NOT_SPECIFIED;
+    double voxelAngularSize = 2*M_PI;
+    bool supportsSaturation = false;
+    create_shape_fun_ptr createShapeImpl = nullptr;
+
+public:
+    /**
+     * @brief Returns the radius of the cirbumscribed sphere.
+     *
+     * @return the radius of the cirbumscribed sphere
+     */
+    double getCircumsphereRadius() const {
+        this->throwIfIncomplete();
+        return circumsphereRadius;
+    }
+
+    /**
+     * @brief Returns the radius of the inscribed sphere.
+     *
+     * @return the radius of the inscribed sphere
+     */
+    double getInsphereRadius() const {
+        this->throwIfIncomplete();
+        return insphereRadius;
+    }
+
+    /**
+     * @brief Returns the linear size of a neighbour list cell.
+     *
+     * @return the linear size of a neighbour list cell
+     */
+    double getNeighbourListCellSize() const {
+        this->throwIfIncomplete();
+        return neighbourListCellSize;
+    }
+
+    /**
+     * @brief Returns the initial linear spatial size of a voxel.
+     *
+     * @return the initial linear spatial size of a voxel
+     */
+    double getVoxelSpatialSize() const {
+        this->throwIfIncomplete();
+        return voxelSpatialSize;
+    }
+
+    /**
+     * @brief Returns the initial angular size of a voxel.
+     *
+     * @return the initial angular size of a voxel
+     */
+    double getVoxelAngularSize() const {
+        this->throwIfIncomplete();
+        return voxelAngularSize;
+    }
+
+    /**
+     * @brief Returns a pointer to function which dynamically allocates the current shape objects.
+     *
+     * @return a pointer to function which dynamically allocates the current shape objects
+     */
+    create_shape_fun_ptr getCreateShapeImpl() const {
+        this->throwIfIncomplete();
+        return createShapeImpl;
+    }
+
+    /**
+     * @brief Returns a flag which indicates if shape supports saturated packings.
+     *
+     * @return a flag which indicates if shape supports saturated packings
+     */
+    bool getSupportsSaturation() const {
+        this->throwIfIncomplete();
+        return supportsSaturation;
+    }
+
+    /**
+     * @brief Sets the radius of the circumsbribed sphere.
+     *
+     * @param circumsphereRadius the radius of the circumsbribed sphere
+     */
+    void setCircumsphereRadius(double circumsphereRadius);
+
+    /**
+     * @brief Sets the radius of the inscribed sphere.
+     * @param insphereRadius the radius of the inscribed sphere
+     */
+    void setInsphereRadius(double insphereRadius);
+
+    /**
+     * @brief Sets size of a cell in neighbour grid.
+     *
+     * The size should be as small as possible, but shapes from not neighbouring cells must not overlap.
+     * @param size size of a cell in neighbour grid
+     */
+    void setNeighbourListCellSize(double neighbourListCellSize);
+
+    /**
+     * @brief Sets initial size of a voxel.
+     *
+     * It indicates the largest possible voxel size that is fully covered by the exclusion zone of the shape placed in
+     * it.
+     * @param size size of a voxel
+     */
+    void setVoxelSpatialSize(double voxelSpatialSize);
+
+    /**
+     * @brief Sets initial angular size of a voxel.
+     *
+     * It indicates the range of angular variable [0, size). By default, the angular size is 2*M_PI.
+     * @param size angular size of a voxel
+     */
+    void setVoxelAngularSize(double voxelAngularSize);
+
+    /**
+     * @brief Sets a flag which inform if the shape supports saturated packing generation.
+     *
+     * It indicates whether it is possible to get saturated packings of this shape. It is used by PackingGenerator to
+     * skip unnecessary voxel analysis.
+     * @param true is shape supports saturated packings
+     */
+    void setSupportsSaturation(bool supportsSaturation);
+
+    /**
+     * @brief Sets a function which will be used to create new shapes by ShapeFactory.
+     *
+     * If @a ANGULAR_DIMENSION is zero, but a Shape is not isotropic, a function should choose random orientation from
+     * supplied random number generator, usually with isotropic distribution. All generated shapes must be identical
+     * (disregarding orientation).
+     *
+     * If a function simply returns dynamically allocated default-constructed shape, setDefaultCreateShapeImpl() can be
+     * used.
+     * @param fptr a pointer to function with signature `Shape* (*)(RND *rnd)`
+     */
+    void setCreateShapeImpl(create_shape_fun_ptr createShapeImpl);
+
+    /**
+     * @brief Sets a function which will be used to create new shapes using default constructor.
+     * @tparam ConcreteShape derived Shape class to instantiate
+     */
+    template<typename ConcreteShape>
+    void setDefaultCreateShapeImpl();
+
+    /**
+     * @brief Checks if all fields which don't have default values has been set. If not, throws.
+     *
+     * This includes circumsphere and insphere radiuses, voxel and neighbour grid spatial sizes and create shape
+     * function implementation.
+     */
+    void throwIfIncomplete() const;
+};
+
+
 /**
  * @brief A shortcut for Shape template specialization with curently used parameters.
  */
 using RSAShape = Shape<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>;
+
+/**
+ * @brief A shortcut for ShapeStaticInfo template specialization with curently used parameters.
+ */
+using RSAShapeStaticInfo = ShapeStaticInfo<RSA_SPATIAL_DIMENSION, RSA_ANGULAR_DIMENSION>;
 
 
 #include "Shape.tpp"

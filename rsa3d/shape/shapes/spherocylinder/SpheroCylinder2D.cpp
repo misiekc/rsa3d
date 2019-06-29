@@ -26,11 +26,14 @@ void SpheroCylinder2D::calculateStatic(const std::string &attr) {
 void SpheroCylinder2D::initClass(const std::string &attr) {
     SpheroCylinder2D::calculateStatic(attr);
 
-    Shape::setNeighbourListCellSize((halfDistance + radius) * 2);
-    Shape::setVoxelSpatialSize(M_SQRT2 * radius);
-    Shape::setVoxelAngularSize(M_PI);
-	Shape::setSupportsSaturation(true);
-    Shape::setDefaultCreateShapeImpl <SpheroCylinder2D> ();
+    ShapeStaticInfo<2, 1> shapeInfo;
+    shapeInfo.setCircumsphereRadius(halfDistance + radius);
+    shapeInfo.setInsphereRadius(radius);
+    shapeInfo.setVoxelAngularSize(M_PI);
+	shapeInfo.setSupportsSaturation(true);
+    shapeInfo.setDefaultCreateShapeImpl <SpheroCylinder2D> ();
+
+    Shape::setShapeStaticInfo(shapeInfo);
 }
 
 double SpheroCylinder2D::getVolume(unsigned short dim) const {

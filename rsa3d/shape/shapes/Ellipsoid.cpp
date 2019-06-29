@@ -27,15 +27,17 @@ void Ellipsoid::initClass(const std::string &attr) {
 
     normalizeVolume();
 
-    Shape::setNeighbourListCellSize(2*c);
-    Shape::setVoxelSpatialSize(2*a/std::sqrt(3));
-
-    Shape::setCreateShapeImpl([](RND *rnd) -> Shape* {
+    ShapeStaticInfo<3, 0> shapeInfo;
+    shapeInfo.setCircumsphereRadius(c);
+    shapeInfo.setInsphereRadius(a);
+    shapeInfo.setCreateShapeImpl([](RND *rnd) -> Shape* {
         return new Ellipsoid(Matrix<3, 3>::rotation(
                 2 * M_PI * rnd->nextValue(),
                 std::asin(2 * rnd->nextValue() - 1),
                 2 * M_PI * rnd->nextValue()));
     });
+
+    Shape::setShapeStaticInfo(shapeInfo);
 }
 
 void Ellipsoid::normalizeVolume() {

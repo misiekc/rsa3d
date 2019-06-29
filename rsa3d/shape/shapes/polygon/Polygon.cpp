@@ -109,11 +109,14 @@ void Polygon::initClass(const std::string &args){
     Polygon::inscribedCircleRadius = Polygon::calculateInscribedCircleRadius();
     Polygon::circumscribedCircleRadius = Polygon::calculateCircumscribedCircleRadius();
 
-    Shape<2, 1>::setNeighbourListCellSize(2.0*Polygon::circumscribedCircleRadius);
-	Shape<2, 1>::setVoxelSpatialSize(1.4*Polygon::inscribedCircleRadius);
-	Shape<2, 1>::setVoxelAngularSize(2*M_PI);
-	Shape<2, 1>::setSupportsSaturation(true);
-	Shape<2, 1>::setDefaultCreateShapeImpl <Polygon> ();
+    ShapeStaticInfo<2, 1> shapeInfo;
+    shapeInfo.setCircumsphereRadius(Polygon::circumscribedCircleRadius);
+	shapeInfo.setInsphereRadius(inscribedCircleRadius);
+	shapeInfo.setVoxelAngularSize(2*M_PI);
+	shapeInfo.setSupportsSaturation(true);
+	shapeInfo.setDefaultCreateShapeImpl <Polygon> ();
+
+	Shape::setShapeStaticInfo(shapeInfo);
 
 	#ifdef CUDA_ENABLED
 		Polygon::cuInit();

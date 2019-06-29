@@ -53,22 +53,24 @@ void Spherocylinder<DIMENSION>::initClass(const std::string &attr) {
     double scaleFactor = pow(Spherocylinder<DIMENSION>::volume(), 1.0/DIMENSION);
     Spherocylinder<DIMENSION>::radius /= scaleFactor;
     Spherocylinder<DIMENSION>::length /= scaleFactor;
-    Shape<DIMENSION, 0>::setNeighbourListCellSize(2.0*Spherocylinder<DIMENSION>::radius + Spherocylinder<DIMENSION>::length);
-    Shape<DIMENSION, 0>::setVoxelSpatialSize(2*Spherocylinder<DIMENSION>::radius / std::sqrt(DIMENSION));
 
-    Shape<DIMENSION, 0>::setCreateShapeImpl([](RND *rnd) -> Shape<DIMENSION, 0>* {
-	#if (RSA_SPATIAL_DIMENSION == 2)
-    	return new Spherocylinder<DIMENSION>(Matrix<DIMENSION, DIMENSION>::rotation(
-                2 * M_PI * rnd->nextValue()));
-	#elif (RSA_SPATIAL_DIMENSION == 3)
-        return new Spherocylinder<DIMENSION>(Matrix<DIMENSION, DIMENSION>::rotation(
-                2 * M_PI * rnd->nextValue(),
-                std::asin(2 * rnd->nextValue() - 1),
-                2 * M_PI * rnd->nextValue()));
-	#else
-        return nullptr;
-	#endif
+    ShapeStaticInfo<DIMENSION, 0> shapeInfo;
+    shapeInfo.setCircumsphereRadius(Spherocylinder<DIMENSION>::radius + Spherocylinder<DIMENSION>::length / 2);
+    shapeInfo.setInsphereRadius(Spherocylinder<DIMENSION>::radius);
+    shapeInfo.setCreateShapeImpl([](RND *rnd) -> Shape<DIMENSION, 0>* {
+        if constexpr (DIMENSION == 2)
+            return new Spherocylinder<DIMENSION>(Matrix<DIMENSION, DIMENSION>::rotation(
+                    2 * M_PI * rnd->nextValue()));
+        else if constexpr (DIMENSION == 3)
+            return new Spherocylinder<DIMENSION>(Matrix<DIMENSION, DIMENSION>::rotation(
+                    2 * M_PI * rnd->nextValue(),
+                    std::asin(2 * rnd->nextValue() - 1),
+                    2 * M_PI * rnd->nextValue()));
+        else
+            throw std::runtime_error("Spherocylinder is currently supported only in 2D and 3D.");
     });
+
+    Shape<DIMENSION, 0>::setShapeStaticInfo(shapeInfo);
 
     // Calculate SpheroCylinder2D params for Stolen2DOverlapSC
 	#if (RSA_SPATIAL_DIMENSION == 2)

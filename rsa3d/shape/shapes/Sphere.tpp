@@ -43,10 +43,15 @@ double Sphere<DIMENSION>::volume() {
 template <unsigned short DIMENSION>
 void Sphere<DIMENSION>::initClass(const std::string &args){
 	Sphere<DIMENSION>::radius = pow(1.0/Sphere::volume(), 1.0/DIMENSION);
-	Shape<DIMENSION, 0>::setNeighbourListCellSize(2.0*Sphere::radius);
-	Shape<DIMENSION, 0>::setVoxelSpatialSize(pow(2.0, 1.0/DIMENSION)*Sphere::radius);
-	Shape<DIMENSION, 0>::setSupportsSaturation(true);
-    Shape<DIMENSION, 0>::template setDefaultCreateShapeImpl <Sphere<DIMENSION>> ();
+
+	ShapeStaticInfo<DIMENSION, 0> shapeInfo;
+
+    shapeInfo.setCircumsphereRadius(Sphere::radius);
+    shapeInfo.setInsphereRadius(Sphere::radius);
+	shapeInfo.setSupportsSaturation(true);
+    shapeInfo.template setDefaultCreateShapeImpl <Sphere<DIMENSION>> ();
+
+    Shape<DIMENSION, 0>::setShapeStaticInfo(shapeInfo);
 }
 
 template <unsigned short DIMENSION>

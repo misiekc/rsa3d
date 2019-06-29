@@ -32,7 +32,7 @@ namespace {
     }
 }
 
-void Quantity::fromSamples(const std::vector<double> &samples)
+void Quantity::calculateFromSamples(const std::vector<double> &samples)
 {
     if (samples.empty()){
         this->value = 0;

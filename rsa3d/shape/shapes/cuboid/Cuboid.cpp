@@ -56,10 +56,12 @@ void Cuboid::initClass(const std::string &args)
     insphereRadius = *std::min_element(size, size + 3) / 2;
     circumsphereRadius = std::sqrt(size[0]*size[0] + size[1]*size[1] + size[2]*size[2]) / 2;
 
-    Shape::setVoxelSpatialSize(2 * insphereRadius / std::sqrt(3));
-    Shape::setNeighbourListCellSize(2 * circumsphereRadius);
+    ShapeStaticInfo<3, 0> shapeInfo;
+    shapeInfo.setCircumsphereRadius(circumsphereRadius);
+    shapeInfo.setInsphereRadius(insphereRadius);
+    shapeInfo.setCreateShapeImpl(&create3D);
 
-    Shape::setCreateShapeImpl(&create3D);
+    Shape::setShapeStaticInfo(shapeInfo);
 }
 
 void Cuboid::normalizeVolume() {

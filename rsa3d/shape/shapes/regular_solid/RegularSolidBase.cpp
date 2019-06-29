@@ -45,9 +45,6 @@ void RegularSolidBase::initClass(const std::string &attr) {
     discoverAxes();
 
     reportCalculations();
-
-    Shape::setNeighbourListCellSize(2*circumsphereRadius);
-    Shape::setVoxelSpatialSize(2*insphereRadius/std::sqrt(3.));
 }
 
 void RegularSolidBase::store(std::ostream &f) const {
