@@ -55,6 +55,7 @@ void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
 	shapeInfo.template setDefaultCreateShapeImpl <OrientedCuboid<DIMENSION>> ();
 
 	Shape<DIMENSION, 0>::setShapeStaticInfo(shapeInfo);
+	Shape<DIMENSION, 0>::setEarlyRejectionEnabled(false);     // it doesn't help here
 }
 
 template <unsigned short DIMENSION>

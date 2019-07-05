@@ -27,7 +27,7 @@ class ShapeStaticInfo;
 /**
  * @brief A @a SPATIAL_DIMENSION dimensional shape providing facilities to generate RSA packings.
  *
- * The class ships with parameters for fine-tuning packing generation (eg initial voxel size), for overlap detection,
+ * The class ships with parameters to fine-tune packing generation (@see ShapeStaticInfo), for overlap detection,
  * for storing and restoring. For more information see appropriate methods' documentation.
  *
  * Derived classes should also provide:
@@ -38,10 +38,10 @@ class ShapeStaticInfo;
  * @code
  * void (*)(const std::string &attr)
  * @endcode
- * The parameters are then stored in a global state and are used when generating shapes (see setCreateShapeImpl()).
- * Moreover, <strong>this method is obliged to invoke setNeighbourListCellSize(), setVoxelSpatialSize(),
- * setVoxelAngularSize() and setCreateShapeImpl() (or setDefaultCreateShapeImpl())</strong> with appropriate arguments
- * every time it is called (after shape change or @a attr change).</li>
+ * The parameters are then stored in a global fields and are used when generating shapes (@see
+ * ShapeStaticInfo::setCreateShapeImpl()). Moreover, <strong>this method is obliged to invoke setShapeStaticInfo()
+ * </strong> every time it is called (after shape change or @a attr change), which will override current parameters
+ * and info and invalidate previously generated Shapes.</li>
  * </ul>
  *
  * Initialization method will be then hard-coded in ShapeFactory in such a way:
@@ -54,13 +54,14 @@ class ShapeStaticInfo;
  * <strong>CALLING INITIALIZATION METHOD IS THE FIRST THING TO DO BEFORE USING A CLASS.</strong>
  *
  * <strong>Creating shapes using ShapeFactory is then the preferred way to create them</strong>. Derived classes do not
- * have to provide public constructors.
+ * have to provide public constructors or other ways of creating them.
  *
  * Derived classes are <strong>not required</strong> to handle <strong>shapes of sizes other than from the global
  * state</strong>. All methods have unexpected behavior if initializing method has not been called before, however
- * <strong>one can change parameters</strong> in any moment by calling initialization method again. If this happens,
- * all previously generated shapes are considered stale and using them leads to an unexpected behaviour, however all new
- * shapes should work properly.
+ * <strong>one can change parameters or current shape</strong> in any moment by calling initialization method again
+ * so <strong>derived classes must be able clean up their previous parameters</strong>. If this happens, all previously
+ * generated shapes are considered stale and using them leads to an unexpected behaviour, however all new shapes should
+ * work properly.
  *
  * @tparam SPATIAL_DIMENSION how many dimensions has the space in which a shape lives
  * @tparam ANGULAR_DIMENSION how many orientational degrees of freedom a shape has. However, this parameter should be
@@ -70,16 +71,39 @@ class ShapeStaticInfo;
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 class Shape : public Positioned<SPATIAL_DIMENSION>{
 public:
+
     /**
      * @brief A pointer to function for creating shapes - taking RND pointer and returning Shape pointer
      */
     using create_shape_fun_ptr = Shape* (*)(RND *rnd);
 
+protected:
+
+    /**
+     * @brief The possible results of early rejection
+     */
+    enum EarlyRejectionResult {
+        /** @brief The collision is present. */
+        TRUE,
+
+        /** @brief There is no collision. */
+        FALSE,
+
+        /** @brief A compex check is required, nothing has been determined. */
+        UNKNOWN
+    };
+
 private:
 
     static ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION> shapeStaticInfo;
+    static bool earlyRejectionEnabled;
 
     Orientation<ANGULAR_DIMENSION> orientation;
+
+    EarlyRejectionResult sphereOnVoxelEarlyRejection(const Vector<SPATIAL_DIMENSION> &relativeSpatialCenter,
+                                                     double halfSpatialSize) const;
+    EarlyRejectionResult furthestCornerEarlyRejection(const Vector<SPATIAL_DIMENSION> &relativeSpatialCenter,
+                                                             double halfSpatialSize) const;
 
 protected:
 
@@ -180,12 +204,31 @@ public:
 	}
 
     /**
-     * @brief returns a pointer to function for creating shapes - taking RND pointer and returning Shape pointer.
+     * @brief Returns a pointer to function for creating shapes - taking RND pointer and returning Shape pointer.
      * @return a pointer to function for creating shapes - taking RND pointer and returning Shape pointer
      */
     static const create_shape_fun_ptr getCreateShapeImpl() {
         return shapeStaticInfo.getCreateShapeImpl();
     }
+
+    /**
+     * @brief Return all static information about the shape, including voxel sizes, etc.
+     *
+     * @return all static information about the shape, including voxel sizes, etc.
+     */
+    static const ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION> &getShapeStaticInfo() {
+        return shapeStaticInfo;
+    }
+
+    /**
+     * @brief Sets a flag which indicated if the early rejection mechanisms should be on.
+     *
+     * Early rejection is based on circumsphere and inshpere radiuses and can quickly decice whether shapes do overlap
+     * or not in most cases. The flag cat be set to false for testing purposes.
+     *
+     * @param earlyRejectionEnabled a flag which indicated if the early rejection mechanisms should be on
+     */
+    static void setEarlyRejectionEnabled(bool earlyRejectionEnabled);
 
     /**
      * @brief Returns an array of all angles describing shape's orientation.
@@ -220,8 +263,21 @@ public:
 	 * @return pointer to overlapping shape or nullptr in no overlap detected
 	 */
 	virtual const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>*
-				overlap(BoundaryConditions<SPATIAL_DIMENSION> *bc,
-						std::vector<const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *shapes) const;
+	overlap(BoundaryConditions<SPATIAL_DIMENSION> *bc,
+	        std::vector<const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *> *shapes) const;
+
+	/**
+	 * @brief Makes a quick check for overlap using inscribed and circumscribed sphere radiuses.
+	 *
+	 * Early rejection is based on circumsphere and inshpere radiuses and can quickly decice whether shapes do overlap
+     * or not in most cases. The function can be optionally used in ovarlap implementation for a speed gain.
+	 *
+	 * @param bc boundary conditions used
+	 * @param s the second shape to check
+	 * @return TRUE or FALSE if result has been determined, UNKNOWN if complex check is required
+	 */
+    EarlyRejectionResult overlapEarlyRejection(BoundaryConditions<SPATIAL_DIMENSION> *bc,
+                                               const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const;
 
 	/**
      * @brief Returns a volume of the shape. dim is a packing dimension which can be smaller than shape dimension. Then
@@ -249,6 +305,25 @@ public:
 	virtual bool voxelInside(BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &voxelPosition,
                              const Orientation<ANGULAR_DIMENSION> &orientation, double spatialSize,
                              double angularSize) const = 0;
+
+    /**
+     * @brief Makes a quick check for a whole voxel being inside an exclusion zone of @this shape using inscribed and
+     * circumscribed sphere radiuses.
+     *
+     * Early rejection is based on circumsphere and inshpere radiuses and can quickly decice whether shape and voxel do
+     * overlap or not in most cases. The function can be optionally used in ovarlap implementation for a speed gain.
+     *
+     * @param bc boundary conditions to take into account
+     * @param voxelPosition position of the "left-bottom" corner of the voxel
+     * @param orientation orientation of the "left-bottom" corner of the voxel
+     * @param spatialSize spatial size of the voxel
+     * @param angularSize angular size of the voxel
+     * @return true if the voxel is fully covered by the exclusion zone of @a this shape, false otherwise.
+     */
+	EarlyRejectionResult voxelInsideEarlyRejection(BoundaryConditions<SPATIAL_DIMENSION> *bc,
+	                                               const Vector<SPATIAL_DIMENSION> &voxelPosition,
+	                                               const Orientation<ANGULAR_DIMENSION> &orientation,
+	                                               double spatialSize, double angularSize) const;
 
     /**
      * @brief ?? Moves the shape towards given shape s.
@@ -331,7 +406,22 @@ public:
 /**
  * @brief A helper class that manages static Shape data, like voxel size, etc.
  *
- * It makes shure that data are correct and everything has been set.
+ * It makes sure that the data is correct and everything has been set. The obligatory parameters to be set:
+ * <ul>
+ * <li> setCircumsphereRadius()
+ * <li> setInsphereRadius()
+ * <li> setDefaultCreateShapeImpl()
+ * </ul>
+ *
+ * The parameters:
+ * <ul>
+ * <li> setNeighbourListCellSize()
+ * <li> setVoxelSpatialSize()
+ * <li> setExclusionZoneMinSpan()
+ * <li> setExclusionZoneMaxSpan()
+ * </ul>
+ * will be set automatically based on spheres radia. They can be set manually, before or after the previous ones, if
+ * needed, but for most cases they should be left as is. For more info check specific setters.
  *
  * @tparam @see Shape
  * @tparam @see Shape
@@ -347,6 +437,8 @@ private:
     double neighbourListCellSize = NOT_SPECIFIED;
     double voxelSpatialSize = NOT_SPECIFIED;
     double voxelAngularSize = 2*M_PI;
+    double exclusionZoneMinSpan = NOT_SPECIFIED;
+    double exclusionZoneMaxSpan = NOT_SPECIFIED;
     bool supportsSaturation = false;
     create_shape_fun_ptr createShapeImpl = nullptr;
 
@@ -357,7 +449,6 @@ public:
      * @return the radius of the cirbumscribed sphere
      */
     double getCircumsphereRadius() const {
-        this->throwIfIncomplete();
         return circumsphereRadius;
     }
 
@@ -367,7 +458,6 @@ public:
      * @return the radius of the inscribed sphere
      */
     double getInsphereRadius() const {
-        this->throwIfIncomplete();
         return insphereRadius;
     }
 
@@ -377,7 +467,6 @@ public:
      * @return the linear size of a neighbour list cell
      */
     double getNeighbourListCellSize() const {
-        this->throwIfIncomplete();
         return neighbourListCellSize;
     }
 
@@ -387,7 +476,6 @@ public:
      * @return the initial linear spatial size of a voxel
      */
     double getVoxelSpatialSize() const {
-        this->throwIfIncomplete();
         return voxelSpatialSize;
     }
 
@@ -397,8 +485,25 @@ public:
      * @return the initial angular size of a voxel
      */
     double getVoxelAngularSize() const {
-        this->throwIfIncomplete();
         return voxelAngularSize;
+    }
+
+    /**
+     * @brief Returns the smallest possible distance to exclusion zone boundary.
+     *
+     * @return smallest possible distance to exclusion zone boundary
+     */
+    double getExclusionZoneMinSpan() const {
+        return exclusionZoneMinSpan;
+    }
+
+    /**
+     * @brief Returns the biggest possible distance to exclusion zone boundary.
+     *
+     * @return bigggest possible distance to exclusion zone boundary
+     */
+    double getExclusionZoneMaxSpan() const {
+        return exclusionZoneMaxSpan;
     }
 
     /**
@@ -407,7 +512,6 @@ public:
      * @return a pointer to function which dynamically allocates the current shape objects
      */
     create_shape_fun_ptr getCreateShapeImpl() const {
-        this->throwIfIncomplete();
         return createShapeImpl;
     }
 
@@ -417,12 +521,14 @@ public:
      * @return a flag which indicates if shape supports saturated packings
      */
     bool getSupportsSaturation() const {
-        this->throwIfIncomplete();
         return supportsSaturation;
     }
 
     /**
      * @brief Sets the radius of the circumsbribed sphere.
+     *
+     * If neighbour list cell size or max exclusion zone span have not been set, they are calculated then automatically
+     * based on the radius.
      *
      * @param circumsphereRadius the radius of the circumsbribed sphere
      */
@@ -430,6 +536,10 @@ public:
 
     /**
      * @brief Sets the radius of the inscribed sphere.
+     *
+     * If voxel spatial size or min exclusion zone span has not been set, it is calculated then automatically based on
+     * the radius.
+     *
      * @param insphereRadius the radius of the inscribed sphere
      */
     void setInsphereRadius(double insphereRadius);
@@ -437,7 +547,11 @@ public:
     /**
      * @brief Sets size of a cell in neighbour grid.
      *
-     * The size should be as small as possible, but shapes from not neighbouring cells must not overlap.
+     * The size should be as small as possible, but shapes from not neighbouring cells must not overlap. If it has not
+     * been specified before or after setting the circumsphere radius, it was calculated automatically. It should be set
+     * manually only in special cases, for example when some rotational freedom is blocked, in essence when not all
+     * orientations of a voxel relative to particle are allowed.
+     *
      * @param size size of a cell in neighbour grid
      */
     void setNeighbourListCellSize(double neighbourListCellSize);
@@ -446,7 +560,10 @@ public:
      * @brief Sets initial size of a voxel.
      *
      * It indicates the largest possible voxel size that is fully covered by the exclusion zone of the shape placed in
-     * it.
+     * it. If it has not been specified before or after setting the insphere radius, it was calculated automatically.
+     * It should be set manually only in special cases, for example when some rotational freedom is blocked, in essence
+     * when not all orientations of a voxel relative to particle are allowed.
+     *
      * @param size size of a voxel
      */
     void setVoxelSpatialSize(double voxelSpatialSize);
@@ -458,6 +575,30 @@ public:
      * @param size angular size of a voxel
      */
     void setVoxelAngularSize(double voxelAngularSize);
+
+    /**
+     * @brief Sets the smallest possible distance to exclusion zone boundary.
+     *
+     * If it has not been specified before or after setting the insphere radius, it was calculated automatically as
+     * the worst case of 2 times the insphere radius. For vast majority of shapes, excluding crazy ones, it should be
+     * optimal.
+     *
+     * @param exclusionZoneMinSpan the smallest possible distance to exclusion zone boundary
+     */
+    void setExclusionZoneMinSpan(double exclusionZoneMinSpan);
+
+    /**
+     * @brief Sets the biggest possible distance to exclusion zone boundary.
+     *
+     * If it has not been specified before or after setting the insphere radius, it was calculated automatically as
+     * the worst case of 2 times the circumsphere radius - the exclusion zone can extend as far as that for example for
+     * shapes allowing saturated packings for 2 parallel particles. For shapes not allowing saturated packings, for
+     * example cubes, the exclusion zone does not go further than circumsphere radius + insphere radius, so in that case
+     * it can be optimized manually.
+     *
+     * @param exclusionZoneMaxSpan the biggest possible distance to exclusion zone boundary
+     */
+    void setExclusionZoneMaxSpan(double exclusionZoneMaxSpan);
 
     /**
      * @brief Sets a flag which inform if the shape supports saturated packing generation.

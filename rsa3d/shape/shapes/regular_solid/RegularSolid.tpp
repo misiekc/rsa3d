@@ -24,6 +24,7 @@ void RegularSolid<SpecificSolid>::initClass(const std::string &attr) {
     ShapeStaticInfo<3, 0> shapeInfo;
     shapeInfo.setCircumsphereRadius(circumsphereRadius);
     shapeInfo.setInsphereRadius(insphereRadius);
+    shapeInfo.setExclusionZoneMaxSpan(circumsphereRadius + insphereRadius);
     shapeInfo.setCreateShapeImpl([](RND *rnd) -> Shape* {
         return new SpecificSolid(Matrix<3, 3>::rotation(
                 2*M_PI*rnd->nextValue(),

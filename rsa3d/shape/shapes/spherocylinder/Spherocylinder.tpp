@@ -54,9 +54,13 @@ void Spherocylinder<DIMENSION>::initClass(const std::string &attr) {
     Spherocylinder<DIMENSION>::radius /= scaleFactor;
     Spherocylinder<DIMENSION>::length /= scaleFactor;
 
+    double circumsphareRadius = Spherocylinder<DIMENSION>::radius + Spherocylinder<DIMENSION>::length / 2;
+    double insphereRadius = Spherocylinder<DIMENSION>::radius;
+
     ShapeStaticInfo<DIMENSION, 0> shapeInfo;
-    shapeInfo.setCircumsphereRadius(Spherocylinder<DIMENSION>::radius + Spherocylinder<DIMENSION>::length / 2);
-    shapeInfo.setInsphereRadius(Spherocylinder<DIMENSION>::radius);
+    shapeInfo.setCircumsphereRadius(circumsphareRadius);
+    shapeInfo.setInsphereRadius(insphereRadius);
+    shapeInfo.setExclusionZoneMaxSpan(insphereRadius + circumsphareRadius);
     shapeInfo.setCreateShapeImpl([](RND *rnd) -> Shape<DIMENSION, 0>* {
         if constexpr (DIMENSION == 2)
             return new Spherocylinder<DIMENSION>(Matrix<DIMENSION, DIMENSION>::rotation(

@@ -59,6 +59,7 @@ void Cuboid::initClass(const std::string &args)
     ShapeStaticInfo<3, 0> shapeInfo;
     shapeInfo.setCircumsphereRadius(circumsphereRadius);
     shapeInfo.setInsphereRadius(insphereRadius);
+    shapeInfo.setExclusionZoneMaxSpan(circumsphereRadius + insphereRadius);
     shapeInfo.setCreateShapeImpl(&create3D);
 
     Shape::setShapeStaticInfo(shapeInfo);

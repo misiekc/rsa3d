@@ -20,6 +20,9 @@
  */
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 class ConvexShape : public Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> {
+protected:
+    using EarlyRejectionResult = typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::EarlyRejectionResult;
+
 public:
     bool voxelInside(BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &voxelPosition,
                      const Orientation<ANGULAR_DIMENSION> &orientation, double spatialSize,

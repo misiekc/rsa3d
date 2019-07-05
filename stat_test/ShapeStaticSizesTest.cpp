@@ -141,6 +141,11 @@ namespace shape_sizetest
         }
 
         ShapeFactory::initShapeClass(argv[2], argv[3]);
+
+        // Early rejection can be used in overlap method and it is based on insphere and circumsphere radiuses, so the
+        // result would be trivial. It should be then disabled, so the actual overlap test will always take place.
+        RSAShape::setEarlyRejectionEnabled(false);
+
         unsigned long max_tries = std::stoul(argv[4]);
         if (max_tries <= 0) {
             std::cerr << "[ERROR] max_tries <= 0" << std::endl;

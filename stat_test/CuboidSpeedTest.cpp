@@ -164,6 +164,7 @@ namespace cube_speedtest
                   std::back_inserter(this->ballRadia));
 
         ShapeFactory::initShapeClass("Cuboid", "3 " + config.getString("cuboid_size"));
+        RSAShape::setEarlyRejectionEnabled(false);
     }
 
     Context::~Context() {

@@ -172,6 +172,7 @@ namespace shape_ovtest
         }
 
         ShapeFactory::initShapeClass(argv[2], argv[3]);
+        RSAShape::setEarlyRejectionEnabled(false);
 
         auto osShape = acquire_overlap_strategy_shape();
         if (!is_shape_supported(argv[2], osShape.get()))

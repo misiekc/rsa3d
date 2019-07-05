@@ -221,6 +221,7 @@ namespace shape_bctest
         }
 
         ShapeFactory::initShapeClass(argv[2], argv[3]);
+        RSAShape::setEarlyRejectionEnabled(false);
         UniformBallDistribution distribution{ballRadius};
         IndependentPairFactory factory{distribution};
 
