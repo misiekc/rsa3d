@@ -78,7 +78,7 @@ void Spherocylinder<DIMENSION>::initClass(const std::string &attr) {
 
     // Calculate SpheroCylinder2D params for Stolen2DOverlapSC
 	if constexpr (DIMENSION == 2)
-        SpheroCylinder2D::calculateStatic(attr);
+        SpheroCylinder2D::initClass(attr);
 }
 
 template<unsigned short DIMENSION>
