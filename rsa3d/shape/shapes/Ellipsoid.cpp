@@ -27,15 +27,18 @@ void Ellipsoid::initClass(const std::string &attr) {
 
     normalizeVolume();
 
-    Shape::setNeighbourListCellSize(2*c);
-    Shape::setVoxelSpatialSize(2*a/std::sqrt(3));
-
-    Shape::setCreateShapeImpl([](RND *rnd) -> Shape* {
+    ShapeStaticInfo<3, 0> shapeInfo;
+    shapeInfo.setCircumsphereRadius(c);
+    shapeInfo.setInsphereRadius(a);
+    shapeInfo.setExclusionZoneMaxSpan(a + c);
+    shapeInfo.setCreateShapeImpl([](RND *rnd) -> Shape* {
         return new Ellipsoid(Matrix<3, 3>::rotation(
                 2 * M_PI * rnd->nextValue(),
                 std::asin(2 * rnd->nextValue() - 1),
                 2 * M_PI * rnd->nextValue()));
     });
+
+    Shape::setShapeStaticInfo(shapeInfo);
 }
 
 void Ellipsoid::normalizeVolume() {
@@ -53,17 +56,16 @@ Ellipsoid::Ellipsoid(const Matrix<3, 3> &orientation) : orientation(orientation)
 }
 
 bool Ellipsoid::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
+    switch (this->overlapEarlyRejection(bc, s)) {
+        case TRUE:      return true;
+        case FALSE:     return false;
+        case UNKNOWN:   break;
+    }
+
     Ellipsoid ellipsoid = dynamic_cast<const Ellipsoid &>(*s);
     this->applyBC(bc, &ellipsoid);
 
     Vector<3> rAB = vectorRAB(this->getPosition(), ellipsoid.getPosition());
-
-    // Early rejection
-    double rABNorm2 = rAB.norm2();
-    if (rABNorm2 > 4*c*c)
-        return false;
-    else if (rABNorm2 < 4*a*a)
-        return true;
 
     double lambda = INITIAL_GUESS;
 	double fder = 0.0;
@@ -73,17 +75,13 @@ bool Ellipsoid::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
 	double previousLambda = 0.0;
 
 	for (int i = 0; i < 20; i++) {
-		try {
-			fder = firstDerivative(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
-            sder = secondDerivative(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
+        fder = firstDerivative(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
+        sder = secondDerivative(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
 
-			derivativeQuotient = fder / sder;
-			previousLambda = lambda;
-			lambda = getNewLambda(lambda, derivativeQuotient);
-		}
-		catch (std::overflow_error e) {
-			std::cout << e.what();
-		}
+        derivativeQuotient = fder / sder;
+        previousLambda = lambda;
+        lambda = getNewLambda(lambda, derivativeQuotient);
+
 		if (std::abs(fder) < 1e-8 || std::abs(lambda - previousLambda) < 1e-8 ) {
             fAB = overlapFunction(this->getEllipsoidMatrix(), ellipsoid.getEllipsoidMatrix(), rAB, lambda);
 

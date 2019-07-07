@@ -19,8 +19,6 @@
 //----------------------------------------------------------------------------
 
 double          Cuboid::size[3];
-double          Cuboid::insphereRadius;
-double          Cuboid::circumsphereRadius;
 Vector<3>       Cuboid::relativeVertices[VERTEX::NUM_OF];
 
 
@@ -53,13 +51,16 @@ void Cuboid::initClass(const std::string &args)
     normalizeVolume();
     calculateRelativeVerties();
 
-    insphereRadius = *std::min_element(size, size + 3) / 2;
-    circumsphereRadius = std::sqrt(size[0]*size[0] + size[1]*size[1] + size[2]*size[2]) / 2;
+    double insphereRadius = *std::min_element(size, size + 3) / 2;
+    double circumsphereRadius = std::sqrt(size[0]*size[0] + size[1]*size[1] + size[2]*size[2]) / 2;
 
-    Shape::setVoxelSpatialSize(2 * insphereRadius / std::sqrt(3));
-    Shape::setNeighbourListCellSize(2 * circumsphereRadius);
+    ShapeStaticInfo<3, 0> shapeInfo;
+    shapeInfo.setCircumsphereRadius(circumsphereRadius);
+    shapeInfo.setInsphereRadius(insphereRadius);
+    shapeInfo.setExclusionZoneMaxSpan(circumsphereRadius + insphereRadius);
+    shapeInfo.setCreateShapeImpl(&create3D);
 
-    Shape::setCreateShapeImpl(&create3D);
+    Shape::setShapeStaticInfo(shapeInfo);
 }
 
 void Cuboid::normalizeVolume() {
@@ -137,15 +138,14 @@ void Cuboid::restoreDefaultStrategy() {
 //----------------------------------------------------------------------------
 bool Cuboid::overlap(BoundaryConditions<3> *bc, const Shape *s) const
 {
+    switch (this->overlapEarlyRejection(bc, s)) {
+        case TRUE:      return true;
+        case FALSE:     return false;
+        case UNKNOWN:   break;
+    }
+
     Cuboid other = dynamic_cast<const Cuboid&>(*s);
     this->applyBC(bc, &other);
-
-    double dist2 = (this->getPosition() - other.getPosition()).norm2();
-    if (dist2 > 4*circumsphereRadius*circumsphereRadius)
-        return false;
-    else if (dist2 < 4*insphereRadius*insphereRadius)
-        return true;
-
     return strategy->overlap(this, &other);
 }
 
@@ -178,7 +178,7 @@ bool Cuboid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &pos, const 
     bool inThisPushed[3];
     for (unsigned short i = 0; i < 3; i++) {
         inThis[i] = (absPointAligned[i] <= Cuboid::size[i] / 2);
-        inThisPushed[i] = (absPointAligned[i] <= Cuboid::size[i] / 2 + insphereRadius);
+        inThisPushed[i] = (absPointAligned[i] <= Cuboid::size[i] / 2 + Shape::getInsphereRadius());
     }
 
     // Check optimistic cases - "lies in this" and "doesn't lie in this + minDimension"
@@ -199,7 +199,7 @@ bool Cuboid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &pos, const 
 
     // Check spheres in vertices
     if (std::pow(absPointAligned[0] - this->size[0] / 2, 2) + std::pow(absPointAligned[1] - this->size[1] / 2, 2) +
-        std::pow(absPointAligned[2] - this->size[2] / 2, 2) <= std::pow(insphereRadius, 2))
+        std::pow(absPointAligned[2] - this->size[2] / 2, 2) <= std::pow(Shape::getInsphereRadius(), 2))
         return true;
 
     return false;
@@ -210,7 +210,7 @@ bool Cuboid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &pos, const 
 bool Cuboid::liesInCylinderOnEdge(const Vector<3> &absPointPos, std::size_t coord1, std::size_t coord2) const {
     return std::pow(absPointPos[coord1] - Cuboid::size[coord1]/2, 2)
            + std::pow(absPointPos[coord2] - Cuboid::size[coord2]/2, 2)
-           <= std::pow(insphereRadius, 2);
+           <= std::pow(Shape::getInsphereRadius(), 2);
 }
 
 // Returns Cuboid orientation
@@ -230,16 +230,16 @@ double * Cuboid::getSize(double * arr)
 
 std::string Cuboid::toPovray() const
 {
-	std::string s = "";
+	std::string s;
 	s += "  box { < ";
 	for(unsigned short i=0; i<3; i++){
-		s += std::to_string(-this->size[i]/2);
+		s += std::to_string(-Cuboid::size[i]/2);
 		if (i<2)
 			s+= ", ";
 	}
 	s += ">, <";
 	for(unsigned short i=0; i<3; i++){
-		s += std::to_string(this->size[i]/2);
+		s += std::to_string(Cuboid::size[i]/2);
 		if (i<2)
 			s+= ", ";
 	}
@@ -271,8 +271,8 @@ std::string Cuboid::toWolfram() const
 {
     std::stringstream out;
     out << "GeometricTransformation[" << std::endl;
-    out << "    Cuboid[{" << (-this->size[0] / 2) << ", " << (-this->size[1] / 2) << ", " << (-this->size[2] / 2) << "}, ";
-    out << "{" << (this->size[0] / 2) << ", " << (this->size[1] / 2) << ", " << (this->size[2] / 2) << "}]," << std::endl;
+    out << "    Cuboid[{" << (-Cuboid::size[0] / 2) << ", " << (-Cuboid::size[1] / 2) << ", " << (-Cuboid::size[2] / 2) << "}, ";
+    out << "{" << (Cuboid::size[0] / 2) << ", " << (Cuboid::size[1] / 2) << ", " << (Cuboid::size[2] / 2) << "}]," << std::endl;
     out << "    AffineTransform[" << std::endl;
     out << "        {{{" << this->orientation(0, 0) << ", " << this->orientation(0, 1) << ", " << this->orientation(0, 2) << "}," << std::endl;
     out << "        {" << this->orientation(1, 0) << ", " << this->orientation(1, 1) << ", " << this->orientation(1, 2) << "}," << std::endl;

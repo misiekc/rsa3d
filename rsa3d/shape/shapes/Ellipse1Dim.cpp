@@ -30,11 +30,15 @@ void Ellipse1Dim::initClass(const std::string &args){
 	double ratio = std::stod(args);
 	Ellipse1Dim::shortSemiAxis = sqrt(1.0/(M_PI*ratio));
 	Ellipse1Dim::longSemiAxis = ratio*shortSemiAxis;
-	Shape::setNeighbourListCellSize(2*longSemiAxis);
-	Shape::setVoxelSpatialSize(2*shortSemiAxis);
-	Shape::setVoxelAngularSize(M_PI);
-	Shape::setSupportsSaturation(true);
-	Shape::setDefaultCreateShapeImpl <Ellipse1Dim> ();
+	
+	ShapeStaticInfo<1, 1> shapeInfo;
+	shapeInfo.setCircumsphereRadius(longSemiAxis);
+	shapeInfo.setInsphereRadius(shortSemiAxis);
+	shapeInfo.setVoxelAngularSize(M_PI);
+	shapeInfo.setSupportsSaturation(true);
+	shapeInfo.setDefaultCreateShapeImpl <Ellipse1Dim> ();
+	
+	Shape::setShapeStaticInfo(shapeInfo);
 }
 
 double Ellipse1Dim::calculateF(double* r, double g) const {
@@ -53,6 +57,12 @@ void Ellipse1Dim::setAngle(double angle){
 }
 
 bool Ellipse1Dim::overlap(BoundaryConditions<1> *bc, const Shape<1, 1> *s) const {
+    switch (this->overlapEarlyRejection(bc, s)) {
+        case TRUE:      return true;
+        case FALSE:     return false;
+        case UNKNOWN:   break;
+    }
+    
 	Ellipse1Dim es = dynamic_cast<const Ellipse1Dim &>(*s);
     this->applyBC(bc, &es);
 	double d;

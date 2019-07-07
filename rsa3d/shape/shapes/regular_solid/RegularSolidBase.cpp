@@ -22,8 +22,6 @@ std::vector<Vector<3>> RegularSolidBase::orientedVertexAxes;
 std::vector<Vector<3>> RegularSolidBase::orientedMidedgeAxes;
 
 double RegularSolidBase::normalizeFactor;
-double RegularSolidBase::circumsphereRadius;
-double RegularSolidBase::insphereRadius;
 
 
 //#define PRINT_FACE_AXES
@@ -37,17 +35,26 @@ void RegularSolidBase::initClass(const std::string &attr) {
         exit(EXIT_SUCCESS);
     }
 
+    double circumsphereRadius, insphereRadius;
+
     normalizeFacesOrientation();
     discoverEdges();
     discoverTriangles();
     normalizeVolume();
-    calculateRadia();
+    calculateRadia(circumsphereRadius, insphereRadius);
     discoverAxes();
 
+#ifndef NDEBUG
     reportCalculations();
+#endif
+    
+    ShapeStaticInfo<3, 0> shapeInfo;
+    shapeInfo.setCircumsphereRadius(circumsphereRadius);
+    shapeInfo.setInsphereRadius(insphereRadius);
+    shapeInfo.setExclusionZoneMaxSpan(circumsphereRadius + insphereRadius);
+    shapeInfo.setCreateShapeImpl([](auto dummy) -> Shape* { return nullptr; });   // To be replaced in RegularSolid.tpp
 
-    Shape::setNeighbourListCellSize(2*circumsphereRadius);
-    Shape::setVoxelSpatialSize(2*insphereRadius/std::sqrt(3.));
+    Shape::setShapeStaticInfo(shapeInfo);
 }
 
 void RegularSolidBase::store(std::ostream &f) const {
@@ -133,30 +140,12 @@ std::vector<Vector<3>> RegularSolidBase::applyPosition(const std::vector<Vector<
 bool RegularSolidBase::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
                                    const Orientation<0> &orientation, double orientationRange) const {
     Vector<3> bcPos = position + bc->getTranslation(this->getPosition(), position);
-
-    switch (pointInsideEarlyRejection(bcPos)) {
-        case TRUE:      return true;
-        case FALSE:     return false;
-        default:        break;
-    }
-
     auto vertices = this->getVertices();
-
     switch (pointInsideFace(bcPos, vertices)) {
         case TRUE:      return true;
         case FALSE:     return false;
         default:        return pointInsideEdge(bcPos, vertices) || pointInsideVertex(bcPos, vertices);
     }
-}
-
-inline RegularSolidBase::PIResult RegularSolidBase::pointInsideEarlyRejection(const Vector<3> &bcPos) const {
-    Vector<3> pointDelta = bcPos - this->getPosition();
-    double norm2 = pointDelta.norm2();
-    if (norm2 <= 4*insphereRadius*insphereRadius)
-        return TRUE;
-    else if (norm2 > std::pow(circumsphereRadius + insphereRadius, 2))
-        return FALSE;
-    return UNKNOWN;
 }
 
 inline RegularSolidBase::PIResult
@@ -170,7 +159,7 @@ RegularSolidBase::pointInsideFace(const Vector<3> &point, const std::vector<Vect
         double faceDist = (point - firstVertex) * faceNormal;
         if (faceDist > 0) {
             insideSolid = false;
-            if (faceDist > insphereRadius)
+            if (faceDist > Shape::getInsphereRadius())
                 return FALSE;
             else if (projectionInsideFace(point, vertices, face, faceNormal))
                 return TRUE;
@@ -204,7 +193,7 @@ inline bool RegularSolidBase::pointInsideEdge(const Vector<3> &point, const std:
         Vector<3> posFromBeg = point - edgeBeg;
 
         Vector<3> orthPosComponent = posFromBeg - posFromBeg.projectOn(edgeVec);
-        if (orthPosComponent.norm2() <= insphereRadius*insphereRadius) {
+        if (orthPosComponent.norm2() <= std::pow(Shape::getInsphereRadius(), 2)) {
             Vector<3> posFromEnd = point - edgeEnd;
             if (posFromBeg * edgeVec >= 0 && posFromEnd * edgeVec <= 0)
                 return true;
@@ -215,7 +204,7 @@ inline bool RegularSolidBase::pointInsideEdge(const Vector<3> &point, const std:
 
 inline bool RegularSolidBase::pointInsideVertex(const Vector<3> &point, const std::vector<Vector<3>> &vertices) const {
     for (const auto &vertex : vertices)
-        if ((point - vertex).norm2() <= insphereRadius * insphereRadius)
+        if ((point - vertex).norm2() <= std::pow(Shape::getInsphereRadius(), 2))
             return true;
     return false;
 }
@@ -304,7 +293,7 @@ void RegularSolidBase::normalizeVolume() {
     std::transform(orientedVertices.begin(), orientedVertices.end(), orientedVertices.begin(), normalizeVertex);
 }
 
-void RegularSolidBase::calculateRadia() {
+void RegularSolidBase::calculateRadia(double &circumsphereRadius, double &insphereRadius) {
     circumsphereRadius = 0;
     for (const auto &vertex : orientedVertices) {
         double vertexDistance = vertex.norm();
@@ -349,8 +338,8 @@ void RegularSolidBase::reportCalculations() {
     std::cout << "[RegularSolid::initClass] Faces: " << orientedFaces.size();
     std::cout << ", triangles: " << orientedTriangles.size() << std::endl;
     std::cout << "[RegularSolid::initClass] Normalizing factor: " << normalizeFactor << std::endl;
-    std::cout << "[RegularSolid::initClass] Circumsphere radius: " << circumsphereRadius;
-    std::cout << ", insphere radius: " << insphereRadius << std::endl;
+    std::cout << "[RegularSolid::initClass] Circumsphere radius: " << Shape::getCircumsphereRadius();
+    std::cout << ", insphere radius: " << Shape::getInsphereRadius() << std::endl;
     std::cout << "[RegularSolid::initClass] Discovered ";
     std::cout << orientedFaceAxes.size() << " face axes, ";
     std::cout << orientedEdgeAxes.size() << " edge axes, ";

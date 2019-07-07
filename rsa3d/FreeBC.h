@@ -16,7 +16,7 @@ class FreeBC : public BoundaryConditions<DIMENSION>
 public:
     using vector = Vector<DIMENSION>;
 
-    double distance2(const vector &p1, const vector &p2) const { return 0; }
+    double distance2(const vector &p1, const vector &p2) const { return (p1 - p2).norm2(); }
     vector getTranslation(const vector &p1, const vector &p2) const { return vector(); }
 };
 

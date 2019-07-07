@@ -6,69 +6,15 @@
  */
 
 #include <iostream>
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelSpatialSize = 0;
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelAngularSize = 2*M_PI;
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::neighbourListCellSize = 0;
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::supportsSaturation = false;
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::create_shape_fun_ptr
-        Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::createShapeImpl = nullptr;
+#include "Shape.h"
 
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setVoxelSpatialSize(double size) {
-	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelSpatialSize = size;
-}
+ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION> Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::shapeStaticInfo;
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setVoxelAngularSize(double size) {
-	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelAngularSize = size;
-}
+bool Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::earlyRejectionEnabled = true;
 
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setNeighbourListCellSize(double size) {
-	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::neighbourListCellSize = size;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setSupportsSaturation(bool flag){
-	Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::supportsSaturation = flag;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelSpatialSize() {
-	return Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelSpatialSize;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getVoxelAngularSize() {
-	return Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelAngularSize;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-double Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getNeighbourListCellSize() {
-	return Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::neighbourListCellSize;
-}
-
-template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-bool Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getSupportsSaturation() {
-	return Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::supportsSaturation;
-}
-
-template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-const typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::create_shape_fun_ptr
-Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getCreateShapeImpl() {
-    return createShapeImpl;
-}
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::Shape() : Positioned<SPATIAL_DIMENSION>(){
@@ -104,7 +50,7 @@ Orientation<ANGULAR_DIMENSION> Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::getO
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setOrientation(
-		const Orientation<ANGULAR_DIMENSION> &orientation) {
+        const Orientation<ANGULAR_DIMENSION> &orientation) {
 	this->orientation = orientation;
 }
 
@@ -190,14 +136,180 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::applyBC(BoundaryConditions<SPA
 }
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setCreateShapeImpl(Shape *(*const fptr)(RND *)) {
-    createShapeImpl = fptr;
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setShapeStaticInfo(
+        ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION> shapeStaticInfo) {
+    shapeStaticInfo.throwIfIncomplete();
+    Shape::shapeStaticInfo = std::move(shapeStaticInfo);
 }
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-template<typename SPECIFIC_SHAPE>
-void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setDefaultCreateShapeImpl() {
-    createShapeImpl = [](RND *rnd) {
-        return static_cast<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *>(new SPECIFIC_SHAPE());
+typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::EarlyRejectionResult
+Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::overlapEarlyRejection(
+        BoundaryConditions<SPATIAL_DIMENSION> *bc, const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const {
+    if (!earlyRejectionEnabled)
+        return UNKNOWN;
+
+    double distance2 = bc->distance2(this->getPosition(), s->getPosition());
+
+    if (distance2 < 4*std::pow(shapeStaticInfo.getInsphereRadius(), 2))
+        return TRUE;
+    else if (distance2 > 4*std::pow(shapeStaticInfo.getCircumsphereRadius(), 2))
+        return FALSE;
+    else
+        return UNKNOWN;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setEarlyRejectionEnabled(bool earlyRejectionEnabled) {
+    Shape::earlyRejectionEnabled = earlyRejectionEnabled;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::EarlyRejectionResult
+Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelInsideEarlyRejection(
+        BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &voxelPosition,
+        const Orientation<ANGULAR_DIMENSION> &orientation, double spatialSize, double angularSize) const {
+    if (!earlyRejectionEnabled)
+        return UNKNOWN;
+
+    double halfSpatialSize = 0.5*spatialSize;
+    auto voxelTranslation = bc->getTranslation(this->getPosition(), voxelPosition);
+    auto spatialCenter = voxelPosition + voxelTranslation + Vector<SPATIAL_DIMENSION>(halfSpatialSize);
+    auto relativeSpatialCenter = spatialCenter - this->getPosition();
+
+    /* Both early rejection mechanisms */
+    /* EarlyRejectionResult result = sphereOnVoxelEarlyRejection(relativeSpatialCenter, halfSpatialSize);
+    if (result != UNKNOWN)
+        return result;
+    else
+        return furthestCornerEarlyRejection(relativeSpatialCenter, halfSpatialSize);*/
+
+    /* Sphere on voxel early rejection only */
+    /* return sphereOnVoxelEarlyRejection(relativeSpatialCenter, halfSpatialSize); */
+
+    /* Furthest corner early rejection only - seems the best option */
+    return furthestCornerEarlyRejection(relativeSpatialCenter, halfSpatialSize);
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::EarlyRejectionResult
+Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::sphereOnVoxelEarlyRejection(
+        const Vector<SPATIAL_DIMENSION> &relativeSpatialCenter, double halfSpatialSize) const {
+    double spatialCenterDistance2 = relativeSpatialCenter.norm2();
+    double voxelCircumsphereRadius = halfSpatialSize * std::sqrt(SPATIAL_DIMENSION);
+    double voxelInsphereRadius = halfSpatialSize;
+
+    if (spatialCenterDistance2 < std::pow(shapeStaticInfo.getExclusionZoneMinSpan() - voxelCircumsphereRadius, 2))
+        return TRUE;
+    else if (spatialCenterDistance2 > std::pow(shapeStaticInfo.getExclusionZoneMaxSpan() - voxelInsphereRadius, 2))
+        return FALSE;
+    else
+        return UNKNOWN;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::EarlyRejectionResult
+Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::furthestCornerEarlyRejection(
+        const Vector<SPATIAL_DIMENSION> &relativeSpatialCenter, double halfSpatialSize) const {
+    auto furthestVoxelCorner = relativeSpatialCenter;
+    for (std::size_t j = 0; j < SPATIAL_DIMENSION; j++) {
+        if (relativeSpatialCenter[j] > 0)
+            furthestVoxelCorner[j] += halfSpatialSize;
+        else
+            furthestVoxelCorner[j] -= halfSpatialSize;
+    }
+
+    double furthestVoxelCornerDistance2 = furthestVoxelCorner.norm2();
+    if (furthestVoxelCornerDistance2 < std::pow(shapeStaticInfo.getExclusionZoneMinSpan(), 2))
+        return TRUE;
+    else if (furthestVoxelCornerDistance2 > std::pow(shapeStaticInfo.getExclusionZoneMaxSpan(), 2))
+        return FALSE;
+    else
+        return UNKNOWN;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setCircumsphereRadius(double circumsphereRadius) {
+    Expects(circumsphereRadius > 0);
+    Expects(circumsphereRadius < std::numeric_limits<double>::infinity());
+    this->circumsphereRadius = circumsphereRadius;
+    if (this->neighbourListCellSize == NOT_SPECIFIED)
+        this->neighbourListCellSize = 2*circumsphereRadius;
+    if (this->exclusionZoneMaxSpan == NOT_SPECIFIED)
+        this->exclusionZoneMaxSpan = 2*circumsphereRadius;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setInsphereRadius(double insphereRadius) {
+    Expects(insphereRadius > 0);
+    Expects(insphereRadius < std::numeric_limits<double>::infinity());
+    this->insphereRadius = insphereRadius;
+    if (this->voxelSpatialSize == NOT_SPECIFIED)
+        this->voxelSpatialSize = 2*insphereRadius/std::sqrt(SPATIAL_DIMENSION);
+    if (this->exclusionZoneMinSpan == NOT_SPECIFIED)
+        this->exclusionZoneMinSpan = 2*insphereRadius;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setNeighbourListCellSize(double neighbourListCellSize) {
+    Expects(neighbourListCellSize > 0);
+    Expects(neighbourListCellSize < std::numeric_limits<double>::infinity());
+    ShapeStaticInfo::neighbourListCellSize = neighbourListCellSize;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setVoxelSpatialSize(double voxelSpatialSize) {
+    Expects(voxelSpatialSize > 0);
+    Expects(voxelSpatialSize < std::numeric_limits<double>::infinity());
+    ShapeStaticInfo::voxelSpatialSize = voxelSpatialSize;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setVoxelAngularSize(double voxelAngularSize) {
+    Expects(voxelAngularSize > 0);
+    Expects(voxelAngularSize <= 2*M_PI);
+    ShapeStaticInfo::voxelAngularSize = voxelAngularSize;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setExclusionZoneMinSpan(double exclusionZoneMinSpan) {
+    Expects(exclusionZoneMinSpan > 0);
+    Expects(exclusionZoneMinSpan < std::numeric_limits<double>::infinity());
+    ShapeStaticInfo::exclusionZoneMinSpan = exclusionZoneMinSpan;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setExclusionZoneMaxSpan(double exclusionZoneMaxSpan) {
+    Expects(exclusionZoneMaxSpan > 0);
+    Expects(exclusionZoneMaxSpan < std::numeric_limits<double>::infinity());
+    ShapeStaticInfo::exclusionZoneMaxSpan = exclusionZoneMaxSpan;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setSupportsSaturation(bool supportsSaturation) {
+    ShapeStaticInfo::supportsSaturation = supportsSaturation;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setCreateShapeImpl(
+        ShapeStaticInfo::create_shape_fun_ptr createShapeImpl) {
+    ShapeStaticInfo::createShapeImpl = createShapeImpl;
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+template<typename ConcreteShape>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setDefaultCreateShapeImpl() {
+    this->createShapeImpl = [](RND *rnd) {
+        return static_cast<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *>(new ConcreteShape());
     };
+}
+
+template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::throwIfIncomplete() const {
+    if (this->circumsphereRadius == NOT_SPECIFIED)
+        throw std::runtime_error("Circumsphere radius has not been set!");
+    else if (this->insphereRadius == NOT_SPECIFIED)
+        throw std::runtime_error("Insphere radius has not been set!");
+    else if (this->createShapeImpl == nullptr)
+        throw std::runtime_error("Create shape function implementation radius has not been set!");
 }

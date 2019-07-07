@@ -164,6 +164,7 @@ namespace cube_speedtest
                   std::back_inserter(this->ballRadia));
 
         ShapeFactory::initShapeClass("Cuboid", "3 " + config.getString("cuboid_size"));
+        RSAShape::setEarlyRejectionEnabled(false);
     }
 
     Context::~Context() {
@@ -260,7 +261,7 @@ namespace cube_speedtest
         Result result;
         result.numAll = this->numAll;
         result.factoryDesc = this->factoryDesc;
-        result.numOverlapped = Quantity::fromSamples(this->numOverlapped);
+        result.numOverlapped.calculateFromSamples(this->numOverlapped);
         result.overlapProb = Quantity(result.numOverlapped.value / this->numAll,
                                       result.numOverlapped.error / this->numAll);
 
@@ -284,6 +285,8 @@ namespace cube_speedtest
     // Generates StrategyResult - it calculates mean and std dev of times
     //----------------------------------------------------------------------------------------
     StrategyResult StrategyAcquiredData::generateResult() {
-        return StrategyResult{strategy, Quantity::fromSamples(times)};
+        Quantity result;
+        result.calculateFromSamples(times);
+        return StrategyResult{strategy, result};
     }
 }

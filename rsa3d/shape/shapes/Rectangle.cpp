@@ -60,11 +60,15 @@ void Rectangle::initClass(const std::string &args) {
         Rectangle::shorter = s * ratio;
     }
 
-    Shape::setVoxelSpatialSize(Rectangle::shorter / 2);
-    Shape::setNeighbourListCellSize(Rectangle::longer * 2);
-    Shape::setVoxelAngularSize(M_PI);
-    Shape::setSupportsSaturation(true);
-    Shape::setDefaultCreateShapeImpl<Rectangle>();
+    ShapeStaticInfo<2, 1> shapeInfo;
+
+    shapeInfo.setCircumsphereRadius(std::sqrt(std::pow(Rectangle::longer, 2) + std::pow(Rectangle::shorter, 2)) / 2);
+    shapeInfo.setInsphereRadius(Rectangle::shorter / 2);
+    shapeInfo.setVoxelAngularSize(M_PI);
+    shapeInfo.setSupportsSaturation(true);
+    shapeInfo.setDefaultCreateShapeImpl<Rectangle>();
+
+    Shape::setShapeStaticInfo(shapeInfo);
 }
 
 double Rectangle::getVolume(unsigned short dim) const {
@@ -346,6 +350,12 @@ bool Rectangle::isIntersection(double p0_x, double p0_y, double p1_x, double p1_
 }
 
 bool Rectangle::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const {
+    switch (this->overlapEarlyRejection(bc, s)) {
+        case TRUE:      return true;
+        case FALSE:     return false;
+        case UNKNOWN:   break;
+    }
+
     Rectangle rectangle = dynamic_cast<const Rectangle &>(*s);
     this->applyBC(bc, &rectangle);
 

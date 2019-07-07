@@ -55,7 +55,7 @@ public:
      * @param samples A vector of doubles to calculate the quantity from
      * @return the quantity from samples
      */
-    void fromSamples(const std::vector<double> &samples);
+    void calculateFromSamples(const std::vector<double> &samples);
 
     /**
      * @brief Prints the quantity on given @a std::ostream The behaviour can be manipulated via Quantity::separator and
@@ -67,7 +67,7 @@ public:
     friend std::ostream &operator<<(std::ostream &stream, const Quantity &quantity);
 
 private:
-    const int errorDigits = 4;
+    int errorDigits = 4;
 
     std::string getSeparatorString() const;
 };

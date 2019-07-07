@@ -64,20 +64,24 @@ void Polydisk::initClass(const std::string &args){
 	}
 	Polydisk::normalizeArea(Polydisk::area);
 
-	double nlCellSize = 0;
-	double vSize = Polydisk::diskR[0];
+	double circumsphereRadius = 0;
+	double insphereRadius = Polydisk::diskR[0];
 	for (size_t i = 0; i < Polydisk::diskCentreR.size(); i++){
-		if (nlCellSize < Polydisk::diskCentreR[i] + Polydisk::diskR[i])
-			nlCellSize = Polydisk::diskCentreR[i] + Polydisk::diskR[i];
-		if (vSize > Polydisk::diskR[i])
-			vSize = Polydisk::diskR[i];
+		if (circumsphereRadius < Polydisk::diskCentreR[i] + Polydisk::diskR[i])
+			circumsphereRadius = Polydisk::diskCentreR[i] + Polydisk::diskR[i];
+		if (insphereRadius > Polydisk::diskR[i])
+			insphereRadius = Polydisk::diskR[i];
 	}
 
-	Shape<2, 1>::setNeighbourListCellSize(2.0*nlCellSize);
-	Shape<2, 1>::setVoxelSpatialSize(1.4*vSize);
-	Shape<2, 1>::setVoxelAngularSize(2*M_PI);
-	Shape<2, 1>::setSupportsSaturation(true);
-	Shape<2, 1>::setDefaultCreateShapeImpl <Polydisk> ();
+	ShapeStaticInfo<2, 1> shapeInfo;
+
+	shapeInfo.setCircumsphereRadius(circumsphereRadius);
+	shapeInfo.setInsphereRadius(insphereRadius);
+	shapeInfo.setVoxelAngularSize(2*M_PI);
+	shapeInfo.setSupportsSaturation(true);
+	shapeInfo.setDefaultCreateShapeImpl <Polydisk> ();
+
+	Shape::setShapeStaticInfo(shapeInfo);
 }
 
 double Polydisk::mcArea(size_t mcTrials){
