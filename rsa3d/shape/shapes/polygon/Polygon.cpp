@@ -18,8 +18,6 @@ std::vector<double> Polygon::vertexR;
 std::vector<double> Polygon::vertexTheta;
 std::vector<std::pair<size_t, size_t>> Polygon::segments;
 std::vector<std::pair<size_t, size_t>> Polygon::helperSegments;
-double Polygon::inscribedCircleRadius{};
-double Polygon::circumscribedCircleRadius{};
 
 double Polygon::calculateCircumscribedCircleRadius(){
 	double result = 0.0;
@@ -106,12 +104,9 @@ void Polygon::initClass(const std::string &args){
     Polygon::parseHelperSegments(in);
     Polygon::normalizeVolume();
 
-    Polygon::inscribedCircleRadius = Polygon::calculateInscribedCircleRadius();
-    Polygon::circumscribedCircleRadius = Polygon::calculateCircumscribedCircleRadius();
-
     ShapeStaticInfo<2, 1> shapeInfo;
-    shapeInfo.setCircumsphereRadius(Polygon::circumscribedCircleRadius);
-	shapeInfo.setInsphereRadius(inscribedCircleRadius);
+    shapeInfo.setCircumsphereRadius(Polygon::calculateCircumscribedCircleRadius());
+	shapeInfo.setInsphereRadius(Polygon::calculateInscribedCircleRadius());
 	shapeInfo.setVoxelAngularSize(2*M_PI);
 	shapeInfo.setSupportsSaturation(true);
 	shapeInfo.setDefaultCreateShapeImpl <Polygon> ();
@@ -135,8 +130,6 @@ void Polygon::clearOldData() {
     vertexTheta.clear();
     segments.clear();
     helperSegments.clear();
-    inscribedCircleRadius = 0;
-    circumscribedCircleRadius = 0;
 }
 
 void Polygon::parseVertices(std::istringstream &in) {
@@ -257,22 +250,17 @@ double Polygon::getVolume(unsigned short dim) const{
 #ifndef CUDA_ENABLED
 
 bool Polygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{
+    switch (this->overlapEarlyRejection(bc, s)) {
+        case TRUE:      return true;
+        case FALSE:     return false;
+        case UNKNOWN:   break;
+    }
+    
 	Polygon pol = dynamic_cast<const Polygon&>(*s);
 	this->applyBC(bc, &pol);
 
-	double polposition[2];
-	pol.getPosition().copyToArray(polposition);
-	double position[2];
-	this->getPosition().copyToArray(position);
-
-	//easy check
-	double d2 = 0, tmp;
-	for (unsigned short i = 0; i < 2; i++){
-		tmp = position[i] - polposition[i];
-		d2 += tmp*tmp;
-	}
-	if (std::sqrt(d2) < 2.0*Polygon::inscribedCircleRadius)
-		return true;
+	Vector<2> polposition = pol.getPosition();
+	Vector<2> position = this->getPosition();
 
 	double angle = this->getOrientation()[0];
 	double polangle = pol.getOrientation()[0];
@@ -313,12 +301,15 @@ bool Polygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosit
     if (voxelOrientation[0] > Shape<2, 1>::getVoxelAngularSize())
 		return true;
 
+    switch(this->voxelInsideEarlyRejection(bc, voxelPosition, voxelOrientation, spatialSize, angularSize)) {
+        case TRUE:      return true;
+        case FALSE:     return false;
+        case UNKNOWN:   break;
+    }
+
 	double halfSpatialSize = 0.5*spatialSize;
 	Vector<2> voxelTranslation = bc->getTranslation(this->getPosition(), voxelPosition);
 	Vector<2> spatialCenter = voxelPosition + voxelTranslation + Vector<2>{{halfSpatialSize, halfSpatialSize}};
-
-    if (voxelInsideEasyCheck(spatialCenter, halfSpatialSize))
-		return true;
 
     if (voxelInsideFullAngleCheck(spatialCenter, halfSpatialSize))
         return true;
@@ -329,19 +320,8 @@ bool Polygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosit
     return voxelInsideComplexCheck(spatialCenter, halfSpatialSize, angularCenter, halfAngularSize);
 }
 
-bool Polygon::voxelInsideEasyCheck(const Vector<2> &spatialCenter, double halfSpatialSize) const {
-    Vector<2> voxelDistance = this->getPosition() - spatialCenter;
-    for (unsigned short j = 0; j < 2; j++) {
-        if (voxelDistance[j] > 0)
-            voxelDistance[j] += halfSpatialSize;
-        else
-            voxelDistance[j] -= halfSpatialSize;
-    }
-    return voxelDistance.norm2() < 4*inscribedCircleRadius*inscribedCircleRadius;
-}
-
 bool Polygon::voxelInsideFullAngleCheck(const Vector<2> &spatialCenter, double halfSpatialSize) const {
-    double pushDistance = Polygon::inscribedCircleRadius - halfSpatialSize * M_SQRT2;
+    double pushDistance = Shape::getInsphereRadius() - halfSpatialSize * M_SQRT2;
     Assert(pushDistance >= 0);
 
     // For small polygons full check yields faster generation, while for larger (like 20-gons) checking only vertices

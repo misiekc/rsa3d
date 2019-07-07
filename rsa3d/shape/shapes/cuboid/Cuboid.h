@@ -24,8 +24,6 @@ class Cuboid : public ConvexShape<3, 0>, public OverlapStrategyShape<3, 0>, publ
 {
 private:
 	static double           size[3];
-	static double           insphereRadius;
-	static double           circumsphereRadius;
 	
 	static Vector<3>        relativeVertices[8];
 	

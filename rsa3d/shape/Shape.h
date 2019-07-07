@@ -193,6 +193,24 @@ public:
         return shapeStaticInfo.getVoxelAngularSize();
 	}
 
+    /**
+     * @brief Returns the radius of the cirbumscribed sphere.
+     *
+     * @return the radius of the cirbumscribed sphere
+     */
+    static double getCircumsphereRadius() {
+        return shapeStaticInfo.getCircumsphereRadius();
+    }
+
+    /**
+     * @brief Returns the radius of the inscribed sphere.
+     *
+     * @return the radius of the inscribed sphere
+     */
+    static double getInsphereRadius() {
+        return shapeStaticInfo.getInsphereRadius();
+    }
+
 	/**
      * @brief Returns flags indicating if the shape supports saturated packing generation.
      *

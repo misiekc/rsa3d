@@ -350,6 +350,12 @@ bool Rectangle::isIntersection(double p0_x, double p0_y, double p1_x, double p1_
 }
 
 bool Rectangle::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const {
+    switch (this->overlapEarlyRejection(bc, s)) {
+        case TRUE:      return true;
+        case FALSE:     return false;
+        case UNKNOWN:   break;
+    }
+
     Rectangle rectangle = dynamic_cast<const Rectangle &>(*s);
     this->applyBC(bc, &rectangle);
 

@@ -21,32 +21,27 @@ void RegularSolid<SpecificSolid>::initClass(const std::string &attr) {
     Assert(!orientedVertices.empty());
     RegularSolidBase::initClass(attr);
 
-    ShapeStaticInfo<3, 0> shapeInfo;
-    shapeInfo.setCircumsphereRadius(circumsphereRadius);
-    shapeInfo.setInsphereRadius(insphereRadius);
-    shapeInfo.setExclusionZoneMaxSpan(circumsphereRadius + insphereRadius);
+    auto shapeInfo = getShapeStaticInfo();
     shapeInfo.setCreateShapeImpl([](RND *rnd) -> Shape* {
         return new SpecificSolid(Matrix<3, 3>::rotation(
                 2*M_PI*rnd->nextValue(),
                 std::asin(2*rnd->nextValue() - 1),
                 2*M_PI*rnd->nextValue()));
     });
-
     Shape::setShapeStaticInfo(shapeInfo);
 }
 
 template<typename SpecificSolid>
 bool RegularSolid<SpecificSolid>::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
+    switch (this->overlapEarlyRejection(bc, s)) {
+        case EarlyRejectionResult::TRUE:      return true;
+        case EarlyRejectionResult::FALSE:     return false;
+        case EarlyRejectionResult::UNKNOWN:   break;
+    }
+
     SpecificSolid other = dynamic_cast<const SpecificSolid &>(*s);     // Make a copy
     this->applyBC(bc, &other);
-
-    double distance2 = (this->getPosition() - other.getPosition()).norm2();
-    if (distance2 > 4*circumsphereRadius*circumsphereRadius)
-        return false;
-    else if (distance2 < 4*insphereRadius*insphereRadius)
-        return true;
-    else
-        return SpecificSolid::overlapStrategy.overlap(this, &other);
+    return SpecificSolid::overlapStrategy.overlap(this, &other);
 }
 
 template<typename SpecificSolid>

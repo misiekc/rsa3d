@@ -77,9 +77,8 @@ void Spherocylinder<DIMENSION>::initClass(const std::string &attr) {
     Shape<DIMENSION, 0>::setShapeStaticInfo(shapeInfo);
 
     // Calculate SpheroCylinder2D params for Stolen2DOverlapSC
-	#if (RSA_SPATIAL_DIMENSION == 2)
+	if constexpr (DIMENSION == 2)
         SpheroCylinder2D::calculateStatic(attr);
-	#endif
 }
 
 template<unsigned short DIMENSION>
@@ -193,9 +192,15 @@ double Spherocylinder<DIMENSION>::distanceFrom(Vector<DIMENSION> *v) const{
 
 template<unsigned short DIMENSION>
 bool Spherocylinder<DIMENSION>::overlap(BoundaryConditions<DIMENSION> *bc, const Shape<DIMENSION, 0> *s) const {
+    using EarlyRejectionResult = typename Shape<DIMENSION, 0>::EarlyRejectionResult;
+    switch (this->overlapEarlyRejection(bc, s)) {
+        case EarlyRejectionResult::TRUE:      return true;
+        case EarlyRejectionResult::FALSE:     return false;
+        case EarlyRejectionResult::UNKNOWN:   break;
+    }
+
     Spherocylinder<DIMENSION> other = dynamic_cast<const Spherocylinder<DIMENSION>&>(*s);
     this->applyBC(bc, &other);
-
 	return this->distanceFrom(&other) < 2*Spherocylinder<DIMENSION>::getRadius();
 }
 
@@ -254,27 +259,29 @@ std::string Spherocylinder<DIMENSION>::toPovray() const {
 	Vector<DIMENSION> t1 = this->getEnd(-1);
 	Vector<DIMENSION> t2 = this->getEnd(1);
 
-	#if (RSA_SPATIAL_DIMENSION==2)
-		out << "  cylinder { < " << t1[0] << ", " << t1[1] << ", 0.0 >, < " << t2[0] << ", " << t2[1] << ", 0.0 >, " << Spherocylinder<DIMENSION>::radius << std::endl;
-		out << "             texture { pigment { color Red } }" << std::endl;
-		out << "  }" << std::endl;
-		out << "  sphere { < " << t1[0] << ", " << t1[1] << ", 0.0 >, " << Spherocylinder<DIMENSION>::radius << std::endl;
-		out << "             texture { pigment { color Red } }" << std::endl;
-		out << "  }" << std::endl;
-		out << "  sphere { < " << t2[0] << ", " << t2[1] << ", 0.0 >, " << Spherocylinder<DIMENSION>::radius << std::endl;
-		out << "             texture { pigment { color Red } }" << std::endl;
-		out << "  }" << std::endl;
-	#elif (RSA_SPATIAL_DIMENSION==3)
-		out << "  cylinder { < " << t1[0] << ", " << t1[1] << ", " << t1[2] << ">, < " << t2[0] << ", " << t2[1] << ", " << t2[2] << ">, " << Spherocylinder<DIMENSION>::radius << std::endl;
-		out << "             texture { pigment { color Red } }" << std::endl;
-		out << "  }" << std::endl;
-		out << "  sphere { < " << t1[0] << ", " << t1[1] << ", " << t1[2] << ">, " << Spherocylinder<DIMENSION>::radius << std::endl;
-		out << "             texture { pigment { color Red } }" << std::endl;
-		out << "  }" << std::endl;
-		out << "  sphere { < " << t2[0] << ", " << t2[1] << ", " << t2[2] << ">, " << Spherocylinder<DIMENSION>::radius << std::endl;
-		out << "             texture { pigment { color Red } }" << std::endl;
-		out << "  }" << std::endl;
-	#endif
+	if constexpr (DIMENSION==2) {
+        out << "  cylinder { < " << t1[0] << ", " << t1[1] << ", 0.0 >, < " << t2[0] << ", " << t2[1] << ", 0.0 >, " << Spherocylinder<DIMENSION>::radius << std::endl;
+        out << "             texture { pigment { color Red } }" << std::endl;
+        out << "  }" << std::endl;
+        out << "  sphere { < " << t1[0] << ", " << t1[1] << ", 0.0 >, " << Spherocylinder<DIMENSION>::radius << std::endl;
+        out << "             texture { pigment { color Red } }" << std::endl;
+        out << "  }" << std::endl;
+        out << "  sphere { < " << t2[0] << ", " << t2[1] << ", 0.0 >, " << Spherocylinder<DIMENSION>::radius << std::endl;
+        out << "             texture { pigment { color Red } }" << std::endl;
+        out << "  }" << std::endl;
+    } else if constexpr (DIMENSION==3) {
+        out << "  cylinder { < " << t1[0] << ", " << t1[1] << ", " << t1[2] << ">, < " << t2[0] << ", " << t2[1] << ", " << t2[2] << ">, " << Spherocylinder<DIMENSION>::radius << std::endl;
+        out << "             texture { pigment { color Red } }" << std::endl;
+        out << "  }" << std::endl;
+        out << "  sphere { < " << t1[0] << ", " << t1[1] << ", " << t1[2] << ">, " << Spherocylinder<DIMENSION>::radius << std::endl;
+        out << "             texture { pigment { color Red } }" << std::endl;
+        out << "  }" << std::endl;
+        out << "  sphere { < " << t2[0] << ", " << t2[1] << ", " << t2[2] << ">, " << Spherocylinder<DIMENSION>::radius << std::endl;
+        out << "             texture { pigment { color Red } }" << std::endl;
+        out << "  }" << std::endl;
+    } else {
+        throw std::runtime_error("Spherocylinder::toPovray() supported only for 2D and 3D");
+    }
 	return out.str();
 }
 
@@ -283,27 +290,28 @@ std::string Spherocylinder<DIMENSION>::toWolfram() const {
     std::stringstream out;
     out << std::fixed;
 
-	#if (RSA_SPATIAL_DIMENSION == 2)
-        out << "GeometricTransformation[{Rectangle[{-" << length/2 << ", -" << radius << "}, {" << length/2 << ", " << radius << "}]," << std::endl;
-        out << "    Disk[{-" << length/2 << ", 0}, " << radius << "]," << std::endl;
-        out << "    Disk[{" << length/2 << ", 0}, " << radius << "]}," << std::endl;
+	if constexpr (DIMENSION == 2) {
+        out << "GeometricTransformation[{Rectangle[{-" << length / 2 << ", -" << radius << "}, {" << length / 2 << ", "
+            << radius << "}]," << std::endl;
+        out << "    Disk[{-" << length / 2 << ", 0}, " << radius << "]," << std::endl;
+        out << "    Disk[{" << length / 2 << ", 0}, " << radius << "]}," << std::endl;
         out << "    {{{" << this->orientation(0, 0) << ", " << this->orientation(0, 1) << "}, ";
         out << "{" << this->orientation(1, 0) << ", " << this->orientation(1, 1) << "}}, ";
         out << this->getPosition() << "}]";
-	#elif (RSA_SPATIAL_DIMENSION == 3)
+    } else if (DIMENSION == 3) {
         Vector<3> beg = this->getEnd(-1);
         Vector<3> end = this->getEnd(1);
-		out << "CapsuleShape[{" << beg << ", " << end << "}, " << Spherocylinder::radius << "]";
-	#else
-		throw std::runtime_error("Spherocylinder::toWolfram() supported only for 2D and 3D");
-    #endif
+        out << "CapsuleShape[{" << beg << ", " << end << "}, " << Spherocylinder::radius << "]";
+    } else {
+        throw std::runtime_error("Spherocylinder::toWolfram() supported only for 2D and 3D");
+    }
 
     return out.str();
 }
 
 template<unsigned short DIMENSION>
 std::vector<std::string> Spherocylinder<DIMENSION>::getSupportedStrategies() const {
-    if (DIMENSION == 2)
+    if constexpr (DIMENSION == 2)
         return {"own", "stolen_from_sc2d"};
     else
         return {"own"};
@@ -311,10 +319,9 @@ std::vector<std::string> Spherocylinder<DIMENSION>::getSupportedStrategies() con
 
 template<unsigned short DIMENSION>
 OverlapStrategy<DIMENSION, 0> *Spherocylinder<DIMENSION>::createStrategy(const std::string &name) const {
-	#if (RSA_SPATIAL_DIMENSION == 2)
+	if constexpr (DIMENSION == 2)
         if (name == "stolen_from_sc2d")
             return new Stolen2DOverlapSC;
-    #endif
 
     if (name == "own")
         return new OwnOverlapSC<DIMENSION>;

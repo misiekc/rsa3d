@@ -23,7 +23,7 @@ private:
     static void discoverEdges();
     static void discoverTriangles();
     static void normalizeVolume();
-    static void calculateRadia();
+    static void calculateRadia(double &circumsphereRadius, double &insphereRadius);
     static void discoverAxes();
     static void reportCalculations();
     static Face3D faceFromVertexIdx(const std::vector<size_t> &vertexIdx);
@@ -32,7 +32,6 @@ private:
 
     Matrix<3, 3> orientation = Matrix<3, 3>::identity();
 
-    PIResult pointInsideEarlyRejection(const Vector<3> &bcPos) const;
     PIResult pointInsideFace(const Vector<3> &point, const std::vector<Vector<3>> &vertices) const;
     bool projectionInsideFace(const Vector<3> &point, const std::vector<Vector<3>> &vertices,
                               const std::vector<size_t> &face, const Vector<3> &faceNormal) const;
@@ -66,8 +65,6 @@ protected:
     static std::vector<Vector<3>> orientedMidedgeAxes;      // from center to midedge, u = -v
 
     static double normalizeFactor;
-    static double circumsphereRadius;
-    static double insphereRadius;
 
     static void initClass(const std::string &attr);
 

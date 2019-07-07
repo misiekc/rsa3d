@@ -57,6 +57,12 @@ void Ellipse1Dim::setAngle(double angle){
 }
 
 bool Ellipse1Dim::overlap(BoundaryConditions<1> *bc, const Shape<1, 1> *s) const {
+    switch (this->overlapEarlyRejection(bc, s)) {
+        case TRUE:      return true;
+        case FALSE:     return false;
+        case UNKNOWN:   break;
+    }
+    
 	Ellipse1Dim es = dynamic_cast<const Ellipse1Dim &>(*s);
     this->applyBC(bc, &es);
 	double d;

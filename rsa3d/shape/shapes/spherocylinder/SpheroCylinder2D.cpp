@@ -67,6 +67,12 @@ double SpheroCylinder2D::getVolume(unsigned short dim) const {
 }
 
 bool SpheroCylinder2D::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const {
+    switch (this->overlapEarlyRejection(bc, s)) {
+        case TRUE:      return true;
+        case FALSE:     return false;
+        case UNKNOWN:   break;
+    }
+
     SpheroCylinder2D other = dynamic_cast<const SpheroCylinder2D&>(*s);
     this->applyBC(bc, &other);
     return withinExclusionZone(other.getPosition(), other.getAngle());
