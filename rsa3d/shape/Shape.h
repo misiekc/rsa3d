@@ -467,6 +467,7 @@ public:
      * @return the radius of the cirbumscribed sphere
      */
     double getCircumsphereRadius() const {
+        this->throwIfIncomplete();
         return circumsphereRadius;
     }
 
@@ -476,6 +477,7 @@ public:
      * @return the radius of the inscribed sphere
      */
     double getInsphereRadius() const {
+        this->throwIfIncomplete();
         return insphereRadius;
     }
 
@@ -485,6 +487,7 @@ public:
      * @return the linear size of a neighbour list cell
      */
     double getNeighbourListCellSize() const {
+        this->throwIfIncomplete();
         return neighbourListCellSize;
     }
 
@@ -494,6 +497,7 @@ public:
      * @return the initial linear spatial size of a voxel
      */
     double getVoxelSpatialSize() const {
+        this->throwIfIncomplete();
         return voxelSpatialSize;
     }
 
@@ -503,6 +507,7 @@ public:
      * @return the initial angular size of a voxel
      */
     double getVoxelAngularSize() const {
+        this->throwIfIncomplete();
         return voxelAngularSize;
     }
 
@@ -512,6 +517,7 @@ public:
      * @return smallest possible distance to exclusion zone boundary
      */
     double getExclusionZoneMinSpan() const {
+        this->throwIfIncomplete();
         return exclusionZoneMinSpan;
     }
 
@@ -521,6 +527,7 @@ public:
      * @return bigggest possible distance to exclusion zone boundary
      */
     double getExclusionZoneMaxSpan() const {
+        this->throwIfIncomplete();
         return exclusionZoneMaxSpan;
     }
 
@@ -530,6 +537,7 @@ public:
      * @return a pointer to function which dynamically allocates the current shape objects
      */
     create_shape_fun_ptr getCreateShapeImpl() const {
+        this->throwIfIncomplete();
         return createShapeImpl;
     }
 
@@ -539,6 +547,7 @@ public:
      * @return a flag which indicates if shape supports saturated packings
      */
     bool getSupportsSaturation() const {
+        this->throwIfIncomplete();
         return supportsSaturation;
     }
 
