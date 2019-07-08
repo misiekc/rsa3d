@@ -44,6 +44,10 @@ private:
     bool pointInsidePushedEdges(const Vector<2> &point, double pushDistance) const;
     bool pointInsidePolygon(const Vector<2> &point) const;
 
+    bool oldOverlapComplexCheck(Vector<2> &position, double angle, Vector<2> &polposition, double polangle) const;
+    static double segmentPointDistance2(const Vector<2> &s1, const Vector<2> &s2, const Vector<2> &point);
+    bool newOverlapComplexCheck(Vector<2> &position, double angle, Vector<2> &polposition, double polangle) const;
+
 protected:
 	//polar coordinates of all vertices
 	static std::vector<double> vertexR;

@@ -249,22 +249,8 @@ double Polygon::getVolume(unsigned short dim) const{
 
 #ifndef CUDA_ENABLED
 
-bool Polygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{
-    switch (this->overlapEarlyRejection(bc, s)) {
-        case TRUE:      return true;
-        case FALSE:     return false;
-        case UNKNOWN:   break;
-    }
-    
-	Polygon pol = dynamic_cast<const Polygon&>(*s);
-	this->applyBC(bc, &pol);
+bool Polygon::oldOverlapComplexCheck(Vector<2> &position, double angle, Vector<2> &polposition, double polangle) const{
 
-	Vector<2> polposition = pol.getPosition();
-	Vector<2> position = this->getPosition();
-
-	double angle = this->getOrientation()[0];
-	double polangle = pol.getOrientation()[0];
-	//complex check
 	for (size_t i = 0; i < Polygon::segments.size() + Polygon::helperSegments.size(); i++){
 		std::pair<size_t, size_t> polsegment;
 		if (i<Polygon::segments.size()){
@@ -288,11 +274,90 @@ bool Polygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{
 			double y3 = position[1] + Polygon::vertexR[segment.first] * std::sin(Polygon::vertexTheta[segment.first] + angle);
 			double x4 = position[0] + Polygon::vertexR[segment.second] * std::cos(Polygon::vertexTheta[segment.second] + angle);
 			double y4 = position[1] + Polygon::vertexR[segment.second] * std::sin(Polygon::vertexTheta[segment.second] + angle);
+
 			if (Polygon::lineLineIntersect(x1, y1, x2, y2, x3, y3, x4, y4))
 				return true;
 		}
 	}
 	return false;
+}
+
+double Polygon::segmentPointDistance2(const Vector<2> &s1, const Vector<2> &s2, const Vector<2> &point){
+	double segmentLenght2 = (s2-s1).norm2();
+	if (segmentLenght2 == 0.0){
+		return (s1-point).norm2();
+	}
+	// Consider the line extending the segment, parameterized as s1 + t (s2 - s1).
+	// We find projection of point p onto the line.
+	// It falls where t = [(p-s1) . (s2-s1)] / |s2-s1|^2
+	// We clamp t from [0,1] to handle points outside the segment s1 s2.
+	double t = std::max(0.0, std::min(1.0, ((point - s1)*(s2 - s1)) / segmentLenght2));
+	Vector<2> projection = s1 + t * (s2 - s1);  // Projection falls on the segment
+	return (point - projection).norm2();
+}
+
+bool Polygon::newOverlapComplexCheck(Vector<2> &position, double angle, Vector<2> &polposition, double polangle) const{
+	// prepare segments set to check for overlapping. Only include segments that are not outside the circumsphere of the other shape.
+	std::vector<std::pair<Vector<2>, Vector<2>>> set, polset;
+	std::pair<size_t, size_t> segment;
+	std::pair<Vector<2>, Vector<2>> xySegment;
+
+	double circumsphereRadius2 = std::pow(RSAShape::getCircumsphereRadius(), 2);
+	for (size_t i = 0; i < Polygon::segments.size() + Polygon::helperSegments.size(); i++){
+		if (i<Polygon::segments.size()){
+			segment = Polygon::segments[i];
+		}else{
+			segment = Polygon::helperSegments[i-Polygon::segments.size()];
+		}
+		xySegment.first[0]  = polposition[0] + Polygon::vertexR[segment.first] * std::cos(Polygon::vertexTheta[segment.first] + polangle);
+		xySegment.first[1]  = polposition[1] + Polygon::vertexR[segment.first] * std::sin(Polygon::vertexTheta[segment.first] + polangle);
+		xySegment.second[0] = polposition[0] + Polygon::vertexR[segment.second] * std::cos(Polygon::vertexTheta[segment.second] + polangle);
+		xySegment.second[1] = polposition[1] + Polygon::vertexR[segment.second] * std::sin(Polygon::vertexTheta[segment.second] + polangle);
+
+		if (Polygon::segmentPointDistance2(xySegment.first, xySegment.second, position) <= circumsphereRadius2)
+			polset.push_back(xySegment);
+
+		xySegment.first[0]  = position[0] + Polygon::vertexR[segment.first] * std::cos(Polygon::vertexTheta[segment.first] + angle);
+		xySegment.first[1]  = position[1] + Polygon::vertexR[segment.first] * std::sin(Polygon::vertexTheta[segment.first] + angle);
+		xySegment.second[0] = position[0] + Polygon::vertexR[segment.second] * std::cos(Polygon::vertexTheta[segment.second] + angle);
+		xySegment.second[1] = position[1] + Polygon::vertexR[segment.second] * std::sin(Polygon::vertexTheta[segment.second] + angle);
+
+		if (Polygon::segmentPointDistance2(xySegment.first, xySegment.second, polposition) <= circumsphereRadius2)
+			set.push_back(xySegment);
+	}
+
+	for (std::pair<Vector<2>, Vector<2>> polsegment : polset){
+
+		for (std::pair<Vector<2>, Vector<2>> segment : set){
+
+			if (Polygon::lineLineIntersect(polsegment.first[0], polsegment.first[1], polsegment.second[0], polsegment.second[1],
+					segment.first[0], segment.first[1], segment.second[0], segment.second[1]))
+				return true;
+		}
+	}
+	return false;
+}
+
+
+bool Polygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{
+    switch (this->overlapEarlyRejection(bc, s)) {
+        case TRUE:      return true;
+        case FALSE:     return false;
+        case UNKNOWN:   break;
+    }
+
+	Polygon pol = dynamic_cast<const Polygon&>(*s);
+	this->applyBC(bc, &pol);
+
+	Vector<2> polposition = pol.getPosition();
+	Vector<2> position = this->getPosition();
+
+	double angle = this->getOrientation()[0];
+	double polangle = pol.getOrientation()[0];
+
+	//complex check
+//	return this->oldOverlapComplexCheck(position, angle, polposition, polangle);
+	return this->newOverlapComplexCheck(position, angle, polposition, polangle);
 }
 #endif
 
