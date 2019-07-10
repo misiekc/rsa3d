@@ -302,7 +302,7 @@ bool Polygon::newOverlapComplexCheck(Vector<2> &position, double angle, Vector<2
 	std::pair<size_t, size_t> segment;
 	std::pair<Vector<2>, Vector<2>> xySegment;
 
-	double circumsphereRadius2 = std::pow(RSAShape::getCircumsphereRadius(), 2);
+	double circumsphereRadius2 = std::pow(Shape::getCircumsphereRadius(), 2);
 	for (size_t i = 0; i < Polygon::segments.size() + Polygon::helperSegments.size(); i++){
 		if (i<Polygon::segments.size()){
 			segment = Polygon::segments[i];

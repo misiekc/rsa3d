@@ -80,8 +80,8 @@ TEST_CASE("Polygon: initClass calculations") {
         // 1 x 1 square, center in x = 0.1, y = 0.2
         Polygon::initClass("4 xy 0.6 0.7 -0.4 0.7 -0.4 -0.3 0.6 -0.3 4 0 1 2 3 0");
 
-        REQUIRE(Polygon::getInscribedCircleRadius() == Approx(0.3));
-        REQUIRE(Polygon::getCircumscribedCircleRadius() == Approx(std::sqrt(0.6*0.6 + 0.7*0.7)));
+        REQUIRE(Shape<2, 1>::getInsphereRadius() == Approx(0.3));
+        REQUIRE(Shape<2, 1>::getCircumsphereRadius() == Approx(std::sqrt(0.6*0.6 + 0.7*0.7)));
     }
 }
 
@@ -96,13 +96,13 @@ TEST_CASE("Polygon: initClass helperSegments") {
     }
 
     SECTION("manual helper segments shouldn't center polygon") {
-        Polygon::initClass("4 xy 0 0 1 0 1 1 0 1 4 0 1 2 3 2 3 1 2 0");
+        Polygon::initClass("4 xy -0.1 -0.1 0.9 -0.1 0.9 0.9 -0.1 0.9 4 0 1 2 3 2 3 1 2 0");
 
         auto vertexR = Polygon::getVertexR();
-        REQUIRE(vertexR[0] == Approx(0));
-        REQUIRE(vertexR[1] == Approx(1));
-        REQUIRE(vertexR[2] == Approx(M_SQRT2));
-        REQUIRE(vertexR[3] == Approx(1));
+        REQUIRE(vertexR[0] == Approx(std::sqrt(0.1*0.1 + 0.1*0.1)));
+        REQUIRE(vertexR[1] == Approx(std::sqrt(0.1*0.1 + 0.9*0.9)));
+        REQUIRE(vertexR[2] == Approx(std::sqrt(0.9*0.9 + 0.9*0.9)));
+        REQUIRE(vertexR[3] == Approx(std::sqrt(0.9*0.9 + 0.1*0.1)));
     }
 
     SECTION("starHelper segments additional vertex") {
@@ -128,7 +128,7 @@ TEST_CASE("Polygon: initClass helperSegments") {
     }
 
     SECTION("star helper segments should center polygon") {
-        Polygon::initClass("4 xy 0 0 1 0 1 1 0 1 4 0 1 2 3 starHelperSegments");
+        Polygon::initClass("4 xy -0.1 -0.1 0.9 -0.1 0.9 0.9 -0.1 0.9 4 0 1 2 3 starHelperSegments");
 
         auto vertexR = Polygon::getVertexR();
         REQUIRE(vertexR[0] == Approx(M_SQRT1_2));
