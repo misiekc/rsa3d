@@ -19,17 +19,10 @@
 #include <cstring>
 #include <cmath>
 
-/*
-void Analyzer::print(std::ostream &out, double value, double error) {
-	int precision =
-	out << "dir\tN\td(N)\td\td(d)\tN_inf\td(N_inf)\tC1\td(C1)\tC2\td(C2)" << std::endl;
-	out << dir << "\t" << theta << "\t" << d << "\t" << thetaInf << "\t" << C1 << "\t" << C2 << std::endl;
-}
-*/
 
 void Analyzer::Result::print(std::ostream &out) const {
-	out << "dir\tN\td(N)\td\td(d)\tN_inf\td(N_inf)\tC1\td(C1)\tC2\td(C2)" << std::endl;
-	out << dir << "\t" << theta << "\t" << d << "\t" << thetaInf << "\t" << C1 << "\t" << C2 << std::endl;
+	out << "dir\ttheta\td(theta)\tA\td(A)\td\td(d)\ttheta_inf\td(theta_inf)\tC1\td(C1)\tC2\td(C2)" << std::endl;
+	out << dir << "\t" << theta << "\t" << A << "\t" << d << "\t" << thetaInf << "\t" << C1 << "\t" << C2 << std::endl;
 }
 
 
@@ -216,19 +209,23 @@ void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA,
 				}
 				lr1.calculate();
 				lr2.calculate();
-				double B = (lr1.getB()+lr2.getB())/2.0;
-				double dB = fabs(B - lr1.getB());
+                double A = (lr1.getA()+lr2.getA())/2.0;
+                double dA = fabs(A - lr1.getA());
+                double B = (lr1.getB()+lr2.getB())/2.0;
+                double dB = fabs(B - lr1.getB());
 				res->d.value = -1.0 / (pr.getA()+1);
 				res->d.error = -pr.getSA()/(pr.getA()+1) * res->d.value;
 				res->thetaInf.value = B;
 				res->thetaInf.error = dB;
+				res->A.value = -A;
+				res->A.error = dA;
 
-				file << "\t" << res->d << "\t" << res->thetaInf << std::endl;
+				file << "\t" << res->A << "\t" << res->d << "\t" << res->thetaInf << std::endl;
 			}else{
-				file << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << std::endl;
+				file << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << std::endl;
 			}
 		}else{
-			file << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << std::endl;
+			file << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << "\t" << 0.0 << std::endl;
 		}
 	}
 	file.close();

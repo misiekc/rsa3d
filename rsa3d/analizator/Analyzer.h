@@ -40,9 +40,10 @@ private:
 		Quantity thetaInf;
 		Quantity C1;
 		Quantity C2;
+        Quantity A;
 
 		void print(std::ostream &out) const;
-	};
+    };
 
 
 	/* returns packing fraction */
