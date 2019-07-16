@@ -44,17 +44,16 @@ void RegularSolidBase::initClass(const std::string &attr) {
     calculateRadia(circumsphereRadius, insphereRadius);
     discoverAxes();
 
-#ifndef NDEBUG
-    reportCalculations();
-#endif
-    
     ShapeStaticInfo<3, 0> shapeInfo;
     shapeInfo.setCircumsphereRadius(circumsphereRadius);
     shapeInfo.setInsphereRadius(insphereRadius);
     shapeInfo.setExclusionZoneMaxSpan(circumsphereRadius + insphereRadius);
     shapeInfo.setCreateShapeImpl([](auto dummy) -> Shape* { return nullptr; });   // To be replaced in RegularSolid.tpp
-
     Shape::setShapeStaticInfo(shapeInfo);
+
+#ifndef NDEBUG
+    reportCalculations();
+#endif
 }
 
 void RegularSolidBase::store(std::ostream &f) const {
