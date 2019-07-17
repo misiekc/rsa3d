@@ -1,8 +1,8 @@
 /make-build/
 /doc/
 /rsa.?.?
-/rsa_stat_test
-/rsa_unit_test
+/stat_test.?.?
+/unit_test.?.?
 /libstat.a
 .idea/
 cmake-build-debug/
