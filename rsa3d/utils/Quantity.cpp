@@ -27,9 +27,21 @@ namespace {
     }
 
     /* Finds the order of a value, ex. 123.34 -> 2, 1.123 -> 1, 0.0345 -> -2 */
-    int find_order(double value) {
+    int find_start_order(double value) {
         return static_cast<int>(std::floor(std::log10(std::abs(value))));
     }
+
+    /* Finds the order of a last significant digit, based on passed significantDigits.
+     * Important! Note, that order may depend of number of significant digits, ex. 1.0e-1 and 9.98e-2 is the same number
+     * - 0.09987 - rounded to, respectively, 2 and 3 significant digits */
+    int find_end_order_after_rounding(double value, int significantDigits) {
+        int endOrder = find_start_order(value) - significantDigits + 1;
+
+        // Recalculate order, because rounding can change first significant digit position!
+        std::string errorRounded = format_up_to_order(value, endOrder);
+        return find_start_order(std::stod(errorRounded)) - significantDigits + 1;
+    }
+
 }
 
 void Quantity::calculateFromSamples(const std::vector<double> &samples)
@@ -58,13 +70,13 @@ std::ostream &operator<<(std::ostream &stream, const Quantity &quantity)
         out << quantity.value << quantity.getSeparatorString() << std::abs(quantity.error);
         stream << out.rdbuf();
     } else {
-    	int errorEndOrder = find_order(quantity.error) - quantity.errorDigits + 1;
+        int errorEndOrder = find_end_order_after_rounding(quantity.error, quantity.errorDigits);
         int valueEndOrder = errorEndOrder;
 
         // If error is bigger than value, value will have one significant digit
-        int valueStartOrder = find_order(quantity.value);
+        int valueStartOrder = find_start_order(quantity.value);
         if (errorEndOrder > valueStartOrder)
-            valueEndOrder = valueStartOrder;
+            valueEndOrder = find_end_order_after_rounding(quantity.value, 1);
 
         stream << format_up_to_order(quantity.value, valueEndOrder) << quantity.getSeparatorString();
         stream << format_up_to_order(std::abs(quantity.error), errorEndOrder);

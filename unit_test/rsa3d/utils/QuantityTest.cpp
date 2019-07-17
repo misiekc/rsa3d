@@ -11,8 +11,8 @@ TEST_CASE("Quantity: rounding based on error") {
         SECTION("decimal with error with fractional part") {
             std::ostringstream result1, result2;
 
-            result1 << Quantity(34.344, 2.559, 3);
-            result2 << Quantity(234.234544, 0.03425, 3);
+            result1 << Quantity(34.344, 2.559, 3);          // log(x) = integer + less than 0.5
+            result2 << Quantity(234.234544, 0.03425, 3);    // log(x) = integer + more than 0.5
 
             REQUIRE(result1.str() == "34.34\t2.56");
             REQUIRE(result2.str() == "234.2345\t0.0343");
@@ -41,9 +41,25 @@ TEST_CASE("Quantity: rounding based on error") {
 
             REQUIRE(result.str() == "28350\t1280");
         }
+
+        /*SECTION("wrong 12.5 rounding") {
+            std::ostringstream result;
+
+            result << Quantity(2.343214, 0.125, 2);
+
+            REQUIRE(result.str() == "2.34\t0.13");
+        }*/
     }
 
     SECTION("tricky") {
+        SECTION("error first significant digit changing after rounding") {
+            std::ostringstream result;
+
+            result << Quantity(0.294838, 0.009977, 2);
+
+            REQUIRE(result.str() == "0.295\t0.010");
+        }
+
         SECTION("decimal with larger error") {
             std::ostringstream result1, result2;
 
@@ -52,6 +68,22 @@ TEST_CASE("Quantity: rounding based on error") {
 
             REQUIRE(result1.str() == "450\t2260");
             REQUIRE(result2.str() == "0.46\t1.57");
+        }
+
+        SECTION("decimal with larger error and order changing after rounding") {
+            std::ostringstream result;
+
+            result << Quantity(0.999838, 1122.5, 2);
+
+            REQUIRE(result.str() == "1\t1100");
+        }
+
+        SECTION("decimal with larger error before rounding") {
+            std::ostringstream result;
+
+            result << Quantity(0.999838, 12.65, 2);
+
+            REQUIRE(result.str() == "1\t13");
         }
 
         SECTION("decimal with much larger error") {
