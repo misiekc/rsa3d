@@ -25,6 +25,7 @@ double Rectangle::getYOnCircle(double cx, double cy, double r, double angle) con
 }
 
 void Rectangle::setAngle(double angle) {
+    angle = this->normalizeAngle(angle, M_PI);
     AnisotropicShape2D::setAngle(angle);
 
     Vector<2> position = this->getPosition();

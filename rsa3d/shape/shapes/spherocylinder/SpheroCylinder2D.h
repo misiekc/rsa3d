@@ -21,6 +21,9 @@ private:
     double pointDistance2(const Vector<2> &p) const;
     bool withinExclusionZone(const Vector<2> &pointPos, double angle) const;
 
+protected:
+    void setAngle(double angle) override;
+
 public:
     static void initClass(const std::string & attr);
     static void calculateStatic(const std::string &attr);

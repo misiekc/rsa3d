@@ -50,6 +50,7 @@ double Ellipse::calculateF(double* r, double g) const {
 }
 
 void Ellipse::setAngle(double angle){
+    angle = this->normalizeAngle(angle, M_PI);
 	AnisotropicShape2D::setAngle(angle);
 	this->calculateU();
 }

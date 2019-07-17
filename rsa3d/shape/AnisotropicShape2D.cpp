@@ -41,9 +41,7 @@ void AnisotropicShape2D::setOrientation(const Orientation<1> &orientation) {
 }
 
 void AnisotropicShape2D::setAngle(double angle) {
-    double interval = getVoxelAngularSize();
-    Orientation<1> orientation{{normalizeAngle(angle, interval)}};
-    Shape::setOrientation(orientation);  // Now use the original setter from Shape
+    ConvexShape::setOrientation({angle});
 }
 
 double AnisotropicShape2D::getAngle() const{
