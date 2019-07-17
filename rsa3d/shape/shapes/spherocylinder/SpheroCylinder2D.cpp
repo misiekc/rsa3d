@@ -218,3 +218,8 @@ bool SpheroCylinder2D::withinExclusionZone(const Vector<2> &pointPos, double ang
 Shape<2, 1> *SpheroCylinder2D::clone() const {
     return new SpheroCylinder2D(*this);
 }
+
+void SpheroCylinder2D::setAngle(double angle) {
+    angle = this->normalizeAngle(angle, M_PI);
+    AnisotropicShape2D::setAngle(angle);
+}

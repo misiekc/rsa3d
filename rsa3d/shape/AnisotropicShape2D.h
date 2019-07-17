@@ -10,18 +10,25 @@
 #include "ConvexShape.h"
 
 /**
- * @brief 2D Shape with anisotropy - its position is described by 2 numbers and orientation by 1 number.
+ * @brief Convenient wrapper around ConvexShape<2, 1>.
  *
- * This class specializes a bit more general Shape class and acts as a base for all anisotropic 2D shapes. Derived
- * classes can now operate on angles, not arrays of angles and automatic normalizataion is introduced (see setAngle()).
+ * This class specializes a bit more general ConvexShape<2, 1> class and acts as a base for all anisotropic 2D shapes.
+ * Derived classes can now operate on angles, not arrays of angles and automatic normalization is introduced
+ * (see setAngle()). Also, it provides some useful subroutines for rotation matrices.
  *
  * Note, that
  * ConvexShape::pointInside(BoundaryConditions*,const Vector<SPATIAL_DIMENSION>&,const Orientation<ANGULAR_DIMENSION>&,double) const
- * and Shape::setOrientation now delegate to
+ * and Shape::setOrientation are replaced by more
  * AnisotropicShape2D::pointInside(BoundaryConditions<2>*,const Vector<2>&,double,double) const and
  * AnisotropicShape2D::setAngle. See those methods documentation for more information.
  */
 class AnisotropicShape2D : public ConvexShape<2, 1> {
+private:
+    /* Delegated to AnisotropicShape2D::setAngle(double) */
+    void setOrientation(const Orientation<1> &orientation) final;
+    /* Delegated to AnisotropicShape2D::pointInside(BoundaryConditions*,double*,double,double). */
+    bool pointInside(BoundaryConditions<2> *bc, const Vector<2> &position, const Orientation<1> &orientation,
+                     double orientationRange) const final;
 
 protected:
 
@@ -38,8 +45,8 @@ protected:
     Matrix<2, 2> getRotationMatrix() const;
 
     /**
-     * @brief Add/subrtacts integer multiple of @a interval to @a angleFrom and @a angleTo so that @a angleFrom lies in
-     * (0, @a interval) range.
+     * @brief Add/subtracts integer multiple of @a interval to @a angleFrom and @a angleTo so that @a angleFrom is
+     * bigger than the angle of Shape, however not more than @a interval.
      * @param angleFrom angle range beginning
      * @param angleTo angle range ending
      * @param interval interval to fit angleFrom into
@@ -47,18 +54,13 @@ protected:
 	void normalizeAngleRange(double *angleFrom, double *angleTo, double interval) const;
 
     /**
-     * @brief Add/subrtacts integer multiple of @a interval to @a angle so that it lies in (0, @a interval) and returns
+     * @brief Add/subtracts integer multiple of @a interval to @a angle so that it lies in (0, @a interval) and returns
      * result.
      * @param angle angle to normalize
      * @param interval interval to fit angle into
      * @return normalized angle
      */
 	double normalizeAngle(double angle, double interval) const;
-
-    /**
-     * @brief Delegated to AnisotropicShape2D::setAngle(double). <strong>Override that instead.</strong>
-     */
-    void setOrientation(const Orientation<1> &orientation) final;
 
     /**
      * @brief Sets new orientation of a shape. It replaces Shape::setOrientation(double*).
@@ -80,13 +82,6 @@ protected:
 public:
 
     /**
-     * @brief Delegated to AnisotropicShape2D::pointInside(BoundaryConditions*,double*,double,double). <strong>Implement
-     * that instead.</strong>
-     */
-    bool pointInside(BoundaryConditions<2> *bc, const Vector<2> &position, const Orientation<1> &orientation,
-                    double orientationRange) const final;
-
-    /**
      * @brief Returns the orientation of a shape.
      * @return the orientation of a shape
      */
@@ -94,7 +89,7 @@ public:
 
     /**
      * @brief Checks if a given point @a da is within intersection of all excluded zone for all orientations in
-     * (@a angleFrom, @a angleTo) range. It replaces Shape::pointInside(BOundaryConditions*,double*,double*,double).
+     * (@a angleFrom, @a angleTo) range. It replaces Shape::pointInside(BoundaryConditions*,double*,double*,double).
      * @param bc boundary conditions to take into account
      * @param da position of a point to check
      * @param angleFrom array of beginnings of angle intervals
