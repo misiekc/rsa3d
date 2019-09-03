@@ -17,6 +17,8 @@ target_compile_definitions(shapes.1.1 PUBLIC RSA_SPATIAL_DIMENSION=1 RSA_ANGULAR
 
 add_library(shapes.2.0
         ${SHAPE_BASE_SOURCE}
+        shapes/ordered_shape.2.1/OrderedShape2_1.h
+        shapes/ordered_shape.2.1/OrderedShape2_1.tpp
         shapes/spherocylinder/OwnOverlapSC.h
         shapes/spherocylinder/SpheroCylinder2D.cpp
         shapes/spherocylinder/Spherocylinder.h
@@ -24,6 +26,7 @@ add_library(shapes.2.0
         shapes/spherocylinder/Stolen2DOverlapSC.cpp
         shapes/OrientedCuboid.h
         shapes/OrientedCuboid.tpp
+        shapes/Polydisk.cpp
         shapes/Sphere.h
         shapes/Sphere.tpp)
 target_compile_definitions(shapes.2.0 PUBLIC RSA_SPATIAL_DIMENSION=2 RSA_ANGULAR_DIMENSION=0)

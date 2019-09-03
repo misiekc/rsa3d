@@ -45,7 +45,10 @@
 #endif
 #elif RSA_SPATIAL_DIMENSION == 2
 	// 2D shapes with angular dimension
-	#if RSA_ANGULAR_DIMENSION == 1
+	#if RSA_ANGULAR_DIMENSION == 0
+        #include "shapes/Polydisk.h"
+        #include "shapes/ordered_shape.2.1/OrderedShape2_1.h"
+    #else
 		#include "shapes/spherocylinder/SpheroCylinder2D.h"
 		#include "shapes/Ellipse.h"
 		#include "shapes/Rectangle.h"
@@ -87,11 +90,13 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
         } else if (sClass == "Spherocylinder") {
              Spherocylinder<RSA_SPATIAL_DIMENSION>::initClass(attr);
              return;
-         } else if (sClass == "OrientedCuboid") {
+        } else if (sClass == "OrientedCuboid") {
             OrientedCuboid<RSA_SPATIAL_DIMENSION>::initClass(attr);
             return;
+        } else if (sClass == "OrientedPolydisk") {
+            OrderedShape2_1<Polydisk>::initClass(attr);
+            return;
         }
-
 
 		#if RSA_SPATIAL_DIMENSION == 3
         	if (sClass == "Cuboid") {
