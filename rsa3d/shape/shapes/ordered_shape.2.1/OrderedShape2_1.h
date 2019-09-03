@@ -9,7 +9,6 @@
 
 #include "../../Shape.h"
 
-template <typename BaseShape>
 class OrderedShape2_1 : public Shape<2, 0> {
 private:
     class RNDUniformRandomBitGenerator {
@@ -35,7 +34,9 @@ private:
     std::unique_ptr<Shape<2, 1>> underlyingShape;
 
 public:
-    static void initClass(const std::string &args);
+    using InitClassFunction = void(*)(const std::string &);
+
+    static void initClass(const std::string &args, InitClassFunction baseShapeInitClassFunction);
     static Shape<2, 0> *createShape(RND *rnd);
 
     explicit OrderedShape2_1(std::unique_ptr<Shape<2, 1>> underlyingShape);
@@ -51,7 +52,7 @@ public:
     double minDistance(const Shape<2, 0> *s) const override;
 
     std::string toString() const override;
-    std::string toPovray() const override ;
+    std::string toPovray() const override;
     std::string toWolfram() const override;
 
     void store(std::ostream &f) const override;
@@ -59,8 +60,6 @@ public:
 
     Shape<2, 0> *clone() const override;
 };
-
-#include "OrderedShape2_1.tpp"
 
 
 #endif //RSA3D_ORDEREDSHAPE2_1_H

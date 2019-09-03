@@ -95,10 +95,10 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
             OrientedCuboid<RSA_SPATIAL_DIMENSION>::initClass(attr);
             return;
         } else if (sClass == "OrientedPolydisk") {
-            OrderedShape2_1<Polydisk>::initClass(attr);
+            OrderedShape2_1::initClass(attr, Polydisk::initClass);
             return;
         } else if (sClass == "OrientedEllipse") {
-            OrderedShape2_1<Ellipse>::initClass(attr);
+            OrderedShape2_1::initClass(attr, Ellipse::initClass);
             return;
         }
 
