@@ -133,6 +133,21 @@ public:
      * will be translated
      */
     void expandOnPBC(double linearSize, double expandMargin);
+
+    /**
+     * @brief Return the total volume of particles in the packing.
+     * @param dim the dimension of the packing
+     * @returnthe total volume of particles in the packing
+     */
+    double getParticlesVolume(unsigned short dim) const;
+
+    /**
+     * @brief Deletes the largest number of the latest particles which gives packing fraction larger or equal than
+     * @a newPackingVolume.
+     * @param newPackingVolume the new packing fraction of the packing
+     * @param dim the dimension of the packing
+     */
+    void reducePackingVolume(double newPackingVolume, unsigned short dim);
 };
 
 

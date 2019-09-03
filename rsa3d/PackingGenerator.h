@@ -56,6 +56,7 @@ public:
 
 	void testPacking(const Packing &packing, double maxTime);
 	void restore(std::istream &f);
+	std::string getPackingFilename() const;
 
 	static void toPovray(const Packing &packing, double size, VoxelList *voxels, const std::string &filename);
 	static void toWolfram(const Packing &packing, double size, VoxelList *voxels, const std::string &filename);

@@ -540,3 +540,7 @@ std::vector<std::string> PackingGenerator::findPackingsInDir(const std::string &
     (void) closedir(dir);
     return filenames;
 }
+
+std::string PackingGenerator::getPackingFilename() const {
+    return this->params.getPackingSignature() + "_" + std::to_string(this->seed) + ".bin";
+}

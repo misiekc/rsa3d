@@ -101,3 +101,28 @@ void Packing::clear() {
         delete shape;
     this->packing.clear();
 }
+
+double Packing::getParticlesVolume(unsigned short dim) const {
+    return std::accumulate(this->packing.begin(), this->packing.end(), 0.0, [dim](auto sum, auto shape) {
+        return sum + shape->getVolume(dim);
+    });
+}
+
+void Packing::reducePackingVolume(double newPackingVolume, unsigned short dim) {
+    std::size_t numberOfParticlesToKeep{};
+    double partialVolume{};
+
+    while (partialVolume < newPackingVolume && numberOfParticlesToKeep < this->packing.size()) {
+        partialVolume += this->packing[numberOfParticlesToKeep]->getVolume(dim);
+        numberOfParticlesToKeep++;
+    }
+
+    if (numberOfParticlesToKeep == 0) {
+        this->clear();
+    } else {
+        std::for_each(this->packing.begin() + numberOfParticlesToKeep, this->packing.end(), [](auto shapePtr) {
+            delete shapePtr;
+        });
+        this->packing.erase(this->packing.begin() + numberOfParticlesToKeep, this->packing.end());
+    }
+}
