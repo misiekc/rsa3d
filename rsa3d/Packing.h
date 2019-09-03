@@ -129,10 +129,10 @@ public:
      * according to periodic boundary conditions
      * @param packing a packing to expand
      * @param linearSize the size of the packing
-     * @param expandMargin the distance (from 0 to 0.5) relative to @a size from the surface boundary from which shapes
+     * @param expandMarginFraction the distance (from 0 to 0.5) relative to @a size from the surface boundary from which shapes
      * will be translated
      */
-    void expandOnPBC(double linearSize, double expandMargin);
+    void expandOnPBC(double linearSize, double expandMarginFraction);
 
     /**
      * @brief Return the total volume of particles in the packing.

@@ -451,18 +451,22 @@ void PackingGenerator::printRemainingVoxels(const std::string &prefix){
 }
 
 
-void PackingGenerator::toWolfram(const Packing &packing, double size, VoxelList *voxels, const std::string &filename){
+void PackingGenerator::toWolfram(Packing packing, double size, VoxelList *voxels, bool isPeriodicImage,
+                                 const std::string &filename) {
 	std::ofstream file(filename);
 
-#if RSA_SPATIAL_DIMENSION == 1
+	if (isPeriodicImage)
+	    packing.expandOnPBC(size, 0.1);
+
+    #if RSA_SPATIAL_DIMENSION == 1
 		file << "Graphics[{Red";
-#elif RSA_SPATIAL_DIMENSION == 2
+    #elif RSA_SPATIAL_DIMENSION == 2
 	    file << "Graphics[{Red";
-#elif RSA_SPATIAL_DIMENSION == 3
+    #elif RSA_SPATIAL_DIMENSION == 3
         file << "Graphics3D[{Red";
-#else
+    #else
         die("Only 1D, 2D and 3D shapes are supported");
-#endif
+    #endif
 
 	for (const RSAShape *s : packing) {
 		file << ", " << std::endl << s->toWolfram();
@@ -472,16 +476,18 @@ void PackingGenerator::toWolfram(const Packing &packing, double size, VoxelList 
 		file << ", Black, " << std::endl << voxels->toWolfram();
 	}
 
-	file << std::endl << "}]" << std::endl;
+	file << "}";
+    if (isPeriodicImage)
+        file << ", " << std::endl << "PlotRange->{{0," << size << "},{0," << size << "}}]" << std::endl;
+    else
+        file << "}]" << std::endl;
 
-	file.close();
+    file.close();
 }
-
 
 void PackingGenerator::toWolfram(const std::string &filename){
-	PackingGenerator::toWolfram(this->packing, this->params.surfaceSize, this->voxels, filename);
+    PackingGenerator::toWolfram(this->packing, this->params.surfaceSize, this->voxels, false, filename);
 }
-
 
 void PackingGenerator::store(std::ostream &f) const{
 	unsigned short sd = RSA_SPATIAL_DIMENSION;

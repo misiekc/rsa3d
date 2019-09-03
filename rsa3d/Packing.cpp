@@ -57,20 +57,20 @@ void Packing::restore(const std::string &filename) {
     file.close();
 }
 
-void Packing::expandOnPBC(double linearSize, double expandMargin) {
+void Packing::expandOnPBC(double linearSize, double expandMarginFraction) {
     if (linearSize <= 0.0)
         throw std::runtime_error("linearSize <= 0.0)");
-    if (expandMargin <= 0.0 || expandMargin >= 0.5)
-        throw std::runtime_error("expandMargin <= 0.0 || expandMargin >= 0.5");
+    if (expandMarginFraction <= 0.0 || expandMarginFraction >= 0.5)
+        throw std::runtime_error("expandMarginFraction <= 0.0 || expandMarginFraction >= 0.5");
 
     for (std::size_t i = 0; i < RSA_SPATIAL_DIMENSION; i++) {
         std::size_t oldSize = this->size();
         for (std::size_t j = 0; j < oldSize; j++) {
             auto shape = (*this)[j];
             RSAVector position = shape->getPosition();
-            if (position[i] < expandMargin * linearSize)
+            if (position[i] < expandMarginFraction * linearSize)
                 expandShapeOnBC(shape, linearSize, i);
-            else if (position[i] > (1 - expandMargin) * linearSize)
+            else if (position[i] > (1 - expandMarginFraction) * linearSize)
                 expandShapeOnBC(shape, -linearSize, i);
         }
     }

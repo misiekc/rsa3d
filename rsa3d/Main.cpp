@@ -239,13 +239,22 @@ void povray(const ProgramArguments &arguments) {
 
 void wolfram(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() != 1)
-        die(arguments.formatUsage("<file in>"));
+    if (positionalArguments.size() < 1 || positionalArguments.size() > 2)
+        die(arguments.formatUsage("<file in> (use periodic image = false)"));
+
+    bool isPeriodicImage{};
+    if (positionalArguments.size() == 1 || positionalArguments[1] == "false")
+        isPeriodicImage = false;
+    else if (positionalArguments[1] == "true")
+        isPeriodicImage = true;
+    else
+        die("(use periodic image) must be empty, 'true' or 'false'");
 
     std::string file(positionalArguments[0]);
     Packing packing;
     packing.restore(file);
-    PackingGenerator::toWolfram(packing, arguments.getParameters().surfaceSize, nullptr, file + ".nb");
+    PackingGenerator::toWolfram(packing, arguments.getParameters().surfaceSize, nullptr, isPeriodicImage,
+                                file + ".nb");
 }
 
 void bc_expand(const ProgramArguments &arguments) {
@@ -325,14 +334,16 @@ void density(const ProgramArguments &arguments) {
         std::cout << " > generated packing fraction: " << currentPackingFraction << ". Keeping original packing.";
         std::cout << std::endl;
     } else {
-        std::cout << "[density] Initial packing fraction: " << currentPackingFraction << ", reducing... " << std::flush;
+        std::cout << "[density] Initial packing fraction      : " << currentPackingFraction << ", reducing... ";
+        std::cout << std::flush;
         double targetVolume = targetPackingFraction * params.sufraceVolume();
         packing.reducePackingVolume(targetVolume, params.surfaceDimension);
         std::cout << "done." << std::endl;
 
         double actualPackingFraction = packing.getParticlesVolume(params.surfaceDimension) / params.sufraceVolume();
-        std::cout << "[density] Target packing fraction: " << targetPackingFraction << std::endl;
-        std::cout << "[density] Actual packing fraction: " << actualPackingFraction << std::endl;
+        std::cout << "[density] Target packing fraction       : " << targetPackingFraction << std::endl;
+        std::cout << "[density] Actual packing fraction       : " << actualPackingFraction << std::endl;
+        std::cout << "[density] Last particle adsorption time : " << packing.back()->time << std::endl;
     }
 
     packing.store(pg.getPackingFilename());
