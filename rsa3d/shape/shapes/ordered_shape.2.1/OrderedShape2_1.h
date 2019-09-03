@@ -5,19 +5,44 @@
 #ifndef RSA3D_ORDEREDSHAPE2_1_H
 #define RSA3D_ORDEREDSHAPE2_1_H
 
+#include <memory>
+
 #include "../../Shape.h"
 
 template <typename BaseShape>
 class OrderedShape2_1 : public Shape<2, 0> {
 private:
+    class RNDUniformRandomBitGenerator {
+    private:
+        RND &underlyingRnd;
+
+    public:
+        explicit RNDUniformRandomBitGenerator(RND &rnd) : underlyingRnd{rnd} { }
+
+        using result_type = unsigned long;
+
+        result_type min() const { return result_type(0); }
+        result_type max() const { return std::numeric_limits<result_type>::max(); }
+        result_type operator()() {
+            return static_cast<result_type>(underlyingRnd.nextValue() * std::numeric_limits<result_type>::max());
+        }
+    };
+
+    static std::normal_distribution<double> angleDistribution;
     static double preferredAngle;
     static double angleDistributionSigma;
 
+    std::unique_ptr<Shape<2, 1>> underlyingShape;
+
 public:
     static void initClass(const std::string &args);
+    static Shape<2, 0> *createShape(RND *rnd);
 
-    OrderedShape2_1(double angle);
+    explicit OrderedShape2_1(std::unique_ptr<Shape<2, 1>> underlyingShape);
     ~OrderedShape2_1() override = default;
+
+    const Vector<2> &getPosition() const override;
+    void translate(const Vector<2> &v) override;
 
     bool overlap(BoundaryConditions<2> *bc, const Shape<2, 0> *s) const override;
     double getVolume(unsigned short dim) const override;
@@ -25,6 +50,7 @@ public:
                      double spatialSize, double angularSize) const override;
     double minDistance(const Shape<2, 0> *s) const override;
 
+    std::string toString() const override;
     std::string toPovray() const override ;
     std::string toWolfram() const override;
 

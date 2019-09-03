@@ -24,6 +24,7 @@ add_library(shapes.2.0
         shapes/spherocylinder/Spherocylinder.h
         shapes/spherocylinder/Spherocylinder.tpp
         shapes/spherocylinder/Stolen2DOverlapSC.cpp
+        shapes/Ellipse.cpp
         shapes/OrientedCuboid.h
         shapes/OrientedCuboid.tpp
         shapes/Polydisk.cpp

@@ -46,6 +46,7 @@
 #elif RSA_SPATIAL_DIMENSION == 2
 	// 2D shapes with angular dimension
 	#if RSA_ANGULAR_DIMENSION == 0
+        #include "shapes/Ellipse.h"
         #include "shapes/Polydisk.h"
         #include "shapes/ordered_shape.2.1/OrderedShape2_1.h"
     #else
@@ -95,6 +96,9 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
             return;
         } else if (sClass == "OrientedPolydisk") {
             OrderedShape2_1<Polydisk>::initClass(attr);
+            return;
+        } else if (sClass == "OrientedEllipse") {
+            OrderedShape2_1<Ellipse>::initClass(attr);
             return;
         }
 
