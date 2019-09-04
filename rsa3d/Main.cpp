@@ -93,8 +93,10 @@ namespace {
         process_mem_usage(vm, rss);
         dataFile << seed << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;
         dataFile.flush();
-        std::cout << "T:" << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "; VM: " << vm
-                  << "; RSS: " << rss << std::endl;
+
+        auto generationSeconds = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
+        std::cout << "[Simulation::runSingleSimulation] T: " << generationSeconds << "; VM: " << vm << "; RSS: " << rss;
+        std::cout << std::endl << std::endl;
 
         return packing;
     }
@@ -123,6 +125,102 @@ namespace {
         }
 
         void postProcessPacking(Packing &packing) override { }
+    };
+
+    class BoundariesSimulation : public Simulation {
+    private:
+        std::size_t targerNumberOfParticles{};
+        std::size_t particleCounter{};
+
+    public:
+        BoundariesSimulation(const Parameters &parameters, std::size_t targetNumberOfParticles)
+                : Simulation(parameters), targerNumberOfParticles{targetNumberOfParticles}
+        {
+            Expects(targetNumberOfParticles > 0);
+        }
+
+        bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) override {
+            return this->particleCounter < this->targerNumberOfParticles;
+        }
+
+        void postProcessPacking(Packing &packing) override {
+            this->particleCounter += packing.size();
+            std::cout << "[BoundariesSimulation::postProcessPacking] Fraction of particles generated: ";
+            std::cout << static_cast<double>(this->particleCounter) / this->targerNumberOfParticles << std::endl;
+        }
+    };
+
+    class AccuracySimulation : public Simulation {
+    private:
+        double targetAccuracy{};
+        std::vector<double> packingFractions;
+        Quantity meanPackingFraction;
+
+    public:
+        AccuracySimulation(const Parameters &parameters, double targetAccuracy) : Simulation(parameters),
+                                                                                  targetAccuracy{targetAccuracy}
+        {
+            Expects(targetAccuracy > 0);
+        }
+
+        bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) override {
+            return packingIndex < 2 || this->meanPackingFraction.error > this->targetAccuracy;
+        }
+
+        void postProcessPacking(Packing &packing) override {
+            this->packingFractions.push_back(static_cast<double>(packing.size()) / this->params.sufraceVolume());
+            this->meanPackingFraction.calculateFromSamples(this->packingFractions);
+            std::cout << "[AccuracySimulation::postProcessPacking] Actual accuracy: ";
+            std::cout << this->meanPackingFraction.error << std::endl;
+            std::cout << "[AccuracySimulation::postProcessPacking] Target accuracy: ";
+            std::cout << this->targetAccuracy << std::endl;
+        }
+
+        Quantity getMeanPackingFraction() const {
+            return this->meanPackingFraction;
+        }
+    };
+
+    class DensitySimulation : public Simulation {
+    private:
+        double targetPackingFraction{};
+
+    public:
+        DensitySimulation(const Parameters &parameters, double targetPackingFraction)
+                : Simulation(parameters), targetPackingFraction{targetPackingFraction}
+        {
+            Expects(targetPackingFraction > 0.0 && targetPackingFraction <= 1.0);
+        }
+
+        bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) override {
+            return packingIndex < this->params.collectors - 1;
+        }
+
+        void postProcessPacking(Packing &packing) override {
+            double currentPackingFraction = packing.getParticlesVolume(this->params.surfaceDimension)
+                                            / this->params.sufraceVolume();
+
+            if (this->targetPackingFraction > currentPackingFraction) {
+                std::cout << "[DensitySimulation::postProcessPacking] Target packing fraction: ";
+                std::cout << this->targetPackingFraction << " > generated packing fraction: ";
+                std::cout << currentPackingFraction << ". Keeping original packing." << std::endl;
+            } else {
+                std::cout << "[DensitySimulation::postProcessPacking] Initial packing fraction      : ";
+                std::cout << currentPackingFraction << ", reducing... " << std::flush;
+                double targetVolume = this->targetPackingFraction * this->params.sufraceVolume();
+                packing.reducePackingVolume(targetVolume, this->params.surfaceDimension);
+                std::cout << "done." << std::endl;
+
+                double actualPackingFraction = packing.getParticlesVolume(this->params.surfaceDimension)
+                                               / this->params.sufraceVolume();
+                std::cout << "[DensitySimulation::postProcessPacking] Target packing fraction       : ";
+                std::cout << this->targetPackingFraction << std::endl;
+                std::cout << "[DensitySimulation::postProcessPacking] Actual packing fraction       : ";
+                std::cout << actualPackingFraction << std::endl;
+                std::cout << "[DensitySimulation::postProcessPacking] Last particle adsorption time : ";
+                std::cout << packing.back()->time << std::endl;
+            }
+        }
     };
 }
 
@@ -153,8 +251,7 @@ int simulate(const ProgramArguments &arguments) {
     if (!arguments.getPositionalArguments().empty())
         die(arguments.formatUsage(""));
 
-    Parameters params = arguments.getParameters();
-    DefaultSimulation defaultSimulation(params);
+    DefaultSimulation defaultSimulation(arguments.getParameters());
     defaultSimulation.run();
 
     /*std::string sFile = params.getPackingSignature() + ".dat";
@@ -235,24 +332,11 @@ void boundaries(const ProgramArguments &arguments) {
     if (positionalArguments.size() != 1)
         die(arguments.formatUsage("<number of particles>"));
 
-    Parameters params = arguments.getParameters();
-    unsigned long max1 = std::stoul(positionalArguments[0]);
-    unsigned long counter = 0;
-    int seed = 0;
-    std::string sFile = params.getPackingSignature() + ".dat";
-    std::ofstream file(sFile);
-    file.precision(std::numeric_limits<double>::digits10 + 1);
-    do {
-        PackingGenerator pg(seed, &params);
-        pg.run();
-        const Packing &packing = pg.getPacking();
-        file << seed << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;
-        file.flush();
-        counter += packing.size();
-        std::cout << (double) counter / (double) max1 << std::endl;
-        seed++;
-    } while (counter < max1);
-    file.close();
+    std::size_t targetNumberOfParticles = std::stoul(positionalArguments[0]);
+    Validate(targetNumberOfParticles > 0);
+
+    BoundariesSimulation boundariesSimulation(arguments.getParameters(), targetNumberOfParticles);
+    boundariesSimulation.run();
 }
 
 void dat(const ProgramArguments &arguments) {
@@ -342,30 +426,19 @@ void accuracy(const ProgramArguments &arguments) {
     if (positionalArguments.size() != 2)
         die(arguments.formatUsage("<accuracy> <out file>"));
     double accuracy = std::stod(positionalArguments[0]);
-    Expects(accuracy > 0);
+    Validate(accuracy > 0);
 
     Parameters params = arguments.getParameters();
-    int seed = 0;
-    std::vector<double> packingFractions;
-    Quantity packingFraction;
-
-    do {
-        PackingGenerator pg(seed, &params);
-        pg.run();
-        const Packing &packing = pg.getPacking();
-
-        packingFractions.push_back(static_cast<double>(packing.size()) / params.sufraceVolume());
-        packingFraction.calculateFromSamples(packingFractions);
-
-        seed++;
-    } while (seed < 2 || packingFraction.error > accuracy);
+    AccuracySimulation accuracySimulation(params, accuracy);
+    accuracySimulation.run();
+    Quantity meanPackingFraction = accuracySimulation.getMeanPackingFraction();
 
     std::string filename = positionalArguments[1];
     std::ofstream file(filename, std::ios_base::app);
     if (!file)
         die("Cannot open " + filename + " file to store packing fraction");
     file.precision(std::numeric_limits<double>::digits10 + 1);
-    file << packingFraction.value << "\t" << packingFraction.error << "\t" << params.particleType;
+    file << meanPackingFraction.value << "\t" << meanPackingFraction.error << "\t" << params.particleType;
     file << "\t" << params.particleAttributes << std::endl;
     file.close();
 }
@@ -375,35 +448,11 @@ void density(const ProgramArguments &arguments) {
     if (positionalArguments.size() != 1)
         die(arguments.formatUsage("<target packing fraction>"));
     double targetPackingFraction = std::stod(positionalArguments[0]);
-    Expects(targetPackingFraction > 0.0);
-    Expects(targetPackingFraction <= 1.0);
+    Validate(targetPackingFraction > 0.0);
+    Validate(targetPackingFraction <= 1.0);
 
-    Parameters params = arguments.getParameters();
-    int seed = 0;
-    PackingGenerator pg(seed, &params);
-    pg.run();
-    Packing packing = pg.getPacking();
-
-    double currentPackingFraction = packing.getParticlesVolume(params.surfaceDimension) / params.sufraceVolume();
-
-    if (targetPackingFraction > currentPackingFraction) {
-        std::cout << "[density] Target packing fraction: " << targetPackingFraction;
-        std::cout << " > generated packing fraction: " << currentPackingFraction << ". Keeping original packing.";
-        std::cout << std::endl;
-    } else {
-        std::cout << "[density] Initial packing fraction      : " << currentPackingFraction << ", reducing... ";
-        std::cout << std::flush;
-        double targetVolume = targetPackingFraction * params.sufraceVolume();
-        packing.reducePackingVolume(targetVolume, params.surfaceDimension);
-        std::cout << "done." << std::endl;
-
-        double actualPackingFraction = packing.getParticlesVolume(params.surfaceDimension) / params.sufraceVolume();
-        std::cout << "[density] Target packing fraction       : " << targetPackingFraction << std::endl;
-        std::cout << "[density] Actual packing fraction       : " << actualPackingFraction << std::endl;
-        std::cout << "[density] Last particle adsorption time : " << packing.back()->time << std::endl;
-    }
-
-    packing.store(pg.getPackingFilename());
+    DensitySimulation densitySimulation(arguments.getParameters(), targetPackingFraction);
+    densitySimulation.run();
 }
 
 int main(int argc, char **argv) {
