@@ -270,18 +270,38 @@ Shape<2, 1> *Polydisk::clone() const {
 std::string Polydisk::toPovray() const{
 	std::stringstream out;
 	out.precision(std::numeric_limits< double >::max_digits10);
-	double position[2];
-	this->getPosition().copyToArray(position);
-	double angle = this->getOrientation()[0];
-	double x, y, r;
 	for (size_t i=0; i < Polydisk::diskCentreR.size(); i++) {
-		x = position[0] + Polydisk::diskCentreR[i] * std::cos(Polydisk::diskCentreTheta[i] + angle);
-		y = position[1] + Polydisk::diskCentreR[i] * std::sin(Polydisk::diskCentreTheta[i] + angle);
-		r = Polydisk::diskR[i];
-		out << "  disc { < " << std::to_string(x) << ", " << std::to_string(y) << ", 0.05>, <0.0, 0.0, 1.0>, " << std::to_string(r) << std::endl;
+        Vector<2> diskPosition = this->getDiskPosition(i);
+		double r = Polydisk::diskR[i];
+		out << "  disc { < " << diskPosition[0] << ", " << diskPosition[1] << ", 0.05>, <0.0, 0.0, 1.0>, ";
+		out << r << std::endl;
 		out << "    texture { finish { ambient 1 diffuse 0 } pigment { color Red} }" << std::endl << "}" << std::endl;
     }
 
 	return out.str();
+}
+
+std::string Polydisk::toWolfram() const {
+    std::stringstream out;
+    out.precision(std::numeric_limits<double>::max_digits10);
+
+    out << "{";
+    for (std::size_t i = 0, max = Polydisk::diskCentreR.size(); i < max; i++) {
+        out << "Disk[" << this->getDiskPosition(i) << ", " << Polydisk::diskR[i] << "]";
+        if (i < max - 1)
+            out << ", ";
+    }
+    out << "}";
+
+    return out.str();
+}
+
+Vector<2> Polydisk::getDiskPosition(std::size_t diskIndex) const {
+    Expects(diskIndex < diskCentreR.size());
+
+    auto position = this->getPosition();
+    double angle = this->getOrientation()[0];
+    return {{position[0] + Polydisk::diskCentreR[diskIndex] * std::cos(Polydisk::diskCentreTheta[diskIndex] + angle),
+             position[1] + Polydisk::diskCentreR[diskIndex] * std::sin(Polydisk::diskCentreTheta[diskIndex] + angle)}};
 }
 
