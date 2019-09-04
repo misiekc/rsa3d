@@ -19,6 +19,8 @@ add_library(shapes.2.0
         ${SHAPE_BASE_SOURCE}
         shapes/ordered_shape.2.1/OrderedShape2_1.h
         shapes/ordered_shape.2.1/OrderedShape2_1.cpp
+        shapes/polydisk/Fibrinogen.cpp
+        shapes/polydisk/Polydisk.cpp
         shapes/spherocylinder/OwnOverlapSC.h
         shapes/spherocylinder/SpheroCylinder2D.cpp
         shapes/spherocylinder/Spherocylinder.h
@@ -27,20 +29,20 @@ add_library(shapes.2.0
         shapes/Ellipse.cpp
         shapes/OrientedCuboid.h
         shapes/OrientedCuboid.tpp
-        shapes/polydisk/Polydisk.cpp
         shapes/Sphere.h
         shapes/Sphere.tpp)
 target_compile_definitions(shapes.2.0 PUBLIC RSA_SPATIAL_DIMENSION=2 RSA_ANGULAR_DIMENSION=0)
 
 add_library(shapes.2.1
         ${SHAPE_BASE_SOURCE}
-        shapes/spherocylinder/SpheroCylinder2D.cpp
+        shapes/polydisk/Fibrinogen.cpp
+        shapes/polydisk/Polydisk.cpp
         shapes/polygon/HBPolygon.cpp
         shapes/polygon/Polygon.cpp
         shapes/polygon/SBPolygon.cpp
         shapes/polygon/Triangle.cpp
+        shapes/spherocylinder/SpheroCylinder2D.cpp
         shapes/Ellipse.cpp
-        shapes/polydisk/Polydisk.cpp
         shapes/Rectangle.cpp)
 target_compile_definitions(shapes.2.1 PUBLIC RSA_SPATIAL_DIMENSION=2 RSA_ANGULAR_DIMENSION=1)
 
