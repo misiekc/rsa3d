@@ -12,8 +12,8 @@
 #include <utility>
 #include <cstddef>
 
-#include "../AnisotropicShape2D.h"
-#include "../../geometry/Vector.h"
+#include "../../AnisotropicShape2D.h"
+#include "../../../geometry/Vector.h"
 
 class Polydisk : public Shape<2, 1> {
 

@@ -47,13 +47,13 @@
 	// 2D shapes with angular dimension
 	#if RSA_ANGULAR_DIMENSION == 0
         #include "shapes/Ellipse.h"
-        #include "shapes/Polydisk.h"
+        #include "shapes/polydisk/Polydisk.h"
         #include "shapes/ordered_shape.2.1/OrderedShape2_1.h"
     #else
 		#include "shapes/spherocylinder/SpheroCylinder2D.h"
 		#include "shapes/Ellipse.h"
 		#include "shapes/Rectangle.h"
-		#include "shapes/Polydisk.h"
+		#include "shapes/polydisk/Polydisk.h"
 		#include "shapes/polygon/Polygon.h"
 		#include "shapes/polygon/SBPolygon.h"
 		#include "shapes/polygon/HBPolygon.h"

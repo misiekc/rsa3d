@@ -27,7 +27,7 @@ add_library(shapes.2.0
         shapes/Ellipse.cpp
         shapes/OrientedCuboid.h
         shapes/OrientedCuboid.tpp
-        shapes/Polydisk.cpp
+        shapes/polydisk/Polydisk.cpp
         shapes/Sphere.h
         shapes/Sphere.tpp)
 target_compile_definitions(shapes.2.0 PUBLIC RSA_SPATIAL_DIMENSION=2 RSA_ANGULAR_DIMENSION=0)
@@ -40,7 +40,7 @@ add_library(shapes.2.1
         shapes/polygon/SBPolygon.cpp
         shapes/polygon/Triangle.cpp
         shapes/Ellipse.cpp
-        shapes/Polydisk.cpp
+        shapes/polydisk/Polydisk.cpp
         shapes/Rectangle.cpp)
 target_compile_definitions(shapes.2.1 PUBLIC RSA_SPATIAL_DIMENSION=2 RSA_ANGULAR_DIMENSION=1)
 
