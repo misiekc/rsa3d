@@ -59,7 +59,8 @@ public:
 	std::string getPackingFilename() const;
 
 	static void toPovray(const Packing &packing, double size, VoxelList *voxels, const std::string &filename);
-    static void toWolfram(Packing packing, double size, VoxelList *voxels, bool isPeriodicImage, const std::string &filename);
+    static void toWolfram(Packing packing, double size, VoxelList *voxels, bool isPeriodicImage,
+                          double bcExpandFraction, const std::string &filename);
 	static std::vector<std::string> findPackingsInDir(const std::string &dirName);
 };
 

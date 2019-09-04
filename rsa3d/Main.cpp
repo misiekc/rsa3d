@@ -239,8 +239,8 @@ void povray(const ProgramArguments &arguments) {
 
 void wolfram(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() < 1 || positionalArguments.size() > 2)
-        die(arguments.formatUsage("<file in> (use periodic image = false)"));
+    if (positionalArguments.size() < 1 || positionalArguments.size() > 3)
+        die(arguments.formatUsage("<file in> (use periodic image = false) (bc expand fraction = 0.1)"));
 
     bool isPeriodicImage{};
     if (positionalArguments.size() == 1 || positionalArguments[1] == "false")
@@ -250,11 +250,19 @@ void wolfram(const ProgramArguments &arguments) {
     else
         die("(use periodic image) must be empty, 'true' or 'false'");
 
+    double bcExpandFraction{};
+    if (positionalArguments.size() == 3) {
+        bcExpandFraction = std::stod(positionalArguments[2]);
+        ValidateMsg(bcExpandFraction >= 0 && bcExpandFraction < 0.5, "BC expand fraction must be in [0, 0.5) range");
+    } else {
+        bcExpandFraction = 0.1;
+    }
+
     std::string file(positionalArguments[0]);
     Packing packing;
     packing.restore(file);
     PackingGenerator::toWolfram(packing, arguments.getParameters().surfaceSize, nullptr, isPeriodicImage,
-                                file + ".nb");
+                                bcExpandFraction, file + ".nb");
 }
 
 void bc_expand(const ProgramArguments &arguments) {
