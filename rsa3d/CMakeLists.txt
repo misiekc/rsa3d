@@ -24,6 +24,7 @@ set(RSA_SOURCE
         Positioned.tpp
         ProgramArguments.cpp
         RND.cpp
+        Simulation.cpp
         Surface.cpp
         ThreadLocalRND.cpp
         Voxel.h
