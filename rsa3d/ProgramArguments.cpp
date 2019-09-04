@@ -70,5 +70,5 @@ void ProgramArguments::fetchModeArgument() {
 }
 
 std::string ProgramArguments::formatUsage(const std::string &additionalArgs) const {
-    return "Usage: " + cmd + " " + mode + " " + additionalArgs;
+    return "Usage: " + cmd + " " + mode + " " + additionalArgs + " (flag parameters anywhere)";
 }

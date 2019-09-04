@@ -57,20 +57,18 @@ void Packing::restore(const std::string &filename) {
     file.close();
 }
 
-void Packing::expandOnPBC(double linearSize, double expandMargin) {
-    if (linearSize <= 0.0)
-        throw std::runtime_error("linearSize <= 0.0)");
-    if (expandMargin <= 0.0 || expandMargin >= 0.5)
-        throw std::runtime_error("expandMargin <= 0.0 || expandMargin >= 0.5");
+void Packing::expandOnPBC(double linearSize, double expandMarginFraction) {
+    Expects(linearSize > 0.0);
+    Expects(expandMarginFraction >= 0.0 && expandMarginFraction < 0.5);
 
     for (std::size_t i = 0; i < RSA_SPATIAL_DIMENSION; i++) {
         std::size_t oldSize = this->size();
         for (std::size_t j = 0; j < oldSize; j++) {
             auto shape = (*this)[j];
             RSAVector position = shape->getPosition();
-            if (position[i] < expandMargin * linearSize)
+            if (position[i] < expandMarginFraction * linearSize)
                 expandShapeOnBC(shape, linearSize, i);
-            else if (position[i] > (1 - expandMargin) * linearSize)
+            else if (position[i] > (1 - expandMarginFraction) * linearSize)
                 expandShapeOnBC(shape, -linearSize, i);
         }
     }
@@ -100,4 +98,29 @@ void Packing::clear() {
     for (auto shape : this->packing)
         delete shape;
     this->packing.clear();
+}
+
+double Packing::getParticlesVolume(unsigned short dim) const {
+    return std::accumulate(this->packing.begin(), this->packing.end(), 0.0, [dim](auto sum, auto shape) {
+        return sum + shape->getVolume(dim);
+    });
+}
+
+void Packing::reducePackingVolume(double newPackingVolume, unsigned short dim) {
+    std::size_t numberOfParticlesToKeep{};
+    double partialVolume{};
+
+    while (partialVolume < newPackingVolume && numberOfParticlesToKeep < this->packing.size()) {
+        partialVolume += this->packing[numberOfParticlesToKeep]->getVolume(dim);
+        numberOfParticlesToKeep++;
+    }
+
+    if (numberOfParticlesToKeep == 0) {
+        this->clear();
+    } else {
+        std::for_each(this->packing.begin() + numberOfParticlesToKeep, this->packing.end(), [](auto shapePtr) {
+            delete shapePtr;
+        });
+        this->packing.erase(this->packing.begin() + numberOfParticlesToKeep, this->packing.end());
+    }
 }

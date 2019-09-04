@@ -12,8 +12,8 @@
 #include <utility>
 #include <cstddef>
 
-#include "../AnisotropicShape2D.h"
-#include "../../geometry/Vector.h"
+#include "../../AnisotropicShape2D.h"
+#include "../../../geometry/Vector.h"
 
 class Polydisk : public Shape<2, 1> {
 
@@ -60,7 +60,10 @@ public:
 	bool overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const override;
 	bool voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition, const Orientation<1> &voxelOrientation,
 					 double spatialSize, double angularSize) const override;
-	std::string toPovray() const override;
+    std::string toPovray() const override;
+    std::string toWolfram() const override;
+
+    Vector<2> getDiskPosition(std::size_t diskIndex) const;
 };
 
 #endif /* SHAPES_POLYDISK_H_ */

@@ -84,7 +84,7 @@ namespace {
 
 int shape_ultitest::main(int argc, char **argv) {
     if (argc < 4) {
-        std::cerr << "Usage: ./rsa_test shape_ovtest [particle] [attibutes]" << std::endl;
+        std::cerr << "Usage: ./rsa_test shape_ultitest [particle] [attibutes]" << std::endl;
         return TEST_ERROR;
     }
 

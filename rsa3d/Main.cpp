@@ -91,10 +91,9 @@ void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile) 
     pg.run();
     const Packing &packing = pg.getPacking();
 
-    if (params->storePackings) {
-        std::string sPackingFile = params->getPackingSignature() + "_" + std::to_string(seed) + ".bin";
-        pg.getPacking().store(sPackingFile);
-    }
+    if (params->storePackings)
+        packing.store(pg.getPackingFilename());
+
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     process_mem_usage(vm, rss);
     dataFile << seed << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;
@@ -104,6 +103,9 @@ void runSingleSimulation(int seed, Parameters *params, std::ofstream &dataFile) 
 }
 
 int simulate(const ProgramArguments &arguments) {
+    if (!arguments.getPositionalArguments().empty())
+        die(arguments.formatUsage(""));
+
     Parameters params = arguments.getParameters();
 
     std::string sFile = params.getPackingSignature() + ".dat";
@@ -149,7 +151,7 @@ int simulate(const ProgramArguments &arguments) {
 
 void test(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() < 2)
+    if (positionalArguments.size() != 2)
         die(arguments.formatUsage("<file in> <max time>"));
 
     Packing packing;
@@ -160,7 +162,7 @@ void test(const ProgramArguments &arguments) {
 
 void debug(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.empty())
+    if (positionalArguments.size() != 1)
         die(arguments.formatUsage("<packing generator file>"));
 
     Parameters params = arguments.getParameters();
@@ -181,7 +183,7 @@ void debug(const ProgramArguments &arguments) {
 
 void boundaries(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.empty())
+    if (positionalArguments.size() != 1)
         die(arguments.formatUsage("<number of particles>"));
 
     Parameters params = arguments.getParameters();
@@ -206,7 +208,7 @@ void boundaries(const ProgramArguments &arguments) {
 
 void dat(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.empty())
+    if (positionalArguments.size() != 1)
         die(arguments.formatUsage("<directory>"));
 
     std::string directory = positionalArguments[0];
@@ -215,7 +217,7 @@ void dat(const ProgramArguments &arguments) {
 
 void analyze(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.empty())
+    if (positionalArguments.size() < 1 || positionalArguments.size() > 2)
         die(arguments.formatUsage("<directory> (correlations range = 10; 0 - no corr output)"));
 
     double corrRange = (positionalArguments.size() >= 2) ? std::stod(positionalArguments[1]) : 10.0;
@@ -226,7 +228,7 @@ void analyze(const ProgramArguments &arguments) {
 
 void povray(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.empty())
+    if (positionalArguments.size() != 1)
         die(arguments.formatUsage("<file in>"));
 
     std::string file(positionalArguments[0]);
@@ -237,18 +239,35 @@ void povray(const ProgramArguments &arguments) {
 
 void wolfram(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.empty())
-        die(arguments.formatUsage("<file in>"));
+    if (positionalArguments.size() < 1 || positionalArguments.size() > 3)
+        die(arguments.formatUsage("<file in> (use periodic image = false) (bc expand fraction = 0.1)"));
+
+    bool isPeriodicImage{};
+    if (positionalArguments.size() == 1 || positionalArguments[1] == "false")
+        isPeriodicImage = false;
+    else if (positionalArguments[1] == "true")
+        isPeriodicImage = true;
+    else
+        die("(use periodic image) must be empty, 'true' or 'false'");
+
+    double bcExpandFraction{};
+    if (positionalArguments.size() == 3) {
+        bcExpandFraction = std::stod(positionalArguments[2]);
+        ValidateMsg(bcExpandFraction >= 0 && bcExpandFraction < 0.5, "BC expand fraction must be in [0, 0.5) range");
+    } else {
+        bcExpandFraction = 0.1;
+    }
 
     std::string file(positionalArguments[0]);
     Packing packing;
     packing.restore(file);
-    PackingGenerator::toWolfram(packing, arguments.getParameters().surfaceSize, nullptr, file + ".nb");
+    PackingGenerator::toWolfram(packing, arguments.getParameters().surfaceSize, nullptr, isPeriodicImage,
+                                bcExpandFraction, file + ".nb");
 }
 
 void bc_expand(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.empty())
+    if (positionalArguments.size() < 1 || positionalArguments.size() > 2)
         die(arguments.formatUsage("<file in> (file out = file in)"));
 
     std::string fileIn(positionalArguments[0]);
@@ -261,7 +280,7 @@ void bc_expand(const ProgramArguments &arguments) {
 
 void exclusion_zones(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() < 2)
+    if (positionalArguments.size() != 2)
         die(arguments.formatUsage("<packing file> <output file>"));
 
     std::string packingFile(positionalArguments[0]);
@@ -271,7 +290,7 @@ void exclusion_zones(const ProgramArguments &arguments) {
 
 void accuracy(const ProgramArguments &arguments) {
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.empty())
+    if (positionalArguments.size() != 2)
         die(arguments.formatUsage("<accuracy> <out file>"));
     double accuracy = std::stod(positionalArguments[0]);
     Expects(accuracy > 0);
@@ -302,6 +321,42 @@ void accuracy(const ProgramArguments &arguments) {
     file.close();
 }
 
+void density(const ProgramArguments &arguments) {
+    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+    if (positionalArguments.size() != 1)
+        die(arguments.formatUsage("<target packing fraction>"));
+    double targetPackingFraction = std::stod(positionalArguments[0]);
+    Expects(targetPackingFraction > 0.0);
+    Expects(targetPackingFraction <= 1.0);
+
+    Parameters params = arguments.getParameters();
+    int seed = 0;
+    PackingGenerator pg(seed, &params);
+    pg.run();
+    Packing packing = pg.getPacking();
+
+    double currentPackingFraction = packing.getParticlesVolume(params.surfaceDimension) / params.sufraceVolume();
+
+    if (targetPackingFraction > currentPackingFraction) {
+        std::cout << "[density] Target packing fraction: " << targetPackingFraction;
+        std::cout << " > generated packing fraction: " << currentPackingFraction << ". Keeping original packing.";
+        std::cout << std::endl;
+    } else {
+        std::cout << "[density] Initial packing fraction      : " << currentPackingFraction << ", reducing... ";
+        std::cout << std::flush;
+        double targetVolume = targetPackingFraction * params.sufraceVolume();
+        packing.reducePackingVolume(targetVolume, params.surfaceDimension);
+        std::cout << "done." << std::endl;
+
+        double actualPackingFraction = packing.getParticlesVolume(params.surfaceDimension) / params.sufraceVolume();
+        std::cout << "[density] Target packing fraction       : " << targetPackingFraction << std::endl;
+        std::cout << "[density] Actual packing fraction       : " << actualPackingFraction << std::endl;
+        std::cout << "[density] Last particle adsorption time : " << packing.back()->time << std::endl;
+    }
+
+    packing.store(pg.getPackingFilename());
+}
+
 int main(int argc, char **argv) {
     std::unique_ptr<ProgramArguments> arguments;
     try {
@@ -324,6 +379,8 @@ int main(int argc, char **argv) {
         boundaries(*arguments);
     else if (mode == "accuracy")
         accuracy(*arguments);
+    else if (mode == "density")
+        density(*arguments);
     else if (mode == "dat")
         dat(*arguments);
     else if (mode == "analyze")

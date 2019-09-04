@@ -45,11 +45,17 @@
 #endif
 #elif RSA_SPATIAL_DIMENSION == 2
 	// 2D shapes with angular dimension
-	#if RSA_ANGULAR_DIMENSION == 1
+	#if RSA_ANGULAR_DIMENSION == 0
+        #include "shapes/Ellipse.h"
+        #include "shapes/polydisk/Polydisk.h"
+        #include "shapes/polydisk/Fibrinogen.h"
+        #include "shapes/ordered_shape.2.1/OrderedShape2_1.h"
+    #else
 		#include "shapes/spherocylinder/SpheroCylinder2D.h"
 		#include "shapes/Ellipse.h"
 		#include "shapes/Rectangle.h"
-		#include "shapes/Polydisk.h"
+        #include "shapes/polydisk/Fibrinogen.h"
+        #include "shapes/polydisk/Polydisk.h"
 		#include "shapes/polygon/Polygon.h"
 		#include "shapes/polygon/SBPolygon.h"
 		#include "shapes/polygon/HBPolygon.h"
@@ -87,11 +93,19 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
         } else if (sClass == "Spherocylinder") {
              Spherocylinder<RSA_SPATIAL_DIMENSION>::initClass(attr);
              return;
-         } else if (sClass == "OrientedCuboid") {
+        } else if (sClass == "OrientedCuboid") {
             OrientedCuboid<RSA_SPATIAL_DIMENSION>::initClass(attr);
             return;
+        } else if (sClass == "OrientedPolydisk") {
+            OrderedShape2_1::initClass(attr, Polydisk::initClass);
+            return;
+        } else if (sClass == "OrientedEllipse") {
+            OrderedShape2_1::initClass(attr, Ellipse::initClass);
+            return;
+        } else if (sClass == "OrientedFibrinogen") {
+            OrderedShape2_1::initClass(attr, Fibrinogen::initClass);
+            return;
         }
-
 
 		#if RSA_SPATIAL_DIMENSION == 3
         	if (sClass == "Cuboid") {
@@ -195,8 +209,11 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
                 Polygon::initClass(attr);
                 return;
             } else if (sClass == "Polydisk") {
-              	Polydisk::initClass(attr);
-              	return;
+                Polydisk::initClass(attr);
+                return;
+            } else if (sClass == "Fibrinogen") {
+                Fibrinogen::initClass(attr);
+                return;
             }
         #endif
 
