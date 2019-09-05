@@ -7,9 +7,18 @@ set(RSA_SOURCE
         geometry/Vector.h
         geometry/Vector.tpp
         modes/AccuracySimulation.cpp
+        modes/AnalyzeMode.cpp
+        modes/BCExpandMode.cpp
         modes/BoundariesSimulation.cpp
+        modes/DatFileGenerationMode.cpp
+        modes/DebugMode.cpp
         modes/DefaultSimulation.cpp
         modes/DensitySimulation.cpp
+        modes/ExclusionZonesMode.cpp
+        modes/PackingTestMode.cpp
+        modes/PovrayMode.cpp
+        modes/Simulation.cpp
+        modes/WolframMode.cpp
         surfaces/NBoxFBC.cpp
         surfaces/NBoxPBC.cpp
         utils/Assertions.h
@@ -29,7 +38,6 @@ set(RSA_SOURCE
         ProgramArguments.cpp
         ProgramMode.h
         RND.cpp
-        modes/Simulation.cpp
         Surface.cpp
         ThreadLocalRND.cpp
         Voxel.h
