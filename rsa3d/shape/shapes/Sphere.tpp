@@ -14,9 +14,6 @@
 template <unsigned short DIMENSION>
 double Sphere<DIMENSION>::radius;
 
-template <unsigned short DIMENSION>
-Sphere<DIMENSION>::~Sphere() {
-}
 
 template <unsigned short DIMENSION>
 double Sphere<DIMENSION>::gamma(){

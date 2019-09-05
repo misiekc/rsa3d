@@ -46,7 +46,6 @@ public:
     static void initClass(const std::string &args);
 
     Rectangle();
-    ~Rectangle() override = default;
 
     bool overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const override;
     double getVolume(unsigned short dim) const override;

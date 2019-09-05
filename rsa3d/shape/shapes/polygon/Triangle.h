@@ -14,8 +14,6 @@ private:
     static Vector<2> calculateThirdVertex(double a, double b, double c);
 
 public:
-    ~Triangle() override = default;
-
     static void initClass(const std::string &args);
     static std::string preparePolygonAttributes(const std::string &triangleAttr);
 };

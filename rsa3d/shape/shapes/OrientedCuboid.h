@@ -16,9 +16,6 @@ private:
     static double 			size[DIMENSION];
 
 public:
-	OrientedCuboid();
-
-	virtual ~OrientedCuboid();
 	static void initClass(const std::string &args);
 
     bool overlap(BoundaryConditions<DIMENSION> *bc, const Shape<DIMENSION, 0> *s) const override;

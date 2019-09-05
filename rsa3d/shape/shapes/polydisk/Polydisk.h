@@ -52,8 +52,6 @@ protected:
 public:
 	static void initClass(const std::string &args);
 
-	~Polydisk() override = default;
-
 	Shape<2, 1> *clone() const override;
 	double getVolume(unsigned short dim) const override;
 

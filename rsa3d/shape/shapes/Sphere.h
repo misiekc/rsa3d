@@ -30,7 +30,6 @@ private:
 public:
 	Sphere();
 
-	virtual ~Sphere();
 	static void initClass(const std::string &args);
 
 	bool overlap(BoundaryConditions<DIMENSION> *bc, const Shape<DIMENSION, 0> *s) const override;

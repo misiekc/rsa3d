@@ -46,6 +46,16 @@ OrderedShape2_1::OrderedShape2_1(std::unique_ptr<Shape<2, 1>> underlyingShape) {
     this->underlyingShape = std::move(underlyingShape);
 }
 
+OrderedShape2_1::OrderedShape2_1(const OrderedShape2_1 &other) : Shape(other) {
+    this->underlyingShape.reset(other.underlyingShape->clone());
+}
+
+OrderedShape2_1 &OrderedShape2_1::operator=(const OrderedShape2_1 &other) {
+    Shape::operator=(other);
+    this->underlyingShape.reset(other.underlyingShape->clone());
+    return *this;
+}
+
 bool OrderedShape2_1::overlap(BoundaryConditions<2> *bc, const Shape<2, 0> *s) const {
     auto &orderedOther = dynamic_cast<const OrderedShape2_1&>(*s);
     return this->underlyingShape->overlap(bc, orderedOther.underlyingShape.get());
@@ -56,8 +66,8 @@ double OrderedShape2_1::getVolume(unsigned short dim) const {
 }
 
 bool OrderedShape2_1::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition,
-                                             const Orientation<0> &voxelOrientation, double spatialSize,
-                                             double angularSize) const {
+                                  const Orientation<0> &voxelOrientation, double spatialSize,
+                                  double angularSize) const {
     return this->underlyingShape->voxelInside(bc, voxelPosition, {{0}}, spatialSize, 2*M_PI);
 }
 
@@ -83,8 +93,7 @@ void OrderedShape2_1::restore(std::istream &f) {
 }
 
 Shape<2, 0> *OrderedShape2_1::clone() const {
-    auto underlyingShapeCopy = this->underlyingShape->clone();
-    return new OrderedShape2_1(std::unique_ptr<Shape<2, 1>>(underlyingShapeCopy));
+    return new OrderedShape2_1(*this);
 }
 
 std::string OrderedShape2_1::toString() const {

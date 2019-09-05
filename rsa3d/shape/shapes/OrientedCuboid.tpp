@@ -14,14 +14,6 @@ template <unsigned short DIMENSION>
 double OrientedCuboid<DIMENSION>::size[DIMENSION];
 
 template <unsigned short DIMENSION>
-OrientedCuboid<DIMENSION>::OrientedCuboid() : ConvexShape<DIMENSION, 0>(){
-}
-
-template <unsigned short DIMENSION>
-OrientedCuboid<DIMENSION>::~OrientedCuboid() {
-}
-
-template <unsigned short DIMENSION>
 void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
 	
     std::stringstream args_stream (args);

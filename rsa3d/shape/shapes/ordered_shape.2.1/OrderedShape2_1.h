@@ -40,6 +40,10 @@ public:
     static Shape<2, 0> *createShape(RND *rnd);
 
     explicit OrderedShape2_1(std::unique_ptr<Shape<2, 1>> underlyingShape);
+    OrderedShape2_1(const OrderedShape2_1 &other);
+    OrderedShape2_1 &operator=(const OrderedShape2_1 &other);
+    OrderedShape2_1(OrderedShape2_1 &&other) = default;
+    OrderedShape2_1 &operator=(OrderedShape2_1 &&other) = default;
     ~OrderedShape2_1() override = default;
 
     const Vector<2> &getPosition() const override;

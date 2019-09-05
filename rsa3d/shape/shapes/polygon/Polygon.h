@@ -70,15 +70,12 @@ protected:
 
 
 public:
-
 	static void initClass(const std::string &args);
 
     static const std::vector<double> &getVertexR() { return vertexR; }
     static const std::vector<double> &getVertexTheta() { return vertexTheta; }
     static const std::vector<std::pair<size_t, size_t>> &getSegments() { return segments; }
     static const std::vector<std::pair<size_t, size_t>> &getHelperSegments() { return helperSegments; }
-
-    ~Polygon() override = default;
 
 	Shape<2, 1> *clone() const override;
 	double getVolume(unsigned short dim) const override;

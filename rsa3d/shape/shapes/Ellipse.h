@@ -40,7 +40,6 @@ public:
 
 	// Implicit copy c-tor and assignment
 	Ellipse();
-	~Ellipse() override = default;
 
     double getVolume(unsigned short dim) const override;
     void setAngle(double angle) override;

@@ -60,9 +60,8 @@ public:
         Z
     };
 
-    // Implicit copy ctor and copy assignment operator - trivial destructor
+    // Implicit copy ctor and copy assignment operator
     explicit Cuboid(const Matrix<3, 3> & rotation);
-    ~Cuboid() override = default;
 
 	static void initClass(const std::string &args);
 	static double * getSize(double * arr);
