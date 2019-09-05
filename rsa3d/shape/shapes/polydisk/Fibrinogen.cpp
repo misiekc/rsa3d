@@ -13,7 +13,11 @@
  * (number of small disks in one chain)
  */
 void Fibrinogen::initClass(const std::string &attr) {
-    std::istringstream attrStream(attr);
+    std::istringstream attrStream;
+    if (attr.empty())
+        attrStream = std::istringstream("6.7 5.3 1.5 10");
+    else
+        attrStream = std::istringstream(attr);
 
     double largeDiskRadius{}, mediumDiskRadius{}, smallDiskRadius{};
     std::size_t numberOfSmallDisks{};
