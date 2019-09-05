@@ -6,7 +6,7 @@
 #define RSA3D_BOUNDARIESSIMULATION_H
 
 
-#include "../Simulation.h"
+#include "Simulation.h"
 #include "../ProgramArguments.h"
 
 class BoundariesSimulation : public Simulation {

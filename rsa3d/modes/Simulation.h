@@ -6,10 +6,11 @@
 #define RSA3D_SIMULATION_H
 
 
-#include "Packing.h"
-#include "Parameters.h"
+#include "../Packing.h"
+#include "../Parameters.h"
+#include "../ProgramMode.h"
 
-class Simulation {
+class Simulation : public ProgramMode {
 private:
     Packing runSingleSimulation(int seed, std::ofstream &dataFile);
 
@@ -23,7 +24,7 @@ protected:
 public:
     explicit Simulation(Parameters params) : params{std::move(params)} { }
 
-    void run();
+    void run() final;
 };
 
 

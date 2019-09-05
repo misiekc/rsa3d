@@ -8,7 +8,7 @@
 
 #include <fstream>
 
-#include "../Simulation.h"
+#include "Simulation.h"
 #include "../ProgramArguments.h"
 #include "../utils/Quantity.h"
 

@@ -4,11 +4,11 @@
 #include "shape/ShapeFactory.h"
 #include "utils/Assertions.h"
 #include "ProgramArguments.h"
-#include "Simulation.h"
-#include "simulation_modes/DefaultSimulation.h"
-#include "simulation_modes/BoundariesSimulation.h"
-#include "simulation_modes/AccuracySimulation.h"
-#include "simulation_modes/DensitySimulation.h"
+#include "modes/Simulation.h"
+#include "modes/DefaultSimulation.h"
+#include "modes/BoundariesSimulation.h"
+#include "modes/AccuracySimulation.h"
+#include "modes/DensitySimulation.h"
 
 
 #include <sys/wait.h>

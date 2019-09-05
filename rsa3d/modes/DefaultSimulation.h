@@ -7,7 +7,7 @@
 
 
 #include "../ProgramArguments.h"
-#include "../Simulation.h"
+#include "Simulation.h"
 
 class DefaultSimulation : public Simulation {
 public:

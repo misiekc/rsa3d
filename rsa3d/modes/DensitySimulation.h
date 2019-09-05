@@ -6,7 +6,7 @@
 #define RSA3D_DENSITYSIMULATION_H
 
 
-#include "../Simulation.h"
+#include "Simulation.h"
 #include "../ProgramArguments.h"
 
 class DensitySimulation : public Simulation {

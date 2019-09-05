@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 #include "Simulation.h"
-#include "PackingGenerator.h"
+#include "../PackingGenerator.h"
 
 
 namespace {

@@ -6,10 +6,10 @@ set(RSA_SOURCE
         geometry/Matrix.tpp
         geometry/Vector.h
         geometry/Vector.tpp
-        simulation_modes/AccuracySimulation.cpp
-        simulation_modes/BoundariesSimulation.cpp
-        simulation_modes/DefaultSimulation.cpp
-        simulation_modes/DensitySimulation.cpp
+        modes/AccuracySimulation.cpp
+        modes/BoundariesSimulation.cpp
+        modes/DefaultSimulation.cpp
+        modes/DensitySimulation.cpp
         surfaces/NBoxFBC.cpp
         surfaces/NBoxPBC.cpp
         utils/Assertions.h
@@ -27,8 +27,9 @@ set(RSA_SOURCE
         Positioned.h
         Positioned.tpp
         ProgramArguments.cpp
+        ProgramMode.h
         RND.cpp
-        Simulation.cpp
+        modes/Simulation.cpp
         Surface.cpp
         ThreadLocalRND.cpp
         Voxel.h
