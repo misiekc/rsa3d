@@ -6,6 +6,10 @@ set(RSA_SOURCE
         geometry/Matrix.tpp
         geometry/Vector.h
         geometry/Vector.tpp
+        simulation_modes/AccuracySimulation.cpp
+        simulation_modes/BoundariesSimulation.cpp
+        simulation_modes/DefaultSimulation.cpp
+        simulation_modes/DensitySimulation.cpp
         surfaces/NBoxFBC.cpp
         surfaces/NBoxPBC.cpp
         utils/Assertions.h

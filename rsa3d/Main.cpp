@@ -2,127 +2,21 @@
 #include "analizator/Analyzer.h"
 #include "analizator/ExclusionZoneVisualizer.h"
 #include "shape/ShapeFactory.h"
-#include "utils/Quantity.h"
 #include "utils/Assertions.h"
 #include "ProgramArguments.h"
 #include "Simulation.h"
+#include "simulation_modes/DefaultSimulation.h"
+#include "simulation_modes/BoundariesSimulation.h"
+#include "simulation_modes/AccuracySimulation.h"
+#include "simulation_modes/DensitySimulation.h"
 
 
 #include <sys/wait.h>
-#include <cstring>
 #include <iomanip>
 #include <fstream>
 #include <memory>
 
 
-namespace {
-    class DefaultSimulation : public Simulation {
-    public:
-        explicit DefaultSimulation(const Parameters &parameters) : Simulation(parameters) { }
-
-        bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) override {
-            return packingIndex < this->params.collectors - 1;
-        }
-
-        void postProcessPacking(Packing &packing) override { }
-    };
-
-    class BoundariesSimulation : public Simulation {
-    private:
-        std::size_t targerNumberOfParticles{};
-        std::size_t particleCounter{};
-
-    public:
-        BoundariesSimulation(const Parameters &parameters, std::size_t targetNumberOfParticles)
-                : Simulation(parameters), targerNumberOfParticles{targetNumberOfParticles}
-        {
-            Expects(targetNumberOfParticles > 0);
-        }
-
-        bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) override {
-            return this->particleCounter < this->targerNumberOfParticles;
-        }
-
-        void postProcessPacking(Packing &packing) override {
-            this->particleCounter += packing.size();
-            std::cout << "[BoundariesSimulation::postProcessPacking] Fraction of particles generated: ";
-            std::cout << static_cast<double>(this->particleCounter) / this->targerNumberOfParticles << std::endl;
-        }
-    };
-
-    class AccuracySimulation : public Simulation {
-    private:
-        double targetAccuracy{};
-        std::vector<double> packingFractions;
-        Quantity meanPackingFraction;
-
-    public:
-        AccuracySimulation(const Parameters &parameters, double targetAccuracy) : Simulation(parameters),
-                                                                                  targetAccuracy{targetAccuracy}
-        {
-            Expects(targetAccuracy > 0);
-        }
-
-        bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) override {
-            return packingIndex < 2 || this->meanPackingFraction.error > this->targetAccuracy;
-        }
-
-        void postProcessPacking(Packing &packing) override {
-            this->packingFractions.push_back(static_cast<double>(packing.size()) / this->params.sufraceVolume());
-            this->meanPackingFraction.calculateFromSamples(this->packingFractions);
-            std::cout << "[AccuracySimulation::postProcessPacking] Actual accuracy: ";
-            std::cout << this->meanPackingFraction.error << std::endl;
-            std::cout << "[AccuracySimulation::postProcessPacking] Target accuracy: ";
-            std::cout << this->targetAccuracy << std::endl;
-        }
-
-        Quantity getMeanPackingFraction() const {
-            return this->meanPackingFraction;
-        }
-    };
-
-    class DensitySimulation : public Simulation {
-    private:
-        double targetPackingFraction{};
-
-    public:
-        DensitySimulation(const Parameters &parameters, double targetPackingFraction)
-                : Simulation(parameters), targetPackingFraction{targetPackingFraction}
-        {
-            Expects(targetPackingFraction > 0.0 && targetPackingFraction <= 1.0);
-        }
-
-        bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) override {
-            return packingIndex < this->params.collectors - 1;
-        }
-
-        void postProcessPacking(Packing &packing) override {
-            double currentPackingFraction = packing.getParticlesVolume(this->params.surfaceDimension)
-                                            / this->params.sufraceVolume();
-
-            if (this->targetPackingFraction > currentPackingFraction) {
-                std::cout << "[DensitySimulation::postProcessPacking] Target packing fraction: ";
-                std::cout << this->targetPackingFraction << " > generated packing fraction: ";
-                std::cout << currentPackingFraction << ". Keeping original packing." << std::endl;
-            } else {
-                std::cout << "[DensitySimulation::postProcessPacking] Initial packing fraction      : ";
-                std::cout << currentPackingFraction << ", reducing... " << std::flush;
-                double targetVolume = this->targetPackingFraction * this->params.sufraceVolume();
-                packing.reducePackingVolume(targetVolume, this->params.surfaceDimension);
-                std::cout << "done." << std::endl;
-
-                double actualPackingFraction = packing.getParticlesVolume(this->params.surfaceDimension)
-                                               / this->params.sufraceVolume();
-                std::cout << "[DensitySimulation::postProcessPacking] Target packing fraction       : ";
-                std::cout << this->targetPackingFraction << std::endl;
-                std::cout << "[DensitySimulation::postProcessPacking] Actual packing fraction       : ";
-                std::cout << actualPackingFraction << std::endl;
-                std::cout << "[DensitySimulation::postProcessPacking] Last particle adsorption time : ";
-                std::cout << packing.back()->time << std::endl;
-            }
-        }
-    };
-}
 
 void makeDatFileForPackingsInDirectory(const Parameters *params, const std::string &dirName) {
     std::string sFile = params->getPackingSignature() + ".dat";
@@ -147,14 +41,8 @@ void makeDatFileForPackingsInDirectory(const Parameters *params, const std::stri
     std::cout << std::endl;
 }
 
-int simulate(const ProgramArguments &arguments) {
-    if (!arguments.getPositionalArguments().empty())
-        die(arguments.formatUsage(""));
-
-    DefaultSimulation defaultSimulation(arguments.getParameters());
-    defaultSimulation.run();
-
-    /*std::string sFile = params.getPackingSignature() + ".dat";
+/*int simulate(const ProgramArguments &arguments) {
+    std::string sFile = params.getPackingSignature() + ".dat";
     std::ofstream file(sFile);
     if (!file)
         die("Cannot open file " + sFile + " to store packing info");
@@ -190,9 +78,9 @@ int simulate(const ProgramArguments &arguments) {
             runSingleSimulation(static_cast<int>(params.from + i), &params, file);
         }
     }
-    file.close();*/
+    file.close();
     return 1;
-}
+}*/
 
 
 void test(const ProgramArguments &arguments) {
@@ -225,18 +113,6 @@ void debug(const ProgramArguments &arguments) {
     PackingGenerator pg(0, &params);
     pg.restore(file);
     pg.run();
-}
-
-void boundaries(const ProgramArguments &arguments) {
-    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() != 1)
-        die(arguments.formatUsage("<number of particles>"));
-
-    std::size_t targetNumberOfParticles = std::stoul(positionalArguments[0]);
-    Validate(targetNumberOfParticles > 0);
-
-    BoundariesSimulation boundariesSimulation(arguments.getParameters(), targetNumberOfParticles);
-    boundariesSimulation.run();
 }
 
 void dat(const ProgramArguments &arguments) {
@@ -321,40 +197,6 @@ void exclusion_zones(const ProgramArguments &arguments) {
     ExclusionZoneVisualizer::main(arguments.getParameters(), packingFile, outputFile);
 }
 
-void accuracy(const ProgramArguments &arguments) {
-    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() != 2)
-        die(arguments.formatUsage("<accuracy> <out file>"));
-    double accuracy = std::stod(positionalArguments[0]);
-    Validate(accuracy > 0);
-
-    Parameters params = arguments.getParameters();
-    AccuracySimulation accuracySimulation(params, accuracy);
-    accuracySimulation.run();
-    Quantity meanPackingFraction = accuracySimulation.getMeanPackingFraction();
-
-    std::string filename = positionalArguments[1];
-    std::ofstream file(filename, std::ios_base::app);
-    if (!file)
-        die("Cannot open " + filename + " file to store packing fraction");
-    file.precision(std::numeric_limits<double>::digits10 + 1);
-    file << meanPackingFraction.value << "\t" << meanPackingFraction.error << "\t" << params.particleType;
-    file << "\t" << params.particleAttributes << std::endl;
-    file.close();
-}
-
-void density(const ProgramArguments &arguments) {
-    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() != 1)
-        die(arguments.formatUsage("<target packing fraction>"));
-    double targetPackingFraction = std::stod(positionalArguments[0]);
-    Validate(targetPackingFraction > 0.0);
-    Validate(targetPackingFraction <= 1.0);
-
-    DensitySimulation densitySimulation(arguments.getParameters(), targetPackingFraction);
-    densitySimulation.run();
-}
-
 int main(int argc, char **argv) {
     std::unique_ptr<ProgramArguments> arguments;
     try {
@@ -365,20 +207,26 @@ int main(int argc, char **argv) {
 
     Parameters params = arguments->getParameters();
     ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
-    
+
+    std::unique_ptr<Simulation> simulationMode;
     std::string mode = arguments->getMode();
+
+    // Simulation modes - they all generate a number of packings, operate on them, create *.dat file and optionally
+    // save additional information
     if (mode == "simulate")
-        simulate(*arguments);
+        simulationMode = std::make_unique<DefaultSimulation>(*arguments);
+    else if (mode == "boundaries")
+        simulationMode = std::make_unique<BoundariesSimulation>(*arguments);
+    else if (mode == "accuracy")
+        simulationMode = std::make_unique<AccuracySimulation>(*arguments);
+    else if (mode == "density")
+        simulationMode = std::make_unique<DensitySimulation>(*arguments);
+
+    // Other modes
     else if (mode == "test")
         test(*arguments);
     else if (mode == "debug")
         debug(*arguments);
-    else if (mode == "boundaries")
-        boundaries(*arguments);
-    else if (mode == "accuracy")
-        accuracy(*arguments);
-    else if (mode == "density")
-        density(*arguments);
     else if (mode == "dat")
         dat(*arguments);
     else if (mode == "analyze")
@@ -393,6 +241,9 @@ int main(int argc, char **argv) {
         exclusion_zones(*arguments);
     else
         die("Unknown mode: " + mode);
+
+    if (simulationMode)
+        simulationMode->run();
 
     return EXIT_SUCCESS;
 }

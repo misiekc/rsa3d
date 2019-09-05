@@ -83,15 +83,17 @@ Packing Simulation::runSingleSimulation(int seed, std::ofstream &dataFile) {
 
 void Simulation::run() {
     std::string sFile = params.getPackingSignature() + ".dat";
-    std::ofstream file(sFile);
-    if (!file)
+    std::ofstream datFile(sFile);
+    if (!datFile)
         die("Cannot open file " + sFile + " to store packing info");
-    file.precision(std::numeric_limits<double>::digits10 + 1);
+    datFile.precision(std::numeric_limits<double>::digits10 + 1);
 
     std::size_t packingIndex{};
     Packing packing;
     do {
         std::size_t seed = params.from + packingIndex;
-        packing = runSingleSimulation(seed, file);
+        packing = runSingleSimulation(seed, datFile);
     } while(this->continuePackingGeneration(packingIndex++, packing));
+
+    this->postProcessSimulation();
 }

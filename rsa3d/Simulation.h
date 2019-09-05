@@ -16,13 +16,14 @@ private:
 protected:
     Parameters params;
 
+    virtual bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) = 0;
+    virtual void postProcessPacking(Packing &packing) = 0;
+    virtual void postProcessSimulation() = 0;
+
 public:
     explicit Simulation(Parameters params) : params{std::move(params)} { }
 
     void run();
-
-    virtual bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) = 0;
-    virtual void postProcessPacking(Packing &packing) = 0;
 };
 
 
