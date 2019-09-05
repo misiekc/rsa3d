@@ -16,29 +16,215 @@
 #include <fstream>
 #include <memory>
 
+namespace {
+    class PackingTestMode : public ProgramMode {
+    private:
+        std::string packingFilename;
+        double maxTime{};
+
+    public:
+        explicit PackingTestMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+            std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+            if (positionalArguments.size() != 2)
+                die(arguments.formatUsage("<file in> <max time>"));
+
+            this->packingFilename = positionalArguments[0];
+            this->maxTime = std::stod(positionalArguments[1]);
+            Validate(this->maxTime > 0);
+        }
+
+        void run() override {
+            Packing packing;
+            packing.restore(this->packingFilename);
+            PackingGenerator pg(1, &this->params);
+            pg.testPacking(packing, this->maxTime);
+        }
+    };
 
 
-void makeDatFileForPackingsInDirectory(const Parameters *params, const std::string &dirName) {
-    std::string sFile = params->getPackingSignature() + ".dat";
-    std::ofstream dataFile(sFile);
-    if (!dataFile)
-        die("Cannot open file " + sFile + " to store packing info");
-    dataFile.precision(std::numeric_limits<double>::digits10 + 1);
+    class DebugMode : public ProgramMode {
+    private:
+        std::string packingGeneratorFilename;
 
-    auto filenames = PackingGenerator::findPackingsInDir(dirName);
-    for (const auto &filename : filenames) {
-        int no1 = lastIndexOf(filename, '_');
-        int no2 = lastIndexOf(filename, '.');
-        std::string seed = filename.substr(no1 + 1, no2 - no1 - 1);
+    public:
+        explicit DebugMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+            std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+            if (positionalArguments.size() != 1)
+                die(arguments.formatUsage("<packing generator file>"));
 
-        Packing packing;
-        packing.restore(filename);
+            this->packingGeneratorFilename = positionalArguments[0];
+        }
 
-        dataFile << seed << "\t" << packing.back()->no << "\t" << packing.back()->time << std::endl;
-        std::cout << ".";
-        std::cout.flush();
-    }
-    std::cout << std::endl;
+        void run() override {
+            std::ifstream file(this->packingGeneratorFilename, std::ios::binary);
+            if (!file)
+                die("Cannot open file " + this->packingGeneratorFilename + " to restore packing generator");
+
+            PackingGenerator pg(0, &params);
+            pg.restore(file);
+            pg.run();
+        }
+    };
+
+    class DatFileGenerationMode : public ProgramMode {
+    private:
+        std::string dirName;
+
+    public:
+        explicit DatFileGenerationMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+            std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+            if (positionalArguments.size() != 1)
+                die(arguments.formatUsage("<directory>"));
+
+            this->dirName = positionalArguments[0];
+        }
+
+        void run() override {
+            std::string sFile = this->params.getPackingSignature() + ".dat";
+            std::ofstream dataFile(sFile);
+            if (!dataFile)
+                die("Cannot open file " + sFile + " to store packing info");
+            dataFile.precision(std::numeric_limits<double>::digits10 + 1);
+
+            auto filenames = PackingGenerator::findPackingsInDir(this->dirName);
+            for (const auto &filename : filenames) {
+                int no1 = lastIndexOf(filename, '_');
+                int no2 = lastIndexOf(filename, '.');
+                std::string seed = filename.substr(no1 + 1, no2 - no1 - 1);
+
+                Packing packing;
+                packing.restore(filename);
+
+                dataFile << seed << "\t" << packing.back()->no << "\t" << packing.back()->time << std::endl;
+                std::cout << ".";
+                std::cout.flush();
+            }
+            std::cout << std::endl;
+        }
+    };
+
+    class AnalyzeMode : public ProgramMode {
+    private:
+        std::string dirName;
+        double corrRange{};
+    public:
+        explicit AnalyzeMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+            std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+            if (positionalArguments.size() < 1 || positionalArguments.size() > 2)
+                die(arguments.formatUsage("<directory> (correlations range = 10; 0 - no corr output)"));
+
+            this->dirName = positionalArguments[0];
+            this->corrRange = (positionalArguments.size() >= 2) ? std::stod(positionalArguments[1]) : 10.0;
+            Validate(this->corrRange >= 0);
+        }
+
+        void run() override {
+            Analyzer an(&this->params);
+            an.analyzePackingsInDirectory(this->dirName, 0.01, 1.0, this->corrRange);
+        }
+    };
+
+    class PovrayMode : public ProgramMode {
+    private:
+        std::string packingFilename;
+
+    public:
+        explicit PovrayMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+            std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+            if (positionalArguments.size() != 1)
+                die(arguments.formatUsage("<file in>"));
+
+            this->packingFilename = positionalArguments[0];
+        }
+
+        void run() override {
+            Packing packing;
+            packing.restore(this->packingFilename);
+            PackingGenerator::toPovray(packing, this->params.surfaceSize, nullptr, this->packingFilename + ".pov");
+        }
+    };
+
+    class WolframMode : public ProgramMode {
+    private:
+        std::string packingFilename;
+        bool isPeriodicImage{};
+        double bcExpandFraction{};
+
+    public:
+        explicit WolframMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+            std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+            if (positionalArguments.size() < 1 || positionalArguments.size() > 3)
+                die(arguments.formatUsage("<file in> (use periodic image = false) (bc expand fraction = 0.1)"));
+
+            this->packingFilename = positionalArguments[0];
+
+            if (positionalArguments.size() == 1 || positionalArguments[1] == "false")
+                this->isPeriodicImage = false;
+            else if (positionalArguments[1] == "true")
+                this->isPeriodicImage = true;
+            else
+                die("(use periodic image) must be empty, 'true' or 'false'");
+
+            if (positionalArguments.size() == 3) {
+                this->bcExpandFraction = std::stod(positionalArguments[2]);
+                ValidateMsg(this->bcExpandFraction >= 0 && this->bcExpandFraction < 0.5,
+                            "BC expand fraction must be in [0, 0.5) range");
+            } else {
+                this->bcExpandFraction = 0.1;
+            }
+        }
+
+        void run() override {
+            Packing packing;
+            packing.restore(this->packingFilename);
+            PackingGenerator::toWolfram(packing, this->params.surfaceSize, nullptr, this->isPeriodicImage,
+                                        this->bcExpandFraction, this->packingFilename + ".nb");
+        }
+    };
+
+    class BCExpandMode : public ProgramMode {
+    private:
+        std::string packingInFilename;
+        std::string packingOutFilename;
+
+    public:
+        explicit BCExpandMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+            std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+            if (positionalArguments.size() < 1 || positionalArguments.size() > 2)
+                die(arguments.formatUsage("<file in> (file out = file in)"));
+
+            this->packingInFilename = positionalArguments[0];
+            this->packingOutFilename = (positionalArguments.size() == 1 ?
+                                        this->packingInFilename : positionalArguments[1]);
+        }
+
+        void run() override {
+            Packing packing;
+            packing.restore(this->packingInFilename);
+            packing.expandOnPBC(this->params.surfaceSize, 0.1);
+            packing.store(this->packingOutFilename);
+        }
+    };
+
+    class ExclusionZonesMode : public ProgramMode {
+    private:
+        std::string packingFilename;
+        std::string outputFilename;
+
+    public:
+        explicit ExclusionZonesMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+            std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+            if (positionalArguments.size() != 2)
+                die(arguments.formatUsage("<packing file> <output file>"));
+
+            this->packingFilename = positionalArguments[0];
+            this->outputFilename = positionalArguments[1];
+        }
+
+        void run() override {
+            ExclusionZoneVisualizer::main(this->params, this->packingFilename, this->outputFilename);
+        }
+    };
 }
 
 /*int simulate(const ProgramArguments &arguments) {
@@ -82,121 +268,6 @@ void makeDatFileForPackingsInDirectory(const Parameters *params, const std::stri
     return 1;
 }*/
 
-
-void test(const ProgramArguments &arguments) {
-    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() != 2)
-        die(arguments.formatUsage("<file in> <max time>"));
-
-    Packing packing;
-    packing.restore(positionalArguments[0]);
-    PackingGenerator pg(1, &arguments.getParameters());
-    pg.testPacking(packing, std::stod(positionalArguments[1]));
-}
-
-void debug(const ProgramArguments &arguments) {
-    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() != 1)
-        die(arguments.formatUsage("<packing generator file>"));
-
-    Parameters params = arguments.getParameters();
-    const char *cfile = positionalArguments[0].c_str();
-    std::string filename(cfile);
-    char buf[20];
-    sprintf(buf, "%.0f", pow(params.surfaceSize, params.surfaceDimension));
-    std::string size(buf);
-
-    std::ifstream file(filename, std::ios::binary);
-    if (!file)
-        die("Cannot open file " + filename + " to restore packing generator");
-
-    PackingGenerator pg(0, &params);
-    pg.restore(file);
-    pg.run();
-}
-
-void dat(const ProgramArguments &arguments) {
-    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() != 1)
-        die(arguments.formatUsage("<directory>"));
-
-    std::string directory = positionalArguments[0];
-    makeDatFileForPackingsInDirectory(&arguments.getParameters(), directory);
-}
-
-void analyze(const ProgramArguments &arguments) {
-    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() < 1 || positionalArguments.size() > 2)
-        die(arguments.formatUsage("<directory> (correlations range = 10; 0 - no corr output)"));
-
-    double corrRange = (positionalArguments.size() >= 2) ? std::stod(positionalArguments[1]) : 10.0;
-    Validate(corrRange >= 0);
-    Analyzer an(&arguments.getParameters());
-    an.analyzePackingsInDirectory(positionalArguments[0], 0.01, 1.0, corrRange);
-}
-
-void povray(const ProgramArguments &arguments) {
-    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() != 1)
-        die(arguments.formatUsage("<file in>"));
-
-    std::string file(positionalArguments[0]);
-    Packing packing;
-    packing.restore(file);
-    PackingGenerator::toPovray(packing, arguments.getParameters().surfaceSize, nullptr, file + ".pov");
-}
-
-void wolfram(const ProgramArguments &arguments) {
-    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() < 1 || positionalArguments.size() > 3)
-        die(arguments.formatUsage("<file in> (use periodic image = false) (bc expand fraction = 0.1)"));
-
-    bool isPeriodicImage{};
-    if (positionalArguments.size() == 1 || positionalArguments[1] == "false")
-        isPeriodicImage = false;
-    else if (positionalArguments[1] == "true")
-        isPeriodicImage = true;
-    else
-        die("(use periodic image) must be empty, 'true' or 'false'");
-
-    double bcExpandFraction{};
-    if (positionalArguments.size() == 3) {
-        bcExpandFraction = std::stod(positionalArguments[2]);
-        ValidateMsg(bcExpandFraction >= 0 && bcExpandFraction < 0.5, "BC expand fraction must be in [0, 0.5) range");
-    } else {
-        bcExpandFraction = 0.1;
-    }
-
-    std::string file(positionalArguments[0]);
-    Packing packing;
-    packing.restore(file);
-    PackingGenerator::toWolfram(packing, arguments.getParameters().surfaceSize, nullptr, isPeriodicImage,
-                                bcExpandFraction, file + ".nb");
-}
-
-void bc_expand(const ProgramArguments &arguments) {
-    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() < 1 || positionalArguments.size() > 2)
-        die(arguments.formatUsage("<file in> (file out = file in)"));
-
-    std::string fileIn(positionalArguments[0]);
-    std::string fileOut = (positionalArguments.size() == 1 ? fileIn : positionalArguments[1]);
-    Packing packing;
-    packing.restore(fileIn);
-    packing.expandOnPBC(arguments.getParameters().surfaceSize, 0.1);
-    packing.store(fileOut);
-}
-
-void exclusion_zones(const ProgramArguments &arguments) {
-    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() != 2)
-        die(arguments.formatUsage("<packing file> <output file>"));
-
-    std::string packingFile(positionalArguments[0]);
-    std::string outputFile(positionalArguments[1]);
-    ExclusionZoneVisualizer::main(arguments.getParameters(), packingFile, outputFile);
-}
-
 int main(int argc, char **argv) {
     std::unique_ptr<ProgramArguments> arguments;
     try {
@@ -208,42 +279,40 @@ int main(int argc, char **argv) {
     Parameters params = arguments->getParameters();
     ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
 
-    std::unique_ptr<Simulation> simulationMode;
+    std::unique_ptr<ProgramMode> programMode;
     std::string mode = arguments->getMode();
 
     // Simulation modes - they all generate a number of packings, operate on them, create *.dat file and optionally
     // save additional information
     if (mode == "simulate")
-        simulationMode = std::make_unique<DefaultSimulation>(*arguments);
+        programMode = std::make_unique<DefaultSimulation>(*arguments);
     else if (mode == "boundaries")
-        simulationMode = std::make_unique<BoundariesSimulation>(*arguments);
+        programMode = std::make_unique<BoundariesSimulation>(*arguments);
     else if (mode == "accuracy")
-        simulationMode = std::make_unique<AccuracySimulation>(*arguments);
+        programMode = std::make_unique<AccuracySimulation>(*arguments);
     else if (mode == "density")
-        simulationMode = std::make_unique<DensitySimulation>(*arguments);
+        programMode = std::make_unique<DensitySimulation>(*arguments);
 
     // Other modes
     else if (mode == "test")
-        test(*arguments);
+        programMode = std::make_unique<PackingTestMode>(*arguments);
     else if (mode == "debug")
-        debug(*arguments);
+        programMode = std::make_unique<DebugMode>(*arguments);
     else if (mode == "dat")
-        dat(*arguments);
+        programMode = std::make_unique<DatFileGenerationMode>(*arguments);
     else if (mode == "analyze")
-        analyze(*arguments);
+        programMode = std::make_unique<AnalyzeMode>(*arguments);
     else if (mode == "povray")
-        povray(*arguments);
+        programMode = std::make_unique<PovrayMode>(*arguments);
     else if (mode == "wolfram")
-        wolfram(*arguments);
+        programMode = std::make_unique<WolframMode>(*arguments);
     else if (mode == "bc_expand")
-        bc_expand(*arguments);
+        programMode = std::make_unique<BCExpandMode>(*arguments);
     else if (mode == "exclusion_zones")
-        exclusion_zones(*arguments);
+        programMode = std::make_unique<ExclusionZonesMode>(*arguments);
     else
         die("Unknown mode: " + mode);
 
-    if (simulationMode)
-        simulationMode->run();
-
+    programMode->run();
     return EXIT_SUCCESS;
 }

@@ -15,14 +15,12 @@ private:
     Packing runSingleSimulation(int seed, std::ofstream &dataFile);
 
 protected:
-    Parameters params;
-
     virtual bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) = 0;
     virtual void postProcessPacking(Packing &packing) = 0;
     virtual void postProcessSimulation() = 0;
 
 public:
-    explicit Simulation(Parameters params) : params{std::move(params)} { }
+    explicit Simulation(Parameters params) : ProgramMode(params) { }
 
     void run() final;
 };
