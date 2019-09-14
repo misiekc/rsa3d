@@ -10,9 +10,6 @@
 #include "../ProgramArguments.h"
 
 class DensitySimulation : public Simulation {
-private:
-    double targetPackingFraction{};
-
 public:
     explicit DensitySimulation(const ProgramArguments &arguments);
 

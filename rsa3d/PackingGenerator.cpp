@@ -208,8 +208,7 @@ void PackingGenerator::createPacking() {
 	RSAShape **sVirtual = new RSAShape*[tmpSplit];
 	Voxel **aVoxels = new Voxel *[tmpSplit];
 
-	while (!this->isSaturated() && t<this->params.maxTime && missCounter<this->params.maxTriesWithoutSuccess) {
-
+	while (!this->generationCompleted(missCounter, t)) {
 		std::cout << "[" << this->seed << " PackingGenerator::createPacking] choosing " << tmpSplit << " shapes..." << std::flush;
 		factor = this->getFactor();
 		factor = (factor < 1.0)?1.0:factor;
@@ -360,6 +359,19 @@ void PackingGenerator::createPacking() {
 	delete[] aVoxels;
 
 	std::cout << "[" << seed << " PackingGenerator::createPacking] finished after generating " << l << " shapes" << std::endl;
+}
+
+bool PackingGenerator::generationCompleted(size_t missCounter, double t) {
+    bool maxDensityAchieved = false;
+    if (this->params.maxDensity < 1.0) {
+        double maxParticlesVolume = this->params.sufraceVolume() * this->params.maxDensity;
+        maxDensityAchieved = (this->packing.getParticlesVolume(this->params.surfaceDimension) >= maxParticlesVolume);
+    }
+
+    return this->isSaturated() ||
+           t >= params.maxTime ||
+           missCounter >= params.maxTriesWithoutSuccess ||
+           maxDensityAchieved;
 }
 
 void PackingGenerator::run(){

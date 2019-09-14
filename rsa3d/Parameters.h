@@ -27,6 +27,7 @@ public:
 	std::size_t from = 0;
 	std::size_t collectors = 1;
     double maxTime = std::numeric_limits<double>::infinity();
+    double maxDensity = 1.0;
 	std::size_t split = 5000;
 	unsigned short surfaceDimension = RSA_SPATIAL_DIMENSION;
 	double surfaceSize = pow(100000.0, 1.0/surfaceDimension);
@@ -45,7 +46,6 @@ public:
 	bool coverageByNumber = false;
 
     bool operator==(const Parameters &rhs) const;
-
     bool operator!=(const Parameters &rhs) const;
 
     Parameters();

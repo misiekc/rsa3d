@@ -62,6 +62,8 @@ public:
     static void toWolfram(Packing packing, double size, VoxelList *voxels, bool isPeriodicImage,
                           double bcExpandFraction, const std::string &filename);
 	static std::vector<std::string> findPackingsInDir(const std::string &dirName);
+
+    bool generationCompleted(size_t missCounter, double t);
 };
 
 #endif /* PACKINGGENERATOR_H_ */

@@ -19,9 +19,10 @@ Parameters::Parameters(std::istream &stream) {
 		else if (key == "maxVoxels")					this->maxVoxels = config.getUnsignedLong(key);
 		else if (key == "requestedAngularVoxelSize")	this->requestedAngularVoxelSize = config.getDouble(key);
 		else if (key == "minDx")						this->minDx = config.getDouble(key);
-		else if (key == "maxTime") 					    this->maxTime = config.getDouble(key);
+        else if (key == "maxTime") 					    this->maxTime = config.getDouble(key);
+        else if (key == "maxDensity") 					this->maxDensity = config.getDouble(key);
 		else if (key == "split") 						this->split = config.getUnsignedLong(key);
-		else if (key == "surfaceDimension") 			this->surfaceDimension = config.getInt(key);
+		else if (key == "surfaceDimension") 		    this->surfaceDimension = config.getInt(key);
 		else if (key == "surfaceVolume") 				this->surfaceSize = pow(config.getDouble(key), 1.0/this->surfaceDimension);
 		else if (key == "storePackings")	 			this->storePackings = config.getString(key) != "false";
 		else if (key == "modifiedRSA")		 		    this->modifiedRSA = config.getString(key) != "false";
@@ -62,7 +63,8 @@ void Parameters::validateData() {
 	Validate(minDx >= 0.0);
 	Validate(from >= 0);
 	Validate(collectors > 0);
-	Validate(maxTime > 0);
+    Validate(maxTime > 0);
+    Validate(maxDensity > 0 && maxDensity <= 1.0);
 	Validate(split > 0);
 	Validate(!std::isnan(surfaceSize) && surfaceSize > 0);
 	Validate(thresholdDistance >= 0.0);
@@ -103,6 +105,7 @@ bool Parameters::operator==(const Parameters &rhs) const {
            from == rhs.from &&
            collectors == rhs.collectors &&
            maxTime == rhs.maxTime &&
+           maxDensity == rhs.maxDensity &&
            split == rhs.split &&
            surfaceDimension == rhs.surfaceDimension &&
            surfaceSize == rhs.surfaceSize &&
