@@ -11,12 +11,15 @@ double OrderedShape2_1::preferredAngle{};
 double OrderedShape2_1::angleDistributionSigma{};
 std::normal_distribution<double> OrderedShape2_1::angleDistribution{};
 
-
+/* Arguments in format: (angle distribution average) (angle distribution sigma) (encapsulated class parameters) */
 void OrderedShape2_1::initClass(const std::string &args, InitClassFunction baseShapeInitClassFunction) {
     std::istringstream argsStream(args);
     argsStream >> preferredAngle >> angleDistributionSigma;
     ValidateMsg(argsStream, "Malformed OrderedShape2_1 parameters");
     ValidateMsg(angleDistributionSigma > 0, "Angle distribution sigma should be positive");
+
+    preferredAngle = preferredAngle * M_PI / 180.;
+    angleDistributionSigma = angleDistributionSigma * M_PI / 180.;
     angleDistribution = std::normal_distribution<double>(preferredAngle, angleDistributionSigma);
 
     std::string baseShapeArgs;

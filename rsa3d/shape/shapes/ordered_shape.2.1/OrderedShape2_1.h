@@ -9,6 +9,13 @@
 
 #include "../../Shape.h"
 
+/**
+ * @brief Class which encapsulated another Shape<2, 1> and samples this particles with gaussian-distribution-drawn
+ * orientations.
+ *
+ * Distribution properies and encapsulated class are set using OrderedShape2_1::initClass. All methods are appropriately
+ * delegated to underlying Shape.
+ */
 class OrderedShape2_1 : public Shape<2, 0> {
 private:
     class RNDUniformRandomBitGenerator {
@@ -36,6 +43,12 @@ private:
 public:
     using InitClassFunction = void(*)(const std::string &);
 
+    /**
+     * @brief Inits OrderedShape2_1 class, which encapsulated Shape<2, 1> class.
+     * @param args Arguments in format:
+     *        (angle distribution average) (angle distribution sigma) (encapsulated class parameters)
+     * @param baseShapeInitClassFunction pointer to encapsulate Shape<2, 1> initClass function
+     */
     static void initClass(const std::string &args, InitClassFunction baseShapeInitClassFunction);
     static Shape<2, 0> *createShape(RND *rnd);
 
