@@ -305,6 +305,14 @@ bool Polydisk::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{
 bool Polydisk::fullAngleVoxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition,
                                     double spatialSize) const
 {
+    double voxelCircumsphereRadius = spatialSize / M_SQRT2;
+    double insphereRadius = Polydisk::getInsphereRadius();
+
+    for (std::size_t i = 0; i < Polydisk::diskR.size(); i++) {
+        double voxelDistance2 = bc->distance2(this->getDiskPosition(i), voxelPosition);
+        if (voxelDistance2 <= std::pow(Polydisk::diskR[i] + insphereRadius - voxelCircumsphereRadius, 2))
+            return true;
+    }
     return false;
 }
 
@@ -319,8 +327,9 @@ bool Polydisk::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosi
         case UNKNOWN:   break;
     }
 
-	//if (angularSize >= 2*M_PI)
-	//    return this->fullAngleVoxelInside(bc, voxelPosition, spatialSize);
+    // Version optimized for full angle - it was made mainly for OrientedFibrinogen, because it took ages to generate
+    if (angularSize >= 2*M_PI)
+	    return this->fullAngleVoxelInside(bc, voxelPosition, spatialSize);
 
 	Vector<2> translation = bc->getTranslation(voxelPosition, this->getPosition());
 	Vector<2> thisPosition = this->getPosition() + translation;
