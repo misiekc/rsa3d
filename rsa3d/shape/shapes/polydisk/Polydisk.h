@@ -40,6 +40,17 @@ private:
 			 	 	 	 	 	   size_t disk1, const Vector<2> disk1Position, const Orientation<1> disk1Orientation,
 								   double spatialSize, double angularSize);
 
+    static std::vector<std::size_t> getIndicesOfLargestDisks();
+    static Vector<2> getApproximateMassCentre();
+    static Vector<2> findPositionOfLargestDiskClosestToMassCentre();
+    static void centerPolydisk(const Vector<2> &newCentre);
+    static Vector<2> getStaticDiskPosition(size_t diskIndex);
+
+    Vector<2> getDiskPosition(std::size_t diskIndex) const;
+
+    //like voxelInside, but optimized for full angle angularSize
+    bool fullAngleVoxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition, double spatialSize) const;
+
 protected:
 	//polar coordinates of all disks
 	//assume vertex 0 is linked to vertex 1, vertex 1 is linked to vertex 2, vertex 2 is linked to vertex 3, etc.
@@ -60,8 +71,6 @@ public:
 					 double spatialSize, double angularSize) const override;
     std::string toPovray() const override;
     std::string toWolfram() const override;
-
-    Vector<2> getDiskPosition(std::size_t diskIndex) const;
 };
 
 #endif /* SHAPES_POLYDISK_H_ */

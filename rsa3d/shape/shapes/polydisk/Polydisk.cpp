@@ -69,14 +69,14 @@ void Polydisk::initClass(const std::string &args){
 	}
 	Polydisk::normalizeArea(Polydisk::area);
 
-	double circumsphereRadius = 0;
-	double insphereRadius = Polydisk::diskR[0];
-	for (size_t i = 0; i < Polydisk::diskCentreR.size(); i++){
+    Vector<2> newCentre = Polydisk::findPositionOfLargestDiskClosestToMassCentre();
+    Polydisk::centerPolydisk(newCentre);
+
+    double insphereRadius = Polydisk::diskR[Polydisk::getIndicesOfLargestDisks().front()];
+    double circumsphereRadius = 0;
+	for (size_t i = 0; i < Polydisk::diskCentreR.size(); i++)
 		if (circumsphereRadius < Polydisk::diskCentreR[i] + Polydisk::diskR[i])
 			circumsphereRadius = Polydisk::diskCentreR[i] + Polydisk::diskR[i];
-		if (insphereRadius > Polydisk::diskR[i])
-			insphereRadius = Polydisk::diskR[i];
-	}
 
 	ShapeStaticInfo<2, 1> shapeInfo;
 
@@ -87,6 +87,56 @@ void Polydisk::initClass(const std::string &args){
 	shapeInfo.setDefaultCreateShapeImpl <Polydisk> ();
 
 	Shape::setShapeStaticInfo(shapeInfo);
+}
+
+void Polydisk::centerPolydisk(const Vector<2> &newCentre) {
+    for (std::size_t i = 0; i < diskCentreR.size(); i++) {
+        Vector<2> position = Polydisk::getStaticDiskPosition(i);
+        position -= newCentre;
+
+        Polydisk::diskCentreR[i] = position.norm();
+        Polydisk::diskCentreTheta[i] = position.angle();
+    }
+}
+
+Vector<2> Polydisk::findPositionOfLargestDiskClosestToMassCentre() {
+    std::vector<std::size_t> indicesOfLargestDisks = Polydisk::getIndicesOfLargestDisks();
+
+    std::vector<Vector<2>> positionsOfLargestDisks;
+    std::transform(indicesOfLargestDisks.begin(), indicesOfLargestDisks.end(),
+                   std::back_inserter(positionsOfLargestDisks), &Polydisk::getStaticDiskPosition);
+
+    Vector<2> approximateMassCentre = Polydisk::getApproximateMassCentre();
+
+    return *std::min_element(positionsOfLargestDisks.begin(), positionsOfLargestDisks.end(),
+                             [approximateMassCentre](auto p1, auto p2) {
+                                 return (p1 - approximateMassCentre).norm2() < (p2 - approximateMassCentre).norm2();
+                             });
+}
+
+Vector<2> Polydisk::getApproximateMassCentre() {
+    Vector<2> approximateMassCentre;
+    for (size_t i = 0; i < diskCentreR.size(); i++)
+        approximateMassCentre += getStaticDiskPosition(i) * std::pow(diskR[i], 2);
+    double sumOfDiskRadiusSquares = std::accumulate(diskR.begin(), diskR.end(), 0.,
+                                                    [](double sum, double r) { return sum + r*r; });
+    approximateMassCentre /= sumOfDiskRadiusSquares;
+    return approximateMassCentre;
+}
+
+std::vector<std::size_t> Polydisk::getIndicesOfLargestDisks() {
+    std::vector<std::size_t> indexesOfLargestDisks = {0};
+    double radiusOfLargestDisk = diskR[0];
+    for (std::size_t i = 1; i < diskR.size(); i++) {
+        double diskR = Polydisk::diskR[i];
+        if (diskR == radiusOfLargestDisk) {
+            indexesOfLargestDisks.push_back(i);
+        } else if (diskR > radiusOfLargestDisk) {
+            radiusOfLargestDisk = diskR;
+            indexesOfLargestDisks = {i};
+        }
+    }
+    return indexesOfLargestDisks;
 }
 
 double Polydisk::mcArea(size_t mcTrials){
@@ -246,11 +296,19 @@ bool Polydisk::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{
 	return false;
 }
 
+bool Polydisk::fullAngleVoxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition,
+                                    double spatialSize) const
+{
+    return false;
+}
 
 bool Polydisk::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition, const Orientation<1> &voxelOrientation, double spatialSize, double angularSize) const{
 
 	if (voxelOrientation[0] > Shape<2, 1>::getVoxelAngularSize())
 		return true;
+
+	//if (angularSize >= 2*M_PI)
+	//    return this->fullAngleVoxelInside(bc, voxelPosition, spatialSize);
 
 	Vector<2> translation = bc->getTranslation(voxelPosition, this->getPosition());
 	Vector<2> thisPosition = this->getPosition() + translation;
@@ -302,11 +360,19 @@ std::string Polydisk::toWolfram() const {
 }
 
 Vector<2> Polydisk::getDiskPosition(std::size_t diskIndex) const {
-    Expects(diskIndex < diskCentreR.size());
+    Expects(diskIndex < Polydisk::diskCentreR.size());
 
     auto position = this->getPosition();
     double angle = this->getOrientation()[0];
     return {{position[0] + Polydisk::diskCentreR[diskIndex] * std::cos(Polydisk::diskCentreTheta[diskIndex] + angle),
-             position[1] + Polydisk::diskCentreR[diskIndex] * std::sin(Polydisk::diskCentreTheta[diskIndex] + angle)}};
+                    position[1] + Polydisk::diskCentreR[diskIndex] * std::sin(Polydisk::diskCentreTheta[diskIndex] + angle)}};
+}
+
+
+Vector<2> Polydisk::getStaticDiskPosition(std::size_t diskIndex) {
+    Expects(diskIndex < Polydisk::diskCentreR.size());
+
+    return {{Polydisk::diskCentreR[diskIndex] * std::cos(Polydisk::diskCentreTheta[diskIndex]),
+             Polydisk::diskCentreR[diskIndex] * std::sin(Polydisk::diskCentreTheta[diskIndex])}};
 }
 
