@@ -278,6 +278,12 @@ double Polydisk::getVolume(unsigned short dim) const {
 }
 
 bool Polydisk::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{
+    switch (this->overlapEarlyRejection(bc, s)) {
+        case TRUE:      return true;
+        case FALSE:     return false;
+        case UNKNOWN:   break;
+    }
+
 	Polydisk pol = dynamic_cast<const Polydisk&>(*s);
 	this->applyBC(bc, &pol);
 
@@ -306,6 +312,12 @@ bool Polydisk::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosi
 
 	if (voxelOrientation[0] > Shape<2, 1>::getVoxelAngularSize())
 		return true;
+
+    switch(this->voxelInsideEarlyRejection(bc, voxelPosition, voxelOrientation, spatialSize, angularSize)) {
+        case TRUE:      return true;
+        case FALSE:     return false;
+        case UNKNOWN:   break;
+    }
 
 	//if (angularSize >= 2*M_PI)
 	//    return this->fullAngleVoxelInside(bc, voxelPosition, spatialSize);
