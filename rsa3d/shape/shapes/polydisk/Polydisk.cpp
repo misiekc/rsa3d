@@ -360,7 +360,7 @@ std::string Polydisk::toWolfram() const {
     std::stringstream out;
     out.precision(std::numeric_limits<double>::max_digits10);
 
-    out << "{";
+    out << std::fixed << "{";
     for (std::size_t i = 0, max = Polydisk::diskCentreR.size(); i < max; i++) {
         out << "Disk[" << this->getDiskPosition(i) << ", " << Polydisk::diskR[i] << "]";
         if (i < max - 1)
