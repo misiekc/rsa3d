@@ -46,11 +46,12 @@ namespace {
         }
     };
 
+    static const std::string MAX_TRIES_PLACEHOLDER = "max_tries_placeholder";
     std::vector<TestInfo> testInfos = {
-            {"shape_ovtest", shape_ovtest::main, {"1.7", "100000"}},
-            {"shape_pitest", shape_pitest::main, {"1.7", "100000"}},
-            {"shape_sizetest", shape_sizetest::main, {"100000"}},
-            {"shape_bctest", shape_bctest::main, {"1.7", "100000"}}
+            {"shape_ovtest", shape_ovtest::main, {"1.7", MAX_TRIES_PLACEHOLDER}},
+            {"shape_pitest", shape_pitest::main, {"1.7", MAX_TRIES_PLACEHOLDER}},
+            {"shape_sizetest", shape_sizetest::main, {MAX_TRIES_PLACEHOLDER}},
+            {"shape_bctest", shape_bctest::main, {"1.7", MAX_TRIES_PLACEHOLDER}}
     };
 
     class ArgumentsBuilder {
@@ -84,16 +85,18 @@ namespace {
 
 int shape_ultitest::main(int argc, char **argv) {
     if (argc < 4) {
-        std::cerr << "Usage: ./rsa_test shape_ultitest [particle] [attibutes]" << std::endl;
+        std::cerr << "Usage: ./rsa_test shape_ultitest [particle] [attibutes] (max tries = 100000)" << std::endl;
         return TEST_ERROR;
     }
 
     std::string particle = argv[2];
     std::string attributes = argv[3];
+    std::string maxTries = (argc == 4 ? "100000" : argv[4]);
 
     for (auto &testInfo : testInfos) {
         std::vector<std::string> arguments = {argv[0], testInfo.name, particle, attributes};
         std::copy(testInfo.arguments.begin(), testInfo.arguments.end(), std::back_inserter(arguments));
+        std::replace(arguments.begin(), arguments.end(), MAX_TRIES_PLACEHOLDER, maxTries);
         ArgumentsBuilder builder(arguments);
 
         std::cout << std::endl;
