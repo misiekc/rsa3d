@@ -29,6 +29,11 @@ double Polydisk::area;
  * Shape is automatically rescaled to have unit area.
  */
 void Polydisk::initClass(const std::string &args){
+    Polydisk::diskCentreR.clear();
+    Polydisk::diskCentreTheta.clear();
+    Polydisk::diskR.clear();
+    Polydisk::area = 0;
+
 	std::istringstream in(args);
 
 	size_t n;
