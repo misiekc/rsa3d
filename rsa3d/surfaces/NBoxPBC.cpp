@@ -6,8 +6,11 @@
  */
 
 #include "NBoxPBC.h"
+#include "../utils/Assertions.h"
 
 NBoxPBC::NBoxPBC(int dim, double s, double ndx, double vdx) : Surface(dim, s, ndx, vdx){
+    ValidateMsg(s > 4*RSAShape::getCircumsphereRadius(),
+                "Packing linear size is <= 4 circumscribed spheres - boundary conditions will break. ");
 }
 
 double NBoxPBC::getArea() const {
