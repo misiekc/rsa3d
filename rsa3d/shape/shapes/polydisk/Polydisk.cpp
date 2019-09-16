@@ -16,18 +16,7 @@ std::vector<double> Polydisk::diskCentreTheta;
 std::vector<double> Polydisk::diskR;
 double Polydisk::area;
 
-/**
- * @param args contains information about coordinates of each disk of the Polydisk.
- * Data should be separated by only spaces, and should be:
- * number_of_disks [xy|rt] c01 c02 r0 c11 c12 r1 c21 c22 r2 ... area
- * xy means cartesian coordinates, and rt means polar coordinates
- * Example format of coordinates
- * 2 xy -1 0 1 1 0 1 6.28318530718
- * or equivalently
- * 4 rt 1 0 1 1 3.1415927 1 6.28318530718
- * if provided area == 0 then it is calculated using Monte-Carlo method.
- * Shape is automatically rescaled to have unit area.
- */
+/* number_of_disks [xy|rt] c01 c02 r0 c11 c12 r1 c21 c22 r2 ... area */
 void Polydisk::initClass(const std::string &args){
     Polydisk::diskCentreR.clear();
     Polydisk::diskCentreTheta.clear();
