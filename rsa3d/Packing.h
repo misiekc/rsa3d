@@ -125,14 +125,12 @@ public:
     const_iterator end() const { return this->packing.end(); }
 
     /**
-     * @brief Clones and translates shapes distant from the surface boundary not more than @a expandMargin x @a size
+     * @brief Clones and translates shapes distant from the surface boundary not more than circumsphere radius
      * according to periodic boundary conditions
-     * @param packing a packing to expand
      * @param linearSize the size of the packing
-     * @param expandMarginFraction the distance (from 0 to 0.5) relative to @a size from the surface boundary from which shapes
      * will be translated
      */
-    void expandOnPBC(double linearSize, double expandMarginFraction);
+    void expandOnPBC(double linearSize);
 
     /**
      * @brief Return the total volume of particles in the packing.

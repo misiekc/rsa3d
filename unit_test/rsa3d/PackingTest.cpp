@@ -313,11 +313,8 @@ TEST_CASE("Packing: PBC expand") {
     SECTION("invalid arguments") {
         Packing packing;
 
-        REQUIRE_THROWS(packing.expandOnPBC(0, 0.1));
-        REQUIRE_THROWS(packing.expandOnPBC(-1, 0.1));
-        REQUIRE_THROWS(packing.expandOnPBC(1, -0.1));
-        REQUIRE_THROWS(packing.expandOnPBC(1, 0.5));
-        REQUIRE_THROWS(packing.expandOnPBC(1, 0.6));
+        REQUIRE_THROWS(packing.expandOnPBC(0));
+        REQUIRE_THROWS(packing.expandOnPBC(-1));
     }
 }
 

@@ -464,13 +464,11 @@ void PackingGenerator::printRemainingVoxels(const std::string &prefix){
 
 
 void PackingGenerator::toWolfram(Packing packing, double size, VoxelList *voxels, bool isPeriodicImage,
-                                 double bcExpandFraction, const std::string &filename) {
-    Expects(bcExpandFraction >= 0 && bcExpandFraction < 0.5);
-
+                                 const std::string &filename) {
 	std::ofstream file(filename);
 
 	if (isPeriodicImage)
-	    packing.expandOnPBC(size, bcExpandFraction);
+	    packing.expandOnPBC(size);
 
     #if RSA_SPATIAL_DIMENSION == 1
 		file << "Graphics[{Red";
@@ -500,7 +498,7 @@ void PackingGenerator::toWolfram(Packing packing, double size, VoxelList *voxels
 }
 
 void PackingGenerator::toWolfram(const std::string &filename){
-    PackingGenerator::toWolfram(this->packing, this->params.surfaceSize, this->voxels, false, 0, filename);
+    PackingGenerator::toWolfram(this->packing, this->params.surfaceSize, this->voxels, false, filename);
 }
 
 void PackingGenerator::store(std::ostream &f) const{
