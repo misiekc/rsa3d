@@ -96,18 +96,20 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
         } else if (sClass == "OrientedCuboid") {
             OrientedCuboid<RSA_SPATIAL_DIMENSION>::initClass(attr);
             return;
-        } else if (sClass == "OrientedPolydisk") {
-            OrderedShape2_1::initClass(attr, Polydisk::initClass);
-            return;
-        } else if (sClass == "OrientedEllipse") {
-            OrderedShape2_1::initClass(attr, Ellipse::initClass);
-            return;
-        } else if (sClass == "OrientedFibrinogen") {
-            OrderedShape2_1::initClass(attr, Fibrinogen::initClass);
-            return;
         }
-
-		#if RSA_SPATIAL_DIMENSION == 3
+        
+        #if RSA_SPATIAL_DIMENSION == 2
+            if (sClass == "OrientedPolydisk") {
+                OrderedShape2_1::initClass(attr, Polydisk::initClass);
+                return;
+            } else if (sClass == "OrientedEllipse") {
+                OrderedShape2_1::initClass(attr, Ellipse::initClass);
+                return;
+            } else if (sClass == "OrientedFibrinogen") {
+                OrderedShape2_1::initClass(attr, Fibrinogen::initClass);
+                return;
+            }
+		#elif RSA_SPATIAL_DIMENSION == 3
         	if (sClass == "Cuboid") {
         		Cuboid::initClass(attr);
         		return;
