@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <string>
 
-
 // bool OrientedCuboid::do2Drotation;
 template <unsigned short DIMENSION>
 double OrientedCuboid<DIMENSION>::size[DIMENSION];
@@ -66,6 +65,60 @@ bool OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, c
 	}
 	return true;
 }
+
+
+
+/*
+template <unsigned short DIMENSION>
+bool OrientedCuboid<DIMENSION>::voxelInside(BoundaryConditions<DIMENSION> *bc, Voxel *v, double spatialSize, double angularSize, const std::vector<const RSAShape *> *shapes){
+	// check over single shapes
+	RSAVector vpos = v->getPosition();
+	for(const RSAShape* s : *shapes){
+		if (s->voxelInside(bc, vpos, v->getOrientation(), spatialSize, angularSize) )
+			return true;
+	}
+	// check over pairs
+	char result = 0;
+	bool fbreak = false;
+	for (size_t i=0; i<shapes->size(); i++){
+		const RSAShape* si = (*shapes)[i];
+		RSAVector pi = si->getPosition();
+		for (size_t j=i+1; j<shapes->size(); j++){
+			const RSAShape* sj = (*shapes)[j];
+			RSAVector pj = sj->getPosition();
+			for (ushort k=0; k<DIMENSION; k++){
+				if (std::fabs(pi[k] - pj[k]) > 2*size[k]){ // this pair does not exclude any voxel
+					fbreak = true;
+					break;
+				}
+				else if (std::fabs(pi[k] - pj[k]) > size[k]) // voxel may be at the boundary of exclusion zones
+					// check if voxel is between shapes
+					if (
+							((std::fabs(vpos[k] - pi[k])<size[k] || std::fabs(vpos[k] - pj[k])<size[k])) &&
+							((std::fabs(vpos[k] + spatialSize - pi[k])<size[k] || std::fabs(vpos[k] + spatialSize - pj[k])<size[k]))
+					)
+						result++;
+					else{
+						fbreak = true;
+						break;
+					}
+				else  // std::fabs(pi[k] - pj[k]) < size[k]
+					// another check
+					if (!
+							((std::fabs(vpos[k] - pi[k])<0.5*size[k] || std::fabs(vpos[k] - pj[k])<0.5*size[k])) &&
+							((std::fabs(vpos[k] + spatialSize - pi[k])<0.5*size[k] || std::fabs(vpos[k] + spatialSize - pj[k])<0.5*size[k]))
+					){
+						fbreak = true;
+						break;
+					}
+			}
+			if (fbreak == false && result < DIMENSION)
+				return true;
+		}
+	}
+	return false;
+}
+*/
 
 template <unsigned short DIMENSION>
 double OrientedCuboid<DIMENSION>::getVolume(unsigned short dim) const{

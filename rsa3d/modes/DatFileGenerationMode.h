@@ -13,6 +13,8 @@ class DatFileGenerationMode : public ProgramMode {
 private:
     std::string dirName;
 
+    double getMedian(std::vector<double> &data);
+
 public:
     explicit DatFileGenerationMode(const ProgramArguments &arguments);
 

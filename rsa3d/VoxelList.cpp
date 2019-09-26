@@ -13,6 +13,7 @@
 #include "utils/OMPMacros.h"
 #include "utils/Assertions.h"
 
+#include "shape/shapes/OrientedCuboid.h"
 
 /**
  * d - requested initial size of a voxel
@@ -268,6 +269,67 @@ bool VoxelList::isVoxelInsidePacking(Voxel *v){
  * returns true when the whole voxel is inside an exclusion area of any shape in shapes
  * To determine it the method tires to split voxel up to level of maxDepth
  */
+bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
+										   std::vector<const RSAShape *> *shapes, RSABoundaryConditions *bc,
+                                           unsigned short depth){
+
+	bool isInside = false;
+	for(const RSAShape *s : *shapes){
+		isInside = s->voxelInside(bc, v->getPosition(), v->getOrientation(), spatialSize, angularSize);
+		if (isInside)
+			break;
+	}
+
+	if (isInside || depth == 0){
+		return isInside;
+	// if cannot determine that it is inside and depth > 0 split and recursively check children
+	}else{
+		size_t length = 1.0;
+		// dzielimy voxel na mniejsze
+		size_t tmpArrayLength = (size_t)round( pow(2, this->surfaceDimension+RSA_ANGULAR_DIMENSION) );
+		Voxel **tmpVoxels = new Voxel*[ tmpArrayLength ];
+		size_t finalArrayLength = (size_t)round( pow(pow(2.0, depth), this->surfaceDimension+RSA_ANGULAR_DIMENSION) );
+		Voxel **finalVoxels = new Voxel*[ finalArrayLength ];
+		double ss = spatialSize;
+		double as = angularSize;
+		finalVoxels[0] = v;
+		size_t last = 0;
+		for(unsigned short i=0; i<depth; i++){
+			ss /= 2.0;
+			as /= 2.0;
+			for(size_t j=0; j<length; j++){
+				this->splitVoxel(v, ss, as, tmpVoxels);
+				finalVoxels[j] = tmpVoxels[0];
+				for(size_t k=1; k<tmpArrayLength; k++){
+					last++;
+					finalVoxels[last] = tmpVoxels[k];
+				}
+			}
+			length *= tmpArrayLength;
+		}
+		Validate(last==length-1);
+		bool bRes = true;
+		// sprawdzamy kazdy z mniejszych
+		for(size_t i=0; i<finalArrayLength; i++){
+			// jesli choc jeden z mniejszych jest false zwracamy false
+			if (!this->isVoxelInsideExclusionZone(finalVoxels[i], ss, as, shapes, bc, depth-1)){
+				bRes = false;
+				break;
+			}
+		}
+		// w przeciwnym razie zwracamy true;
+
+		for(size_t i=0; i<finalArrayLength; i++){
+			delete finalVoxels[i];
+		}
+		delete[] finalVoxels;
+		delete[] tmpVoxels;
+
+		return bRes;
+	}
+}
+/*
+// old recursive version
 
 bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
 										   std::vector<const RSAShape *> *shapes, RSABoundaryConditions *bc,
@@ -313,6 +375,7 @@ bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double 
 		return bRes;
 	}
 }
+*/
 
 
 bool VoxelList::isTopLevelVoxelActive(Voxel *v){
@@ -349,6 +412,28 @@ bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABou
 	return false;
 }
 
+/*
+
+//test version for oriented cuboids
+
+bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, double angularSize, unsigned short depth){
+	if (!this->disabled){ // && (depth > v->depth || depth==0) ){
+
+	    if (!isTopLevelVoxelActive(v) || !this->isVoxelInsidePacking(v) )
+			return true;
+
+	    std::vector<const RSAShape*> shapes;
+		    nl->getNeighbours(&shapes, v->getPosition());
+
+		bool isInside = OrientedCuboid<RSA_SPATIAL_DIMENSION>::voxelInside(bc, v, spatialSize, angularSize, &shapes);
+
+		v->depth = depth;
+		v->lastAnalyzed = 0;
+		return isInside;
+	}
+	return false;
+}
+*/
 
 size_t VoxelList::analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth) {
 

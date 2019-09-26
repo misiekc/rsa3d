@@ -8,6 +8,9 @@
 #ifndef SHAPES_ORIENTEDCUBOID_H_
 #define SHAPES_ORIENTEDCUBOID_H_
 
+#include "../../Voxel.h"
+#include "../ConvexShape.h"
+
 
 template <unsigned short DIMENSION>
 class OrientedCuboid : public ConvexShape<DIMENSION, 0>{
@@ -15,8 +18,10 @@ private:
 //	static bool do2Drotation;
     static double 			size[DIMENSION];
 
+
 public:
 	static void initClass(const std::string &args);
+    static bool voxelInside(BoundaryConditions<DIMENSION> *bc, Voxel *v, double spatialSize, double angularSize, const std::vector<const RSAShape *> *shapes);
 
     bool overlap(BoundaryConditions<DIMENSION> *bc, const Shape<DIMENSION, 0> *s) const override;
 	bool pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position,
