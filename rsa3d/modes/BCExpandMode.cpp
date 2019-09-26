@@ -12,13 +12,12 @@ BCExpandMode::BCExpandMode(const ProgramArguments &arguments) : ProgramMode(argu
         die(arguments.formatUsage("<file in> (file out = file in)"));
 
     this->packingInFilename = positionalArguments[0];
-    this->packingOutFilename = (positionalArguments.size() == 1 ?
-                                this->packingInFilename : positionalArguments[1]);
+    this->packingOutFilename = (positionalArguments.size() == 1 ? this->packingInFilename : positionalArguments[1]);
 }
 
 void BCExpandMode::run() {
     Packing packing;
     packing.restore(this->packingInFilename);
-    packing.expandOnPBC(this->params.surfaceSize, 0.1);
+    packing.expandOnPBC(this->params.surfaceSize);
     packing.store(this->packingOutFilename);
 }

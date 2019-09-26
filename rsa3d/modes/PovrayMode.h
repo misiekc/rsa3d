@@ -12,6 +12,7 @@
 class PovrayMode : public ProgramMode {
 private:
     std::string packingFilename;
+    bool isPeriodicImage;
 
 public:
     explicit PovrayMode(const ProgramArguments &arguments);

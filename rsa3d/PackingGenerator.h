@@ -58,9 +58,10 @@ public:
 	void restore(std::istream &f);
 	std::string getPackingFilename() const;
 
-	static void toPovray(const Packing &packing, double size, VoxelList *voxels, const std::string &filename);
+	static void toPovray(Packing packing, double size, VoxelList *voxels, bool drawPBC,
+                         const std::string &filename);
     static void toWolfram(Packing packing, double size, VoxelList *voxels, bool isPeriodicImage,
-                          double bcExpandFraction, const std::string &filename);
+                          const std::string &filename);
 	static std::vector<std::string> findPackingsInDir(const std::string &dirName);
 
     bool generationCompleted(size_t missCounter, double t);

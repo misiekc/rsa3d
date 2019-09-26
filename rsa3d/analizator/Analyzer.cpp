@@ -268,35 +268,39 @@ void Analyzer::printCorrelations(Plot& correlations, std::string filename){
 	}
 	correlations.getAsHistogramPoints(correlationPoints);
 
-	double r = 0.0, volume, expectedNumberOfParticles, packingVolume;
+	double packingVolume;
 
-	if (RSA_SPATIAL_DIMENSION==2)
+	if constexpr (RSA_SPATIAL_DIMENSION==2)
 		packingVolume = M_PI * pow(correlations.getMax(), 2.0);
-	else if (RSA_SPATIAL_DIMENSION==3)
+	else if constexpr (RSA_SPATIAL_DIMENSION==3)
 		packingVolume = 4.0/3.0 * M_PI * pow(correlations.getMax(), 3.0);
 	else
 		return;
 
-	unsigned long int totalPoints = correlations.getTotalNumberOfHistogramPoints();
+    std::ofstream file(filename);
 
-	std::ofstream file(filename);
+    unsigned long int totalPoints = correlations.getTotalNumberOfHistogramPoints();
 
-	volume = 0.0;
+    double r{};
 	for (int i = 0; i < correlations.size()-1; i++) {
+	    double thinShellVolume{};
 		if (i>0){
-			if (RSA_SPATIAL_DIMENSION==2)
-				volume = -M_PI * r*r;
-			else if (RSA_SPATIAL_DIMENSION==3)
-				volume = -4.0/3.0* M_PI * r*r*r;
+			if constexpr (RSA_SPATIAL_DIMENSION==2)
+				thinShellVolume = -M_PI * r*r;
+			else if constexpr (RSA_SPATIAL_DIMENSION==3)
+				thinShellVolume = -4.0/3.0* M_PI * r*r*r;
 		}
 		r = 0.5*(correlationPoints[i][0]+correlationPoints[i+1][0]);
-		if (RSA_SPATIAL_DIMENSION==2)
-			volume += M_PI * r*r;
-		else if (RSA_SPATIAL_DIMENSION==3)
-			volume += 4.0/3.0* M_PI * r*r*r;
+		if constexpr (RSA_SPATIAL_DIMENSION==2)
+			thinShellVolume += M_PI * r*r;
+		else if constexpr (RSA_SPATIAL_DIMENSION==3)
+			thinShellVolume += 4.0/3.0* M_PI * r*r*r;
 
-		expectedNumberOfParticles = totalPoints * volume / packingVolume;
-		file << correlationPoints[i][0] << "\t" << correlationPoints[i][1] / expectedNumberOfParticles;
+		double expectedNumberOfParticles = totalPoints * thinShellVolume / packingVolume;
+		double G = correlationPoints[i][1] / expectedNumberOfParticles;
+		double dG = std::sqrt(static_cast<double>(correlationPoints[i][1])) / expectedNumberOfParticles;
+		
+		file << correlationPoints[i][0] << "\t" << G << "\t" << dG;
 		file << std::endl;
 	}
 	file.close();

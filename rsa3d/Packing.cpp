@@ -57,18 +57,18 @@ void Packing::restore(const std::string &filename) {
     file.close();
 }
 
-void Packing::expandOnPBC(double linearSize, double expandMarginFraction) {
+void Packing::expandOnPBC(double linearSize) {
     Expects(linearSize > 0.0);
-    Expects(expandMarginFraction >= 0.0 && expandMarginFraction < 0.5);
+    double circusphereRadius = RSAShape::getCircumsphereRadius();
 
     for (std::size_t i = 0; i < RSA_SPATIAL_DIMENSION; i++) {
         std::size_t oldSize = this->size();
         for (std::size_t j = 0; j < oldSize; j++) {
             auto shape = (*this)[j];
             RSAVector position = shape->getPosition();
-            if (position[i] < expandMarginFraction * linearSize)
+            if (position[i] < circusphereRadius)
                 expandShapeOnBC(shape, linearSize, i);
-            else if (position[i] > (1 - expandMarginFraction) * linearSize)
+            else if (position[i] > linearSize - circusphereRadius)
                 expandShapeOnBC(shape, -linearSize, i);
         }
     }

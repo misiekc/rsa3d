@@ -109,8 +109,12 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
                 OrderedShape2_1::initClass(attr, Fibrinogen::initClass);
                 return;
             }
+<<<<<<< HEAD
 
 		#if RSA_SPATIAL_DIMENSION == 3
+=======
+		#elif RSA_SPATIAL_DIMENSION == 3
+>>>>>>> refs/remotes/origin/master
         	if (sClass == "Cuboid") {
         		Cuboid::initClass(attr);
         		return;

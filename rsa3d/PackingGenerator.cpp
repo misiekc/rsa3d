@@ -384,12 +384,22 @@ const Packing &PackingGenerator::getPacking(){
 }
 
 
-void PackingGenerator::toPovray(const Packing &packing, double size, VoxelList *voxels, const std::string &filename){
+void PackingGenerator::toPovray(Packing packing, double size, VoxelList *voxels, bool drawPBC,
+                                const std::string &filename) {
 	std::ofstream file(filename);
 
-	file << "#include \"colors.inc\"" << std::endl;
+    if (drawPBC)
+        packing.expandOnPBC(size);
+
+    file << "#include \"colors.inc\"" << std::endl;
 	file << "background { color White }" << std::endl;
-	file << "camera { orthographic location <" << size / 2 << ", " << size / 2 << ", " << (1.3 * size) << "> look_at  <" << size / 2 << ", " << size / 2 << ",  0> }" << std::endl;
+	file << "camera {" << std::endl;
+	file << "  orthographic" << std::endl;
+	file << "  location <" << size / 2 << ", " << size / 2 << ", " << (1.3 * size) << ">" << std::endl;
+	file << "  look_at <" << size / 2 << ", " << size / 2 << ",  0>" << std::endl;
+	file << "  right <" << size << ", 0, 0>" << std::endl;
+	file << "  up <0, " << size << ", 0>" << std::endl;
+	file << "}" << std::endl;
 	file << "light_source { < 1000.0, 1000.0, 1000.0> color White shadowless parallel point_at <" << size / 2 << ", " << size / 2 << ",  0>}" << std::endl;
 	file << "#declare layer=union{" << std::endl;
 
@@ -424,7 +434,7 @@ void PackingGenerator::toPovray(const Packing &packing, double size, VoxelList *
 
 
 void PackingGenerator::toPovray(const std::string &filename){
-	PackingGenerator::toPovray(this->packing, this->params.surfaceSize, this->voxels, filename);
+    PackingGenerator::toPovray(this->packing, this->params.surfaceSize, this->voxels, false, filename);
 }
 
 
@@ -464,13 +474,11 @@ void PackingGenerator::printRemainingVoxels(const std::string &prefix){
 
 
 void PackingGenerator::toWolfram(Packing packing, double size, VoxelList *voxels, bool isPeriodicImage,
-                                 double bcExpandFraction, const std::string &filename) {
-    Expects(bcExpandFraction >= 0 && bcExpandFraction < 0.5);
-
+                                 const std::string &filename) {
 	std::ofstream file(filename);
 
 	if (isPeriodicImage)
-	    packing.expandOnPBC(size, bcExpandFraction);
+	    packing.expandOnPBC(size);
 
     #if RSA_SPATIAL_DIMENSION == 1
 		file << "Graphics[{Red";
@@ -500,7 +508,7 @@ void PackingGenerator::toWolfram(Packing packing, double size, VoxelList *voxels
 }
 
 void PackingGenerator::toWolfram(const std::string &filename){
-    PackingGenerator::toWolfram(this->packing, this->params.surfaceSize, this->voxels, false, 0, filename);
+    PackingGenerator::toWolfram(this->packing, this->params.surfaceSize, this->voxels, false, filename);
 }
 
 void PackingGenerator::store(std::ostream &f) const{

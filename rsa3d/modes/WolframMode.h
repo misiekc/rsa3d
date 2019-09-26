@@ -13,7 +13,6 @@ class WolframMode : public ProgramMode {
 private:
     std::string packingFilename;
     bool isPeriodicImage{};
-    double bcExpandFraction{};
 
 public:
     explicit WolframMode(const ProgramArguments &arguments);
