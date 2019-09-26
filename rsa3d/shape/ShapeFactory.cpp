@@ -10,12 +10,35 @@
 #include "../utils/Assertions.h"
 
 #if RSA_ANGULAR_DIMENSION == 0
-	#include "shapes/Sphere.h"
+    #include "shapes/Sphere.h"
 	#include "shapes/spherocylinder/Spherocylinder.h"
 	#include "shapes/OrientedCuboid.h"
+#endif
 
-	#if RSA_SPATIAL_DIMENSION == 3
-		#include "shapes/cuboid/Cuboid.h"
+#if RSA_SPATIAL_DIMENSION == 1
+    #if RSA_ANGULAR_DIMENSION == 1
+        #include "shapes/Ellipse1Dim.h"
+    #endif
+#elif RSA_SPATIAL_DIMENSION == 2
+	#if RSA_ANGULAR_DIMENSION == 0
+        #include "shapes/Ellipse.h"
+        #include "shapes/polydisk/Polydisk.h"
+        #include "shapes/polydisk/Fibrinogen.h"
+        #include "shapes/ordered_shape.2.1/OrderedShape2_1.h"
+    #elif RSA_ANGULAR_DIMENSION == 1
+		#include "shapes/spherocylinder/SpheroCylinder2D.h"
+		#include "shapes/Ellipse.h"
+		#include "shapes/Rectangle.h"
+        #include "shapes/polydisk/Fibrinogen.h"
+        #include "shapes/polydisk/Polydisk.h"
+		#include "shapes/polygon/Polygon.h"
+		#include "shapes/polygon/SBPolygon.h"
+		#include "shapes/polygon/HBPolygon.h"
+        #include "shapes/polygon/Triangle.h"
+    #endif
+#elif RSA_SPATIAL_DIMENSION == 3
+    #if RSA_ANGULAR_DIMENSION == 0
+        #include "shapes/cuboid/Cuboid.h"
 		#include "shapes/regular_solid/Dodecahedron.h"
 		#include "shapes/regular_solid/Icosahedron.h"
 		#include "shapes/regular_solid/Octahedron.h"
@@ -35,31 +58,6 @@
 		#include "shapes/regular_solid/SnubDodecahedron.h"
 		#include "shapes/regular_solid/CubeToTetrahedron.h"
 		#include "shapes/Ellipsoid.h"
-	#endif
-#endif
-
-#if RSA_SPATIAL_DIMENSION == 1
-	#if RSA_ANGULAR_DIMENSION == 1
-		#include "shapes/Ellipse1Dim.h"
-
-#endif
-#elif RSA_SPATIAL_DIMENSION == 2
-	// 2D shapes with angular dimension
-	#if RSA_ANGULAR_DIMENSION == 0
-        #include "shapes/Ellipse.h"
-        #include "shapes/polydisk/Polydisk.h"
-        #include "shapes/polydisk/Fibrinogen.h"
-        #include "shapes/ordered_shape.2.1/OrderedShape2_1.h"
-    #else
-		#include "shapes/spherocylinder/SpheroCylinder2D.h"
-		#include "shapes/Ellipse.h"
-		#include "shapes/Rectangle.h"
-        #include "shapes/polydisk/Fibrinogen.h"
-        #include "shapes/polydisk/Polydisk.h"
-		#include "shapes/polygon/Polygon.h"
-		#include "shapes/polygon/SBPolygon.h"
-		#include "shapes/polygon/HBPolygon.h"
-        #include "shapes/polygon/Triangle.h"
     #endif
 #endif
 
@@ -86,6 +84,8 @@ void ShapeFactory::initShapeClass(const std::string &sClass, const std::string &
 
 void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string &attr) {
     // Shapes for any dimension, without angular dimensions
+    //-----------------------------------------------------
+
     #if RSA_ANGULAR_DIMENSION == 0
         if (sClass == "Sphere") {
             Sphere<RSA_SPATIAL_DIMENSION>::initClass(attr);
@@ -97,91 +97,11 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
             OrientedCuboid<RSA_SPATIAL_DIMENSION>::initClass(attr);
             return;
         }
-        
-        #if RSA_SPATIAL_DIMENSION == 2
-            if (sClass == "OrientedPolydisk") {
-                OrderedShape2_1::initClass(attr, Polydisk::initClass);
-                return;
-            } else if (sClass == "OrientedEllipse") {
-                OrderedShape2_1::initClass(attr, Ellipse::initClass);
-                return;
-            } else if (sClass == "OrientedFibrinogen") {
-                OrderedShape2_1::initClass(attr, Fibrinogen::initClass);
-                return;
-            }
-<<<<<<< HEAD
+    #endif
 
-		#if RSA_SPATIAL_DIMENSION == 3
-=======
-		#elif RSA_SPATIAL_DIMENSION == 3
->>>>>>> refs/remotes/origin/master
-        	if (sClass == "Cuboid") {
-        		Cuboid::initClass(attr);
-        		return;
-        	} else if (sClass == "Tetrahedron") {
-        		RegularSolid<Tetrahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "Cube") {
-        		Cuboid::initClass("3 1 1 1");
-        		return;
-        	} else if (sClass == "Octahedron") {
-        		RegularSolid<Octahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "Dodecahedron") {
-        		RegularSolid<Dodecahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "Icosahedron") {
-        		RegularSolid<Icosahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "TruncatedTetrahedron") {
-        		RegularSolid<TruncatedTetrahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "Cuboctahedron") {
-        		RegularSolid<Cuboctahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "TruncatedCube") {
-        		RegularSolid<TruncatedCube>::initClass(attr);
-        		return;
-        	} else if (sClass == "TruncatedOctahedron") {
-        		RegularSolid<TruncatedOctahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "Rhombicuboctahedron") {
-        		RegularSolid<Rhombicuboctahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "TruncatedCuboctahedron") {
-        		RegularSolid<TruncatedCuboctahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "SnubCube") {
-        		RegularSolid<SnubCube>::initClass(attr);
-        		return;
-        	} else if (sClass == "Icosidodecahedron") {
-        		RegularSolid<Icosidodecahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "TruncatedDodecahedron") {
-        		RegularSolid<TruncatedDodecahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "TruncatedIcosahedron") {
-        		RegularSolid<TruncatedIcosahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "Rhombicosidodecahedron") {
-        		RegularSolid<Rhombicosidodecahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "TruncatedIcosidodecahedron") {
-        		RegularSolid<TruncatedIcosidodecahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "SnubDodecahedron") {
-        		RegularSolid<SnubDodecahedron>::initClass(attr);
-        		return;
-        	} else if (sClass == "Ellipsoid") {
-        		Ellipsoid::initClass(attr);
-        		return;
-        	} else if (sClass == "CubeToTetrahedron") {
-        		RegularSolid<CubeToTetrahedron>::initClass(attr);
-        		return;
-        	}
-		#endif
-	#endif
     // Shapes of specific dimensions
+    //------------------------------
+
     #if RSA_SPATIAL_DIMENSION == 1
         // 1D shapes with angular dimension
         #if RSA_ANGULAR_DIMENSION == 1
@@ -192,8 +112,21 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
         #endif
 
     #elif RSA_SPATIAL_DIMENSION == 2
-        // 2D shapes with angular dimension
-        #if RSA_ANGULAR_DIMENSION == 1
+        // 2D shapes with no angular dimension
+        #if RSA_ANGULAR_DIMENSION == 0
+            if (sClass == "OrientedPolydisk") {
+                OrderedShape2_1::initClass(attr, Polydisk::initClass);
+                return;
+            } else if (sClass == "OrientedEllipse") {
+                OrderedShape2_1::initClass(attr, Ellipse::initClass);
+                return;
+            } else if (sClass == "OrientedFibrinogen") {
+                OrderedShape2_1::initClass(attr, Fibrinogen::initClass);
+                return;
+            }
+
+        // 2D shapes with an angular dimension
+        #elif RSA_ANGULAR_DIMENSION == 1
             if (sClass == "SpheroCylinder2D") {
                 SpheroCylinder2D::initClass(attr);
                 return;
@@ -204,11 +137,11 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
                 Rectangle::initClass(attr);
                 return;
             } else if (sClass == "SBPolygon") {
-            	SBPolygon::initClass(attr);
-            	return;
+                SBPolygon::initClass(attr);
+                return;
             } else if (sClass == "HBPolygon") {
-            	HBPolygon::initClass(attr);
-            	return;
+                HBPolygon::initClass(attr);
+                return;
             } else if (sClass == "Triangle") {
                 Triangle::initClass(attr);
                 return;
@@ -224,9 +157,78 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
             }
         #endif
 
-	#endif
+    #elif RSA_SPATIAL_DIMENSION == 3
+        // 3D shapes with no angular dimension
+        #if RSA_ANGULAR_DIMENSION == 0
+            if (sClass == "Cuboid") {
+                Cuboid::initClass(attr);
+                return;
+            } else if (sClass == "Tetrahedron") {
+                RegularSolid<Tetrahedron>::initClass(attr);
+                return;
+            } else if (sClass == "Cube") {
+                Cuboid::initClass("3 1 1 1");
+                return;
+            } else if (sClass == "Octahedron") {
+                RegularSolid<Octahedron>::initClass(attr);
+                return;
+            } else if (sClass == "Dodecahedron") {
+                RegularSolid<Dodecahedron>::initClass(attr);
+                return;
+            } else if (sClass == "Icosahedron") {
+                RegularSolid<Icosahedron>::initClass(attr);
+                return;
+            } else if (sClass == "TruncatedTetrahedron") {
+                RegularSolid<TruncatedTetrahedron>::initClass(attr);
+                return;
+            } else if (sClass == "Cuboctahedron") {
+                RegularSolid<Cuboctahedron>::initClass(attr);
+                return;
+            } else if (sClass == "TruncatedCube") {
+                RegularSolid<TruncatedCube>::initClass(attr);
+                return;
+            } else if (sClass == "TruncatedOctahedron") {
+                RegularSolid<TruncatedOctahedron>::initClass(attr);
+                return;
+            } else if (sClass == "Rhombicuboctahedron") {
+                RegularSolid<Rhombicuboctahedron>::initClass(attr);
+                return;
+            } else if (sClass == "TruncatedCuboctahedron") {
+                RegularSolid<TruncatedCuboctahedron>::initClass(attr);
+                return;
+            } else if (sClass == "SnubCube") {
+                RegularSolid<SnubCube>::initClass(attr);
+                return;
+            } else if (sClass == "Icosidodecahedron") {
+                RegularSolid<Icosidodecahedron>::initClass(attr);
+                return;
+            } else if (sClass == "TruncatedDodecahedron") {
+                RegularSolid<TruncatedDodecahedron>::initClass(attr);
+                return;
+            } else if (sClass == "TruncatedIcosahedron") {
+                RegularSolid<TruncatedIcosahedron>::initClass(attr);
+                return;
+            } else if (sClass == "Rhombicosidodecahedron") {
+                RegularSolid<Rhombicosidodecahedron>::initClass(attr);
+                return;
+            } else if (sClass == "TruncatedIcosidodecahedron") {
+                RegularSolid<TruncatedIcosidodecahedron>::initClass(attr);
+                return;
+            } else if (sClass == "SnubDodecahedron") {
+                RegularSolid<SnubDodecahedron>::initClass(attr);
+                return;
+            } else if (sClass == "Ellipsoid") {
+                Ellipsoid::initClass(attr);
+                return;
+            } else if (sClass == "CubeToTetrahedron") {
+                RegularSolid<CubeToTetrahedron>::initClass(attr);
+                return;
+            }
+        #endif
 
-	throw UnknownShapeException();
+    #endif
+
+    throw UnknownShapeException();
 }
 
 RSAShape *ShapeFactory::createShape(RND *rnd) {
