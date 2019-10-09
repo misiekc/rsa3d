@@ -13,7 +13,7 @@ class Rhombicuboctahedron : public RegularSolid<Rhombicuboctahedron> {
 private:
     friend RegularSolid<Rhombicuboctahedron>;
 
-    static void calculateStatic(const std::string &attr);
+    static ShapeData calculateStatic(const std::string &attr);
 
 public:
     explicit Rhombicuboctahedron(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}

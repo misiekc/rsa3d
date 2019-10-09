@@ -18,7 +18,7 @@ private:
 
     const static UnoptimizedSATOverlapRS overlapStrategy;
 
-    static void calculateStatic(const std::string &attr);
+    static ShapeData calculateStatic(const std::string &attr);
 
 public:
     explicit Tetrahedron(const Matrix<3, 3> &orientation) : RegularSolid<Tetrahedron>{orientation} {};

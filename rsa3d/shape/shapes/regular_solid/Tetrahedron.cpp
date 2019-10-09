@@ -10,18 +10,22 @@
 
 const UnoptimizedSATOverlapRS Tetrahedron::overlapStrategy{};
 
-void Tetrahedron::calculateStatic(const std::string &attr) {
-    RegularSolid<Tetrahedron>::orientedVertices =
+RegularSolidBase::ShapeData Tetrahedron::calculateStatic(const std::string &attr) {
+    ShapeData shapeData;
+
+    shapeData.orientedVertices =
             {{{1, 1, 1}}, {{1, -1, -1}}, {{-1, 1, -1}}, {{-1, -1, 1}}};
 
-    RegularSolid<Tetrahedron>::orientedFaces =
+    shapeData.orientedFaces =
             {{3, 2, 1}, {3, 0, 2}, {0, 3, 1}, {0, 1, 2}};
 
     // Dual tetrahedron - (-1, -1, -1) as one of vertices; CubeToTetrahedron uses it
     if (attr == "dual") {
-        std::transform(orientedVertices.begin(), orientedVertices.end(), orientedVertices.begin(),
-                       std::negate<Vector<3>>());
+        std::transform(shapeData.orientedVertices.begin(), shapeData.orientedVertices.end(),
+                       shapeData.orientedVertices.begin(), std::negate<>());
     }
+
+    return shapeData;
 }
 
 OverlapStrategy<3, 0> *Tetrahedron::createStrategy(const std::string &name) const {

@@ -13,7 +13,7 @@ class Icosahedron : public RegularSolid<Icosahedron>, public OrderCalculable {
 private:
     friend RegularSolid<Icosahedron>;
 
-    static void calculateStatic(const std::string &attr);
+    static ShapeData calculateStatic(const std::string &attr);
 
 public:
     explicit Icosahedron(const Matrix<3, 3> &orientation) : RegularSolid<Icosahedron>{orientation} {};

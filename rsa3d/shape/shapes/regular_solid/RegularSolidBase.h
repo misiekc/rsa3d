@@ -5,39 +5,20 @@
 #ifndef RSA3D_REGULARSOLIDBASE_H
 #define RSA3D_REGULARSOLIDBASE_H
 
+#include <memory>
+#include <utility>
 
 #include "../../ConvexShape.h"
 #include "../../OverlapStrategyShape.h"
 #include "../../../geometry/Geometry.h"
 
+/**
+ * @brief Class of common base functionality of concrete regular solid subclasses.
+ *
+ * The class contains everything which does not require using templates (Shape::clone, for example, requires).
+ * Template-related things and also initClass required by ShapeFactory are in RegularSolid subclass.
+ */
 class RegularSolidBase : public ConvexShape<3, 0>, public OverlapStrategyShape<3, 0> {
-private:
-    enum PIResult {
-        TRUE,
-        FALSE,
-        UNKNOWN
-    };
-
-    static void printFaceHelperNotebook();
-    static void normalizeFacesOrientation();
-    static void discoverEdges();
-    static void discoverTriangles();
-    static void normalizeVolume();
-    static void calculateRadia(double &circumsphereRadius, double &insphereRadius);
-    static void discoverAxes();
-    static void reportCalculations();
-    static Face3D faceFromVertexIdx(const std::vector<size_t> &vertexIdx);
-    static void addUniqueAxis(std::vector<Vector<3>> &axes, const Vector<3> &newAxis);
-    static void printAxes(const std::vector<Vector<3>> &axes);
-
-    Matrix<3, 3> orientation = Matrix<3, 3>::identity();
-
-    PIResult pointInsideFace(const Vector<3> &point, const std::vector<Vector<3>> &vertices) const;
-    bool projectionInsideFace(const Vector<3> &point, const std::vector<Vector<3>> &vertices,
-                              const std::vector<size_t> &face, const Vector<3> &faceNormal) const;
-    bool pointInsideEdge(const Vector<3> &point, const std::vector<Vector<3>> &vertices) const;
-    bool pointInsideVertex(const Vector<3> &point, const std::vector<Vector<3>> &vertices) const;
-
 protected:
     class Edge {
         std::size_t _first{};
@@ -53,22 +34,72 @@ protected:
         bool operator==(const Edge &other) const { return _first == other._first && _second == other._second; }
     };
 
-    static std::vector<Vector<3>>                   orientedVertices;
-    static std::vector<Edge>                        orientedEdges;
-    static std::vector<std::vector<std::size_t>>    orientedFaces;
-    static std::vector<std::array<std::size_t, 3>>  orientedTriangles;
-    static std::vector<Vector<3>>                   orientedFaceNormals;
+    /**
+     * @brief Helper struct containing all data for the specific RegularSolid.
+     */
+    struct ShapeData {
+        std::vector<Vector<3>> orientedVertices;
+        std::vector<Edge> orientedEdges;
+        std::vector<std::vector<std::size_t>> orientedFaces;
+        std::vector<std::array<std::size_t, 3>> orientedTriangles;
+        std::vector<Vector<3>> orientedFaceNormals;
 
-    static std::vector<Vector<3>> orientedFaceAxes;         // same as face normal, but u,v: u = -v count as one
-    static std::vector<Vector<3>> orientedEdgeAxes;         // from vertex to vertex, u = -v as one
-    static std::vector<Vector<3>> orientedVertexAxes;       // from center to vertex, u = -v
-    static std::vector<Vector<3>> orientedMidedgeAxes;      // from center to midedge, u = -v
+        std::vector<Vector<3>> orientedFaceAxes;         // same as face normal, but u,v: u = -v count as one
+        std::vector<Vector<3>> orientedEdgeAxes;         // from vertex to vertex, u = -v as one
+        std::vector<Vector<3>> orientedVertexAxes;       // from center to vertex, u = -v
+        std::vector<Vector<3>> orientedMidedgeAxes;      // from center to midedge, u = -v
 
-    static double normalizeFactor;
+        double normalizeFactor;
 
-    static void initClass(const std::string &attr);
+        Face3D faceFromVertexIdx(const std::vector<size_t> &vertexIdx) const;
+        void printInfo(std::ostream &out) const;
+        void printAxes(const std::vector<Vector<3>> &axes, std::ostream &out) const;
+    };
 
-    explicit RegularSolidBase(const Matrix<3, 3> &orientation) : orientation(orientation) {};
+private:
+    enum PIResult {
+        TRUE,
+        FALSE,
+        UNKNOWN
+    };
+
+    static void printFaceHelperNotebook(const ShapeData &shapeData);
+    static void normalizeFacesOrientation(ShapeData &shapeDataToComplement);
+    static void discoverEdges(ShapeData &shapeDataToComplement);
+    static void discoverTriangles(ShapeData &shapeDataToComplement);
+    static void normalizeVolume(ShapeData &shapeDataToComplement);
+    static void calculateRadia(const ShapeData &shapeData, double &circumsphereRadius, double &insphereRadius);
+    static void discoverAxes(ShapeData &shapeDataToComplement);
+    static void addUniqueAxis(std::vector<Vector<3>> &axes, const Vector<3> &newAxis);
+
+    Matrix<3, 3> orientation = Matrix<3, 3>::identity();
+
+    PIResult pointInsideFace(const Vector<3> &point, const std::vector<Vector<3>> &vertices) const;
+    bool projectionInsideFace(const Vector<3> &point, const std::vector<Vector<3>> &vertices,
+                              const std::vector<size_t> &face, const Vector<3> &faceNormal) const;
+    bool pointInsideEdge(const Vector<3> &point, const std::vector<Vector<3>> &vertices) const;
+    bool pointInsideVertex(const Vector<3> &point, const std::vector<Vector<3>> &vertices) const;
+
+protected:
+     /**
+      * @brief Static data of the specific RegularSolid shared by all instances of the same RegularSolid subclass.
+      *
+      * It is not RegularSolid static field, because we want to have coexisting multiple subclasses of RegularSolid to
+      * be able to compute order parameters. The ShapeData are passed in the constructor and are prepared earlier by
+      * the SpecificClass::calculateStatic and also RegularSolidBase::complementShapeData.
+      */
+    std::shared_ptr<ShapeData> shapeData;
+
+    /**
+     * @brief Using vertices and faces from @a shapeDataToComplement, calculates the rest of ShapeData.
+     *
+     * @param shapeDataToComplement data containing only vertices and faces, which are to be complemented
+     */
+    static void complementShapeData(ShapeData &shapeDataToComplement);
+
+    explicit RegularSolidBase(const Matrix<3, 3> &orientation, std::shared_ptr<ShapeData> shapeData)
+        : orientation(orientation), shapeData(std::move(shapeData))
+     { };
 
     inline std::vector<Vector<3>> applyOrientation(const std::vector<Vector<3>> &vectors) const;
     inline std::vector<Vector<3>> applyPosition(const std::vector<Vector<3>> &vectors) const;

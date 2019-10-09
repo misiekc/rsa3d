@@ -9,11 +9,11 @@
 #include "RegularSolid.h"
 #include "../../OrderCalculable.h"
 
-class Cuboctahedron : public RegularSolid<Cuboctahedron>{// {
+class Cuboctahedron : public RegularSolid<Cuboctahedron> {
 private:
     friend RegularSolid<Cuboctahedron>;
 
-    static void calculateStatic(const std::string &attr);
+    static ShapeData calculateStatic(const std::string &attr);
 
 public:
     explicit Cuboctahedron(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}

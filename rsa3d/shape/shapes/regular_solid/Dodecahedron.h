@@ -13,7 +13,7 @@ class Dodecahedron : public RegularSolid<Dodecahedron>, public OrderCalculable {
 private:
     friend RegularSolid<Dodecahedron>;
 
-    static void calculateStatic(const std::string &attr);
+    static ShapeData calculateStatic(const std::string &attr);
 
 public:
     explicit Dodecahedron(const Matrix<3, 3> &orientation) : RegularSolid<Dodecahedron>{orientation} {};

@@ -15,7 +15,7 @@ private:
 
     const static TriTriOverlapRS overlapStrategy;
 
-    static void calculateStatic(const std::string &attr);
+    static ShapeData calculateStatic(const std::string &attr);
 
 public:
     explicit SnubDodecahedron(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}

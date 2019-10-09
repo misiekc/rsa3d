@@ -13,7 +13,7 @@ class TruncatedOctahedron : public RegularSolid<TruncatedOctahedron> {
 private:
     friend RegularSolid<TruncatedOctahedron>;
 
-    static void calculateStatic(const std::string &attr);
+    static ShapeData calculateStatic(const std::string &attr);
 
 public:
     explicit TruncatedOctahedron(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}

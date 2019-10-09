@@ -9,8 +9,10 @@ namespace {
     double eta = 1 + 2*M_SQRT2;
 }
 
-void TruncatedCuboctahedron::calculateStatic(const std::string &attr) {
-    RegularSolid<TruncatedCuboctahedron>::orientedVertices =
+RegularSolidBase::ShapeData TruncatedCuboctahedron::calculateStatic(const std::string &attr) {
+    ShapeData shapeData;
+
+    shapeData.orientedVertices =
             {{{ 1,  xi, eta}}, {{ 1, xi, -eta}}, {{1, -xi,  eta}}, {{-1,  xi,  eta}},
              {{-1, -xi, eta}}, {{-1, xi, -eta}}, {{1, -xi, -eta}}, {{-1, -xi, -eta}},
 
@@ -29,7 +31,7 @@ void TruncatedCuboctahedron::calculateStatic(const std::string &attr) {
              {{ xi,  1, eta}}, {{ xi, 1, -eta}}, {{xi, -1,  eta}}, {{-xi,  1,  eta}},
              {{-xi, -1, eta}}, {{-xi, 1, -eta}}, {{xi, -1, -eta}}, {{-xi, -1, -eta}}};
 
-    RegularSolid<TruncatedCuboctahedron>::orientedFaces =
+    shapeData.orientedFaces =
             {{ 2, 42, 40,  0,  3, 43, 44,  4}, {11,  8, 16, 17,  9, 13, 21, 19}, {  1, 41, 46, 6,  7, 47, 45,  5},
              {14, 22, 18, 10, 12, 20, 23, 15}, {37, 39, 31, 28, 36, 35, 27, 29}, {34, 26, 30, 38, 33, 25, 24, 32},
 
@@ -38,6 +40,8 @@ void TruncatedCuboctahedron::calculateStatic(const std::string &attr) {
 
              {7, 15, 23, 31, 39, 47}, {20, 12, 4, 44, 36, 28}, {43,  3, 11, 19, 27, 35}, {29, 21, 13,  5, 45, 37},
              {1,  9, 17, 25, 33, 41}, {24, 16, 8,  0, 40, 32}, {34, 42,  2, 10, 18, 26}, {38, 30, 22, 14,  6, 46}};
+
+    return shapeData;
 }
 
 double TruncatedCuboctahedron::projectionHalfsize(const Vector<3> &axis) const {
@@ -49,5 +53,5 @@ double TruncatedCuboctahedron::projectionHalfsize(const Vector<3> &axis) const {
     double yRectHalfsize = std::max(yAxis + xi*zAxis + eta*xAxis, yAxis + eta*zAxis + xi*xAxis);
     double zRectHalfsize = std::max(zAxis + xi*xAxis + eta*yAxis, zAxis + eta*xAxis + xi*yAxis);
 
-    return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * normalizeFactor;
+    return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * this->shapeData->normalizeFactor;
 }

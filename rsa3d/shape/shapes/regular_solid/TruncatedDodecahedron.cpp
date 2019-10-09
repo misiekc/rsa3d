@@ -12,8 +12,10 @@ namespace {
     const double gp1 = g + 1;
 }
 
-void TruncatedDodecahedron::calculateStatic(const std::string &attr) {
-    RegularSolid<TruncatedDodecahedron>::orientedVertices =
+RegularSolidBase::ShapeData TruncatedDodecahedron::calculateStatic(const std::string &attr) {
+    ShapeData shapeData;
+
+    shapeData.orientedVertices =
             {{{0, gi, gp2}}, {{0, gi, -gp2}}, {{0, -gi, gp2}}, {{0, -gi, -gp2}},
              {{gi, gp2, 0}}, {{gi, -gp2, 0}}, {{-gi, gp2, 0}}, {{-gi, -gp2, 0}},
              {{gp2, 0, gi}}, {{gp2, 0, -gi}}, {{-gp2, 0, gi}}, {{-gp2, 0, -gi}},
@@ -32,7 +34,7 @@ void TruncatedDodecahedron::calculateStatic(const std::string &attr) {
              {{ gp1,  g, 2}}, {{ gp1, g, -2}}, {{gp1, -g,  2}}, {{-gp1,  g,  2}},
              {{-gp1, -g, 2}}, {{-gp1, g, -2}}, {{gp1, -g, -2}}, {{-gp1, -g, -2}}};
 
-    RegularSolid<TruncatedDodecahedron>::orientedFaces =
+    shapeData.orientedFaces =
             {{40, 16,  2,  0, 15, 39, 55, 31, 32, 56}, {31, 55, 47, 23, 25, 49, 57, 33, 11, 10}, 
              {39, 15, 12, 36, 44, 20,  4,  6, 23, 47}, {49, 25,  6,  4, 21, 45, 37, 13, 17, 41}, 
              {41, 17,  1,  3, 19, 43, 59, 35, 33, 57}, {10, 11, 35, 59, 51, 27, 24, 48, 56, 32}, 
@@ -44,6 +46,8 @@ void TruncatedDodecahedron::calculateStatic(const std::string &attr) {
              {52, 44, 36}, {20, 21,  4}, { 6, 25, 23}, {49, 41, 57}, {33, 35, 11},
              {59, 43, 51}, {27,  7, 24}, { 5, 26, 22}, {46, 54, 38}, { 8, 28, 30},
              {34, 29,  9}, {42, 58, 50}, {19,  3, 18}, { 1, 17, 13}, {37, 45, 53}};
+
+    return shapeData;
 }
 
 double TruncatedDodecahedron::projectionHalfsize(const Vector<3> &axis) const {
@@ -55,5 +59,5 @@ double TruncatedDodecahedron::projectionHalfsize(const Vector<3> &axis) const {
     double yRectHalfsize = std::max(std::max(gi*zAxis +gp2*xAxis, gi*yAxis + g*zAxis + gt2*xAxis), g*yAxis + 2*zAxis + gp1*xAxis);
     double zRectHalfsize = std::max(std::max(gi*xAxis +gp2*yAxis, gi*zAxis + g*xAxis + gt2*yAxis), g*zAxis + 2*xAxis + gp1*yAxis);
 
-    return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * normalizeFactor;
+    return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * this->shapeData->normalizeFactor;
 }

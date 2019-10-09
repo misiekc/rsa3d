@@ -15,7 +15,7 @@ private:
     friend RegularSolid<Octahedron>;
     friend CubeToTetrahedron;
 
-    static void calculateStatic(const std::string &attr);
+    static ShapeData calculateStatic(const std::string &attr);
 
 public:
     explicit Octahedron(const Matrix<3, 3> &orientation) : RegularSolid<Octahedron>{orientation} {};

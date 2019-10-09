@@ -2,24 +2,21 @@
 // Created by PKua on 21.04.18.
 //
 
-#include <sstream>
-#include <functional>
-#include <iterator>
-#include <fstream>
-
-#include "../../../geometry/Vector.h"
 #include "SATOverlapRS.h"
 #include "TriTriOverlapRS.h"
 #include "../../../utils/Assertions.h"
+
+template<typename SpecificSolid>
+std::shared_ptr<RegularSolidBase::ShapeData> RegularSolid<SpecificSolid>::staticShapeData;
 
 template<typename SpecificSolid>
 const SATOverlapRS RegularSolid<SpecificSolid>::overlapStrategy{};
 
 template<typename SpecificSolid>
 void RegularSolid<SpecificSolid>::initClass(const std::string &attr) {
-    SpecificSolid::calculateStatic(attr);
-    Assert(!orientedVertices.empty());
-    RegularSolidBase::initClass(attr);
+    RegularSolid::staticShapeData = std::make_shared<ShapeData>(SpecificSolid::calculateStatic(attr));
+    Assert(!RegularSolid::staticShapeData->orientedVertices.empty());
+    RegularSolidBase::complementShapeData(*RegularSolid::staticShapeData);
 
     auto shapeInfo = getShapeStaticInfo();
     shapeInfo.setCreateShapeImpl([](RND *rnd) -> Shape* {
