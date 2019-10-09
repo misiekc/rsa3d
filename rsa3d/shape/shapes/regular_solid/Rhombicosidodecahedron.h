@@ -7,11 +7,13 @@
 
 
 #include "RegularSolid.h"
-#include "../../OrderCalculable.h"
+#include "Icosahedron.h"
 
 class Rhombicosidodecahedron : public RegularSolid<Rhombicosidodecahedron> {
 private:
     friend RegularSolid<Rhombicosidodecahedron>;
+
+    using SymmetryPlatonicSolid = Icosahedron;
 
     static ShapeData calculateStatic(const std::string &attr);
 

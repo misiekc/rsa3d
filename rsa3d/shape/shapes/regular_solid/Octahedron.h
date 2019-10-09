@@ -7,10 +7,10 @@
 
 
 #include "RegularSolid.h"
-#include "../../OrderCalculable.h"
-#include "CubeToTetrahedron.h"
 
-class Octahedron : public RegularSolid<Octahedron>, public OrderCalculable {
+class CubeToTetrahedron;
+
+class Octahedron : public RegularSolid<Octahedron> {
 private:
     friend RegularSolid<Octahedron>;
     friend CubeToTetrahedron;

@@ -11,6 +11,7 @@
 #include "../../ConvexShape.h"
 #include "../../OverlapStrategyShape.h"
 #include "../../../geometry/Geometry.h"
+#include "../../OrderCalculable.h"
 
 /**
  * @brief Class of common base functionality of concrete regular solid subclasses.
@@ -18,7 +19,7 @@
  * The class contains everything which does not require using templates (Shape::clone, for example, requires).
  * Template-related things and also initClass required by ShapeFactory are in RegularSolid subclass.
  */
-class RegularSolidBase : public ConvexShape<3, 0>, public OverlapStrategyShape<3, 0> {
+class RegularSolidBase : public ConvexShape<3, 0>, public OverlapStrategyShape<3, 0>, public OrderCalculable {
 protected:
     class Edge {
         std::size_t _first{};

@@ -18,7 +18,8 @@
  * @brief Class complementing RegularSolidBase with stuff requiring templates and specific to concrete solids.
  *
  * It uses CRTP idiom - enables concrete solids to provide "polymorphic" calculateStatic function, an overlap strategy
- * of choice (see any specific class how it works). It takes care of the rest - registering ShapeStaticInfo, cloning and
+ * of choice and Platonic solid of which symmetry to use to calculate order parameters (see any specific class how it
+ * works). It takes care of the rest - registering ShapeStaticInfo, cloning and
  * passing common instance of ShapeData (see RegularSolidBase::shapeData for explanation).
  *
  * @tparam SpecificSolid CRTP-idiom-static-polymorphic class
@@ -28,7 +29,18 @@ class RegularSolid : public RegularSolidBase {
 private:
     static std::shared_ptr<ShapeData> staticShapeData;
 
+    static bool isSpecificSolidBorrowingOrderParameters();
+
 protected:
+    /**
+     * @brief Platonic solid which should be used to calculate order parameters (Tetrahedron, Octahedron or
+     * Icosahedron).
+     *
+     * Default value is only placeholder, most classes (apart from the above three) should "override" it (see any but
+     * those three to know how it works).
+     */
+    using SymmetryPlatonicSolid = SpecificSolid;
+
     /**
      * @brief Default overlapStrategy. SpecificSolid classes can "override" this field with different strategy class
      * (see for example how Tetrahedron does this).
@@ -44,6 +56,8 @@ public:
 
     bool overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const final;
     Shape<3, 0> *clone() const override;
+
+    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 };
 
 #include "RegularSolid.tpp"

@@ -7,11 +7,13 @@
 
 
 #include "RegularSolid.h"
-#include "../../OrderCalculable.h"
+#include "Icosahedron.h"
 
-class Dodecahedron : public RegularSolid<Dodecahedron>, public OrderCalculable {
+class Dodecahedron : public RegularSolid<Dodecahedron> {
 private:
     friend RegularSolid<Dodecahedron>;
+
+    using SymmetryPlatonicSolid = Icosahedron;
 
     static ShapeData calculateStatic(const std::string &attr);
 
@@ -19,8 +21,6 @@ public:
     explicit Dodecahedron(const Matrix<3, 3> &orientation) : RegularSolid<Dodecahedron>{orientation} {};
 
     double projectionHalfsize(const Vector<3> &axis) const override;
-
-    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 };
 
 

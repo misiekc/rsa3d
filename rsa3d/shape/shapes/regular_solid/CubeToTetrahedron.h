@@ -8,10 +8,13 @@
 
 #include "RegularSolid.h"
 #include "UnoptimizedSATOverlapRS.h"
+#include "Octahedron.h"
 
 class CubeToTetrahedron : public RegularSolid<CubeToTetrahedron> {
 private:
     friend RegularSolid<CubeToTetrahedron>;
+
+    using SymmetryPlatonicSolid = Octahedron;
 
     const static UnoptimizedSATOverlapRS overlapStrategy;
 

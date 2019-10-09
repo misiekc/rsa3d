@@ -7,11 +7,13 @@
 
 
 #include "RegularSolid.h"
-#include "../../OrderCalculable.h"
+#include "Icosahedron.h"
 
 class SnubDodecahedron : public RegularSolid<SnubDodecahedron> {
 private:
     friend RegularSolid<SnubDodecahedron>;
+
+    using SymmetryPlatonicSolid = Icosahedron;
 
     const static TriTriOverlapRS overlapStrategy;
 

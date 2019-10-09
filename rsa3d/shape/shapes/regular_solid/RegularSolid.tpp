@@ -14,6 +14,12 @@ const SATOverlapRS RegularSolid<SpecificSolid>::overlapStrategy{};
 
 template<typename SpecificSolid>
 void RegularSolid<SpecificSolid>::initClass(const std::string &attr) {
+    // We need to initialize platonic solid corresponding to SpecificSolid's symmetry to calculate order parameters.
+    // It will register that platonic solid in Shape<3, 0> class, but it is ok, we will overwrite it afterwards with
+    // our SpecificSolid, however the platonic solid will remain accessible
+    if (RegularSolid::isSpecificSolidBorrowingOrderParameters())
+        RegularSolid<typename SpecificSolid::SymmetryPlatonicSolid>::initClass("");
+
     RegularSolid::staticShapeData = std::make_shared<ShapeData>(SpecificSolid::calculateStatic(attr));
     Assert(!RegularSolid::staticShapeData->orientedVertices.empty());
     RegularSolidBase::complementShapeData(*RegularSolid::staticShapeData);
@@ -26,6 +32,10 @@ void RegularSolid<SpecificSolid>::initClass(const std::string &attr) {
                 2*M_PI*rnd->nextValue()));
     });
     Shape::setShapeStaticInfo(shapeInfo);
+}
+template<typename SpecificSolid>
+bool RegularSolid<SpecificSolid>::isSpecificSolidBorrowingOrderParameters() {
+    return !std::is_same_v<SpecificSolid, typename SpecificSolid::SymmetryPlatonicSolid>;
 }
 
 template<typename SpecificSolid>
@@ -45,4 +55,14 @@ template<typename SpecificSolid>
 Shape<3, 0> *RegularSolid<SpecificSolid>::clone() const {
     auto &thisSpecific = static_cast<const SpecificSolid&>(*this);
     return new SpecificSolid(thisSpecific);
+}
+
+template<typename SpecificSolid>
+std::vector<double> RegularSolid<SpecificSolid>::calculateOrder(const OrderCalculable *other) const {
+    using SymmetryPlatonicSolid = typename SpecificSolid::SymmetryPlatonicSolid;
+    SymmetryPlatonicSolid thisPlatonic(this->getOrientationMatrix());
+    auto otherRegularSolid = static_cast<const RegularSolid &>(*other);
+    SymmetryPlatonicSolid otherPlatonic(otherRegularSolid.getOrientationMatrix());
+
+    return thisPlatonic.calculateOrder(&otherPlatonic);
 }

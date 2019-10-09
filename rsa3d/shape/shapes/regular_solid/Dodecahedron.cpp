@@ -39,15 +39,3 @@ double Dodecahedron::projectionHalfsize(const Vector<3> &axis) const {
     return std::max(std::max(std::max(cubeHalfsize, xRectHalfsize), yRectHalfsize), zRectHalfsize)
            * this->shapeData->normalizeFactor;
 }
-
-std::vector<double> Dodecahedron::calculateOrder(const OrderCalculable *other) const {
-    auto &otherDod = dynamic_cast<const Dodecahedron&>(*other);
-    auto thisFaceAxes = this->getFaceAxes();
-    auto otherFaceAxes = otherDod.getFaceAxes();
-    auto thisVertexAxes = this->getVertexAxes();
-    auto otherVertexAxes = otherDod.getVertexAxes();
-
-    return {OrderParameters::dodecahedral(thisFaceAxes, otherFaceAxes),
-            OrderParameters::nematicP2(thisFaceAxes, otherFaceAxes),
-            OrderParameters::nematicP2(thisVertexAxes, otherVertexAxes)};
-}

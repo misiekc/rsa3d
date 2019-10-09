@@ -7,9 +7,8 @@
 
 
 #include "RegularSolid.h"
-#include "../../OrderCalculable.h"
 
-class Icosahedron : public RegularSolid<Icosahedron>, public OrderCalculable {
+class Icosahedron : public RegularSolid<Icosahedron> {
 private:
     friend RegularSolid<Icosahedron>;
 
