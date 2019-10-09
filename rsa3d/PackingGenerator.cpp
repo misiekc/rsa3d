@@ -34,7 +34,7 @@ PackingGenerator::PackingGenerator(int seed, const Parameters *params) {
 	if (this->params.requestedAngularVoxelSize > this->angularSize)
 		this->params.requestedAngularVoxelSize = this->angularSize;
 
-	this->voxels = new VoxelList(this->params.surfaceDimension, this->spatialSize, RSAShape::getVoxelSpatialSize(), this->angularSize, this->params.requestedAngularVoxelSize);
+	this->voxels = ShapeFactory::createVoxelList(params->particleType, this->params.surfaceDimension, this->spatialSize, RSAShape::getVoxelSpatialSize(), this->angularSize, this->params.requestedAngularVoxelSize);
 
 	double gridSize = RSAShape::getNeighbourListCellSize();
 	if (gridSize < this->params.thresholdDistance)

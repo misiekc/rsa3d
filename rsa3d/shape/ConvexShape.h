@@ -24,9 +24,9 @@ protected:
     using EarlyRejectionResult = typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::EarlyRejectionResult;
 
 public:
-    bool voxelInside(BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &voxelPosition,
+    virtual bool voxelInside(BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &voxelPosition,
                      const Orientation<ANGULAR_DIMENSION> &orientation, double spatialSize,
-                     double angularSize) const final;
+                     double angularSize) const;
 
     /**
      * @brief Checks if a virtual particle of the same size is within intersection of all excluded volumes for all its

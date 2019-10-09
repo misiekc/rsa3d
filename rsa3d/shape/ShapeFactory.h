@@ -9,6 +9,7 @@
 #define SHAPEFACTORY_H_
 
 #include "Shape.h"
+#include "../VoxelList.h"
 #include "OverlapStrategy.h"
 #include "OverlapStrategyShape.h"
 #include <string>
@@ -31,6 +32,11 @@ public:
      * @return a pointer to a new, dynamically allocated Shape
      */
 	static RSAShape* createShape(RND *rnd);
+
+	/**
+	 * @brief Provides implementation of VoxelList
+	 */
+	static VoxelList *createVoxelList(const std::string &sClass, double surfaceDimension, double spatialSize, double voxelSpatialSize, double angularSize, double requestedAngularVoxelSize);
 
     /**
      * @brief Initializes a shape class based on passed name and attributes.

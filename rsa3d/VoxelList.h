@@ -32,9 +32,6 @@ private:
 	// array of top level voxel. If a top level voxel becomes inactive (due to shape placement, all its child voxels becomes obsolete
 	bool* activeTopLevelVoxels;
 
-	// disables voxel list for debug purposes - typically is false
-	bool disabled;
-
 	// returns initial size of a vovel. It is not grater than d and be an integer power of 2 (due to numerical issues)
 	double findFloorSize(double d);
 
@@ -53,9 +50,6 @@ private:
 	// initialize voxels - used inside a constructor
 	void initVoxels();
 
-	// checks if a top level voxel for voxel v is active (if not v should be removed
-	bool isTopLevelVoxelActive(Voxel *v);
-
 	// checks consistency of indexes of root voxels
 	void checkTopLevelVoxels();
 
@@ -68,6 +62,9 @@ private:
 					  const RSAOrientation &angle);
 
 protected:
+	// disables voxel list for debug purposes - typically is false
+	bool disabled;
+
 	int surfaceDimension;
 	Voxel** voxels;
 	size_t length;
@@ -84,14 +81,20 @@ protected:
 	size_t beginningVoxelNumber;
 
 
+	// checks if a top level voxel for voxel v is active (if not v should be removed
+	bool isTopLevelVoxelActive(Voxel *v);
+
 	bool isVoxelInsidePacking(Voxel *v);
-	bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
+	virtual bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
+                                    std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc,
+                                    unsigned short depth = 0);
+	bool isVoxelInsideExclusionZoneOld(Voxel *v, double spatialSize, double angularSize,
                                     std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc,
                                     unsigned short depth = 0);
 
 	void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes);
 
-	bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, double angularSize, unsigned short depth = 0);
+	virtual bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, double angularSize, unsigned short depth = 0);
 
 public:
 

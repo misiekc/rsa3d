@@ -66,59 +66,102 @@ bool OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, c
 	return true;
 }
 
+/*
+ * -1 - outside,
+ * otherwise returned value contains a set of flags showin in which dimension the voxel is fully covered.
+ * For example for three dimensional cuboid the value 3 means that the voxel is fully covered in x and y coordinate end partially in z
+ * 0 - 2^d-1 partially inside, 2^d-1 fully inside
+ */
 
+template <unsigned short DIMENSION>
+int OrientedCuboid<DIMENSION>::voxelFullyOrPartiallyInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &voxelPosition, double spatialSize) const {
+
+	Orientation<0> orientation;
+	double angularSize = 0;
+    switch(this->voxelInsideEarlyRejection(bc, voxelPosition, orientation, spatialSize, angularSize)) {
+        case EarlyRejectionResult::TRUE:      return (1 << DIMENSION)-1;
+        case EarlyRejectionResult::FALSE:     return -1;
+        case EarlyRejectionResult::UNKNOWN:   break;
+    }
+
+    RSAVector position = this->getPosition();
+	RSAVector ta = bc->getTranslation(position, voxelPosition);
+	int iResult = 0;
+
+    for(unsigned short i=0; i<DIMENSION; i++){
+    	bool fullyInside = (voxelPosition[i] + ta[i] >= position[i] - size[i]) && (voxelPosition[i] + ta[i] + spatialSize < position[i] + size[i]);
+    	if (fullyInside){
+    		iResult |= (1 << i);
+    	}else{
+    		bool fullyOutside = (voxelPosition[i] + ta[i] > position[i] + size[i]) || (voxelPosition[i] + ta[i] + spatialSize <= position[i] - size[i]);
+    		if (fullyOutside)
+    			return -1;
+    	}
+    }
+    return iResult;
+}
+
+template <unsigned short DIMENSION>
+bool OrientedCuboid<DIMENSION>::voxelInside(BoundaryConditions<DIMENSION> *bc,
+											const Vector<DIMENSION> &voxelPosition,
+											const Orientation<0> &orientation,
+                                            double spatialSize, double angularSize) const {
+
+	return (this->voxelFullyOrPartiallyInside(bc, voxelPosition, spatialSize) == (1 << DIMENSION)-1);
+}
 
 /*
+ * @brief Method used by OrientedCuboidVoxelList to chceck if voxel is overlapped by a set of neighbouring shapes
+ *
+ */
+
 template <unsigned short DIMENSION>
-bool OrientedCuboid<DIMENSION>::voxelInside(BoundaryConditions<DIMENSION> *bc, Voxel *v, double spatialSize, double angularSize, const std::vector<const RSAShape *> *shapes){
+bool OrientedCuboid<DIMENSION>::voxelInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &voxelPosition, double spatialSize, const std::vector<const RSAShape *> *shapes){
 	// check over single shapes
-	RSAVector vpos = v->getPosition();
-	for(const RSAShape* s : *shapes){
-		if (s->voxelInside(bc, vpos, v->getOrientation(), spatialSize, angularSize) )
+	std::vector< std::pair<const RSAShape *, unsigned short> > closestShapes;
+//	RSAVector pos;
+//	RSAOrientation orientation;
+	// check over shapes and select positions of shapes which exclusion zones partially overlap the voxel
+	for(const RSAShape *s: *shapes){
+//		if (s->voxelInside(bc, voxelPosition, orientation, spatialSize, 0)){
+		int res = ((OrientedCuboid<DIMENSION> *)s)->voxelFullyOrPartiallyInside(bc, voxelPosition, spatialSize);
+		if (res==(1 << DIMENSION)-1){
 			return true;
+		}else if (res!=-1){
+			unsigned int flags = (unsigned int)res;
+			unsigned int all1 = (1 << DIMENSION)-1;
+			unsigned int invertedFlags = ~flags & all1;
+			double ddim = std::log2( invertedFlags );
+			if (ddim != round(ddim))
+				continue;
+			std::pair <const RSAShape *, unsigned short> p;
+			p.first = s;
+			p.second = (unsigned short)ddim;
+			closestShapes.push_back(p);
+		}
 	}
-	// check over pairs
-	char result = 0;
-	bool fbreak = false;
-	for (size_t i=0; i<shapes->size(); i++){
-		const RSAShape* si = (*shapes)[i];
-		RSAVector pi = si->getPosition();
-		for (size_t j=i+1; j<shapes->size(); j++){
-			const RSAShape* sj = (*shapes)[j];
-			RSAVector pj = sj->getPosition();
-			for (ushort k=0; k<DIMENSION; k++){
-				if (std::fabs(pi[k] - pj[k]) > 2*size[k]){ // this pair does not exclude any voxel
-					fbreak = true;
-					break;
-				}
-				else if (std::fabs(pi[k] - pj[k]) > size[k]) // voxel may be at the boundary of exclusion zones
-					// check if voxel is between shapes
-					if (
-							((std::fabs(vpos[k] - pi[k])<size[k] || std::fabs(vpos[k] - pj[k])<size[k])) &&
-							((std::fabs(vpos[k] + spatialSize - pi[k])<size[k] || std::fabs(vpos[k] + spatialSize - pj[k])<size[k]))
-					)
-						result++;
-					else{
-						fbreak = true;
-						break;
-					}
-				else  // std::fabs(pi[k] - pj[k]) < size[k]
-					// another check
-					if (!
-							((std::fabs(vpos[k] - pi[k])<0.5*size[k] || std::fabs(vpos[k] - pj[k])<0.5*size[k])) &&
-							((std::fabs(vpos[k] + spatialSize - pi[k])<0.5*size[k] || std::fabs(vpos[k] + spatialSize - pj[k])<0.5*size[k]))
-					){
-						fbreak = true;
-						break;
-					}
-			}
-			if (fbreak == false && result < DIMENSION)
+
+	// check if pair of shapes fully overlap the voxel
+	// we look for pair of such shapes which partially overlaps the voxel along the same axis, voxel are between them and their distance is lower than 2*size
+	for (size_t i=0; i<closestShapes.size(); i++){
+		RSAVector pi = closestShapes[i].first->getPosition() + bc->getTranslation(voxelPosition, closestShapes[i].first->getPosition());
+		int k = closestShapes[i].second;
+		double ipos = pi[k];
+		double vpos = voxelPosition[k];
+		for (size_t j=i+1; j<closestShapes.size(); j++){
+			if (closestShapes[j].second!=k)
+				continue; // different coordinates - not interesting
+			RSAVector pj = closestShapes[j].first->getPosition() + bc->getTranslation(voxelPosition, closestShapes[j].first->getPosition());
+			double jpos = pj[k];
+			if ( (ipos - size[k] < vpos && vpos + spatialSize < jpos + size[k] ) && (jpos-ipos < 2*size[k]) )
+				return true;
+			if ( (jpos - size[k] < vpos && vpos + spatialSize < ipos + size[k] ) && (ipos-jpos < 2*size[k]) )
 				return true;
 		}
 	}
 	return false;
 }
-*/
+
 
 template <unsigned short DIMENSION>
 double OrientedCuboid<DIMENSION>::getVolume(unsigned short dim) const{

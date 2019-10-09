@@ -13,6 +13,7 @@
     #include "shapes/Sphere.h"
 	#include "shapes/spherocylinder/Spherocylinder.h"
 	#include "shapes/OrientedCuboid.h"
+	#include "../OrientedCuboidVoxelList.h"
 #endif
 
 #if RSA_SPATIAL_DIMENSION == 1
@@ -235,4 +236,10 @@ RSAShape *ShapeFactory::createShape(RND *rnd) {
     // Fetch appropriate function from Shape
     auto createShapeImpl = RSAShape::getCreateShapeImpl();
     return createShapeImpl(rnd);
+}
+
+VoxelList *ShapeFactory::createVoxelList(const std::string &sClass, double surfaceDimension, double spatialSize, double voxelSpatialSize, double angularSize, double requestedAngularVoxelSize) {
+    if (sClass == "OrientedCuboid")
+		return new OrientedCuboidVoxelList(surfaceDimension, spatialSize, voxelSpatialSize, angularSize, requestedAngularVoxelSize);
+	return new VoxelList(surfaceDimension, spatialSize, voxelSpatialSize, angularSize, requestedAngularVoxelSize);
 }
