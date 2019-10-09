@@ -12,8 +12,10 @@ namespace {
     const double gp2 = g + 2;
 }
 
-void Rhombicosidodecahedron::calculateStatic(const std::string &attr) {
-    RegularSolid<Rhombicosidodecahedron>::orientedVertices =
+RegularSolidBase::ShapeData Rhombicosidodecahedron::calculateStatic(const std::string &attr) {
+    ShapeData shapeData;
+
+    shapeData.orientedVertices =
             {{{ 1,  1, g3}}, {{ 1, 1, -g3}}, {{1, -1,  g3}}, {{-1,  1,  g3}},
              {{-1, -1, g3}}, {{-1, 1, -g3}}, {{1, -1, -g3}}, {{-1, -1, -g3}},
              {{ 1,  g3, 1}}, {{ 1, g3, -1}}, {{1, -g3,  1}}, {{-1,  g3,  1}},
@@ -32,7 +34,7 @@ void Rhombicosidodecahedron::calculateStatic(const std::string &attr) {
              {{0, g2, gp2}}, {{0, g2, -gp2}}, {{0, -g2, gp2}}, {{0, -g2, -gp2}},
              {{g2, gp2, 0}}, {{g2, -gp2, 0}}, {{-g2, gp2, 0}}, {{-g2, -gp2, 0}}};
 
-    RegularSolid<Rhombicosidodecahedron>::orientedFaces =
+    shapeData.orientedFaces =
             {{ 4,  3, 27, 50, 28}, {52, 32,  8, 11, 35}, {19, 43, 58, 45, 21}, {2, 26, 48, 24,  0},
              {36, 12, 10, 34, 54}, {20, 23, 47, 59, 44}, {33, 53, 37, 13,  9}, {5,  7, 31, 51, 29},
              {55, 38, 14, 15, 39}, {46, 22, 18, 42, 57}, {41, 56, 40, 16, 17}, {1, 25, 49, 30,  6},
@@ -47,6 +49,8 @@ void Rhombicosidodecahedron::calculateStatic(const std::string &attr) {
              {21, 51, 23}, {31, 39, 47}, {15, 12, 59}, {14, 57, 10}, {42, 26, 34}, 
              {18, 16, 48}, {40, 32, 24}, {56,  9,  8}, {13, 58, 11}, {37, 29, 45}, 
              {49, 17, 22}, {30, 46, 38}, { 6, 55,  7}, {53,  1,  5}, {33, 41, 25}};
+
+    return shapeData;
 }
 
 double Rhombicosidodecahedron::projectionHalfsize(const Vector<3> &axis) const {
@@ -58,5 +62,5 @@ double Rhombicosidodecahedron::projectionHalfsize(const Vector<3> &axis) const {
     double yRectHalfsize = std::max(std::max(yAxis + zAxis + g3*xAxis, g2*yAxis + g*zAxis + gt2*xAxis), gp2*yAxis + g2*xAxis);
     double zRectHalfsize = std::max(std::max(zAxis + xAxis + g3*yAxis, g2*zAxis + g*xAxis + gt2*yAxis), gp2*zAxis + g2*yAxis);
 
-    return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * normalizeFactor;
+    return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * this->shapeData->normalizeFactor;
 }

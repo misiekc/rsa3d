@@ -30,6 +30,7 @@ set(RSA_SOURCE
         Config.cpp
         FreeBC.h
         NeighbourGrid.h
+        OrientedCuboidVoxelList.cpp
         Packing.cpp
         PackingGenerator.cpp
         Parameters.cpp
