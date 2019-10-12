@@ -8,17 +8,17 @@
 
 #include "RegularSolid.h"
 #include "UnoptimizedSATOverlapRS.h"
-#include "../../OrderCalculable.h"
-#include "CubeToTetrahedron.h"
 
-class Tetrahedron : public RegularSolid<Tetrahedron>, public OrderCalculable {
+class CubeToTetrahedron;
+
+class Tetrahedron : public RegularSolid<Tetrahedron> {
 private:
     friend RegularSolid<Tetrahedron>;
     friend CubeToTetrahedron;
 
     const static UnoptimizedSATOverlapRS overlapStrategy;
 
-    static void calculateStatic(const std::string &attr);
+    static ShapeData calculateStatic(const std::string &attr);
 
 public:
     explicit Tetrahedron(const Matrix<3, 3> &orientation) : RegularSolid<Tetrahedron>{orientation} {};

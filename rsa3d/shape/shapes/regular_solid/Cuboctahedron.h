@@ -7,13 +7,15 @@
 
 
 #include "RegularSolid.h"
-#include "../../OrderCalculable.h"
+#include "Octahedron.h"
 
-class Cuboctahedron : public RegularSolid<Cuboctahedron>{// {
+class Cuboctahedron : public RegularSolid<Cuboctahedron> {
 private:
     friend RegularSolid<Cuboctahedron>;
 
-    static void calculateStatic(const std::string &attr);
+    using SymmetryPlatonicSolid = Octahedron;
+
+    static ShapeData calculateStatic(const std::string &attr);
 
 public:
     explicit Cuboctahedron(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}

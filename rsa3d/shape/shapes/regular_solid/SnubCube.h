@@ -8,15 +8,17 @@
 
 #include "RegularSolid.h"
 #include "UnoptimizedSATOverlapRS.h"
-#include "../../OrderCalculable.h"
+#include "Octahedron.h"
 
 class SnubCube : public RegularSolid<SnubCube> {
 private:
     friend RegularSolid<SnubCube>;
 
+    using SymmetryPlatonicSolid = Octahedron;
+
     const static UnoptimizedSATOverlapRS overlapStrategy;
 
-    static void calculateStatic(const std::string &attr);
+    static ShapeData calculateStatic(const std::string &attr);
 
 public:
     explicit SnubCube(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}

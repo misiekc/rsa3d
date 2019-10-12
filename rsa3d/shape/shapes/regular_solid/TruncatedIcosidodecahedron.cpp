@@ -21,8 +21,10 @@ namespace {
     const double gt2 = 2*g;
 }
 
-void TruncatedIcosidodecahedron::calculateStatic(const std::string &attr) {
-    RegularSolid<TruncatedIcosidodecahedron>::orientedVertices =
+RegularSolidBase::ShapeData TruncatedIcosidodecahedron::calculateStatic(const std::string &attr) {
+    ShapeData shapeData;
+
+    shapeData.orientedVertices =
             {{{ gi,  gi, gp3}}, {{ gi, gi, -gp3}}, {{gi, -gi,  gp3}}, {{-gi,  gi,  gp3}},
              {{-gi, -gi, gp3}}, {{-gi, gi, -gp3}}, {{gi, -gi, -gp3}}, {{-gi, -gi, -gp3}},
              {{ gi,  gp3, gi}}, {{ gi, gp3, -gi}}, {{gi, -gp3,  gi}}, {{-gi,  gp3,  gi}},
@@ -58,7 +60,7 @@ void TruncatedIcosidodecahedron::calculateStatic(const std::string &attr) {
              {{ gt2,  g, 3}}, {{ gt2, g, -3}}, {{gt2, -g,  3}}, {{-gt2,  g,  3}},
              {{-gt2, -g, 3}}, {{-gt2, g, -3}}, {{gt2, -g, -3}}, {{-gt2, -g, -3}}};
 
-    RegularSolid<TruncatedIcosidodecahedron>::orientedFaces =
+    shapeData.orientedFaces =
             {{ 52, 100, 84,  36,  12,  10,  34,  82,  98, 50}, {26, 74, 114,  66, 64, 112,  72, 24,   0,   2},
              { 87, 103, 55,  54, 102,  86,  38,  14,  15, 39}, {44, 20,  23,  47, 95, 111,  63, 60, 108,  92},
              {110,  94, 46,  22,  18,  42,  90, 106,  58, 62}, { 7, 31,  79, 119, 71,  69, 117, 77,  29,   5},
@@ -78,6 +80,8 @@ void TruncatedIcosidodecahedron::calculateStatic(const std::string &attr) {
              {19, 21,  23,  20}, { 47,  71, 119, 95}, {31, 55, 103, 79}, { 30, 78, 102,  54}, { 5,   1,   6,   7},
              {41, 65, 113,  89}, {104,  56,  32, 80}, {35, 59, 107, 83}, {117, 69,  45,  93}, {37,  85, 109,  61},
              { 8,  9,  13,  11}, { 57, 105,  81, 33}, {73, 25,  49, 97}, { 98, 74,  26,  50}, {53,  29,  77, 101}};
+
+    return shapeData;
 }
 
 double TruncatedIcosidodecahedron::projectionHalfsize(const Vector<3> &axis) const {
@@ -92,5 +96,5 @@ double TruncatedIcosidodecahedron::projectionHalfsize(const Vector<3> &axis) con
     double zRectHalfsize = max(gi*(zAxis + xAxis) + gp3*yAxis, git2*zAxis + g*xAxis + gt2p1*yAxis, gi*zAxis + g2*xAxis + gt3m1*yAxis,
                                gt2m1*zAxis + 2*xAxis + gp2*yAxis, g*zAxis + 3*xAxis +gt2*yAxis);
 
-    return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * normalizeFactor;
+    return std::max(std::max(xRectHalfsize, yRectHalfsize), zRectHalfsize) * this->shapeData->normalizeFactor;
 }

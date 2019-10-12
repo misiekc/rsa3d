@@ -28,8 +28,10 @@ namespace {
     const double c14 = phi * std::sqrt(x * (x + phi) + 1) / 2;
 }
 
-void SnubDodecahedron::calculateStatic(const std::string &attr) {
-    RegularSolid<SnubDodecahedron>::orientedVertices =
+RegularSolidBase::ShapeData SnubDodecahedron::calculateStatic(const std::string &attr) {
+    ShapeData shapeData;
+
+    shapeData.orientedVertices =
             {{{c2, c1, -c14}}, {{c2, -c1, c14}}, {{-c2, c1, c14}}, {{-c2, -c1, -c14}},
              {{c1, c14, -c2}}, {{c1, -c14, c2}}, {{-c1, c14, c2}}, {{-c1, -c14, -c2}},
              {{c14, c2, -c1}}, {{c14, -c2, c1}}, {{-c14, c2, c1}}, {{-c14, -c2, -c1}},
@@ -50,7 +52,7 @@ void SnubDodecahedron::calculateStatic(const std::string &attr) {
              {{c5, c10, c9}}, {{-c5, -c10, c9}}, {{-c5, c10, -c9}}, {{c5, -c10, -c9}},
              {{c10, c9, c5}}, {{-c10, -c9, c5}}, {{-c10, c9, -c5}}, {{c10, -c9, -c5}}};
 
-    RegularSolid<SnubDodecahedron>::orientedFaces =
+    shapeData.orientedFaces =
             {{46, 10, 34, 18, 58}, {45, 11, 35, 19, 57}, {22, 49, 37,  2, 26}, {30, 14, 52, 40,  6},
              {48, 36,  1, 25, 21}, {16, 56, 44,  8, 32}, {20, 51, 39,  0, 24}, {33, 17, 59, 47,  9},
              {54, 42,  4, 28, 12}, {27, 23, 50, 38,  3}, {53, 41,  5, 29, 13}, { 7, 31, 15, 55, 43},
@@ -71,6 +73,8 @@ void SnubDodecahedron::calculateStatic(const std::string &attr) {
              { 3, 39, 15}, { 3, 15, 27}, {27, 15, 31}, {15, 39, 55}, {55, 39, 51},
              {55, 51, 59}, {55, 59, 43}, {43, 59, 17}, {43, 17,  5}, {43,  5,  7},
              { 7,  5, 41}, { 5, 17, 29}, {29, 33, 17}, {59, 51, 47}, {47, 51, 20}};
+
+    return shapeData;
 }
 
 OverlapStrategy<3, 0> *SnubDodecahedron::createStrategy(const std::string &name) const {

@@ -8,29 +8,28 @@
 
 #include "RegularSolid.h"
 #include "UnoptimizedSATOverlapRS.h"
+#include "Octahedron.h"
 
 class CubeToTetrahedron : public RegularSolid<CubeToTetrahedron> {
 private:
     friend RegularSolid<CubeToTetrahedron>;
 
+    using SymmetryPlatonicSolid = Octahedron;
+
     const static UnoptimizedSATOverlapRS overlapStrategy;
 
-    static void calculateStatic(const std::string &attr);
+    static ShapeData calculateStatic(const std::string &attr);
 
 public:
     explicit CubeToTetrahedron(const Matrix<3, 3> &orientation) : RegularSolid(orientation) {}
 
     OverlapStrategy<3, 0> *createStrategy(const std::string &name) const override;
 
-    static void calculateTruncatedTetrahedron(double xi);
-
-    static void calculateTruncatedCube(double aa);
-
-    static void calculateCuboctahedron(double aa);
-
-    static void calculateNonintersectingTruncations(double aa, double ac);
-
-    static void calculateIntersectingTruncations(double aa, double ac);
+    static ShapeData calculateTruncatedTetrahedron(double xi);
+    static ShapeData calculateTruncatedCube(double aa);
+    static ShapeData calculateCuboctahedron(double aa);
+    static ShapeData calculateNonintersectingTruncations(double aa, double ac);
+    static ShapeData calculateIntersectingTruncations(double aa, double ac);
 };
 
 
