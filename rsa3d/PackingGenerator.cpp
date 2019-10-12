@@ -135,12 +135,13 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 		_OMP_PARALLEL_FOR
 		for(int i = 0; i<loop; i++){
 			RSAShape *sVirtual = ShapeFactory::createShape(threadRND.get());
-			Voxel *v;
 			RSAVector pos;
 			RSAOrientation angle{};
 			do{
-				v = this->voxels->getRandomVoxel(threadRND.get());
-				this->voxels->getRandomPositionAndOrientation(&pos, &angle, v, threadRND.get());
+				for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++)
+					pos[k] = threadRND.get()->nextValue()*this->spatialSize;
+				for(unsigned short k=0; k<RSA_ANGULAR_DIMENSION; k++)
+					angle[k] = threadRND.get()->nextValue()*this->angularSize;
 			}while(!this->isInside(pos, angle));
 			// setting shape position and orientation
 			sVirtual->translate(pos);
@@ -289,9 +290,11 @@ void PackingGenerator::createPacking() {
 			std::cout.flush();
 //						this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
 
-			bool b = voxels->splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface);
+			double voxelRatio = voxels->splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface);
+			bool b = (voxelRatio>0);
 			if (b){
 				v1 = this->voxels->getLength();
+				v0 = (size_t)(v1/voxelRatio);
 //				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
 				std::cout << " done. " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << ", factor: " << this->getFactor() << std::endl;
 				missCounter = 0;
@@ -305,7 +308,7 @@ void PackingGenerator::createPacking() {
 				std::cout << "skipped" << std::endl << std::flush;
 				depthAnalyze = 1;
 			}
-			// if number of voxels has changed
+			// if number of voxels has changed v0!=1 is for the first split
 			if (v1!=v0){
 				tmpSplit *= ((double)v1 / (double)v0);
 			}else{

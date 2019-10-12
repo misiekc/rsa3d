@@ -19,6 +19,9 @@
 class VoxelList {
 
 private:
+	// to optimize memory occupations voxels are initialized in the first invoke split()
+	bool voxelsInitialized;
+
 	// allows voxels to overlap - only for testing purposes and normally should be set to 1
 	const double dxFactor = 1.0; // 1.0000000001;
 
@@ -47,8 +50,8 @@ private:
 	// for a given voxel returns index of its root
 	int getIndexOfTopLevelVoxel(const RSAVector &da);
 
-	// initialize voxels - used inside a constructor
-	void initVoxels();
+	// initialize voxels, returns number of initial voxels
+	unsigned int initVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl);
 
 	// checks consistency of indexes of root voxels
 	void checkTopLevelVoxels();
@@ -117,7 +120,7 @@ public:
 	size_t analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth);
 
 
-	bool splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc);
+	double splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc);
 
 	Voxel *getRandomVoxel(RND *rnd);
 	Voxel *getVoxel(int i);
