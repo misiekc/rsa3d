@@ -34,9 +34,22 @@ public:
 	static RSAShape* createShape(RND *rnd);
 
 	/**
-	 * @brief Provides implementation of VoxelList
+	 * @brief Provides implementation of VoxelList.
+	 *
+	 * For most classes it will be standard VoxelList, but some may want they own version.
+	 *
+	 * @param sClass name of the particle
+	 * @param sufraceDimension the dimension of surface - may be smaller than @a RSA_SPATIAL_DIMENSION
+	 * @param spatialSize the linear size of a packing
+	 * @param voxelSpatialSize the initial linear size of the voxel
+	 * @param angularSize the angular size of the @a sClass particle - typically 2*M_PI, but may be smaller if
+	 * symmetries are present
+	 * @param requestedAngularVoxelSize the initial angular size of the voxel - can be smaller than @a angularSize;
+	 * it can help delete voxels faster
+	 * @return `new`-allocated proper implementation of VoxelList
 	 */
-	static VoxelList *createVoxelList(const std::string &sClass, double surfaceDimension, double spatialSize, double voxelSpatialSize, double angularSize, double requestedAngularVoxelSize);
+	static VoxelList *createVoxelList(const std::string &sClass, unsigned short surfaceDimension, double spatialSize,
+	                                  double voxelSpatialSize, double angularSize, double requestedAngularVoxelSize);
 
     /**
      * @brief Initializes a shape class based on passed name and attributes.
