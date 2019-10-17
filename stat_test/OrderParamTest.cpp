@@ -10,6 +10,8 @@
 #include "../rsa3d/shape/ShapeFactory.h"
 #include "../rsa3d/shape/shapes/regular_solid/RegularSolidBase.h"
 #include "../rsa3d/shape/OrderCalculable.h"
+#include "utils/ShapeGenerators.h"
+#include "utils/ShapePairFactory.h"
 
 namespace {
     using shape_ptr = std::unique_ptr<RSAShape>;
@@ -22,13 +24,7 @@ namespace {
         shape_cptr  maxShape;
     };
 
-    shape_ptr acquire_first_shape(const std::string &particleName) {
-        ShapeFactory::initShapeClass(particleName, "");
-        RND rnd;
-        return shape_ptr(ShapeFactory::createShape(&rnd));
-    }
-
-    bool is_shape_compatible(const std::string &shapeName, const RSAShape *shape) {
+    bool is_shape_compatible(const RSAShape *shape) {
         auto regularSolid = dynamic_cast<const RegularSolidBase*>(shape);
         auto orderCalculable = dynamic_cast<const OrderCalculable*>(shape);
         return regularSolid != nullptr && orderCalculable != nullptr;
@@ -48,7 +44,7 @@ namespace {
 
         std::cout << "[INFO] Finding boundaries... " << std::flush;
         for (std::size_t i = 0; i < iterations; i++) {
-            auto secondShape = shape_ptr(ShapeFactory::createShape(&rnd));
+            auto secondShape = generate_randomly_oriented_shape(Vector<3>(), &rnd);
 
             double fullOrder = calculate_full_order(firstShape, *secondShape);
             if (fullOrder < result.minParamValue) {
@@ -71,7 +67,7 @@ namespace {
 
         std::cout << "[INFO] Finding disorder value... " << std::flush;
         for (std::size_t i = 0; i < iterations; i++) {
-            auto secondShape = shape_ptr(ShapeFactory::createShape(&rnd));
+            auto secondShape = generate_randomly_oriented_shape(Vector<3>(), &rnd);
             double fullOrder = calculate_full_order(firstShape, *secondShape);
             result += fullOrder;
         }
@@ -121,25 +117,35 @@ namespace {
         std::cout << "[INFO] Max value           : " << boundaries.maxParamValue << std::endl;
         std::cout << "[INFO] Disorder value      : " << disorder << std::endl;
         std::cout << "[INFO] Nematic order value : " << nematicOrder << std::endl;
+        std::cout << std::endl;
+        std::cout << "[INFO] Configuration yielding minimal value:" << std::endl;
+
+        RSAShapePairFactory::ShapePair pair = {first.clone(), boundaries.minShape->clone()};
+        pair.print(std::cout);
     }
 }
 
 int order_param_test::main(int argc, char **argv) {
-    if (argc < 4)
-        die("[ERROR] Usage: ./rsa_test order_param_test [particle] [iterations]");
+    if (argc < 5)
+        die("[ERROR] Usage: ./rsa_test order_param_test [particle] [attributes] [iterations]");
 
-    auto shape = acquire_first_shape(argv[2]);
-    if (!is_shape_compatible(argv[2], shape.get()))
-        die("[ERROR] " + std::string(argv[2]) + " is not both RegularSolid and OrderCalculable");
+    std::string particleName = argv[2];
+    std::string particleAttr = argv[3];
+    ShapeFactory::initShapeClass(particleName, particleAttr);
 
-    std::size_t iterations = std::stoul(argv[3]);
+    RND rnd;
+    auto firstShape = generate_randomly_oriented_shape(Vector<3>(), &rnd);
+    if (!is_shape_compatible(firstShape.get()))
+        die("[ERROR] " + particleName + " is not both RegularSolid and OrderCalculable");
+
+    std::size_t iterations = std::stoul(argv[4]);
     if (iterations == 0)
         die("[ERROR] iterations == 0");
 
-    Boundaries boundaries = find_boundaries(*shape, iterations);
-    double disorder = find_disorder_value(*shape, iterations);
-    double nematicOrder = find_nematic_order_value(*shape, iterations);
+    Boundaries boundaries = find_boundaries(*firstShape, iterations);
+    double disorder = find_disorder_value(*firstShape, iterations);
+    double nematicOrder = find_nematic_order_value(*firstShape, iterations);
 
-    report_results(*shape, boundaries, disorder, nematicOrder);
+    report_results(*firstShape, boundaries, disorder, nematicOrder);
     return EXIT_SUCCESS;
 }
