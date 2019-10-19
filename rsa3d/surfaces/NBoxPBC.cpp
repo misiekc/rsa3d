@@ -13,10 +13,6 @@ NBoxPBC::NBoxPBC(int dim, double s, double ndx, double vdx) : Surface(dim, s, nd
                 "Packing linear size is <= 4 circumscribed spheres - boundary conditions will break. ");
 }
 
-double NBoxPBC::getArea() const {
-	return pow(this->size, RSA_SPATIAL_DIMENSION);
-}
-
 RSAVector NBoxPBC::getTranslation(double s, const RSAVector &p1, const RSAVector &p2) {
     RSAVector result;
     RSAVector delta = p1 - p2;

@@ -11,10 +11,6 @@ NBoxFBC::NBoxFBC(int dim, double s, double ndx, double vdx) : Surface(dim, s, nd
 	// TODO Auto-generated constructor stub
 }
 
-double NBoxFBC::getArea() const {
-	return pow(this->size, RSA_SPATIAL_DIMENSION);
-}
-
 RSAVector NBoxFBC::getTranslation(double s, const RSAVector &p1, const RSAVector &p2) {
 	return {};
 }

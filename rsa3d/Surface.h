@@ -22,6 +22,7 @@ protected:
 	NeighbourGrid<const RSAShape> *list;
 
 	double size;
+	double dimension;
 
 	RSAVector vectorFreeBC(const RSAVector &v) const;
 	RSAVector vectorPeriodicBC(const RSAVector &v) const;
@@ -42,7 +43,7 @@ public:
 	RSAVector getTranslation(const RSAVector &p1, const RSAVector &p2) const override = 0;
 	virtual RSAVector vector(const RSAVector &v) const = 0;
 	virtual RSAVector checkPosition(const RSAVector &da) const;
-	virtual double getArea() const = 0;
+	virtual double getArea() const;
 
 //	void drawShapes(Graphics g, double scale);
 //	void drawShapes(Graphics g, double scale, double[] ta);

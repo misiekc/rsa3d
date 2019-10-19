@@ -9,6 +9,7 @@
 #include <iostream>
 
 Surface::Surface(int dim, double s, double ndx, double vdx) : BoundaryConditions() {
+	this->dimension = dim;
 	this->size = s;
 	this->list = new NeighbourGrid<const RSAShape>(dim, s, ndx);
 }
@@ -21,6 +22,9 @@ void Surface::clear(){
 	this->list->clear();
 }
 
+double Surface::getArea() const {
+	return pow(this->size, this->dimension);
+}
 
 void Surface::add(const RSAShape *s) {
 	this->list->add(s, s->getPosition());

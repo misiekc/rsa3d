@@ -195,18 +195,22 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 			position[i] = this->spatialVoxelSize*ins[i]; // position point to the "left bottom" corner of a voxel
 		}
 		ina.fill(0);
+		bool removeTopLevelVoxel = true;
 		do{
 			for(unsigned char i=0; i<RSA_ANGULAR_DIMENSION; i++){
 				orientation[i] = this->angularVoxelSize*ina[i]; // orientation point to the "left bottom" corner of a voxel
 			}
 			this->voxels[index] = new Voxel(position, orientation);
 			if (this->analyzeVoxel(this->voxels[index], nl, bc, this->spatialVoxelSize, this->angularVoxelSize)){ // dividing only not overlapping voxels
-				this->activeTopLevelVoxels[index] = false;
 				delete this->voxels[index];
 				this->voxels[index] = nullptr;
+			}else{
+				removeTopLevelVoxel = false;
 			}
 			index++;
 		}while(increment(ina.data(), RSA_ANGULAR_DIMENSION, na-1));
+		if (removeTopLevelVoxel == true)
+			this->removeTopLevelVoxel(this->voxels[index-1]);
 	}while(increment(ins.data(), this->surfaceDimension, ns-1));
 
 	this->beginningVoxelNumber = ss*sa;
