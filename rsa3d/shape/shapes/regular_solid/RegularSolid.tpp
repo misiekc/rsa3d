@@ -59,10 +59,15 @@ Shape<3, 0> *RegularSolid<SpecificSolid>::clone() const {
 
 template<typename SpecificSolid>
 std::vector<double> RegularSolid<SpecificSolid>::calculateOrder(const OrderCalculable *other) const {
-    using SymmetryPlatonicSolid = typename SpecificSolid::SymmetryPlatonicSolid;
-    SymmetryPlatonicSolid thisPlatonic(this->getOrientationMatrix());
-    auto otherRegularSolid = static_cast<const RegularSolid &>(*other);
-    SymmetryPlatonicSolid otherPlatonic(otherRegularSolid.getOrientationMatrix());
+    auto &otherRegularSolid = static_cast<const RegularSolid &>(*other);
 
-    return thisPlatonic.calculateOrder(&otherPlatonic);
+    auto thisSymmetry = this->createSymmetryShape();
+    auto otherSymmetry = otherRegularSolid.createSymmetryShape();
+
+    return thisSymmetry->calculateOrder(otherSymmetry.get());
+}
+
+template<typename SpecificSolid>
+std::unique_ptr<RegularSolidBase> RegularSolid<SpecificSolid>::createSymmetryShape() const {
+    return std::make_unique<typename SpecificSolid::SymmetryPlatonicSolid>(this->getOrientationMatrix());
 }

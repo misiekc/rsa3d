@@ -126,6 +126,11 @@ public:
     PolyhedronFaces getFaces() const;
     std::vector<Vector<3>> getFaceNormals() const;
 
+    /** @brief Creates the shape corresponsing to the symmetry of this object with the same orientation and 0 position
+     * @return the shape corresponsing to the symmetry of this object with the same orientation and 0 position
+     */
+    virtual std::unique_ptr<RegularSolidBase> createSymmetryShape() const = 0;
+
     const Matrix<3, 3> &getOrientationMatrix() const;
     void setOrientationMatrix(const Matrix<3, 3> &orientation);
     virtual double projectionHalfsize(const Vector<3> &axis) const;

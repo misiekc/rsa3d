@@ -57,6 +57,8 @@ public:
     bool overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const final;
     Shape<3, 0> *clone() const override;
 
+    std::unique_ptr<RegularSolidBase> createSymmetryShape() const override;
+
     std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 };
 
