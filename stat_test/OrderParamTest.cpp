@@ -27,6 +27,19 @@ namespace {
         shape_cptr  maxShape;
     };
 
+    struct Result {
+        Boundaries boundaries;
+        Quantity disorder;
+        Quantity nematicOrder;
+        Quantity nematicOrderFullRotations;
+        int nematicExitCode;
+        std::unique_ptr<RSAShape> firstShape;
+
+        void report(std::ostream &out) const;
+
+        int getExitCode();
+    };
+
     bool is_shape_compatible(const RSAShape *shape) {
         auto regularSolid = dynamic_cast<const RegularSolidBase*>(shape);
         auto orderCalculable = dynamic_cast<const OrderCalculable*>(shape);
@@ -151,7 +164,8 @@ namespace {
     }
 
     /* Returns a tuple: test exit code and the average value of order parameter for solids almost closest possible
-     * Test exit code is TEST_ERROR if all sampled solids overlapped */
+     * Test exit code is TEST_ERROR if all sampled solids overlapped - it check face axes and vertex axes of symmetry
+     * Platonic solid */
     auto find_nematic_order_value_full_rotations(const RSAShape &firstShape, std::size_t iterations) {
         auto &firstRegular = dynamic_cast<const RegularSolidBase&>(firstShape);
         auto firstSymmetry = firstRegular.createSymmetryShape();
@@ -173,34 +187,49 @@ namespace {
             std::cout << "[INFO] DONE. Iterations without overlap: " << numberOfIterations << std::endl;
             return std::make_tuple(TEST_SUCCESS, result);
         } else {
-            std::cout << "[FAILURE] No non-overlapping particles found. " << std::endl;
+            std::cout << "[ERROR] No non-overlapping particles found. " << std::endl;
             return std::make_tuple(TEST_ERROR, result);
         }
     }
 
-    void report_results(const RSAShape &first, const Boundaries &boundaries, Quantity disorder, Quantity nematicOrder,
-                        int nematicExitCode, Quantity nematicOrderFullRotations)
-    {
-        std::cout << std::endl;
-        std::cout << "[INFO] Min value                                : " << boundaries.minParamValue << std::endl;
-        std::cout << "[INFO] Max value                                : " << boundaries.maxParamValue << std::endl;
-        std::cout << "[INFO] Disorder value                           : " << disorder << std::endl;
-        std::cout << "[INFO] Nematic order value                      : " << nematicOrder << std::endl;
-        if (nematicExitCode == TEST_SUCCESS)
-            std::cout << "[INFO] Nematic order value using full rotations : " << nematicOrderFullRotations << std::endl;
+    void Result::report(std::ostream &out) const {
+        out << std::endl;
+        out << "[INFO] Min value                                : " << this->boundaries.minParamValue << std::endl;
+        out << "[INFO] Max value                                : " << this->boundaries.maxParamValue << std::endl;
+        out << "[INFO] Disorder value                           : " << this->disorder << std::endl;
+        out << "[INFO] Nematic order value                      : " << this->nematicOrder << std::endl;
+        if (this->nematicExitCode == TEST_SUCCESS)
+            out << "[INFO] Nematic order value using full rotations : " << this->nematicOrderFullRotations << std::endl;
         else
-            std::cout << "[INFO] Nematic order value using full rotations : ERROR" << std::endl;
-        std::cout << std::endl;
-        std::cout << "[INFO] Configuration yielding minimal value:" << std::endl;
+            out << "[INFO] Nematic order value using full rotations : ERROR" << std::endl;
+        out << std::endl;
+        out << "[INFO] Configuration yielding minimal value:" << std::endl;
 
-        RSAShapePairFactory::ShapePair pair = {first.clone(), boundaries.minShape->clone()};
+        RSAShapePairFactory::ShapePair pair = {this->firstShape->clone(), this->boundaries.minShape->clone()};
         pair.print(std::cout);
+    }
+
+    int Result::getExitCode() {
+        return this->nematicExitCode;
+    }
+
+    Result perform_tests(std::unique_ptr<RSAShape> firstShape, size_t iterations) {
+        Result result;
+        result.firstShape = std::move(firstShape);
+        result.boundaries = find_boundaries(*result.firstShape, iterations);
+        result.disorder = find_disorder_value(*result.firstShape, iterations);
+        result.nematicOrder = find_nematic_order_value(*result.firstShape, iterations);
+        std::tie(result.nematicExitCode, result.nematicOrderFullRotations)
+                = find_nematic_order_value_full_rotations(*result.firstShape, iterations);
+        return result;
     }
 }
 
 int order_param_test::main(int argc, char **argv) {
-    if (argc < 5)
-        die("[ERROR] Usage: ./rsa_test order_param_test [particle] [attributes] [iterations]");
+    if (argc < 5) {
+        std::cerr << "[ERROR] Usage: ./rsa_test order_param_test [particle] [attributes] [iterations]" << std::endl;
+        return TEST_ERROR;
+    }
 
     std::string particleName = argv[2];
     std::string particleAttr = argv[3];
@@ -208,18 +237,18 @@ int order_param_test::main(int argc, char **argv) {
 
     RND rnd;
     auto firstShape = generate_randomly_oriented_shape(Vector<3>(), &rnd);
-    if (!is_shape_compatible(firstShape.get()))
-        die("[ERROR] " + particleName + " is not both RegularSolid and OrderCalculable");
+    if (!is_shape_compatible(firstShape.get())) {
+        std::cerr << "[ERROR] " << particleName << " is not both RegularSolid and OrderCalculable" << std::endl;
+        return TEST_ERROR;
+    }
 
     std::size_t iterations = std::stoul(argv[4]);
-    if (iterations == 0)
-        die("[ERROR] iterations == 0");
+    if (iterations == 0) {
+        std::cerr << "[ERROR] iterations == 0" << std::endl;
+        return TEST_ERROR;
+    }
 
-    Boundaries boundaries = find_boundaries(*firstShape, iterations);
-    Quantity disorder = find_disorder_value(*firstShape, iterations);
-    Quantity nematicOrder = find_nematic_order_value(*firstShape, iterations);
-    auto [nematicExitCode, nematicOrderFullRotations] = find_nematic_order_value_full_rotations(*firstShape, iterations);
-
-    report_results(*firstShape, boundaries, disorder, nematicOrder, nematicExitCode, nematicOrderFullRotations);
-    return nematicExitCode;
+    Result result = perform_tests(std::move(firstShape), iterations);
+    result.report(std::cout);
+    return result.getExitCode();
 }
