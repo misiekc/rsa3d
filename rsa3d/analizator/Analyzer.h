@@ -50,7 +50,7 @@ private:
 	double analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, double surfaceFactor);
 	void analyzeCorrelations(const Packing &packing, const NeighbourGrid<const RSAShape> &ng, Plot *corr);
 	void analyzeOrder(const Packing &packing, const NeighbourGrid<const RSAShape> &ng, std::vector<Plot*> *order);
-	void printKinetics(LogPlot &nvt, std::string filename, double *fixedA, double surfaceFactor, Result *res);
+	void printKinetics(LogPlot &nvt, std::string filename, double *fixedA, double surfaceFactor, double dTime, Result *res);
 	void printASF(Plot &asf, std::string filename, int counter, double packingFraction, Result *res);
 	void printCorrelations(Plot &corr, std::string filename);
 	void printOrder(const std::vector<Plot*> &order, const std::string &filename) const;

@@ -181,7 +181,7 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 	}
 	this->spatialVoxelSize = this->initialVoxelSize;
 	this->angularVoxelSize = this->initialAngularVoxelSize;
-	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(this->surfaceDimension, this->spatialVoxelSize*ns, ns);
+	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(this->surfaceDimension, this->spatialVoxelSize*ns, ns, false);
 
 	RSAVector position;
 	RSAOrientation orientation{};
@@ -534,90 +534,21 @@ size_t VoxelList::analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const R
 
 	return begin - this->length;
 }
-/*
-double VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc){
-	if (this->disabled)
-		return -1;
-	unsigned int v0 = this->length;
-	size_t voxelsFactor = (size_t)round( pow(2, this->surfaceDimension+RSA_ANGULAR_DIMENSION) );
-	if ((this->spatialVoxelSize<2*minDx && voxelsFactor*this->length > this->beginningVoxelNumber) || voxelsFactor*this->length > maxVoxels){
-		return -1;
-	}
-
-	int newListSize = voxelsFactor*(this->length);
-	Voxel** newList = new Voxel*[ newListSize ];
-	for(int i=0; i<newListSize; i++){
-		newList[i] = nullptr;
-	}
-
-	Voxel ***aVoxels = new Voxel**[_OMP_MAXTHREADS];
-	for(int i=0; i<_OMP_MAXTHREADS; i++){
-		aVoxels[i] = new Voxel*[ voxelsFactor ];
-	}
-
-	_OMP_PARALLEL_FOR
-	for(size_t i=0; i<this->length; i++){
-		if (!this->analyzeVoxel(this->voxels[i], nl, bc, this->spatialVoxelSize, this->angularVoxelSize)){ // dividing only not overlapping voxels
-			this->splitVoxel(this->voxels[i], this->spatialVoxelSize/2.0, this->angularVoxelSize/2.0, aVoxels[_OMP_THREAD_ID]);
-			for(size_t j=0; j<voxelsFactor; j++){
-				Voxel *v = aVoxels[_OMP_THREAD_ID][j];
-//				if(this->isVoxelInsidePacking(v) && ( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc) ) ){
-				if( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc, this->spatialVoxelSize/2.0, this->angularVoxelSize/2.0) ){
-					if(this->voxels[i]->depth > 0){
-						v->depth = this->voxels[i]->depth-1;
-					}
-					newList[i*voxelsFactor + j] = v;
-				}else{
-					delete aVoxels[_OMP_THREAD_ID][j];
-				}
-			}
-		}
-		delete this->voxels[i];
-		if (i%10000 == 0){ std::cout << "." << std::flush; }
-	}
-
-	for(int i=0; i<_OMP_MAXTHREADS; i++){
-		delete[] aVoxels[i];
-	}
-	delete[] aVoxels;
-
-	delete[] this->voxels;
-
-	int endIndex = newListSize - 1;
-
-	std::cout << " compacting" << std::flush;
-
-	this->compactVoxelArray(newList, endIndex);
-
-	this->spatialVoxelSize = (this->spatialVoxelSize/2.0)*this->dxFactor;
-	delete this->spatialDistribution;
-	this->spatialDistribution = new std::uniform_real_distribution<double>(0.0, this->spatialVoxelSize);
-
-	this->angularVoxelSize = (this->angularVoxelSize/2.0)*this->dxFactor;
-	delete this->angularDistribution;
-	this->angularDistribution = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize);
-
-	this->length = endIndex+1;
-	this->voxels = newList;
-	this->rebuildNeighbourGrid();
-
-//	this->checkTopLevelVoxels();
-	return ((double)this->length / (double)v0);
-}
-*/
 
 double VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc){
 	if (this->disabled)
 		return -1;
-	unsigned int v0 = this->length;
-	if (!this->voxelsInitialized)
+	unsigned int v0;
+	if (!this->voxelsInitialized){
 		v0 = this->initVoxels(bc, nl);
-
-
-	size_t voxelsFactor = (size_t)round( pow(2, this->surfaceDimension+RSA_ANGULAR_DIMENSION) );
-	if ((this->spatialVoxelSize<2*minDx && voxelsFactor*this->length > this->beginningVoxelNumber) || voxelsFactor*this->length > maxVoxels){
-		return -1;
+		this->analyzeVoxels(bc, nl, 0);
+		return ((double)this->length / (double)v0);
 	}
+	size_t voxelsFactor = (size_t)round( pow(2, this->surfaceDimension+RSA_ANGULAR_DIMENSION) );
+	if ((this->spatialVoxelSize<2*minDx && voxelsFactor*this->length > this->beginningVoxelNumber) )
+		return -1;
+
+	v0 = this->length;
 
 	int newListSize = voxelsFactor*(this->length);
 	Voxel** newList = new Voxel*[ newListSize ];
@@ -647,7 +578,6 @@ double VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<cons
 				}
 			}
 		}
-		delete this->voxels[i];
 		if (i%10000 == 0){ std::cout << "." << std::flush; }
 	}
 
@@ -656,28 +586,40 @@ double VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<cons
 	}
 	delete[] aVoxels;
 
-	delete[] this->voxels;
-
 	int endIndex = newListSize - 1;
 
 	std::cout << " compacting" << std::flush;
 
 	this->compactVoxelArray(newList, endIndex);
 
-	this->spatialVoxelSize = (this->spatialVoxelSize/2.0)*this->dxFactor;
-	delete this->spatialDistribution;
-	this->spatialDistribution = new std::uniform_real_distribution<double>(0.0, this->spatialVoxelSize);
 
-	this->angularVoxelSize = (this->angularVoxelSize/2.0)*this->dxFactor;
-	delete this->angularDistribution;
-	this->angularDistribution = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize);
 
-	this->length = endIndex+1;
-	this->voxels = newList;
-	this->rebuildNeighbourGrid();
+	if (endIndex+1 > (int)maxVoxels){
+		std::cout << " too many new voxels (" << (endIndex+1) << ">" << maxVoxels <<"): - cancel splitting" << std::flush;
+		for(int i=0; i<endIndex+1; i++)
+			delete newList[i];
+		delete[] newList;
+		return -1;
+	}else{
 
-//	this->checkTopLevelVoxels();
-	return ((double)this->length / (double)v0);
+		this->spatialVoxelSize = (this->spatialVoxelSize/2.0)*this->dxFactor;
+		delete this->spatialDistribution;
+		this->spatialDistribution = new std::uniform_real_distribution<double>(0.0, this->spatialVoxelSize);
+
+		this->angularVoxelSize = (this->angularVoxelSize/2.0)*this->dxFactor;
+		delete this->angularDistribution;
+		this->angularDistribution = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize);
+
+		for(size_t i=0; i<this->length; i++)
+			delete this->voxels[i];
+		delete[] this->voxels;
+		this->length = endIndex+1;
+		this->voxels = newList;
+		this->rebuildNeighbourGrid();
+
+		//	this->checkTopLevelVoxels();
+		return ((double)this->length / (double)v0);
+	}
 }
 
 

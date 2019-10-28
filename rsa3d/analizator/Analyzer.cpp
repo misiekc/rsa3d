@@ -155,7 +155,8 @@ double Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf,
 }
 
 
-void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA, double surfaceFactor, Result *res){
+void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA, double surfaceFactor, double dTime, Result *res){
+	double parameterD = 0.0, errorD = 0.0;
 	double **points = new double*[nvt.size()];
 	for(int i=0; i<nvt.size(); i++)
 		points[i] = new double[2];
@@ -215,6 +216,10 @@ void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA,
                 double dB = fabs(B - lr1.getB());
 				res->d.value = -1.0 / (pr.getA()+1);
 				res->d.error = -pr.getSA()/(pr.getA()+1) * res->d.value;
+				if (maxX<dTime){
+					parameterD = res->d.value;
+					errorD = res->d.error;
+				}
 				res->thetaInf.value = B;
 				res->thetaInf.error = dB;
 				res->A.value = -A;
@@ -232,6 +237,8 @@ void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA,
 	for(int i=0; i<nvt.size(); i++)
 		delete[] points[i];
 	delete[] points;
+	res->d.value = parameterD;
+	res->d.error = errorD;
 }
 
 void Analyzer::printASF(Plot &asf, std::string filename, int counter, double packingFraction, Result *res){
@@ -385,8 +392,8 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
 	std::cout << std::endl;
 
 	Result result;
-
-	this->printKinetics(nvt, (dirName + "_kinetics.txt"), nullptr, particleSize / packingSize, &result);
+	double dTime = (minmaxTimes[0]>0.01*minmaxTimes[1])? minmaxTimes[0] : minmaxTimes[0]/10;
+	this->printKinetics(nvt, (dirName + "_kinetics.txt"), nullptr, particleSize / packingSize, dTime, &result);
 	double packingFraction = result.thetaInf.value;
 	this->printASF(asf, dirName + "_asf.txt", counter, packingFraction, &result);
 

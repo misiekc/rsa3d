@@ -299,7 +299,7 @@ void PackingGenerator::createPacking() {
 				std::cout << " done. " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << ", factor: " << this->getFactor() << std::endl;
 				missCounter = 0;
 			}else if(RSAShape::getSupportsSaturation() || rnd.nextValue() < 0.1){
-				std::cout << "skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;
+				std::cout << " skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;
 				this->voxels->analyzeVoxels(this->surface, this->surface->getNeighbourGrid(), depthAnalyze);
 				std::cout << " done: " << this->voxels->getLength() << " voxels remained, factor = " << this->getFactor() << std::endl << std::flush;
 				tmpSplit = (int)(1.1 * tmpSplit);

@@ -25,10 +25,34 @@ private:
 	double linearSize;
 	int n;
 	double dx;
+	bool withNeighbouringCells;
 
 	// contains vectors of cells (vectors with Positioned* inside)
 	std::vector<std::vector<E * > * > lists;
 	std::vector<std::vector<int> * > neighbouringCells;
+
+
+	void fillNeigbouringCellsVector(std::vector<int> *vec, int cellNo) const{
+		int in[RSA_SPATIAL_DIMENSION];
+		double da[RSA_SPATIAL_DIMENSION];
+		int coords[RSA_SPATIAL_DIMENSION];
+
+		vec->reserve((1 << this->surfaceDimension));
+
+		i2position(da, this->surfaceDimension, cellNo, this->dx, this->n);
+		for(unsigned char i=0; i<RSA_SPATIAL_DIMENSION; i++){
+			in[i] = 0;
+		}
+		coordinates(coords, da, this->surfaceDimension, this->linearSize, this->dx, this->n);
+
+		do{
+			int iCell = neighbour2i(coords, in, this->surfaceDimension, 1, this->n);
+			vec->push_back(iCell);
+		}while(increment(in, this->surfaceDimension, 2));
+		// sort and erase to avoid duplicates - important for small packings
+		std::sort( vec->begin(), vec->end() );
+		vec->erase( std::unique( vec->begin(), vec->end() ), vec->end() );
+	}
 
 	void init(double size, size_t n){
 		this->linearSize = size;
@@ -36,29 +60,18 @@ private:
 		this->dx = size/this->n;
 		int length = (int) round(pow(this->n, this->surfaceDimension));
 		this->lists.reserve(length);
-		this->neighbouringCells.reserve(length);
-
-		int in[RSA_SPATIAL_DIMENSION];
-		double da[RSA_SPATIAL_DIMENSION];
-		int coords[RSA_SPATIAL_DIMENSION];
+		if (this->withNeighbouringCells)
+			this->neighbouringCells.reserve(length);
+		else
+			this->neighbouringCells.reserve(0);
 
 		for(int i=0; i<length; i++){
 			this->lists.push_back(new std::vector<E *>);
-			this->neighbouringCells.push_back(new std::vector<int>);
-			this->neighbouringCells[i]->reserve((1 << this->surfaceDimension));
 
-			i2position(da, this->surfaceDimension, i, this->dx, this->n);
-			for(unsigned char i=0; i<RSA_SPATIAL_DIMENSION; i++){
-				in[i] = 0;
+			if (this->withNeighbouringCells){
+				this->neighbouringCells.push_back(new std::vector<int>);
+				this->fillNeigbouringCellsVector(this->neighbouringCells[i], i);
 			}
-			coordinates(coords, da, this->surfaceDimension, this->linearSize, this->dx, this->n);
-			do{
-				int iCell = neighbour2i(coords, in, this->surfaceDimension, 1, this->n);
-				this->neighbouringCells[i]->push_back(iCell);
-			}while(increment(in, this->surfaceDimension, 2));
-			// sort and erase to avoid duplicates - important for small packings
-			std::sort( neighbouringCells[i]->begin(), neighbouringCells[i]->end() );
-			neighbouringCells[i]->erase( std::unique( neighbouringCells[i]->begin(), neighbouringCells[i]->end() ), neighbouringCells[i]->end() );
 		}
 	}
 
@@ -71,12 +84,12 @@ public:
 		Expects(dx > 0);
 
 		this->surfaceDimension = surfaceDim;
+		this->withNeighbouringCells = true;
 		size_t n = (size_t)(size/dx);
 		if (n == 0)
 		    throw std::runtime_error("neighbour grid cell too big");
 		this->init(size, n);
 	}
-
 
 	NeighbourGrid(int surfaceDim, double size, size_t n){ // @suppress("Class members should be properly initialized")
 		Expects(surfaceDim > 0);
@@ -84,6 +97,18 @@ public:
 		Expects(size > 0);
 		Expects(n > 0);
 
+		this->withNeighbouringCells = true;
+		this->surfaceDimension = surfaceDim;
+		this->init(size, n);
+	}
+
+	NeighbourGrid(int surfaceDim, double size, size_t n, bool neighbouringCells){ // @suppress("Class members should be properly initialized")
+		Expects(surfaceDim > 0);
+		Expects(surfaceDim <= RSA_SPATIAL_DIMENSION);
+		Expects(size > 0);
+		Expects(n > 0);
+
+		this->withNeighbouringCells = neighbouringCells;
 		this->surfaceDimension = surfaceDim;
 		this->init(size, n);
 	}
@@ -131,10 +156,20 @@ public:
 		double array[RSA_SPATIAL_DIMENSION];
 		da.copyToArray(array);
 		int i = position2i(array, this->surfaceDimension, this->linearSize, this->dx, this->n);
-		for(int iCell : *(this->neighbouringCells[i])){
+
+		std::vector<int> *cellsptr;
+		if (this->withNeighbouringCells)
+			cellsptr = this->neighbouringCells[i];
+		else{
+			cellsptr = new std::vector<int>();
+			this->fillNeigbouringCellsVector(cellsptr, i);
+		}
+		for(int iCell : *(cellsptr)){
 			vTmp = (this->lists[iCell]);
 			result->insert(result->end(), vTmp->begin(), vTmp->end());
 		}
+		if(!this->withNeighbouringCells)
+			delete cellsptr;
 	}
 };
 
