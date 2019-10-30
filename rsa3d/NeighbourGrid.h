@@ -116,7 +116,8 @@ public:
 	virtual ~NeighbourGrid(){
 		for(unsigned int i=0; i<this->lists.size(); i++){
 				delete this->lists[i];
-				delete this->neighbouringCells[i];
+				if (withNeighbouringCells)
+					delete this->neighbouringCells[i];
 			}
 	}
 

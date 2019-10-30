@@ -126,6 +126,7 @@ VoxelList::VoxelList(int dim, double packingSpatialSize, double requestedSpatial
 
 VoxelList::~VoxelList() {
 	delete this->spatialDistribution;
+	delete this->angularDistribution;
 
 	for(size_t i=0; i<this->length; i++){
 		delete this->voxels[i];
@@ -215,9 +216,7 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 
 	this->beginningVoxelNumber = ss*sa;
 	this->length = this->beginningVoxelNumber;
-	int endIndex = this->length-1;
-	this->compactVoxelArray(this->voxels, endIndex);
-	this->length = endIndex+1;
+	this->length = this->compactVoxelArray(this->voxels, this->length);
 
 	delete this->spatialDistribution;
 	this->spatialDistribution = new std::uniform_real_distribution<double>(0.0, this->spatialVoxelSize);
@@ -242,21 +241,34 @@ void VoxelList::getNeighbours(std::vector<Voxel *> *result, const RSAVector &da)
 	return this->voxelNeighbourGrid->getNeighbours(result, da);
 }
 
-void VoxelList::compactVoxelArray(Voxel **list, int &endIndex){
-	int beginIndex = 0;
+size_t VoxelList::compactVoxelArray(Voxel **list, size_t length){
+	if (length==0)
+		return 0;
 
-	while(list[endIndex] == nullptr && endIndex > -1)
-		(endIndex)--;
+	size_t beginIndex = 0;
+	size_t endIndex = length-1;
 
-	while (beginIndex<endIndex){
-		if(list[beginIndex] == nullptr){
+	do{
+		// moving lastIndex to the last non-null value
+		while(endIndex > 0 && list[endIndex] == nullptr)
+			(endIndex)--;
+
+		// moving beginIdex to the first null value
+		while(beginIndex < length && list[beginIndex] !=nullptr)
+			beginIndex++;
+
+		if(beginIndex<endIndex){
 			list[beginIndex] = list[endIndex];
 			list[endIndex] = nullptr;
-		}
-		beginIndex++;
-		while(list[endIndex] == nullptr && endIndex > -1)
+			beginIndex++;
 			endIndex--;
-	}
+		}
+	}while(beginIndex<endIndex);
+
+	if (list[endIndex]!=nullptr)
+		return endIndex+1;
+	else
+		return 0;
 }
 
 int VoxelList::getIndexOfTopLevelVoxel(const RSAVector &da){
@@ -528,9 +540,7 @@ size_t VoxelList::analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const R
 
 	std::cout << " compacting" << std::flush;
 
-	int endIndex = this->length-1;
-	this->compactVoxelArray(this->voxels, endIndex);
-	this->length = endIndex+1;
+	this->length = this->compactVoxelArray(this->voxels, this->length);
 
 	return begin - this->length;
 }
@@ -538,24 +548,25 @@ size_t VoxelList::analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const R
 double VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc){
 	if (this->disabled)
 		return -1;
-	unsigned int v0;
+
+	size_t v0 = this->length;
 	if (!this->voxelsInitialized){
 		v0 = this->initVoxels(bc, nl);
-		this->analyzeVoxels(bc, nl, 0);
 		return ((double)this->length / (double)v0);
 	}
 	size_t voxelsFactor = (size_t)round( pow(2, this->surfaceDimension+RSA_ANGULAR_DIMENSION) );
-	if ((this->spatialVoxelSize<2*minDx && voxelsFactor*this->length > this->beginningVoxelNumber) )
+	if (this->spatialVoxelSize<2*minDx)
 		return -1;
 
-	v0 = this->length;
+	size_t newVoxelsCounter = 0;
 
-	int newListSize = voxelsFactor*(this->length);
+	size_t newListSize = voxelsFactor*(this->length);
 	Voxel** newList = new Voxel*[ newListSize ];
-	for(int i=0; i<newListSize; i++){
+	for(size_t i=0; i<newListSize; i++){
 		newList[i] = nullptr;
 	}
 
+	// temporary metrices for voxels after divisions. One separate matrix for each thread
 	Voxel ***aVoxels = new Voxel**[_OMP_MAXTHREADS];
 	for(int i=0; i<_OMP_MAXTHREADS; i++){
 		aVoxels[i] = new Voxel*[ voxelsFactor ];
@@ -563,44 +574,59 @@ double VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<cons
 
 	_OMP_PARALLEL_FOR
 	for(size_t i=0; i<this->length; i++){
-		if (!this->analyzeVoxel(this->voxels[i], nl, bc, this->spatialVoxelSize, this->angularVoxelSize)){ // dividing only not overlapping voxels
-			this->splitVoxel(this->voxels[i], this->spatialVoxelSize/2.0, this->angularVoxelSize/2.0, aVoxels[_OMP_THREAD_ID]);
-			for(size_t j=0; j<voxelsFactor; j++){
-				Voxel *v = aVoxels[_OMP_THREAD_ID][j];
-//				if(this->isVoxelInsidePacking(v) && ( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc) ) ){
-				if( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc, this->spatialVoxelSize/2.0, this->angularVoxelSize/2.0) ){
-					if(this->voxels[i]->depth > 0){
-						v->depth = this->voxels[i]->depth-1;
+		// voxel is tested if it should remain active and if so it is divided
+		if (!this->analyzeVoxel(this->voxels[i], nl, bc, this->spatialVoxelSize, this->angularVoxelSize)){
+			// if too much new voxels there is no point in further splitting
+			if (newVoxelsCounter <= maxVoxels){
+				// preparing array of new voxels after division of this->voxels[i] (aVoxels)
+				this->splitVoxel(this->voxels[i], this->spatialVoxelSize/2.0, this->angularVoxelSize/2.0, aVoxels[_OMP_THREAD_ID]);
+				// analyzing new voxels, only the non covered ones will be added to the new array (newList)
+				for(size_t j=0; j<voxelsFactor; j++){
+					Voxel *v = aVoxels[_OMP_THREAD_ID][j];
+					if( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc, this->spatialVoxelSize/2.0, this->angularVoxelSize/2.0) ){
+						if(this->voxels[i]->depth > 0){
+							v->depth = this->voxels[i]->depth-1;
+						}
+						newList[i*voxelsFactor + j] = v;
+						newVoxelsCounter++;
+					}else{
+						// covered voxels are removed
+						delete aVoxels[_OMP_THREAD_ID][j];
 					}
-					newList[i*voxelsFactor + j] = v;
-				}else{
-					delete aVoxels[_OMP_THREAD_ID][j];
 				}
 			}
+		}else{
+			// original covered voxels are cleaned
+			delete this->voxels[i];
+			this->voxels[i] = nullptr;
 		}
 		if (i%10000 == 0){ std::cout << "." << std::flush; }
 	}
 
+	// delete temporary thread matrices. Covered voxels have been already removed
 	for(int i=0; i<_OMP_MAXTHREADS; i++){
 		delete[] aVoxels[i];
 	}
 	delete[] aVoxels;
 
-	int endIndex = newListSize - 1;
-
-	std::cout << " compacting" << std::flush;
-
-	this->compactVoxelArray(newList, endIndex);
-
-
-
-	if (endIndex+1 > (int)maxVoxels){
-		std::cout << " too many new voxels (" << (endIndex+1) << ">" << maxVoxels <<"): - cancel splitting" << std::flush;
-		for(int i=0; i<endIndex+1; i++)
-			delete newList[i];
+	if (newVoxelsCounter > maxVoxels){
+		// too much voxels. Voxel splitting cancelled - using oryginal list instead of the new one
+		std::cout << " too many new voxels (" << newVoxelsCounter << ">" << maxVoxels <<"): - cancel splitting," << std::flush;
+		for(size_t i=0; i<newListSize; i++){
+			if (newList[i]!=nullptr)
+				delete newList[i];
+		}
 		delete[] newList;
-		return -1;
+
 	}else{
+		// clearing the old list and processing the new one
+		for(size_t i=0; i<this->length; i++){
+			if(this->voxels[i]!=nullptr)
+				delete this->voxels[i];
+		}
+		delete[] this->voxels;
+		this->voxels = newList;
+		this->length = newListSize;
 
 		this->spatialVoxelSize = (this->spatialVoxelSize/2.0)*this->dxFactor;
 		delete this->spatialDistribution;
@@ -609,19 +635,14 @@ double VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<cons
 		this->angularVoxelSize = (this->angularVoxelSize/2.0)*this->dxFactor;
 		delete this->angularDistribution;
 		this->angularDistribution = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize);
-
-		for(size_t i=0; i<this->length; i++)
-			delete this->voxels[i];
-		delete[] this->voxels;
-		this->length = endIndex+1;
-		this->voxels = newList;
-		this->rebuildNeighbourGrid();
-
-		//	this->checkTopLevelVoxels();
-		return ((double)this->length / (double)v0);
 	}
-}
+	std::cout << " compacting" << std::flush;
 
+	this->length = this->compactVoxelArray(this->voxels, this->length);
+	this->rebuildNeighbourGrid();
+	//	this->checkTopLevelVoxels();
+	return ((double)this->length / (double)v0);
+}
 
 Voxel * VoxelList::getRandomVoxel(RND *rnd){
 	double d = rnd->nextValue();

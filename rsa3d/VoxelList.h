@@ -58,7 +58,8 @@ private:
 
 
 	// voxels array will not have NULLs between pointers to objects - they can appear when splitting or analyze voxels in parallel
-	void compactVoxelArray(Voxel **list, int &endIndex);
+	// returns number of not null values in list
+	size_t compactVoxelArray(Voxel **list, size_t endIndex);
 
 	// finds voxel containing given point - not used - only for debugging
 	Voxel * findVoxel(Voxel **list, size_t listSize, const RSAVector &pos,
