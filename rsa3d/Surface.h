@@ -10,10 +10,11 @@
 
 
 #include <vector>
+
+#include "NeighbourGrid.h"
 //#include "DeviceNeighbourGrid.cu"
 
 #include "shape/Shape.h"
-#include "NeighbourGrid.h"
 
 class Surface : public BoundaryConditions<RSA_SPATIAL_DIMENSION> {
 

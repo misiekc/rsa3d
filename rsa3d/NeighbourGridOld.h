@@ -1,12 +1,12 @@
 /*
- * NeighbourGrid.h
+ * NeighbourGridOld.h
  *
  *  Created on: 07.03.2017
  *      Author: Michal Ciesla
  */
 
-#ifndef NEIGHBOURGRID_H_
-#define NEIGHBOURGRID_H_
+#ifndef NEIGHBOURGRIDOLD_H_
+#define NEIGHBOURGRIDOLD_H_
 
 #include <vector>
 #include <cmath>
@@ -18,7 +18,7 @@
 
 
 template <typename E>
-class NeighbourGrid{
+class NeighbourGridOld{
 
 private:
 	int surfaceDimension;
@@ -77,7 +77,7 @@ private:
 
 public:
 
-	NeighbourGrid(int surfaceDim, double size, double dx){ // @suppress("Class members should be properly initialized")
+	NeighbourGridOld(int surfaceDim, double size, double dx){ // @suppress("Class members should be properly initialized")
 		Expects(surfaceDim > 0);
 		Expects(surfaceDim <= RSA_SPATIAL_DIMENSION);
 		Expects(size > 0);
@@ -91,7 +91,7 @@ public:
 		this->init(size, n);
 	}
 
-	NeighbourGrid(int surfaceDim, double size, size_t n){ // @suppress("Class members should be properly initialized")
+	NeighbourGridOld(int surfaceDim, double size, size_t n){ // @suppress("Class members should be properly initialized")
 		Expects(surfaceDim > 0);
 		Expects(surfaceDim <= RSA_SPATIAL_DIMENSION);
 		Expects(size > 0);
@@ -102,7 +102,7 @@ public:
 		this->init(size, n);
 	}
 
-	NeighbourGrid(int surfaceDim, double size, size_t n, bool neighbouringCells){ // @suppress("Class members should be properly initialized")
+	NeighbourGridOld(int surfaceDim, double size, size_t n, bool neighbouringCells){ // @suppress("Class members should be properly initialized")
 		Expects(surfaceDim > 0);
 		Expects(surfaceDim <= RSA_SPATIAL_DIMENSION);
 		Expects(size > 0);
@@ -113,7 +113,7 @@ public:
 		this->init(size, n);
 	}
 
-	virtual ~NeighbourGrid(){
+	virtual ~NeighbourGridOld(){
 		for(unsigned int i=0; i<this->lists.size(); i++){
 				delete this->lists[i];
 				if (withNeighbouringCells)
@@ -174,4 +174,4 @@ public:
 	}
 };
 
-#endif /* NEIGHBOURGRID_H_ */
+#endif /* NEIGHBOURGRIDOLD_H_ */

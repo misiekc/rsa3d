@@ -11,10 +11,11 @@
 #include "Voxel.h"
 #include "shape/Shape.h"
 #include "RND.h"
-#include "NeighbourGrid.h"
 #include "BoundaryConditions.h"
 #include "Positioned.h"
 #include <vector>
+
+#include "NeighbourGrid.h"
 
 class VoxelList {
 

@@ -33,7 +33,6 @@ void Surface::add(const RSAShape *s) {
 const RSAShape* Surface::check(const RSAShape *s){
 	std::vector<const RSAShape *> neighbours;
 	this->list->getNeighbours(&neighbours, s->getPosition());
-
 	return s->overlap(this, &neighbours);
 /*
 	for(const RSAShape *shape: neighbours) {

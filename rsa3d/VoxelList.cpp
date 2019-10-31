@@ -182,7 +182,8 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 	}
 	this->spatialVoxelSize = this->initialVoxelSize;
 	this->angularVoxelSize = this->initialAngularVoxelSize;
-	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(this->surfaceDimension, this->spatialVoxelSize*ns, ns, false);
+//	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(this->surfaceDimension, this->spatialVoxelSize*ns, ns, false);
+	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(this->surfaceDimension, this->spatialVoxelSize*ns, this->spatialVoxelSize);
 
 	RSAVector position;
 	RSAOrientation orientation{};
