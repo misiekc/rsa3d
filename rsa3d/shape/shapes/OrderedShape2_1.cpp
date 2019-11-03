@@ -15,8 +15,8 @@ std::normal_distribution<double> OrderedShape2_1::angleDistribution{};
 void OrderedShape2_1::initClass(const std::string &args, InitClassFunction baseShapeInitClassFunction) {
     std::istringstream argsStream(args);
     argsStream >> preferredAngle >> angleDistributionSigma;
-    ValidateMsg(argsStream, "Malformed OrderedShape2_1 parameters");
-    ValidateMsg(angleDistributionSigma > 0, "Angle distribution sigma should be positive");
+    ValidateMsg(argsStream, "(preferred angle in degrees) (angle sigma in degrees)");
+    ValidateMsg(angleDistributionSigma >= 0, "Angle distribution sigma should be non-negative");
 
     preferredAngle = preferredAngle * M_PI / 180.;
     angleDistributionSigma = angleDistributionSigma * M_PI / 180.;
@@ -38,10 +38,11 @@ Shape<2, 0> *OrderedShape2_1::createShape(RND *rnd) {
     auto createShape = Shape<2, 1>::getCreateShapeImpl();
     auto underlyingShape = std::unique_ptr<Shape<2, 1>>(createShape(rnd));
 
-    RNDUniformRandomBitGenerator bitGenerator(*rnd);
-    double angle = angleDistribution(bitGenerator);
-
-    underlyingShape->rotate({{angle}});
+    if (angleDistributionSigma > 0) {
+        RNDUniformRandomBitGenerator bitGenerator(*rnd);
+        double angle = angleDistribution(bitGenerator);
+        underlyingShape->rotate({{angle}});
+    }
     return new OrderedShape2_1(std::move(underlyingShape));
 }
 

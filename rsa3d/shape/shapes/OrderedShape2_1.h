@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "../../Shape.h"
+#include "../Shape.h"
 
 /**
  * @brief Class which encapsulated another Shape<2, 1> and samples this particles with gaussian-distribution-drawn

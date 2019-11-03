@@ -25,7 +25,7 @@
         #include "shapes/Ellipse.h"
         #include "shapes/polydisk/Polydisk.h"
         #include "shapes/polydisk/Fibrinogen.h"
-        #include "shapes/ordered_shape.2.1/OrderedShape2_1.h"
+        #include "shapes/OrderedShape2_1.h"
     #elif RSA_ANGULAR_DIMENSION == 1
 		#include "shapes/spherocylinder/SpheroCylinder2D.h"
 		#include "shapes/Ellipse.h"
