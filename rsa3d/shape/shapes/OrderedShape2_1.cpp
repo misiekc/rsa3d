@@ -6,6 +6,9 @@
 
 #include "OrderedShape2_1.h"
 
+/* If defined, zero variation in angle would be actually very small variation - some truly oriented shapes generate
+ * very slowly */
+#define ORDERED_SHAPE_ZERO_DISPERSION_WORKAROUND
 
 double OrderedShape2_1::preferredAngle{};
 double OrderedShape2_1::angleDistributionSigma{};
@@ -17,6 +20,11 @@ void OrderedShape2_1::initClass(const std::string &args, InitClassFunction baseS
     argsStream >> preferredAngle >> angleDistributionSigma;
     ValidateMsg(argsStream, "(preferred angle in degrees) (angle sigma in degrees)");
     ValidateMsg(angleDistributionSigma >= 0, "Angle distribution sigma should be non-negative");
+
+#ifdef ORDERED_SHAPE_ZERO_DISPERSION_WORKAROUND
+    if (angleDistributionSigma == 0)
+        angleDistributionSigma = 0.00000001;
+#endif
 
     preferredAngle = preferredAngle * M_PI / 180.;
     angleDistributionSigma = angleDistributionSigma * M_PI / 180.;
