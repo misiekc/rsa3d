@@ -107,7 +107,7 @@ void Polygon::initClass(const std::string &args){
     ShapeStaticInfo<2, 1> shapeInfo;
     shapeInfo.setCircumsphereRadius(Polygon::calculateCircumscribedCircleRadius());
 	shapeInfo.setInsphereRadius(Polygon::calculateInscribedCircleRadius());
-	shapeInfo.setVoxelAngularSize(2*M_PI);
+	shapeInfo.setAngularVoxelSize(2*M_PI);
 	shapeInfo.setSupportsSaturation(true);
 	shapeInfo.setDefaultCreateShapeImpl <Polygon> ();
 
@@ -363,7 +363,7 @@ bool Polygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{
 
 bool Polygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition,
 						  const Orientation<1> &voxelOrientation, double spatialSize, double angularSize) const {
-    if (voxelOrientation[0] > Shape<2, 1>::getVoxelAngularSize())
+    if (voxelOrientation[0] > Shape<2, 1>::getAngularVoxelSize())
 		return true;
 
     switch(this->voxelInsideEarlyRejection(bc, voxelPosition, voxelOrientation, spatialSize, angularSize)) {

@@ -31,6 +31,10 @@ public:
 	 */
 	unsigned short depth;
 
+	/**
+	 * @brief index in voxel list
+	 */
+	size_t index;
 
 	/**
 	 * @brief creates an empty voxel. It position and orientation is not initialized and other attributes are set to 0

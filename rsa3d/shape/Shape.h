@@ -189,7 +189,7 @@ public:
      * (0, getVoxelAngularSize()) describes all possible shape's orientations.
      * @return angular size of a voxel
      */
-	static double getVoxelAngularSize() {
+	static double getAngularVoxelSize() {
         return shapeStaticInfo.getVoxelAngularSize();
 	}
 
@@ -593,7 +593,7 @@ public:
      *
      * @param size size of a voxel
      */
-    void setVoxelSpatialSize(double voxelSpatialSize);
+    void setSpatialVoxelSize(double voxelSpatialSize);
 
     /**
      * @brief Sets initial angular size of a voxel.
@@ -601,7 +601,7 @@ public:
      * It indicates the range of angular variable [0, size). By default, the angular size is 2*M_PI.
      * @param size angular size of a voxel
      */
-    void setVoxelAngularSize(double voxelAngularSize);
+    void setAngularVoxelSize(double voxelAngularSize);
 
     /**
      * @brief Sets the smallest possible distance to exclusion zone boundary.

@@ -8,9 +8,9 @@
 #ifndef ORIENTEDCUBOIDVOXELLIST_H_
 #define ORIENTEDCUBOIDVOXELLIST_H_
 
-#include "VoxelList.h"
+#include "VariableSizeVoxelList.h"
 
-class OrientedCuboidVoxelList : public VoxelList {
+class OrientedCuboidVoxelList : public VariableSizeVoxelList {
 
 	protected:
 		bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize, std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc, unsigned short depth = 0) override ;

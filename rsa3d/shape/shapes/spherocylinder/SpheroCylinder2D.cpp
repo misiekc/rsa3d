@@ -29,7 +29,7 @@ void SpheroCylinder2D::initClass(const std::string &attr) {
     ShapeStaticInfo<2, 1> shapeInfo;
     shapeInfo.setCircumsphereRadius(halfDistance + radius);
     shapeInfo.setInsphereRadius(radius);
-    shapeInfo.setVoxelAngularSize(M_PI);
+    shapeInfo.setAngularVoxelSize(M_PI);
 	shapeInfo.setSupportsSaturation(true);
     shapeInfo.setDefaultCreateShapeImpl <SpheroCylinder2D> ();
 

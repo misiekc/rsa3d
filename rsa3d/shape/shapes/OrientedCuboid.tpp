@@ -41,7 +41,7 @@ void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
     shapeInfo.setCircumsphereRadius(diagonal / 2);
     shapeInfo.setInsphereRadius(minSize / 2);
     shapeInfo.setNeighbourListCellSize(maxSize);
-    shapeInfo.setVoxelSpatialSize(minSize / 2);
+    shapeInfo.setSpatialVoxelSize(minSize / 2);
     shapeInfo.setSupportsSaturation(true);
 	shapeInfo.template setDefaultCreateShapeImpl <OrientedCuboid<DIMENSION>> ();
 

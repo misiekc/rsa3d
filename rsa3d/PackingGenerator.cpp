@@ -30,7 +30,7 @@ PackingGenerator::PackingGenerator(int seed, const Parameters *params) {
 	RND rnd(this->seed);
 
 	this->spatialSize = this->params.surfaceSize;
-	this->angularSize = RSAShape::getVoxelAngularSize();
+	this->angularSize = RSAShape::getAngularVoxelSize();
 	if (this->params.requestedAngularVoxelSize > this->angularSize)
 		this->params.requestedAngularVoxelSize = this->angularSize;
 
@@ -60,7 +60,7 @@ bool PackingGenerator::isSaturated() {
 
 
 double PackingGenerator::getFactor() {
-	return this->surface->getArea() / this->voxels->getVoxelsSurface();
+	return this->surface->getArea() / this->voxels->getVoxelsVolume();
 }
 
 void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
@@ -264,7 +264,7 @@ void PackingGenerator::createPacking() {
 					if (aVoxels[i]!=this->voxels->getVoxel(aVoxels[i]->getPosition(), aVoxels[i]->getOrientation())){
 						Voxel *v = this->voxels->getVoxel(aVoxels[i]->getPosition(), aVoxels[i]->getOrientation());
 						std::cout << std::endl << "Problem: PackingGenerator - inconsistent voxels positions: [" << aVoxels[i]->toString() << "], [" << v->toString() << "]" << std::endl;
-						std::cout << "size: " << this->voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << std::endl;
+						std::cout << "size: " << this->voxels->getSpatialVoxelSize() << ", angular size: " << this->voxels->getAngularVoxelSize() << std::endl;
 						std::cout << "shape: " << sVirtual[i]->toString() << std::endl;
 
 					}
@@ -296,7 +296,7 @@ void PackingGenerator::createPacking() {
 				v1 = this->voxels->getLength();
 				v0 = (size_t)(v1/voxelRatio);
 //				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
-				std::cout << " done. " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getVoxelSize() << ", angular size: " << this->voxels->getVoxelAngularSize() << ", factor: " << this->getFactor() << std::endl;
+				std::cout << " done. " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getSpatialVoxelSize() << ", angular size: " << this->voxels->getAngularVoxelSize() << ", factor: " << this->getFactor() << std::endl;
 				missCounter = 0;
 			}else if(RSAShape::getSupportsSaturation() || rnd.nextValue() < 0.1){
 				std::cout << " skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;
@@ -458,7 +458,7 @@ void PackingGenerator::toWolfram(const RSAVector &da, const std::string &filenam
 	if (!vVoxels.empty()){
 		file << ", Black, " << std::endl;
 		for(Voxel *v: vVoxels){
-			file << v->toWolfram(this->voxels->getVoxelSize(), this->voxels->getVoxelAngularSize());
+			file << v->toWolfram(this->voxels->getSpatialVoxelSize(), this->voxels->getAngularVoxelSize());
 		}
 	}
 	file << std::endl << "}]" << std::endl;

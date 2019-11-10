@@ -17,6 +17,7 @@
 Voxel::Voxel(){
 	this->lastAnalyzed = 0;
 	this->depth = 0;
+	this->index = 0;
 }
 
 
@@ -25,6 +26,7 @@ Voxel::Voxel(const RSAVector &pos, const RSAOrientation &angle){
 	this->orientation = angle;
 	this->lastAnalyzed = 0;
 	this->depth = 0;
+	this->index = 0;
 }
 
 bool Voxel::isInside(const RSAVector &pos, double size){

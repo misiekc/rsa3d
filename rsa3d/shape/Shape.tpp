@@ -258,14 +258,14 @@ void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setNeighbourListCell
 }
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setVoxelSpatialSize(double voxelSpatialSize) {
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setSpatialVoxelSize(double voxelSpatialSize) {
     Expects(voxelSpatialSize > 0);
     Expects(voxelSpatialSize < std::numeric_limits<double>::infinity());
     ShapeStaticInfo::voxelSpatialSize = voxelSpatialSize;
 }
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setVoxelAngularSize(double voxelAngularSize) {
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setAngularVoxelSize(double voxelAngularSize) {
     Expects(voxelAngularSize > 0);
     Expects(voxelAngularSize <= 2*M_PI);
     ShapeStaticInfo::voxelAngularSize = voxelAngularSize;

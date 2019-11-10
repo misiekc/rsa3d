@@ -242,10 +242,10 @@ VoxelList *ShapeFactory::createVoxelList(const std::string &sClass, unsigned sho
                                          double voxelSpatialSize, double angularSize,
                                          double requestedAngularVoxelSize)
 {
-    #if RSA_ANGULAR_DIMENSION == 0
-        if (sClass == "OrientedCuboid")
-            return new OrientedCuboidVoxelList(surfaceDimension, spatialSize, voxelSpatialSize, angularSize, requestedAngularVoxelSize);
-    #endif
+ //   #if RSA_ANGULAR_DIMENSION == 0
+ //       if (sClass == "OrientedCuboid")
+ //           return new OrientedCuboidVoxelList(surfaceDimension, spatialSize, voxelSpatialSize, angularSize, requestedAngularVoxelSize);
+ //   #endif
 
 	return new VoxelList(surfaceDimension, spatialSize, voxelSpatialSize, angularSize, requestedAngularVoxelSize);
 }

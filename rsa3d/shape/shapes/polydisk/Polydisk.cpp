@@ -71,7 +71,7 @@ void Polydisk::initClass(const std::string &args){
 
 	shapeInfo.setCircumsphereRadius(circumsphereRadius);
 	shapeInfo.setInsphereRadius(insphereRadius);
-	shapeInfo.setVoxelAngularSize(2*M_PI);
+	shapeInfo.setAngularVoxelSize(2*M_PI);
 	shapeInfo.setSupportsSaturation(true);
 	shapeInfo.setDefaultCreateShapeImpl <Polydisk> ();
 
@@ -307,7 +307,7 @@ bool Polydisk::fullAngleVoxelInside(BoundaryConditions<2> *bc, const Vector<2> &
 
 bool Polydisk::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition, const Orientation<1> &voxelOrientation, double spatialSize, double angularSize) const{
 
-	if (voxelOrientation[0] > Shape<2, 1>::getVoxelAngularSize())
+	if (voxelOrientation[0] > Shape<2, 1>::getAngularVoxelSize())
 		return true;
 
     switch(this->voxelInsideEarlyRejection(bc, voxelPosition, voxelOrientation, spatialSize, angularSize)) {

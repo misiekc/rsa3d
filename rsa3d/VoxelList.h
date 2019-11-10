@@ -20,21 +20,19 @@
 class VoxelList {
 
 private:
-	// to optimize memory occupations voxels are initialized in the first invoke split()
-	bool voxelsInitialized;
 
 	// allows voxels to overlap - only for testing purposes and normally should be set to 1
 	const double dxFactor = 1.0; // 1.0000000001;
 
-	// neighbour grid structure for voxels. Needed to quickly find a voxel using its location
-	NeighbourGrid<Voxel>* voxelNeighbourGrid;
+	// array of top level voxel. If a top level voxel becomes inactive (due to shape placement, all its child voxels becomes obsolete
+	bool* activeTopLevelVoxels;
+
+	double spatialVoxelSize;
+	double angularVoxelSize;
 
 	// probability distrubutions for drawing position inside a voxel
 	std::uniform_real_distribution<double> *spatialDistribution;
 	std::uniform_real_distribution<double> *angularDistribution;
-
-	// array of top level voxel. If a top level voxel becomes inactive (due to shape placement, all its child voxels becomes obsolete
-	bool* activeTopLevelVoxels;
 
 	// returns initial size of a vovel. It is not grater than d and be an integer power of 2 (due to numerical issues)
 	double findFloorSize(double d);
@@ -45,30 +43,20 @@ private:
 	// returns number of elements of size cellSize needed to cover a desired range
 	size_t findArraySize(double range, double cellSize);
 
-	// fills neigbour grid with voxels
-	void rebuildNeighbourGrid();
-
 	// for a given voxel returns index of its root
 	int getIndexOfTopLevelVoxel(const RSAVector &da);
-
-	// initialize voxels, returns number of initial voxels
-	unsigned int initVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl);
 
 	// checks consistency of indexes of root voxels
 	void checkTopLevelVoxels();
 
-
-	// voxels array will not have NULLs between pointers to objects - they can appear when splitting or analyze voxels in parallel
-	// returns number of not null values in list
-	size_t compactVoxelArray(Voxel **list, size_t endIndex);
-
 	// finds voxel containing given point - not used - only for debugging
 	Voxel * findVoxel(Voxel **list, size_t listSize, const RSAVector &pos,
 					  const RSAOrientation &angle);
-
 protected:
 	// disables voxel list for debug purposes - typically is false
 	bool disabled;
+	// to optimize memory occupations voxels are initialized in the first invoke split()
+	bool voxelsInitialized;
 
 	int surfaceDimension;
 	Voxel** voxels;
@@ -76,15 +64,19 @@ protected:
 
 	double initialVoxelSize;
 	double initialAngularVoxelSize;
-	double spatialVoxelSize;
-	double angularVoxelSize;
-
 
 	double angularRange;
 	double spatialRange;
 
 	size_t beginningVoxelNumber;
 
+	// neighbour grid structure for voxels. Needed to quickly find a voxel using its location
+	NeighbourGrid<Voxel>* voxelNeighbourGrid;
+
+	virtual void allocateVoxels(size_t size);
+
+	// initialize voxels, returns number of initial voxels
+	unsigned int initVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl);
 
 	// checks if a top level voxel for voxel v is active (if not v should be removed
 	bool isTopLevelVoxelActive(Voxel *v);
@@ -99,7 +91,16 @@ protected:
 
 	void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes);
 
-	virtual bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, double angularSize, unsigned short depth = 0);
+	// fills neigbour grid with voxels
+	void rebuildNeighbourGrid();
+
+	bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, double angularSize, unsigned short depth = 0);
+
+	virtual void moveVoxelInList(size_t from, size_t to);
+
+	// voxels array will not have NULLs between pointers to objects - they can appear when splitting or analyze voxels in parallel
+	// returns number of not null values in list
+	size_t compactVoxelArray();
 
 public:
 
@@ -122,17 +123,17 @@ public:
 	size_t analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth);
 
 
-	double splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc);
+	virtual double splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc);
 
-	Voxel *getRandomVoxel(RND *rnd);
+	virtual Voxel *getRandomVoxel(RND *rnd);
 	Voxel *getVoxel(int i);
-	Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle);
-	void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd);
-	double getVoxelSize();
-	double getVoxelAngularSize();
+	virtual Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle);
+	virtual void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd);
+	double getSpatialVoxelSize();
+	double getAngularVoxelSize();
 	Voxel* get(int i);
 	size_t getLength() const;
-	double getVoxelsSurface();
+	virtual double getVoxelsVolume();
 	std::string toPovray();
 	std::string toWolfram();
 

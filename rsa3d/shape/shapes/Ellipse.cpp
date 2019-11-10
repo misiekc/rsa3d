@@ -35,7 +35,7 @@ void Ellipse::initClass(const std::string &args){
     ShapeStaticInfo<2, 1> shapeInfo;
     shapeInfo.setCircumsphereRadius(longSemiAxis);
     shapeInfo.setInsphereRadius(shortSemiAxis);
-    shapeInfo.setVoxelAngularSize(M_PI);
+    shapeInfo.setAngularVoxelSize(M_PI);
     shapeInfo.setSupportsSaturation(true);
     shapeInfo.setDefaultCreateShapeImpl <Ellipse> ();
     

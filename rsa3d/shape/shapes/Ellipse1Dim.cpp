@@ -34,7 +34,7 @@ void Ellipse1Dim::initClass(const std::string &args){
 	ShapeStaticInfo<1, 1> shapeInfo;
 	shapeInfo.setCircumsphereRadius(longSemiAxis);
 	shapeInfo.setInsphereRadius(shortSemiAxis);
-	shapeInfo.setVoxelAngularSize(M_PI);
+	shapeInfo.setAngularVoxelSize(M_PI);
 	shapeInfo.setSupportsSaturation(true);
 	shapeInfo.setDefaultCreateShapeImpl <Ellipse1Dim> ();
 	
@@ -49,7 +49,7 @@ double Ellipse1Dim::calculateF(double* r, double g) const {
 }
 
 void Ellipse1Dim::setAngle(double angle){
-	double interval = getVoxelAngularSize();
+	double interval = getAngularVoxelSize();
 	Orientation<1> orientation{{normalizeAngle(angle, interval)}};
 	Shape::setOrientation(orientation);  // Now use the original setter from Shape
 
