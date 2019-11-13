@@ -48,9 +48,9 @@ namespace
                 zeroOrientation.fill(0);
 
                 secondInsideFirst = pair.first()->voxelInside(&bc, pair.second()->getPosition(), zeroOrientation, 0,
-                        RSAShape::getVoxelAngularSize());
+                        RSAShape::getAngularVoxelSize());
                 firstInsideSecond = pair.second()->voxelInside(&bc, pair.first()->getPosition(), zeroOrientation, 0,
-                        RSAShape::getVoxelAngularSize());
+                        RSAShape::getAngularVoxelSize());
             }
             return std::make_pair(secondInsideFirst, firstInsideSecond);
         }

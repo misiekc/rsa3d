@@ -9,8 +9,8 @@
 #include "../utils/Assertions.h"
 
 NBoxPBC::NBoxPBC(int dim, double s, double ndx, double vdx) : Surface(dim, s, ndx, vdx){
-    ValidateMsg(s > 4*RSAShape::getCircumsphereRadius(),
-                "Packing linear size is <= 4 circumscribed spheres - boundary conditions will break. ");
+    ValidateMsg(s > 2*RSAShape::getNeighbourListCellSize(),
+                "Packing linear size is <= 2 neighbour list cell size - boundary conditions will break. ");
 }
 
 RSAVector NBoxPBC::getTranslation(double s, const RSAVector &p1, const RSAVector &p2) {

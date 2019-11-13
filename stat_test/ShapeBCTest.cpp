@@ -179,9 +179,9 @@ namespace {
             zeroOrientation.fill(0);
 
             bcPointInside = pair.first()->voxelInside(&translatingBC, pair.second()->getPosition(), zeroOrientation, 0,
-                    RSAShape::getVoxelAngularSize());
+                    RSAShape::getAngularVoxelSize());
             transPointInside = pairTranslated.first()->voxelInside(&mockBC, pairTranslated.second()->getPosition(),
-                    zeroOrientation, 0, RSAShape::getVoxelAngularSize());
+                    zeroOrientation, 0, RSAShape::getAngularVoxelSize());
         }
 
         if (bcPointInside)

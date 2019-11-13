@@ -41,9 +41,8 @@ set(RSA_SOURCE
         RND.cpp
         Surface.cpp
         ThreadLocalRND.cpp
-        Voxel.h
+        VariableSizeVoxelList.cpp
         Voxel.cpp
-        VoxelList.h
         VoxelList.cpp)
 
 add_subdirectory(shape)

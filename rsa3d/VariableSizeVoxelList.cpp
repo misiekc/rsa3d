@@ -117,8 +117,8 @@ double VariableSizeVoxelList::splitVoxels(double minDx, size_t maxVoxels, Neighb
 
 	// temporary metrices for voxels after divisions. One separate matrix for each thread
 	Voxel ***aVoxels = new Voxel**[_OMP_MAXTHREADS];
-	size_t newVoxelsCounter[_OMP_MAXTHREADS];
-	size_t initialNewVoxelsCounter[_OMP_MAXTHREADS];
+	std::vector<size_t> newVoxelsCounter(_OMP_MAXTHREADS);
+	std::vector<size_t> initialNewVoxelsCounter(_OMP_MAXTHREADS);
 	for(unsigned short i=0; i<_OMP_MAXTHREADS; i++){
 		aVoxels[i] = new Voxel*[ voxelsFactor ];
 		newVoxelsCounter[i] = 0;
