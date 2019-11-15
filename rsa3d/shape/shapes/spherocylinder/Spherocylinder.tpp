@@ -219,7 +219,7 @@ std::vector<double> Spherocylinder<DIMENSION>::calculateOrder(const OrderCalcula
 	Vector<DIMENSION> thisAxis = this->getEnd(1) - this->getEnd(-1);
 	Vector<DIMENSION> otherAxis = s.getEnd(1) - s.getEnd(-1);
 
-    return { legendre::P2(thisAxis*otherAxis) };
+    return {integer_legendre::P2(thisAxis * otherAxis) };
 }
 
 

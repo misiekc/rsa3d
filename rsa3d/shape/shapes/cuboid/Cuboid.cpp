@@ -401,10 +401,10 @@ std::vector<double> Cuboid::calculateOrder(const OrderCalculable *other) const {
     axisAlignment[2] = fabs(product(3 - row[0] - row[1], 3 - column[0] - column[1]));
 
     std::vector<double> result(5);
-    result[0] = legendre::P2(axisAlignment[0]);
-    result[1] = ( legendre::P2(axisAlignment[0]) + legendre::P2(axisAlignment[1]) + legendre::P2(axisAlignment[2]) )/3.0;
-    result[2] = legendre::P4(axisAlignment[0]);
-    result[3] = ( legendre::P4(axisAlignment[0]) + legendre::P4(axisAlignment[1]) + legendre::P4(axisAlignment[2]) )/3.0;
+    result[0] = integer_legendre::P2(axisAlignment[0]);
+    result[1] = (integer_legendre::P2(axisAlignment[0]) + integer_legendre::P2(axisAlignment[1]) + integer_legendre::P2(axisAlignment[2]) ) / 3.0;
+    result[2] = integer_legendre::P4(axisAlignment[0]);
+    result[3] = (integer_legendre::P4(axisAlignment[0]) + integer_legendre::P4(axisAlignment[1]) + integer_legendre::P4(axisAlignment[2]) ) / 3.0;
     result[4] = (5.0*cos4Sum - 9.0)/6.0;
     return result;
 }

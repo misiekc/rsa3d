@@ -24,7 +24,7 @@ public:
     static double dodecahedral(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes);
 };
 
-namespace legendre {
+namespace integer_legendre {
     inline double P1(double x) {
         return x;
     }

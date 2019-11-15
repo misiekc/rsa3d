@@ -34,11 +34,11 @@ inline double OrderParameters::cosOfMaxAbs(const std::vector<Vector<3>> &firstAx
 }
 
 double OrderParameters::nematicP1(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {
-    return legendre::P1(cosOfMaxAbs(firstAxes, secondAxes));
+    return integer_legendre::P1(cosOfMaxAbs(firstAxes, secondAxes));
 }
 
 double OrderParameters::nematicP2(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {
-    return legendre::P2(cosOfMaxAbs(firstAxes, secondAxes));
+    return integer_legendre::P2(cosOfMaxAbs(firstAxes, secondAxes));
 }
 
 double OrderParameters::tetrahedral(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {

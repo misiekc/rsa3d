@@ -15,6 +15,6 @@ target_link_libraries(unit_test.2.0  unit_test_runner rsa_main.2.0 shapes.2.0 rs
 add_executable(unit_test.2.1
         rsa3d/shape/shapes/polydisk/PolydiskTest.cpp
         rsa3d/shape/shapes/polygon/PolygonTest.cpp
-        rsa3d/shape/shapes/polygon/TriangleTest.cpp)
+        rsa3d/shape/shapes/polygon/TriangleTest.cpp rsa3d/shape/shapes/polydisk/KmerTest.cpp)
 target_compile_definitions(unit_test.2.1 PUBLIC RSA_SPATIAL_DIMENSION=2 RSA_ANGULAR_DIMENSION=1)
 target_link_libraries(unit_test.2.1 unit_test_runner rsa_main.2.1 shapes.2.1 rsa_main.2.1)

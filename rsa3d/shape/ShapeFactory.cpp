@@ -31,6 +31,7 @@
 		#include "shapes/Ellipse.h"
 		#include "shapes/Rectangle.h"
         #include "shapes/polydisk/Fibrinogen.h"
+        #include "shapes/polydisk/Kmer.h"
         #include "shapes/polydisk/Polydisk.h"
 		#include "shapes/polygon/Polygon.h"
 		#include "shapes/polygon/SBPolygon.h"
@@ -154,6 +155,9 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
                 return;
             } else if (sClass == "Fibrinogen") {
                 Fibrinogen::initClass(attr);
+                return;
+            } else if (sClass == "Kmer") {
+                Kmer::initClass(attr);
                 return;
             }
         #endif
