@@ -199,7 +199,10 @@ void PackingGenerator::createPacking() {
 	delete s;
 
 	int l = 0;
-	double t = 0, factor = 1;
+	double t = 0;
+	double factor = this->getFactor();
+	factor = (factor < 1.0)?1.0:factor;
+
 	std::size_t tmpSplit = this->params.split, oldTmpSplit = tmpSplit;
 //	int snapshotCounter = 0;
 
@@ -211,8 +214,6 @@ void PackingGenerator::createPacking() {
 
 	while (!this->generationCompleted(missCounter, t)) {
 		std::cout << "[" << this->seed << " PackingGenerator::createPacking] choosing " << tmpSplit << " shapes..." << std::flush;
-		factor = this->getFactor();
-		factor = (factor < 1.0)?1.0:factor;
 
 		_OMP_PARALLEL_FOR
 		for(std::size_t i = 0; i<tmpSplit; i++){
@@ -291,17 +292,22 @@ void PackingGenerator::createPacking() {
 //						this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
 
 			double voxelRatio = voxels->splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface);
+			factor = this->getFactor();
+			factor = (factor < 1.0)?1.0:factor;
+
 			bool b = (voxelRatio>0);
 			if (b){
 				v1 = this->voxels->getLength();
 				v0 = (size_t)(v1/voxelRatio);
 //				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
-				std::cout << " done. " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getSpatialVoxelSize() << ", angular size: " << this->voxels->getAngularVoxelSize() << ", factor: " << this->getFactor() << std::endl;
+				std::cout << " done. " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getSpatialVoxelSize() << ", angular size: " << this->voxels->getAngularVoxelSize() << ", factor: " << factor << std::endl;
 				missCounter = 0;
 			}else if(RSAShape::getSupportsSaturation() || rnd.nextValue() < 0.1){
 				std::cout << " skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;
 				this->voxels->analyzeVoxels(this->surface, this->surface->getNeighbourGrid(), depthAnalyze);
-				std::cout << " done: " << this->voxels->getLength() << " voxels remained, factor = " << this->getFactor() << std::endl << std::flush;
+				factor = this->getFactor();
+				factor = (factor < 1.0)?1.0:factor;
+				std::cout << " done: " << this->voxels->getLength() << " voxels remained, factor = " << factor << std::endl << std::flush;
 				tmpSplit = (int)(1.1 * tmpSplit);
 				v1 = this->voxels->getLength();
 			}else{
