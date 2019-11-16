@@ -529,22 +529,20 @@ size_t VoxelList::analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const R
 	return begin - this->length;
 }
 
-double VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc){
-	if (this->disabled)
-		return -1;
+unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc){
+	if (this->disabled || this->spatialVoxelSize<2*minDx)
+		return VoxelList::NO_SPLIT;
 
-	size_t v0 = this->length;
 	if (!this->voxelsInitialized){
-		v0 = this->initVoxels(bc, nl);
-		return ((double)this->length / (double)v0);
+		this->initVoxels(bc, nl);
+		return VoxelList::NO_SPLIT_BUT_INITIALIZED;
 	}
-	size_t voxelsFactor = (size_t)round( pow(2, this->surfaceDimension+RSA_ANGULAR_DIMENSION) );
-	if (this->spatialVoxelSize<2*minDx)
-		return -1;
 
-	// rough approximation of the number of created voxels
+
+	// number of created voxels
 	size_t newVoxelsCounter = 0;
 
+	size_t voxelsFactor = (size_t)round( pow(2, this->surfaceDimension+RSA_ANGULAR_DIMENSION) );
 	size_t newListSize = voxelsFactor*(this->length);
 	Voxel** newList = new Voxel*[ newListSize ];
 	for(size_t i=0; i<newListSize; i++){
@@ -573,13 +571,14 @@ double VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<cons
 							v->depth = this->voxels[i]->depth-1;
 						}
 						newList[i*voxelsFactor + j] = v;
+						_OMP_ATOMIC
 						newVoxelsCounter++;
 					}else{
 						// covered voxels are removed
 						delete aVoxels[_OMP_THREAD_ID][j];
 					}
-				}
-			}
+				} //for
+			} // if
 		}else{
 			// original covered voxels are cleaned
 			delete this->voxels[i];
@@ -603,6 +602,11 @@ double VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<cons
 		}
 		delete[] newList;
 
+		std::cout << " compacting" << std::flush;
+		this->length = this->compactVoxelArray();
+		this->rebuildNeighbourGrid();
+		return VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT;
+
 	}else{
 		// clearing the old list and processing the new one
 		for(size_t i=0; i<this->length; i++){
@@ -620,13 +624,15 @@ double VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<cons
 		this->angularVoxelSize = (this->angularVoxelSize/2.0)*this->dxFactor;
 		delete this->angularDistribution;
 		this->angularDistribution = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize);
-	}
-	std::cout << " compacting" << std::flush;
 
-	this->length = this->compactVoxelArray();
-	this->rebuildNeighbourGrid();
+
+		std::cout << " compacting" << std::flush;
+		this->length = this->compactVoxelArray();
+		this->rebuildNeighbourGrid();
+		return VoxelList::NORMAL_SPLIT;
+
+	}
 	//	this->checkTopLevelVoxels();
-	return ((double)this->length / (double)v0);
 }
 
 Voxel * VoxelList::getRandomVoxel(RND *rnd){

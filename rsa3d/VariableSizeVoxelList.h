@@ -37,7 +37,7 @@ public:
 	Voxel *getRandomVoxel(RND *rnd) override;
 	void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd) override;
 
-	double splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc) override;
+	unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc) override;
 	double getVoxelsVolume() override;
 
 	Voxel* getVoxel(const RSAVector &pos, const RSAOrientation &angle) override;

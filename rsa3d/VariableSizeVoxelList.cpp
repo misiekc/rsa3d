@@ -94,15 +94,14 @@ void VariableSizeVoxelList::getRandomPositionAndOrientation(RSAVector *position,
 }
 
 
-double VariableSizeVoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc){
+unsigned short VariableSizeVoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc){
 	if (this->disabled)
-		return -1;
+		return VoxelList::NO_SPLIT;
 
-	size_t v0 = this->length;
 	if (!this->voxelsInitialized){
-		v0 = this->initVoxels(bc, nl);
+		this->initVoxels(bc, nl);
 		this->createVoxelMap();
-		return ((double)this->length / (double)v0);
+		return VoxelList::NO_SPLIT_BUT_INITIALIZED;
 	}
 	size_t voxelsFactor = (size_t)round( pow(2, this->surfaceDimension+RSA_ANGULAR_DIMENSION) );
 
@@ -204,7 +203,7 @@ double VariableSizeVoxelList::splitVoxels(double minDx, size_t maxVoxels, Neighb
 	this->createVoxelMap();
 	this->rebuildNeighbourGrid();
 	//	this->checkTopLevelVoxels();
-	return ((double)this->length / (double)v0);
+	return VoxelList::NORMAL_SPLIT;
 }
 
 void VariableSizeVoxelList::moveVoxelInList(size_t from, size_t to){

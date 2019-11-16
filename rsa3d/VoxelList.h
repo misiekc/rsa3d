@@ -105,6 +105,14 @@ protected:
 public:
 
 	/**
+	 * constants returned by splitVoxels method
+	 */
+	static const unsigned short NO_SPLIT = 0;
+	static const unsigned short NO_SPLIT_DUE_TO_VOXELS_LIMIT = 1;
+	static const unsigned short NO_SPLIT_BUT_INITIALIZED = 2;
+	static const unsigned short NORMAL_SPLIT = 3;
+
+	/**
 	 * @brief Constructor
 	 * @param packingSpatialSize packing size to be covered by voxels
 	 * @param requestedSpatialVoxelSize suggested initial size of a voxel. Initial size of a allocated voxels will not be larger than the requested one.
@@ -123,7 +131,7 @@ public:
 	size_t analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth);
 
 
-	virtual double splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc);
+	virtual unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc);
 
 	virtual Voxel *getRandomVoxel(RND *rnd);
 	Voxel *getVoxel(int i);

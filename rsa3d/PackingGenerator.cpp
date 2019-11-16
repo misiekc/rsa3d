@@ -60,7 +60,8 @@ bool PackingGenerator::isSaturated() {
 
 
 double PackingGenerator::getFactor() {
-	return this->surface->getArea() / this->voxels->getVoxelsVolume();
+	double factor = this->surface->getArea() / this->voxels->getVoxelsVolume();
+	return (factor < 1.0)?1.0:factor;
 }
 
 void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
@@ -201,7 +202,6 @@ void PackingGenerator::createPacking() {
 	int l = 0;
 	double t = 0;
 	double factor = this->getFactor();
-	factor = (factor < 1.0)?1.0:factor;
 
 	std::size_t tmpSplit = this->params.split, oldTmpSplit = tmpSplit;
 //	int snapshotCounter = 0;
@@ -285,41 +285,53 @@ void PackingGenerator::createPacking() {
 		//whether splitting voxels
 		if (added == 0) { // v.getMissCounter() % iSplit == 0){ //
 			missCounter += tmpSplit;
-			size_t v0 = this->voxels->getLength(), v1 = v0;
+			size_t v0 = this->voxels->getLength();
 
 			std::cout << "[" << this->seed << " PackingGenerator::createPacking] splitting " << v0 << " voxels ";
 			std::cout.flush();
 //						this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
 
-			double voxelRatio = voxels->splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface);
+			unsigned short status = voxels->splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface);
 			factor = this->getFactor();
-			factor = (factor < 1.0)?1.0:factor;
 
-			bool b = (voxelRatio>0);
-			if (b){
-				v1 = this->voxels->getLength();
-				v0 = (size_t)(v1/voxelRatio);
+			if (status == VoxelList::NORMAL_SPLIT || status == VoxelList::NO_SPLIT_BUT_INITIALIZED){
 //				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
-				std::cout << " done. " << this->packing.size() << " shapes, " << v1 << " voxels, new voxel size: " << voxels->getSpatialVoxelSize() << ", angular size: " << this->voxels->getAngularVoxelSize() << ", factor: " << factor << std::endl;
+				std::cout << " done. " << this->packing.size() << " shapes, " << this->voxels->getLength() << " voxels, new voxel size: " << voxels->getSpatialVoxelSize() << ", angular size: " << this->voxels->getAngularVoxelSize() << ", factor: " << factor << std::endl;
 				missCounter = 0;
-			}else if(RSAShape::getSupportsSaturation() || rnd.nextValue() < 0.1){
-				std::cout << " skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;
-				this->voxels->analyzeVoxels(this->surface, this->surface->getNeighbourGrid(), depthAnalyze);
-				factor = this->getFactor();
-				factor = (factor < 1.0)?1.0:factor;
-				std::cout << " done: " << this->voxels->getLength() << " voxels remained, factor = " << factor << std::endl << std::flush;
-				tmpSplit = (int)(1.1 * tmpSplit);
-				v1 = this->voxels->getLength();
+			}else if (status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
+				if(RSAShape::getSupportsSaturation() || rnd.nextValue() < 0.1){
+					std::cout << " skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;
+					this->voxels->analyzeVoxels(this->surface, this->surface->getNeighbourGrid(), depthAnalyze);
+					factor = this->getFactor();
+					std::cout << " done: " << this->voxels->getLength() << " voxels remained, factor = " << factor << std::endl << std::flush;
+					tmpSplit = (int)(1.1 * tmpSplit);
+				}
 			}else{
 				std::cout << "skipped" << std::endl << std::flush;
 				depthAnalyze = 1;
 			}
-			// if number of voxels has changed v0!=1 is for the first split
-			if (v1!=v0){
-				tmpSplit *= ((double)v1 / (double)v0);
+			size_t v1 = this->voxels->getLength();
+
+			// determining new value of tmpSplit
+
+
+			if (status == VoxelList::NO_SPLIT_BUT_INITIALIZED){
+				tmpSplit = (int)(tmpSplit/factor);
 			}else{
-				tmpSplit = (int)1.1*tmpSplit + _OMP_MAXTHREADS;
+				// standard grow of tmpSplit
+				tmpSplit = (int)(tmpSplit * 1.1* v1 / v0);
 			}
+			if (status == VoxelList::NO_SPLIT || status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
+				if ((double)(v0-v1)/(double)v0 < 0.1){ // not much voxels removed
+					depthAnalyze++;
+					tmpSplit = 2*tmpSplit;
+				}
+			}else{
+				if (depthAnalyze>0)
+					depthAnalyze--;
+			}
+
+			// additional tweaking
 
 			if (tmpSplit > std::max(this->params.maxVoxels/20, 10*this->params.split))
 				tmpSplit = std::max(this->params.maxVoxels/20, 10*this->params.split);
@@ -327,13 +339,6 @@ void PackingGenerator::createPacking() {
 				tmpSplit /= 10.0;
 			if(tmpSplit < 10ul*_OMP_MAXTHREADS)
 				tmpSplit = 10ul*_OMP_MAXTHREADS;
-
-			if (!b && (double)(v0-v1)/(double)v0 < 0.1){ // not much voxels removed
-				depthAnalyze++;
-			}else{
-				if (depthAnalyze>0)
-					depthAnalyze--;
-			}
 
 			if(tmpSplit != oldTmpSplit){
 
