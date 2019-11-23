@@ -389,6 +389,8 @@ bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double 
 		as /= 2.0;
 		for(size_t j=0; j<length; j++){
 			this->splitVoxel(finalVoxels[j], ss, as, tmpVoxels);
+			if (finalVoxels[j]!=v)
+				delete finalVoxels[j]; //deleting virtual voxel which were already splitted
 			finalVoxels[j] = tmpVoxels[0];
 			for(size_t k=1; k<tmpArrayLength; k++){
 				last++;
@@ -772,7 +774,16 @@ void VoxelList::restore(std::istream &f){
 	delete this->angularDistribution;
 	this->angularDistribution = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize);
 
+	size_t ns = this->findArraySize(this->spatialRange, this->initialVoxelSize);
+	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(this->surfaceDimension, this->initialVoxelSize*ns, this->initialVoxelSize);
 	this->voxelNeighbourGrid->clear();
+	size_t ss = (size_t)(pow(ns, this->surfaceDimension)+0.5);
+
+	this->activeTopLevelVoxels = new bool[ss];
+	for(size_t i = 0; i<ss; i++){
+		this->activeTopLevelVoxels[i] = false;
+	}
+
 	for(size_t i=0; i<this->length; i++){
 		delete this->voxels[i];
 	}
@@ -790,5 +801,7 @@ void VoxelList::restore(std::istream &f){
 		this->activeTopLevelVoxels[topIndex] = true;
 	}
 	this->length = size;
+	this->length = this->compactVoxelArray();
 	this->rebuildNeighbourGrid();
+	this->voxelsInitialized = true;
 }
