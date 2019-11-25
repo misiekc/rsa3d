@@ -14,14 +14,16 @@
 std::vector<double> Polydisk::diskCentreR;
 std::vector<double> Polydisk::diskCentreTheta;
 std::vector<double> Polydisk::diskR;
-double Polydisk::area;
 
-/* number_of_disks [xy|rt] c01 c02 r0 c11 c12 r1 c21 c22 r2 ... area */
+/* If one wants to center automatically on the largest disk:
+ * number_of_disks [xy|rt] c01 c02 r0 c11 c12 r1 c21 c22 r2 ... area
+ *
+ * If one wants to retain original centering:
+ * number_of_disks [xy|rt] c01 c02 r0 c11 c12 r1 c21 c22 r2 ... area 'dontcenter' insphere_radius */
 void Polydisk::initClass(const std::string &args){
     Polydisk::diskCentreR.clear();
     Polydisk::diskCentreTheta.clear();
     Polydisk::diskR.clear();
-    Polydisk::area = 0;
 
 	std::istringstream in(args);
 
@@ -51,21 +53,33 @@ void Polydisk::initClass(const std::string &args){
 		Polydisk::diskCentreTheta.push_back(t);
 		Polydisk::diskR.push_back(diskR_);
 	}
-	in >> Polydisk::area;
 
-	if (Polydisk::area==0.0){
-		Polydisk::area = Polydisk::mcArea(100000000);
+	double initialArea;
+	in >> initialArea;
+
+	if (initialArea==0.0){
+        initialArea = Polydisk::mcArea(100000000);
 	}
-	Polydisk::normalizeArea(Polydisk::area);
+	Polydisk::normalizeArea(initialArea);
 
-    Vector<2> newCentre = Polydisk::findPositionOfLargestDiskClosestToMassCentre();
-    Polydisk::centerPolydisk(newCentre);
+	std::string dontCenterPhrase;
+	in >> dontCenterPhrase;
+	double insphereRadius{};
+	if (dontCenterPhrase == "dontcenter") {
+	    in >> insphereRadius;
+	    Validate(insphereRadius > 0);
+	    insphereRadius /= std::sqrt(initialArea);
+	} else {
+        Vector<2> newCentre = Polydisk::findPositionOfLargestDiskClosestToMassCentre();
+        Polydisk::centerPolydisk(newCentre);
+        insphereRadius = Polydisk::diskR[Polydisk::getIndicesOfLargestDisks().front()];
+	}
 
-    double insphereRadius = Polydisk::diskR[Polydisk::getIndicesOfLargestDisks().front()];
     double circumsphereRadius = 0;
-	for (size_t i = 0; i < Polydisk::diskCentreR.size(); i++)
-		if (circumsphereRadius < Polydisk::diskCentreR[i] + Polydisk::diskR[i])
-			circumsphereRadius = Polydisk::diskCentreR[i] + Polydisk::diskR[i];
+    for (size_t i = 0; i < Polydisk::diskCentreR.size(); i++)
+        if (circumsphereRadius < Polydisk::diskCentreR[i] + Polydisk::diskR[i])
+            circumsphereRadius = Polydisk::diskCentreR[i] + Polydisk::diskR[i];
+    Validate(insphereRadius <= circumsphereRadius);
 
 	ShapeStaticInfo<2, 1> shapeInfo;
 
@@ -160,7 +174,6 @@ void Polydisk::normalizeArea(double area){
 		Polydisk::diskCentreR[disk] /= denominator;
 		Polydisk::diskR[disk] /= denominator;
 	}
-	Polydisk::area = 1.0;
 }
 
 bool Polydisk::diskDiskIntersect(size_t disk0, const Vector<2> shape0Position, const Orientation<1> shape0Orientation,
@@ -263,7 +276,7 @@ double Polydisk::getVolume(unsigned short dim) const {
     if (dim != 2)
         throw std::runtime_error ("Polydisk supports only 2D packings");
 
-    return Polydisk::area;
+    return 1.0;
 }
 
 bool Polydisk::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{

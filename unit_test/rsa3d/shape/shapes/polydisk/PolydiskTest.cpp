@@ -141,3 +141,27 @@ TEST_CASE("Polydisk: centering based on largest circle") {
         REQUIRE(diskR[2] == Approx(1));
     }
 }
+
+TEST_CASE("Polydisk: not centering") {
+    SECTION("dontcenter: coordinates remain unaltered") {
+        Polydisk::initClass("2 rt  1 0.5 2  1.5 1.5 1  1  dontcenter 2");
+
+        auto diskCentreR = Polydisk::getDiskCentreR();
+        auto diskCentreTheta = Polydisk::getDiskCentreTheta();
+        auto diskR = Polydisk::getDiskR();
+
+        REQUIRE(diskCentreR[0] == Approx(1));
+        REQUIRE(diskCentreTheta[0] == Approx(0.5));
+        REQUIRE(diskR[0] == Approx(2));
+
+        REQUIRE(diskCentreR[1] == Approx(1.5));
+        REQUIRE(diskCentreTheta[1] == Approx(1.5));
+        REQUIRE(diskR[1] == Approx(1));
+    }
+
+    SECTION("dontcenter: insphere radius scaled by 0.5 with area 4") {
+        Polydisk::initClass("2 rt  1 0.5 2  1.5 1.5 1  4  dontcenter 1");
+
+        REQUIRE(Shape<2, 1>::getInsphereRadius() == Approx(0.5));
+    }
+}

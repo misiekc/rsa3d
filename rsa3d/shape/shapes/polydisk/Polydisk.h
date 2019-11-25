@@ -58,7 +58,6 @@ protected:
 	static std::vector<double> diskCentreR;
     static std::vector<double> diskCentreTheta;
 	static std::vector<double> diskR;
-	static double area;
 
 public:
     /**

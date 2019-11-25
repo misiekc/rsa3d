@@ -25,15 +25,12 @@ std::string Kmer::preparePolydiskAttr(int numberOfDisks, double distance) {
     polydiskAttrStream << numberOfDisks << " xy 0 0 1";
     for (int i = 1; i < numberOfDisks; i++)
         polydiskAttrStream << " " << (distance * i) << " 0 1";
-    polydiskAttrStream << " " << area;
+    polydiskAttrStream << " " << area << " dontcenter 1";
 
     return polydiskAttrStream.str();
 }
 
 double Kmer::calculateArea(int numberOfDisks, double distance) {
-    Assert(distance >= 0);
-    Assert(distance <= 2 * M_SQRT2);
-
     // Area based on Cieśla, M., Paja̧k, G., & Ziff, R. M., J. Chem. Phys., 2016, 145(4), 044708
     double S_pol{};
     double S_ad{};
