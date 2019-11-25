@@ -24,12 +24,22 @@ TEST_CASE("Kmer: argument parsing exceptions") {
 }
 
 TEST_CASE("Kmer: preparing Polydisk attributes") {
+    SECTION("3 disks, distance 0.5") {
+        std::string attr = Kmer::preparePolydiskAttr(3, 0.5);
+
+        // Stripping area
+        REQUIRE(attr.length() > 32);
+        std::string expected = "3 xy -0.5 0 1 0 0 1 0.5 0 1";
+        REQUIRE(attr.substr(0, expected.length()) == expected);
+    }
+
     SECTION("4 disks, distance 0.5") {
         std::string attr = Kmer::preparePolydiskAttr(4, 0.5);
 
         // Stripping area
         REQUIRE(attr.length() > 32);
-        REQUIRE(attr.substr(0, 32) == "4 xy 0 0 1 0.5 0 1 1 0 1 1.5 0 1");
+        std::string expected = "4 xy -0.75 0 1 -0.25 0 1 0.25 0 1 0.75 0 1";
+        REQUIRE(attr.substr(0, expected.length()) == expected);
     }
 }
 

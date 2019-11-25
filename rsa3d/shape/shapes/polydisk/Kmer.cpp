@@ -22,9 +22,10 @@ std::string Kmer::preparePolydiskAttr(int numberOfDisks, double distance) {
     double area = calculateArea(numberOfDisks, distance);
 
     std::ostringstream polydiskAttrStream;
-    polydiskAttrStream << numberOfDisks << " xy 0 0 1";
-    for (int i = 1; i < numberOfDisks; i++)
-        polydiskAttrStream << " " << (distance * i) << " 0 1";
+    polydiskAttrStream << numberOfDisks << " xy";
+    double firstDiskOffset = distance*(numberOfDisks - 1)/2;
+    for (int i = 0; i < numberOfDisks; i++)
+        polydiskAttrStream << " " << (distance * i - firstDiskOffset) << " 0 1";
     polydiskAttrStream << " " << area << " dontcenter 1";
 
     return polydiskAttrStream.str();
