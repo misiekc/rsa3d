@@ -12,10 +12,11 @@
 class ExclusionZonesMode : public ProgramMode {
 private:
     std::string packingFilename;
-    std::string outputFilename;
 
 public:
-    explicit ExclusionZonesMode(const ProgramArguments &arguments);
+    void initializeForArguments(const ProgramArguments &arguments) override;
+
+    void printHelp(std::ostream &out, const ProgramArguments &arguments) override;
 
     void run() override;
 };

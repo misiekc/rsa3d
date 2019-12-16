@@ -14,8 +14,8 @@ private:
     std::string packingGeneratorFilename;
 
 public:
-    explicit DebugMode(const ProgramArguments &arguments);
-
+    void initializeForArguments(const ProgramArguments &arguments) override;
+    void printHelp(std::ostream &out, const ProgramArguments &arguments) override;
     void run() override;
 };
 

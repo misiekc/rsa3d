@@ -130,7 +130,7 @@ void ExclusionZoneVisualizer::normalizeShapeOrientation(RSAShape &shape){
 	shape.rotate(orientation);
 }
 
-void ExclusionZoneVisualizer::main(const Parameters &params, std::string &packingFile, std::string &outputFile){
+void ExclusionZoneVisualizer::main(const Parameters &params, std::string &packingFile){
 	ExclusionZoneVisualizer xzv(params);
 	xzv.initPacking(packingFile);
 

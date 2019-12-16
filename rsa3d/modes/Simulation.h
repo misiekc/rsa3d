@@ -20,7 +20,7 @@ protected:
     virtual void postProcessSimulation() = 0;
 
 public:
-    explicit Simulation(Parameters params) : ProgramMode(params) { }
+    void printHelp(std::ostream &out, const ProgramArguments &arguments) override;
 
     void run() final;
 };

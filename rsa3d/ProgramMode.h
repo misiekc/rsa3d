@@ -5,16 +5,18 @@
 #ifndef RSA3D_PROGRAMMODE_H
 #define RSA3D_PROGRAMMODE_H
 
-#include "Parameters.h"
+#include "ProgramArguments.h"
 
 class ProgramMode {
 protected:
     Parameters params;
 
 public:
-    explicit ProgramMode(Parameters params) : params{std::move(params)} { }
+    virtual ~ProgramMode() = default;
 
+    virtual void initializeForArguments(const ProgramArguments &arguments) = 0;
     virtual void run() = 0;
+    virtual void printHelp(std::ostream &out, const ProgramArguments &arguments) = 0;
 };
 
 

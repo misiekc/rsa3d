@@ -33,7 +33,7 @@ ProgramArguments::ProgramArguments(int argc, char **argv) {
 
 ProgramArguments::ProgramArguments(int argc, char **argv, ParametersFileReader &pfr, std::istream &inputStream) {
     Expects(argc >= 1);     // valid program arguments have at least 1 arg - cmd; assertion error otherwise
-    cmd = argv[0];
+    this->cmd = argv[0];
 
     std::stringstream input;
     for (int i = 1; i < argc; i++) {
@@ -48,12 +48,12 @@ ProgramArguments::ProgramArguments(int argc, char **argv, ParametersFileReader &
         } else if (startsWithMinus(arg)) {
             input << arg.substr(1) << std::endl;
         } else {
-            positionalArguments.push_back(arg);
+            this->positionalArguments.push_back(arg);
         }
     }
 
-    fetchModeArgument();
-    parameters = Parameters(input);
+    this->fetchModeArgument();
+    this->parameters = Parameters(input);
 }
 
 bool ProgramArguments::startsWithMinus(const std::string &arg) const {
@@ -62,13 +62,35 @@ bool ProgramArguments::startsWithMinus(const std::string &arg) const {
 
 void ProgramArguments::fetchModeArgument() {
     // First positional argument, after stripping all extra stuff, should be the mode parameter
-    if (positionalArguments.empty())
-        throw InvalidArgumentsException("Usage: " + cmd + " <mode> (additional parameters)");
+    if (this->positionalArguments.empty())
+        throw InvalidArgumentsException(this->formatUsage(""));
 
-    mode = positionalArguments[0];
-    positionalArguments.erase(positionalArguments.begin());
+    this->mode = this->positionalArguments[0];
+    this->positionalArguments.erase(this->positionalArguments.begin());
+
+    // If the mode is help, then we want to flag, that help is wanted and mode is actually the argument after help
+    // (or empty string, if none). Then the class is in the state "help wanted for this mode"
+    if (this->mode == "help") {
+        this->helpRequested = true;
+        if (this->positionalArguments.empty()) {
+            this->mode = "";
+        } else {
+            this->mode = this->positionalArguments[0];
+            this->positionalArguments.erase(this->positionalArguments.begin());
+        }
+    }
 }
 
 std::string ProgramArguments::formatUsage(const std::string &additionalArgs) const {
-    return "Usage: " + cmd + " " + mode + " " + additionalArgs + " (flag parameters anywhere)";
+    std::ostringstream out;
+    out << "Usage: " << this->cmd << " ";
+
+    // If mode is unknown, we use a placeholder and put "mode specific arguments" instead of additionalArgs
+    if (this->mode.empty())
+        out << "[mode] (mode specific arguments)";
+    else
+        out << this->mode << " " << additionalArgs;
+    out << " (flag parameters anywhere)";
+
+    return out.str();
 }

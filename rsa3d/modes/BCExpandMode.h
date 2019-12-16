@@ -15,8 +15,8 @@ private:
     std::string packingOutFilename;
 
 public:
-    explicit BCExpandMode(const ProgramArguments &arguments);
-
+    void initializeForArguments(const ProgramArguments &arguments) override;
+    void printHelp(std::ostream &out, const ProgramArguments &arguments) override;
     void run() override;
 };
 

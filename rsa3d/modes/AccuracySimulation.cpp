@@ -4,10 +4,11 @@
 
 #include "AccuracySimulation.h"
 
-AccuracySimulation::AccuracySimulation(const ProgramArguments &arguments) : Simulation(arguments.getParameters()) {
+void AccuracySimulation::initializeForArguments(const ProgramArguments &arguments) {
+    this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() != 2)
-        die(arguments.formatUsage("<accuracy> <out file>"));
+        die(arguments.formatUsage("[accuracy] [out file]"));
     this->targetAccuracy = std::stod(positionalArguments[0]);
     Validate(this->targetAccuracy > 0);
     this->outputFilename = positionalArguments[1];
@@ -33,4 +34,13 @@ void AccuracySimulation::postProcessSimulation() {
     file.precision(std::numeric_limits<double>::digits10 + 1);
     file << this->meanPackingFraction.value << "\t" << this->meanPackingFraction.error << "\t";
     file << this->params.particleType << "\t" << this->params.particleAttributes << std::endl;
+}
+
+void AccuracySimulation::printHelp(std::ostream &out, const ProgramArguments &arguments) {
+    out << arguments.formatUsage("[accuracy] [file out]") << std::endl;
+    out << std::endl;
+    Simulation::printHelp(out, arguments);
+    out << "It perform as many simulation as needed for packing fraction mean error to be smaller than" << std::endl;
+    out << "[accuracy]. Moreover, it appends to [file out] a line containing particle attributes and" << std::endl;
+    out << "packing fraction with error." << std::endl;
 }

@@ -6,6 +6,7 @@
 #define RSA3D_PROGRAMARGUMENTS_H
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "Parameters.h"
@@ -30,6 +31,7 @@ private:
     std::string cmd;
     std::string mode;
     std::vector<std::string> positionalArguments;
+    bool helpRequested = false;
 
     void fetchModeArgument();
     bool startsWithMinus(const std::string &arg) const;
@@ -42,6 +44,7 @@ public:
     const Parameters &getParameters() const { return parameters; }
     const std::string &getMode() const { return mode; }
     const std::vector<std::string> &getPositionalArguments() const { return positionalArguments; }
+    bool isHelpRequested() const { return helpRequested; }
 
     std::string formatUsage(const std::string &additionalArgs) const;
 };

@@ -13,9 +13,10 @@ class AnalyzeMode : public ProgramMode {
 private:
     std::string dirName;
     double corrRange{};
-public:
-    explicit AnalyzeMode(const ProgramArguments &arguments);
 
+public:
+    void initializeForArguments (const ProgramArguments &arguments) override;
+    void printHelp(std::ostream &out, const ProgramArguments &arguments) override;
     void run() override;
 };
 

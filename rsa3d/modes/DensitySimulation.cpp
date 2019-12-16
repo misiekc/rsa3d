@@ -4,7 +4,8 @@
 
 #include "DensitySimulation.h"
 
-DensitySimulation::DensitySimulation(const ProgramArguments &arguments) : Simulation(arguments.getParameters()) {
+void DensitySimulation::initializeForArguments(const ProgramArguments &arguments) {
+    this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (!positionalArguments.empty())
         die(arguments.formatUsage(""));
@@ -38,4 +39,14 @@ void DensitySimulation::postProcessPacking(Packing &packing) {
         std::cout << "[DensitySimulation::postProcessPacking] Last particle adsorption time : ";
         std::cout << packing.back()->time << std::endl;
     }
+}
+
+void DensitySimulation::printHelp(std::ostream &out, const ProgramArguments &arguments) {
+    out << arguments.formatUsage("") << std::endl;
+    out << std::endl;
+    Simulation::printHelp(out, arguments);
+    out << "It performs as many simulation as specified by 'collectors' parameter. After generating each" << std::endl;
+    out << "packing it removes some particles added last to match 'maxDensity' parameter. Note, that this" << std::endl;
+    out << "parameter also can be used in other modes, but only this deletes excess particles and ensures" << std::endl;
+    out << "the correct density." << std::endl;
 }
