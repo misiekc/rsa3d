@@ -10,7 +10,7 @@ void WolframMode::initializeForArguments(const ProgramArguments &arguments) {
     this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() < 1 || positionalArguments.size() > 2)
-        die(arguments.formatUsage("<file in> (use periodic image = false)"));
+        die(arguments.formatUsage("[file in] (use periodic image = false)"));
 
     this->packingFilename = positionalArguments[0];
 
@@ -29,8 +29,8 @@ void WolframMode::run() {
                                 this->packingFilename + ".nb");
 }
 
-void WolframMode::printHelp(std::ostream &out, const std::string &cmd) {
-    out << "Usage: " << cmd << " wolfram (use periodic image = false)" << std::endl;
+void WolframMode::printHelp(std::ostream &out, const ProgramArguments &arguments) {
+    out << arguments.formatUsage("(use periodic image = false)") << std::endl;
     out << std::endl;
     out << "It draws a packing using Mathematica. If [use periodic image] is true, the packing will be" << std::endl;
     out << "expanded according to the boundary conditions so that the resulting image can be placed" << std::endl;

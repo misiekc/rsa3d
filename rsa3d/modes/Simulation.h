@@ -20,7 +20,7 @@ protected:
     virtual void postProcessSimulation() = 0;
 
 public:
-    void printHelp(std::ostream &out, const std::string &cmd) override;
+    void printHelp(std::ostream &out, const ProgramArguments &arguments) override;
 
     void run() final;
 };

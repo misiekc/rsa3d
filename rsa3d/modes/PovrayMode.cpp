@@ -9,7 +9,7 @@ void PovrayMode::initializeForArguments(const ProgramArguments &arguments) {
     this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() < 1 || positionalArguments.size() > 2)
-        die(arguments.formatUsage("<file in> (use periodic image = false)"));
+        die(arguments.formatUsage("[file in] (use periodic image = false)"));
 
     this->packingFilename = positionalArguments[0];
 
@@ -28,8 +28,8 @@ void PovrayMode::run() {
                                this->packingFilename + ".pov");
 }
 
-void PovrayMode::printHelp(std::ostream &out, const std::string &cmd) {
-    out << "Usage: " << cmd << " povray (use periodic image = false)" << std::endl;
+void PovrayMode::printHelp(std::ostream &out, const ProgramArguments &arguments) {
+    out << arguments.formatUsage("(use periodic image = false)") << std::endl;
     out << std::endl;
     out << "It draws a packing using povray. If [use periodic image] is true, the packing will be" << std::endl;
     out << "expanded according to the boundary conditions so that the resulting image can be placed" << std::endl;

@@ -11,7 +11,7 @@ void DatFileGenerationMode::initializeForArguments(const ProgramArguments &argum
     this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() != 1)
-        die(arguments.formatUsage("<directory>"));
+        die(arguments.formatUsage("[directory]"));
 
     this->dirName = positionalArguments[0];
 }
@@ -66,10 +66,10 @@ void DatFileGenerationMode::run() {
     std::cout << sno << "\t" << std::sqrt((sno2 - sno*sno)/vTimes.size()) << "\t" << median << "\t" << mad << std::endl;
 }
 
-void DatFileGenerationMode::printHelp(std::ostream &out, const std::string &cmd) {
-    out << "Usage: " << cmd << " dat [directory]" << std::endl;
+void DatFileGenerationMode::printHelp(std::ostream &out, const ProgramArguments &arguments) {
+    out << arguments.formatUsage("[directory]") << std::endl;
     out << std::endl;
     out << "It searches for *.bin files in a [directory] and creates *.dat file from them. See for" << std::endl;
-    out << "example '" << cmd << " help simulate' for information about the *.dat file. Note, that it" << std::endl;
+    out << "example '" << arguments.getCmd() << " help simulate' for information about the *.dat file. Note, that it" << std::endl;
     out << "requires to be invoked with the same parameters as were used to generate the packings." << std::endl;
 }

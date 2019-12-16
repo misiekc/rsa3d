@@ -16,7 +16,7 @@ public:
 
     virtual void initializeForArguments(const ProgramArguments &arguments) = 0;
     virtual void run() = 0;
-    virtual void printHelp(std::ostream &out, const std::string &cmd) { }
+    virtual void printHelp(std::ostream &out, const ProgramArguments &arguments) = 0;
 };
 
 

@@ -98,7 +98,7 @@ void Simulation::run() {
     this->postProcessSimulation();
 }
 
-void Simulation::printHelp(std::ostream &out, const std::string &cmd) {
+void Simulation::printHelp(std::ostream &out, const ProgramArguments &arguments) {
     out << "This is one of simulation modes. Each one generates RSA packings based on given parameters." << std::endl;
     out << "It outputs a file" << std::endl;
     out << "    packing_[particle name]_[particle attributes]_[surface volume].dat" << std::endl;

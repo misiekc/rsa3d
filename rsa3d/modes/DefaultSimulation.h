@@ -12,7 +12,7 @@
 class DefaultSimulation : public Simulation {
 public:
     void initializeForArguments(const ProgramArguments &arguments) override;
-    void printHelp(std::ostream &out, const std::string &cmd) override;
+    void printHelp(std::ostream &out, const ProgramArguments &arguments) override;
 
     bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) override;
 

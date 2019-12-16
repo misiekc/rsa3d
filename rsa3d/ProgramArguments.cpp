@@ -63,16 +63,21 @@ bool ProgramArguments::startsWithMinus(const std::string &arg) const {
 void ProgramArguments::fetchModeArgument() {
     // First positional argument, after stripping all extra stuff, should be the mode parameter
     if (this->positionalArguments.empty())
-        throw InvalidArgumentsException("Usage: " + this->cmd + " <mode> (additional parameters)");
+        throw InvalidArgumentsException("Usage: " + this->cmd + " [mode] (additional parameters)");
 
     this->mode = this->positionalArguments[0];
     this->positionalArguments.erase(this->positionalArguments.begin());
 
+    // If the mode is help, then we want to flag, that help is wanted and mode is actually the argument after help
+    // (or empty string, if none). Then the class is in the state "help wanted for this mode"
     if (this->mode == "help") {
-        if (this->positionalArguments.empty())
-            throw ArgumentsHelpRequest("");
-        else
-            throw ArgumentsHelpRequest(this->positionalArguments[0]);
+        this->helpRequested = true;
+        if (this->positionalArguments.empty()) {
+            this->mode = "";
+        } else {
+            this->mode = this->positionalArguments[0];
+            this->positionalArguments.erase(this->positionalArguments.begin());
+        }
     }
 }
 

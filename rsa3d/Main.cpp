@@ -71,21 +71,25 @@ int main(int argc, char **argv) {
         arguments = std::make_unique<ProgramArguments>(argc, argv);
     } catch (InvalidArgumentsException &e) {
         die(e.what());
-    } catch (ArgumentsHelpRequest &helpRequest) {
-        std::string mode = helpRequest.getMode();
+    }
+
+    std::string mode = arguments->getMode();
+    if (arguments->isHelpRequested()) {
         if (mode.empty()) {
             print_general_help(std::cout, argv[0]);
             return EXIT_SUCCESS;
-        } else if (programModes.find(mode) != programModes.end()) {
-            programModes[mode]->printHelp(std::cout, argv[0]);
+        }
+
+        if (programModes.find(mode) != programModes.end()) {
+            programModes[mode]->printHelp(std::cout, *arguments);
             return EXIT_SUCCESS;
         } else {
-            std::cerr << "Unknown mode: " << mode << ". Type '" << argv[0] << " help' for help" << std::endl;
+            std::cerr << "Unknown mode: " << mode << ". Type '" << arguments->getCmd() << " help' for help";
+            std::cerr << std::endl;
             return EXIT_FAILURE;
         }
     }
 
-    std::string mode = arguments->getMode();
     if (programModes.find(mode) == programModes.end()) {
         std::cerr << "Unknown mode: " << mode << ". Type '" << arguments->getCmd() << " help' for help" << std::endl;
         return EXIT_FAILURE;
