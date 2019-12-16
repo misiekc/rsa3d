@@ -8,13 +8,18 @@
 void ExclusionZonesMode::initializeForArguments(const ProgramArguments &arguments) {
     this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() != 2)
-        die(arguments.formatUsage("<packing file> <output file>"));
+    if (positionalArguments.size() != 1)
+        die(arguments.formatUsage("<packing file>"));
 
     this->packingFilename = positionalArguments[0];
-    this->outputFilename = positionalArguments[1];
 }
 
 void ExclusionZonesMode::run() {
-    ExclusionZoneVisualizer::main(this->params, this->packingFilename, this->outputFilename);
+    ExclusionZoneVisualizer::main(this->params, this->packingFilename);
+}
+
+void ExclusionZonesMode::printHelp(std::ostream &out, const std::string &cmd) {
+    out << "Usage: " << cmd << " exclusion_zones [packing file] [output file]" << std::endl;
+    out << std::endl;
+    out << "Currently it is broken, so I am not sure what it does." << std::endl;
 }

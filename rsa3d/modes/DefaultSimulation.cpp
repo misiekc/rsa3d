@@ -17,5 +17,7 @@ bool DefaultSimulation::continuePackingGeneration(std::size_t packingIndex, cons
 void DefaultSimulation::printHelp(std::ostream &out, const std::string &cmd) {
     out << "Usage: " << cmd << " simulate" << std::endl;
     out << std::endl;
-    out << "Performs a standard simulation for a given parameters without anything additional." << std::endl;
+    Simulation::printHelp(out, cmd);
+    out << "It perform as many simulation as specified by 'collectors' parameter and does not perform any" << std::endl;
+    out << "additional operations." << std::endl;
 }

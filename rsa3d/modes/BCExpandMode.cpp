@@ -22,3 +22,12 @@ void BCExpandMode::run() {
     packing.expandOnPBC(this->params.surfaceSize);
     packing.store(this->packingOutFilename);
 }
+
+void BCExpandMode::printHelp(std::ostream &out, const std::string &cmd) {
+    out << "Usage: " << cmd << " bc_expand [file in] (file out = file in)" << std::endl;
+    out << std::endl;
+    out << "Loads a packing from a given file and duplicates some particles on the border according to" << std::endl;
+    out << "periodic boundary conditions. The expanding margin is determined by particle's circumscribed" << std::endl;
+    out << "sphere. Note, that it requires to be invoked with the same parameters as were used to" << std::endl;
+    out << "generate the packing." << std::endl;
+}

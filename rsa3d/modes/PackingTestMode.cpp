@@ -23,3 +23,11 @@ void PackingTestMode::run() {
     PackingGenerator pg(1, &this->params);
     pg.testPacking(packing, this->maxTime);
 }
+
+void PackingTestMode::printHelp(std::ostream &out, const std::string &cmd) {
+    out << "Usage: " << cmd << " test [packing file] [max time]" << std::endl;
+    out << std::endl;
+    out << "It loads the packing from [packing file] and tries to add a new particle up to [max time]" << std::endl;
+    out << "dimensionless time. It can be used to check if the packing is saturated. Note, that it" << std::endl;
+    out << "requires to be invoked with the same parameters as were used to generate the packing." << std::endl;
+}

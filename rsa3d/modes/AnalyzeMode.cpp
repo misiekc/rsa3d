@@ -21,3 +21,13 @@ void AnalyzeMode::run() {
     Analyzer an(&this->params);
     an.analyzePackingsInDirectory(this->dirName, 0.01, 1.0, this->corrRange);
 }
+
+void AnalyzeMode::printHelp(std::ostream &out, const std::string &cmd) {
+    out << "Usage: " << cmd << " analyze [directory] (correlacions range = 10; 0 - no corr output)" << std::endl;
+    out << std::endl;
+    out << "It searches [directory] for '*.bin' files and analyzes them. It produces a few files, each" << std::endl;
+    out << "with prefix '[directory]_': kinetics plot (suffix 'nvt'), ASF plot ('asf'), order parameters," << std::endl;
+    out << "if available for the shape used ('order'), and prints on the standard output parameters such" << std::endl;
+    out << "as packing fraction and d, all labeled. Note, that it requires to be invoked with the same" << std::endl;
+    out << "parameters as were used to generate the packings." << std::endl;
+}

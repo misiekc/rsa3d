@@ -34,7 +34,7 @@ public:
 	virtual ~ExclusionZoneVisualizer();
 	void toPovray(const std::string &filename, RSAShape *trialShape);
 
-	static void main(const Parameters &params, std::string &packingFile, std::string &outputFile);
+	static void main(const Parameters &params, std::string &packingFile);
 };
 
 #endif /* ANALIZATOR_EXCLUSIONZONEVISUALIZER_H_ */

@@ -24,3 +24,11 @@ void DebugMode::run() {
     pg.restore(file);
     pg.run();
 }
+
+void DebugMode::printHelp(std::ostream &out, const std::string &cmd) {
+    out << "Usage: " << cmd << " debug [packing generator file]" << std::endl;
+    out << std::endl;
+    out << "It restores packing generator state from a given file and continues packing generation. The" << std::endl;
+    out << "states are saved after uncommenting specific lines of code in PackingGenerator class. Note" << std::endl;
+    out << "that you have to pass the same parameters as were used before." << std::endl;
+}

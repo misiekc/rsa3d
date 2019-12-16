@@ -97,3 +97,15 @@ void Simulation::run() {
 
     this->postProcessSimulation();
 }
+
+void Simulation::printHelp(std::ostream &out, const std::string &cmd) {
+    out << "This is one of simulation modes. Each one generates RSA packings based on given parameters." << std::endl;
+    out << "It outputs a file" << std::endl;
+    out << "    packing_[particle name]_[particle attributes]_[surface volume].dat" << std::endl;
+    out << "whose rows correspond to subsequent packings and columns are: number of collector, number of" << std::endl;
+    out << "particles and time of adding the last particle. Moreover, if specified, the packings are" << std::endl;
+    out << "stored as" << std::endl;
+    out << "    packing_[particle name]_[particle attributes]_[surface volume]_[number of collector].bin" << std::endl;
+    out << std::endl;
+    out << "The stopping conditions and additional operations specific to this mode:" << std::endl;
+}

@@ -65,3 +65,11 @@ void DatFileGenerationMode::run() {
 
     std::cout << sno << "\t" << std::sqrt((sno2 - sno*sno)/vTimes.size()) << "\t" << median << "\t" << mad << std::endl;
 }
+
+void DatFileGenerationMode::printHelp(std::ostream &out, const std::string &cmd) {
+    out << "Usage: " << cmd << " dat [directory]" << std::endl;
+    out << std::endl;
+    out << "It searches for *.bin files in a [directory] and creates *.dat file from them. See for" << std::endl;
+    out << "example '" << cmd << " help simulate' for information about the *.dat file. Note, that it" << std::endl;
+    out << "requires to be invoked with the same parameters as were used to generate the packings." << std::endl;
+}

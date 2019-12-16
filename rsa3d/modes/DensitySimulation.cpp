@@ -40,3 +40,13 @@ void DensitySimulation::postProcessPacking(Packing &packing) {
         std::cout << packing.back()->time << std::endl;
     }
 }
+
+void DensitySimulation::printHelp(std::ostream &out, const std::string &cmd) {
+    out << "Usage: " << cmd << " density" << std::endl;
+    out << std::endl;
+    Simulation::printHelp(out, cmd);
+    out << "It performs as many simulation as specified by 'collectors' parameter. After generating each" << std::endl;
+    out << "packing it removes some particles added last to match 'maxDensity' parameter. Note, that this" << std::endl;
+    out << "parameter also can be used in other modes, but only this deletes excess particles and ensures" << std::endl;
+    out << "the correct density." << std::endl;
+}

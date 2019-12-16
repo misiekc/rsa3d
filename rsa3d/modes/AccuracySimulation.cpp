@@ -35,3 +35,12 @@ void AccuracySimulation::postProcessSimulation() {
     file << this->meanPackingFraction.value << "\t" << this->meanPackingFraction.error << "\t";
     file << this->params.particleType << "\t" << this->params.particleAttributes << std::endl;
 }
+
+void AccuracySimulation::printHelp(std::ostream &out, const std::string &cmd) {
+    out << "Usage: " << cmd << " accuracy [accuracy] [file out]" << std::endl;
+    out << std::endl;
+    Simulation::printHelp(out, cmd);
+    out << "It perform as many simulation as needed for packing fraction mean error to be smaller than" << std::endl;
+    out << "[accuracy]. Moreover, it appends to [file out] a line containing particle attributes and" << std::endl;
+    out << "packing fraction with error." << std::endl;
+}

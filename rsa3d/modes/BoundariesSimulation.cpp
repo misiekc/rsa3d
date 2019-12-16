@@ -23,3 +23,11 @@ void BoundariesSimulation::postProcessPacking(Packing &packing) {
     std::cout << "[BoundariesSimulation::postProcessPacking] Fraction of particles generated: ";
     std::cout << static_cast<double>(this->particleCounter) / this->targetNumberOfParticles << std::endl;
 }
+
+void BoundariesSimulation::printHelp(std::ostream &out, const std::string &cmd) {
+    out << "Usage: " << cmd << " boundaries [number of particles]" << std::endl;
+    out << std::endl;
+    Simulation::printHelp(out, cmd);
+    out << "It perform as many simulation as needed to obtain a total count of particles greater than" << std::endl;
+    out << "[number of particles]." << std::endl;
+}

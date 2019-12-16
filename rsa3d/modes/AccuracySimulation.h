@@ -21,6 +21,8 @@ private:
 
 public:
     void initializeForArguments(const ProgramArguments &arguments) override;
+    void printHelp(std::ostream &out, const std::string &cmd) override;
+
     bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) override;
     void postProcessPacking(Packing &packing) override;
     void postProcessSimulation() override;
