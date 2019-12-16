@@ -6,7 +6,8 @@
 #include "../utils/Assertions.h"
 #include "../PackingGenerator.h"
 
-PackingTestMode::PackingTestMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+void PackingTestMode::initializeForArguments(const ProgramArguments &arguments) {
+    this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() != 2)
         die(arguments.formatUsage("<file in> <max time>"));

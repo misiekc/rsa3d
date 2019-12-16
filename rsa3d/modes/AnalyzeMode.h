@@ -14,8 +14,7 @@ private:
     std::string dirName;
     double corrRange{};
 public:
-    explicit AnalyzeMode(const ProgramArguments &arguments);
-
+    void initializeForArguments (const ProgramArguments &arguments) override;
     void run() override;
 };
 

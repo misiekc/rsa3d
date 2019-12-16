@@ -15,8 +15,7 @@ private:
     bool isPeriodicImage{};
 
 public:
-    explicit WolframMode(const ProgramArguments &arguments);
-
+    void initializeForArguments(const ProgramArguments &arguments) override;
     void run() override;
 };
 

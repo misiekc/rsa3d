@@ -15,7 +15,7 @@ private:
     std::size_t particleCounter{};
 
 public:
-    explicit BoundariesSimulation(const ProgramArguments &arguments);
+    void initializeForArguments(const ProgramArguments &arguments) override;
 
     bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) override;
     void postProcessPacking(Packing &packing) override;

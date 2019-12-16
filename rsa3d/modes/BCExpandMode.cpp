@@ -6,7 +6,8 @@
 #include "../ProgramArguments.h"
 #include "../Packing.h"
 
-BCExpandMode::BCExpandMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+void BCExpandMode::initializeForArguments(const ProgramArguments &arguments) {
+    this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() < 1 || positionalArguments.size() > 2)
         die(arguments.formatUsage("<file in> (file out = file in)"));

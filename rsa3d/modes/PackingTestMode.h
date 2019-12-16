@@ -15,8 +15,7 @@ private:
     double maxTime{};
 
 public:
-    explicit PackingTestMode(const ProgramArguments &arguments);
-
+    void initializeForArguments(const ProgramArguments &arguments) override;
     void run() override;
 };
 

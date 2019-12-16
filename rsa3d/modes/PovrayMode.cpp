@@ -5,7 +5,8 @@
 #include "PovrayMode.h"
 #include "../PackingGenerator.h"
 
-PovrayMode::PovrayMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+void PovrayMode::initializeForArguments(const ProgramArguments &arguments) {
+    this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() < 1 || positionalArguments.size() > 2)
         die(arguments.formatUsage("<file in> (use periodic image = false)"));

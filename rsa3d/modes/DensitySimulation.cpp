@@ -4,7 +4,8 @@
 
 #include "DensitySimulation.h"
 
-DensitySimulation::DensitySimulation(const ProgramArguments &arguments) : Simulation(arguments.getParameters()) {
+void DensitySimulation::initializeForArguments(const ProgramArguments &arguments) {
+    this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (!positionalArguments.empty())
         die(arguments.formatUsage(""));

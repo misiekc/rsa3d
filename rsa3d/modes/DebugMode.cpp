@@ -6,7 +6,8 @@
 #include "DebugMode.h"
 #include "../PackingGenerator.h"
 
-DebugMode::DebugMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+void DebugMode::initializeForArguments(const ProgramArguments &arguments) {
+    this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() != 1)
         die(arguments.formatUsage("<packing generator file>"));

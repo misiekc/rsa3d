@@ -16,8 +16,7 @@ private:
     double getMedian(std::vector<double> &data);
 
 public:
-    explicit DatFileGenerationMode(const ProgramArguments &arguments);
-
+    void initializeForArguments(const ProgramArguments &arguments) override;
     void run() override;
 };
 

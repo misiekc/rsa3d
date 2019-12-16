@@ -20,8 +20,6 @@ protected:
     virtual void postProcessSimulation() = 0;
 
 public:
-    explicit Simulation(Parameters params) : ProgramMode(params) { }
-
     void run() final;
 };
 

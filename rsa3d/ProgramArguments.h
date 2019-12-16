@@ -6,6 +6,7 @@
 #define RSA3D_PROGRAMARGUMENTS_H
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "Parameters.h"
@@ -22,6 +23,16 @@ public:
 class InvalidArgumentsException : public std::runtime_error {
 public:
     explicit InvalidArgumentsException(const std::string &msg) : runtime_error{msg} {}
+};
+
+class ArgumentsHelpRequest : public std::exception {
+private:
+    std::string mode;
+
+public:
+    explicit ArgumentsHelpRequest(std::string mode) : mode{std::move(mode)} { }
+
+    const std::string &getMode() const { return mode; }
 };
 
 class ProgramArguments {

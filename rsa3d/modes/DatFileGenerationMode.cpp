@@ -7,7 +7,8 @@
 #include "DatFileGenerationMode.h"
 #include "../PackingGenerator.h"
 
-DatFileGenerationMode::DatFileGenerationMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+void DatFileGenerationMode::initializeForArguments(const ProgramArguments &arguments) {
+    this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() != 1)
         die(arguments.formatUsage("<directory>"));

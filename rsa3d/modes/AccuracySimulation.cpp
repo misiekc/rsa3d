@@ -4,7 +4,8 @@
 
 #include "AccuracySimulation.h"
 
-AccuracySimulation::AccuracySimulation(const ProgramArguments &arguments) : Simulation(arguments.getParameters()) {
+void AccuracySimulation::initializeForArguments(const ProgramArguments &arguments) {
+    this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() != 2)
         die(arguments.formatUsage("<accuracy> <out file>"));

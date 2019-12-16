@@ -15,8 +15,7 @@ private:
     std::string outputFilename;
 
 public:
-    explicit ExclusionZonesMode(const ProgramArguments &arguments);
-
+    void initializeForArguments(const ProgramArguments &arguments) override;
     void run() override;
 };
 

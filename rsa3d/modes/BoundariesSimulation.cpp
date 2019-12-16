@@ -4,7 +4,8 @@
 
 #include "BoundariesSimulation.h"
 
-BoundariesSimulation::BoundariesSimulation(const ProgramArguments &arguments) : Simulation(arguments.getParameters()) {
+void BoundariesSimulation::initializeForArguments(const ProgramArguments &arguments) {
+    this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() != 1)
         die(arguments.formatUsage("<number of particles>"));

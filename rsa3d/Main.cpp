@@ -1,5 +1,8 @@
 #include <sys/wait.h>
 #include <memory>
+#include <map>
+#include <iterator>
+#include <functional>
 
 #include "shape/ShapeFactory.h"
 #include "ProgramArguments.h"
@@ -17,46 +20,50 @@
 #include "modes/WolframMode.h"
 
 
-/*int simulate(const ProgramArguments &arguments) {
-    std::string sFile = params.getPackingSignature() + ".dat";
-    std::ofstream file(sFile);
-    if (!file)
-        die("Cannot open file " + sFile + " to store packing info");
-    file.precision(std::numeric_limits<double>::digits10 + 1);
+namespace {
+    // This it the place where you want to add additional program modes. Just implement ProgramMode / Simulation
+    // and add it here. The rest it already done for you ;)
+    std::map<std::string, std::shared_ptr<ProgramMode>> programModes = {
+            // Simulation modes - they all generate a number of packings, operate on them, create *.dat file and
+            // optionally save additional information
+            {"simulate", std::make_shared<DefaultSimulation>()},
+            {"boundaries", std::make_shared<BoundariesSimulation>()},
+            {"accuracy", std::make_shared<AccuracySimulation>()},
+            {"density", std::make_shared<DensitySimulation>()},
+            // Other modes
+            {"test", std::make_shared<PackingTestMode>()},
+            {"debug", std::make_shared<DebugMode>()},
+            {"dat", std::make_shared<DatFileGenerationMode>()},
+            {"analyze", std::make_shared<AnalyzeMode>()},
+            {"povray", std::make_shared<PovrayMode>()},
+            {"wolfram", std::make_shared<WolframMode>()},
+            {"bc_expand", std::make_shared<BCExpandMode>()},
+            {"exclusion_zones", std::make_shared<ExclusionZonesMode>()}};
 
-    std::size_t seed = params.from;
-    if (params.generatorProcesses > 1) {
-        while (seed < params.from + params.collectors) {
-            std::size_t i;
-            for (i = 0; ((i < params.generatorProcesses) &&
-                         ((seed + i) < (params.from + params.collectors))); i++) {
-                int pid = fork();
-                if (pid < 0) {
-                    std::cout << "fork problem" << std::endl;
-                    i--;
-                    continue;
-                }
-                if (pid == 0) {
-                    runSingleSimulation(static_cast<int>(seed + i), &params, file);
-                    return 1;
-                }
-                if (pid > 0) {
-                    continue;
-                }
-            }
-            for (std::size_t j = 0; j < i; j++) {
-                wait(nullptr);
-                seed++;
-            }
-        }
-    } else {
-        for (std::size_t i = 0; i < params.collectors; i++) {
-            runSingleSimulation(static_cast<int>(params.from + i), &params, file);
-        }
+    void print_modes(std::ostream &out) {
+        using modes_pair_t = decltype(programModes)::value_type;
+        using namespace std::placeholders;
+        std::transform(programModes.begin(), programModes.end(), std::ostream_iterator<std::string>(out, ", "),
+                       std::bind(&modes_pair_t::first, _1));
     }
-    file.close();
-    return 1;
-}*/
+
+    void print_general_help(std::ostream &out, const std::string &cmd) {
+        out << "Usage: " << cmd << " [mode] (mode specific arguments) (flag parameters anywhere)" << std::endl;
+        out << std::endl;
+        out << "At the beginning the program initializes parameters with default values. They can be changed using ";
+        out << "flags:" << std::endl;
+        out << "  -f [file] : reads the parameters from a given file begin a key=value config" << std::endl;
+        out << "  -i : reads the parameters from a standard input, in the form as above" << std::endl;
+        out << "  -[parameter name]=[parameter value] : anything else starting with - is treated as a parameter (no ";
+        out << "spaces!)" << std::endl;
+        out << "You can combine all the above methods of specifying parameters. The latter ones override the former.";
+        out << std::endl << std::endl;
+        out << "Available modes: ";
+        print_modes(out);
+        out << std::endl;
+        out << "To see the help for a specific mode, use '" << cmd << " help [mode]'" << std::endl;
+    }
+}
 
 int main(int argc, char **argv) {
     std::unique_ptr<ProgramArguments> arguments;
@@ -64,45 +71,31 @@ int main(int argc, char **argv) {
         arguments = std::make_unique<ProgramArguments>(argc, argv);
     } catch (InvalidArgumentsException &e) {
         die(e.what());
+    } catch (ArgumentsHelpRequest &helpRequest) {
+        std::string mode = helpRequest.getMode();
+        if (mode.empty()) {
+            print_general_help(std::cout, argv[0]);
+            return EXIT_SUCCESS;
+        } else if (programModes.find(mode) != programModes.end()) {
+            programModes[mode]->printHelp(std::cout, argv[0]);
+            return EXIT_SUCCESS;
+        } else {
+            std::cerr << "Unknown mode: " << mode << ". Type '" << argv[0] << " help' for help" << std::endl;
+            return EXIT_FAILURE;
+        }
+    }
+
+    std::string mode = arguments->getMode();
+    if (programModes.find(mode) == programModes.end()) {
+        std::cerr << "Unknown mode: " << mode << ". Type '" << arguments->getCmd() << " help' for help" << std::endl;
+        return EXIT_FAILURE;
     }
 
     Parameters params = arguments->getParameters();
     ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
-
-    std::unique_ptr<ProgramMode> programMode;
-    std::string mode = arguments->getMode();
-
-    // Simulation modes - they all generate a number of packings, operate on them, create *.dat file and optionally
-    // save additional information
-    if (mode == "simulate")
-        programMode = std::make_unique<DefaultSimulation>(*arguments);
-    else if (mode == "boundaries")
-        programMode = std::make_unique<BoundariesSimulation>(*arguments);
-    else if (mode == "accuracy")
-        programMode = std::make_unique<AccuracySimulation>(*arguments);
-    else if (mode == "density")
-        programMode = std::make_unique<DensitySimulation>(*arguments);
-
-    // Other modes
-    else if (mode == "test")
-        programMode = std::make_unique<PackingTestMode>(*arguments);
-    else if (mode == "debug")
-        programMode = std::make_unique<DebugMode>(*arguments);
-    else if (mode == "dat")
-        programMode = std::make_unique<DatFileGenerationMode>(*arguments);
-    else if (mode == "analyze")
-        programMode = std::make_unique<AnalyzeMode>(*arguments);
-    else if (mode == "povray")
-        programMode = std::make_unique<PovrayMode>(*arguments);
-    else if (mode == "wolfram")
-        programMode = std::make_unique<WolframMode>(*arguments);
-    else if (mode == "bc_expand")
-        programMode = std::make_unique<BCExpandMode>(*arguments);
-    else if (mode == "exclusion_zones")
-        programMode = std::make_unique<ExclusionZonesMode>(*arguments);
-    else
-        die("Unknown mode: " + mode);
-
-    programMode->run();
+    
+    auto &modeObject = *(programModes[mode]);
+    modeObject.initializeForArguments(*arguments);
+    modeObject.run();
     return EXIT_SUCCESS;
 }

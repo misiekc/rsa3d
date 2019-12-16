@@ -5,7 +5,8 @@
 #include "ExclusionZonesMode.h"
 #include "../analizator/ExclusionZoneVisualizer.h"
 
-ExclusionZonesMode::ExclusionZonesMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+void ExclusionZonesMode::initializeForArguments(const ProgramArguments &arguments) {
+    this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() != 2)
         die(arguments.formatUsage("<packing file> <output file>"));

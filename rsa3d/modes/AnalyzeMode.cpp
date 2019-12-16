@@ -6,7 +6,8 @@
 #include "../utils/Assertions.h"
 #include "../analizator/Analyzer.h"
 
-AnalyzeMode::AnalyzeMode(const ProgramArguments &arguments) : ProgramMode(arguments.getParameters()) {
+void AnalyzeMode::initializeForArguments(const ProgramArguments &arguments) {
+    this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() < 1 || positionalArguments.size() > 2)
         die(arguments.formatUsage("<directory> (correlations range = 10; 0 - no corr output)"));

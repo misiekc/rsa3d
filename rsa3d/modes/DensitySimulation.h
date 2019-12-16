@@ -11,7 +11,7 @@
 
 class DensitySimulation : public Simulation {
 public:
-    explicit DensitySimulation(const ProgramArguments &arguments);
+    void initializeForArguments(const ProgramArguments &arguments) override;
 
     bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) override;
     void postProcessPacking(Packing &packing) override;
