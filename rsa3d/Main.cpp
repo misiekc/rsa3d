@@ -47,8 +47,8 @@ namespace {
                        std::bind(&modes_pair_t::first, _1));
     }
 
-    void print_general_help(std::ostream &out, const std::string &cmd) {
-        out << "Usage: " << cmd << " [mode] (mode specific arguments) (flag parameters anywhere)" << std::endl;
+    void print_general_help(std::ostream &out, const ProgramArguments &arguments) {
+        out << arguments.formatUsage("") << std::endl;
         out << std::endl;
         out << "At the beginning the program initializes parameters with default values. They can be changed using ";
         out << "flags:" << std::endl;
@@ -61,7 +61,24 @@ namespace {
         out << "Available modes: ";
         print_modes(out);
         out << std::endl;
-        out << "To see the help for a specific mode, use '" << cmd << " help [mode]'" << std::endl;
+        out << "To see the help for a specific mode, use '" << arguments.getCmd() << " help [mode]'" << std::endl;
+    }
+
+    int handle_help_request(const ProgramArguments &arguments) {
+        std::string mode = arguments.getMode();
+        if (mode.empty()) {
+            print_general_help(std::cout, arguments);
+            return EXIT_SUCCESS;
+        }
+
+        if (programModes.find(mode) != programModes.end()) {
+            programModes[mode]->printHelp(std::cout, arguments);
+            return EXIT_SUCCESS;
+        } else {
+            std::cerr << "Unknown mode: " << mode << ". Type '" << arguments.getCmd() << " help' for help";
+            std::cerr << std::endl;
+            return EXIT_FAILURE;
+        }
     }
 }
 
@@ -73,23 +90,10 @@ int main(int argc, char **argv) {
         die(e.what());
     }
 
+    if (arguments->isHelpRequested())
+        return handle_help_request(*arguments);
+
     std::string mode = arguments->getMode();
-    if (arguments->isHelpRequested()) {
-        if (mode.empty()) {
-            print_general_help(std::cout, argv[0]);
-            return EXIT_SUCCESS;
-        }
-
-        if (programModes.find(mode) != programModes.end()) {
-            programModes[mode]->printHelp(std::cout, *arguments);
-            return EXIT_SUCCESS;
-        } else {
-            std::cerr << "Unknown mode: " << mode << ". Type '" << arguments->getCmd() << " help' for help";
-            std::cerr << std::endl;
-            return EXIT_FAILURE;
-        }
-    }
-
     if (programModes.find(mode) == programModes.end()) {
         std::cerr << "Unknown mode: " << mode << ". Type '" << arguments->getCmd() << " help' for help" << std::endl;
         return EXIT_FAILURE;

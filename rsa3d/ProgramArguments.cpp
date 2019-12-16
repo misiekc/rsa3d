@@ -63,7 +63,7 @@ bool ProgramArguments::startsWithMinus(const std::string &arg) const {
 void ProgramArguments::fetchModeArgument() {
     // First positional argument, after stripping all extra stuff, should be the mode parameter
     if (this->positionalArguments.empty())
-        throw InvalidArgumentsException("Usage: " + this->cmd + " [mode] (additional parameters)");
+        throw InvalidArgumentsException(this->formatUsage(""));
 
     this->mode = this->positionalArguments[0];
     this->positionalArguments.erase(this->positionalArguments.begin());
@@ -82,5 +82,15 @@ void ProgramArguments::fetchModeArgument() {
 }
 
 std::string ProgramArguments::formatUsage(const std::string &additionalArgs) const {
-    return "Usage: " + this->cmd + " " + this->mode + " " + additionalArgs + " (flag parameters anywhere)";
+    std::ostringstream out;
+    out << "Usage: " << this->cmd << " ";
+
+    // If mode is unknown, we use a placeholder and put "mode specific arguments" instead of additionalArgs
+    if (this->mode.empty())
+        out << "[mode] (mode specific arguments)";
+    else
+        out << this->mode << " " << additionalArgs;
+    out << " (flag parameters anywhere)";
+
+    return out.str();
 }
