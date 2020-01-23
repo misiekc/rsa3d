@@ -7,11 +7,12 @@
 void AccuracySimulation::initializeForArguments(const ProgramArguments &arguments) {
     this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
-    if (positionalArguments.size() != 2)
-        die(arguments.formatUsage("[accuracy] [out file]"));
+    if (positionalArguments.size() != 2 && positionalArguments.size() != 3)
+        die(arguments.formatUsage("[accuracy] [out file] (additional data)"));
     this->targetAccuracy = std::stod(positionalArguments[0]);
     Validate(this->targetAccuracy > 0);
     this->outputFilename = positionalArguments[1];
+    this->additionalData = positionalArguments.size() == 2 ? "" : positionalArguments[2];
 }
 
 bool AccuracySimulation::continuePackingGeneration(std::size_t packingIndex, const Packing &packing) {
@@ -32,6 +33,8 @@ void AccuracySimulation::postProcessSimulation() {
     if (!file)
         die("Cannot open " + this->outputFilename + " file to store packing fraction");
     file.precision(std::numeric_limits<double>::digits10 + 1);
+    if (this->additionalData.size() > 0)
+        file << this->additionalData << "\t";
     file << this->meanPackingFraction.value << "\t" << this->meanPackingFraction.error << "\t";
     file << this->params.particleType << "\t" << this->params.particleAttributes << std::endl;
 }
@@ -40,7 +43,8 @@ void AccuracySimulation::printHelp(std::ostream &out, const ProgramArguments &ar
     out << arguments.formatUsage("[accuracy] [file out]") << std::endl;
     out << std::endl;
     Simulation::printHelp(out, arguments);
-    out << "It perform as many simulation as needed for packing fraction mean error to be smaller than" << std::endl;
-    out << "[accuracy]. Moreover, it appends to [file out] a line containing particle attributes and" << std::endl;
-    out << "packing fraction with error." << std::endl;
+    out << "It performs as many simulations as needed for packing fraction mean error to be smaller than" << std::endl;
+    out << "[accuracy]. Moreover, it appends to [file out] a line containing following data" << std::endl;
+    out << "separated with tabulators: (additional data) - if given, packing fraction, its error" << std::endl;
+    out << "and particle attributes." << std::endl;
 }

@@ -18,6 +18,7 @@ private:
     std::string outputFilename;
     std::vector<double> packingFractions;
     Quantity meanPackingFraction;
+    std::string additionalData;
 
 public:
     void initializeForArguments(const ProgramArguments &arguments) override;
