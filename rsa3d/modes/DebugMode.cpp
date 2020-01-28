@@ -20,7 +20,7 @@ void DebugMode::run() {
     if (!file)
         die("Cannot open file " + this->packingGeneratorFilename + " to restore packing generator");
 
-    PackingGenerator pg(0, &params);
+    PackingGenerator pg(0, 0, &params);
     pg.restore(file);
     pg.run();
 }

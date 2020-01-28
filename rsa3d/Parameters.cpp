@@ -29,7 +29,8 @@ Parameters::Parameters(std::istream &stream) {
 		else if (key == "thresholdDistance") 			this->thresholdDistance = config.getDouble(key);
 		else if (key == "boundaryConditions") 		    this->boundaryConditions = config.getString(key);
 		else if (key == "particleType") 				this->particleType = config.getString(key);
-		else if (key == "particleAttributes")			this->particleAttributes = config.getString(key);
+        else if (key == "particleAttributes")			this->particleAttributes = config.getString(key);
+        else if (key == "seedOrigin")			        this->seedOrigin = config.getString(key);
 
 		else if (key == "from") 						this->from = config.getUnsignedLong(key);
 		else if (key == "collectors") 				    this->collectors = config.getUnsignedLong(key);
@@ -117,7 +118,8 @@ bool Parameters::operator==(const Parameters &rhs) const {
            particleAttributes == rhs.particleAttributes &&
            generatorProcesses == rhs.generatorProcesses &&
            ompThreads == rhs.ompThreads &&
-		   coverageByNumber == rhs.coverageByNumber;
+		   coverageByNumber == rhs.coverageByNumber &&
+		   seedOrigin == rhs.seedOrigin;
 }
 
 bool Parameters::operator!=(const Parameters &rhs) const {

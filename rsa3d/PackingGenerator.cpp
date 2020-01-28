@@ -24,11 +24,9 @@
 double PackingGenerator::FACTOR_LIMIT = 5.0;
 
 
-PackingGenerator::PackingGenerator(int seed, const Parameters *params) {
-	this->params = *params;
-	this->seed = seed;
-	RND rnd(this->seed);
-
+PackingGenerator::PackingGenerator(int seed, std::size_t collector, const Parameters *params)
+        : seed{seed}, collector{collector}, params{*params}
+{
 	this->spatialSize = this->params.surfaceSize;
 	this->angularSize = RSAShape::getAngularVoxelSize();
 	if (this->params.requestedAngularVoxelSize > this->angularSize)
@@ -110,7 +108,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 
 	std::cout.precision(std::numeric_limits< double >::max_digits10);
 
-	std::cout << "[" << this->seed << " PackingGenerator::testPacking] using up to " << _OMP_MAXTHREADS;
+	std::cout << "[" << this->collector << " PackingGenerator::testPacking] using up to " << _OMP_MAXTHREADS;
 	std::cout << " concurrent treads" << std::endl;
 
 	RND rnd(this->seed);
@@ -121,7 +119,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 	this->packing = packing;
 	for(const RSAShape *s : packing)
 		this->surface->add(s);
-	std::cout << "[" << this->seed << " PackingGenerator::testPacking] " << packing.size() << " shapes restored" << std::endl;
+	std::cout << "[" << this->collector << " PackingGenerator::testPacking] " << packing.size() << " shapes restored" << std::endl;
 
 
 
@@ -131,7 +129,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 
 	while (t<maxTime) {
 
-		std::cout << "\r" << "[" << this->seed << " PackingGenerator::testPacking] t=" << std::setprecision(4) << t/maxTime << " choosing " << loop << " shapes..." << std::flush;
+		std::cout << "\r" << "[" << this->collector << " PackingGenerator::testPacking] t=" << std::setprecision(4) << t/maxTime << " choosing " << loop << " shapes..." << std::flush;
 
 		_OMP_PARALLEL_FOR
 		for(int i = 0; i<loop; i++){
@@ -179,14 +177,14 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 		t += dt * loop;
 	} // while
 
-	std::cout << "[" << seed << " PackingGenerator::testPacking] finished after time " << t << std::endl;
+	std::cout << "[" << this->collector << " PackingGenerator::testPacking] finished after time " << t << std::endl;
 }
 
 
 void PackingGenerator::createPacking() {
 
 	std::cout.precision(std::numeric_limits< double >::max_digits10);
-	std::cout << "[" << this->seed << " PackingGenerator::createPacking] using up to " << _OMP_MAXTHREADS;
+	std::cout << "[" << this->collector << " PackingGenerator::createPacking] using up to " << _OMP_MAXTHREADS;
 	std::cout << " concurrent treads" << std::endl;
 
 	std::size_t checkedAgain = 0;
@@ -213,7 +211,7 @@ void PackingGenerator::createPacking() {
 	Voxel **aVoxels = new Voxel *[tmpSplit];
 
 	while (!this->generationCompleted(missCounter, t)) {
-		std::cout << "[" << this->seed << " PackingGenerator::createPacking] choosing " << tmpSplit << " shapes..." << std::flush;
+		std::cout << "[" << this->collector << " PackingGenerator::createPacking] choosing " << tmpSplit << " shapes..." << std::flush;
 
 		_OMP_PARALLEL_FOR
 		for(std::size_t i = 0; i<tmpSplit; i++){
@@ -287,7 +285,7 @@ void PackingGenerator::createPacking() {
 			missCounter += tmpSplit;
 			size_t v0 = this->voxels->getLength();
 
-			std::cout << "[" << this->seed << " PackingGenerator::createPacking] splitting " << v0 << " voxels ";
+			std::cout << "[" << this->collector << " PackingGenerator::createPacking] splitting " << v0 << " voxels ";
 			std::cout.flush();
 //						this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
 
@@ -372,7 +370,7 @@ void PackingGenerator::createPacking() {
 	delete[] sVirtual;
 	delete[] aVoxels;
 
-	std::cout << "[" << seed << " PackingGenerator::createPacking] finished after generating " << l << " shapes" << std::endl;
+	std::cout << "[" << this->collector << " PackingGenerator::createPacking] finished after generating " << l << " shapes" << std::endl;
 }
 
 bool PackingGenerator::generationCompleted(size_t missCounter, double t) {
@@ -584,5 +582,5 @@ std::vector<std::string> PackingGenerator::findPackingsInDir(const std::string &
 }
 
 std::string PackingGenerator::getPackingFilename() const {
-    return this->params.getPackingSignature() + "_" + std::to_string(this->seed) + ".bin";
+    return this->params.getPackingSignature() + "_" + std::to_string(this->collector) + ".bin";
 }

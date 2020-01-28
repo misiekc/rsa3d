@@ -12,7 +12,8 @@
 
 class Simulation : public ProgramMode {
 private:
-    Packing runSingleSimulation(int seed, std::ofstream &dataFile);
+    Packing runSingleSimulation(int seed, std::size_t collector, std::ofstream &dataFile);
+    [[nodiscard]] unsigned long getSeedOrigin() const;
 
 protected:
     virtual bool continuePackingGeneration(std::size_t packingIndex, const Packing &packing) = 0;

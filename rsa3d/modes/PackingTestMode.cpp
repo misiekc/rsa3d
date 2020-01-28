@@ -20,7 +20,7 @@ void PackingTestMode::initializeForArguments(const ProgramArguments &arguments) 
 void PackingTestMode::run() {
     Packing packing;
     packing.restore(this->packingFilename);
-    PackingGenerator pg(1, &this->params);
+    PackingGenerator pg(1, 1, &this->params);
     pg.testPacking(packing, this->maxTime);
 }
 

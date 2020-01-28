@@ -56,12 +56,12 @@ namespace {
 }
 
 
-Packing Simulation::runSingleSimulation(int seed, std::ofstream &dataFile) {
+Packing Simulation::runSingleSimulation(int seed, std::size_t collector, std::ofstream &dataFile) {
     double vm, rss;
 
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-    PackingGenerator pg(seed, &params);
+    PackingGenerator pg(seed, collector, &params);
     pg.run();
     Packing packing = pg.getPacking();
     this->postProcessPacking(packing);
@@ -90,12 +90,21 @@ void Simulation::run() {
 
     std::size_t packingIndex{};
     Packing packing;
+    unsigned long seedOrigin = this->getSeedOrigin();
     do {
-        std::size_t seed = params.from + packingIndex;
-        packing = runSingleSimulation(seed, datFile);
+        std::size_t collector = params.from + packingIndex;
+        unsigned long seed = seedOrigin + collector;
+        packing = runSingleSimulation(seed, collector, datFile);
     } while(this->continuePackingGeneration(packingIndex++, packing));
 
     this->postProcessSimulation();
+}
+
+unsigned long Simulation::getSeedOrigin() const {
+    if (this->params.seedOrigin == "random")
+        return std::random_device{}();
+    else
+        return std::stoul(this->params.seedOrigin);
 }
 
 void Simulation::printHelp(std::ostream &out, const ProgramArguments &arguments) {
