@@ -95,6 +95,62 @@ void Analyzer::analyzeCorrelations(const Packing &packing, const NeighbourGrid<c
 		}
 	}
 }
+
+const RSAShape * Analyzer::getNearestNeighbour(const RSAShape *s, const NeighbourGrid<const RSAShape> &ng){
+	const RSAShape *nearestNeighbour = nullptr;
+	double da[RSA_SPATIAL_DIMENSION];
+	double nearestNeighbourDistance2 = std::numeric_limits<double>::max();
+	std::vector<const RSAShape *> neighbours;
+	RSAVector pos = s->getPosition();
+	ng.getNeighbours(&neighbours, pos);
+	for(const RSAShape* sn : neighbours){
+		if (sn == s)
+			continue;
+		RSAVector posn = sn->getPosition();
+		double dist2 = 0.0;
+		for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
+			da[k] = std::fabs(pos[k] - posn[k]);
+			if (da[k]>0.5*this->params->surfaceSize)
+				da[k] = this->params->surfaceSize - da[k];
+			dist2 += da[k]*da[k];
+		}
+		if (nearestNeighbourDistance2 > dist2){
+			nearestNeighbourDistance2 = dist2;
+			nearestNeighbour = sn;
+		}
+	}
+	return nearestNeighbour;
+}
+
+void Analyzer::analyzeNearestNeighbours(const Packing &packing, const NeighbourGrid<const RSAShape> &ng, Plot *minDist){
+	double da[RSA_SPATIAL_DIMENSION];
+	_OMP_PARALLEL_FOR
+   	for(size_t i=0; i<packing.size(); i++){
+   		const RSAShape *si = packing[i];
+   		const RSAShape *nearestNeighbour = this->getNearestNeighbour(si, ng);
+   		if(nearestNeighbour==nullptr)
+   			continue;
+   		const RSAShape *nearestNeighbourOfNearestNeighbour = this->getNearestNeighbour(nearestNeighbour, ng);
+
+   		if (
+   				(nearestNeighbourOfNearestNeighbour==si && si->no < nearestNeighbour->no) ||
+				(nearestNeighbourOfNearestNeighbour!=si)
+			){
+			double dist2 = 0.0;
+   			RSAVector posi = si->getPosition();
+   			RSAVector posnn = nearestNeighbour->getPosition();
+			for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
+				da[k] = std::fabs(posi[k] - posnn[k]);
+				if (da[k]>0.5*this->params->surfaceSize)
+					da[k] = this->params->surfaceSize - da[k];
+				dist2 += da[k]*da[k];
+			}
+			_OMP_CRITICAL(closestNeighbour)
+			minDist->add(std::sqrt(dist2));
+		}
+
+	}
+}
 /*
 double Analyzer::getPeriodicDistance(const RSAShape *shape1, const RSAShape *shape2) const {
     RSAVector delta = shape1->getPosition() - shape2->getPosition();
@@ -268,6 +324,27 @@ void Analyzer::printASF(Plot &asf, std::string filename, int counter, double pac
 	res->C2.error = asfreg.getSC2();
 }
 
+void Analyzer::printHistogram(Plot& plot, std::string filename){
+	double **plotPoints = new double*[plot.size()];
+	for(int i=0; i<plot.size(); i++){
+		plotPoints[i] = new double[2];
+	}
+	plot.getAsHistogramPoints(plotPoints);
+
+    std::ofstream file(filename);
+
+    for (int i = 0; i < plot.size()-1; i++) {
+		file << plotPoints[i][0] << "\t" << plotPoints[i][1];
+		file << std::endl;
+	}
+	file.close();
+
+	for(int i=0; i<plot.size(); i++){
+		delete[] plotPoints[i];
+	}
+	delete[] plotPoints;
+}
+
 void Analyzer::printCorrelations(Plot& correlations, std::string filename){
 	double **correlationPoints = new double*[correlations.size()];
 	for(int i=0; i<correlations.size(); i++){
@@ -364,6 +441,7 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
     LogPlot nvt(mintime, minmaxTimes[0], 200);
     Plot asf(0.0, 1.0, 200);
     Plot correlations(0.0, correlationsRange, 200);
+    Plot minDist(0.0, correlationsRange, 200);
     std::vector<Plot*> order = this->getFilledOrderVector(correlationsRange);
 
     double spf = 0.0, spf2 = 0.0;
@@ -385,6 +463,7 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
             }
             this->analyzeCorrelations(packing, ng, &correlations);
             this->analyzeOrder(packing, ng, &order);
+            this->analyzeNearestNeighbours(packing, ng, &minDist);
         }
         std::cout << ".";
         std::cout.flush();
@@ -406,6 +485,7 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
 	if (correlationsRange > 0) {
         this->printCorrelations(correlations, dirName + "_cor.txt");
         this->printOrder(order, dirName + "_order.txt");
+        this->printHistogram(minDist, dirName + "_dist.txt");
     }
 	for (Plot *orderPlot : order)
 		delete orderPlot;
