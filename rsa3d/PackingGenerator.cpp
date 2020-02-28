@@ -12,6 +12,10 @@
 #include <iomanip>
 #include <dirent.h>
 
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include "PackingGenerator.h"
 #include "surfaces/NBoxPBC.h"
 #include "surfaces/NBoxFBC.h"
@@ -386,7 +390,32 @@ bool PackingGenerator::generationCompleted(size_t missCounter, double t) {
            maxDensityAchieved;
 }
 
+
 void PackingGenerator::run(){
+
+#ifdef _OPENMP
+	struct timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
+	std::string s = ""; //default to empty string
+	fd_set fds;
+	FD_ZERO(&fds);
+	FD_SET(STDIN_FILENO, &fds);
+	int result = select(STDIN_FILENO + 1, &fds, NULL, NULL, &timeout);
+	if (result != -1){
+		if (FD_ISSET(STDIN_FILENO, &fds)){
+			std::string s;
+			std::cin >> s;
+			std::string sOmpThreads = "ompThreads:";
+			size_t pos = s.find(sOmpThreads);
+			if (pos!=std::string::npos){
+				s = s.substr(sOmpThreads.length(), s.length()-sOmpThreads.length());
+				omp_set_num_threads(std::stoi(s));
+			}
+		}
+	}
+#endif
+
 	this->createPacking();
 }
 
