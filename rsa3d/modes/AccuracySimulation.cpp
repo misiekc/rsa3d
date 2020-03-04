@@ -16,7 +16,7 @@ void AccuracySimulation::initializeForArguments(const ProgramArguments &argument
 }
 
 bool AccuracySimulation::continuePackingGeneration(std::size_t packingIndex, const Packing &packing) {
-    return packingIndex < 2 || this->meanPackingFraction.error > this->targetAccuracy;
+    return packingIndex < minPackings || this->meanPackingFraction.error > this->targetAccuracy;
 }
 
 void AccuracySimulation::postProcessPacking(Packing &packing) {
