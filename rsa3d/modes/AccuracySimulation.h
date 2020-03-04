@@ -20,7 +20,7 @@ private:
     Quantity meanPackingFraction;
     std::string additionalData;
 
-    static constexpr std::size_t minPackings = 10;
+    static constexpr std::size_t minPackings = 9;
 
 public:
     void initializeForArguments(const ProgramArguments &arguments) override;
