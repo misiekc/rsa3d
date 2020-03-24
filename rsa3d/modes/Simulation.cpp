@@ -91,6 +91,7 @@ void Simulation::run() {
     std::size_t packingIndex{};
     Packing packing;
     unsigned long seedOrigin = this->getSeedOrigin();
+    std::cout << "[Simulation::run] Using seed origin: " << seedOrigin << std::endl;
     do {
         std::size_t collector = params.from + packingIndex;
         unsigned long seed = seedOrigin + collector;
