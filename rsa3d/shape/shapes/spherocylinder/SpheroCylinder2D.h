@@ -15,6 +15,12 @@ private:
     static double halfDistance;
     static Vector<2> centerVector;
 
+    /**
+     * @brief A ShapeStaticInfo for SpheroCylinder2D. This one is used, instead of Shape class static info, because
+     * spherocylinder in also used in RegularDiskoPolygon, which overrides Shape's static info.
+     */
+    static ShapeStaticInfo<2, 1> spherocylinderShapeInfo;
+
     static double pointDistance2(const Vector<2> &pos, double angle, const Vector<2> &point);
 
     bool angleInRange(double angle, double rangeStart, double rangeEnd) const;
