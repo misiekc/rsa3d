@@ -23,6 +23,14 @@ void i2position(double* da, int dalength, int index, double dx, int n);
 void coordinates(int* result, const double* da, int dalength, double size, double dx, int n);
 int neighbour2i(int* coordinates, int* neighbour, int clength, int offset, int n);
 
+template<std::size_t SIZE>
+void calculateGrid(std::array<int, SIZE> &grid, size_t index, size_t lenght){
+	for(unsigned char i = 0; i<SIZE; i++){
+		grid[i] = index % lenght;
+		index /= lenght;
+	}
+}
+
 // trim from start
 std::string &ltrim(std::string &s);
 // trim from end

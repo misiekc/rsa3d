@@ -76,6 +76,7 @@ protected:
 	virtual void allocateVoxels(size_t size);
 
 	// initialize voxels, returns number of initial voxels
+	unsigned int initVoxelsOld(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl);
 	unsigned int initVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl);
 
 	// checks if a top level voxel for voxel v is active (if not v should be removed
