@@ -15,12 +15,31 @@ Vector<2> SpheroCylinder2D::centerVector;
 ShapeStaticInfo<2, 1> SpheroCylinder2D::spherocylinderShapeInfo;
 
 void SpheroCylinder2D::calculateStatic(const std::string &attr) {
-    double ratio = std::stod(attr);
-    ValidateMsg(ratio >= 1, "Ratio has to be >= 1");
+    std::istringstream attrStream(attr);
+    double firstArg, secondArg;
+    attrStream >> firstArg;
+    ValidateMsg(attrStream, "Invalid attibutes format. Expecting: [ratio] OR [distance] [radius]");
+    attrStream >> secondArg;
+    bool hasSecondArg = static_cast<bool>(attrStream);
 
-    double normalization = std::sqrt(4 * (ratio - 1) + M_PI);
-    radius = 1 / normalization;
-    halfDistance = (ratio - 1) / normalization;
+    if (hasSecondArg) {
+        // arguments: [distance between disks] [radius]
+
+        halfDistance = firstArg/2;
+        radius = secondArg;
+        Validate(halfDistance >= 0);
+        Validate(radius > 0);
+    } else {
+        // arguments: [ratio]; volume normalize to 1
+
+        double ratio = firstArg;
+        Validate(ratio >= 1);
+
+        double normalization = std::sqrt(4 * (ratio - 1) + M_PI);
+        radius = 1 / normalization;
+        halfDistance = (ratio - 1) / normalization;
+    }
+
     centerVector = Vector<2>{{halfDistance , 0}};
 }
 

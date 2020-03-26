@@ -32,6 +32,10 @@ protected:
 
 public:
     static void initClass(const std::string & attr);
+
+    /**
+     * @brief Calculates static values for attr format: [ratio] OR [distance] [radius]
+     */
     static void calculateStatic(const std::string &attr);
 
     double getVolume(unsigned short dim) const override;
