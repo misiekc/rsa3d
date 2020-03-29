@@ -19,34 +19,13 @@ class Polygon : public Shape<2, 1> {
 
 private:
 
-    static void clearOldData();
-    static void parseVertices(std::istringstream &in);
-    static void parseSegments(std::istringstream &in);
-    static void parseHelperSegments(std::istringstream &in);
     static void normalizeVolume();
 
-    static Vector<2> getStaticVertexPosition(std::size_t index);
-
-	//test if line segment from point 1 to 2 intersects with line segment from point 3 to 4
-	static bool lineLineIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
-
-	//same as above, except that endpoints 3 and 4 comes from a line in a voxel, and thus carry an uncertainty
-	static bool lineVoxelIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double dx, double dtheta, double l3, double l4);
-
-	Vector<2> getVertexPosition(std::size_t index) const;
-	void vertexToPovray(std::size_t index, std::ostream &out) const;
-
-    bool voxelInsideComplexCheck(const Vector<2> &spatialCenter, double halfSpatialSize, double angularCenter,
-                                 double halfAngularSize) const;
     bool voxelInsideFullAngleCheck(const Vector<2> &spatialCenter, double halfSpatialSize) const;
 
     bool pointInsidePushedVertices(const Vector<2> &point, double pushDistance) const;
     bool pointInsidePushedEdges(const Vector<2> &point, double pushDistance) const;
     bool pointInsidePolygon(const Vector<2> &point) const;
-
-    bool oldOverlapComplexCheck(Vector<2> &position, double angle, Vector<2> &polposition, double polangle) const;
-    static double segmentPointDistance2(const Vector<2> &s1, const Vector<2> &s2, const Vector<2> &point);
-    bool newOverlapComplexCheck(Vector<2> &position, double angle, Vector<2> &polposition, double polangle) const;
 
 protected:
 	//polar coordinates of all vertices
@@ -55,6 +34,14 @@ protected:
 	static std::vector<std::pair<size_t, size_t>> segments;
 	static std::vector<std::pair<size_t, size_t>> helperSegments;
 
+    static void clearOldData();
+    static void parseVertices(std::istringstream &in);
+    static void parseSegments(std::istringstream &in);
+    static void parseHelperSegments(std::istringstream &in);
+
+
+	static Vector<2> getStaticVertexPosition(std::size_t index);
+
     static double calculateCircumscribedCircleRadius();
     static double calculateInscribedCircleRadius();
 	static void centerPolygon();
@@ -62,6 +49,22 @@ protected:
 
 	//calculate the area of the triangle made from the origin, vertex i, and vertex j
 	static double getTriangleArea(size_t i, size_t j);
+
+	//test if line segment from point 1 to 2 intersects with line segment from point 3 to 4
+	static bool lineLineIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
+
+	//same as above, except that endpoints 3 and 4 comes from a line in a voxel, and thus carry an uncertainty
+	static bool lineVoxelIntersect(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double dx, double dtheta, double l3, double l4);
+
+    static double segmentPointDistance2(const Vector<2> &s1, const Vector<2> &s2, const Vector<2> &point);
+
+    virtual bool overlapComplexCheck(Vector<2> &position, double angle, Vector<2> &polposition, double polangle) const;
+    virtual bool voxelInsideComplexCheck(const Vector<2> &spatialCenter, double halfSpatialSize, double angularCenter,
+                                 double halfAngularSize) const;
+
+    Vector<2> getVertexPosition(std::size_t index) const;
+
+    void vertexToPovray(std::size_t index, std::ostream &out) const;
 
 #ifdef CUDA_ENABLED
 	static void cuInit();

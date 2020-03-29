@@ -101,6 +101,7 @@ void Polygon::initClass(const std::string &args){
 	std::istringstream in(args);
     Polygon::parseVertices(in);
     Polygon::parseSegments(in);
+    Polygon::centerPolygon();
     Polygon::parseHelperSegments(in);
     Polygon::normalizeVolume();
 
@@ -187,7 +188,6 @@ void Polygon::parseSegments(std::istringstream &in) {
 void Polygon::parseHelperSegments(std::istringstream &in) {
     std::size_t n;
     if (in.str().find("starHelperSegments")!=std::string::npos){
-        Polygon::centerPolygon();
         Polygon::createStarHelperSegments();
     }else{
         in >> n;
@@ -249,39 +249,6 @@ double Polygon::getVolume(unsigned short dim) const{
 
 #ifndef CUDA_ENABLED
 
-bool Polygon::oldOverlapComplexCheck(Vector<2> &position, double angle, Vector<2> &polposition, double polangle) const{
-
-	for (size_t i = 0; i < Polygon::segments.size() + Polygon::helperSegments.size(); i++){
-		std::pair<size_t, size_t> polsegment;
-		if (i<Polygon::segments.size()){
-			polsegment = Polygon::segments[i];
-		}else{
-			polsegment = Polygon::helperSegments[i-Polygon::segments.size()];
-		}
-		double x1 = polposition[0] + Polygon::vertexR[polsegment.first] * std::cos(Polygon::vertexTheta[polsegment.first] + polangle);
-		double y1 = polposition[1] + Polygon::vertexR[polsegment.first] * std::sin(Polygon::vertexTheta[polsegment.first] + polangle);
-		double x2 = polposition[0] + Polygon::vertexR[polsegment.second] * std::cos(Polygon::vertexTheta[polsegment.second] + polangle);
-		double y2 = polposition[1] + Polygon::vertexR[polsegment.second] * std::sin(Polygon::vertexTheta[polsegment.second] + polangle);
-
-		for (size_t j = 0; j < Polygon::segments.size() + Polygon::helperSegments.size(); j++){
-			std::pair<size_t, size_t> segment;
-			if (j<Polygon::segments.size()){
-				segment = Polygon::segments[j];
-			}else{
-				segment = Polygon::helperSegments[j-Polygon::segments.size()];
-			}
-			double x3 = position[0] + Polygon::vertexR[segment.first] * std::cos(Polygon::vertexTheta[segment.first] + angle);
-			double y3 = position[1] + Polygon::vertexR[segment.first] * std::sin(Polygon::vertexTheta[segment.first] + angle);
-			double x4 = position[0] + Polygon::vertexR[segment.second] * std::cos(Polygon::vertexTheta[segment.second] + angle);
-			double y4 = position[1] + Polygon::vertexR[segment.second] * std::sin(Polygon::vertexTheta[segment.second] + angle);
-
-			if (Polygon::lineLineIntersect(x1, y1, x2, y2, x3, y3, x4, y4))
-				return true;
-		}
-	}
-	return false;
-}
-
 double Polygon::segmentPointDistance2(const Vector<2> &s1, const Vector<2> &s2, const Vector<2> &point){
 	double segmentLenght2 = (s2-s1).norm2();
 	if (segmentLenght2 == 0.0){
@@ -296,7 +263,7 @@ double Polygon::segmentPointDistance2(const Vector<2> &s1, const Vector<2> &s2, 
 	return (point - projection).norm2();
 }
 
-bool Polygon::newOverlapComplexCheck(Vector<2> &position, double angle, Vector<2> &polposition, double polangle) const{
+bool Polygon::overlapComplexCheck(Vector<2> &position, double angle, Vector<2> &polposition, double polangle) const{
 	// prepare segments set to check for overlapping. Only include segments that are not outside the circumsphere of the other shape.
 	std::vector<std::pair<Vector<2>, Vector<2>>> set, polset;
 	std::pair<size_t, size_t> segment;
@@ -356,8 +323,7 @@ bool Polygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const{
 	double polangle = pol.getOrientation()[0];
 
 	//complex check
-//	return this->oldOverlapComplexCheck(position, angle, polposition, polangle);
-	return this->newOverlapComplexCheck(position, angle, polposition, polangle);
+	return this->overlapComplexCheck(position, angle, polposition, polangle);
 }
 #endif
 

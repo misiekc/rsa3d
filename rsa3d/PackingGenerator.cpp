@@ -436,10 +436,10 @@ void PackingGenerator::toPovray(Packing packing, double size, VoxelList *voxels,
 	file << "background { color White }" << std::endl;
 	file << "camera {" << std::endl;
 	file << "  orthographic" << std::endl;
-	file << "  location <" << size / 2 << ", " << size / 2 << ", " << (1.3 * size) << ">" << std::endl;
+	file << "  location <" << size / 2 << ", " << size / 2 << ", " << (1.1*size) << ">" << std::endl;
 	file << "  look_at <" << size / 2 << ", " << size / 2 << ",  0>" << std::endl;
-	file << "  right <" << size << ", 0, 0>" << std::endl;
-	file << "  up <0, " << size << ", 0>" << std::endl;
+	file << "  right <" << (1.1*size) << ", 0, 0>" << std::endl;
+	file << "  up <0, " << (1.1*size) << ", 0>" << std::endl;
 	file << "}" << std::endl;
 	file << "light_source { < 1000.0, 1000.0, 1000.0> color White shadowless parallel point_at <" << size / 2 << ", " << size / 2 << ",  0>}" << std::endl;
 	file << "#declare layer=union{" << std::endl;
