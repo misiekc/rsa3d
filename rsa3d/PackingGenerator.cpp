@@ -153,7 +153,21 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 			if (this->surface->check(sVirtual)== nullptr){
 				_OMP_CRITICAL(stdout)
 				{
-					std::cout << std::endl << "\t non overlapping shape found " << std::setprecision(10) << sVirtual->toString() << std::endl << std::flush;
+					std::cout << std::endl << "\t non overlapping shape found at (" << std::setprecision(10);
+					for (unsigned char i=0; i<RSA_SPATIAL_DIMENSION; i++){
+						std::cout << pos[i];
+						if(i<RSA_SPATIAL_DIMENSION-1)
+							std::cout << ", ";
+					}
+					std::cout << "), (";
+					for (unsigned char i=0; i<RSA_ANGULAR_DIMENSION; i++){
+						std::cout << angle[i];
+						if(i<RSA_ANGULAR_DIMENSION-1)
+							std::cout << ", ";
+					}
+					std::cout <<")" << std::endl;
+
+					std::cout << sVirtual->toString() << std::endl << std::flush;
 					std::cout << "\t povray: " << std::endl << std::setprecision(10) << sVirtual->toPovray() << std::endl << std::flush;
 				}
 				RSAVector position = sVirtual->getPosition();
@@ -448,8 +462,8 @@ void PackingGenerator::toPovray(Packing packing, double size, VoxelList *voxels,
 //	file << "  text { ttf \"timrom.ttf\" \"0\" 1, 0 pigment { color Black } scale 1.0 translate < 0, 0, 0.0002> }" << std::endl;
 
 	for (const RSAShape *s : packing) {
-//		file << "  text { ttf \"timrom.ttf\" \"" << s->no << "\" 1, 0 pigment { color White } scale 0.2 translate < " << da[0] << ", " << da[1] << ", 0.01> }" << std::endl;
 //		RSAVector pos = s->getPosition();
+//		file << "  text { ttf \"timrom.ttf\" \"" << s->no << "\" 1, 0 pigment { color White } scale 0.2 translate < " << pos[0] << ", " << pos[1] << ", 0.01> }" << std::endl;
 //		if (pos[2]>0 && pos[2]<3.0)
 		file << s->toPovray();
 	}

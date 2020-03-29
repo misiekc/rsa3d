@@ -111,7 +111,7 @@ double RoundedPolygon::lineLineDistance2(double x1, double y1, double x2, double
 }
 */
 
-//returns distance between line segment from point 1 to 2 and line segment from point 3 to 4
+//returns distance between line segment from point 1 to 2 and line segment from point 3 to 4 for segments that do not intersect
 double RoundedPolygon::lineLineDistance2(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4){
 
 	Vector<2> p1 = {{x1, y1}};
@@ -133,10 +133,10 @@ bool RoundedPolygon::lineVoxelIntersect(double x1, double y1, double x2, double 
 	if (Polygon::lineVoxelIntersect(x1, y1, x2, y2, x3, y3, x4, y4, dx, dtheta, l3, l4))
 		return true;
 
-	double d2 = lineLineDistance2(x1, y1, x2, y2, x3, y3, x4, y4);
+	double d = std::sqrt(lineLineDistance2(x1, y1, x2, y2, x3, y3, x4, y4));
 	double delta = 2*std::max(l3,l4)*tan(dtheta/2) + dx*M_SQRT2;
 
-	if (d2+delta*delta < 4*RoundedPolygon::radius*RoundedPolygon::radius)
+	if (d+delta < 2*RoundedPolygon::radius)
 		return true;
 	else
 		return false;
@@ -188,6 +188,14 @@ bool RoundedPolygon::overlapComplexCheck(Vector<2> &position, double angle, Vect
 }
 
 bool RoundedPolygon::voxelInsideComplexCheck(const Vector<2> &spatialCenter, double halfSpatialSize, double angularCenter, double halfAngularSize) const {
+/*
+	if (
+			(std::fabs(spatialCenter[0] - 0.007926502214) < halfSpatialSize) &&
+			(std::fabs(spatialCenter[1] - 7.637121042) < halfSpatialSize) &&
+			(std::fabs(angularCenter - 5.152016127) < halfAngularSize)
+			)
+		std::cout << std::endl;
+*/
     Vector<2> position = this->getPosition();
     double angle = getOrientation()[0];
     for (size_t i = 0; i < segments.size() + helperSegments.size(); i++) {
@@ -297,6 +305,7 @@ std::string RoundedPolygon::toPovray() const{
 }
 
 std::string RoundedPolygon::toWolfram() const {
-    throw std::runtime_error ("RoundedPolygon::toWolfram() not yet supported");
+//    throw std::runtime_error ("RoundedPolygon::toWolfram() not yet supported");
+	return "";
 }
 
