@@ -292,10 +292,15 @@ public:
 	 *
 	 * @param bc boundary conditions used
 	 * @param s the second shape to check
+	 * @param shapeStaticInfo_ shape static info to use here; by default it is a global Shape::shapeStaticInfo, but
+	 * a different one may be used here
 	 * @return TRUE or FALSE if result has been determined, UNKNOWN if complex check is required
 	 */
-    EarlyRejectionResult overlapEarlyRejection(BoundaryConditions<SPATIAL_DIMENSION> *bc,
-                                               const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const;
+    EarlyRejectionResult
+    overlapEarlyRejection(BoundaryConditions<SPATIAL_DIMENSION> *bc,
+                          const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s,
+                          ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION> shapeStaticInfo_
+                          = shapeStaticInfo) const;
 
 	/**
      * @brief Returns a volume of the shape. dim is a packing dimension which can be smaller than shape dimension. Then

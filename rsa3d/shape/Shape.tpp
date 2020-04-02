@@ -144,16 +144,19 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setShapeStaticInfo(
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::EarlyRejectionResult
-Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::overlapEarlyRejection(
-        BoundaryConditions<SPATIAL_DIMENSION> *bc, const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s) const {
+Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>
+    ::overlapEarlyRejection(BoundaryConditions<SPATIAL_DIMENSION> *bc,
+                            const Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *s,
+                            ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION> shapeStaticInfo_) const
+{
     if (!earlyRejectionEnabled)
         return UNKNOWN;
 
     double distance2 = bc->distance2(this->getPosition(), s->getPosition());
 
-    if (distance2 < 4*std::pow(shapeStaticInfo.getInsphereRadius(), 2))
+    if (distance2 < 4*std::pow(shapeStaticInfo_.getInsphereRadius(), 2))
         return TRUE;
-    else if (distance2 > 4*std::pow(shapeStaticInfo.getCircumsphereRadius(), 2))
+    else if (distance2 > 4*std::pow(shapeStaticInfo_.getCircumsphereRadius(), 2))
         return FALSE;
     else
         return UNKNOWN;

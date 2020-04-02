@@ -45,24 +45,6 @@ protected:
     Matrix<2, 2> getRotationMatrix() const;
 
     /**
-     * @brief Add/subtracts integer multiple of @a interval to @a angleFrom and @a angleTo so that @a angleFrom is
-     * bigger than the angle of Shape, however not more than @a interval.
-     * @param angleFrom angle range beginning
-     * @param angleTo angle range ending
-     * @param interval interval to fit angleFrom into
-     */
-	void normalizeAngleRange(double *angleFrom, double *angleTo, double interval) const;
-
-    /**
-     * @brief Add/subtracts integer multiple of @a interval to @a angle so that it lies in (0, @a interval) and returns
-     * result.
-     * @param angle angle to normalize
-     * @param interval interval to fit angle into
-     * @return normalized angle
-     */
-	double normalizeAngle(double angle, double interval) const;
-
-    /**
      * @brief Sets new orientation of a shape. It replaces Shape::setOrientation(double*).
      *
      * The angle is normalized using normalizeAngle(double, double) with getVoxelAngularSize() as an interval.
@@ -80,6 +62,25 @@ protected:
     virtual void setAngle(double angle);
 
 public:
+    /**
+     * @brief Add/subtracts integer multiple of @a interval to @a angleFrom and @a angleTo so that @a angleFrom is
+     * bigger than the @a shapeAngle, however not more than @a interval.
+     * @param shapeAngle angle of the shape to normalize with respect to
+     * @param angleFrom angle range beginning
+     * @param angleTo angle range ending
+     * @param interval interval to fit angleFrom into
+     */
+    static void normalizeAngleRange(double shapeAngle, double *angleFrom, double *angleTo, double interval);
+
+    /**
+     * @brief Add/subtracts integer multiple of @a interval to @a angle so that it lies in (0, @a interval) and returns
+     * result.
+     * @param angle angle to normalize
+     * @param interval interval to fit angle into
+     * @return normalized angle
+     */
+    static double normalizeAngle(double angle, double interval);
+
 
     /**
      * @brief Returns the orientation of a shape.

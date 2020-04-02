@@ -160,7 +160,7 @@ bool Rectangle::pointInside(BoundaryConditions<2> *bc, const Vector<2> &da, doub
     angleTo -= angle;
 
 // and normalized
-    normalizeAngleRange(&angleFrom, &angleTo, M_PI);
+    AnisotropicShape2D::normalizeAngleRange(this->getAngle(), &angleFrom, &angleTo, M_PI);
 
 // 90 degrees means minimal exclusion zone
     if (angleTo - angleFrom >= M_PI)

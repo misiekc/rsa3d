@@ -30,6 +30,7 @@
 		#include "shapes/spherocylinder/SpheroCylinder2D.h"
 		#include "shapes/Ellipse.h"
 		#include "shapes/Rectangle.h"
+        #include "shapes/RegularDiskopolygon.h"
         #include "shapes/polydisk/Fibrinogen.h"
         #include "shapes/polydisk/Kmer.h"
         #include "shapes/polydisk/Polydisk.h"
@@ -162,6 +163,9 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
                 return;
             } else if (sClass == "Kmer") {
                 Kmer::initClass(attr);
+                return;
+            } else if (sClass == "RegularDiskopolygon") {
+                RegularDiskopolygon::initClass(attr);
                 return;
             }
         #endif

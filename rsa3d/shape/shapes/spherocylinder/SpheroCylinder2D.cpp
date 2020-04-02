@@ -12,28 +12,54 @@ static const double EPSILON = 0.0000000001;
 double SpheroCylinder2D::radius;
 double SpheroCylinder2D::halfDistance;
 Vector<2> SpheroCylinder2D::centerVector;
+ShapeStaticInfo<2, 1> SpheroCylinder2D::spherocylinderShapeInfo;
 
 void SpheroCylinder2D::calculateStatic(const std::string &attr) {
-    double ratio = std::stod(attr);
-    ValidateMsg(ratio >= 1, "Ratio has to be >= 1");
+    std::istringstream attrStream(attr);
+    double firstArg, secondArg;
+    attrStream >> firstArg;
+    ValidateMsg(attrStream, "Invalid attibutes format. Expecting: [ratio] OR [distance] [radius]");
+    attrStream >> secondArg;
+    bool hasSecondArg = static_cast<bool>(attrStream);
 
-    double normalization = std::sqrt(4 * (ratio - 1) + M_PI);
-    radius = 1 / normalization;
-    halfDistance = (ratio - 1) / normalization;
+    if (hasSecondArg) {
+        // arguments: [distance between disks] [radius]
+
+        halfDistance = firstArg/2;
+        radius = secondArg;
+        Validate(halfDistance >= 0);
+        Validate(radius > 0);
+    } else {
+        // arguments: [ratio]; volume normalize to 1
+
+        double ratio = firstArg;
+        Validate(ratio >= 1);
+
+        double normalization = std::sqrt(4 * (ratio - 1) + M_PI);
+        radius = 1 / normalization;
+        halfDistance = (ratio - 1) / normalization;
+    }
+
     centerVector = Vector<2>{{halfDistance , 0}};
 }
 
 void SpheroCylinder2D::initClass(const std::string &attr) {
     SpheroCylinder2D::calculateStatic(attr);
 
-    ShapeStaticInfo<2, 1> shapeInfo;
-    shapeInfo.setCircumsphereRadius(halfDistance + radius);
-    shapeInfo.setInsphereRadius(radius);
-    shapeInfo.setAngularVoxelSize(M_PI);
-	shapeInfo.setSupportsSaturation(true);
-    shapeInfo.setDefaultCreateShapeImpl <SpheroCylinder2D> ();
+    // First of all, initialize spherocylinder own ShapeInfo.
+    // It won't be lost after diskopolygon-type shapes rerun ShapeFactory::initShapeClass (because is used
+    // SpheroCylinder2D internally, it has to initialize it at the beginning
+    SpheroCylinder2D::spherocylinderShapeInfo.setCircumsphereRadius(halfDistance + radius);
+    SpheroCylinder2D::spherocylinderShapeInfo.setInsphereRadius(radius);
+    SpheroCylinder2D::spherocylinderShapeInfo.setAngularVoxelSize(M_PI);
+    SpheroCylinder2D::spherocylinderShapeInfo.setSupportsSaturation(true);
+    SpheroCylinder2D::spherocylinderShapeInfo.setDefaultCreateShapeImpl <SpheroCylinder2D> ();
 
-    Shape::setShapeStaticInfo(shapeInfo);
+    // Set normal, global shape info to that one.
+    // This one will be overwritten in case of diskopolygon simulation, but in that case only
+    // SpheroCylinder2D::overlap and SpheroCylinder2D::pointInside methods matter, and they are not affected by the
+    // global Shape's static info
+    Shape::setShapeStaticInfo(SpheroCylinder2D::spherocylinderShapeInfo);
 }
 
 double SpheroCylinder2D::getVolume(unsigned short dim) const {
@@ -67,7 +93,8 @@ double SpheroCylinder2D::getVolume(unsigned short dim) const {
 }
 
 bool SpheroCylinder2D::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const {
-    switch (this->overlapEarlyRejection(bc, s)) {
+    // Use "local", SpheroCylinder2D ShapeStaticInfo, because for diskopolygon classes, the global one is overriden
+    switch (this->overlapEarlyRejection(bc, s, SpheroCylinder2D::spherocylinderShapeInfo)) {
         case TRUE:      return true;
         case FALSE:     return false;
         case UNKNOWN:   break;
@@ -96,7 +123,7 @@ double SpheroCylinder2D::pointDistance2(const Vector<2> &pos, double angle, cons
 
 bool SpheroCylinder2D::pointInside(BoundaryConditions<2> *bc, const Vector<2> &da, double angleFrom,
                                    double angleTo) const {
-    this->normalizeAngleRange(&angleFrom, &angleTo, M_PI);
+    AnisotropicShape2D::normalizeAngleRange(this->getAngle(), &angleFrom, &angleTo, M_PI);
 
     // If angleTo not in normal range (see normalizeAngleRange), divide it and check separately
     if (angleTo > this->getAngle() + M_PI) {

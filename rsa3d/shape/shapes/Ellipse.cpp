@@ -135,7 +135,7 @@ bool Ellipse::pointInside(BoundaryConditions<2> *bc, const Vector<2> &other, dou
 bool Ellipse::pointInsideSpecialArea(BoundaryConditions<2> *bc, const Vector<2> &other, double angleFrom,
 									double angleTo) const {
 
-	this->normalizeAngleRange(&angleFrom, &angleTo, M_PI);
+	AnisotropicShape2D::normalizeAngleRange(this->getAngle(), &angleFrom, &angleTo, M_PI);
 	// now angleFrom is in [this->getAngle(), this->getAngle() + M_PI)
 
     // If angleTo is not in not in [this->getAngle(), this->getAngle() + M_PI), then two checks are made separately
