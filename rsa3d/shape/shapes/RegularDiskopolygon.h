@@ -26,11 +26,11 @@ public:
 
 class RectangularBoundingBuilder {
 private:
-    static void createBounding(RectangularBounding &bounding, const Vector<2> &zeroAngleVector, double angleTo,
-                               double quarterAngle);
+    static void recurseQuarters(RectangularBounding &bounding, const Vector<2> &zeroAngleVector, double angleTo,
+                                double quarterAngle);
 
 public:
-    static RectangularBounding buildForArch(const Vector<2> &zeroAngleVector, double angleFrom, double angleTo);
+    static RectangularBounding forArch(const Vector<2> &zeroAngleVector, double angleFrom, double angleTo);
 };
 
 class RegularDiskopolygon : public Shape<2, 1> {
@@ -45,6 +45,9 @@ private:
 
     SpheroCylinder2D getSpherocylinder(std::size_t index) const;
 
+protected:
+    void setOrientation(const Orientation<1> &orientation) override;
+
 public:
     static void initClass(const std::string &attr);
 
@@ -57,12 +60,6 @@ public:
                      double spatialSize, double angularSize) const override;
     Shape<2, 1> *clone() const override;
     std::string toWolfram() const override;
-
-protected:
-    void setOrientation(const Orientation<1> &orientation) override;
-
-public:
-
     double getVolume(unsigned short dim) const override { return 1; }
 
     double getAngle() const { return this->getOrientation()[0]; };

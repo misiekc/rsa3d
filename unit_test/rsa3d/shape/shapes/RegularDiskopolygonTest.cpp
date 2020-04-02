@@ -139,42 +139,42 @@ TEST_CASE("RectangularBounding") {
 
 TEST_CASE("RectangularBoundingBuilder: building for arch") {
     SECTION("only first quarter") {
-        RectangularBounding bounding = RectangularBoundingBuilder::buildForArch({{0, 1}}, M_PI/6, M_PI/4);
+        RectangularBounding bounding = RectangularBoundingBuilder::forArch({{0, 1}}, M_PI / 6, M_PI / 4);
 
         REQUIRE_THAT(bounding.getBottomLeft(), IsApproxEqual(Vector<2>{{-M_SQRT1_2, M_SQRT1_2}}, 1e-12));
         REQUIRE_THAT(bounding.getTopRight(), IsApproxEqual(Vector<2>{{-0.5, std::sqrt(3)/2}}, 1e-12));
     }
 
     SECTION("only second quarter") {
-        RectangularBounding bounding = RectangularBoundingBuilder::buildForArch({{0, 1}}, 2*M_PI/3, 3*M_PI/4);
+        RectangularBounding bounding = RectangularBoundingBuilder::forArch({{0, 1}}, 2 * M_PI / 3, 3 * M_PI / 4);
 
         REQUIRE_THAT(bounding.getBottomLeft(), IsApproxEqual(Vector<2>{{-std::sqrt(3)/2, -M_SQRT1_2}}, 1e-12));
         REQUIRE_THAT(bounding.getTopRight(), IsApproxEqual(Vector<2>{{-M_SQRT1_2, -0.5}}, 1e-12));
     }
 
     SECTION("only fourth quarter") {
-        RectangularBounding bounding = RectangularBoundingBuilder::buildForArch({{0, 1}}, 5*M_PI/3, 7*M_PI/4);
+        RectangularBounding bounding = RectangularBoundingBuilder::forArch({{0, 1}}, 5 * M_PI / 3, 7 * M_PI / 4);
 
         REQUIRE_THAT(bounding.getBottomLeft(), IsApproxEqual(Vector<2>{{M_SQRT1_2, 0.5}}, 1e-12));
         REQUIRE_THAT(bounding.getTopRight(), IsApproxEqual(Vector<2>{{std::sqrt(3)/2, M_SQRT1_2}}, 1e-12));
     }
 
     SECTION("first and second quarter") {
-        RectangularBounding bounding = RectangularBoundingBuilder::buildForArch({{0, 1}}, M_PI/6, 3*M_PI/4);
+        RectangularBounding bounding = RectangularBoundingBuilder::forArch({{0, 1}}, M_PI / 6, 3 * M_PI / 4);
 
         REQUIRE_THAT(bounding.getBottomLeft(), IsApproxEqual(Vector<2>{{-1, -M_SQRT1_2}}, 1e-12));
         REQUIRE_THAT(bounding.getTopRight(), IsApproxEqual(Vector<2>{{-0.5, std::sqrt(3)/2}}, 1e-12));
     }
 
     SECTION("third and fourth quarter") {
-        RectangularBounding bounding = RectangularBoundingBuilder::buildForArch({{0, 1}}, 5*M_PI/4, 5*M_PI/3);
+        RectangularBounding bounding = RectangularBoundingBuilder::forArch({{0, 1}}, 5 * M_PI / 4, 5 * M_PI / 3);
 
         REQUIRE_THAT(bounding.getBottomLeft(), IsApproxEqual(Vector<2>{{M_SQRT1_2, -M_SQRT1_2}}, 1e-12));
         REQUIRE_THAT(bounding.getTopRight(), IsApproxEqual(Vector<2>{{1, 0.5}}, 1e-12));
     }
 
     SECTION("second, third, fourth and fifth quarter") {
-        RectangularBounding bounding = RectangularBoundingBuilder::buildForArch({{0, 1}}, 2*M_PI/3, 9*M_PI/4);
+        RectangularBounding bounding = RectangularBoundingBuilder::forArch({{0, 1}}, 2 * M_PI / 3, 9 * M_PI / 4);
 
         REQUIRE_THAT(bounding.getBottomLeft(), IsApproxEqual(Vector<2>{{-std::sqrt(3)/2, -1}}, 1e-12));
         REQUIRE_THAT(bounding.getTopRight(), IsApproxEqual(Vector<2>{{1, 1}}, 1e-12));

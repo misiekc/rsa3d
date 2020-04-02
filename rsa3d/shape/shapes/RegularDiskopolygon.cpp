@@ -18,7 +18,7 @@ double RegularDiskopolygon::halfDiagonal{};
 void RegularDiskopolygon::initClass(const std::string &attr) {
     std::istringstream attrStream(attr);
     attrStream >> nSides >> sideLength >> radius;
-    ValidateMsg(attrStream, "Malformed attributes. Expected: [nubmer of sites] [side length] [disk radius]");
+    ValidateMsg(attrStream, "Malformed attributes. Expected: [number of sites] [side length] [disk radius]");
     Validate(nSides >= 3);
     Validate(sideLength >= 0);
     Validate(radius > 0);
@@ -79,7 +79,7 @@ bool RegularDiskopolygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *
 bool RegularDiskopolygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition,
                                       const Orientation<1> &orientation, double spatialSize, double angularSize) const
 {
-    switch(this->voxelInsideEarlyRejection(bc, voxelPosition, orientation, spatialSize, angularSize)) {
+    switch (this->voxelInsideEarlyRejection(bc, voxelPosition, orientation, spatialSize, angularSize)) {
         case EarlyRejectionResult::TRUE:      return true;
         case EarlyRejectionResult::FALSE:     return false;
         case EarlyRejectionResult::UNKNOWN:   break;
@@ -92,8 +92,9 @@ bool RegularDiskopolygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2>
         double virtualScAngleTo = virtualScAngleFrom + angularSize;
         AnisotropicShape2D::normalizeAngleRange(0, &virtualScAngleFrom, &virtualScAngleTo, 2*M_PI);
 
-        RectangularBounding rectangularBounding = RectangularBoundingBuilder::buildForArch(defaultSpherocylinderOffset,
-                virtualScAngleFrom, virtualScAngleTo);
+        RectangularBounding rectangularBounding = RectangularBoundingBuilder::forArch(defaultSpherocylinderOffset,
+                                                                                      virtualScAngleFrom,
+                                                                                      virtualScAngleTo);
 
         Vector<2> voxelTranslation = bc->getTranslation(this->getPosition(), voxelPosition);
         rectangularBounding.expand(spatialSize);
@@ -150,26 +151,26 @@ void RegularDiskopolygon::setOrientation(const Orientation<1> &orientation) {
     Shape::setOrientation({{angle}});
 }
 
-void RectangularBoundingBuilder::createBounding(RectangularBounding &bounding, const Vector<2> &zeroAngleVector,
-                                                double angleTo, double quarterAngle)
+void RectangularBoundingBuilder::recurseQuarters(RectangularBounding &bounding, const Vector<2> &zeroAngleVector,
+                                                 double angleTo, double quarterAngle)
 {
     if (angleTo < quarterAngle) {
         bounding.addPoint(Matrix<2, 2>::rotation(angleTo) * zeroAngleVector);
     } else {
         bounding.addPoint(Matrix<2, 2>::rotation(quarterAngle) * zeroAngleVector);
-        createBounding(bounding, zeroAngleVector, angleTo, quarterAngle + M_PI / 2);
+        recurseQuarters(bounding, zeroAngleVector, angleTo, quarterAngle + M_PI / 2);
     }
 }
 
 void RectangularBounding::addPoint(const Vector<2> &p) {
-    if (p[0] < minPoint[0])
-        minPoint[0] = p[0];
-    if (p[1] < minPoint[1])
-        minPoint[1] = p[1];
-    if (p[0] > maxPoint[0])
-        maxPoint[0] = p[0];
-    if (p[1] > maxPoint[1])
-        maxPoint[1] = p[1];
+    if (p[0] < this->minPoint[0])
+        this->minPoint[0] = p[0];
+    if (p[1] < this->minPoint[1])
+        this->minPoint[1] = p[1];
+    if (p[0] > this->maxPoint[0])
+        this->maxPoint[0] = p[0];
+    if (p[1] > this->maxPoint[1])
+        this->maxPoint[1] = p[1];
 }
 
 void RectangularBounding::translate(const Vector<2> &translation) {
@@ -181,8 +182,8 @@ void RectangularBounding::expand(double expansion) {
     this->maxPoint += {{expansion, expansion}};
 }
 
-RectangularBounding RectangularBoundingBuilder::buildForArch(const Vector<2> &zeroAngleVector, double angleFrom,
-                                                             double angleTo)
+RectangularBounding RectangularBoundingBuilder::forArch(const Vector<2> &zeroAngleVector, double angleFrom,
+                                                        double angleTo)
 {
     Expects(angleFrom >= 0);
     Expects(angleTo >= angleFrom);
@@ -194,6 +195,6 @@ RectangularBounding RectangularBoundingBuilder::buildForArch(const Vector<2> &ze
     while (quarterAngle < angleFrom)
         quarterAngle += M_PI/2;
 
-    createBounding(rectangularBounding, zeroAngleVector, angleTo, quarterAngle);
+    recurseQuarters(rectangularBounding, zeroAngleVector, angleTo, quarterAngle);
     return rectangularBounding;
 }
