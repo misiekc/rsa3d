@@ -30,7 +30,7 @@ void RoundedPolygon::normalizeVolume(){
  * @param args contains information about rounded polygon
  *
  * Data should be separated by only spaces, and should be:
- * radius nv [xy/rt] v_01 v_02 ... v_(nv-1),1 v_(nv-1),2 ns si_0 ... si_(ns-1) [starHelperSegments / nhs hsi_01 hsi_02 ... hsi_(nhs-1),1 hsi_(nhs-1),2]
+ * radius nv [xy/rt] v_01 v_02 ... v_(nv-1),1 v_(nv-1),2 ns si_0 ... si_(ns-1)
  *
  * xy means cartesian coordinates, and rt means polar coordinates
  * nv - number of vertices
@@ -38,15 +38,11 @@ void RoundedPolygon::normalizeVolume(){
  * ns - number of segments - some vertices may be reserved exclusively for helper segments
  * si_0 ... si_(ns-1) - indexes of vertices to create segments from with radiuses; segments are created cyclicly, meaning their ends
  *      will be (si_0, si_1), (si_1, si_2), ... (si_(ns-1), si_0)
- * starHelperSegments - helper segments will be creating automatically from centre of mass to each vertex
- * nhs - number of helper segments, when being specified manually; can be 0
- * hsi_01 hsi_02 ... hsi_(nhs-1),1 hsi_(nhs-1),2 - subsequent pairs of indexes of vertices to create helper segments
- *      from; the first index from pair is segment beginning, the second is segment end
  *
  * Example format of coordinates
- * 0.2 4 xy 1 1 1 -1 -1 -1 -1 1 4 0 1 2 3 starHelperSegments
+ * 0.2 4 xy 1 1 1 -1 -1 -1 -1 1 4 0 1 2 3
  * or equivalently
- * 0.2 4 rt 1.4142 0.7854 1.4142 2.3562 1.4142 3.9270 1.4142 5.4978 4 0 1 2 3 starHelperSegments
+ * 0.2 4 rt 1.4142 0.7854 1.4142 2.3562 1.4142 3.9270 1.4142 5.4978 4 0 1 2 3
  */
 void RoundedPolygon::initClass(const std::string &args){
     clearOldData();
@@ -305,7 +301,16 @@ std::string RoundedPolygon::toPovray() const{
 }
 
 std::string RoundedPolygon::toWolfram() const {
-//    throw std::runtime_error ("RoundedPolygon::toWolfram() not yet supported");
-	return "";
+    std::ostringstream out;
+    out << "{" << Polygon::toWolfram() << "";
+
+    for (std::size_t i{}; i < Polygon::segments.size(); i++) {
+        Vector<2> beg = this->getVertexPosition(Polygon::segments[i].first);
+        Vector<2> end = this->getVertexPosition(Polygon::segments[i].second);
+        out << ", StadiumShape[" << "{" << beg << ", " << end << "}, " << radius << "]";
+    }
+
+    out << "}";
+	return out.str();
 }
 
