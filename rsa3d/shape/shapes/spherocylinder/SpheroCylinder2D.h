@@ -38,6 +38,9 @@ public:
      */
     static void calculateStatic(const std::string &attr);
 
+    static double getRadius() { return radius; }
+    static double getDistance() { return 2*halfDistance; }
+
     double getVolume(unsigned short dim) const override;
 
     Shape<2, 1> *clone() const override;

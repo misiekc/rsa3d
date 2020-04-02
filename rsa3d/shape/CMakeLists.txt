@@ -38,12 +38,15 @@ add_library(shapes.2.1
         shapes/polydisk/Fibrinogen.cpp
         shapes/polydisk/Polydisk.cpp
         shapes/polygon/HBPolygon.cpp
+        shapes/polydisk/Kmer.cpp
         shapes/polygon/Polygon.cpp
+        shapes/polygon/RoundedPolygon.cpp
         shapes/polygon/SBPolygon.cpp
         shapes/polygon/Triangle.cpp
         shapes/spherocylinder/SpheroCylinder2D.cpp
         shapes/Ellipse.cpp
-        shapes/Rectangle.cpp shapes/polydisk/Kmer.cpp shapes/polydisk/Kmer.h)
+        shapes/Rectangle.cpp
+        shapes/RegularDiskopolygon.cpp)
 target_compile_definitions(shapes.2.1 PUBLIC RSA_SPATIAL_DIMENSION=2 RSA_ANGULAR_DIMENSION=1)
 
 add_library(shapes.3.0

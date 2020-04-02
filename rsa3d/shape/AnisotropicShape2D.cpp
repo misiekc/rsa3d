@@ -17,18 +17,18 @@ Matrix<2, 2> AnisotropicShape2D::getAntiRotationMatrix() const {
     return Matrix<2, 2>::rotation(-this->getAngle());
 }
 
-void AnisotropicShape2D::normalizeAngleRange(double *angleFrom, double *angleTo, double interval) const {
-    while (*angleFrom < this->getAngle()) {
+void AnisotropicShape2D::normalizeAngleRange(double shapeAngle, double *angleFrom, double *angleTo, double interval) {
+    while (*angleFrom < shapeAngle) {
         *angleFrom += interval;
         *angleTo += interval;
     }
-    while (*angleFrom > this->getAngle() + interval) {
+    while (*angleFrom > shapeAngle + interval) {
         *angleFrom -= interval;
         *angleTo -= interval;
     }
 }
 
-double AnisotropicShape2D::normalizeAngle(double angle, double interval) const {
+double AnisotropicShape2D::normalizeAngle(double angle, double interval) {
     while (angle < 0)
         angle += interval;
     while (angle > interval)
