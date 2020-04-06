@@ -35,6 +35,7 @@
         #include "shapes/polydisk/Kmer.h"
         #include "shapes/polydisk/Polydisk.h"
 		#include "shapes/polygon/Polygon.h"
+		#include "shapes/polygon/RegularRoundedPolygon.h"
 		#include "shapes/polygon/RoundedPolygon.h"
 		#include "shapes/polygon/SBPolygon.h"
 		#include "shapes/polygon/HBPolygon.h"
@@ -151,6 +152,9 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
                 return;
             } else if (sClass == "Polygon") {
                 Polygon::initClass(attr);
+                return;
+            } else if (sClass == "RegularRoundedPolygon") {
+                RegularRoundedPolygon::initClass(attr);
                 return;
             } else if (sClass == "RoundedPolygon") {
                 RoundedPolygon::initClass(attr);

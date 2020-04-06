@@ -33,15 +33,34 @@ public:
     static RectangularBounding forArch(const Vector<2> &zeroAngleVector, double angleFrom, double angleTo);
 };
 
+class RegularDiskopolygonAttributes {
+private:
+    std::size_t nSides{};
+    double sideLength{};
+    double radius{};
+    double height{};
+    double halfDiagonal{};
+
+    void normalizeVolume();
+
+public:
+    RegularDiskopolygonAttributes() = default;
+
+    /**
+     * @brief Calculates attributes from format: [number of sides] [side length] [radius]
+     */
+    explicit RegularDiskopolygonAttributes(const std::string &attr);
+
+    size_t getNSides() const { return nSides;}
+    double getSideLength() const { return sideLength; }
+    double getRadius() const { return radius; }
+    double getHeight() const { return height; }
+    double getHalfDiagonal() const { return halfDiagonal; }
+};
+
 class RegularDiskopolygon : public Shape<2, 1> {
 private:
-    static std::size_t nSides;
-    static double sideLength;
-    static double radius;
-    static double height;
-    static double halfDiagonal;
-
-    static void normalizeVolume();
+    static RegularDiskopolygonAttributes attributes;
 
     SpheroCylinder2D getSpherocylinder(std::size_t index) const;
 
@@ -51,9 +70,11 @@ protected:
 public:
     static void initClass(const std::string &attr);
 
-    static std::size_t getNSides() { return nSides; }
-    static double getSideLength() { return sideLength; }
-    static double getRadius() { return radius; }
+    static std::size_t getNSides() { return attributes.getNSides(); }
+    static double getSideLength() { return attributes.getSideLength(); }
+    static double getRadius() { return attributes.getRadius(); }
+    static double getHeight() { return attributes.getHeight(); }
+    static double getHalfDiagonal() { return attributes.getHalfDiagonal(); }
 
     bool overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const override;
     bool voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition, const Orientation<1> &orientation,

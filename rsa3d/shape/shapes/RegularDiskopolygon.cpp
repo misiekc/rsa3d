@@ -9,48 +9,33 @@
 #include "spherocylinder/SpheroCylinder2D.h"
 #include "../../FreeBC.h"
 
-std::size_t RegularDiskopolygon::nSides{};
-double RegularDiskopolygon::sideLength{};
-double RegularDiskopolygon::radius{};
-double RegularDiskopolygon::height{};
-double RegularDiskopolygon::halfDiagonal{};
+RegularDiskopolygonAttributes RegularDiskopolygon::attributes;
 
 void RegularDiskopolygon::initClass(const std::string &attr) {
-    std::istringstream attrStream(attr);
-    attrStream >> nSides >> sideLength >> radius;
-    ValidateMsg(attrStream, "Malformed attributes. Expected: [number of sites] [side length] [disk radius]");
-    Validate(nSides >= 3);
-    Validate(sideLength >= 0);
-    Validate(radius > 0);
-
-    height = sideLength / 2 / std::tan(M_PI / nSides);
-    halfDiagonal = sideLength / 2 / std::sin(M_PI / nSides);
-    normalizeVolume();
+    attributes = RegularDiskopolygonAttributes(attr);
 
     std::ostringstream spherocylinderAttr;
-    spherocylinderAttr << sideLength << " " << radius;
+    spherocylinderAttr << getSideLength() << " " << getRadius();
     SpheroCylinder2D::initClass(spherocylinderAttr.str());
 
     ShapeStaticInfo<2, 1> shapeInfo;
-
-    shapeInfo.setCircumsphereRadius(halfDiagonal + radius);
-    shapeInfo.setInsphereRadius(height + radius);
-    shapeInfo.setAngularVoxelSize(2*M_PI / nSides);
+    shapeInfo.setCircumsphereRadius(getHalfDiagonal() + getRadius());
+    shapeInfo.setInsphereRadius(getHeight() + getRadius());
+    shapeInfo.setAngularVoxelSize(2*M_PI / getNSides());
     shapeInfo.setSupportsSaturation(true);
     shapeInfo.setDefaultCreateShapeImpl<RegularDiskopolygon>();
-
     Shape::setShapeStaticInfo(shapeInfo);
 }
 
-void RegularDiskopolygon::normalizeVolume() {
-    double volume = 0.25 * nSides * std::pow(sideLength, 2) / tan(M_PI / nSides)   // Polygon inside
-                    + nSides * radius * sideLength                                  // Pushed edges
-                    + M_PI * std::pow(radius, 2);                                   // Corners
+void RegularDiskopolygonAttributes::normalizeVolume() {
+    double volume = 0.25 * this->nSides * std::pow(this->sideLength, 2) / tan(M_PI / this->nSides)   // Polygon inside
+                    + this->nSides * this->radius * this->sideLength                                  // Pushed edges
+                    + M_PI * std::pow(this->radius, 2);                                   // Corners
 
-    sideLength /= std::sqrt(volume);
-    radius /= std::sqrt(volume);
-    height /= std::sqrt(volume);
-    halfDiagonal /= std::sqrt(volume);
+    this->sideLength /= std::sqrt(volume);
+    this->radius /= std::sqrt(volume);
+    this->height /= std::sqrt(volume);
+    this->halfDiagonal /= std::sqrt(volume);
 }
 
 bool RegularDiskopolygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const {
@@ -64,9 +49,9 @@ bool RegularDiskopolygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *
     this->applyBC(bc, &other);
 
     FreeBC<2> freeBC;
-    for (std::size_t i{}; i < nSides; i++) {
+    for (std::size_t i{}; i < getNSides(); i++) {
         SpheroCylinder2D sc1 = this->getSpherocylinder(i);
-        for (std::size_t j{}; j < nSides; j++) {
+        for (std::size_t j{}; j < getNSides(); j++) {
             SpheroCylinder2D sc2 = other.getSpherocylinder(j);
             if (sc1.overlap(&freeBC, &sc2))
                 return true;
@@ -85,10 +70,10 @@ bool RegularDiskopolygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2>
         case EarlyRejectionResult::UNKNOWN:   break;
     }
 
-    Vector<2> defaultSpherocylinderOffset{{0, height}};
+    Vector<2> defaultSpherocylinderOffset{{0, getHeight()}};
 
-    for (std::size_t i{}; i < nSides; i++) {
-        double virtualScAngleFrom = orientation[0] + static_cast<double>(i) * 2 * M_PI / nSides;
+    for (std::size_t i{}; i < getNSides(); i++) {
+        double virtualScAngleFrom = orientation[0] + static_cast<double>(i) * 2 * M_PI / getNSides();
         double virtualScAngleTo = virtualScAngleFrom + angularSize;
         AnisotropicShape2D::normalizeAngleRange(0, &virtualScAngleFrom, &virtualScAngleTo, 2*M_PI);
 
@@ -100,7 +85,7 @@ bool RegularDiskopolygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2>
         rectangularBounding.expand(spatialSize);
         rectangularBounding.translate(voxelPosition + voxelTranslation);
 
-        for (std::size_t j{}; j < nSides; j++) {
+        for (std::size_t j{}; j < getNSides(); j++) {
             FreeBC<2> freeBC;
 
             auto sc = this->getSpherocylinder(j);
@@ -124,8 +109,8 @@ Shape<2, 1> *RegularDiskopolygon::clone() const {
 SpheroCylinder2D RegularDiskopolygon::getSpherocylinder(std::size_t index) const {
     SpheroCylinder2D sc;
 
-    double scAngle = this->getAngle() + static_cast<double>(index) * 2 * M_PI / nSides;
-    Vector<2> defaultSpherocylinderOffset{{0, height}};
+    double scAngle = this->getAngle() + static_cast<double>(index) * 2 * M_PI / getNSides();
+    Vector<2> defaultSpherocylinderOffset{{0, getHeight()}};
     sc.rotate({{scAngle}});
     sc.translate(this->getPosition() + Matrix<2, 2>::rotation(scAngle) * defaultSpherocylinderOffset);
 
@@ -136,18 +121,18 @@ std::string RegularDiskopolygon::toWolfram() const {
     std::ostringstream out;
 
     out << "{";
-    for (std::size_t i{}; i < nSides; i++)
+    for (std::size_t i{}; i < getNSides(); i++)
         out << this->getSpherocylinder(i).toWolfram() << ", ";
     // For this->getAngle() == 0, we want top side to be horizontal
-    double mathematicaAngle = this->getAngle() + M_PI/2 + M_PI/nSides;
-    out << "RegularPolygon[" << this->getPosition() << ", {" << halfDiagonal << ", " << mathematicaAngle << "}, ";
-    out << nSides << "]}";
+    double mathematicaAngle = this->getAngle() + M_PI/2 + M_PI/getNSides();
+    out << "RegularPolygon[" << this->getPosition() << ", {" << getHalfDiagonal() << ", " << mathematicaAngle << "}, ";
+    out << getNSides() << "]}";
 
     return out.str();
 }
 
 void RegularDiskopolygon::setOrientation(const Orientation<1> &orientation) {
-    double angle = AnisotropicShape2D::normalizeAngle(orientation[0], 2*M_PI/nSides);
+    double angle = AnisotropicShape2D::normalizeAngle(orientation[0], 2*M_PI/getNSides());
     Shape::setOrientation({{angle}});
 }
 
@@ -197,4 +182,17 @@ RectangularBounding RectangularBoundingBuilder::forArch(const Vector<2> &zeroAng
 
     recurseQuarters(rectangularBounding, zeroAngleVector, angleTo, quarterAngle);
     return rectangularBounding;
+}
+
+RegularDiskopolygonAttributes::RegularDiskopolygonAttributes(const std::string &attr) {
+    std::istringstream attrStream(attr);
+    attrStream >> this->nSides >> this->sideLength >> this->radius;
+    ValidateMsg(attrStream, "Malformed attributes. Expected: [number of sites] [side length] [disk radius]");
+    Validate(this->nSides >= 3);
+    Validate(this->sideLength >= 0);
+    Validate(this->radius > 0);
+
+    this->height = this->sideLength / 2 / std::tan(M_PI / this->nSides);
+    this->halfDiagonal = this->sideLength / 2 / std::sin(M_PI / this->nSides);
+    this->normalizeVolume();
 }
