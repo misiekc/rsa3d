@@ -47,7 +47,11 @@ public:
     RegularDiskopolygonAttributes() = default;
 
     /**
-     * @brief Calculates attributes from format: [number of sides] [side length] [radius]
+     * @brief Calculates attributes from 2 available formats.
+     * @details The formats are:
+     * <pre>standard [number of sides] [side length] [radius]</pre>
+     * <pre>short [number of sides] [radius]</pre>
+     * In the second case, the side length is like in the polygon, whose circumscribed circle has radius 1.
      */
     explicit RegularDiskopolygonAttributes(const std::string &attr);
 

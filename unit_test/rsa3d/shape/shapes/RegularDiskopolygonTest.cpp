@@ -8,41 +8,67 @@
 #include "../../../../rsa3d/shape/shapes/spherocylinder/SpheroCylinder2D.h"
 #include "../../../matchers/VectorApproxMatcher.h"
 
-TEST_CASE("RegularDiskopolygon: attributes parsing") {
-    SECTION("normalization for triangle") {
-        RegularDiskopolygon::initClass("3 4 5");
+TEST_CASE("RegularDiskopolygonAttributes") {
+    SECTION("standard") {
+        RegularDiskopolygonAttributes attr("standard 3 4 5"); // triangle, side 4, radius 5
+
+        REQUIRE(attr.getNSides() == 3);
+        REQUIRE(attr.getSideLength() == Approx(0.3316471184014903));
+        REQUIRE(attr.getRadius() == Approx(0.4145588980018629));
+        REQUIRE(attr.getHeight() == Approx(0.09573827654253206));
+        REQUIRE(attr.getHalfDiagonal() == Approx(0.1914765530850641));
+    }
+
+    SECTION("short") {
+        RegularDiskopolygonAttributes attr("short 3 2"); // triangle, smoothing radius 2, implicit circumradius 1
+
+        REQUIRE(attr.getNSides() == 3);
+        REQUIRE(attr.getSideLength() == Approx(0.3516703029486882));
+        REQUIRE(attr.getRadius() == Approx(0.4060738881468448));
+        REQUIRE(attr.getHeight() == Approx(0.1015184720367112));
+        REQUIRE(attr.getHalfDiagonal() == Approx(0.2030369440734224));
+    }
+
+    SECTION("validation") {
+        SECTION("malformed") {
+            REQUIRE_THROWS_WITH(RegularDiskopolygonAttributes("skrewed 1 2 3"), Catch::Contains("Supported"));
+            REQUIRE_THROWS_WITH(RegularDiskopolygonAttributes("standard 3 2"), Catch::Contains("Malformed"));
+            REQUIRE_THROWS_WITH(RegularDiskopolygonAttributes("standard 3"), Catch::Contains("Malformed"));
+            REQUIRE_THROWS_WITH(RegularDiskopolygonAttributes("standard 3 2 a"), Catch::Contains("Malformed"));
+            REQUIRE_THROWS_WITH(RegularDiskopolygonAttributes("standard 3 a 1"), Catch::Contains("Malformed"));
+            REQUIRE_THROWS_WITH(RegularDiskopolygonAttributes("standard a 2 1"), Catch::Contains("Malformed"));
+            REQUIRE_THROWS_WITH(RegularDiskopolygonAttributes("short 3"), Catch::Contains("Malformed"));
+            REQUIRE_THROWS_WITH(RegularDiskopolygonAttributes("short 3 a"), Catch::Contains("Malformed"));
+            REQUIRE_THROWS_WITH(RegularDiskopolygonAttributes("short a 3"), Catch::Contains("Malformed"));
+        }
+
+        SECTION("mathematically incorrect") {
+            REQUIRE_THROWS(RegularDiskopolygon::initClass("standard 1 2 3"));
+            REQUIRE_THROWS(RegularDiskopolygon::initClass("standard 2 2 3"));
+            REQUIRE_THROWS(RegularDiskopolygon::initClass("standard 3 1 0"));
+            REQUIRE_NOTHROW(RegularDiskopolygon::initClass("standard 3 0 1"));
+            REQUIRE_THROWS(RegularDiskopolygon::initClass("short 1 2"));
+            REQUIRE_THROWS(RegularDiskopolygon::initClass("short 2 2"));
+            REQUIRE_THROWS(RegularDiskopolygon::initClass("short 3 0"));
+        }
+    }
+}
+
+TEST_CASE("RegularDiskopolygonAttributes: initClass") {
+    SECTION("shape info") {
+        RegularDiskopolygon::initClass("standard 3 4 5");
 
         auto shapeInfo = Shape<2, 1>::getShapeStaticInfo();
-        REQUIRE(RegularDiskopolygon::getSideLength() == Approx(0.3316471184014903));
-        REQUIRE(RegularDiskopolygon::getRadius() == Approx(0.4145588980018629));
         REQUIRE(shapeInfo.getCircumsphereRadius() == Approx(0.6060354510869270));
         REQUIRE(shapeInfo.getInsphereRadius() == Approx(0.5102971745443950));
         REQUIRE(shapeInfo.getVoxelAngularSize() == Approx(2.094395102393195));
     }
 
     SECTION("spherocylinder parameters") {
-        RegularDiskopolygon::initClass("3 4 5");
+        RegularDiskopolygon::initClass("standard 3 4 5");
 
         REQUIRE(SpheroCylinder2D::getRadius() == Approx(0.4145588980018629));
         REQUIRE(SpheroCylinder2D::getDistance() == Approx(0.3316471184014903));
-    }
-
-    SECTION("validation") {
-        SECTION("malformed") {
-            REQUIRE_THROWS_WITH(RegularDiskopolygon::initClass("3 2"), Catch::Contains("Malformed"));
-            REQUIRE_THROWS(RegularDiskopolygon::initClass("3"), Catch::Contains("Malformed"));
-            REQUIRE_THROWS(RegularDiskopolygon::initClass(""), Catch::Contains("Malformed"));
-            REQUIRE_THROWS(RegularDiskopolygon::initClass("3 2 a"), Catch::Contains("Malformed"));
-            REQUIRE_THROWS(RegularDiskopolygon::initClass("3 a 1"), Catch::Contains("Malformed"));
-            REQUIRE_THROWS(RegularDiskopolygon::initClass("a 2 1"), Catch::Contains("Malformed"));
-        }
-
-        SECTION("mathematically incorrect") {
-            REQUIRE_THROWS(RegularDiskopolygon::initClass("1 2 3"));
-            REQUIRE_THROWS(RegularDiskopolygon::initClass("2 2 3"));
-            REQUIRE_THROWS(RegularDiskopolygon::initClass("3 1 0"));
-            REQUIRE_NOTHROW(RegularDiskopolygon::initClass("3 0 1"));
-        }
     }
 }
 

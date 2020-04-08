@@ -188,14 +188,18 @@ RegularDiskopolygonAttributes::RegularDiskopolygonAttributes(const std::string &
     std::istringstream attrStream(attr);
     std::string type;
     attrStream >> type;
-    if (type == "standard"){
+    if (type == "standard") {
     	attrStream >> this->nSides >> this->sideLength >> this->radius;
-    }else if (type == "short"){
+    } else if (type == "short") {
     	attrStream >> this->nSides >> this->radius;
     	this->sideLength = 2*std::sin(M_PI/this->nSides);
+    } else {
+        throw ValidationException("Supported argument types are: standard, short");
     }
 
-    ValidateMsg(attrStream, "Malformed attributes. Expected: standard [number of sites] [side length] [disk radius] 	or		short [number of sides] [disk radius]");
+    ValidateMsg(attrStream, "Malformed attributes. Expected:\n"
+                            "standard [number of sites] [side length] [disk radius] 	or\n"
+                            "short [number of sides] [disk radius]");
     Validate(this->nSides >= 3);
     Validate(this->sideLength >= 0);
     Validate(this->radius > 0);

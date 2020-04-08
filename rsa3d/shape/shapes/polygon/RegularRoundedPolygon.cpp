@@ -10,7 +10,6 @@ void RegularRoundedPolygon::initClass(const std::string &attr) {
 
     double nSides = attributes.getNSides();
     double radius = attributes.getRadius();
-//    double height = attributes.getHeight();
     double halfDiagonal = attributes.getHalfDiagonal();
 
     std::ostringstream roundedPolygonAttributes;
@@ -19,7 +18,6 @@ void RegularRoundedPolygon::initClass(const std::string &attr) {
     roundedPolygonAttributes << radius << " " << nSides << " rt ";
 
     for (std::size_t i{}; i < nSides; i++)
-//        roundedPolygonAttributes << " " << height << " " << (2*M_PI*i/nSides);
         roundedPolygonAttributes << " " << halfDiagonal << " " << (2*M_PI*i/nSides);
 
     roundedPolygonAttributes << " " << nSides;
@@ -28,8 +26,8 @@ void RegularRoundedPolygon::initClass(const std::string &attr) {
 
     RoundedPolygon::initClass(roundedPolygonAttributes.str());
 
+    // Make angular voxel size smaller - regular polygon has an n-fold rotational symmetry
     ShapeStaticInfo<2, 1> shapeInfo = Shape::getShapeStaticInfo();
     shapeInfo.setAngularVoxelSize(2*M_PI/nSides);
     Shape::setShapeStaticInfo(shapeInfo);
-
 }
