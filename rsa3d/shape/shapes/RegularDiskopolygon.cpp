@@ -186,8 +186,16 @@ RectangularBounding RectangularBoundingBuilder::forArch(const Vector<2> &zeroAng
 
 RegularDiskopolygonAttributes::RegularDiskopolygonAttributes(const std::string &attr) {
     std::istringstream attrStream(attr);
-    attrStream >> this->nSides >> this->sideLength >> this->radius;
-    ValidateMsg(attrStream, "Malformed attributes. Expected: [number of sites] [side length] [disk radius]");
+    std::string type;
+    attrStream >> type;
+    if (type == "standard"){
+    	attrStream >> this->nSides >> this->sideLength >> this->radius;
+    }else if (type == "short"){
+    	attrStream >> this->nSides >> this->radius;
+    	this->sideLength = 2*std::sin(M_PI/this->nSides);
+    }
+
+    ValidateMsg(attrStream, "Malformed attributes. Expected: standard [number of sites] [side length] [disk radius] 	or		short [number of sides] [disk radius]");
     Validate(this->nSides >= 3);
     Validate(this->sideLength >= 0);
     Validate(this->radius > 0);

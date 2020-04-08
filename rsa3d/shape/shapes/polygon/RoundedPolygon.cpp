@@ -130,7 +130,7 @@ bool RoundedPolygon::lineVoxelIntersect(double x1, double y1, double x2, double 
 		return true;
 
 	double d = std::sqrt(lineLineDistance2(x1, y1, x2, y2, x3, y3, x4, y4));
-	double delta = 2*std::max(l3,l4)*tan(dtheta/2) + dx*M_SQRT2;
+	double delta = 2*std::max(l3,l4)*std::sin(dtheta/2) + dx*M_SQRT2;
 
 	if (d+delta < 2*RoundedPolygon::radius)
 		return true;
