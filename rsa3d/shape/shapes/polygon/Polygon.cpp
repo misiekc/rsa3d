@@ -101,7 +101,6 @@ void Polygon::initClass(const std::string &args){
 	std::istringstream in(args);
     Polygon::parseVertices(in);
     Polygon::parseSegments(in);
-    Polygon::centerPolygon();
     Polygon::parseHelperSegments(in);
     Polygon::normalizeVolume();
 
@@ -188,6 +187,7 @@ void Polygon::parseSegments(std::istringstream &in) {
 void Polygon::parseHelperSegments(std::istringstream &in) {
     std::size_t n;
     if (in.str().find("starHelperSegments")!=std::string::npos){
+        Polygon::centerPolygon();
         Polygon::createStarHelperSegments();
     }else{
         in >> n;
