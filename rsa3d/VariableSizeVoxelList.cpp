@@ -197,7 +197,7 @@ unsigned short VariableSizeVoxelList::splitVoxels(double minDx, size_t maxVoxels
 		newVoxelsSize += newVoxelsCounter[i];
 
 	std::cout << " compacting" << std::flush;
-	this->length = this->compactVoxelArray();
+	this->compactVoxelArray();
 	Assert(this->length == newVoxelsSize);
 
 	this->createVoxelMap();

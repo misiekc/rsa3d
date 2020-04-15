@@ -49,6 +49,9 @@ private:
 	// checks consistency of indexes of root voxels
 	void checkTopLevelVoxels();
 
+	// sets status basing on existing voxels
+	void refreshTopLevelVoxels();
+
 	// finds voxel containing given point - not used - only for debugging
 	Voxel * findVoxel(Voxel **list, size_t listSize, const RSAVector &pos,
 					  const RSAOrientation &angle);
@@ -101,7 +104,7 @@ protected:
 
 	// voxels array will not have NULLs between pointers to objects - they can appear when splitting or analyze voxels in parallel
 	// returns number of not null values in list
-	size_t compactVoxelArray();
+	void compactVoxelArray();
 
 public:
 
@@ -133,6 +136,9 @@ public:
 
 
 	virtual unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc);
+
+	// counts active top level voxels
+	size_t countActiveTopLevelVoxels();
 
 	virtual Voxel *getRandomVoxel(RND *rnd);
 	Voxel *getVoxel(int i);

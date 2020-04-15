@@ -308,18 +308,23 @@ void PackingGenerator::createPacking() {
 //						this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
 
 			unsigned short status = voxels->splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface);
+			double oldFactor = factor;
 			factor = this->getFactor();
 
 			if (status == VoxelList::NORMAL_SPLIT || status == VoxelList::NO_SPLIT_BUT_INITIALIZED){
 //				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
-				std::cout << " done. " << this->packing.size() << " shapes, " << this->voxels->getLength() << " voxels, new voxel size: " << voxels->getSpatialVoxelSize() << ", angular size: " << this->voxels->getAngularVoxelSize() << ", factor: " << factor << std::endl;
+				std::cout.precision(5);
+				std::cout << " done. " << this->voxels->getLength() << "(" << this->voxels->countActiveTopLevelVoxels() << ") voxels, new voxel size: " << voxels->getSpatialVoxelSize() << ", angular size: " << this->voxels->getAngularVoxelSize() << ", factor: " << factor << ", change: " << (factor/oldFactor) << std::endl;
+				std::cout.precision(std::numeric_limits< double >::max_digits10);
 				missCounter = 0;
 			}else if (status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
 				if(RSAShape::getSupportsSaturation() || rnd.nextValue() < 0.1){
 					std::cout << " skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;
 					this->voxels->analyzeVoxels(this->surface, this->surface->getNeighbourGrid(), depthAnalyze);
 					factor = this->getFactor();
-					std::cout << " done: " << this->voxels->getLength() << " voxels remained, factor = " << factor << std::endl << std::flush;
+					std::cout.precision(5);
+					std::cout << " done: " << this->voxels->getLength() << "(" << this->voxels->countActiveTopLevelVoxels() << ") voxels remained, factor = " << factor << ", change: " << (factor/oldFactor) << std::endl << std::flush;
+					std::cout.precision(std::numeric_limits< double >::max_digits10);
 					tmpSplit = (int)(1.1 * tmpSplit);
 				}
 			}else{
@@ -337,6 +342,10 @@ void PackingGenerator::createPacking() {
 				// standard grow of tmpSplit
 				tmpSplit = (int)(tmpSplit * 1.1* v1 / v0);
 			}
+			// increase split when number of voxels closes to its limit
+			if (this->voxels->getLength() > 0.05*this->params.maxVoxels)
+				tmpSplit *= 1.5;
+			// increase split when number of voxels limit is reached
 			if (status == VoxelList::NO_SPLIT || status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
 				if ((double)(v0-v1)/(double)v0 < 0.1){ // not much voxels removed
 					depthAnalyze++;
@@ -349,10 +358,13 @@ void PackingGenerator::createPacking() {
 
 			// additional tweaking
 
-			if (tmpSplit > std::max(this->params.maxVoxels/20, 10*this->params.split))
-				tmpSplit = std::max(this->params.maxVoxels/20, 10*this->params.split);
+			if (tmpSplit > std::max(this->params.maxVoxels/5, 10*this->params.split))
+				tmpSplit = std::max(this->params.maxVoxels/5, 10*this->params.split);
 			if(v1<v0 && voxels->getLength()<0.001*this->params.maxVoxels && tmpSplit > 10ul*_OMP_MAXTHREADS)
 				tmpSplit /= 10.0;
+
+			tmpSplit = ((tmpSplit / _OMP_MAXTHREADS)+1) * _OMP_MAXTHREADS;
+
 			if(tmpSplit < 10ul*_OMP_MAXTHREADS)
 				tmpSplit = 10ul*_OMP_MAXTHREADS;
 
