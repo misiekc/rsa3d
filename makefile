@@ -42,9 +42,11 @@ LIBSTAT = libstat.a
 # All packages in the project
 PACKAGES = rsa3d/analizator/ \
            rsa3d/geometry/ \
+           rsa3d/modes/ \
            rsa3d/shape/ \
            rsa3d/shape/shapes/ \
            rsa3d/shape/shapes/cuboid/ \
+           rsa3d/shape/shapes/polydisk/ \
            rsa3d/shape/shapes/polygon/ \
            rsa3d/shape/shapes/regular_solid/ \
            rsa3d/shape/shapes/spherocylinder/ \
@@ -70,6 +72,19 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/Voxel \
        rsa3d/VoxelList \
        rsa3d/geometry/Geometry \
+       rsa3d/modes/AccuracySimulation \
+       rsa3d/modes/AnalyzeMode \
+       rsa3d/modes/BCExpandMode \
+       rsa3d/modes/BoundariesSimulation \
+       rsa3d/modes/DatFileGenerationMode \
+       rsa3d/modes/DebugMode \
+       rsa3d/modes/DefaultSimulation \
+       rsa3d/modes/DensitySimulation \
+       rsa3d/modes/ExclusionZonesMode \
+       rsa3d/modes/PackingTestMode \
+       rsa3d/modes/PovrayMode \
+       rsa3d/modes/Simulation \
+       rsa3d/modes/WolframMode \
        rsa3d/shape/shapes/cuboid/Cuboid \
        rsa3d/shape/shapes/cuboid/MineOverlapCB \
        rsa3d/shape/shapes/cuboid/OptimizedSATOverlapCB \
@@ -99,14 +114,19 @@ OBJS_COMMON = rsa3d/Config \
        rsa3d/shape/shapes/regular_solid/UnoptimizedSATOverlapRS \
        rsa3d/shape/shapes/spherocylinder/SpheroCylinder2D \
        rsa3d/shape/shapes/spherocylinder/Stolen2DOverlapSC \
+       rsa3d/shape/shapes/polydisk/Fibrinogen \
+       rsa3d/shape/shapes/polydisk/Kmer \
+       rsa3d/shape/shapes/polydisk/Polydisk \
        rsa3d/shape/shapes/polygon/HBPolygon \
-       rsa3d/shape/shapes/polygon/SBPolygon \
        rsa3d/shape/shapes/polygon/Polygon \
+       rsa3d/shape/shapes/polygon/RegularRoundedPolygon \
+       rsa3d/shape/shapes/polygon/RoundedPolygon \
+       rsa3d/shape/shapes/polygon/SBPolygon \
        rsa3d/shape/shapes/polygon/Triangle \
        rsa3d/shape/shapes/Ellipse \
        rsa3d/shape/shapes/Ellipsoid \
-       rsa3d/shape/shapes/Polydisk \
        rsa3d/shape/shapes/Rectangle \
+       rsa3d/shape/shapes/RegularDiskopolygon \
        rsa3d/shape/AnisotropicShape2D \
        rsa3d/shape/OrderParameters \
        rsa3d/shape/ShapeFactory \
