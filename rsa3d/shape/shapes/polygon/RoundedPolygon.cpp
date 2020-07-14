@@ -20,9 +20,14 @@ double RoundedPolygon::calculateCircumscribedCircleRadius(){
 	return Polygon::calculateCircumscribedCircleRadius() + RoundedPolygon::radius;
 }
 
-void RoundedPolygon::normalizeVolume(){
-    double area = RoundedPolygon::getArea();
-    std::for_each(vertexR.begin(), vertexR.end(), [area](auto &vR) { vR /= sqrt(area); });
+void RoundedPolygon::normalizeVolume(std::istringstream &in){
+	double area;
+	if (in.rdbuf()->in_avail() > 0){
+		in >> area;
+	}else{
+		area = RoundedPolygon::getArea();
+	}
+	std::for_each(vertexR.begin(), vertexR.end(), [area](auto &vR) { vR /= sqrt(area); });
     RoundedPolygon::radius /= sqrt(area);
 }
 
@@ -54,7 +59,7 @@ void RoundedPolygon::initClass(const std::string &args){
     Polygon::parseSegments(in);
     Polygon::centerPolygon();
 
-    RoundedPolygon::normalizeVolume();
+    RoundedPolygon::normalizeVolume(in);
 
     ShapeStaticInfo<2, 1> shapeInfo;
     shapeInfo.setCircumsphereRadius(Polygon::calculateCircumscribedCircleRadius() + RoundedPolygon::radius);

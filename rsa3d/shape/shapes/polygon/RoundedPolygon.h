@@ -22,7 +22,7 @@ class RoundedPolygon : public Polygon {
 private:
 	static double distance2pq(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double p, double q);
 	static void gradientDistance2pq(std::array<double, 2> &gradient, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double p, double q);
-	static void normalizeVolume();
+	static void normalizeVolume(std::istringstream &in);
 	static double getArea();
 
 

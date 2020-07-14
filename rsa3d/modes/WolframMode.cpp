@@ -25,6 +25,7 @@ void WolframMode::initializeForArguments(const ProgramArguments &arguments) {
 void WolframMode::run() {
     Packing packing;
     packing.restore(this->packingFilename);
+    std::cout << "Packing restored, now creating Mathematica notebook" << std::endl;
     PackingGenerator::toWolfram(packing, this->params.surfaceSize, nullptr, this->isPeriodicImage,
                                 this->packingFilename + ".nb");
 }
