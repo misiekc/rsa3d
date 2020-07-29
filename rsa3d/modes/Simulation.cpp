@@ -66,7 +66,7 @@ Packing Simulation::runSingleSimulation(unsigned int seed, std::size_t collector
     Packing packing = pg.getPacking();
     this->postProcessPacking(packing);
 
-    if (params.storePackings)
+    if (this->params.storePackings)
         packing.store(pg.getPackingFilename());
 
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
@@ -82,10 +82,14 @@ Packing Simulation::runSingleSimulation(unsigned int seed, std::size_t collector
 }
 
 void Simulation::run() {
-    std::string sFile = params.getPackingSignature() + ".dat";
-    std::ofstream datFile(sFile);
+    std::string datFilename = params.getPackingSignature() + ".dat";
+    std::ofstream datFile;
+    if (this->params.appendToDat)
+        datFile.open(datFilename, std::ios_base::app);
+    else
+        datFile.open(datFilename, std::ios_base::out);
     if (!datFile)
-        die("Cannot open file " + sFile + " to store packing info");
+        die("Cannot open file " + datFilename + " to store packing info");
     datFile.precision(std::numeric_limits<double>::digits10 + 1);
 
     std::size_t packingIndex{};
