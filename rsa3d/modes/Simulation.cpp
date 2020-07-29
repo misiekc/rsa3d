@@ -56,7 +56,7 @@ namespace {
 }
 
 
-Packing Simulation::runSingleSimulation(int seed, std::size_t collector, std::ofstream &dataFile) {
+Packing Simulation::runSingleSimulation(unsigned int seed, std::size_t collector, std::ofstream &dataFile) {
     double vm, rss;
 
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -71,7 +71,7 @@ Packing Simulation::runSingleSimulation(int seed, std::size_t collector, std::of
 
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     process_mem_usage(vm, rss);
-    dataFile << seed << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;
+    dataFile << collector << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;
     dataFile.flush();
 
     auto generationSeconds = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
