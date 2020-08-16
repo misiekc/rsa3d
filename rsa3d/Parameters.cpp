@@ -39,6 +39,7 @@ Parameters::Parameters(std::istream &stream) {
 		else if (key == "timestamp")		 		    this->timestamp = config.getString(key) != "false";
 
 		else if (key == "coverageByNumber")				this->coverageByNumber = config.getString(key) != "false";
+        else if (key == "appendToDat")		 		    this->appendToDat = config.getString(key) != "false";
 		else
 		    std::cerr << "[Parameters::Parameters] Warning: unknown parameter " << key << std::endl;
 	}
@@ -120,7 +121,8 @@ bool Parameters::operator==(const Parameters &rhs) const {
            generatorProcesses == rhs.generatorProcesses &&
            ompThreads == rhs.ompThreads &&
 		   coverageByNumber == rhs.coverageByNumber &&
-		   seedOrigin == rhs.seedOrigin;
+		   seedOrigin == rhs.seedOrigin &&
+		   appendToDat == rhs.appendToDat;
 }
 
 bool Parameters::operator!=(const Parameters &rhs) const {
