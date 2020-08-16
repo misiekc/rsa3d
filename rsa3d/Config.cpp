@@ -67,7 +67,7 @@ int Config::getInt(const std::string & field) const {
 
 unsigned long Config::getUnsignedLong(const std::string & field) const {
     auto str = this->getString(field);
-    if (std::stoi(str) < 0)
+    if (std::stol(str) < 0)
         throw std::invalid_argument("unsigned long field negative");
     return std::stoul(str);
 }

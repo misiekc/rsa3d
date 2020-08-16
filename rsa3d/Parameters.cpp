@@ -36,6 +36,7 @@ Parameters::Parameters(std::istream &stream) {
 		else if (key == "collectors") 				    this->collectors = config.getUnsignedLong(key);
 		else if (key == "generatorProcesses") 		    this->generatorProcesses = config.getUnsignedLong(key);
 		else if (key == "ompThreads") 				    this->ompThreads = config.getInt(key);
+		else if (key == "timestamp")		 		    this->timestamp = config.getString(key) != "false";
 
 		else if (key == "coverageByNumber")				this->coverageByNumber = config.getString(key) != "false";
 		else
@@ -59,7 +60,7 @@ Parameters::Parameters(const std::string &fileName) {
 
 void Parameters::validateData() {
     Validate(maxTriesWithoutSuccess > 0);
-	Validate(maxVoxels > 0);
+	Validate(maxVoxels >= 0);
 	Validate(requestedAngularVoxelSize > 0);
 	Validate(minDx >= 0.0);
 	Validate(from >= 0);

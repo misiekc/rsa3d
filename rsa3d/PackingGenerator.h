@@ -37,7 +37,7 @@ private:
 	bool isSaturated();
 	double getFactor();
 	bool isInside(const RSAVector &position, RSAOrientation &orientation);
-	void createPacking();
+	void createPacking(Packing *packing);
 
 	void toPovray(const std::string &filename);
     void toWolfram(const std::string &filename);
@@ -51,7 +51,7 @@ public:
     PackingGenerator(int seed, std::size_t collector, const Parameters *params);
 
 	virtual ~PackingGenerator();
-    void run();
+    void run(Packing *packing=nullptr);
 
 	const Packing &getPacking();
 

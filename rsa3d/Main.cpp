@@ -7,6 +7,7 @@
 #include "shape/ShapeFactory.h"
 #include "ProgramArguments.h"
 #include "modes/DefaultSimulation.h"
+#include "modes/Saturation.h"
 #include "modes/BoundariesSimulation.h"
 #include "modes/AccuracySimulation.h"
 #include "modes/DensitySimulation.h"
@@ -27,6 +28,7 @@ namespace {
             // Simulation modes - they all generate a number of packings, operate on them, create *.dat file and
             // optionally save additional information
             {"simulate", std::make_shared<DefaultSimulation>()},
+            {"saturate", std::make_shared<Saturation>()},
             {"boundaries", std::make_shared<BoundariesSimulation>()},
             {"accuracy", std::make_shared<AccuracySimulation>()},
             {"density", std::make_shared<DensitySimulation>()},

@@ -37,6 +37,8 @@ PackingGenerator::PackingGenerator(int seed, std::size_t collector, const Parame
 		this->params.requestedAngularVoxelSize = this->angularSize;
 
 	this->voxels = ShapeFactory::createVoxelList(params->particleType, this->params.surfaceDimension, this->spatialSize, RSAShape::getVoxelSpatialSize(), this->angularSize, this->params.requestedAngularVoxelSize);
+	if (params->maxVoxels==0)
+		this->voxels->disable();
 
 	double gridSize = RSAShape::getNeighbourListCellSize();
 	if (gridSize < this->params.thresholdDistance)
@@ -199,7 +201,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 }
 
 
-void PackingGenerator::createPacking() {
+void PackingGenerator::createPacking(Packing *packing) {
 
 	std::cout.precision(std::numeric_limits< double >::max_digits10);
 	std::cout << "[" << this->collector << " PackingGenerator::createPacking] using up to " << _OMP_MAXTHREADS;
@@ -218,6 +220,12 @@ void PackingGenerator::createPacking() {
 	int l = 0;
 	double t = 0;
 	double factor = this->getFactor();
+	if (packing!=nullptr){
+		this->packing = *packing;
+		for(const RSAShape *s : *packing)
+			this->surface->add(s);
+		l = this->packing.size();
+	}
 
 	std::size_t tmpSplit = this->params.split, oldTmpSplit = tmpSplit;
 //	int snapshotCounter = 0;
@@ -228,7 +236,15 @@ void PackingGenerator::createPacking() {
 	RSAShape **sVirtual = new RSAShape*[tmpSplit];
 	Voxel **aVoxels = new Voxel *[tmpSplit];
 
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
 	while (!this->generationCompleted(missCounter, t)) {
+		if (this->params.timestamp){
+		    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+		    auto miliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now - begin).count();
+		    std::cout << "[" << miliseconds << "]";
+
+		}
 		std::cout << "[" << this->collector << " PackingGenerator::createPacking] choosing " << tmpSplit << " shapes..." << std::flush;
 
 		_OMP_PARALLEL_FOR
@@ -303,6 +319,12 @@ void PackingGenerator::createPacking() {
 			missCounter += tmpSplit;
 			size_t v0 = this->voxels->getLength();
 
+			if (this->params.timestamp){
+			    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+			    auto miliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now - begin).count();
+			    std::cout << "[" << miliseconds << "]";
+
+			}
 			std::cout << "[" << this->collector << " PackingGenerator::createPacking] splitting " << v0 << " voxels ";
 			std::cout.flush();
 //						this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
@@ -314,7 +336,7 @@ void PackingGenerator::createPacking() {
 			if (status == VoxelList::NORMAL_SPLIT || status == VoxelList::NO_SPLIT_BUT_INITIALIZED){
 //				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
 				std::cout.precision(5);
-				std::cout << " done. " << this->voxels->getLength() << "(" << this->voxels->countActiveTopLevelVoxels() << ") voxels, new voxel size: " << voxels->getSpatialVoxelSize() << ", angular size: " << this->voxels->getAngularVoxelSize() << ", factor: " << factor << ", change: " << (factor/oldFactor) << std::endl;
+				std::cout << " done. " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels, new voxel size: " << voxels->getSpatialVoxelSize() << ", angular size: " << this->voxels->getAngularVoxelSize() << ", factor: " << factor << ", change: " << (factor/oldFactor) << std::endl;
 				std::cout.precision(std::numeric_limits< double >::max_digits10);
 				missCounter = 0;
 			}else if (status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
@@ -323,7 +345,7 @@ void PackingGenerator::createPacking() {
 					this->voxels->analyzeVoxels(this->surface, this->surface->getNeighbourGrid(), depthAnalyze);
 					factor = this->getFactor();
 					std::cout.precision(5);
-					std::cout << " done: " << this->voxels->getLength() << "(" << this->voxels->countActiveTopLevelVoxels() << ") voxels remained, factor = " << factor << ", change: " << (factor/oldFactor) << std::endl << std::flush;
+					std::cout << " done: " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels remained, factor = " << factor << ", change: " << (factor/oldFactor) << std::endl << std::flush;
 					std::cout.precision(std::numeric_limits< double >::max_digits10);
 					tmpSplit = (int)(1.1 * tmpSplit);
 				}
@@ -400,6 +422,12 @@ void PackingGenerator::createPacking() {
 	delete[] sVirtual;
 	delete[] aVoxels;
 
+	if (this->params.timestamp){
+	    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+	    auto miliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now - begin).count();
+	    std::cout << "[" << miliseconds << "]";
+
+	}
 	std::cout << "[" << this->collector << " PackingGenerator::createPacking] finished after generating " << l << " shapes" << std::endl;
 }
 
@@ -417,7 +445,7 @@ bool PackingGenerator::generationCompleted(size_t missCounter, double t) {
 }
 
 
-void PackingGenerator::run(){
+void PackingGenerator::run(Packing *packing){
 
 #ifdef _OPENMP
 	struct timeval timeout;
@@ -442,7 +470,7 @@ void PackingGenerator::run(){
 	}
 #endif
 
-	this->createPacking();
+	this->createPacking(packing);
 }
 
 
