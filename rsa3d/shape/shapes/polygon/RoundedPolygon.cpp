@@ -22,11 +22,13 @@ double RoundedPolygon::calculateCircumscribedCircleRadius(){
 
 void RoundedPolygon::normalizeVolume(std::istringstream &in){
 	double area;
-	if (in.rdbuf()->in_avail() > 0){
-		in >> area;
-	}else{
-		area = RoundedPolygon::getArea();
-	}
+	in >> area;
+	if (in) {
+        Validate(area > 0);
+    } else {
+        area = RoundedPolygon::getArea();
+    }
+
 	std::for_each(vertexR.begin(), vertexR.end(), [area](auto &vR) { vR /= sqrt(area); });
     RoundedPolygon::radius /= sqrt(area);
 }
@@ -232,7 +234,8 @@ bool RoundedPolygon::voxelInsideComplexCheck(const Vector<2> &spatialCenter, dou
     return false;
 }
 
-double RoundedPolygon::getArea(){
+double RoundedPolygon::getArea() {
+    ValidateMsg(Polygon::isPolygonConvex(), "Automatic volume normalization for concave polygons is unsupported");
 
     double area = std::accumulate(segments.begin(), segments.end(), 0.0, [](auto a, auto seg) {
         return a + getTriangleArea(seg.first, seg.second);
@@ -251,8 +254,6 @@ double RoundedPolygon::getArea(){
         double areaTmp = 0.5*std::abs(v10[0]*v20[1] - v10[1]*v20[0]);
         double h = 2*areaTmp / v12.norm();
         double angle = std::acos(h/v10.norm()) + std::acos(h/v20.norm());
-        if (angle > M_PI)
-            throw std::runtime_error ("RoundedPolygon::getArea() supports only convex shapes");
 
         area += RoundedPolygon::radius*RoundedPolygon::radius*(M_PI - angle)/2.0;
         area += v10.norm()*RoundedPolygon::radius;
@@ -263,7 +264,7 @@ double RoundedPolygon::getArea(){
 double RoundedPolygon::getVolume(unsigned short dim) const {
     if (dim != 2)
         throw std::runtime_error ("RoundedPolygon supports only 2D packings");
-    return RoundedPolygon::getArea();
+    return 1;
 }
 
 Shape<2, 1> *RoundedPolygon::clone() const {

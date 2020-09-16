@@ -40,8 +40,8 @@ unsigned long Saturation::getSeedOrigin() const {
 }
 
 void Saturation::printHelp(std::ostream &out, const ProgramArguments &arguments) {
-    out << arguments.formatUsage("") << std::endl;
+    out << arguments.formatUsage("[file in]") << std::endl;
     out << std::endl;
-    out << "It loads a given packing and try to saturate it." << std::endl;
+    out << "It loads a given packing and tries to saturate it." << std::endl;
 }
 

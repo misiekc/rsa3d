@@ -30,13 +30,20 @@ double Polygon::calculateCircumscribedCircleRadius(){
 	return result;
 }
 
-double Polygon::calculateInscribedCircleRadius(){
-	double result = Polygon::vertexR[Polygon::segments[0].first];
+double Polygon::calculateInscribedCircleRadius(const Vector<2> &origin) {
+	double result = std::numeric_limits<double>::infinity();
 	for (auto segment : Polygon::segments) {
-        Vector<2> v3 = Polygon::getStaticVertexPosition(segment.first);
-        Vector<2> v4 = Polygon::getStaticVertexPosition(segment.second);
-		double d = std::abs(v3[0]*v4[1] - v3[1]*v4[0]) / (v4 - v3).norm();
-		result = std::min(result, d);
+        Vector<2> v3 = Polygon::getStaticVertexPosition(segment.first) - origin;
+        Vector<2> v4 = Polygon::getStaticVertexPosition(segment.second) - origin;
+        result = std::min(result, v3.norm());
+        result = std::min(result, v4.norm());
+
+        Vector<2> edgeVector = v4 - v3;
+        bool projectionInsideEdge = ((v3 * edgeVector) * (v4 * edgeVector) < 0);
+        if (projectionInsideEdge) {
+            double d = std::abs(v3[0] * v4[1] - v3[1] * v4[0]) / (v4 - v3).norm();
+            result = std::min(result, d);
+        }
 	}
 	return result;
 }
@@ -52,17 +59,66 @@ double Polygon::getTriangleArea(size_t i, size_t j){
 /**
  * moves the center of the polygon to (0,0)
  */
-void Polygon::centerPolygon(){
-	Vector<2> cm;
-	for (size_t i=0; i<Polygon::vertexR.size(); i++)
-	    cm += Polygon::getStaticVertexPosition(i);
-	cm /= Polygon::vertexR.size();
+void Polygon::centerPolygon() {
+    Vector<2> origin = Polygon::calculateOptimalOrigin();
 
 	for (size_t i=0; i<Polygon::vertexR.size(); i++){
-	    Vector<2> newV = Polygon::getStaticVertexPosition(i) - cm;
+	    Vector<2> newV = Polygon::getStaticVertexPosition(i) - origin;
 		Polygon::vertexR[i] = newV.norm();
 		Polygon::vertexTheta[i] = newV.angle();
 	}
+}
+
+/**
+ * @brief Finds optimal origin for largest insphere.
+ * @details Uses pole of inaccessibility algorithm known from geography: https://arxiv.org/pdf/1212.3193.pdf
+ */
+Vector<2> Polygon::calculateOptimalOrigin() {
+    double xmin, xmax, ymin, ymax;
+    xmin = ymin = std::numeric_limits<double>::infinity();
+    xmax = ymax = -std::numeric_limits<double>::infinity();
+
+    for (const auto &vertex : Polygon::getStaticVerticesPositions()) {
+        if (vertex[0] < xmin)
+            xmin = vertex[0];
+        if (vertex[0] > xmax)
+            xmax = vertex[0];
+        if (vertex[1] < ymin)
+            ymin = vertex[1];
+        if (vertex[1] > ymax)
+            ymax = vertex[1];
+    }
+
+    Vector<2> origin{};
+    double insphereRadius{};
+    while (std::pow(xmax - xmin, 2) + std::pow(ymax - ymin, 2) > std::pow(INSPHERE_SEARCH_PRECISION, 2)) {
+        bool anyPointInsideSampled{};
+        for (std::size_t i{}; i <= INSPHERE_SEARCH_DIVISIONS; i++) {
+            Vector<2> point;
+            point[0] = xmin + (xmax - xmin) * i / INSPHERE_SEARCH_DIVISIONS;
+            for (std::size_t j{}; j <= INSPHERE_SEARCH_DIVISIONS; j++) {
+                point[1] = ymin + (ymax - ymin) * j / INSPHERE_SEARCH_DIVISIONS;
+                if (!Polygon::pointInsidePolygon(point, Polygon::getStaticVerticesPositions()))
+                    continue;
+
+                anyPointInsideSampled = true;
+                double newRadius = Polygon::calculateInscribedCircleRadius(point);
+                if (newRadius > insphereRadius) {
+                    insphereRadius = newRadius;
+                    origin = point;
+                }
+            }
+        }
+        Assert(anyPointInsideSampled);
+
+        double newXSize = (xmax - xmin) / INSPHERE_SEARCH_FACTOR;
+        double newYSize = (ymax - ymin) / INSPHERE_SEARCH_FACTOR;
+        xmin = origin[0] - newXSize / 2;
+        xmax = origin[0] + newXSize / 2;
+        ymin = origin[1] - newYSize / 2;
+        ymax = origin[1] + newYSize / 2;
+    }
+    return origin;
 }
 
 void Polygon::createStarHelperSegments(){
@@ -101,15 +157,16 @@ void Polygon::initClass(const std::string &args){
 	std::istringstream in(args);
     Polygon::parseVertices(in);
     Polygon::parseSegments(in);
+    Polygon::centerPolygon();
     Polygon::parseHelperSegments(in);
-    Polygon::normalizeVolume();
+    Polygon::normalizeVolume(in);
 
     ShapeStaticInfo<2, 1> shapeInfo;
     shapeInfo.setCircumsphereRadius(Polygon::calculateCircumscribedCircleRadius());
 	shapeInfo.setInsphereRadius(Polygon::calculateInscribedCircleRadius());
 	shapeInfo.setAngularVoxelSize(2*M_PI);
 	shapeInfo.setSupportsSaturation(true);
-	shapeInfo.setDefaultCreateShapeImpl <Polygon> ();
+	shapeInfo.setDefaultCreateShapeImpl<Polygon>();
 
 	Shape::setShapeStaticInfo(shapeInfo);
 
@@ -118,11 +175,37 @@ void Polygon::initClass(const std::string &args){
 	#endif
 }
 
-void Polygon::normalizeVolume() {
-    double area = std::accumulate(segments.begin(), segments.end(), 0.0, [](auto a, auto seg) {
-        return a + getTriangleArea(seg.first, seg.second);
-    });
-    std::for_each(vertexR.begin(), vertexR.end(), [area](auto &vR) { vR /= sqrt(area); });
+void Polygon::normalizeVolume(std::istringstream &in) {
+    double area;
+    in >> area;
+    if (in) {
+        Validate(area > 0);
+    } else {
+        ValidateMsg(Polygon::isPolygonConvex(), "Automatic volume normalization for concave polygons is unsupported");
+        area = std::accumulate(segments.begin(), segments.end(), 0.0, [](auto a, auto seg) {
+            return a + getTriangleArea(seg.first, seg.second);
+        });
+    }
+
+    std::for_each(vertexR.begin(), vertexR.end(), [area](auto &vR) { vR /= std::sqrt(area); });
+}
+
+bool Polygon::isPolygonConvex() {
+    Vector<2> v0 = getStaticVertexPosition(0);
+    Vector<2> v1 = getStaticVertexPosition(1);
+    Vector<2> prevSegment = v1 - v0;
+    std::optional<double> prevSpin = std::nullopt;
+    for (std::size_t i = 1; i <= segments.size(); i++) {
+        auto segmentIdx = segments[i % segments.size()];
+        Vector<2> currSegment = getStaticVertexPosition(segmentIdx.second)
+                                - getStaticVertexPosition(segmentIdx.first);
+        double currSpin = currSegment[0] * prevSegment[1] - currSegment[1] * prevSegment[0];
+        if (prevSpin.has_value() && *prevSpin * currSpin < 0)
+            return false;
+        prevSegment = currSegment;
+        prevSpin = currSpin;
+    }
+    return true;
 }
 
 void Polygon::clearOldData() {
@@ -186,10 +269,12 @@ void Polygon::parseSegments(std::istringstream &in) {
 
 void Polygon::parseHelperSegments(std::istringstream &in) {
     std::size_t n;
-    if (in.str().find("starHelperSegments")!=std::string::npos){
-        Polygon::centerPolygon();
+    if (in.str().find("starHelperSegments") != std::string::npos) {
+        std::string starHelperSegments;
+        in >> starHelperSegments;
+        ValidateMsg(starHelperSegments == "starHelperSegments", "Malformed Polygon attributes");
         Polygon::createStarHelperSegments();
-    }else{
+    } else{
         in >> n;
         // reading helper segments
         for(size_t i = 0; i<n; i++){
@@ -362,7 +447,7 @@ bool Polygon::voxelInsideFullAngleCheck(const Vector<2> &spatialCenter, double h
     #else
         return this->pointInsidePushedVertices(spatialCenter, pushDistance)
             || this->pointInsidePushedEdges(spatialCenter, pushDistance)
-            || this->pointInsidePolygon(spatialCenter);
+            || this->pointInsidePolygon(spatialCenter, this->getVerticesPositions());
     #endif
 }
 
@@ -395,11 +480,11 @@ bool Polygon::pointInsidePushedEdges(const Vector<2> &point, double pushDistance
     return false;
 }
 
-bool Polygon::pointInsidePolygon(const Vector<2> &point) const {
+bool Polygon::pointInsidePolygon(const Vector<2> &point, const std::vector<Vector<2>> &vertices) {
     std::size_t intersectionsOnLeft = 0;
     for (auto segment : Polygon::segments) {
-        Vector<2> s1 = Polygon::getVertexPosition(segment.first);
-        Vector<2> s2 = Polygon::getVertexPosition(segment.second);
+        Vector<2> s1 = vertices[segment.first];
+        Vector<2> s2 = vertices[segment.second];
 
         if (s1[1] > s2[1])
             std::swap(s1, s2);
@@ -490,17 +575,30 @@ Vector<2> Polygon::getVertexPosition(std::size_t index) const {
     Vector<2> position = this->getPosition();
     double angle = Polygon::vertexTheta[index] + this->getOrientation()[0];
     return Vector<2>{{
-        position[0] + Polygon::vertexR[index] * std::cos(angle),
-        position[1] + Polygon::vertexR[index] * std::sin(angle)
-    }};
+                             position[0] + Polygon::vertexR[index] * std::cos(angle),
+                             position[1] + Polygon::vertexR[index] * std::sin(angle)
+                     }};
 }
 
+std::vector<Vector<2>> Polygon::getVerticesPositions() const {
+    std::vector<Vector<2>> result(Polygon::segments.size());
+    for (std::size_t i{}; i < Polygon::segments.size(); i++)
+        result[i] = this->getVertexPosition(Polygon::segments[i].first);
+    return result;
+}
 
 Vector<2> Polygon::getStaticVertexPosition(std::size_t index) {
     return Vector<2>{{
         Polygon::vertexR[index] * std::cos(Polygon::vertexTheta[index]),
         Polygon::vertexR[index] * std::sin(Polygon::vertexTheta[index])
     }};
+}
+
+std::vector<Vector<2>> Polygon::getStaticVerticesPositions() {
+    std::vector<Vector<2>> result(Polygon::segments.size());
+    for (std::size_t i{}; i < Polygon::segments.size(); i++)
+        result[i] = Polygon::getStaticVertexPosition(Polygon::segments[i].first);
+    return result;
 }
 
 void Polygon::vertexToPovray(std::size_t index, std::ostream &out) const {

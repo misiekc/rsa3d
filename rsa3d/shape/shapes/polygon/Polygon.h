@@ -16,16 +16,17 @@
 #include "../../../geometry/Vector.h"
 
 class Polygon : public Shape<2, 1> {
-
 private:
-
-    static void normalizeVolume();
+    static void normalizeVolume(std::istringstream &in);
+    static bool pointInsidePolygon(const Vector<2> &point, const std::vector<Vector<2>> &vertiecs);
 
     bool voxelInsideFullAngleCheck(const Vector<2> &spatialCenter, double halfSpatialSize) const;
-
     bool pointInsidePushedVertices(const Vector<2> &point, double pushDistance) const;
     bool pointInsidePushedEdges(const Vector<2> &point, double pushDistance) const;
-    bool pointInsidePolygon(const Vector<2> &point) const;
+
+    static constexpr std::size_t INSPHERE_SEARCH_DIVISIONS = 20;
+    static constexpr double INSPHERE_SEARCH_FACTOR = M_SQRT2;
+    static constexpr double INSPHERE_SEARCH_PRECISION = 1e-8;
 
 protected:
 	//polar coordinates of all vertices
@@ -39,11 +40,11 @@ protected:
     static void parseSegments(std::istringstream &in);
     static void parseHelperSegments(std::istringstream &in);
 
-
-	static Vector<2> getStaticVertexPosition(std::size_t index);
+    static Vector<2> getStaticVertexPosition(std::size_t index);
+    static std::vector<Vector<2>> getStaticVerticesPositions();
 
     static double calculateCircumscribedCircleRadius();
-    static double calculateInscribedCircleRadius();
+    static double calculateInscribedCircleRadius(const Vector<2> &origin = Vector<2>{});
 	static void centerPolygon();
 	static void createStarHelperSegments();
 
@@ -63,6 +64,7 @@ protected:
                                  double halfAngularSize) const;
 
     Vector<2> getVertexPosition(std::size_t index) const;
+    std::vector<Vector<2>> getVerticesPositions() const;
 
     void vertexToPovray(std::size_t index, std::ostream &out) const;
 
@@ -94,6 +96,10 @@ public:
 	std::string toPovray() const override;
 	std::string toString() const override;
 	std::string toWolfram() const override;
+
+    static bool isPolygonConvex();
+
+    static Vector<2> calculateOptimalOrigin();
 };
 
 #endif /* SHAPES_POLYGONS_POLYGON_H_ */

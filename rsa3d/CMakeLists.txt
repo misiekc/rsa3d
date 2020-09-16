@@ -18,6 +18,7 @@ set(RSA_SOURCE
         modes/PackingTestMode.cpp
         modes/PovrayMode.cpp
         modes/Simulation.cpp
+        modes/Saturation.cpp
         modes/WolframMode.cpp
         surfaces/NBoxFBC.cpp
         surfaces/NBoxPBC.cpp

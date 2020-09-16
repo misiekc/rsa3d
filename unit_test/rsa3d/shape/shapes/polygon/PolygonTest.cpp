@@ -58,30 +58,50 @@ TEST_CASE("Polygon: initClass basic parsing") {
     }
 }
 
-TEST_CASE("Polygon: initClass calculations") {
-    SECTION("volume normalization") {
-        Polygon::initClass("4 xy 1.3 1.3 -1.3 1.3 -1.3 -1.3 1.3 -1.3 4 0 1 2 3 0");
+TEST_CASE("Polygon: volume normalization") {
+    Polygon::initClass("4 xy 1.3 1.3 -1.3 1.3 -1.3 -1.3 1.3 -1.3 4 0 1 2 3 0");
 
-        auto vertexR = Polygon::getVertexR();
-        auto vertexTheta = Polygon::getVertexTheta();
-        REQUIRE(vertexR.size() == 4);
-        REQUIRE(vertexTheta.size() == 4);
-        REQUIRE(vertexR[0] == Approx(M_SQRT1_2));
-        REQUIRE(vertexR[1] == Approx(M_SQRT1_2));
-        REQUIRE(vertexR[2] == Approx(M_SQRT1_2));
-        REQUIRE(vertexR[3] == Approx(M_SQRT1_2));
-        REQUIRE(vertexTheta[0] == Approx(M_PI / 4));
-        REQUIRE(vertexTheta[1] == Approx(3 * M_PI / 4));
-        REQUIRE(vertexTheta[2] == Approx(-3 * M_PI / 4));
-        REQUIRE(vertexTheta[3] == Approx(-M_PI / 4));
-    }
+    auto vertexR = Polygon::getVertexR();
+    auto vertexTheta = Polygon::getVertexTheta();
+    REQUIRE(vertexR.size() == 4);
+    REQUIRE(vertexTheta.size() == 4);
+    REQUIRE(vertexR[0] == Approx(M_SQRT1_2));
+    REQUIRE(vertexR[1] == Approx(M_SQRT1_2));
+    REQUIRE(vertexR[2] == Approx(M_SQRT1_2));
+    REQUIRE(vertexR[3] == Approx(M_SQRT1_2));
+    REQUIRE(vertexTheta[0] == Approx(M_PI / 4));
+    REQUIRE(vertexTheta[1] == Approx(3 * M_PI / 4));
+    REQUIRE(vertexTheta[2] == Approx(-3 * M_PI / 4));
+    REQUIRE(vertexTheta[3] == Approx(-M_PI / 4));
+}
 
-    SECTION("inscribed and circumscribed sphere radius") {
-        // 1 x 1 square, center in x = 0.1, y = 0.2
+TEST_CASE("Polygon: automatic volume only for convex") {
+    REQUIRE_THROWS_WITH(Polygon::initClass("4 xy 1.3 1.3 -1.3 -1.3 -1.3 1.3 1.3 -1.3 4 0 1 2 3 0"),
+                        Catch::Contains("unsupported"));
+}
+
+TEST_CASE("Polygon: insphere and circumsphere") {
+    SECTION("1 x 1 square, center in x = 0.1, y = 0.2") {
         Polygon::initClass("4 xy 0.6 0.7 -0.4 0.7 -0.4 -0.3 0.6 -0.3 4 0 1 2 3 0");
 
-        REQUIRE(Shape<2, 1>::getInsphereRadius() == Approx(0.3));
-        REQUIRE(Shape<2, 1>::getCircumsphereRadius() == Approx(std::sqrt(0.6*0.6 + 0.7*0.7)));
+        REQUIRE(Shape<2, 1>::getInsphereRadius() == Approx(0.5).margin(1e-7));
+        REQUIRE(Shape<2, 1>::getCircumsphereRadius() == Approx(M_SQRT1_2).margin(1e-7));
+    }
+
+    SECTION("3 x 4 x 5 right triangle, center in right angle vertex") {
+        // Use external volume = 1 not to normalize anything
+        Polygon::initClass("3 xy  0 0 4 0 0 3  3 0 1 2  0  1");
+
+        REQUIRE(Shape<2, 1>::getInsphereRadius() == Approx(1).margin(1e-7));
+        REQUIRE(Shape<2, 1>::getCircumsphereRadius() == Approx(std::sqrt(1*1 + 3*3)).margin(1e-7));
+    }
+
+    SECTION("M-like shape with a base") {
+        // Use external volume = 1 not to normalize anything
+        Polygon::initClass("5 xy  0 0 2 0 2 5 1 2 0 5  5 0 1 2 3 4  0  1");
+
+        REQUIRE(Shape<2, 1>::getInsphereRadius() == Approx(1).margin(1e-7));
+        REQUIRE(Shape<2, 1>::getCircumsphereRadius() == Approx(std::sqrt(1*1 + 4*4)).margin(1e-7));
     }
 }
 
@@ -93,16 +113,6 @@ TEST_CASE("Polygon: initClass helperSegments") {
         REQUIRE(helperSegments.size() == 2);
         REQUIRE(helperSegments[0] == std::make_pair(3ul, 1ul));
         REQUIRE(helperSegments[1] == std::make_pair(2ul, 0ul));
-    }
-
-    SECTION("manual helper segments shouldn't center polygon") {
-        Polygon::initClass("4 xy -0.1 -0.1 0.9 -0.1 0.9 0.9 -0.1 0.9 4 0 1 2 3 2 3 1 2 0");
-
-        auto vertexR = Polygon::getVertexR();
-        REQUIRE(vertexR[0] == Approx(std::sqrt(0.1*0.1 + 0.1*0.1)));
-        REQUIRE(vertexR[1] == Approx(std::sqrt(0.1*0.1 + 0.9*0.9)));
-        REQUIRE(vertexR[2] == Approx(std::sqrt(0.9*0.9 + 0.9*0.9)));
-        REQUIRE(vertexR[3] == Approx(std::sqrt(0.9*0.9 + 0.1*0.1)));
     }
 
     SECTION("starHelper segments additional vertex") {
@@ -125,16 +135,6 @@ TEST_CASE("Polygon: initClass helperSegments") {
         REQUIRE(helperSegments[1] == std::make_pair(1ul, 4ul));
         REQUIRE(helperSegments[2] == std::make_pair(2ul, 4ul));
         REQUIRE(helperSegments[3] == std::make_pair(3ul, 4ul));
-    }
-
-    SECTION("star helper segments should center polygon") {
-        Polygon::initClass("4 xy -0.1 -0.1 0.9 -0.1 0.9 0.9 -0.1 0.9 4 0 1 2 3 starHelperSegments");
-
-        auto vertexR = Polygon::getVertexR();
-        REQUIRE(vertexR[0] == Approx(M_SQRT1_2));
-        REQUIRE(vertexR[1] == Approx(M_SQRT1_2));
-        REQUIRE(vertexR[2] == Approx(M_SQRT1_2));
-        REQUIRE(vertexR[3] == Approx(M_SQRT1_2));
     }
 }
 
