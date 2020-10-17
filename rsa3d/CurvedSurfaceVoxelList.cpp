@@ -24,7 +24,7 @@ unsigned short CurvedSurfaceVoxelList::splitVoxels(double minDx, size_t maxVoxel
         int n = (int)(this->spatialRange/spatialSize) + 1;
         int idx = position2i(daArray, RSA_SPATIAL_DIMENSION, n*spatialSize, spatialSize, n);
 
-        if (this->activeGridCells.find(idx) != this->activeGridCells.end()) {
+        if (this->activeGridCells.find(idx) == this->activeGridCells.end()) {
             this->activeGridCells.insert(idx);
             this->randomAccessActiveGridCells.push_back(idx);
         }
@@ -36,6 +36,9 @@ unsigned short CurvedSurfaceVoxelList::splitVoxels(double minDx, size_t maxVoxel
 void CurvedSurfaceVoxelList::getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) {
     if (!this->voxelsInitialized) {
         VoxelList::getRandomEntry(position, orientation, v, rnd);
+        this->surface->fillInLastCoordinate(*position);
+        Assert(std::abs((*position)[RSA_SPATIAL_DIMENSION - 1]) < this->spatialRange/2);
+        (*position)[RSA_SPATIAL_DIMENSION - 1] += (this->spatialRange/2);
         return;
     }
 
@@ -66,6 +69,8 @@ bool CurvedSurfaceVoxelList::isVoxelInsidePacking(Voxel *v) {
     RSAVector voxelPos = v->getPosition();
     double spatialSize = this->getSpatialVoxelSize();
     auto [min, max] = this->surface->calculateValueRange(voxelPos, spatialSize);
+    min += this->spatialRange/2;
+    max += this->spatialRange/2;
     if (max < voxelPos[RSA_SPATIAL_DIMENSION - 1] || min > voxelPos[RSA_SPATIAL_DIMENSION - 1] + spatialSize)
         return false;
     else
