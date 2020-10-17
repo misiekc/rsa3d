@@ -8,16 +8,16 @@
 #include <memory>
 
 #include "geometry/Vector.h"
-#include "Surface.h"
+#include "surfaces/NBoxPBC.h"
 #include "SurfaceFunction.h"
 
-class CurvedSurface : public Surface {
+class CurvedSurface : public NBoxPBC {
 private:
     std::unique_ptr<SurfaceFunction> surfaceFunction;
 
 public:
     CurvedSurface(int dim, double s, double ndx, double vdx, std::unique_ptr<SurfaceFunction> surfaceFunction)
-            : Surface(dim, s, ndx, vdx), surfaceFunction(std::move(surfaceFunction))
+            : NBoxPBC(dim, s, ndx, vdx), surfaceFunction(std::move(surfaceFunction))
     { }
 
     [[nodiscard]] SurfaceFunction::MinMax calculateValueRange(const RSAVector &voxelPosition,
