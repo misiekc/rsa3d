@@ -29,6 +29,8 @@ set(RSA_SOURCE
         utils/Utils.cpp
         BoundaryConditions.h
         Config.cpp
+        CurvedSurface.cpp
+        CurvedSurfaceVoxelList.cpp
         FreeBC.h
         NeighbourGrid.h
         OrientedCuboidVoxelList.cpp

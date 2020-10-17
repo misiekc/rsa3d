@@ -61,12 +61,12 @@ bool Voxel::isInside(const RSAVector &pos, double size, const RSAOrientation &an
 
 
 
-const RSAVector &Voxel::getPosition(){
+const RSAVector &Voxel::getPosition() const {
 	return this->position;
 }
 
 
-const RSAOrientation &Voxel::getOrientation(){
+const RSAOrientation &Voxel::getOrientation() const{
 	return this->orientation;
 }
 

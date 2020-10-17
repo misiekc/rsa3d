@@ -53,9 +53,9 @@ public:
 	bool isInside(const RSAVector &pos, double size, const RSAOrientation &angle,
                   double asize);
 
-	const RSAVector &getPosition();
+	const RSAVector &getPosition() const;
 
-	const RSAOrientation &getOrientation();
+	const RSAOrientation &getOrientation() const;
 
 	std::string toPovray(double ssize);
 	std::string toWolfram(double ssize, double asize);
