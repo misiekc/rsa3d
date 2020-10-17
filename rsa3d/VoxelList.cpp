@@ -632,18 +632,18 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 	//	this->checkTopLevelVoxels();
 }
 
-Voxel * VoxelList::getRandomVoxel(RND *rnd){
+void VoxelList::getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) {
 	double d = rnd->nextValue();
-	return this->voxels[(int)(d*(this->length))];
+	*v = (this->voxels[(int)(d*(this->length))]);
+	this->getRandomPositionAndOrientation(position, orientation, *v, rnd);
 }
 
-
-Voxel * VoxelList::getVoxel(int i){
+Voxel * VoxelList::getVoxel(int i) {
 	return this->voxels[i];
 }
 
-
-void VoxelList::getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd){
+void VoxelList::getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd)
+{
 	RSAVector vpos = v->getPosition();
 	RSAOrientation vangle = v->getOrientation();
 

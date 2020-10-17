@@ -253,8 +253,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 			RSAVector pos;
 			RSAOrientation angle{};
 			do{
-				aVoxels[i] = this->voxels->getRandomVoxel(threadRND.get());
-				this->voxels->getRandomPositionAndOrientation(&pos, &angle, aVoxels[i], threadRND.get());
+			    this->voxels->getRandomEntry(&pos, &angle, &(aVoxels[i]), threadRND.get());
 			}while(!this->isInside(pos, angle));
 			// setting shape position and orientation
 			sVirtual[i]->translate(pos);

@@ -85,7 +85,7 @@ protected:
 	// checks if a top level voxel for voxel v is active (if not v should be removed
 	bool isTopLevelVoxelActive(Voxel *v);
 
-	bool isVoxelInsidePacking(Voxel *v);
+	virtual bool isVoxelInsidePacking(Voxel *v);
 	virtual bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
                                     std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc,
                                     unsigned short depth = 0);
@@ -140,7 +140,7 @@ public:
 	// counts active top level voxels
 	size_t countActiveTopLevelVoxels();
 
-	virtual Voxel *getRandomVoxel(RND *rnd);
+	virtual void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd);
 	Voxel *getVoxel(int i);
 	virtual Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle);
 	virtual void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd);
