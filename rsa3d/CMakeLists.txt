@@ -22,6 +22,7 @@ set(RSA_SOURCE
         modes/WolframMode.cpp
         surfaces/NBoxFBC.cpp
         surfaces/NBoxPBC.cpp
+        surface_functions/FlatSurfaceFunction.h
         utils/Assertions.h
         utils/OMPMacros.h
         utils/Quantity.cpp
