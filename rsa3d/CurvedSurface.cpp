@@ -4,10 +4,12 @@
 
 #include "CurvedSurface.h"
 
-void CurvedSurface::fillInLastCoordinate(RSAVector &position) {
-
+void CurvedSurface::fillInLastCoordinate(RSAVector &position) const {
+    this->surfaceFunction->fillInLastCoordinate(position);
 }
 
-CurvedSurface::MinMax CurvedSurface::calculateValueRange(const RSAVector &voxelPosition, double voxelSpatialSize) {
-    return {};
+SurfaceFunction::MinMax CurvedSurface::calculateValueRange(const RSAVector &voxelPosition,
+                                                           double voxelSpatialSize) const
+{
+    return this->surfaceFunction->calculateValueRange(voxelPosition, voxelSpatialSize);
 }

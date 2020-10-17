@@ -43,6 +43,7 @@ set(RSA_SOURCE
         ProgramMode.h
         RND.cpp
         Surface.cpp
+        SurfaceFunction.h
         ThreadLocalRND.cpp
         VariableSizeVoxelList.cpp
         Voxel.cpp

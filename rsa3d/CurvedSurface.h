@@ -5,19 +5,24 @@
 #ifndef RSA3D_CURVEDSURFACE_H
 #define RSA3D_CURVEDSURFACE_H
 
+#include <memory>
 
 #include "geometry/Vector.h"
 #include "Surface.h"
+#include "SurfaceFunction.h"
 
 class CurvedSurface : public Surface {
-public:
-    struct MinMax {
-        double min{};
-        double max{};
-    };
+private:
+    std::unique_ptr<SurfaceFunction> surfaceFunction;
 
-    MinMax calculateValueRange(const RSAVector &voxelPosition, double voxelSpatialSize);
-    void fillInLastCoordinate(RSAVector &position);
+public:
+    CurvedSurface(int dim, double s, double ndx, double vdx, std::unique_ptr<SurfaceFunction> surfaceFunction)
+            : Surface(dim, s, ndx, vdx), surfaceFunction(std::move(surfaceFunction))
+    { }
+
+    [[nodiscard]] SurfaceFunction::MinMax calculateValueRange(const RSAVector &voxelPosition,
+                                                              double voxelSpatialSize) const;
+    void fillInLastCoordinate(RSAVector &position) const;
 };
 
 
