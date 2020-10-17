@@ -74,10 +74,10 @@ bool CurvedSurfaceVoxelList::isVoxelInsidePacking(Voxel *v) {
 
 CurvedSurfaceVoxelList::CurvedSurfaceVoxelList(double packingSpatialSize, double requestedSpatialVoxelSize,
                                                double shapeAngularRange, double requestedAngularVoxelSize,
-                                               std::shared_ptr<CurvedSurface> surface)
+                                               CurvedSurface *surface)
         : VoxelList(RSA_SPATIAL_DIMENSION, packingSpatialSize, requestedSpatialVoxelSize, shapeAngularRange,
                     requestedAngularVoxelSize),
-          surface(std::move(surface))
+          surface(surface)
 {
     Expects(RSA_ANGULAR_DIMENSION == 0);
     Expects(RSA_SPATIAL_DIMENSION > 1);

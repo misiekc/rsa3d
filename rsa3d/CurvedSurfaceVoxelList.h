@@ -16,14 +16,14 @@ class CurvedSurfaceVoxelList : public VoxelList {
 private:
     std::unordered_set<int> activeGridCells;
     std::vector<int> randomAccessActiveGridCells;
-    std::shared_ptr<CurvedSurface> surface;
+    CurvedSurface *surface;
 
 protected:
     bool isVoxelInsidePacking(Voxel *v) override;
 
 public:
     CurvedSurfaceVoxelList(double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange,
-                           double requestedAngularVoxelSize, std::shared_ptr<CurvedSurface> surface);
+                           double requestedAngularVoxelSize, CurvedSurface *surface);
 
     unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl,
                                RSABoundaryConditions *bc) override;

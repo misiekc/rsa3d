@@ -23,6 +23,9 @@
 #include "shape/ConvexShape.h"
 #include "ThreadLocalRND.h"
 #include "utils/OMPMacros.h"
+#include "surface_functions/FlatSurfaceFunction.h"
+#include "CurvedSurface.h"
+#include "CurvedSurfaceVoxelList.h"
 
 
 double PackingGenerator::FACTOR_LIMIT = 5.0;
@@ -31,24 +34,46 @@ double PackingGenerator::FACTOR_LIMIT = 5.0;
 PackingGenerator::PackingGenerator(int seed, std::size_t collector, const Parameters *params)
         : seed{seed}, collector{collector}, params{*params}
 {
-	this->spatialSize = this->params.surfaceSize;
-	this->angularSize = RSAShape::getAngularVoxelSize();
-	if (this->params.requestedAngularVoxelSize > this->angularSize)
-		this->params.requestedAngularVoxelSize = this->angularSize;
+    this->spatialSize = this->params.surfaceSize;
+    this->angularSize = RSAShape::getAngularVoxelSize();
+    if (this->params.requestedAngularVoxelSize > this->angularSize)
+        this->params.requestedAngularVoxelSize = this->angularSize;
 
-	this->voxels = ShapeFactory::createVoxelList(params->particleType, this->params.surfaceDimension, this->spatialSize, RSAShape::getVoxelSpatialSize(), this->angularSize, this->params.requestedAngularVoxelSize);
-	if (params->maxVoxels==0)
-		this->voxels->disable();
-
-	double gridSize = RSAShape::getNeighbourListCellSize();
-	if (gridSize < this->params.thresholdDistance)
-		gridSize = this->params.thresholdDistance;
+    double gridSize = RSAShape::getNeighbourListCellSize();
+    if (gridSize < this->params.thresholdDistance)
+        gridSize = this->params.thresholdDistance;
 
 
-	if (this->params.boundaryConditions == "free")
-		this->surface = new NBoxFBC(this->params.surfaceDimension, this->params.surfaceSize, gridSize, RSAShape::getVoxelSpatialSize());
-	else
-		this->surface = new NBoxPBC(this->params.surfaceDimension, this->params.surfaceSize, gridSize, RSAShape::getVoxelSpatialSize());
+    if (this->params.surfaceFunction.empty()) {
+        if (this->params.boundaryConditions == "free") {
+            this->surface = new NBoxFBC(this->params.surfaceDimension, this->params.surfaceSize, gridSize,
+                                        RSAShape::getVoxelSpatialSize());
+        } else {
+            this->surface = new NBoxPBC(this->params.surfaceDimension, this->params.surfaceSize, gridSize,
+                                        RSAShape::getVoxelSpatialSize());
+        }
+
+        this->voxels = ShapeFactory::createVoxelList(params->particleType, this->params.surfaceDimension, this->spatialSize,
+                                                     RSAShape::getVoxelSpatialSize(), this->angularSize,
+                                                     this->params.requestedAngularVoxelSize);
+    } else {
+        Assert(this->params.surfaceDimension == RSA_SPATIAL_DIMENSION);
+
+        CurvedSurface *curvedSurface{};
+        if (this->params.surfaceFunction == "FlatSurfaceFunction") {
+            curvedSurface = new CurvedSurface(this->params.surfaceDimension, this->params.surfaceSize, gridSize,
+                                              RSAShape::getVoxelSpatialSize(), std::make_unique<FlatSurfaceFunction>());
+        } else {
+            die("Unknown surface function: " + this->params.surfaceFunction);
+        }
+
+        this->surface = curvedSurface;
+        this->voxels = new CurvedSurfaceVoxelList(this->spatialSize, RSAShape::getVoxelSpatialSize(), this->angularSize,
+                                                  this->params.requestedAngularVoxelSize, curvedSurface);
+    }
+
+    if (params->maxVoxels == 0)
+        this->voxels->disable();
 }
 
 

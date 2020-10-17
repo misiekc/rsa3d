@@ -39,6 +39,7 @@ public:
 	double thresholdDistance = 0.0;
 
 	std::string boundaryConditions = "periodic";
+	std::string surfaceFunction = "";
 	std::string particleType = "Sphere";
 	std::string particleAttributes;
 
