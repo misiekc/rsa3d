@@ -657,12 +657,12 @@ void VoxelList::getRandomPositionAndOrientation(RSAVector *position, RSAOrientat
 }
 
 
-double VoxelList::getSpatialVoxelSize(){
+double VoxelList::getSpatialVoxelSize() const {
 	return this->spatialVoxelSize;
 }
 
 
-double VoxelList::getAngularVoxelSize(){
+double VoxelList::getAngularVoxelSize() const {
 	return this->angularVoxelSize;
 }
 

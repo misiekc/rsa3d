@@ -23,6 +23,7 @@ set(RSA_SOURCE
         surfaces/NBoxFBC.cpp
         surfaces/NBoxPBC.cpp
         surface_functions/FlatSurfaceFunction.h
+        surface_functions/SineSurfaceFunction.h
         utils/Assertions.h
         utils/OMPMacros.h
         utils/Quantity.cpp

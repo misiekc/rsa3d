@@ -24,6 +24,7 @@
 #include "ThreadLocalRND.h"
 #include "utils/OMPMacros.h"
 #include "surface_functions/FlatSurfaceFunction.h"
+#include "surface_functions/SineSurfaceFunction.h"
 #include "CurvedSurface.h"
 #include "CurvedSurfaceVoxelList.h"
 
@@ -59,14 +60,29 @@ PackingGenerator::PackingGenerator(int seed, std::size_t collector, const Parame
     } else {
         Assert(this->params.surfaceDimension == RSA_SPATIAL_DIMENSION);
 
-        CurvedSurface *curvedSurface{};
-        if (this->params.surfaceFunction == "FlatSurfaceFunction") {
-            curvedSurface = new CurvedSurface(this->params.surfaceDimension, this->params.surfaceSize, gridSize,
-                                              RSAShape::getVoxelSpatialSize(), std::make_unique<FlatSurfaceFunction>());
+        std::istringstream surfaceFunctionStream(this->params.surfaceFunction);
+        std::string surfaceFunctionName;
+        surfaceFunctionStream >> surfaceFunctionName;
+        Assert(surfaceFunctionStream);
+
+        std::unique_ptr<SurfaceFunction> surfaceFunction;
+        if (surfaceFunctionName == "FlatSurfaceFunction") {
+            surfaceFunction = std::make_unique<FlatSurfaceFunction>();
+        } else if (surfaceFunctionName == "SineSurfaceFunction") {
+            double A{};
+            std::size_t periods{};
+            surfaceFunctionStream >> A >> periods;
+            ValidateMsg(surfaceFunctionStream, "Malformed SineSurfaceFunctionParameters, usage: [amplitude] "
+                                               "[number of periods]");
+            Validate(periods > 0);
+            double k = 2*M_PI*periods/this->params.surfaceSize;
+            surfaceFunction = std::make_unique<SineSurfaceFunction>(A, k);
         } else {
-            die("Unknown surface function: " + this->params.surfaceFunction);
+            die("Unknown surface function: " + surfaceFunctionName);
         }
 
+        auto curvedSurface = new CurvedSurface(this->params.surfaceDimension, this->params.surfaceSize, gridSize,
+                                               RSAShape::getVoxelSpatialSize(), std::move(surfaceFunction));
         this->surface = curvedSurface;
         this->voxels = new CurvedSurfaceVoxelList(this->spatialSize, RSAShape::getVoxelSpatialSize(), this->angularSize,
                                                   this->params.requestedAngularVoxelSize, curvedSurface);

@@ -18,6 +18,8 @@ private:
     std::vector<int> randomAccessActiveGridCells;
     CurvedSurface *surface;
 
+    int getVoxelIndex(const Voxel &voxel) const;
+
 protected:
     bool isVoxelInsidePacking(Voxel *v) override;
 

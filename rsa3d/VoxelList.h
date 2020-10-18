@@ -144,8 +144,8 @@ public:
 	Voxel *getVoxel(int i);
 	virtual Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle);
 	virtual void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd);
-	double getSpatialVoxelSize();
-	double getAngularVoxelSize();
+	double getSpatialVoxelSize() const;
+	double getAngularVoxelSize() const;
 	Voxel* get(int i);
 	size_t getLength() const;
 	virtual double getVoxelsVolume();
