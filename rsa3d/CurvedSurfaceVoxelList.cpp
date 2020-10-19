@@ -11,32 +11,34 @@ unsigned short CurvedSurfaceVoxelList::splitVoxels(double minDx, size_t maxVoxel
                                                    RSABoundaryConditions *bc)
 {
     auto returnCode = VoxelList::splitVoxels(minDx, maxVoxels, nl, bc);
-
-    this->activeGridCells.clear();
-    this->activeGridCells.reserve(this->length);
-    this->randomAccessActiveGridCells.clear();
-    this->randomAccessActiveGridCells.reserve(this->length);
-
-    for (std::size_t i{}; i < this->length; i++) {
-        const auto &voxel = *(this->voxels[i]);
-        int idx = this->getVoxelIndex(voxel);
-
-        if (this->activeGridCells.find(idx) == this->activeGridCells.end()) {
-            this->activeGridCells.insert(idx);
-            this->randomAccessActiveGridCells.push_back(idx);
-        }
-    }
-
+    this->rebuildActiveSurfaceCells();
     return returnCode;
 }
 
-int CurvedSurfaceVoxelList::getVoxelIndex(const Voxel &voxel) const {
+void CurvedSurfaceVoxelList::rebuildActiveSurfaceCells() {
+    this->activeSurfaceCells.clear();
+    this->activeSurfaceCells.reserve(this->length);
+    this->randomAccessActiveSurfaceCells.clear();
+    this->randomAccessActiveSurfaceCells.reserve(this->length);
+
+    for (std::size_t i{}; i < this->length; i++) {
+        const auto &voxel = *(this->voxels[i]);
+        int idx = getSurfaceCellIndexForVoxel(voxel);
+
+        if (this->activeSurfaceCells.find(idx) == this->activeSurfaceCells.end()) {
+            this->activeSurfaceCells.insert(idx);
+            this->randomAccessActiveSurfaceCells.push_back(idx);
+        }
+    }
+}
+
+int CurvedSurfaceVoxelList::getSurfaceCellIndexForVoxel(const Voxel &voxel) const {
     const auto &pos = voxel.getPosition();
-    double daArray[RSA_SPATIAL_DIMENSION];
-    pos.copyToArray(daArray);
+    double posArray[RSA_SPATIAL_DIMENSION];
+    pos.copyToArray(posArray);
     double spatialSize = this->getSpatialVoxelSize();
     int n = (int)(spatialRange / spatialSize) + 1;
-    int idx = position2i(daArray, RSA_SPATIAL_DIMENSION - 1, n*spatialSize, spatialSize, n);
+    int idx = position2i(posArray, RSA_SPATIAL_DIMENSION - 1, n * spatialSize, spatialSize, n);
     Assert(idx >= 0);
     return idx;
 }
@@ -44,48 +46,43 @@ int CurvedSurfaceVoxelList::getVoxelIndex(const Voxel &voxel) const {
 void CurvedSurfaceVoxelList::getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) {
     if (!this->voxelsInitialized) {
         VoxelList::getRandomEntry(position, orientation, v, rnd);
-        this->surface->fillInLastCoordinate(*position);
-        Assert(std::abs((*position)[RSA_SPATIAL_DIMENSION - 1]) < this->spatialRange/2);
-        (*position)[RSA_SPATIAL_DIMENSION - 1] += (this->spatialRange/2);
+        this->fillInLastCoordinate(*position);
         return;
     }
 
     do {
-        auto randomSetIdx = static_cast<std::size_t>(this->randomAccessActiveGridCells.size() * rnd->nextValue());
-        Assert(randomSetIdx < this->randomAccessActiveGridCells.size());
-        int randomGridCellIdx = this->randomAccessActiveGridCells[randomSetIdx];
+        // Sample random active grid cell
+        auto randomSetIdx = static_cast<std::size_t>(this->randomAccessActiveSurfaceCells.size() * rnd->nextValue());
+        Assert(randomSetIdx < this->randomAccessActiveSurfaceCells.size());
+        int randomGridCellIdx = this->randomAccessActiveSurfaceCells[randomSetIdx];
 
-        std::array<double, RSA_SPATIAL_DIMENSION> da{};
-        da.fill(0);
+        // Calculate position of its bottom left corner and store in *position
+        std::array<double, RSA_SPATIAL_DIMENSION> positionArray{};
+        positionArray.fill(0);
         double spatialSize = this->getSpatialVoxelSize();
         int n = (int) (this->spatialRange / spatialSize) + 1;
-        i2position(da.data(), RSA_SPATIAL_DIMENSION - 1, randomGridCellIdx, spatialSize, n);
-        *position = da;
+        i2position(positionArray.data(), RSA_SPATIAL_DIMENSION - 1, randomGridCellIdx, spatialSize, n);
+        *position = positionArray;
 
-        bool insidePacking = true;
-        for (std::size_t i{}; i < RSA_SPATIAL_DIMENSION - 1; i++) {
+        // Sample random position inside this cell and store in *position
+        for (std::size_t i{}; i < RSA_SPATIAL_DIMENSION - 1; i++)
             (*position)[i] += ((rnd->nextValue() - 0.5) * spatialSize);
-            if ((*position)[i] >= this->spatialRange) {
-                insidePacking = false;
-                break;
-            }
-        }
-        if (!insidePacking)
-            continue;
 
-        this->surface->fillInLastCoordinate(*position);
-        Assert(std::abs((*position)[RSA_SPATIAL_DIMENSION - 1]) < this->spatialRange / 2);
-        (*position)[RSA_SPATIAL_DIMENSION - 1] += (this->spatialRange / 2);
+        // Fill in last coordinate according to surface function
+        this->fillInLastCoordinate(*position);
 
+        // Find voxel contatining this point
         RSAOrientation dummyOrientation{};
         (*v) = this->getVoxel(*position, dummyOrientation);
-        if (*v == nullptr) {
-            std::cout << "no voxel - setIdx: " << randomSetIdx << ", gridIdx: " << randomGridCellIdx;
+
+        // Debug code showing useful info when no voxel found
+        /*if (*v == nullptr) {
+            std::cout << "no voxel found - setIdx: " << randomSetIdx << ", gridIdx: " << randomGridCellIdx;
             std::cout << ", position: " << *position << ", spatial size: " << spatialSize << ", candidates: " << std::endl;
             bool rangeShown = false;
             for (std::size_t i{}; i < this->length; i++) {
                 const auto &voxel = *(this->voxels[i]);
-                if (this->getVoxelIndex(voxel) == randomGridCellIdx) {
+                if (this->getSurfaceCellIndexForVoxel(voxel) == randomGridCellIdx) {
                     if (!rangeShown) {
                         auto [min, max] = this->surface->calculateValueRange(voxel.getPosition(), spatialSize);
                         min += this->spatialRange/2;
@@ -111,11 +108,15 @@ void CurvedSurfaceVoxelList::getRandomEntry(RSAVector *position, RSAOrientation 
                     }
                 }
             }
-        }
+        }*/
+
+        // Repeat until a voxel is found - if a grid cell is active that means there are still voxels in it, so sooner
+        // or later the voxel will be found (unless is is outside of the surface and not deleted...)
     } while (*v == nullptr);
 }
 
 bool CurvedSurfaceVoxelList::isVoxelInsidePacking(const Voxel *v) const {
+    // Debug: register all examined voxels
     this->registeredVoxels[v].push_back({v->getPosition(), this->getSpatialVoxelSize()});
 
     if (!VoxelList::isVoxelInsidePacking(v))
@@ -124,8 +125,12 @@ bool CurvedSurfaceVoxelList::isVoxelInsidePacking(const Voxel *v) const {
     RSAVector voxelPos = v->getPosition();
     double spatialSize = this->getSpatialVoxelSize();
     auto [min, max] = this->surface->calculateValueRange(voxelPos, spatialSize);
+
+    // Out surface is in the middle
     min += this->spatialRange/2;
     max += this->spatialRange/2;
+
+    // If voxel is below or above the surface, it should be deleted
     if (max < voxelPos[RSA_SPATIAL_DIMENSION - 1] || min > voxelPos[RSA_SPATIAL_DIMENSION - 1] + spatialSize)
         return false;
     else
@@ -139,6 +144,16 @@ CurvedSurfaceVoxelList::CurvedSurfaceVoxelList(double packingSpatialSize, double
                     requestedAngularVoxelSize),
           surface(surface)
 {
+    // Currently we are supporting only isotropic shapes
     Expects(RSA_ANGULAR_DIMENSION == 0);
+    // Function plot is at least 2-dim
     Expects(RSA_SPATIAL_DIMENSION > 1);
+}
+
+void CurvedSurfaceVoxelList::fillInLastCoordinate(RSAVector &position) {
+    this->surface->fillInLastCoordinate(position);
+
+    // Surface places a function along last coordinate = 0; We want it to be in the middle of the simulation box
+    Assert(std::abs(position[RSA_SPATIAL_DIMENSION - 1]) < this->spatialRange/2);
+    position[RSA_SPATIAL_DIMENSION - 1] += (this->spatialRange/2);
 }
