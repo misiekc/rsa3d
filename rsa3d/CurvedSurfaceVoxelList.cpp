@@ -56,7 +56,7 @@ void CurvedSurfaceVoxelList::getRandomEntry(RSAVector *position, RSAOrientation 
         Assert(randomSetIdx < this->randomAccessActiveSurfaceCells.size());
         int randomGridCellIdx = this->randomAccessActiveSurfaceCells[randomSetIdx];
 
-        // Calculate position of its bottom left corner and store in *position
+        // Calculate position of its CENTER (as i2position does) and store in *position
         std::array<double, RSA_SPATIAL_DIMENSION> positionArray{};
         positionArray.fill(0);
         double spatialSize = this->getSpatialVoxelSize();
