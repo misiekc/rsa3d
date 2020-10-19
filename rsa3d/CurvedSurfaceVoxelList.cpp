@@ -2,6 +2,8 @@
 // Created by Piotr Kubala on 17/10/2020.
 //
 
+#include <iterator>
+
 #include "CurvedSurfaceVoxelList.h"
 #include "utils/Utils.h"
 
@@ -78,7 +80,7 @@ void CurvedSurfaceVoxelList::getRandomEntry(RSAVector *position, RSAOrientation 
         RSAOrientation dummyOrientation{};
         (*v) = this->getVoxel(*position, dummyOrientation);
         if (*v == nullptr) {
-            /*std::cout << "no voxel - setIdx: " << randomSetIdx << ", gridIdx: " << randomGridCellIdx;
+            std::cout << "no voxel - setIdx: " << randomSetIdx << ", gridIdx: " << randomGridCellIdx;
             std::cout << ", position: " << *position << ", spatial size: " << spatialSize << ", candidates: " << std::endl;
             bool rangeShown = false;
             for (std::size_t i{}; i < this->length; i++) {
@@ -86,18 +88,36 @@ void CurvedSurfaceVoxelList::getRandomEntry(RSAVector *position, RSAOrientation 
                 if (this->getVoxelIndex(voxel) == randomGridCellIdx) {
                     if (!rangeShown) {
                         auto [min, max] = this->surface->calculateValueRange(voxel.getPosition(), spatialSize);
+                        min += this->spatialRange/2;
+                        max += this->spatialRange/2;
                         std::cout << "  function range: {" << min << ", " << max << "}" << std::endl;
                         rangeShown = true;
                     };
                     std::cout << "  {" << voxel.getPosition() << ", " << (voxel.getPosition() + RSAVector(spatialSize));
-                    std::cout << "}" << std::endl;
+                    std::cout << "}";
+
+                    if (this->isVoxelInsidePacking(&voxel)) {
+                        std::cout << std::endl;
+                    } else {
+                        std::cout << " - not inside packing";
+                        auto it = this->registeredVoxels.find(&voxel);
+                        if (it == this->registeredVoxels.end()) {
+                            std::cout << " - not registered" << std::endl;
+                        } else {
+                            std::cout << " - registered as: " << std::endl << "    ";
+                            std::copy(it->second.begin(), it->second.end(), std::ostream_iterator<VoxelEntry>(std::cout, "\n    "));
+                            std::cout << std::endl;
+                        }
+                    }
                 }
-            }*/
+            }
         }
     } while (*v == nullptr);
 }
 
-bool CurvedSurfaceVoxelList::isVoxelInsidePacking(Voxel *v) {
+bool CurvedSurfaceVoxelList::isVoxelInsidePacking(const Voxel *v) const {
+    this->registeredVoxels[v].push_back({v->getPosition(), this->getSpatialVoxelSize()});
+
     if (!VoxelList::isVoxelInsidePacking(v))
         return false;
 

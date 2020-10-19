@@ -85,7 +85,7 @@ protected:
 	// checks if a top level voxel for voxel v is active (if not v should be removed
 	bool isTopLevelVoxelActive(Voxel *v);
 
-	virtual bool isVoxelInsidePacking(Voxel *v);
+	virtual bool isVoxelInsidePacking(const Voxel *v) const;
 	virtual bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
                                     std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc,
                                     unsigned short depth = 0);

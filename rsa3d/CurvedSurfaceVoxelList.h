@@ -14,14 +14,24 @@
 
 class CurvedSurfaceVoxelList : public VoxelList {
 private:
+    struct VoxelEntry {
+        RSAVector position;
+        double size{};
+
+        friend std::ostream &operator<<(std::ostream &out, const VoxelEntry &entry) {
+            return out << "{" << entry.position << ", " << entry.size << "}";
+        }
+    };
+
     std::unordered_set<int> activeGridCells;
     std::vector<int> randomAccessActiveGridCells;
     CurvedSurface *surface;
+    mutable std::unordered_map<const Voxel *, std::vector<VoxelEntry>> registeredVoxels;
 
     int getVoxelIndex(const Voxel &voxel) const;
 
 protected:
-    bool isVoxelInsidePacking(Voxel *v) override;
+    bool isVoxelInsidePacking(const Voxel *v) const override;
 
 public:
     CurvedSurfaceVoxelList(double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange,

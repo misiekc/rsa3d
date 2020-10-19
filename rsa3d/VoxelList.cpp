@@ -341,7 +341,7 @@ void VoxelList::splitVoxel(Voxel *v, double spatialSize, double angularSize, Vox
 }
 
 
-bool VoxelList::isVoxelInsidePacking(Voxel *v){
+bool VoxelList::isVoxelInsidePacking(const Voxel *v) const {
 	RSAVector vpos = v->getPosition();
 	RSAOrientation vangle = v->getOrientation();
 	for(unsigned short i=0; i < this->surfaceDimension; i++){
