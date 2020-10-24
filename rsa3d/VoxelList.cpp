@@ -341,7 +341,7 @@ void VoxelList::splitVoxel(Voxel *v, double spatialSize, double angularSize, Vox
 }
 
 
-bool VoxelList::isVoxelInsidePacking(const Voxel *v) const {
+bool VoxelList::isVoxelInsidePacking(const Voxel *v, [[maybe_unused]] double spatialSize) const {
 	RSAVector vpos = v->getPosition();
 	RSAOrientation vangle = v->getOrientation();
 	for(unsigned short i=0; i < this->surfaceDimension; i++){
@@ -476,7 +476,7 @@ bool VoxelList::isTopLevelVoxelActive(Voxel *v){
 bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, double angularSize, unsigned short depth){
 	if (!this->disabled){ // && (depth > v->depth || depth==0) ){
 
-	    if (!isTopLevelVoxelActive(v) || !this->isVoxelInsidePacking(v) )
+	    if (!isTopLevelVoxelActive(v) || !this->isVoxelInsidePacking(v, spatialSize) )
 			return true;
 
 	    std::vector<const RSAShape*> tmpShapes, shapes;

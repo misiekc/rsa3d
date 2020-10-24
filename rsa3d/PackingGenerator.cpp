@@ -444,10 +444,10 @@ void PackingGenerator::createPacking(Packing *packing) {
 			}
 //			this code is for debugging purposes in case of problems with subsequent stages of packing generation
 
-//			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
-//			this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
-//			this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
-//			this->toPovray(this->packing, this->params.surfaceSize, nullptr, "test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
+//			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getSpatialVoxelSize()));
+//			this->toWolfram("test_" + std::to_string(this->voxels->getSpatialVoxelSize()) + ".nb");
+//			this->toPovray("test_" + std::to_string(this->voxels->getSpatialVoxelSize()) + ".pov");
+//			this->toPovray(this->packing, this->params.surfaceSize, nullptr, false, "test_" + std::to_string(this->voxels->getSpatialVoxelSize()) + ".pov");
 //			std::string filename = "snapshot_" + std::to_string(this->packing.size()) + "_" + std::to_string(this->voxels->getLength()) + ".dbg";
 //			std::ofstream file(filename, std::ios::binary);
 //			this->store(file);

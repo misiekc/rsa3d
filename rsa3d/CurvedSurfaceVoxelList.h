@@ -45,7 +45,7 @@ private:
     void fillInLastCoordinate(RSAVector &position);
 
 protected:
-    bool isVoxelInsidePacking(const Voxel *v) const override;
+    bool isVoxelInsidePacking(const Voxel *v, double spatialSize) const override;
 
 public:
     CurvedSurfaceVoxelList(double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange,

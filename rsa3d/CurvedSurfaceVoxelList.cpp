@@ -115,15 +115,16 @@ void CurvedSurfaceVoxelList::getRandomEntry(RSAVector *position, RSAOrientation 
     } while (*v == nullptr);
 }
 
-bool CurvedSurfaceVoxelList::isVoxelInsidePacking(const Voxel *v) const {
+bool CurvedSurfaceVoxelList::isVoxelInsidePacking(const Voxel *v, double spatialSize) const {
+    Expects(spatialSize > 0);
+
     // Debug: register all examined voxels
     this->registeredVoxels[v].push_back({v->getPosition(), this->getSpatialVoxelSize()});
 
-    if (!VoxelList::isVoxelInsidePacking(v))
+    if (!VoxelList::isVoxelInsidePacking(v, spatialSize))
         return false;
 
     RSAVector voxelPos = v->getPosition();
-    double spatialSize = this->getSpatialVoxelSize();
     auto [min, max] = this->surface->calculateValueRange(voxelPos, spatialSize);
 
     // Out surface is in the middle
