@@ -6,7 +6,7 @@
 #define RSA3D_OWNOVERLAPSC_H
 
 #include "../../OverlapStrategy.h"
-#include "../../../FreeBC.h"
+#include "../../../boundary_conditions//FreeBC.h"
 
 template <unsigned short DIM>
 class Spherocylinder;

@@ -8,19 +8,20 @@
 #include <memory>
 
 #include "geometry/Vector.h"
-#include "surfaces/NBoxPBC.h"
+#include "Surface.h"
 #include "SurfaceFunction.h"
 
 /**
  * @brief A curved surface dictated by underlying SurfaceFunction
  */
-class CurvedSurface : public NBoxPBC {
+class CurvedSurface : public Surface {
 private:
     std::unique_ptr<SurfaceFunction> surfaceFunction;
 
 public:
-    CurvedSurface(int dim, double s, double ndx, double vdx, std::unique_ptr<SurfaceFunction> surfaceFunction)
-            : NBoxPBC(dim, s, ndx, vdx), surfaceFunction(std::move(surfaceFunction))
+    CurvedSurface(int dim, double s, double ndx, double vdx, std::unique_ptr<SurfaceFunction> surfaceFunction,
+                  std::unique_ptr<RSABoundaryConditions> bc)
+            : Surface(dim, s, ndx, vdx, std::move(bc)), surfaceFunction(std::move(surfaceFunction))
     { }
 
     /**

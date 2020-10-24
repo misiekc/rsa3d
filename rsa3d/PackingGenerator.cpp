@@ -17,8 +17,8 @@
 #include <unistd.h>
 
 #include "PackingGenerator.h"
-#include "surfaces/NBoxPBC.h"
-#include "surfaces/NBoxFBC.h"
+#include "boundary_conditions/PeriodicBC.h"
+#include "boundary_conditions/FreeBC.h"
 #include "shape/ShapeFactory.h"
 #include "shape/ConvexShape.h"
 #include "ThreadLocalRND.h"
@@ -44,15 +44,15 @@ PackingGenerator::PackingGenerator(int seed, std::size_t collector, const Parame
     if (gridSize < this->params.thresholdDistance)
         gridSize = this->params.thresholdDistance;
 
+    std::unique_ptr<RSABoundaryConditions> bc;
+    if (this->params.boundaryConditions == "free")
+        bc = std::make_unique<RSAFreeBC>();
+    else
+        bc = std::make_unique<RSAPeriodicBC>(this->params.surfaceSize);
 
     if (this->params.surfaceFunction.empty()) {
-        if (this->params.boundaryConditions == "free") {
-            this->surface = new NBoxFBC(this->params.surfaceDimension, this->params.surfaceSize, gridSize,
-                                        RSAShape::getVoxelSpatialSize());
-        } else {
-            this->surface = new NBoxPBC(this->params.surfaceDimension, this->params.surfaceSize, gridSize,
-                                        RSAShape::getVoxelSpatialSize());
-        }
+        this->surface = new Surface(this->params.surfaceDimension, this->params.surfaceSize, gridSize,
+                                    RSAShape::getVoxelSpatialSize(), std::move(bc));
 
         this->voxels = ShapeFactory::createVoxelList(params->particleType, this->params.surfaceDimension, this->spatialSize,
                                                      RSAShape::getVoxelSpatialSize(), this->angularSize,
@@ -82,7 +82,8 @@ PackingGenerator::PackingGenerator(int seed, std::size_t collector, const Parame
         }
 
         auto curvedSurface = new CurvedSurface(this->params.surfaceDimension, this->params.surfaceSize, gridSize,
-                                               RSAShape::getVoxelSpatialSize(), std::move(surfaceFunction));
+                                               RSAShape::getVoxelSpatialSize(), std::move(surfaceFunction),
+                                               std::move(bc));
         this->surface = curvedSurface;
         this->voxels = new CurvedSurfaceVoxelList(this->spatialSize, RSAShape::getVoxelSpatialSize(), this->angularSize,
                                                   this->params.requestedAngularVoxelSize, curvedSurface);
@@ -111,7 +112,7 @@ double PackingGenerator::getFactor() {
 
 void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
 
-	const RSAShape *sn = this->surface->getClosestNeighbour(s->getPosition());
+	/*const RSAShape *sn = this->surface->getClosestNeighbour(s->getPosition());
 	if (sn == nullptr)
 		sn = this->surface->getClosestNeighbour(s->getPosition(), this->packing.getVector());
 	if (sn != nullptr){
@@ -131,7 +132,7 @@ void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
 				exit(0);
 			}
 		}
-	}
+	}*/
 }
 
 
@@ -223,7 +224,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 				std::vector<const RSAShape*> vNeighbours;
 				this->surface->getNeighbours(&vNeighbours, position);
 				for(const RSAShape *sTmp : vNeighbours){
-					if (sTmp->voxelInside(this->surface, position, orientation, 0.0001, delta)){
+					if (sTmp->voxelInside(this->surface->getBC(), position, orientation, 0.0001, delta)){
 						sCovers = sTmp;
 						break;
 					}
@@ -369,7 +370,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 			std::cout.flush();
 //						this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
 
-			unsigned short status = voxels->splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface);
+			unsigned short status = voxels->splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface->getBC());
 			double oldFactor = factor;
 			factor = this->getFactor();
 
@@ -382,7 +383,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 			}else if (status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
 				if(RSAShape::getSupportsSaturation() || rnd.nextValue() < 0.1){
 					std::cout << " skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;
-					this->voxels->analyzeVoxels(this->surface, this->surface->getNeighbourGrid(), depthAnalyze);
+					this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), depthAnalyze);
 					factor = this->getFactor();
 					std::cout.precision(5);
 					std::cout << " done: " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels remained, factor = " << factor << ", change: " << (factor/oldFactor) << std::endl << std::flush;

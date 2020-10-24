@@ -7,7 +7,7 @@
 
 #include "RegularDiskopolygon.h"
 #include "spherocylinder/SpheroCylinder2D.h"
-#include "../../FreeBC.h"
+#include "../../boundary_conditions/FreeBC.h"
 
 RegularDiskopolygonAttributes RegularDiskopolygon::attributes;
 

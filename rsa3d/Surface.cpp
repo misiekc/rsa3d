@@ -8,7 +8,11 @@
 #include "Surface.h"
 #include <iostream>
 
-Surface::Surface(int dim, double s, double ndx, double vdx) : BoundaryConditions() {
+Surface::Surface(int dim, double s, double ndx, double vdx, std::unique_ptr<RSABoundaryConditions> bc) {
+    ValidateMsg(s > 2*RSAShape::getNeighbourListCellSize(),
+                "Packing linear size is <= 2 neighbour list cell size - boundary conditions will break. ");
+
+    this->bc = std::move(bc);
 	this->dimension = dim;
 	this->size = s;
 	this->list = new NeighbourGrid<const RSAShape>(dim, s, ndx);
@@ -33,7 +37,7 @@ void Surface::add(const RSAShape *s) {
 const RSAShape* Surface::check(const RSAShape *s){
 	std::vector<const RSAShape *> neighbours;
 	this->list->getNeighbours(&neighbours, s->getPosition());
-	return s->overlap(this, &neighbours);
+	return s->overlap(this->bc.get(), &neighbours);
 /*
 	for(const RSAShape *shape: neighbours) {
 		if (shape->overlap(this, s))
@@ -48,7 +52,7 @@ const RSAShape *Surface::getClosestNeighbour(const RSAVector &da, const std::vec
     double d, dmin = std::numeric_limits<double>::max();
     const RSAShape *pmin = nullptr;
     for(const RSAShape *p : neighbours){
-        d = this->distance2(da, p->getPosition());
+        d = this->bc->distance2(da, p->getPosition());
         if (d<dmin){
             pmin = p;
             dmin = d;
@@ -56,7 +60,6 @@ const RSAShape *Surface::getClosestNeighbour(const RSAVector &da, const std::vec
     }
     return pmin;
 }
-
 
 const RSAShape *Surface::getClosestNeighbour(const RSAVector &da) {
     std::vector<const RSAShape*> result;
@@ -77,21 +80,7 @@ RSAVector Surface::checkPosition(const RSAVector &da) const {
 	return da;	// do nothing
 }
 
-double Surface::distance2(const RSAVector &a1, const RSAVector &a2) const {
-	return this->vector(a1 - a2).norm2();
-}
 
-RSAVector Surface::vectorFreeBC(const RSAVector &v) const {
-	return v;
-}
-
-RSAVector Surface::vectorPeriodicBC(const RSAVector &v) const {
-    RSAVector result = v;
-	for (int i = 0; i < RSA_SPATIAL_DIMENSION; i++) {
-		if (v[i] > this->size / 2.0)
-			result[i] -= this->size;
-		else if (v[i] < -this->size / 2.0)
-			result[i] += this->size;
-	}
-	return result;
+RSABoundaryConditions *Surface::getBC() {
+    return this->bc.get();
 }

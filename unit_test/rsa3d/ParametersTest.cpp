@@ -87,11 +87,9 @@ TEST_CASE("Parameters: invalid") {
         REQUIRE_THROWS(Parameters{str2});
     };
 
-    SECTION("maxVoxels > 0") {
-        std::istringstream str1{"maxVoxels = 0"};
+    SECTION("maxVoxels >= 0") {
         std::istringstream str2{"maxVoxels = -1"};
 
-        REQUIRE_THROWS(Parameters{str1});
         REQUIRE_THROWS(Parameters{str2});
     }
 
