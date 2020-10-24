@@ -13,3 +13,7 @@ SurfaceFunction::MinMax CurvedSurface::calculateValueRange(const RSAVector &voxe
 {
     return this->surfaceFunction->calculateValueRange(voxelPosition, voxelSpatialSize);
 }
+
+double CurvedSurface::getArea() const {
+    return std::pow(this->size, RSA_SPATIAL_DIMENSION - 1);
+}

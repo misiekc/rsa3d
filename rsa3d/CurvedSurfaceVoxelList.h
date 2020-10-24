@@ -37,9 +37,6 @@ private:
 
     CurvedSurface *surface;
 
-    // A debug map registering voxels comming to isVoxelInsidePacking
-    mutable std::unordered_map<const Voxel *, std::vector<VoxelEntry>> registeredVoxels;
-
     int getSurfaceCellIndexForVoxel(const Voxel &voxel) const;
     void rebuildActiveSurfaceCells();
     void fillInLastCoordinate(RSAVector &position);
@@ -54,6 +51,9 @@ public:
     unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl,
                                RSABoundaryConditions *bc) override;
     void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) override;
+    double getVoxelsVolume() override;
+
+    RSAVector calculateSurfaceCellBottomLeftPosition(int surfaceCellIdx);
 };
 
 

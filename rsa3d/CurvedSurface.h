@@ -33,6 +33,8 @@ public:
      * @brief SurfaceFunction::fillInLastCoordinate
      */
     void fillInLastCoordinate(RSAVector &position) const;
+
+    double getArea() const override;
 };
 
 
