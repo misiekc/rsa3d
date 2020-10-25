@@ -9,6 +9,7 @@
 #include "../../../utils/Assertions.h"
 #include <cmath>
 #include <sstream>
+#include <optional>
 
 
 #define VOXEL_INSIDE_FULL_ANGLE_ONLY_VERTICES

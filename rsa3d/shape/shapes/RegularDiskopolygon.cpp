@@ -202,7 +202,7 @@ RegularDiskopolygonAttributes::RegularDiskopolygonAttributes(const std::string &
                             "short [number of sides] [disk radius]");
     Validate(this->nSides >= 3);
     Validate(this->sideLength >= 0);
-    Validate(this->radius > 0);
+    Validate(this->radius >= 0);
 
     this->height = this->sideLength / 2 / std::tan(M_PI / this->nSides);
     this->halfDiagonal = this->sideLength / 2 / std::sin(M_PI / this->nSides);

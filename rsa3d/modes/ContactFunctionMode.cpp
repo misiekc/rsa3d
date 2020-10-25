@@ -85,7 +85,7 @@ void ContactFunctionMode::calculate2D(std::string filename){
 
 
 void ContactFunctionMode::run() {
-	this->calculate2D("contactFunction.dat");
+	this->calculate2D(this->params.getPackingSignature() + "_cf.txt");
 }
 
 void ContactFunctionMode::printHelp(std::ostream &out, const ProgramArguments &arguments) {
