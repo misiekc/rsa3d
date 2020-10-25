@@ -21,10 +21,12 @@
 #include "boundary_conditions/FreeBC.h"
 #include "shape/ShapeFactory.h"
 #include "shape/ConvexShape.h"
+#include "shape/shapes/Sphere.h"
 #include "ThreadLocalRND.h"
 #include "utils/OMPMacros.h"
 #include "surface_functions/FlatSurfaceFunction.h"
 #include "surface_functions/SineSurfaceFunction.h"
+#include "surface_functions/VirtualSineSurfaceFunction.h"
 #include "CurvedSurface.h"
 #include "CurvedSurfaceVoxelList.h"
 
@@ -77,6 +79,18 @@ PackingGenerator::PackingGenerator(int seed, std::size_t collector, const Parame
             Validate(periods > 0);
             double k = 2*M_PI*periods/this->params.surfaceSize;
             surfaceFunction = std::make_unique<SineSurfaceFunction>(A, k);
+        }  else if (surfaceFunctionName == "VirtualSineSurfaceFunction") {
+            double A{};
+            std::size_t periods{};
+            surfaceFunctionStream >> A >> periods;
+            ValidateMsg(surfaceFunctionStream, "Malformed VirtualSineSurfaceFunctionParameters, usage: "
+                                               "[amplitude] [number of periods]");
+            Validate(periods > 0);
+            double k = 2*M_PI*periods/this->params.surfaceSize;
+
+            surfaceFunction = std::make_unique<VirtualSineSurfaceFunction>(
+                A, k, Sphere<RSA_SPATIAL_DIMENSION>::getRadius()
+            );
         } else {
             die("Unknown surface function: " + surfaceFunctionName);
         }

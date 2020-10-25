@@ -163,3 +163,8 @@ std::string Sphere<DIMENSION>::toWolfram() const {
     return out.str();
 }
 
+template<unsigned short DIMENSION>
+double Sphere<DIMENSION>::getRadius() {
+    return radius;
+}
+

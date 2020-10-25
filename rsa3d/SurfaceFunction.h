@@ -5,6 +5,9 @@
 #ifndef RSA3D_SURFACEFUNCTION_H
 #define RSA3D_SURFACEFUNCTION_H
 
+#include "geometry/Vector.h"
+#include "utils/Utils.h"
+
 /**
  * @brief A function representing curved surface.
  */

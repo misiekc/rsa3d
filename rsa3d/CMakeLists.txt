@@ -22,6 +22,7 @@ set(RSA_SOURCE
         modes/WolframMode.cpp
         surface_functions/FlatSurfaceFunction.h
         surface_functions/SineSurfaceFunction.h
+        surface_functions/VirtualSineSurfaceFunction.cpp
         utils/Assertions.h
         utils/OMPMacros.h
         utils/Quantity.cpp
