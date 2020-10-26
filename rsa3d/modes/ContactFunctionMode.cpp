@@ -31,6 +31,8 @@ double ContactFunctionMode::calculate(RSAShape *s1, RSAShape *s2) {
 	s1->translate(-vPos);
 	s2->translate(-vPos);
 	vPos = s2->getPosition();
+	vPos = vPos.normalized();
+	this->absoluteTranslate(s2, &vPos);
 
 	double dmin = 1.0, dmax = 1.0;
 	while(s1->overlap(&(this->bc), s2)){
@@ -69,11 +71,14 @@ void ContactFunctionMode::calculate2D(std::string filename){
 	s2Pos[0] = 1.0; s2Pos[1] = 0.0;
 	s2->translate(s2Pos);
 
-	RSAOrientation dAngle{s1->getAngularVoxelSize()/this->stepAngle};
+//	s2->rotate(RSAOrientation{1.5708});
+//	calculate(s1, s2);
+
+	RSAOrientation dAngle{2*M_PI/this->stepAngle};
 
 	std::ofstream file(filename);
-	for (double a1 = 0; a1<s1->getAngularVoxelSize(); a1+=dAngle[0]){
-		for (double a2 = 0; a2<s2->getAngularVoxelSize(); a2+=dAngle[0]){
+	for (double a1 = 0; a1<2*M_PI; a1+=dAngle[0]){
+		for (double a2 = 0; a2<2*M_PI; a2+=dAngle[0]){
 			double d = calculate(s1, s2);
 			file << a1 << "\t" << a2 << "\t" << d << std::endl;
 			s2->rotate(dAngle);
