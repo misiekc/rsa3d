@@ -28,16 +28,26 @@ private:
         }
     };
 
-    // Those 2 structures are used to track which parts of surface have active voxels. They contain indices computed
-    // by position2i for a grid like voxels with current voxel spatial size, but without last coordinate.
+    // Hasher for RSAVector
+    struct VectorHasher {
+        std::size_t operator()(const RSAVector &v) const {
+            std::size_t h = 0;
+
+            for (std::size_t i{}; i < RSA_SPATIAL_DIMENSION; i++)
+                h ^= std::hash<double>{}(v[i])  + 0x9e3779b9 + (h << 6ul) + (h >> 2ul);
+            return h;
+        }
+    };
+
+    // Those 2 structures are used to track which parts of surface have active voxels. They contain coordinates of
+    // voxels, but without last coordinate.
     // So if a cell representing 2d position {1.5, 3} is active (for spatial size 0.5), it means that for example there
     // are 2 active voxels with coordinates {1.5, 3, 4} and {1.4, 3, 4.5}
-    std::unordered_set<int> activeSurfaceCells;
-    std::vector<int> randomAccessActiveSurfaceCells;
+    std::unordered_set<RSAVector, VectorHasher> activeSurfaceCells;
+    std::vector<RSAVector> randomAccessActiveSurfaceCells;
 
     CurvedSurface *surface;
 
-    int getSurfaceCellIndexForVoxel(const Voxel &voxel) const;
     void rebuildActiveSurfaceCells();
     void fillInLastCoordinate(RSAVector &position);
 
@@ -52,8 +62,6 @@ public:
                                RSABoundaryConditions *bc) override;
     void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) override;
     double getVoxelsVolume() override;
-
-    RSAVector calculateSurfaceCellBottomLeftPosition(int surfaceCellIdx);
 };
 
 
