@@ -41,7 +41,7 @@ private:
 	double findCeilSize(double d);
 
 	// returns number of elements of size cellSize needed to cover a desired range
-	size_t findArraySize(double range, double cellSize);
+	size_t findArraySize(double range, double cellSize) const;
 
 	// for a given voxel returns index of its root
 	int getIndexOfTopLevelVoxel(const RSAVector &da);
@@ -71,7 +71,7 @@ protected:
 	double angularRange;
 	double spatialRange;
 
-	size_t beginningVoxelNumber;
+	//size_t beginningVoxelNumber;
 
 	// neighbour grid structure for voxels. Needed to quickly find a voxel using its location
 	NeighbourGrid<Voxel>* voxelNeighbourGrid;
@@ -105,6 +105,8 @@ protected:
 	// voxels array will not have NULLs between pointers to objects - they can appear when splitting or analyze voxels in parallel
 	// returns number of not null values in list
 	void compactVoxelArray();
+
+    virtual std::array<std::size_t, RSA_SPATIAL_DIMENSION> calculateVoxelsGridLinearSize() const;
 
 public:
 
@@ -154,7 +156,6 @@ public:
 
 	void store(std::ostream &f) const;
 	void restore(std::istream &f);
-
 };
 
 
