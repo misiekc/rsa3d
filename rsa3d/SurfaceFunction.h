@@ -16,6 +16,8 @@ public:
     struct MinMax {
         double min{};
         double max{};
+
+        [[nodiscard]] double getSpan() const { return this->max - this->min; }
     };
 
     virtual ~SurfaceFunction() = default;

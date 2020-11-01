@@ -17,12 +17,11 @@
 class CurvedSurface : public Surface {
 private:
     std::unique_ptr<SurfaceFunction> surfaceFunction;
+    SurfaceFunction::MinMax valueSpan;
 
 public:
     CurvedSurface(int dim, double s, double ndx, double vdx, std::unique_ptr<SurfaceFunction> surfaceFunction,
-                  std::unique_ptr<RSABoundaryConditions> bc)
-            : Surface(dim, s, ndx, vdx, std::move(bc)), surfaceFunction(std::move(surfaceFunction))
-    { }
+                  std::unique_ptr<RSABoundaryConditions> bc);
 
     /**
      * @brief See SurfaceFunction::calculateValueRange
@@ -35,7 +34,8 @@ public:
      */
     void fillInLastCoordinate(RSAVector &position) const;
 
-    double getArea() const override;
+    [[nodiscard]] double getArea() const override;
+    [[nodiscard]] SurfaceFunction::MinMax getValueSpan() const;
 };
 
 

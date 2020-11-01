@@ -66,9 +66,9 @@ bool CurvedSurfaceVoxelList::isVoxelInsidePacking(const Voxel *v, double spatial
     RSAVector voxelPos = v->getPosition();
     auto [min, max] = this->surface->calculateValueRange(voxelPos, spatialSize);
 
-    // Out surface is in the middle
-    min += this->spatialRange/2;
-    max += this->spatialRange/2;
+    // We place the surface in last coordinate = 0
+    min -= this->surface->getValueSpan().min;
+    max -= this->surface->getValueSpan().min;
 
     // If voxel is below or above the surface, it should be deleted
     if (max < voxelPos[RSA_SPATIAL_DIMENSION - 1] || min > voxelPos[RSA_SPATIAL_DIMENSION - 1] + spatialSize)
@@ -93,9 +93,9 @@ CurvedSurfaceVoxelList::CurvedSurfaceVoxelList(double packingSpatialSize, double
 void CurvedSurfaceVoxelList::fillInLastCoordinate(RSAVector &position) {
     this->surface->fillInLastCoordinate(position);
 
-    // Surface places a function along last coordinate = 0; We want it to be in the middle of the simulation box
-    Assert(std::abs(position[RSA_SPATIAL_DIMENSION - 1]) < this->spatialRange/2);
-    position[RSA_SPATIAL_DIMENSION - 1] += (this->spatialRange/2);
+    // Minimal value of function should land on 0 on the last coordinate
+    position[RSA_SPATIAL_DIMENSION - 1] -= this->surface->getValueSpan().min;
+    Ensures(position[RSA_SPATIAL_DIMENSION - 1] >= 0);
 }
 
 double CurvedSurfaceVoxelList::getVoxelsVolume() {
@@ -117,5 +117,12 @@ double CurvedSurfaceVoxelList::getVoxelsVolume() {
         }
         result += s;
     }
+    return result;
+}
+
+std::array<std::size_t, RSA_SPATIAL_DIMENSION> CurvedSurfaceVoxelList::calculateVoxelsGridLinearSize() const {
+    auto result = VoxelList::calculateVoxelsGridLinearSize();
+    double span = this->surface->getValueSpan().getSpan();
+    result[RSA_SPATIAL_DIMENSION - 1] = this->findArraySize(span, this->initialVoxelSize);
     return result;
 }

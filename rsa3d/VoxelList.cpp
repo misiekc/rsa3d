@@ -36,7 +36,7 @@ double VoxelList::findCeilSize(double d){
 	return 2*dRes;
 }
 
-inline size_t VoxelList::findArraySize(double range, double cellSize) const {
+size_t VoxelList::findArraySize(double range, double cellSize) const {
 	return (size_t)(range/cellSize) + 1;
 }
 
@@ -124,7 +124,7 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 	this->angularVoxelSize = this->initialAngularVoxelSize;
 	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(this->surfaceDimension, this->spatialVoxelSize*ns, this->spatialVoxelSize);
 
-	std::cout << " alocating " << (ss*sa) << " voxels, now checking " << std::flush;
+	std::cout << " alocating " << (voxelGridSize*sa) << " voxels, now checking " << std::flush;
 
 	size_t dotEvery = (voxelGridSize/100)+1;
 	_OMP_PARALLEL_FOR

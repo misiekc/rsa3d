@@ -40,9 +40,6 @@ private:
 	// returns initial size of a vovel. It is not smaller than d and be an integer power of 2 (due to numerical issues)
 	double findCeilSize(double d);
 
-	// returns number of elements of size cellSize needed to cover a desired range
-	size_t findArraySize(double range, double cellSize) const;
-
 	// for a given voxel returns index of its root
 	int getIndexOfTopLevelVoxel(const RSAVector &da);
 
@@ -107,6 +104,9 @@ protected:
 	void compactVoxelArray();
 
     virtual std::array<std::size_t, RSA_SPATIAL_DIMENSION> calculateVoxelsGridLinearSize() const;
+
+    // returns number of elements of size cellSize needed to cover a desired range
+    std::size_t findArraySize(double range, double cellSize) const;
 
 public:
 
