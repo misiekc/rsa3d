@@ -120,8 +120,8 @@ double CurvedSurfaceVoxelList::getVoxelsVolume() {
     return result;
 }
 
-std::array<std::size_t, RSA_SPATIAL_DIMENSION> CurvedSurfaceVoxelList::calculateVoxelsGridLinearSize() const {
-    auto result = VoxelList::calculateVoxelsGridLinearSize();
+std::array<std::size_t, RSA_SPATIAL_DIMENSION> CurvedSurfaceVoxelList::calculateSpatialGridLinearSize() const {
+    auto result = VoxelList::calculateSpatialGridLinearSize();
     double span = this->surface->getValueSpan().getSpan();
     result[RSA_SPATIAL_DIMENSION - 1] = this->findArraySize(span, this->initialVoxelSize);
     return result;

@@ -53,7 +53,7 @@ private:
 
 protected:
     bool isVoxelInsidePacking(const Voxel *v, double spatialSize) const override;
-    std::array<std::size_t, RSA_SPATIAL_DIMENSION> calculateVoxelsGridLinearSize() const override;
+    std::array<std::size_t, RSA_SPATIAL_DIMENSION> calculateSpatialGridLinearSize() const override;
 
 public:
     CurvedSurfaceVoxelList(double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange,

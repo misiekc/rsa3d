@@ -103,7 +103,10 @@ protected:
 	// returns number of not null values in list
 	void compactVoxelArray();
 
-    virtual std::array<std::size_t, RSA_SPATIAL_DIMENSION> calculateVoxelsGridLinearSize() const;
+	// Returns number of grid cells in each direction of the simulation box.
+	// The default implementation gives the same number of cells in each directions covering the whole simulation box,
+	// but derived classes can alter this behaviour
+    [[nodiscard]] virtual std::array<std::size_t, RSA_SPATIAL_DIMENSION> calculateSpatialGridLinearSize() const;
 
     // returns number of elements of size cellSize needed to cover a desired range
     std::size_t findArraySize(double range, double cellSize) const;
