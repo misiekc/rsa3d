@@ -20,7 +20,8 @@ bool AccuracySimulation::continuePackingGeneration(std::size_t packingIndex, con
 }
 
 void AccuracySimulation::postProcessPacking(Packing &packing) {
-    this->packingFractions.push_back(static_cast<double>(packing.size()) / this->params.sufraceVolume());
+    this->packingFractions.push_back(packing.getParticlesVolume(this->params.packingFractionSurfaceDimension())
+                                     / this->params.sufraceVolume());
     this->meanPackingFraction.calculateFromSamples(this->packingFractions);
     std::cout << "[AccuracySimulation::postProcessPacking] Current accuracy : ";
     std::cout << this->meanPackingFraction.error << std::endl;

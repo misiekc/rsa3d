@@ -56,8 +56,21 @@ public:
 	explicit Parameters(std::istream &stream);
     explicit Parameters(const std::string &fileName);
 
-    std::string getPackingSignature() const;
-    double sufraceVolume() const;
+    [[nodiscard]] std::string getPackingSignature() const;
+
+    /**
+     * @brief Returns surface volume assuming Parameters::surfaceSize linear size and
+     * Parameters::packingFractionSurfaceDimension() dimension
+     * @return
+     */
+    [[nodiscard]] double sufraceVolume() const;
+
+    /**
+     * @brief Return the dimension of surfaces with respect to which the packing fractio nshould be calculated.
+     * @details For example, for curved surfaces, although the actual surface is n-dimentional, the packing fraction
+     * is calculated a a projection on n-1 first dimensions.
+     */
+    [[nodiscard]] std::size_t packingFractionSurfaceDimension() const;
 };
 
 #endif /* PARAMETERS_H_ */

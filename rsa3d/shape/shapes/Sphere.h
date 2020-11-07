@@ -24,8 +24,8 @@ private:
 
 	double r;
 
-	static double gamma();
-	static double volume();
+	static double gamma(unsigned short dim);
+	static double volume(unsigned short dim);
 
 public:
 	Sphere();

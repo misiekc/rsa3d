@@ -16,7 +16,7 @@ bool DensitySimulation::continuePackingGeneration(std::size_t packingIndex, cons
 }
 
 void DensitySimulation::postProcessPacking(Packing &packing) {
-    double currentPackingFraction = packing.getParticlesVolume(this->params.surfaceDimension)
+    double currentPackingFraction = packing.getParticlesVolume(this->params.packingFractionSurfaceDimension())
                                     / this->params.sufraceVolume();
 
     if (this->params.maxDensity > currentPackingFraction) {
@@ -27,10 +27,10 @@ void DensitySimulation::postProcessPacking(Packing &packing) {
         std::cout << "[DensitySimulation::postProcessPacking] Initial packing fraction      : ";
         std::cout << currentPackingFraction << ", reducing... " << std::flush;
         double targetVolume = this->params.maxDensity * this->params.sufraceVolume();
-        packing.reducePackingVolume(targetVolume, this->params.surfaceDimension);
+        packing.reducePackingVolume(targetVolume, this->params.packingFractionSurfaceDimension());
         std::cout << "done." << std::endl;
 
-        double actualPackingFraction = packing.getParticlesVolume(this->params.surfaceDimension)
+        double actualPackingFraction = packing.getParticlesVolume(this->params.packingFractionSurfaceDimension())
                                        / this->params.sufraceVolume();
         std::cout << "[DensitySimulation::postProcessPacking] Target packing fraction       : ";
         std::cout << this->params.maxDensity << std::endl;

@@ -490,7 +490,8 @@ bool PackingGenerator::generationCompleted(size_t missCounter, double t) {
     bool maxDensityAchieved = false;
     if (this->params.maxDensity < 1.0) {
         double maxParticlesVolume = this->params.sufraceVolume() * this->params.maxDensity;
-        maxDensityAchieved = (this->packing.getParticlesVolume(this->params.surfaceDimension) >= maxParticlesVolume);
+        maxDensityAchieved = (this->packing.getParticlesVolume(this->params.packingFractionSurfaceDimension())
+                              >= maxParticlesVolume);
     }
 
     return this->isSaturated() ||

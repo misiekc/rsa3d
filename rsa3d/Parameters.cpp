@@ -98,7 +98,7 @@ std::string Parameters::getPackingSignature() const {
 }
 
 double Parameters::sufraceVolume() const {
-    return std::pow(this->surfaceSize, this->surfaceDimension);
+    return std::pow(this->surfaceSize, this->packingFractionSurfaceDimension());
 }
 
 bool Parameters::operator==(const Parameters &rhs) const {
@@ -128,4 +128,13 @@ bool Parameters::operator==(const Parameters &rhs) const {
 
 bool Parameters::operator!=(const Parameters &rhs) const {
     return !(rhs == *this);
+}
+
+std::size_t Parameters::packingFractionSurfaceDimension() const {
+    if (this->surfaceFunction.empty()) {
+        return this->surfaceDimension;
+    } else {
+        Assert(this->surfaceDimension > 1);
+        return this->surfaceDimension - 1;
+    }
 }
