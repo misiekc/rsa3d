@@ -105,7 +105,7 @@ double VirtualSineSurfaceFunction::calculateMinValue() const {
     if (this->r < 1/this->A/this->k/this->k)
         return -this->A + this->r;
 
-    double xmin = M_PI / this->k;
+    double xmin = 0.5 * M_PI / this->k;
     double xmid = xmin;
     double xmax = 1.5 * M_PI / this->k;
     do {
