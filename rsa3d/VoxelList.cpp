@@ -113,7 +113,9 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 	size_t fullSpatialGridSize = (size_t)(pow(fullSpatialGridLinearSize, this->surfaceDimension) + 0.5);
 	size_t angularGridSize = (size_t)(pow(angularGridLinearSize, RSA_ANGULAR_DIMENSION) + 0.5);
 	std::array<std::size_t, RSA_SPATIAL_DIMENSION> spatialGridLinearSize = this->calculateSpatialGridLinearSize();
-	std::size_t spatialGridSize = std::accumulate(spatialGridLinearSize.begin(), spatialGridLinearSize.end(), 1.,
+	Assert(RSA_SPATIAL_DIMENSION >= this->surfaceDimension);
+	std::size_t spatialGridSize = std::accumulate(spatialGridLinearSize.begin(),
+                                                  spatialGridLinearSize.begin() + this->surfaceDimension, 1.,
                                                   std::multiplies<>{});
 
 	delete this->voxels[0];
