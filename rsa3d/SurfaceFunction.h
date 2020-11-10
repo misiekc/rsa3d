@@ -18,6 +18,10 @@ public:
         double max{};
 
         [[nodiscard]] double getSpan() const { return this->max - this->min; }
+
+        friend std::ostream &operator<<(std::ostream &out, const MinMax &minMax) {
+            return out << "[" << minMax.min << ", " << minMax.max << "]";
+        }
     };
 
     virtual ~SurfaceFunction() = default;
