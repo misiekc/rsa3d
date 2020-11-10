@@ -285,7 +285,8 @@ void VoxelList::checkTopLevelVoxels(){
 size_t VoxelList::countActiveTopLevelVoxels(){
 	size_t result = 0;
 	size_t n = (size_t)(this->spatialRange/this->initialVoxelSize) + 1;
-	for(size_t i=0; i<n*n; i++){
+	auto max = static_cast<std::size_t>(std::round(std::pow(n, this->surfaceDimension)));
+	for(size_t i=0; i<max; i++){
 		if(this->activeTopLevelVoxels[i])
 			result++;
 	}
@@ -294,7 +295,8 @@ size_t VoxelList::countActiveTopLevelVoxels(){
 
 void VoxelList::refreshTopLevelVoxels(){
 	size_t n = (size_t)(this->spatialRange/this->initialVoxelSize) + 1;
-	for(size_t i=0; i<n*n; i++){
+    auto max = static_cast<std::size_t>(std::round(std::pow(n, this->surfaceDimension)));
+	for(size_t i=0; i<max; i++){
 		this->activeTopLevelVoxels[i] = false;
 	}
 
