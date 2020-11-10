@@ -10,6 +10,7 @@ set(RSA_SOURCE
         modes/AnalyzeMode.cpp
         modes/BCExpandMode.cpp
         modes/BoundariesSimulation.cpp
+        modes/ContactFunctionMode.cpp
         modes/DatFileGenerationMode.cpp
         modes/DebugMode.cpp
         modes/DefaultSimulation.cpp

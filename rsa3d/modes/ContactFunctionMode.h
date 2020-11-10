@@ -9,12 +9,12 @@
 #include "../ProgramMode.h"
 #include "../ProgramArguments.h"
 #include "../shape/Shape.h"
-#include "../FreeBC.h"
+#include "../boundary_conditions/FreeBC.h"
 
 class ContactFunctionMode : public ProgramMode {
 private:
 	RSAFreeBC bc;
-	int stepAngle;
+	int stepAngle{};
     void absoluteTranslate(RSAShape *s, RSAVector *v);
     double calculate(RSAShape *s1, RSAShape *s2);
     void calculate2D(std::string filename);

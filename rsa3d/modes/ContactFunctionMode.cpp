@@ -74,7 +74,8 @@ void ContactFunctionMode::calculate2D(std::string filename){
 //	s2->rotate(RSAOrientation{1.5708});
 //	calculate(s1, s2);
 
-	RSAOrientation dAngle{2*M_PI/this->stepAngle};
+	RSAOrientation dAngle;
+	dAngle[0] = 2*M_PI/this->stepAngle;
 
 	std::ofstream file(filename);
 	for (double a1 = 0; a1<2*M_PI; a1+=dAngle[0]){
@@ -90,6 +91,9 @@ void ContactFunctionMode::calculate2D(std::string filename){
 
 
 void ContactFunctionMode::run() {
+    Assert(RSA_SPATIAL_DIMENSION == 2);
+    Assert(RSA_ANGULAR_DIMENSION == 1);
+
 	this->calculate2D(this->params.getPackingSignature() + "_cf.txt");
 }
 
