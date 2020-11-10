@@ -10,27 +10,27 @@
 
 
 #include <vector>
+#include <memory>
 
 #include "NeighbourGrid.h"
 //#include "DeviceNeighbourGrid.cu"
 
 #include "shape/Shape.h"
 
-class Surface : public BoundaryConditions<RSA_SPATIAL_DIMENSION> {
+class Surface {
 
 protected:
-
 	NeighbourGrid<const RSAShape> *list;
+	std::unique_ptr<RSABoundaryConditions> bc;
 
 	double size;
 	double dimension;
 
-	RSAVector vectorFreeBC(const RSAVector &v) const;
-	RSAVector vectorPeriodicBC(const RSAVector &v) const;
-
 public:
-	Surface(int dim, double s, double ndx, double vdx);
+	Surface(int dim, double s, double ndx, double vdx, std::unique_ptr<RSABoundaryConditions> bc);
 	virtual ~Surface();
+	Surface(const Surface &) = delete;
+	Surface &operator=(const Surface &) = delete;
 
 	void clear();
 	void add(const RSAShape *s);
@@ -39,12 +39,10 @@ public:
 	const RSAShape *getClosestNeighbour(const RSAVector &da);
 	const RSAShape *getClosestNeighbour(const RSAVector &da, const std::vector<const RSAShape*> &neighbours);
 	NeighbourGrid<const RSAShape> *getNeighbourGrid();
-    double distance2(const RSAVector &a1, const RSAVector &a2) const override;
+	RSABoundaryConditions *getBC();
 
-	RSAVector getTranslation(const RSAVector &p1, const RSAVector &p2) const override = 0;
-	virtual RSAVector vector(const RSAVector &v) const = 0;
-	virtual RSAVector checkPosition(const RSAVector &da) const;
-	virtual double getArea() const;
+	[[nodiscard]] virtual RSAVector checkPosition(const RSAVector &da) const;
+	[[nodiscard]] virtual double getArea() const;
 
 //	void drawShapes(Graphics g, double scale);
 //	void drawShapes(Graphics g, double scale, double[] ta);

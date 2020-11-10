@@ -9,7 +9,7 @@
 #include "AnisotropicShape2DExclusionTest.h"
 #include "AnisotropicShape2DExclusionDrawer.h"
 #include "../rsa3d/shape/ShapeFactory.h"
-#include "../rsa3d/FreeBC.h"
+#include "../rsa3d/boundary_conditions/FreeBC.h"
 #include "utils/ShapeGenerators.h"
 
 

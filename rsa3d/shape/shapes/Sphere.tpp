@@ -16,16 +16,16 @@ double Sphere<DIMENSION>::radius;
 
 
 template <unsigned short DIMENSION>
-double Sphere<DIMENSION>::gamma(){
+double Sphere<DIMENSION>::gamma(unsigned short dim){
 	double result;
-	if(DIMENSION % 2==0){
+	if(dim % 2==0){
 		result = Sphere::g20;
-		for (unsigned short i=4; i<=DIMENSION; i+=2){
+		for (unsigned short i=4; i<=dim; i+=2){
 			result = (i/2.0)*result;
 		}
 	}else{ // d%2==1
 		result = Sphere::g15;
-		for (unsigned short i=3; i<=DIMENSION; i+=2){
+		for (unsigned short i=3; i<=dim; i+=2){
 			result = (i/2.0)*result;
 		}
 	}
@@ -33,13 +33,13 @@ double Sphere<DIMENSION>::gamma(){
 }
 
 template <unsigned short DIMENSION>
-double Sphere<DIMENSION>::volume() {
-	return pow(M_PI, DIMENSION/2.0) / gamma();
+double Sphere<DIMENSION>::volume(unsigned short dim) {
+	return pow(M_PI, dim/2.0) / gamma(dim);
 }
 
 template <unsigned short DIMENSION>
 void Sphere<DIMENSION>::initClass(const std::string &args){
-	Sphere<DIMENSION>::radius = pow(1.0/Sphere::volume(), 1.0/DIMENSION);
+	Sphere<DIMENSION>::radius = pow(1.0/Sphere::volume(DIMENSION), 1.0/DIMENSION);
 
 	ShapeStaticInfo<DIMENSION, 0> shapeInfo;
 
@@ -68,9 +68,7 @@ bool Sphere<DIMENSION>::overlap(BoundaryConditions<DIMENSION> *bc, const Shape<D
 
 template <unsigned short DIMENSION>
 double Sphere<DIMENSION>::getVolume(unsigned short dim) const {
-    if (dim != DIMENSION)
-        throw std::runtime_error("Sphere supports only " + std::to_string(DIMENSION) + "D packings");
-    return Sphere<DIMENSION>::volume()*pow(this->r, DIMENSION);
+    return Sphere<DIMENSION>::volume(dim)*pow(this->r, dim);
 }
 
 template <unsigned short DIMENSION>
@@ -161,5 +159,10 @@ std::string Sphere<DIMENSION>::toWolfram() const {
     // Dimension independent Mathematica primitive
     out << "Ball[" << this->getPosition() << ", " << Sphere<DIMENSION>::radius << "]";
     return out.str();
+}
+
+template<unsigned short DIMENSION>
+double Sphere<DIMENSION>::getRadius() {
+    return radius;
 }
 

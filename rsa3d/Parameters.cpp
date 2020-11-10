@@ -27,7 +27,8 @@ Parameters::Parameters(std::istream &stream) {
 		else if (key == "storePackings")	 			this->storePackings = config.getString(key) != "false";
 		else if (key == "modifiedRSA")		 		    this->modifiedRSA = config.getString(key) != "false";
 		else if (key == "thresholdDistance") 			this->thresholdDistance = config.getDouble(key);
-		else if (key == "boundaryConditions") 		    this->boundaryConditions = config.getString(key);
+        else if (key == "boundaryConditions") 		    this->boundaryConditions = config.getString(key);
+        else if (key == "surfaceFunction") 		        this->surfaceFunction = config.getString(key);
 		else if (key == "particleType") 				this->particleType = config.getString(key);
         else if (key == "particleAttributes")			this->particleAttributes = config.getString(key);
         else if (key == "seedOrigin")			        this->seedOrigin = config.getString(key);
@@ -97,7 +98,7 @@ std::string Parameters::getPackingSignature() const {
 }
 
 double Parameters::sufraceVolume() const {
-    return std::pow(this->surfaceSize, this->surfaceDimension);
+    return std::pow(this->surfaceSize, this->packingFractionSurfaceDimension());
 }
 
 bool Parameters::operator==(const Parameters &rhs) const {
@@ -127,4 +128,13 @@ bool Parameters::operator==(const Parameters &rhs) const {
 
 bool Parameters::operator!=(const Parameters &rhs) const {
     return !(rhs == *this);
+}
+
+std::size_t Parameters::packingFractionSurfaceDimension() const {
+    if (this->surfaceFunction.empty()) {
+        return this->surfaceDimension;
+    } else {
+        Assert(this->surfaceDimension > 1);
+        return this->surfaceDimension - 1;
+    }
 }

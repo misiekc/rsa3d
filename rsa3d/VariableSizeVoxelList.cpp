@@ -67,7 +67,7 @@ void VariableSizeVoxelList::createVoxelMap(){
 	}
 }
 
-Voxel * VariableSizeVoxelList::getRandomVoxel(RND *rnd){
+void VariableSizeVoxelList::getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) {
 	double d = rnd->nextValue();
 	size_t i1=0, i2=this->length-1, i;
 	while(i2>i1+1 && i2>0){
@@ -77,7 +77,8 @@ Voxel * VariableSizeVoxelList::getRandomVoxel(RND *rnd){
 		else
 			i1 = i;
 	}
-	return this->voxels[i1];
+	*v = this->voxels[i1];
+	this->getRandomPositionAndOrientation(position, orientation, *v, rnd);
 }
 
 void VariableSizeVoxelList::getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd){

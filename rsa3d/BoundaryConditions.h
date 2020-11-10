@@ -24,6 +24,7 @@ public:
 	 */
 	virtual vector getTranslation(const vector& p1, const vector &p2) const = 0;
 
+
 };
 
 using RSABoundaryConditions = BoundaryConditions<RSA_SPATIAL_DIMENSION>;

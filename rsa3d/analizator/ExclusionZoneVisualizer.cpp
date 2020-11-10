@@ -6,16 +6,20 @@
  */
 
 #include "ExclusionZoneVisualizer.h"
-#include "../surfaces/NBoxPBC.h"
+#include "../boundary_conditions/PeriodicBC.h"
+#include "../Surface.h"
 #include "../RND.h"
 #include "../shape/ShapeFactory.h"
 #include "../Voxel.h"
 #include "../geometry/Vector.h"
 #include <fstream>
+#include <memory>
 
 ExclusionZoneVisualizer::ExclusionZoneVisualizer(const Parameters &params) {
 	this->params = &params;
-	this->surface = new NBoxPBC(this->params->surfaceDimension, this->params->surfaceSize, RSAShape::getNeighbourListCellSize(), RSAShape::getVoxelSpatialSize());
+	this->surface = new Surface(this->params->surfaceDimension, this->params->surfaceSize,
+                                RSAShape::getNeighbourListCellSize(), RSAShape::getVoxelSpatialSize(),
+                                std::make_unique<RSAPeriodicBC>(this->params->surfaceSize));
 	this->voxelSize = this->params->surfaceSize/800;
 }
 
@@ -40,7 +44,7 @@ bool ExclusionZoneVisualizer::voxelInsideShapeExclusionZone(Voxel *v, const RSAS
             position[j] = voxelPosition[j] + RSAPositioned::offset[i][j]*this->voxelSize;
         }
         trialShape->translate(position - trialShape->getPosition());
-        if(!shape->overlap(this->surface, trialShape)){
+        if(!shape->overlap(this->surface->getBC(), trialShape)){
             isInside = false;
             break;
         }

@@ -20,8 +20,9 @@ set(RSA_SOURCE
         modes/Simulation.cpp
         modes/Saturation.cpp
         modes/WolframMode.cpp
-        surfaces/NBoxFBC.cpp
-        surfaces/NBoxPBC.cpp
+        surface_functions/FlatSurfaceFunction.h
+        surface_functions/SineSurfaceFunction.h
+        surface_functions/VirtualSineSurfaceFunction.cpp
         utils/Assertions.h
         utils/OMPMacros.h
         utils/Quantity.cpp
@@ -29,7 +30,9 @@ set(RSA_SOURCE
         utils/Utils.cpp
         BoundaryConditions.h
         Config.cpp
-        FreeBC.h
+        CurvedSurface.cpp
+        CurvedSurfaceVoxelList.cpp
+        boundary_conditions/FreeBC.h
         NeighbourGrid.h
         OrientedCuboidVoxelList.cpp
         Packing.cpp
@@ -41,6 +44,7 @@ set(RSA_SOURCE
         ProgramMode.h
         RND.cpp
         Surface.cpp
+        SurfaceFunction.h
         ThreadLocalRND.cpp
         VariableSizeVoxelList.cpp
         Voxel.cpp

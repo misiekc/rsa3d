@@ -17,12 +17,18 @@
 #include <unistd.h>
 
 #include "PackingGenerator.h"
-#include "surfaces/NBoxPBC.h"
-#include "surfaces/NBoxFBC.h"
+#include "boundary_conditions/PeriodicBC.h"
+#include "boundary_conditions/FreeBC.h"
 #include "shape/ShapeFactory.h"
 #include "shape/ConvexShape.h"
+#include "shape/shapes/Sphere.h"
 #include "ThreadLocalRND.h"
 #include "utils/OMPMacros.h"
+#include "surface_functions/FlatSurfaceFunction.h"
+#include "surface_functions/SineSurfaceFunction.h"
+#include "surface_functions/VirtualSineSurfaceFunction.h"
+#include "CurvedSurface.h"
+#include "CurvedSurfaceVoxelList.h"
 
 
 double PackingGenerator::FACTOR_LIMIT = 5.0;
@@ -31,24 +37,74 @@ double PackingGenerator::FACTOR_LIMIT = 5.0;
 PackingGenerator::PackingGenerator(int seed, std::size_t collector, const Parameters *params)
         : seed{seed}, collector{collector}, params{*params}
 {
-	this->spatialSize = this->params.surfaceSize;
-	this->angularSize = RSAShape::getAngularVoxelSize();
-	if (this->params.requestedAngularVoxelSize > this->angularSize)
-		this->params.requestedAngularVoxelSize = this->angularSize;
+    this->spatialSize = this->params.surfaceSize;
+    this->angularSize = RSAShape::getAngularVoxelSize();
+    if (this->params.requestedAngularVoxelSize > this->angularSize)
+        this->params.requestedAngularVoxelSize = this->angularSize;
 
-	this->voxels = ShapeFactory::createVoxelList(params->particleType, this->params.surfaceDimension, this->spatialSize, RSAShape::getVoxelSpatialSize(), this->angularSize, this->params.requestedAngularVoxelSize);
-	if (params->maxVoxels==0)
-		this->voxels->disable();
+    double gridSize = RSAShape::getNeighbourListCellSize();
+    if (gridSize < this->params.thresholdDistance)
+        gridSize = this->params.thresholdDistance;
 
-	double gridSize = RSAShape::getNeighbourListCellSize();
-	if (gridSize < this->params.thresholdDistance)
-		gridSize = this->params.thresholdDistance;
+    std::unique_ptr<RSABoundaryConditions> bc;
+    if (this->params.boundaryConditions == "free")
+        bc = std::make_unique<RSAFreeBC>();
+    else
+        bc = std::make_unique<RSAPeriodicBC>(this->params.surfaceSize);
 
+    if (this->params.surfaceFunction.empty()) {
+        this->surface = new Surface(this->params.surfaceDimension, this->params.surfaceSize, gridSize,
+                                    RSAShape::getVoxelSpatialSize(), std::move(bc));
 
-	if (this->params.boundaryConditions == "free")
-		this->surface = new NBoxFBC(this->params.surfaceDimension, this->params.surfaceSize, gridSize, RSAShape::getVoxelSpatialSize());
-	else
-		this->surface = new NBoxPBC(this->params.surfaceDimension, this->params.surfaceSize, gridSize, RSAShape::getVoxelSpatialSize());
+        this->voxels = ShapeFactory::createVoxelList(params->particleType, this->params.surfaceDimension, this->spatialSize,
+                                                     RSAShape::getVoxelSpatialSize(), this->angularSize,
+                                                     this->params.requestedAngularVoxelSize);
+    } else {
+        Assert(this->params.surfaceDimension == RSA_SPATIAL_DIMENSION);
+
+        std::istringstream surfaceFunctionStream(this->params.surfaceFunction);
+        std::string surfaceFunctionName;
+        surfaceFunctionStream >> surfaceFunctionName;
+        Assert(surfaceFunctionStream);
+
+        std::unique_ptr<SurfaceFunction> surfaceFunction;
+        if (surfaceFunctionName == "FlatSurfaceFunction") {
+            surfaceFunction = std::make_unique<FlatSurfaceFunction>();
+        } else if (surfaceFunctionName == "SineSurfaceFunction") {
+            double A{};
+            std::size_t periods{};
+            surfaceFunctionStream >> A >> periods;
+            ValidateMsg(surfaceFunctionStream, "Malformed SineSurfaceFunctionParameters, usage: [amplitude] "
+                                               "[number of periods]");
+            Validate(periods > 0);
+            double k = 2*M_PI*periods/this->params.surfaceSize;
+            surfaceFunction = std::make_unique<SineSurfaceFunction>(A, k);
+        }  else if (surfaceFunctionName == "VirtualSineSurfaceFunction") {
+            double A{};
+            std::size_t periods{};
+            surfaceFunctionStream >> A >> periods;
+            ValidateMsg(surfaceFunctionStream, "Malformed VirtualSineSurfaceFunctionParameters, usage: "
+                                               "[amplitude] [number of periods]");
+            Validate(periods > 0);
+            double k = 2*M_PI*periods/this->params.surfaceSize;
+
+            surfaceFunction = std::make_unique<VirtualSineSurfaceFunction>(
+                A, k, Sphere<RSA_SPATIAL_DIMENSION>::getRadius()
+            );
+        } else {
+            die("Unknown surface function: " + surfaceFunctionName);
+        }
+
+        auto curvedSurface = new CurvedSurface(this->params.surfaceDimension, this->params.surfaceSize, gridSize,
+                                               RSAShape::getVoxelSpatialSize(), std::move(surfaceFunction),
+                                               std::move(bc));
+        this->surface = curvedSurface;
+        this->voxels = new CurvedSurfaceVoxelList(this->spatialSize, RSAShape::getVoxelSpatialSize(), this->angularSize,
+                                                  this->params.requestedAngularVoxelSize, curvedSurface);
+    }
+
+    if (params->maxVoxels == 0)
+        this->voxels->disable();
 }
 
 
@@ -70,7 +126,7 @@ double PackingGenerator::getFactor() {
 
 void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
 
-	const RSAShape *sn = this->surface->getClosestNeighbour(s->getPosition());
+	/*const RSAShape *sn = this->surface->getClosestNeighbour(s->getPosition());
 	if (sn == nullptr)
 		sn = this->surface->getClosestNeighbour(s->getPosition(), this->packing.getVector());
 	if (sn != nullptr){
@@ -90,7 +146,7 @@ void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
 				exit(0);
 			}
 		}
-	}
+	}*/
 }
 
 
@@ -182,7 +238,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 				std::vector<const RSAShape*> vNeighbours;
 				this->surface->getNeighbours(&vNeighbours, position);
 				for(const RSAShape *sTmp : vNeighbours){
-					if (sTmp->voxelInside(this->surface, position, orientation, 0.0001, delta)){
+					if (sTmp->voxelInside(this->surface->getBC(), position, orientation, 0.0001, delta)){
 						sCovers = sTmp;
 						break;
 					}
@@ -253,8 +309,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 			RSAVector pos;
 			RSAOrientation angle{};
 			do{
-				aVoxels[i] = this->voxels->getRandomVoxel(threadRND.get());
-				this->voxels->getRandomPositionAndOrientation(&pos, &angle, aVoxels[i], threadRND.get());
+			    this->voxels->getRandomEntry(&pos, &angle, &(aVoxels[i]), threadRND.get());
 			}while(!this->isInside(pos, angle));
 			// setting shape position and orientation
 			sVirtual[i]->translate(pos);
@@ -329,7 +384,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 			std::cout.flush();
 //						this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
 
-			unsigned short status = voxels->splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface);
+			unsigned short status = voxels->splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface->getBC());
 			double oldFactor = factor;
 			factor = this->getFactor();
 
@@ -342,7 +397,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 			}else if (status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
 				if(RSAShape::getSupportsSaturation() || rnd.nextValue() < 0.1){
 					std::cout << " skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;
-					this->voxels->analyzeVoxels(this->surface, this->surface->getNeighbourGrid(), depthAnalyze);
+					this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), depthAnalyze);
 					factor = this->getFactor();
 					std::cout.precision(5);
 					std::cout << " done: " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels remained, factor = " << factor << ", change: " << (factor/oldFactor) << std::endl << std::flush;
@@ -404,10 +459,10 @@ void PackingGenerator::createPacking(Packing *packing) {
 			}
 //			this code is for debugging purposes in case of problems with subsequent stages of packing generation
 
-//			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getVoxelSize()));
-//			this->toWolfram("test_" + std::to_string(this->voxels->getVoxelSize()) + ".nb");
-//			this->toPovray("test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
-//			this->toPovray(this->packing, this->params.surfaceSize, nullptr, "test_" + std::to_string(this->voxels->getVoxelSize()) + ".pov");
+//			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getSpatialVoxelSize()));
+//			this->toWolfram("test_" + std::to_string(this->voxels->getSpatialVoxelSize()) + ".nb");
+//			this->toPovray("test_" + std::to_string(this->voxels->getSpatialVoxelSize()) + ".pov");
+//			this->toPovray(this->packing, this->params.surfaceSize, nullptr, false, "test_" + std::to_string(this->voxels->getSpatialVoxelSize()) + ".pov");
 //			std::string filename = "snapshot_" + std::to_string(this->packing.size()) + "_" + std::to_string(this->voxels->getLength()) + ".dbg";
 //			std::ofstream file(filename, std::ios::binary);
 //			this->store(file);
@@ -435,7 +490,8 @@ bool PackingGenerator::generationCompleted(size_t missCounter, double t) {
     bool maxDensityAchieved = false;
     if (this->params.maxDensity < 1.0) {
         double maxParticlesVolume = this->params.sufraceVolume() * this->params.maxDensity;
-        maxDensityAchieved = (this->packing.getParticlesVolume(this->params.surfaceDimension) >= maxParticlesVolume);
+        maxDensityAchieved = (this->packing.getParticlesVolume(this->params.packingFractionSurfaceDimension())
+                              >= maxParticlesVolume);
     }
 
     return this->isSaturated() ||

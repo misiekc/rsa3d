@@ -13,7 +13,7 @@
 #include <iterator>
 
 #include "CuboidSpeedTest.h"
-#include "../rsa3d/FreeBC.h"
+#include "../rsa3d/boundary_conditions/FreeBC.h"
 #include "../rsa3d/shape/shapes/cuboid/MineOverlapCB.h"
 #include "../rsa3d/shape/shapes/cuboid/TriTriOverlapCB.h"
 #include "../rsa3d/shape/shapes/cuboid/SATOverlapCB.h"

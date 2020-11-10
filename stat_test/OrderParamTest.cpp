@@ -11,7 +11,7 @@
 #include "../rsa3d/shape/shapes/regular_solid/RegularSolidBase.h"
 #include "utils/ShapeGenerators.h"
 #include "utils/ShapePairFactory.h"
-#include "../rsa3d/FreeBC.h"
+#include "../rsa3d/boundary_conditions/FreeBC.h"
 #include "utils/InfoLooper.h"
 #include "../rsa3d/utils/Quantity.h"
 #include "utils/TestExitCodes.h"

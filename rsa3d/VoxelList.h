@@ -40,9 +40,6 @@ private:
 	// returns initial size of a vovel. It is not smaller than d and be an integer power of 2 (due to numerical issues)
 	double findCeilSize(double d);
 
-	// returns number of elements of size cellSize needed to cover a desired range
-	size_t findArraySize(double range, double cellSize);
-
 	// for a given voxel returns index of its root
 	int getIndexOfTopLevelVoxel(const RSAVector &da);
 
@@ -71,7 +68,7 @@ protected:
 	double angularRange;
 	double spatialRange;
 
-	size_t beginningVoxelNumber;
+	//size_t beginningVoxelNumber;
 
 	// neighbour grid structure for voxels. Needed to quickly find a voxel using its location
 	NeighbourGrid<Voxel>* voxelNeighbourGrid;
@@ -85,7 +82,7 @@ protected:
 	// checks if a top level voxel for voxel v is active (if not v should be removed
 	bool isTopLevelVoxelActive(Voxel *v);
 
-	bool isVoxelInsidePacking(Voxel *v);
+	virtual bool isVoxelInsidePacking(const Voxel *v, double spatialSize) const;
 	virtual bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
                                     std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc,
                                     unsigned short depth = 0);
@@ -105,6 +102,14 @@ protected:
 	// voxels array will not have NULLs between pointers to objects - they can appear when splitting or analyze voxels in parallel
 	// returns number of not null values in list
 	void compactVoxelArray();
+
+	// Returns number of grid cells in each direction of the simulation box.
+	// The default implementation gives the same number of cells in each directions covering the whole simulation box,
+	// but derived classes can alter this behaviour
+    [[nodiscard]] virtual std::array<std::size_t, RSA_SPATIAL_DIMENSION> calculateSpatialGridLinearSize() const;
+
+    // returns number of elements of size cellSize needed to cover a desired range
+    std::size_t findArraySize(double range, double cellSize) const;
 
 public:
 
@@ -140,12 +145,12 @@ public:
 	// counts active top level voxels
 	size_t countActiveTopLevelVoxels();
 
-	virtual Voxel *getRandomVoxel(RND *rnd);
+	virtual void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd);
 	Voxel *getVoxel(int i);
 	virtual Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle);
 	virtual void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd);
-	double getSpatialVoxelSize();
-	double getAngularVoxelSize();
+	double getSpatialVoxelSize() const;
+	double getAngularVoxelSize() const;
 	Voxel* get(int i);
 	size_t getLength() const;
 	virtual double getVoxelsVolume();
@@ -154,7 +159,6 @@ public:
 
 	void store(std::ostream &f) const;
 	void restore(std::istream &f);
-
 };
 
 

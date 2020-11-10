@@ -38,6 +38,7 @@ private:
 		int ix;
 		for(short i=this->surfaceDimension-1; i>=0; i--){
 			Expects(position[i] >= 0);
+            // TODO: is this conditions necessary? Maybe this->linearSize + this->dx is also ok?
 			Expects(position[i] < this->linearSize);
 			ix = (int)(position[i]/this->dx) + 1;
 
@@ -49,6 +50,7 @@ private:
 	void coordinates(size_t* result, const RSAVector &position) const{
 		for(short i=this->surfaceDimension-1; i>=0; i--){
 			Expects(position[i] >= 0);
+            // TODO: is this conditions necessary? Maybe this->linearSize + this->dx is also ok?
 			Expects(position[i] < this->linearSize);
 
 			result[i] = (int)(position[i]/this->dx) + 1;

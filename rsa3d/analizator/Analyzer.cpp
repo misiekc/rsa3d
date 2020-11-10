@@ -198,10 +198,17 @@ double Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf,
 			asf->add(packingFraction, tries);
 		}
 		double particleVolume;
+		// As for now, we have 2 cases:
+		// - surface is flat and can be lower dimensional than particle. Then the first branch correctly counts number
+		//   of particles per unit volume assuming that particle volume is 1. In the second branch
+		//   params->packingFractionSurfaceDimension() returns just params->surfaceDimension so everything is ok
+		// - surface is curved and it cannot be lower dimensional than particle. The first branch counts number of
+		//   particles per surface projection volume, and the second the correct projection packing fraction, because
+		//   params->packingFractionSurfaceDimension() returns RSA_SPATIAL_DIMENSION - 1
 		if (this->params->coverageByNumber)
 			particleVolume = packing[i]->getVolume(RSA_SPATIAL_DIMENSION);
 		else
-			particleVolume = packing[i]->getVolume(this->params->surfaceDimension);
+			particleVolume = packing[i]->getVolume(this->params->packingFractionSurfaceDimension());
 		sumOfParticlesVolume += particleVolume;
 		lastt = t;
 	}
@@ -446,7 +453,7 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
 
     double spf = 0.0, spf2 = 0.0;
     int counter = 0;
-    double packingSize = pow(this->params->surfaceSize, this->params->surfaceDimension);
+    double packingSize = this->params->sufraceVolume();
 
     std::cout << "[Analyzer::analyzePackingsInDirectory] " << std::flush;
 	for (const auto &packingPath : packingPaths) {

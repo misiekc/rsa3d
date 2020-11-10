@@ -4,10 +4,10 @@
 // (C)PKua 2017
 //--------------------------------------------------------------------------------------------
 
-#ifndef _MOCK_BC_H
-    #define _MOCK_BC_H
+#ifndef BOUNDARY_CONDITIONS_FREEBC_H_
+    #define BOUNDARY_CONDITIONS_FREEBC_H_
     
-#include "BoundaryConditions.h"
+#include "../BoundaryConditions.h"
 #include <cstdlib>
 
 template <unsigned short DIMENSION>
@@ -22,4 +22,4 @@ public:
 
 using RSAFreeBC = FreeBC<RSA_SPATIAL_DIMENSION>;
 
-#endif //_MOCK_BC_H
+#endif //BOUNDARY_CONDITIONS_FREEBC_H_

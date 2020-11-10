@@ -25,10 +25,18 @@ int neighbour2i(int* coordinates, int* neighbour, int clength, int offset, int n
 
 template<std::size_t SIZE>
 void calculateGrid(std::array<int, SIZE> &grid, size_t index, size_t lenght){
-	for(unsigned char i = 0; i<SIZE; i++){
-		grid[i] = index % lenght;
-		index /= lenght;
-	}
+    for(unsigned char i = 0; i<SIZE; i++){
+        grid[i] = index % lenght;
+        index /= lenght;
+    }
+}
+
+template<std::size_t SIZE>
+void calculateGrid(std::array<int, SIZE> &grid, size_t index, const std::array<std::size_t, SIZE> &lenghts) {
+    for(unsigned char i = 0; i<SIZE; i++){
+        grid[i] = index % lenghts[i];
+        index /= lenghts[i];
+    }
 }
 
 // trim from start
