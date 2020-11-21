@@ -44,7 +44,7 @@ void Analyzer::analyzeOrder(const Packing &packing, const NeighbourGrid<const RS
 
     		RSAVector posj = sj->getPosition();
     		double dist2 = 0.0;
-    		for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
+    		for(std::size_t k{}; k<this->params->packingFractionSurfaceDimension(); k++){
     			da[k] = fabs(posi[k] - posj[k]);
     			if (da[k]>0.5*this->params->surfaceSize)
     				da[k] = this->params->surfaceSize - da[k];
@@ -80,8 +80,8 @@ void Analyzer::analyzeCorrelations(const Packing &packing, const NeighbourGrid<c
 
 			RSAVector posj = sj->getPosition();
 			double dist2 = 0.0;
-			for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
-				da[k] = fabs(posi[k] - posj[k]);
+			for (std::size_t k{}; k < this->params->packingFractionSurfaceDimension(); k++){
+				da[k] = std::fabs(posi[k] - posj[k]);
 				if (da[k]>0.5*this->params->surfaceSize)
 					da[k] = this->params->surfaceSize - da[k];
 				dist2 += da[k]*da[k];
@@ -89,7 +89,7 @@ void Analyzer::analyzeCorrelations(const Packing &packing, const NeighbourGrid<c
 					break;
 			}
 			if (dist2 < dMax2){
-				_OMP_CRITICAL(correlations)
+				_OMP_CRITICAL(corr)
 				corr->add(std::sqrt(dist2));
 			}
 		}
@@ -108,7 +108,7 @@ const RSAShape * Analyzer::getNearestNeighbour(const RSAShape *s, const Neighbou
 			continue;
 		RSAVector posn = sn->getPosition();
 		double dist2 = 0.0;
-		for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
+		for (std::size_t k{}; k<this->params->packingFractionSurfaceDimension(); k++){
 			da[k] = std::fabs(pos[k] - posn[k]);
 			if (da[k]>0.5*this->params->surfaceSize)
 				da[k] = this->params->surfaceSize - da[k];
@@ -139,7 +139,7 @@ void Analyzer::analyzeNearestNeighbours(const Packing &packing, const NeighbourG
 			double dist2 = 0.0;
    			RSAVector posi = si->getPosition();
    			RSAVector posnn = nearestNeighbour->getPosition();
-			for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++){
+			for(std::size_t k{}; k < this->params->packingFractionSurfaceDimension(); k++){
 				da[k] = std::fabs(posi[k] - posnn[k]);
 				if (da[k]>0.5*this->params->surfaceSize)
 					da[k] = this->params->surfaceSize - da[k];
@@ -361,9 +361,10 @@ void Analyzer::printCorrelations(Plot& correlations, std::string filename){
 
 	double packingVolume;
 
-	if constexpr (RSA_SPATIAL_DIMENSION==2)
+    std::size_t dim = this->params->packingFractionSurfaceDimension();
+	if (dim==2)
 		packingVolume = M_PI * pow(correlations.getMax(), 2.0);
-	else if constexpr (RSA_SPATIAL_DIMENSION==3)
+	else if (dim==3)
 		packingVolume = 4.0/3.0 * M_PI * pow(correlations.getMax(), 3.0);
 	else
 		return;
@@ -376,15 +377,15 @@ void Analyzer::printCorrelations(Plot& correlations, std::string filename){
 	for (int i = 0; i < correlations.size()-1; i++) {
 	    double thinShellVolume{};
 		if (i>0){
-			if constexpr (RSA_SPATIAL_DIMENSION==2)
+			if (dim==2)
 				thinShellVolume = -M_PI * r*r;
-			else if constexpr (RSA_SPATIAL_DIMENSION==3)
+			else if (dim==3)
 				thinShellVolume = -4.0/3.0* M_PI * r*r*r;
 		}
 		r = 0.5*(correlationPoints[i][0]+correlationPoints[i+1][0]);
-		if constexpr (RSA_SPATIAL_DIMENSION==2)
+		if (dim==2)
 			thinShellVolume += M_PI * r*r;
-		else if constexpr (RSA_SPATIAL_DIMENSION==3)
+		else if (dim==3)
 			thinShellVolume += 4.0/3.0* M_PI * r*r*r;
 
 		double expectedNumberOfParticles = totalPoints * thinShellVolume / packingVolume;
@@ -464,7 +465,10 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
         spf2 += pf*pf;
         counter++;
         if (correlationsRange>0.0){
-            NeighbourGrid<const RSAShape> ng(params->surfaceDimension, params->surfaceSize, correlationsRange);
+            // We want to create a neighbour grid to optimize correlations calculation for "packing fraction" dimension
+            // - if some spatial dimensions are projected when calculating the packing fraction, they should also
+            // be projected when calculating correlations
+            NeighbourGrid<const RSAShape> ng(params->packingFractionSurfaceDimension(), params->surfaceSize, correlationsRange);
             for(const RSAShape *s: packing){
                 ng.add(s, s->getPosition());
             }
