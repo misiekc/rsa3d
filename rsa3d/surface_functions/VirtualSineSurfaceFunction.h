@@ -16,6 +16,9 @@ private:
     double k{};
     double r{};
 
+    double globalMin{};
+    double globalMax{};
+
     static void normalizeTo2Pi(double &x0, double &x1);
     [[nodiscard]] double virtualSineValue(double x) const;
     [[nodiscard]] double calculateDiskCenterX(double tangentX) const;

@@ -24,9 +24,9 @@ SurfaceFunction::MinMax VirtualSineSurfaceFunction::calculateValueRange(const RS
     normalizeTo2Pi(x0, x1);
 
     if ((x1 > M_PI/2 && x0 < M_PI/2) || (x0 < -3*M_PI/2))
-        max = this->A + this->r;
+        max = this->globalMax;
     if ((x1 > 3*M_PI/2 && x0 < 3*M_PI/2) || (x0 < -M_PI/2))
-        min = this->calculateMinValue();
+        min = this->globalMin;
 
     return {min, max};
 }
@@ -69,7 +69,14 @@ double VirtualSineSurfaceFunction::virtualSineValue(double x) const {
     xmin /= this->k;
     xmax /= this->k;
 
-    return findValueBisectively(x, xmin, xmax);
+    double value = findValueBisectively(x, xmin, xmax);
+
+    // Minimum is calculated bisectively, so it is prone to precision errors - value can be thus smaller than previously
+    // calculated minimum
+    if (value < this->globalMin)
+        return this->globalMin;
+    else
+        return value;
 }
 
 double VirtualSineSurfaceFunction::findValueBisectively(double x, double xmin, double xmax) const {
@@ -99,6 +106,9 @@ double VirtualSineSurfaceFunction::calculateDiskCenterY(double tangentX) const {
 
 VirtualSineSurfaceFunction::VirtualSineSurfaceFunction(double A, double k, double r) : A{A}, k{k}, r{r} {
     Expects(r > 0);
+
+    this->globalMin = this->calculateMinValue();
+    this->globalMax = this->A + this->r;
 }
 
 double VirtualSineSurfaceFunction::calculateMinValue() const {

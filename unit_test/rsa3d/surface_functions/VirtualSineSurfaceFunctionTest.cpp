@@ -74,6 +74,19 @@ TEST_CASE("VirtualSineSurfaceFunctionTest: bug fixes") {
         CHECK(min == Approx(0.7907537668516279));
         CHECK(max == Approx(0.8821067963959804));
     }
+
+    // As global minimum is calculated bisectively, it is prone to numerical errors. It happened in the production that
+    // some value was actually a tiny bit smaller than the global minimum
+    SECTION("value < global minumum bug") {
+        VirtualSineSurfaceFunction sf(10, 2.6389378290154273, 0.62035049089939998);
+        auto valueSpan = sf.calculateValueRange(RSAVector{}, 100);
+
+        RSAVector position{};
+        position[0] = 32.738095238095838;
+        sf.fillInLastCoordinate(position);
+
+        CHECK(position[RSA_SPATIAL_DIMENSION - 1] >= valueSpan.min);
+    }
 }
 
 // This test is a regression test - the values are taken by using the tested class after visual inspection using
