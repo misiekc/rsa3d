@@ -658,8 +658,8 @@ public:
      * @brief Sets a function which will be used to create new shapes using default constructor.
      * @tparam ConcreteShape derived Shape class to instantiate
      */
-    template<typename ConcreteShape>
-    void setDefaultCreateShapeImpl();
+    template<typename ConcreteShape, typename ...Args>
+    void setDefaultCreateShapeImpl(Args&& ...args);
 
     /**
      * @brief Checks if all fields which don't have default values has been set. If not, throws.

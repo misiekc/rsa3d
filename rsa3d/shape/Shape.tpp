@@ -300,10 +300,10 @@ void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setCreateShapeImpl(
 }
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-template<typename ConcreteShape>
-void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setDefaultCreateShapeImpl() {
-    this->createShapeImpl = [](RND *rnd) {
-        return static_cast<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *>(new ConcreteShape());
+template<typename ConcreteShape, typename ...Args>
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setDefaultCreateShapeImpl(Args&& ...args) {
+    this->createShapeImpl = [args...](RND *rnd) {
+        return static_cast<Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION> *>(new ConcreteShape(args...));
     };
 }
 
