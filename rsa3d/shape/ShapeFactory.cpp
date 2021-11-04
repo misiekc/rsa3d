@@ -37,6 +37,8 @@
 		#include "shapes/polygon/Polygon.h"
 		#include "shapes/polygon/RegularRoundedPolygon.h"
 		#include "shapes/polygon/RoundedPolygon.h"
+		#include "shapes/polygon/RoundedRectangle.h"
+		#include "shapes/polygon/RoundedIsoscelesTriangle.h"
 		#include "shapes/polygon/SBPolygon.h"
 		#include "shapes/polygon/HBPolygon.h"
         #include "shapes/polygon/Triangle.h"
@@ -154,10 +156,16 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
                 Polygon::initClass(attr);
                 return;
             } else if (sClass == "RegularRoundedPolygon") {
-                RegularRoundedPolygon::initClass(attr);
-                return;
+                 RegularRoundedPolygon::initClass(attr);
+                 return;
             } else if (sClass == "RoundedPolygon") {
                 RoundedPolygon::initClass(attr);
+                return;
+            } else if (sClass == "RoundedRectangle") {
+                RoundedRectangle::initClass(attr);
+                return;
+            } else if (sClass == "RoundedIsoscelesTriangle") {
+                RoundedIsoscelesTriangle::initClass(attr);
                 return;
             } else if (sClass == "Polydisk") {
                 Polydisk::initClass(attr);
