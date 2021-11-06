@@ -21,6 +21,7 @@ set(RSA_SOURCE
         modes/Simulation.cpp
         modes/Saturation.cpp
         modes/WolframMode.cpp
+        modes/SurfaceAreaMode.cpp
         surface_functions/FlatSurfaceFunction.h
         surface_functions/SineSurfaceFunction.cpp
         surface_functions/VirtualSineSurfaceFunction.cpp

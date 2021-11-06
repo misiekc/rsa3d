@@ -158,5 +158,5 @@ double VirtualSineSurfaceFunction::getArea(double size) const {
         prevY = y;
     }
 
-    return std::pow(size, RSA_SPATIAL_DIMENSION) / (M_PI/this->k) * curveLength;
+    return std::pow(size, RSA_SPATIAL_DIMENSION - 1) / (M_PI/this->k) * curveLength;
 }

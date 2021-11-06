@@ -154,18 +154,18 @@ TEST_CASE("VirtualSineSurfaceFunctionTest: area", "[regression]") {
     SECTION("perfect sine") {
         VirtualSineSurfaceFunction sf(1, 1, 1e-15);
 
-        CHECK(sf.getArea(M_PI) == Approx(12.00150530926943).epsilon(1e-12));    // numerical value from Mathematica
+        CHECK(sf.getArea(M_PI) == Approx(3.820197789027712).epsilon(1e-12));    // numerical value from Mathematica
     }
 
     SECTION("smooth curve") {
         VirtualSineSurfaceFunction sf(2, 0.2*M_PI, 0.6);
 
-        CHECK(sf.getArea(10) == Approx(132.0658226692865).epsilon(1e-12));
+        CHECK(sf.getArea(10) == Approx(13.20658226692865).epsilon(1e-12));
     }
 
     SECTION("cusped curve") {
         VirtualSineSurfaceFunction sf(2, M_PI, 0.6);
 
-        CHECK(sf.getArea(2) == Approx(9.444434483163013).epsilon(1e-12));
+        CHECK(sf.getArea(2) == Approx(4.722217241581506).epsilon(1e-12));
     }
 }

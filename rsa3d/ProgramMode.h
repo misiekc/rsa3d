@@ -14,7 +14,7 @@ protected:
 public:
     virtual ~ProgramMode() = default;
 
-    virtual void initializeForArguments(const ProgramArguments &arguments) = 0;
+    virtual void initializeForArguments(const ProgramArguments &arguments) { this->params = arguments.getParameters(); }
     virtual void run() = 0;
     virtual void printHelp(std::ostream &out, const ProgramArguments &arguments) = 0;
 };
