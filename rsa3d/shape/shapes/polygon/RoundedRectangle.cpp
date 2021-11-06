@@ -17,11 +17,14 @@
 void RoundedRectangle::initClass(const std::string &args) {
 	std::istringstream in(args);
 
+    in >> RoundedPolygon::radius;
+    double ratio;
+    in >> ratio;
     ValidateMsg(in, "Expected 2 doubles as radius and width to height ratio");
-	in >> RoundedPolygon::radius;
+
     ValidateMsg(RoundedPolygon::radius<1.0, "The radius has to be not greater than one");
 	// width to height ratio
-	double ratio, h, w;
+	double h, w;
 	h = 2*(1.0 - RoundedPolygon::radius);
 	in >> ratio;
     ValidateMsg(ratio>=1.0, "Width to height ratio should not be smaller than 1.0");
