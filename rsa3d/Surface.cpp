@@ -27,7 +27,11 @@ void Surface::clear(){
 }
 
 double Surface::getArea() const {
-	return pow(this->size, this->dimension);
+    return pow(this->size, this->dimension);
+}
+
+double Surface::getRealArea() const {
+    return pow(this->size, this->dimension);
 }
 
 void Surface::add(const RSAShape *s) {

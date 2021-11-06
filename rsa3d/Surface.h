@@ -43,6 +43,7 @@ public:
 
 	[[nodiscard]] virtual RSAVector checkPosition(const RSAVector &da) const;
 	[[nodiscard]] virtual double getArea() const;
+    [[nodiscard]] virtual double getRealArea() const;
 
 //	void drawShapes(Graphics g, double scale);
 //	void drawShapes(Graphics g, double scale, double[] ta);

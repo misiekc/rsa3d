@@ -69,7 +69,7 @@ double VirtualSineSurfaceFunction::virtualSineValue(double x) const {
     xmin /= this->k;
     xmax /= this->k;
 
-    double value = findValueBisectively(x, xmin, xmax);
+    double value = this->findValueBisectively(x, xmin, xmax);
 
     // Minimum is calculated bisectively, so it is prone to precision errors - value can be thus smaller than previously
     // calculated minimum
@@ -80,6 +80,10 @@ double VirtualSineSurfaceFunction::virtualSineValue(double x) const {
 }
 
 double VirtualSineSurfaceFunction::findValueBisectively(double x, double xmin, double xmax) const {
+    return this->calculateDiskCenterY(this->findTangentXBisectively(x, xmin, xmax));
+}
+
+double VirtualSineSurfaceFunction::findTangentXBisectively(double x, double xmin, double xmax) const {
     Expects(xmax > xmin);
 
     double currX{};
@@ -93,7 +97,7 @@ double VirtualSineSurfaceFunction::findValueBisectively(double x, double xmin, d
             xmin = xmid;
     } while (xmax - xmin > PRECISION);
 
-    return this->calculateDiskCenterY(xmid);
+    return xmid;
 }
 
 double VirtualSineSurfaceFunction::calculateDiskCenterX(double tangentX) const {
@@ -115,6 +119,13 @@ double VirtualSineSurfaceFunction::calculateMinValue() const {
     if (this->r < 1/this->A/this->k/this->k)
         return -this->A + this->r;
 
+    return this->calculateDiskCenterY(this->calculateMinValueTangentX());
+}
+
+double VirtualSineSurfaceFunction::calculateMinValueTangentX() const {
+    if (this->r < 1/this->A/this->k/this->k)
+        return -M_PI/2/this->k;
+
     double xmin = 0.5 * M_PI / this->k;
     double xmid = xmin;
     double xmax = 1.5 * M_PI / this->k;
@@ -122,5 +133,11 @@ double VirtualSineSurfaceFunction::calculateMinValue() const {
         xmid = (xmid + xmax) / 2;
     } while (this->calculateDiskCenterX(xmid) < xmax);
 
-    return this->findValueBisectively(xmax, xmin, xmid);
+    return this->findTangentXBisectively(xmax, xmin, xmid);
+}
+
+double VirtualSineSurfaceFunction::getArea(double size) const {
+    Assert(RSA_SPATIAL_DIMENSION > 1);
+    Expects(size > 0);
+    return 0;
 }

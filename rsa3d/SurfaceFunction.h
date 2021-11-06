@@ -37,6 +37,11 @@ public:
      * last coordinate
      */
     virtual void fillInLastCoordinate(RSAVector &position) const = 0;
+
+    /**
+     * @brief Return the real area of a surface given by this SurfaceFunction for the domain of linear size @a size
+     */
+    [[nodiscard]] virtual double getArea(double size) const = 0;
 };
 
 #endif //RSA3D_SURFACEFUNCTION_H
