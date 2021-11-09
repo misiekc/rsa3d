@@ -25,7 +25,7 @@ void RoundedRectangle::initClass(const std::string &args) {
 	h = 2*(1.0 - RoundedPolygon::radius);
 	in >> ratio;
     ValidateMsg(ratio>=1.0, "Width to height ratio should not be smaller than 1.0");
-    // length of straight interval: ratio = (l+2*radius)/(1+2*radius)
+    // length of straight interval: ratio = (w+2*radius)/(1+2*radius)
     w = 2*(ratio-RoundedPolygon::radius);
 
     std::ostringstream roundedPolygonAttributes;

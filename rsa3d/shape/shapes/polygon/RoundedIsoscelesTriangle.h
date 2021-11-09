@@ -1,5 +1,5 @@
 /*
- * RoundedPolygon.h
+ * RoundedIsoscelesTriangle.h
  *
  *  Created on: 3.11.2021
  *      Author: ciesla
