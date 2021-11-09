@@ -10,8 +10,7 @@
 /**
  * IsoscelesRoundedTriangle is parameterized as follows.
  * the base of the triangle is equal to a,
- * but the total width of the rounded triangle is constant and has a constant width of 2: 2 = 2*radius + a => a = 2*(1 - radius)
- * and therefore radius < 1.0
+ * but the whole base of the rounded triangle is constant and has a constant width of 2: 2 = 2*radius + a => a = 2*(1 - radius)
  * the arm width x divided by a is the ratio - the second parameter of the triangle,
  * thus x = a*ratio = 2*(1 - radius)*ratio. x has to be greater than a/2 thus ratio has to be larger than 0.5
  * the height of the triangle is then:
@@ -21,13 +20,15 @@
 void RoundedIsoscelesTriangle::initClass(const std::string &args) {
 	std::istringstream in(args);
 
+    in >> RoundedPolygon::radius;
+    double ratio;
+    in >> ratio;
     ValidateMsg(in, "Expected 2 doubles as radius and side to base ratio");
-	in >> RoundedPolygon::radius;
+
     ValidateMsg(RoundedPolygon::radius<1.0, "The radius has to be not greater than one");
-	double ratio, a, h;
-	a = 2*(1.0 - RoundedPolygon::radius);
-	in >> ratio;
-    ValidateMsg(ratio>0.0, "Height to width ratio should not be larger than 0.0");
+    double a, h;
+	a = 2*(1.0 - radius);
+    ValidateMsg(ratio>0.5, "Sides to base ratio should not be smaller than 0.5");
     // length of straight interval
     h = a*sqrt(ratio*ratio - 0.25);
 

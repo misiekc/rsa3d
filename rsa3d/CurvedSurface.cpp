@@ -20,6 +20,10 @@ double CurvedSurface::getArea() const {
     return std::pow(this->size, RSA_SPATIAL_DIMENSION - 1);
 }
 
+double CurvedSurface::getRealArea() const {
+    return this->surfaceFunction->getArea(this->size);
+}
+
 SurfaceFunction::MinMax CurvedSurface::getValueSpan() const {
     return this->valueSpan;
 }

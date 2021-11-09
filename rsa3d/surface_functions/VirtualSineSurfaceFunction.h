@@ -23,7 +23,9 @@ private:
     [[nodiscard]] double virtualSineValue(double x) const;
     [[nodiscard]] double calculateDiskCenterX(double tangentX) const;
     [[nodiscard]] double calculateDiskCenterY(double tangentX) const;
-    double findValueBisectively(double x, double xmin, double xmax) const;
+    [[nodiscard]] double findValueBisectively(double x, double xmin, double xmax) const;
+    [[nodiscard]] double findTangentXBisectively(double x, double xmin, double xmax) const;
+    [[nodiscard]] double calculateMinValueTangentX() const;
 
 public:
     VirtualSineSurfaceFunction(double A, double k, double r);
@@ -31,7 +33,8 @@ public:
     [[nodiscard]] MinMax calculateValueRange(const RSAVector &voxelPosition, double voxelSpatialSize) const override;
     void fillInLastCoordinate(RSAVector &position) const override;
 
-    double calculateMinValue() const;
+    [[nodiscard]] double calculateMinValue() const;
+    [[nodiscard]] double getArea(double size) const override;
 };
 
 

@@ -35,6 +35,7 @@ public:
     void fillInLastCoordinate(RSAVector &position) const;
 
     [[nodiscard]] double getArea() const override;
+    [[nodiscard]] double getRealArea() const override;
     [[nodiscard]] SurfaceFunction::MinMax getValueSpan() const;
 };
 

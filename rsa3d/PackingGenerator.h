@@ -66,6 +66,8 @@ public:
 	static std::vector<std::string> findPackingsInDir(const std::string &dirName);
 
     bool generationCompleted(size_t missCounter, double t);
+
+    [[nodiscard]] const Surface &getSurface() const { return *this->surface; }
 };
 
 #endif /* PACKINGGENERATOR_H_ */

@@ -19,6 +19,12 @@ public:
         Assert(RSA_SPATIAL_DIMENSION > 1);
         position[RSA_SPATIAL_DIMENSION - 1] = 0;
     }
+
+    [[nodiscard]] double getArea(double size) const override {
+        Assert(RSA_SPATIAL_DIMENSION > 1);
+        Expects(size > 0);
+        return std::pow(size, RSA_SPATIAL_DIMENSION - 1);
+    }
 };
 
 

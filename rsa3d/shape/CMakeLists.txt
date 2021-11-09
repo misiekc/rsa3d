@@ -40,7 +40,9 @@ add_library(shapes.2.1
         shapes/polygon/HBPolygon.cpp
         shapes/polydisk/Kmer.cpp
         shapes/polygon/Polygon.cpp
+        shapes/polygon/RoundedIsoscelesTriangle.cpp
         shapes/polygon/RoundedPolygon.cpp
+        shapes/polygon/RoundedRectangle.cpp
         shapes/polygon/SBPolygon.cpp
         shapes/polygon/Triangle.cpp
         shapes/spherocylinder/SpheroCylinder2D.cpp

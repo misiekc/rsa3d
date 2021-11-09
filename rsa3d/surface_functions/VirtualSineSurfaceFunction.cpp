@@ -69,7 +69,7 @@ double VirtualSineSurfaceFunction::virtualSineValue(double x) const {
     xmin /= this->k;
     xmax /= this->k;
 
-    double value = findValueBisectively(x, xmin, xmax);
+    double value = this->findValueBisectively(x, xmin, xmax);
 
     // Minimum is calculated bisectively, so it is prone to precision errors - value can be thus smaller than previously
     // calculated minimum
@@ -80,6 +80,10 @@ double VirtualSineSurfaceFunction::virtualSineValue(double x) const {
 }
 
 double VirtualSineSurfaceFunction::findValueBisectively(double x, double xmin, double xmax) const {
+    return this->calculateDiskCenterY(this->findTangentXBisectively(x, xmin, xmax));
+}
+
+double VirtualSineSurfaceFunction::findTangentXBisectively(double x, double xmin, double xmax) const {
     Expects(xmax > xmin);
 
     double currX{};
@@ -93,7 +97,7 @@ double VirtualSineSurfaceFunction::findValueBisectively(double x, double xmin, d
             xmin = xmid;
     } while (xmax - xmin > PRECISION);
 
-    return this->calculateDiskCenterY(xmid);
+    return xmid;
 }
 
 double VirtualSineSurfaceFunction::calculateDiskCenterX(double tangentX) const {
@@ -115,6 +119,13 @@ double VirtualSineSurfaceFunction::calculateMinValue() const {
     if (this->r < 1/this->A/this->k/this->k)
         return -this->A + this->r;
 
+    return this->calculateDiskCenterY(this->calculateMinValueTangentX());
+}
+
+double VirtualSineSurfaceFunction::calculateMinValueTangentX() const {
+    if (this->r < 1/this->A/this->k/this->k)
+        return 1.5 * M_PI / this->k;
+
     double xmin = 0.5 * M_PI / this->k;
     double xmid = xmin;
     double xmax = 1.5 * M_PI / this->k;
@@ -122,5 +133,30 @@ double VirtualSineSurfaceFunction::calculateMinValue() const {
         xmid = (xmid + xmax) / 2;
     } while (this->calculateDiskCenterX(xmid) < xmax);
 
-    return this->findValueBisectively(xmax, xmin, xmid);
+    return this->findTangentXBisectively(xmax, xmin, xmid);
+}
+
+double VirtualSineSurfaceFunction::getArea(double size) const {
+    Assert(RSA_SPATIAL_DIMENSION > 1);
+    Expects(size > 0);
+
+    double tanX1 = 0.5*M_PI/this->k;
+    double tanX2 = this->calculateMinValueTangentX();
+    double range = tanX2 - tanX1;
+
+    double curveLength{};
+    double prevX = this->calculateDiskCenterX(tanX1);
+    double prevY = this->calculateDiskCenterY(tanX1);
+    const std::size_t DIVISIONS = 1000000;
+    for (std::size_t i = 1; i <= DIVISIONS; i++) {
+        double tanX = tanX1 + range * static_cast<double>(i) / DIVISIONS;
+        double x = this->calculateDiskCenterX(tanX);
+        double y = this->calculateDiskCenterY(tanX);
+
+        curveLength += std::sqrt(std::pow(x - prevX, 2) + std::pow(y - prevY, 2));
+        prevX = x;
+        prevY = y;
+    }
+
+    return std::pow(size, RSA_SPATIAL_DIMENSION - 1) / (M_PI/this->k) * curveLength;
 }

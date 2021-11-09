@@ -20,6 +20,7 @@
 #include "modes/ContactFunctionMode.h"
 #include "modes/ExclusionZonesMode.h"
 #include "modes/WolframMode.h"
+#include "modes/SurfaceAreaMode.h"
 
 
 namespace {
@@ -42,7 +43,8 @@ namespace {
             {"wolfram", std::make_shared<WolframMode>()},
             {"bc_expand", std::make_shared<BCExpandMode>()},
             {"contact_function", std::make_shared<ContactFunctionMode>()},
-            {"exclusion_zones", std::make_shared<ExclusionZonesMode>()}};
+            {"exclusion_zones", std::make_shared<ExclusionZonesMode>()},
+            {"surface_area", std::make_shared<SurfaceAreaMode>()}};
 
     void print_modes(std::ostream &out) {
         using modes_pair_t = decltype(programModes)::value_type;
