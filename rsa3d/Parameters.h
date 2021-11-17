@@ -33,7 +33,6 @@ public:
 	double surfaceSize = pow(100000.0, 1.0/surfaceDimension);
 	bool storePackings = true;
 	std::string seedOrigin = "0";
-	bool appendToDat = false;
 
 	bool modifiedRSA = false;
 	double thresholdDistance = 0.0;

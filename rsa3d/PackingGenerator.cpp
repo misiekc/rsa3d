@@ -397,7 +397,10 @@ void PackingGenerator::createPacking(Packing *packing) {
 			}else if (status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
 				if(RSAShape::getSupportsSaturation() || rnd.nextValue() < 0.1){
 					if (!this->params.goDeep){
-						std::cout << "[" << this->collector << " PackingGenerator::createPacking] skipped after generating " << l << " shapes" << std::endl;
+						std::cout << " skipped after generating " << l << " shapes" << std::endl;
+						delete[] sOverlapped;
+						delete[] sVirtual;
+						delete[] aVoxels;
 						return;
 					}
 					std::cout << " skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;

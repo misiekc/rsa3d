@@ -62,17 +62,22 @@ Packing Simulation::runSingleSimulation(unsigned int seed, std::size_t collector
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
     PackingGenerator pg(seed, collector, &params);
-    pg.run();
-    Packing packing = pg.getPacking();
-    this->postProcessPacking(packing);
+    Packing packing;
+    if (access(pg.getPackingFilename().c_str(), F_OK)!=0){
+    	pg.run();
+    	packing = pg.getPacking();
+    	this->postProcessPacking(packing);
 
-    if (this->params.storePackings)
-        packing.store(pg.getPackingFilename());
+    	if (this->params.storePackings)
+    		packing.store(pg.getPackingFilename());
+        dataFile << collector << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;
+        dataFile.flush();
+    }else{
+    	packing.restore(pg.getPackingFilename());
+    }
 
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     process_mem_usage(vm, rss);
-    dataFile << collector << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;
-    dataFile.flush();
 
     auto generationSeconds = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
     std::cout << "[Simulation::runSingleSimulation] T: " << generationSeconds << "; VM: " << vm << "; RSS: " << rss;
@@ -84,7 +89,7 @@ Packing Simulation::runSingleSimulation(unsigned int seed, std::size_t collector
 void Simulation::run() {
     std::string datFilename = params.getPackingSignature() + ".dat";
     std::ofstream datFile;
-    if (this->params.appendToDat)
+    if (access(datFilename.c_str(), F_OK)==0)
         datFile.open(datFilename, std::ios_base::app);
     else
         datFile.open(datFilename, std::ios_base::out);
