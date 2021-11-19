@@ -23,11 +23,11 @@ void RoundedOrthogonalTriangle::initClass(const std::string &args) {
 	in >> RoundedPolygon::radius;
     ValidateMsg(RoundedPolygon::radius<1.0, "The radius has to be not greater than one");
 	double ratio, w, h;
-	h = 2*(1.0 - RoundedPolygon::radius);
+	w = 2*(1.0 - RoundedPolygon::radius);
 	in >> ratio;
     ValidateMsg(ratio>RoundedPolygon::radius, "Width to height ratio should larger than radius");
     // length of straight interval
-    w = 2*(ratio - RoundedPolygon::radius);
+    h = 2*(ratio - RoundedPolygon::radius);
 
     std::ostringstream roundedPolygonAttributes;
     roundedPolygonAttributes.precision(std::numeric_limits< double >::max_digits10);

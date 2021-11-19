@@ -27,10 +27,10 @@ void RoundedIsoscelesTriangle::initClass(const std::string &args) {
 
     ValidateMsg(RoundedPolygon::radius<1.0, "The radius has to be not greater than one");
     double a, h;
-	a = 2*(1.0 - radius);
-    ValidateMsg(ratio>0.5, "Sides to base ratio should not be smaller than 0.5");
+	a = 2*(1.0 - RoundedPolygon::radius);
+    ValidateMsg(ratio>RoundedPolygon::radius, "Width to height ratio should larger than radius");
     // length of straight interval
-    h = a*sqrt(ratio*ratio - 0.25);
+    h = 2*(ratio - RoundedPolygon::radius);
 
     std::ostringstream roundedPolygonAttributes;
     roundedPolygonAttributes.precision(std::numeric_limits< double >::max_digits10);

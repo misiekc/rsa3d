@@ -243,18 +243,29 @@ double RoundedPolygon::getArea() {
 
     size_t i0, i1, i2;
     for(size_t i=0; i<Polygon::segments.size(); i++){
+    	// analyze triangle i1 i0 i2 to determine angle at the vertex i0
     	i1 = (i>0) ? Polygon::segments[(i-1)].first : Polygon::segments[Polygon::segments.size()-1].first;
     	i0 = Polygon::segments[i].first;
     	i2 = Polygon::segments[(i+1)%Polygon::segments.size()].first;
 
+    	// vector from i0 to i1
     	Vector<2> v10 = Polygon::getStaticVertexPosition(i1) - Polygon::getStaticVertexPosition(i0);
+    	// vector from i0 to i2
         Vector<2> v20 = Polygon::getStaticVertexPosition(i2) - Polygon::getStaticVertexPosition(i0);
+        // vector from i2 to i2
         Vector<2> v12 = Polygon::getStaticVertexPosition(i1) - Polygon::getStaticVertexPosition(i2);
 
+        // surface of triangle (i1 i0 i2) equal to half of vector products of v10 and v20
         double areaTmp = 0.5*std::abs(v10[0]*v20[1] - v10[1]*v20[0]);
+        // if the base is v12, then the triangle height is h
         double h = 2*areaTmp / v12.norm();
-        double angle = std::acos(h/v10.norm()) + std::acos(h/v20.norm());
+        // the angle is a sum of two angles between v10 and h, and v20 and h. Cosine of each angle is calculated using scalar product, because h = v10*cos(a1) and h = v20*cos(a2)
+        double angle = 0.0;
+        // this protects against h < triangle sides due to rounding error in case of (almost) right triangle
+        angle += (h<v10.norm())?std::acos(h/v10.norm()):0.0;
+        angle += (h<v20.norm())?std::acos(h/v20.norm()):0.0;
 
+        // the angle we need is outside this triangle, thus searched angle is 2*PI - angle - 2*PI/2 = PI - angle
         area += RoundedPolygon::radius*RoundedPolygon::radius*(M_PI - angle)/2.0;
         area += v10.norm()*RoundedPolygon::radius;
     }
