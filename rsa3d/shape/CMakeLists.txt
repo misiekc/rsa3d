@@ -41,6 +41,7 @@ add_library(shapes.2.1
         shapes/polydisk/Kmer.cpp
         shapes/polygon/Polygon.cpp
         shapes/polygon/RoundedIsoscelesTriangle.cpp
+        shapes/polygon/RoundedOrthogonalTriangle.cpp
         shapes/polygon/RoundedPolygon.cpp
         shapes/polygon/RoundedRectangle.cpp
         shapes/polygon/SBPolygon.cpp

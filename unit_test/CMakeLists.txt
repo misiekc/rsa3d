@@ -16,6 +16,7 @@ target_link_libraries(unit_test.2.0  unit_test_runner rsa_main.2.0 shapes.2.0 rs
 add_executable(unit_test.2.1
         rsa3d/shape/shapes/polydisk/PolydiskTest.cpp
         rsa3d/shape/shapes/polygon/PolygonTest.cpp
+        rsa3d/shape/shapes/polygon/RoundedPolygonTest.cpp
         rsa3d/shape/shapes/polygon/TriangleTest.cpp
         rsa3d/shape/shapes/polydisk/KmerTest.cpp
         rsa3d/shape/shapes/RegularDiskopolygonTest.cpp)
