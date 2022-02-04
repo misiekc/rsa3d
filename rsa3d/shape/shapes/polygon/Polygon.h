@@ -14,8 +14,9 @@
 
 #include "../../AnisotropicShape2D.h"
 #include "../../../geometry/Vector.h"
+#include "../../OrderCalculable.h"
 
-class Polygon : public Shape<2, 1> {
+class Polygon : public Shape<2, 1>, public OrderCalculable {
 private:
     static void normalizeVolume(std::istringstream &in);
     static bool pointInsidePolygon(const Vector<2> &point, const std::vector<Vector<2>> &vertiecs);
@@ -68,6 +69,8 @@ protected:
 
     void vertexToPovray(std::size_t index, std::ostream &out) const;
 
+    std::vector<Vector<2>> getSideAxes() const;
+
 #ifdef CUDA_ENABLED
 	static void cuInit();
 	static void cuFree();
@@ -96,6 +99,7 @@ public:
 	std::string toPovray() const override;
 	std::string toString() const override;
 	std::string toWolfram() const override;
+    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 
     static bool isPolygonConvex();
 

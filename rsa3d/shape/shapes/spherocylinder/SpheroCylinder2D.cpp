@@ -192,7 +192,7 @@ std::string SpheroCylinder2D::toPovray() const {
     Vector<2> position = this->getPosition();
 	for(unsigned short i=0; i<2; i++)
 		out << (position[i]) << ", ";
-	out << "0.0>" << std::endl << "	texture { pigment { color Red } }" << std::endl << "}" << std::endl;
+	out << "0.0>" << std::endl << "	texture { finish { ambient 1 diffuse 0 } pigment { color Red} }" << std::endl << "}" << std::endl;
 
 	return out.str();
 

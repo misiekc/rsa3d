@@ -10,11 +10,16 @@
 
 #include "RoundedPolygon.h"
 
-class RoundedRectangle : public RoundedPolygon {
+class RoundedRectangle : public RoundedPolygon{
 
+private:
+	std::vector<Vector<2>> getAxes();
 
 public:
 	static void initClass(const std::string &args);
+    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 };
+
+
 
 #endif /* SHAPES_POLYGONS_ROUNDEDRECTANGLE_H_ */

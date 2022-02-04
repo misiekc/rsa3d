@@ -7,6 +7,7 @@
 
 #include "Polygon.h"
 #include "../../../utils/Assertions.h"
+#include "../../OrderParameters.h"
 #include <cmath>
 #include <sstream>
 #include <optional>
@@ -606,3 +607,38 @@ void Polygon::vertexToPovray(std::size_t index, std::ostream &out) const {
     Vector<2> position = this->getVertexPosition(index);
     out << "< " << position[0] << ", " << position[1] << ", 0.0002>";
 }
+
+std::vector<Vector<2>> Polygon::getSideAxes() const{
+	std::vector<Vector<2>> axes;
+
+	std::vector<Vector<2>> vertexPositions = this->getVerticesPositions();
+	for(int i=0; i<vertexPositions.size(); i++){
+		int previous = (i>0 ? (i-1) : vertexPositions.size()-1);
+		Vector<2> v = vertexPositions[i] - vertexPositions[previous];
+		axes.push_back(v.normalized());
+	}
+	return axes;
+}
+
+std::vector<double> Polygon::calculateOrder(const OrderCalculable *other) const {
+    auto &otherPolygon = dynamic_cast<const Polygon&>(*other);
+
+    std::vector<Vector<3>> thisSideAxes;
+    for(Vector<2> v :this->getSideAxes()){
+    	Vector<3> vTmp({v[0], v[1], 0});
+    	thisSideAxes.push_back(vTmp);
+    }
+
+    std::vector<Vector<3>> otherSideAxes;
+    for(Vector<2> v :otherPolygon.getSideAxes()){
+    	Vector<3> vTmp({v[0], v[1], 0});
+    	otherSideAxes.push_back(vTmp);
+    }
+
+    return {
+    	OrderParameters::nematicP1(thisSideAxes, otherSideAxes),
+    	OrderParameters::nematicP2(thisSideAxes, otherSideAxes)
+    };
+
+}
+
