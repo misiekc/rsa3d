@@ -34,6 +34,7 @@ void RoundedPolygon::normalizeVolume(std::istringstream &in){
 	std::for_each(vertexR.begin(), vertexR.end(), [area](auto &vR) { vR /= sqrt(area); });
     RoundedPolygon::radius /= sqrt(area);
 
+    // Sanitize volume normalization
     if (!isAreaExplicit) {
         area = RoundedPolygon::getArea();
         ValidateMsg(std::fabs(area - 1.0) < 0.00001, "Something wrong with shape scaling");

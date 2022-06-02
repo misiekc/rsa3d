@@ -48,4 +48,12 @@ TEST_CASE("RoundedPolygon: area normalization") {
         CHECK(get_segment_length(vertexR, vertexTheta, 1, 2) == Approx(0.3882451851870145));
         CHECK(get_segment_length(vertexR, vertexTheta, 2, 0) == Approx(0.7209532095891463));
     }
+
+    SECTION("explicit volume for concave should not throw") {
+        REQUIRE_NOTHROW(RoundedPolygon::initClass("0.5 6 xy -1 -1 1 -1 1 0 0 0 0 1 -1 1 6 0 1 2 3 4 5 7.731747704246810"));
+    }
+
+    SECTION("auto volume for concave should  throw") {
+        REQUIRE_THROWS(RoundedPolygon::initClass("0.5 6 xy -1 -1 1 -1 1 0 0 0 0 1 -1 1 6 0 1 2 3 4 5"));
+    }
 }
