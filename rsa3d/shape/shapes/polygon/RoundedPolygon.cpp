@@ -23,7 +23,9 @@ double RoundedPolygon::calculateCircumscribedCircleRadius(){
 void RoundedPolygon::normalizeVolume(std::istringstream &in){
 	double area;
 	in >> area;
-	if (in) {
+    bool isAreaExplicit = !in.fail();
+
+	if (isAreaExplicit) {
         Validate(area > 0);
     } else {
         area = RoundedPolygon::getArea();
@@ -31,8 +33,11 @@ void RoundedPolygon::normalizeVolume(std::istringstream &in){
 
 	std::for_each(vertexR.begin(), vertexR.end(), [area](auto &vR) { vR /= sqrt(area); });
     RoundedPolygon::radius /= sqrt(area);
-    area = RoundedPolygon::getArea();
-    ValidateMsg(std::fabs(area-1.0)<0.00001, "Something wrong with shape scaling");
+
+    if (!isAreaExplicit) {
+        area = RoundedPolygon::getArea();
+        ValidateMsg(std::fabs(area - 1.0) < 0.00001, "Something wrong with shape scaling");
+    }
 }
 
 /**
