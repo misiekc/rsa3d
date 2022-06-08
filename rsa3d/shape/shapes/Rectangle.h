@@ -35,12 +35,14 @@ private:
     Vector<2> rotatePoint(const Vector<2>& point, const Matrix<2,2>& rotation) const;
     bool isInsideExcludingRectangle(double angleFrom, double angleTo, double x, double y) const;
     bool checkTangents(double x, double y, double cx, double cy, double r, double angle1, double angle2) const;
-    void setAngle(double angle) override;
     bool isIntersection(double p0_x, double p0_y, double p1_x, double p1_y, double p2_x, double p2_y, double p3_x,
                         double p3_y) const;
 
 protected:
+    static void parseRatio(double ratio);
     void setPosition(const Vector<2> &position) override;
+    virtual void setAngle(double angle) override;
+
 
 public:
     static void initClass(const std::string &args);

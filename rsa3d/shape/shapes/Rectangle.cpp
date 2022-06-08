@@ -50,8 +50,7 @@ void Rectangle::setAngle(double angle) {
     ys[3] = point[1] + position[1];
 }
 
-void Rectangle::initClass(const std::string &args) {
-    double ratio = std::stod(args);
+void Rectangle::parseRatio(double ratio){
     double s = sqrt(1.0 / ratio);
     if (ratio >= 0) {
         Rectangle::longer = s * ratio;
@@ -60,6 +59,11 @@ void Rectangle::initClass(const std::string &args) {
         Rectangle::longer = s;
         Rectangle::shorter = s * ratio;
     }
+}
+
+void Rectangle::initClass(const std::string &args) {
+    double ratio = std::stod(args);
+    Rectangle::parseRatio(ratio);
 
     ShapeStaticInfo<2, 1> shapeInfo;
 

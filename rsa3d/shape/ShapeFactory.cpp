@@ -29,6 +29,7 @@
     #elif RSA_ANGULAR_DIMENSION == 1
 		#include "shapes/spherocylinder/SpheroCylinder2D.h"
 		#include "shapes/Ellipse.h"
+		#include "shapes/AlignedRectangle.h"
 		#include "shapes/Rectangle.h"
         #include "shapes/RegularDiskopolygon.h"
         #include "shapes/polydisk/Fibrinogen.h"
@@ -140,6 +141,9 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
                 return;
             } else if (sClass == "Ellipse") {
                 Ellipse::initClass(attr);
+                return;
+            } else if (sClass == "AlignedRectangle") {
+                AlignedRectangle::initClass(attr);
                 return;
             } else if (sClass == "Rectangle") {
                 Rectangle::initClass(attr);
