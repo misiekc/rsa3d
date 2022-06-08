@@ -175,10 +175,10 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 	this->length = angularGridSize * spatialGridSize;// this->beginningVoxelNumber;
 	this->compactVoxelArray();
 
-	this->checkTopLevelVoxels();
-
-	this->rebuildNeighbourGrid();
 	this->voxelsInitialized = true;
+
+	this->checkTopLevelVoxels();
+	this->rebuildNeighbourGrid();
 	return spatialGridSize * angularGridSize;
 }
 
@@ -268,13 +268,15 @@ void VoxelList::checkTopLevelVoxels(){
 	for(size_t i=0; i<this->length; i++){
 		Voxel *v = this->voxels[i];
 		this->getRandomPositionAndOrientation(&pos, &angle, v, &rnd);
-		int index = this->getIndexOfTopLevelVoxel(pos);
-		if (this->getIndexOfTopLevelVoxel(v->getPosition())!=index){
+		int i1 = this->getIndexOfTopLevelVoxel(pos);
+		int i2 = this->getIndexOfTopLevelVoxel(v->getPosition());
+		if (i1!=i2){
 			std::cout << "checkTopVoxels problem" << std::endl;
 		}
 		for(int j=0; j<10; j++){
 			this->getRandomPositionAndOrientation(&pos, &angle, v, &rnd);
-			if (this->getIndexOfTopLevelVoxel(pos)!=index){
+			i2 = this->getIndexOfTopLevelVoxel(pos);
+			if (i1!=i2){
 				std::cout << "checkTopVoxels problem" << std::endl;
 			}
 		}

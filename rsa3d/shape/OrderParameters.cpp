@@ -41,6 +41,11 @@ double OrderParameters::nematicP2(const std::vector<Vector<3>> &firstAxes, const
     return integer_legendre::P2(cosOfMaxAbs(firstAxes, secondAxes));
 }
 
+double OrderParameters::nematicD2(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {
+	double x = cosOfMaxAbs(firstAxes, secondAxes);
+    return 2*x*x-1;
+}
+
 double OrderParameters::tetrahedral(const std::vector<Vector<3>> &firstAxes, const std::vector<Vector<3>> &secondAxes) {
     return 9./32*cosNSum(firstAxes, secondAxes, 3);
 }

@@ -20,6 +20,7 @@ class Polygon : public Shape<2, 1>, public OrderCalculable {
 private:
     static void normalizeVolume(std::istringstream &in);
     static bool pointInsidePolygon(const Vector<2> &point, const std::vector<Vector<2>> &vertiecs);
+    static bool isParallel(std::vector<Vector<2>> &axes, Vector<2> &v);
 
     bool voxelInsideFullAngleCheck(const Vector<2> &spatialCenter, double halfSpatialSize) const;
     bool pointInsidePushedVertices(const Vector<2> &point, double pushDistance) const;
@@ -99,7 +100,7 @@ public:
 	std::string toPovray() const override;
 	std::string toString() const override;
 	std::string toWolfram() const override;
-    std::vector<double> calculateOrder(const OrderCalculable *other) const override;
+    virtual std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 
     static bool isPolygonConvex();
 

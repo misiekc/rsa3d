@@ -45,6 +45,7 @@ private:
 		void print(std::ostream &out) const;
     };
 
+	std::vector<std::vector<double>> orderParameterRange;
 
 	/* returns packing fraction */
 	double analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf, double surfaceFactor);
@@ -56,6 +57,8 @@ private:
 	void printASF(Plot &asf, std::string filename, int counter, double packingFraction, Result *res);
 	void printHistogram(Plot& plot, std::string filename);
 	void printCorrelations(Plot &corr, std::string filename);
+	void fillOrderParameterRange(const RSAShape *s);
+	double applyOrderNormalisation(double d, std::vector<double> &norm);
 	void printOrder(const std::vector<Plot*> &order, const std::string &filename) const;
 //	double getPetiodicDistance(const RSAShape *shape1, const RSAShape *shape2) const;
 	std::vector<Plot *> getFilledOrderVector(double range) const;

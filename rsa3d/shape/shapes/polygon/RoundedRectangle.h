@@ -9,6 +9,7 @@
 #define SHAPES_POLYGONS_ROUNDEDRECTANGLE_H_
 
 #include "RoundedPolygon.h"
+#include "../../OrderCalculable.h"
 
 class RoundedRectangle : public RoundedPolygon{
 

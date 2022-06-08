@@ -608,14 +608,23 @@ void Polygon::vertexToPovray(std::size_t index, std::ostream &out) const {
     out << "< " << position[0] << ", " << position[1] << ", 0.0002>";
 }
 
+bool Polygon::isParallel(std::vector<Vector<2>> &axes, Vector<2> &v){
+	for(Vector<2> axe: axes){
+		if ((v[0]*axe[1]-v[1]*axe[0])<Polygon::INSPHERE_SEARCH_PRECISION)
+			return true;
+	}
+	return false;
+}
+
 std::vector<Vector<2>> Polygon::getSideAxes() const{
 	std::vector<Vector<2>> axes;
 
 	std::vector<Vector<2>> vertexPositions = this->getVerticesPositions();
-	for(int i=0; i<vertexPositions.size(); i++){
+	for(size_t i=0; i<vertexPositions.size(); i++){
 		int previous = (i>0 ? (i-1) : vertexPositions.size()-1);
 		Vector<2> v = vertexPositions[i] - vertexPositions[previous];
-		axes.push_back(v.normalized());
+		if (!Polygon::isParallel(axes, v))
+			axes.push_back(v.normalized());
 	}
 	return axes;
 }
@@ -636,9 +645,8 @@ std::vector<double> Polygon::calculateOrder(const OrderCalculable *other) const 
     }
 
     return {
-    	OrderParameters::nematicP1(thisSideAxes, otherSideAxes),
-    	OrderParameters::nematicP2(thisSideAxes, otherSideAxes)
-    };
+    	OrderParameters::nematicD2(thisSideAxes, otherSideAxes)
+   	};
 
 }
 

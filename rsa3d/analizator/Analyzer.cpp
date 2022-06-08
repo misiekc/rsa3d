@@ -19,10 +19,57 @@
 #include <cstring>
 #include <cmath>
 
-
 void Analyzer::Result::print(std::ostream &out) const {
 	out << "dir\ttheta\td(theta)\tA\td(A)\td\td(d)\ttheta_inf\td(theta_inf)\tC1\td(C1)\tC2\td(C2)" << std::endl;
 	out << dir << "\t" << theta << "\t" << A << "\t" << d << "\t" << thetaInf << "\t" << C1 << "\t" << C2 << std::endl;
+}
+
+
+void Analyzer::fillOrderParameterRange(const RSAShape *s){
+	RND rnd(1);
+	std::uniform_real_distribution<double> ud(0.0, 2*M_PI);
+    auto particle1 = dynamic_cast<const OrderCalculable*>(s);
+    std::vector<std::vector<double>> vParameters;
+	int total = 1000000;
+	_OMP_PARALLEL_FOR
+	for(int i=0; i<total; i++){
+		RSAShape *other = ShapeFactory::createShape(&rnd);
+
+#if RSA_ANGULAR_DIMENSION==1
+		RSAOrientation angle{};
+        angle[0] = rnd.nextValue(&ud);
+        other->rotate(angle);
+#endif
+	    auto particle2 = dynamic_cast<const OrderCalculable*>(other);
+	    _OMP_CRITICAL(vParameters)
+        vParameters.push_back(particle1->calculateOrder(particle2));
+	}
+	int numberOfParameters = particle1->getNumOfOrderParameters();
+	for(int i=0; i<numberOfParameters; i++){
+		std::vector<double> statistics;
+		statistics.push_back(-std::numeric_limits<double>::infinity());
+		statistics.push_back(std::numeric_limits<double>::infinity());
+		statistics.push_back(0.0);
+		this->orderParameterRange.push_back(statistics);
+	}
+	for(int i=0; i<total; i++){
+		for(int j=0; j<numberOfParameters; j++){
+			double d = vParameters[i][j];
+			if (this->orderParameterRange[j][0]<d) // max update
+				this->orderParameterRange[j][0]=d;
+			if (this->orderParameterRange[j][1]>d) // min update
+				this->orderParameterRange[j][1]=d;
+			this->orderParameterRange[j][2] += d;
+		}
+	}
+	for(int j=0; j<numberOfParameters; j++){
+		this->orderParameterRange[j][2] /= total;
+	}
+}
+
+double Analyzer::applyOrderNormalisation(double d, std::vector<double> &norm){
+//	d = 2*(d-norm[2])/(norm[0]-norm[1]); // (d - mean)(max - min)
+	return d;
 }
 
 
@@ -32,6 +79,8 @@ void Analyzer::analyzeOrder(const Packing &packing, const NeighbourGrid<const RS
 
 	double da[RSA_SPATIAL_DIMENSION];
    	double dMax = (*order)[0]->getMax(), dMax2 = dMax*dMax;
+   	if (this->orderParameterRange.size()==0)
+   		this->fillOrderParameterRange(packing[0]);
    	_OMP_PARALLEL_FOR
    	for(size_t i=0; i<packing.size(); i++){
    		const RSAShape *si = packing[i];
@@ -57,8 +106,10 @@ void Analyzer::analyzeOrder(const Packing &packing, const NeighbourGrid<const RS
                 auto particle2 = dynamic_cast<const OrderCalculable*>(sj);
                 std::vector<double> orderParameters = particle1->calculateOrder(particle2);
     			for(std::size_t k = 0; k < orderParameters.size(); k++){
+    				double d = orderParameters[k];
+    				d = this->applyOrderNormalisation(d, this->orderParameterRange[k]);
     				_OMP_CRITICAL(order)
-                    (*order)[k]->add(std::sqrt(dist2), orderParameters[k]);
+                    (*order)[k]->add(std::sqrt(dist2), d);
     			}
     		}
     	}
@@ -446,10 +497,10 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
     this->findMinMaxTimes(minmaxTimes, packingPaths);
 //    double maxTime = 1.0e+15;
 
-    LogPlot nvt(mintime, minmaxTimes[0], 200);
-    Plot asf(0.0, 1.0, 200);
-    Plot correlations(0.0, correlationsRange, 200);
-    Plot minDist(0.0, correlationsRange, 200);
+    LogPlot nvt(mintime, minmaxTimes[0], 500);
+    Plot asf(0.0, 1.0, 500);
+    Plot correlations(0.0, correlationsRange, 500);
+    Plot minDist(0.0, correlationsRange, 500);
     std::vector<Plot*> order = this->getFilledOrderVector(correlationsRange);
 
     double spf = 0.0, spf2 = 0.0;
@@ -512,7 +563,7 @@ std::vector<Plot*> Analyzer::getFilledOrderVector(double range) const {
     auto orderCalculable = dynamic_cast<OrderCalculable*>(shape.get());
     std::size_t paramNum = orderCalculable->getNumOfOrderParameters();
     for (std::size_t i = 0; i < paramNum; i++)
-        result.push_back(new Plot(0.0, range, 200));
+        result.push_back(new Plot(0.0, range, 500));
     return result;
 }
 

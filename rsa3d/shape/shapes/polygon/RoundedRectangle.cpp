@@ -4,7 +4,10 @@
 
 #include "RoundedRectangle.h"
 #include "../../../utils/Assertions.h"
+#include "../../OrderParameters.h"
 #include <sstream>
+#include <vector>
+
 
 
 /**
@@ -47,3 +50,26 @@ void RoundedRectangle::initClass(const std::string &args) {
     shapeInfo.setAngularVoxelSize(M_PI);
     Shape::setShapeStaticInfo(shapeInfo);
 }
+
+std::vector<double> RoundedRectangle::calculateOrder(const OrderCalculable *other) const {
+    auto &otherRectangle = dynamic_cast<const RoundedRectangle &>(*other);
+
+    std::vector<Vector<3>> thisSideAxes;
+    for(Vector<2> v :this->getSideAxes()){
+    	Vector<3> vTmp({v[0], v[1], 0});
+    	thisSideAxes.push_back(vTmp);
+    }
+
+    std::vector<Vector<3>> otherSideAxes;
+    for(Vector<2> v :otherRectangle.getSideAxes()){
+    	Vector<3> vTmp({v[0], v[1], 0});
+    	otherSideAxes.push_back(vTmp);
+    }
+
+    return {
+    	OrderParameters::cubatic(thisSideAxes, otherSideAxes)
+    };
+
+}
+
+
