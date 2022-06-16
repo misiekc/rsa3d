@@ -9,8 +9,10 @@
 #include <iostream>
 
 Surface::Surface(int dim, double s, double ndx, double vdx, std::unique_ptr<RSABoundaryConditions> bc) {
-    ValidateMsg(s > 2*RSAShape::getNeighbourListCellSize(),
-                "Packing linear size is <= 2 neighbour list cell size - boundary conditions will break. ");
+	std::ostringstream out;
+	std::cout << "[Surface::Surface] Packing linear size (" << s << ") is <= 2 neighbour list cell size (" << RSAShape::getNeighbourListCellSize() << ") - no neighbour grid support, boundary conditions may not be applied" << std::endl;
+//    ValidateMsg(s > 2*RSAShape::getNeighbourListCellSize(),
+//                "Packing linear size is <= 2 neighbour list cell size - boundary conditions will break. ");
 
     this->bc = std::move(bc);
 	this->dimension = dim;

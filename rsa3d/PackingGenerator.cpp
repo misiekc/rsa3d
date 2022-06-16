@@ -265,6 +265,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 
 	std::size_t checkedAgain = 0;
 	std::size_t added = 0;
+	std::size_t addedSinceLastSplit = 0;
 	std::size_t missCounter = 0;
 	unsigned short depthAnalyze = 0;
 
@@ -368,7 +369,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 		}  // for
 
 		std::cout << "done, double checked: " << checkedAgain << " added: " << added << ", time: " << t << ", shapes: " << l << std::endl << std::flush;
-
+		addedSinceLastSplit += added;
 		//whether splitting voxels
 		if (added == 0) { // v.getMissCounter() % iSplit == 0){ //
 			missCounter += tmpSplit;
@@ -380,6 +381,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 			    std::cout << "[" << miliseconds << "]";
 
 			}
+			std::cout << "[" << this->collector << " PackingGenerator::createPacking] shapes added since last split " << addedSinceLastSplit << std::endl;
 			std::cout << "[" << this->collector << " PackingGenerator::createPacking] splitting " << v0 << " voxels ";
 			std::cout.flush();
 //						this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
@@ -394,9 +396,10 @@ void PackingGenerator::createPacking(Packing *packing) {
 				std::cout << " done. " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels, new voxel size: " << voxels->getSpatialVoxelSize() << ", angular size: " << this->voxels->getAngularVoxelSize() << ", factor: " << factor << ", change: " << (factor/oldFactor) << std::endl;
 				std::cout.precision(std::numeric_limits< double >::max_digits10);
 				missCounter = 0;
+				addedSinceLastSplit = 0;
 			}else if (status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
 				if(RSAShape::getSupportsSaturation() || rnd.nextValue() < 0.1){
-					if (!this->params.goDeep){
+					if (!this->params.goDeep && addedSinceLastSplit==0){
 						std::cout << " skipped after generating " << l << " shapes" << std::endl;
 						delete[] sOverlapped;
 						delete[] sVirtual;
@@ -411,9 +414,11 @@ void PackingGenerator::createPacking(Packing *packing) {
 					std::cout.precision(std::numeric_limits< double >::max_digits10);
 					tmpSplit = (int)(1.1 * tmpSplit);
 				}
+				addedSinceLastSplit = 0;
 			}else{
 				std::cout << "skipped" << std::endl << std::flush;
 				depthAnalyze = 1;
+				addedSinceLastSplit = 0;
 			}
 			size_t v1 = this->voxels->getLength();
 

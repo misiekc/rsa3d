@@ -11,6 +11,7 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
 #include "BoundaryConditions.h"
 #include "utils/Assertions.h"
@@ -27,6 +28,8 @@ private:
 	unsigned int n;
 	double dx;
 	size_t cellSize;
+	// dummy grid stores all shapes in one cell - used for packing of highly anisotropic shapes. By default dummyGrid is equal to false. When it is true there is no advantage of using neighbour grid structure
+	bool dummyGrid;
 
 	// contains vectors of cells (vectors with Positioned* inside)
 	std::vector<E * > **cells;
@@ -34,6 +37,8 @@ private:
 
 
 	size_t position2i(const RSAVector &position) const{
+		if (this->dummyGrid)
+			return 0;
 		int result = 0;
 		int ix;
 		for(short i=this->surfaceDimension-1; i>=0; i--){
@@ -142,20 +147,23 @@ private:
 	void init(double size, size_t n){
 		this->linearSize = size;
 		this->n = n;
-		this->dx = size/(this->n-2);
+		if (this->dummyGrid)
+			this->dx = size;
+		else
+			this->dx = size/(this->n-2);
 		this->cellSize = (int) round(pow(this->n, this->surfaceDimension));
 		this->cells = new std::vector<E *> *[this->cellSize];
 
 		// filling real cells
 		for(size_t i=0; i<this->cellSize; i++){
-			if (this->reflectedCell(i))
+			if (this->reflectedCell(i) && !this->dummyGrid)
 				continue;
 			this->cells[i] = new std::vector<E *>;
 		}
 
 		// filing reflected cells
 		for(size_t i=0; i<this->cellSize; i++){
-			if (this->reflectedCell(i))
+			if (this->reflectedCell(i) && !this->dummyGrid)
 				this->cells[i] = this->reflectedCellVector(i);
 		}
 
@@ -163,7 +171,8 @@ private:
 		for(size_t i=0; i<this->cellSize; i++){
 			Expects(this->cells[i]!=nullptr);
 		}
-		this->fillNeigbouringCellsOffsets();
+		if (!this->dummyGrid)
+			this->fillNeigbouringCellsOffsets();
 	}
 
 public:
@@ -174,36 +183,19 @@ public:
 		Expects(size > 0);
 		Expects(dx > 0);
 
+		size_t n;
 		this->surfaceDimension = surfaceDim;
+		if (size<2*dx){
+		    std::cout << "[NeigbourGrid::NeighbourGrid] neighbour grid cell is too big, entering dummy neigbour grid mode" << std::endl;
+		    n = 1;
+		    this->dummyGrid = true;
+		}else{
 		// cells on the edges are used by periodic boundary conditions
-		size_t n = (size_t)(size/dx) + 2;
-		if (n < 3)
-		    throw std::runtime_error("neighbour grid cell too big");
+			n = (size_t)(size/dx) + 2;
+			this->dummyGrid = false;
+		}
 		this->init(size, n);
 	}
-
-/*
-	NeighbourGrid(int surfaceDim, double size, size_t n){ // @suppress("Class members should be properly initialized")
-		Expects(surfaceDim > 0);
-		Expects(surfaceDim <= RSA_SPATIAL_DIMENSION);
-		Expects(size > 0);
-		Expects(n > 0);
-
-		this->surfaceDimension = surfaceDim;
-		this->init(size, n);
-	}
-
-	NeighbourGridNew(int surfaceDim, double size, size_t n, bool neighbouringCells){ // @suppress("Class members should be properly initialized")
-		Expects(surfaceDim > 0);
-		Expects(surfaceDim <= RSA_SPATIAL_DIMENSION);
-		Expects(size > 0);
-		Expects(n > 0);
-
-		this->withNeighbouringCells = neighbouringCells;
-		this->surfaceDimension = surfaceDim;
-		this->init(size, n);
-	}
-	*/
 
 	virtual ~NeighbourGrid(){
 		for(size_t i=0; i<this->cellSize; i++){
@@ -242,8 +234,13 @@ public:
 
 		int cellNo = this->position2i(position);
 
-		for(int iCellOffset : this->neighbouringCellsOffsets){
-			vTmp = (this->cells[cellNo + iCellOffset]);
+		if(!this->dummyGrid){
+			for(int iCellOffset : this->neighbouringCellsOffsets){
+				vTmp = (this->cells[cellNo + iCellOffset]);
+				result->insert(result->end(), vTmp->begin(), vTmp->end());
+			}
+		}else{
+			vTmp = (this->cells[cellNo]);
 			result->insert(result->end(), vTmp->begin(), vTmp->end());
 		}
 	}
