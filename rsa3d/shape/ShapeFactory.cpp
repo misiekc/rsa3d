@@ -67,6 +67,7 @@
 		#include "shapes/regular_solid/SnubDodecahedron.h"
 		#include "shapes/regular_solid/CubeToTetrahedron.h"
 		#include "shapes/Ellipsoid.h"
+		#include "shapes/Superellipsoid.h"
     #endif
 #endif
 
@@ -252,6 +253,9 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
                 return;
             } else if (sClass == "Ellipsoid") {
                 Ellipsoid::initClass(attr);
+                return;
+            } else if (sClass == "Superellipsoid") {
+                Superellipsoid::initClass(attr);
                 return;
             } else if (sClass == "CubeToTetrahedron") {
                 RegularSolid<CubeToTetrahedron>::initClass(attr);

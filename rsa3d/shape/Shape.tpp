@@ -113,7 +113,8 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::restore(std::istream &f){
 
 	if (sd!=SPATIAL_DIMENSION || ad!=ANGULAR_DIMENSION){
         throw std::runtime_error(
-                std::string("[ERROR] cannot restore Shape: incompatible dimensions: read ")
+                std::string("[ERROR] cannot restore Shape: incompatible dimensions: (") +
+				std::to_string(sd) + std::string(", ") + std::to_string(ad) + std::string(") read ")
                 + std::to_string(f.gcount())
                 + " bytes.");
 	}
