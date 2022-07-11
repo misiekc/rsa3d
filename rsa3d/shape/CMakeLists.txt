@@ -93,5 +93,6 @@ add_library(shapes.3.0
         shapes/OrientedCuboid.h
         shapes/OrientedCuboid.tpp
         shapes/Sphere.h
-        shapes/Sphere.tpp)
+        shapes/Sphere.tpp
+        shapes/Superellipsoid.cpp)
 target_compile_definitions(shapes.3.0 PUBLIC RSA_SPATIAL_DIMENSION=3 RSA_ANGULAR_DIMENSION=0)
