@@ -177,6 +177,21 @@ public:
     operator^=(const Vector<3, E> & other);      // Vector product assignemnt
 
 
+    // Check if vector in numerically very small (for double)
+    //---------------------------------------------------------------------------------------
+    template <std::size_t _DIM = DIM, typename _E = E>
+    enabled<std::is_same<_E, double>::value, double>
+    isZero() const
+    {
+   		double ZERO = 9.094947e-13;
+    	bool b = true;
+    	for(size_t i=0; i<_DIM; i++){
+    		if ((*this)[i] > ZERO || (*this)[i] < -ZERO)
+    			b = false;
+    	}
+    	return b;
+    }
+
     // Norm of vector (for double)
     //---------------------------------------------------------------------------------------
     template <typename _E = E>

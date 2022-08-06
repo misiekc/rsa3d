@@ -30,8 +30,8 @@ void Superellipsoid::initClass(const std::string &attr) {
     normalizeVolume();
 
     ShapeStaticInfo<3, 0> shapeInfo;
-    shapeInfo.setCircumsphereRadius(std::cbrt(Superellipsoid::c*Superellipsoid::c + Superellipsoid::b*Superellipsoid::b + Superellipsoid::a*Superellipsoid::a));
-    shapeInfo.setInsphereRadius(a*b*c/std::sqrt(a*a*b*b+a*a*c*c+b*b*c*c));
+    shapeInfo.setCircumsphereRadius(std::cbrt(c*c + b*b + a*a));
+    shapeInfo.setInsphereRadius(a*b*c / std::sqrt(a*a*b*b + a*a*c*c + b*b*c*c));
     shapeInfo.setExclusionZoneMaxSpan(0.1*a);
     shapeInfo.setCreateShapeImpl([](RND *rnd) -> Shape* {
         return new Superellipsoid(Matrix<3, 3>::rotation(
@@ -44,9 +44,9 @@ void Superellipsoid::initClass(const std::string &attr) {
 }
 
 void Superellipsoid::normalizeVolume() {
-    double volume = (2.0/3.0)*Superellipsoid::a*Superellipsoid::b*Superellipsoid::c/(Superellipsoid::p*Superellipsoid::p);
-    volume *= std::beta(1.0/(2*Superellipsoid::p), 1.0/(2*Superellipsoid::p));
-    volume *= std::beta(1.0/Superellipsoid::p, 1.0/(2*Superellipsoid::p));
+    double volume = (2.0/3.0)*a*b*c/(p*p);
+    volume *= std::beta(1.0/(2*p), 1.0/(2*p));
+    volume *= std::beta(1.0/p, 1.0/(2*p));
     double factor = 1/std::cbrt(volume);
     Superellipsoid::a *= factor;
     Superellipsoid::b *= factor;
@@ -69,9 +69,9 @@ Vector<3> Superellipsoid::r_relative(const Vector<3> &r) const{
 
 double Superellipsoid::inner_shape_function(const Vector<3> &r) const{
 	Vector<3> r_relative = this->r_relative(r);
-	return 	std::pow((r_relative[0] / Superellipsoid::a), 2 * Superellipsoid::p) +
-			std::pow((r_relative[1] / Superellipsoid::b), 2 * Superellipsoid::p) +
-			std::pow((r_relative[2] / Superellipsoid::c), 2 * Superellipsoid::p);
+	return 	std::pow(std::abs(r_relative[0] / a), 2*p) +
+			std::pow(std::abs(r_relative[1] / b), 2*p) +
+			std::pow(std::abs(r_relative[2] / c), 2*p);
 }
 
 double Superellipsoid::shape_function(const Vector<3> &r) const{
@@ -81,15 +81,15 @@ double Superellipsoid::shape_function(const Vector<3> &r) const{
 Vector<3> Superellipsoid::inner_shape_function_gradient(const Vector<3> &r) const{
 	Vector<3> gradient;
 	Vector<3> r_relative = this->r_relative(r);
-	gradient[0] = (2*Superellipsoid::p/Superellipsoid::a)*std::pow(r_relative[0] / Superellipsoid::a, 2*Superellipsoid::p - 1);
-	gradient[1] = (2*Superellipsoid::p/Superellipsoid::b)*std::pow(r_relative[1] / Superellipsoid::b, 2*Superellipsoid::p - 1);
-	gradient[2] = (2*Superellipsoid::p/Superellipsoid::c)*std::pow(r_relative[2] / Superellipsoid::c, 2*Superellipsoid::p - 1);
+	gradient[0] = (2*p/a)*std::pow(std::abs(r_relative[0] / a), 2*p - 1);
+	gradient[1] = (2*p/b)*std::pow(std::abs(r_relative[1] / b), 2*p - 1);
+	gradient[2] = (2*p/c)*std::pow(std::abs(r_relative[2] / c), 2*p - 1);
 	return this->orientation*gradient;
 }
 
 Vector<3> Superellipsoid::shape_function_gradient(const Vector<3> r) const{
 	Vector<3> gradient;
-	double factor = (1.0/Superellipsoid::p)*std::pow(this->inner_shape_function(r), 1.0/Superellipsoid::p - 1);
+	double factor = (1.0/p)*std::pow(this->inner_shape_function(r), 1.0/p - 1);
 	gradient = factor*this->inner_shape_function_gradient(r);
 	return gradient;
 }
@@ -97,15 +97,15 @@ Vector<3> Superellipsoid::shape_function_gradient(const Vector<3> r) const{
 Matrix<3, 3> Superellipsoid::inner_shape_function_hesian(const Vector<3> r) const{
 	Matrix<3, 3> hesian{};
 	Vector<3> r_relative = this->r_relative(r);
-	hesian(0, 0) = (2*Superellipsoid::p*(2*Superellipsoid::p-1)*std::pow(r_relative[0]/Superellipsoid::a, 2*Superellipsoid::p-2))/(Superellipsoid::a*Superellipsoid::a);
+	hesian(0, 0) = (2*p*(2*p-1)*std::pow(std::abs(r_relative[0]/a), 2*p-2))/(a*a);
 	hesian(0, 1) = 0.0;
 	hesian(0, 2) = 0.0;
 	hesian(1, 0) = 0.0;
-	hesian(1, 1) = (2*Superellipsoid::p*(2*Superellipsoid::p-1)*std::pow(r_relative[1]/Superellipsoid::b, 2*Superellipsoid::p-2))/(Superellipsoid::b*Superellipsoid::b);
+	hesian(1, 1) = (2*p*(2*p-1)*std::pow(std::abs(r_relative[1]/b), 2*p-2))/(b*b);
 	hesian(1, 2) = 0.0;
 	hesian(2, 0) = 0.0;
 	hesian(2, 1) = 0.0;
-	hesian(2, 2) = (2*Superellipsoid::p*(2*Superellipsoid::p-1)*std::pow(r_relative[2]/Superellipsoid::c, 2*Superellipsoid::p-2))/(Superellipsoid::c*Superellipsoid::c);
+	hesian(2, 2) = (2*p*(2*p-1)*std::pow(std::abs(r_relative[2]/c), 2*p-2))/(c*c);
 	return this->orientation*hesian*this->orientationTr;
 }
 
@@ -117,9 +117,9 @@ Matrix<3, 3> Superellipsoid::shape_function_hesian(const Vector<3> r) const{
 
 	for(int i=0; i<3; i++)
 		for(int j=0; j<3; j++)
-			hesian(i,j) = 	(1/Superellipsoid::p)*
-								((1.0/Superellipsoid::p - 1)*std::pow(inner_shape, 1.0/Superellipsoid::p - 2)*inner_gradient[i]*inner_gradient[j] +
-								std::pow(inner_shape, 1.0/Superellipsoid::p - 1)*inner_hesian(i,j));
+			hesian(i,j) = 	(1/p)*
+								((1.0/p - 1)*std::pow(inner_shape, 1.0/p - 2)*inner_gradient[i]*inner_gradient[j] +
+								std::pow(inner_shape, 1.0/p - 1)*inner_hesian(i,j));
 	return hesian;
 }
 
@@ -181,8 +181,8 @@ bool Superellipsoid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &pos
     Vector<3> bcPos = position + bc->getTranslation(this->getPosition(), position);
     Vector<3> pointAligned = this->orientationTr * (bcPos - this->getPosition());
 
-    double d = pointAligned[0]*pointAligned[0]/(4*Superellipsoid::a*Superellipsoid::a) + pointAligned[1]*pointAligned[1]/((Superellipsoid::b + Superellipsoid::a)*(Superellipsoid::b + Superellipsoid::a)) + pointAligned[2]*pointAligned[2]/((Superellipsoid::c + Superellipsoid::a)*(Superellipsoid::c + Superellipsoid::a));
-    return (d <= 1.0);
+    double d = std::pow(pointAligned[0]/Superellipsoid::a, 2*Superellipsoid::p) + std::pow(pointAligned[1]/Superellipsoid::b, 2*Superellipsoid::p) + std::pow(pointAligned[2]/Superellipsoid::c, 2*Superellipsoid::p);
+    return (d <= 1.0 + this->getShapeStaticInfo().getInsphereRadius());
 }
 
 void Superellipsoid::store(std::ostream &f) const {
@@ -218,8 +218,8 @@ std::string Superellipsoid::toPovray() const {
 	std::stringstream out;
 	out.precision(std::numeric_limits< double >::max_digits10);
     Vector<3> position = this->getPosition();
-	out << "  superellipsoi { <" << 1.0/Superellipsoid::p << ", " << 1.0/Superellipsoid::p << ">" << std::endl;
-	out << "    scale < " << Superellipsoid::a << ", " << Superellipsoid::b << ", " << Superellipsoid::c << " >" << std::endl;
+	out << "  superellipsoid { <" << 1.0/p << ", " << 1.0/p << ">" << std::endl;
+	out << "    scale < " << a << ", " << b << ", " << c << " >" << std::endl;
 	out << "    matrix <" << std::endl;
 	out << "      " << this->orientation(0, 0) << ", " << this->orientation(1, 0) << ", " << this->orientation(2, 0) << ", " << std::endl;
     out << "      " << this->orientation(0, 1) << ", " << this->orientation(1, 1) << ", " << this->orientation(2, 1) << ", " << std::endl;
@@ -235,7 +235,7 @@ std::string Superellipsoid::toWolfram() const {
     std::stringstream out;
     out << std::fixed;
     out << "GeometricTransformation[" << std::endl;
-    out << "    Ellipsoid[{0, 0, 0}, {" << Superellipsoid::a << ", " << Superellipsoid::b << ", " << Superellipsoid::c << "}]," << std::endl;
+    out << "    Ellipsoid[{0, 0, 0}, {" << a << ", " << b << ", " << c << "}]," << std::endl;
     out << "    AffineTransform[" << std::endl;
     out << "        {{{" << this->orientation(0, 0) << ", " << this->orientation(0, 1) << ", " << this->orientation(0, 2) << "}," << std::endl;
     out << "          {" << this->orientation(1, 0) << ", " << this->orientation(1, 1) << ", " << this->orientation(1, 2) << "}," << std::endl;
