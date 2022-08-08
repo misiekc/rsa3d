@@ -21,7 +21,6 @@
 #include "modes/ExclusionZonesMode.h"
 #include "modes/WolframMode.h"
 #include "modes/SurfaceAreaMode.h"
-#include "modes/MyTestMode.h"
 
 
 namespace {
@@ -45,7 +44,6 @@ namespace {
             {"bc_expand", std::make_shared<BCExpandMode>()},
             {"contact_function", std::make_shared<ContactFunctionMode>()},
             {"exclusion_zones", std::make_shared<ExclusionZonesMode>()},
-            {"myTest", std::make_shared<MyTestMode>()},
             {"surface_area", std::make_shared<SurfaceAreaMode>()}};
 
     void print_modes(std::ostream &out) {

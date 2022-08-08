@@ -1,6 +1,11 @@
 set(RSA_SOURCE
         analizator/Analyzer.cpp
         analizator/ExclusionZoneVisualizer.cpp
+        geometry/xenocollide/BodyBuilder.cpp
+        geometry/xenocollide/Collide.cpp
+        geometry/xenocollide/CollideGeometry.cpp
+        geometry/xenocollide/MapPtr.cpp
+        geometry/xenocollide/Quat.cpp
         geometry/Geometry.cpp
         geometry/Matrix.h
         geometry/Matrix.tpp

@@ -47,6 +47,7 @@ add_library(shapes.2.1
         shapes/polygon/SBPolygon.cpp
         shapes/polygon/Triangle.cpp
         shapes/spherocylinder/SpheroCylinder2D.cpp
+        shapes/AlignedRectangle.cpp
         shapes/Ellipse.cpp
         shapes/Rectangle.cpp
         shapes/RegularDiskopolygon.cpp shapes/polygon/RegularRoundedPolygon.cpp shapes/polygon/RegularRoundedPolygon.h)
@@ -90,8 +91,10 @@ add_library(shapes.3.0
         shapes/spherocylinder/Spherocylinder.tpp
         shapes/spherocylinder/Stolen2DOverlapSC.cpp
         shapes/Ellipsoid.cpp
+        shapes/GenericXCShape.cpp
         shapes/OrientedCuboid.h
         shapes/OrientedCuboid.tpp
+        shapes/RoundedCone.cpp
         shapes/Sphere.h
         shapes/Sphere.tpp
         shapes/Superellipsoid.cpp)
