@@ -10,22 +10,33 @@
 #include "../../geometry/xenocollide/Collide.h"
 #include "../../geometry/xenocollide/Quat.h"
 
-MapPtr<CollideGeometry> RoundedCone::shapeModel;
-MapPtr<CollideGeometry> RoundedCone::evModel;
 double RoundedCone::R;
 double RoundedCone::r;
 double RoundedCone::l;
 
-RoundedCone::RoundedCone(const Matrix<3, 3> &orientation) : orientation(orientation)
+RoundedCone::RoundedCone(const Matrix<3, 3> &orientation) : GenericXCShape(orientation)
 {
-
 }
-
 
 RoundedCone::~RoundedCone() {
-	// TODO Auto-generated destructor stub
 }
 
+// needed to be chcecked
+double RoundedCone::volume(){
+	return
+			(M_PI*
+					(l*l*l*l*(r*r + r*R + R*R) +
+					2*l*l*(r - R)*(r - R)*(r*r + r*R + R*R) -
+					(r - R)*(r - R)*(r - R)*(r - R)*(r*r + r*R + R*R) +
+					2*l*l*l*(r*r*r + R*R*R))
+			)/(3*l*l*l);
+}
+
+/**
+ * @param attr two parameters:
+ * - radius of the smaller cap
+ * - distance between centers of spheres
+ */
 void RoundedCone::initClass(const std::string &attr){
     std::istringstream attrStream(attr);
     RoundedCone::R=1.0;
@@ -34,12 +45,12 @@ void RoundedCone::initClass(const std::string &attr){
     ValidateMsg(r > 0 && l > 0, "RoundedCone parameters should be positive");
     ValidateMsg(r <= 1, "RoundedCone smaller sphere radius should be smaller than 1.0");
 
-    double v = (1.0/3.0) * M_PI *
-    		(2*R*R*R + 2*r*r*r + (l/(R-r))*(R*R*R-r*r*r));
+    double v = volume();
     double factor = std::pow(v, 1.0/3.0);
     R /= factor;
     r /= factor;
     l /= factor;
+    v = volume();
 
     BodyBuilder bb;
     bb.sphere(R);
@@ -47,21 +58,22 @@ void RoundedCone::initClass(const std::string &attr){
     bb.sphere(r);
     bb.move(0, 0, l/2);
     bb.wrap();
-    RoundedCone::shapeModel = bb.getCollideGeometry();
+    GenericXCShape::shapeModel = bb.getCollideGeometry();
 
     bb.clear();
+    double d = l*(R+r)/std::sqrt(4*l*l + (R-r)*(R-r));
 
-    bb.sphere(R+r);
+    bb.sphere(R+d);
     bb.move(0, 0, -l/2);
-    bb.sphere(r+r);
+    bb.sphere(r+d);
     bb.move(0, 0, l/2);
     bb.wrap();
-    RoundedCone::evModel = bb.getCollideGeometry();
+    GenericXCShape::evModel = bb.getCollideGeometry();
 
 
     ShapeStaticInfo<3, 0> shapeInfo;
-    shapeInfo.setCircumsphereRadius(l+R+r);
-    shapeInfo.setInsphereRadius(r);
+    shapeInfo.setCircumsphereRadius(0.5*l+R);
+    shapeInfo.setInsphereRadius(d);
 //    shapeInfo.setExclusionZoneMaxSpan(a + c);
     shapeInfo.setCreateShapeImpl([](RND *rnd) -> Shape* {
         return new RoundedCone(Matrix<3, 3>::rotation(
@@ -76,60 +88,7 @@ Shape<3, 0> *RoundedCone::clone() const {
     return new RoundedCone(*this);
 }
 
-bool RoundedCone::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
-//    switch (this->overlapEarlyRejection(bc, s)) {
-//        case TRUE:      return true;
-//        case FALSE:     return false;
-//        case UNKNOWN:   break;
-//    }
-
-    RoundedCone cone = dynamic_cast<const RoundedCone &>(*s);
-    this->applyBC(bc, &cone);
-    Quat q1(this->orientation);
-    Quat q2(cone.orientation);
-//    CollideSphere geom(1.0);
-//    geom = *model;
-//	bool result = Intersect(geom, q1, this->getPosition(), geom, q2, cone.getPosition(), 0.1);
-//	double dist = (this->getPosition()-cone.getPosition()).norm();
-    bool result = Collide::Intersect(*(shapeModel), q1, this->getPosition(), *(shapeModel), q2, cone.getPosition(), 1.0e-12);
-//	if (result==false && dist<1.0){
-//		std::cout << this->getPosition() << ", " << cone.getPosition() << std::endl;
-//	}
-	return result;
-}
-
-bool RoundedCone::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation, double orientationRange) const {
-    // Transform point coordinates to Ellipsoid coordinate system
-    Vector<3> bcPos = position + bc->getTranslation(this->getPosition(), position);
-    CollideGeometry *point = new CollidePoint(Vector<3>({0, 0, 0}));
-    Quat q1(this->orientation);
-    Quat q2(Matrix<3,3>::identity());
-    bool result = Collide::Intersect(*(evModel), q1, this->getPosition(), *point, q2, bcPos, 1.0e-12);
-    return result;
-}
-
-void RoundedCone::store(std::ostream &f) const {
-    Shape::store(f);
-    double d;
-    for (unsigned short i=0; i<3; i++){
-        for (unsigned short j=0; j<3; j++){
-            d = this->orientation(i, j);
-            f.write((char *)(&d), sizeof(double));
-        }
-    }
-}
-
-void RoundedCone::restore(std::istream &f) {
-    Shape::restore(f);
-    double d;
-    for (unsigned short i=0; i<3; i++){
-        for (unsigned short j=0; j<3; j++){
-            f.read((char *)&d, sizeof(double));
-            this->orientation(i, j) = d;
-        }
-    }
-}
-
+// not supported yet
 std::string RoundedCone::toPovray() const {
 	std::stringstream out;
 	out.precision(std::numeric_limits< double >::max_digits10);

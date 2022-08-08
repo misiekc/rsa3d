@@ -2,7 +2,7 @@
  * BodyBuilder.h
  *
  *  Created on: Aug 5, 2022
- *      Author: ciesla
+ *      Author: Michal Ciesla
  */
 
 #ifndef GEOMETRY_XENOCOLLIDE_BODYBUILDER_H_
@@ -53,6 +53,7 @@ public:
 	void ProcessCommand(std::string& cmd);
 	MapPtr<CollideGeometry> getCollideGeometry();
 	double getMaxRadius();
+	size_t getModelStackSize();
 
 private:
 	struct XCShape{
@@ -66,10 +67,6 @@ private:
 		Vector<3>			x;
 	};
 	std::list< MapPtr<XCShape> > mShapeStack;
-	std::string mStatusLine;
-	void Status(const char* str);
-
-
 };
 
 

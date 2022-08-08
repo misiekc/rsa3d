@@ -17,12 +17,20 @@ would be appreciated but is not required.
 not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 */
+/*
+ * Adapted by Michal Ciesla
+ */
+
 
 
 
 #include "BodyBuilder.h"
 #include "MapPtr.h"
+#include "../../utils/Utils.h"
+#include "../../utils/Assertions.h"
 #include <list>
+#include <sstream>
+#include <string>
 
 //////////////////////////////////////////////////////////////
 
@@ -55,10 +63,16 @@ double BodyBuilder::getMaxRadius()
 }
 
 MapPtr<CollideGeometry> BodyBuilder::getCollideGeometry(){
-    ValidateMsg(mShapeStack.size()>=1, "Empty shape stack");
+	if (mShapeStack.size() < 1)
+		throw new ValidationException("BodyBuilder: shape stack empty");
 	XCShape& s = *mShapeStack.back();
 	return s.geom;
 }
+
+size_t BodyBuilder::getModelStackSize(){
+	return this->mShapeStack.size();
+}
+
 
 
 BodyBuilder::~BodyBuilder()
@@ -83,7 +97,8 @@ void BodyBuilder::clear(){
 }
 
 void BodyBuilder::diff(){
-	ValidateMsg(mShapeStack.size() >= 2, "Insufficient shapes number on stack. At least two required");
+	if (mShapeStack.size() < 2)
+		return;
 	MapPtr<XCShape> shape2 = mShapeStack.back();
 	mShapeStack.pop_back();
 
@@ -106,7 +121,8 @@ void BodyBuilder::disc(double x, double y){
 }
 
 void BodyBuilder::dup(size_t n){
-	ValidateMsg(mShapeStack.size() >= n, "Insufficient shapes number on stack. At least n required");
+	if (mShapeStack.size() < n)
+		return;
 	std::list< MapPtr<XCShape> >::iterator it = mShapeStack.end();
 	for (size_t i=0; i < n; i++){
 			it--;
@@ -125,7 +141,8 @@ void BodyBuilder::football(double l, double w){
 }
 
 void BodyBuilder::move(double x, double y, double z){
-	ValidateMsg(mShapeStack.size() > 0, "Empty stack. No shape to move");
+	if (mShapeStack.size() < 1)
+		return;
 	mShapeStack.back()->x += Vector<3>({x, y, z});
 }
 
@@ -135,7 +152,8 @@ void BodyBuilder::point(double x, double y, double z){
 }
 
 void BodyBuilder::pop(){
-	ValidateMsg(mShapeStack.size() > 0, "Empty stack. No shape to pop");
+	if (mShapeStack.size() < 1)
+		return;
 	mShapeStack.pop_back();
 }
 
@@ -145,7 +163,8 @@ void::BodyBuilder::rect(double x, double y){
 }
 
 void BodyBuilder::rot(double x, double y, double z){
-	ValidateMsg(mShapeStack.size() > 0, "Empty stack. No shape to rotate");
+	if (mShapeStack.size() < 1)
+		return;
 	Quat quatLog( x*M_PI/180.0, y*M_PI/180.0, z*M_PI/180.0, 0);
 	Quat q = Quat::QuatExp(quatLog);
 	mShapeStack.back()->q = q * mShapeStack.back()->q;
@@ -172,7 +191,8 @@ void BodyBuilder::sphere(double rx, double ry, double rz){
 }
 
 void BodyBuilder::swap(){
-	ValidateMsg(mShapeStack.size() >= 2, "Insufficient shapes number on stack. At least two required");
+	if (mShapeStack.size() < 2)
+		return;
 	MapPtr<XCShape> s1 = mShapeStack.back();
 	mShapeStack.pop_back();
 
@@ -184,7 +204,8 @@ void BodyBuilder::swap(){
 }
 
 void BodyBuilder::sweep(){
-	ValidateMsg(mShapeStack.size() >= 2, "Insufficient shapes number on stack. At least two required");
+	if (mShapeStack.size() < 2)
+		return;
 	MapPtr<XCShape> shape1 = mShapeStack.back();
 	mShapeStack.pop_back();
 
@@ -197,7 +218,8 @@ void BodyBuilder::sweep(){
 }
 
 void BodyBuilder::wrap(){
-	ValidateMsg(mShapeStack.size() >= 2, "Insufficient shapes number on stack. At least two required");
+	if (mShapeStack.size() < 2)
+		return;
 	MapPtr<XCShape> shape1 = mShapeStack.back();
 	mShapeStack.pop_back();
 
@@ -212,209 +234,118 @@ void BodyBuilder::wrap(){
 //////////////////////////////////////////////////////////////
 
 
-void BodyBuilder::ProcessCommand(std::string& cmd)
-{
-	for (size_t i=0; i < cmd.size(); i++){
-		cmd[i] = std::tolower(cmd[i]);
-	}
+void BodyBuilder::ProcessCommand(std::string& commandLine){
+	commandLine = trim(commandLine);
+	std::stringstream ss(commandLine);
+	std::string command;
+	ss >> command;
 
-	if (cmd == "axis"){
-		double x = 10;
-		sscanf(cmd.c_str(), " axis %lf", &x);
+	if (command == "axis"){
+		double x;
+		ss >> x;
 		this->axis(x);
-		Status("Axis created.");
 	}
-	else if (cmd.substr(0,3) == "box"){
-		double x = 5;
-		double y = 5;
-		double z = 5;
-		sscanf(cmd.c_str(), "box %lf %lf %lf", &x, &y, &z);
+	else if (command == "box"){
+		double x, y, z;
+		ss >> x;
+		ss >> y;
+		ss >> z;
 		this->box(x, y, z);
-		Status("Box created.");
 	}
-	else if (cmd == "diff"){
-		if (mShapeStack.size() >= 2){
-			this->diff();
-			Status("Minkowski difference created.");
-		}else{
-			Status("Minkowski difference requires two shapes.");
-		}
+	else if (command == "diff"){
+		this->diff();
 	}
-	else if (cmd.substr(0,4) == "disc"){
-		double x = 5;
-		double y = 5;
-		double count = sscanf(cmd.c_str(), "disc %lf %lf", &x, &y);
-		if (count == 2){
+	else if (command == "disc"){
+		double x;
+		ss >> x;
+		if(!ss.eof()){
+			double y;
+			ss >> y;
 			this->disc(x, y);
 		}else{
 			this->disc(x);
 		}
-		Status("Disc created.");
 	}
-	else if (cmd.substr(0, 3) == "dup"){
-		size_t n = 1;
-		sscanf(cmd.c_str(), "dup %lu", &n);
-		if (mShapeStack.size() >= n){
-			this->dup(n);
-			Status("Shape(s) duplicated.");
-		}else{
-			Status("Too few shapes on stack.");
-		}
+	else if (command == "dup"){
+		size_t n;
+		ss >> n;
+		this->dup(n);
 	}
-	else if (cmd.substr(0, 7) == "execute" || cmd.substr(0, 3) == "run")
-	{
-		char name[100];
-		if (sscanf(cmd.c_str(), " execute %s", name) == 1 || sscanf(cmd.c_str(), " run %s", name) == 1)
-		{
-			std::string filename = std::string("scripts\\") + name;
-			FILE* fp = fopen(filename.c_str(), "rt");
-			if (!fp)
-			{
-				filename += ".txt";
-				fp = fopen(filename.c_str(), "rt");
-			}
-			if (fp)
-			{
-				while (!feof(fp) && fgets(name, 100, fp))
-				{
-					for (char* tmp = name; *tmp; tmp++)
-					{
-						if (*tmp == 10 || *tmp == 13)
-						{
-							*tmp = 0;
-							break;
-						}
-					}
-					std::string cmd(name);
-					ProcessCommand(cmd);
-				}
-				fclose(fp);
-				Status("Execution complete.");
-			}
-			else
-			{
-				Status("Could not read file.");
-			}
-		}
-		else
-		{
-			Status("Could not read file.");
-		}
+	else if (command == "script"){
+		std::string commands;
+		std::getline(ss, commands, '\0');
+		std::stringstream commandsStream(commands);
+		std::string cmdLine;
+		while (std::getline(commandsStream, cmdLine, '&'))
+			this->ProcessCommand(cmdLine);
 	}
-	else if (cmd.substr(0,8) == "football"){
-		double l = 5.5f;
-		double w = 3.5f;
-		sscanf(cmd.c_str(), "football %lf %lf", &l, &w);
+	else if (command == "football"){
+		double l, w;
+		ss >> l;
+		ss >> w;
 		this->football(l, w);
-		Status("Football created.");
 	}
-	else if (cmd.substr(0, 4) == "move"){
-		if (!mShapeStack.empty()){
-			double x = 0;
-			double y = 0;
-			double z = 0;
-			sscanf(cmd.c_str(), " move %lf %lf %lf", &x, &y, &z);
-			this->move(x, y, z);
-			Status("Shape moved.");
-		}else{
-			Status("Shape stack is empty.");
-		}
+	else if (command == "move"){
+		double x, y, z;
+		ss >> x;
+		ss >> y;
+		ss >> z;
+		this->move(x, y, z);
 	}
-	else if (cmd.substr(0, 5) == "point"){
-		double x = 0;
-		double y = 0;
-		double z = 0;
-		sscanf(cmd.c_str(), " point %lf %lf %lf", &x, &y, &z);
+	else if (command == "point"){
+		double x, y, z;
+		ss >> x;
+		ss >> y;
+		ss >> z;
 		this->point(x, y, z);
-		Status("Point created.");
 	}
-	else if (cmd == "pop"){
-		if (!mShapeStack.empty()){
-			this->pop();
-			Status("Shape popped from stack.");
-		}else{
-			Status("Shape stack is empty.");
-		}
+	else if (command == "pop"){
+		this->pop();
 	}
-	else if (cmd.substr(0,4) == "rect")
-	{
-		double x = 5;
-		double y = 5;
-		sscanf(cmd.c_str(), " rect %lf %lf", &x, &y);
+	else if (command == "rect"){
+		double x, y;
+		ss >> x;
+		ss >> y;
 		this->rect(x, y);
-		Status("Rectangle created.");
 	}
-	else if (cmd.substr(0, 3) == "rot"){
-		if (!mShapeStack.empty()){
-			double x = 0;
-			double y = 0;
-			double z = 0;
-			sscanf(cmd.c_str(), " rot %lf %lf %lf", &x, &y, &z);
-			this->rot(x, y, z);
-			Status("Shape rotated.");
-		}else{
-			Status("Shape stack is empty.");
-		}
+	else if (command == "rot"){
+		double x, y, z;
+		ss >> x;
+		ss >> y;
+		ss >> z;
+		this->rot(x, y, z);
 	}
-	else if (cmd.substr(0,6) == "saucer"){
-		double r = 3;
-		double t = 1;
-		sscanf(cmd.c_str(), " saucer %lf %lf", &r, &t);
+	else if (command == "saucer"){
+		double r, t;
+		ss >> r;
+		ss >> t;
 		this->saucer(r, t);
-		Status("Saucer created.");
 	}
-	else if (cmd.substr(0,7) == "segment"){
-		double x = 5;
-		sscanf(cmd.c_str(), " segment %lf", &x);
+	else if (command == "segment"){
+		double x;
+		ss >> x;
 		this->segment(x);
-		Status("Segment created.");
 	}
-	else if (cmd.substr(0,6) == "sphere"){
-		double rx = 5;
-		double ry = 5;
-		double rz = 5;
-		int count = sscanf(cmd.c_str(), "sphere %lf %lf %lf", &rx, &ry, &rz);
-		if (count == 1){
-			this->sphere(rx);
-		}else{
+	else if(command=="sphere"){
+		double rx, ry, rz;
+		ss >> rx;
+		if(!ss.eof()){
+			ss >> ry;
+			ss >> rz;
 			this->sphere(rx, ry, rz);
-		}
-		Status("Sphere created.");
-	}
-	else if (cmd == "swap"){
-		if (mShapeStack.size() >= 2){
-			this->swap();
-			Status("Shapes swapped.");
 		}else{
-			Status("Shape stack is empty.");
+			this->sphere(rx);
 		}
 	}
-	else if (cmd == "sweep"){
-		if (mShapeStack.size() >= 2){
-			this->sweep();
-			Status("Minkowski sum (sweep) created.");
-		}else{
-			Status("Minkowski sum requires two shapes.");
-		}
+	else if (command == "swap"){
+		this->swap();
 	}
-	else if (cmd == "wrap"){
-		if (mShapeStack.size() >= 2){
-			this->wrap();
-			Status("Minkowski max (shrink wrap) created.");
-		}else{
-			Status("Minkowski max requires two shapes.");
-		}
+	else if (command == "sweep"){
+		this->sweep();
 	}
-	else{
-		Status("Command not recognized.  Type 'help' for list of commands.");
+	else if (command == "wrap"){
+		this->wrap();
 	}
-}
-
-//////////////////////////////////////////////////////////////
-
-void BodyBuilder::Status(const char* str)
-{
-	mStatusLine = str;
 }
 
 //////////////////////////////////////////////////////////////
