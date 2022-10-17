@@ -148,6 +148,31 @@ Vector<3> CollideEllipsoid::GetSupportPoint(const Vector<3>& n)
 	n2 = n2.normalized();
 	return CompMul(n2, mRadius);
 }
+//////////////////////////////////////////////////////////////////////////////
+// CollideSuperellipsoid
+
+CollideSuperellipsoid::CollideSuperellipsoid(const Vector<3>& axes, double p)
+{
+	semiAxes = axes;
+	this->p = p;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
+Vector<3> CollideSuperellipsoid::GetSupportPoint(const Vector<3>& n)
+{
+	double factor = 0;
+
+	for(int i=0; i<3; i++){
+		factor += std::pow(n[i]*this->semiAxes[i], p/(p-1));
+	}
+	factor = std::pow(factor, (p-1)/p);
+	Vector<3> result;
+	for(int i=0; i<3; i++){
+		result[i] = this->semiAxes[i] * std::pow(n[i]*this->semiAxes[i]/factor, 1/(p-1));
+	}
+	return result;
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // CollideDisc

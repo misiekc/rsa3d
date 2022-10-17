@@ -33,7 +33,8 @@ public:
 	void saucer(double r, double t);
 	void segment(double l);
 	void sphere(double x);
-	void sphere(double x, double y, double z);
+	void ellipsoid(double x, double y, double z);
+	void superellipsoid(double x, double y, double z, double p);
 
 	// shapes transformations
 	void move(double x, double y, double z);

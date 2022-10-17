@@ -147,6 +147,20 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////
 
+class CollideSuperellipsoid : public CollideGeometry
+{
+private:
+	Vector<3> semiAxes;
+	double p;
+
+public:
+	CollideSuperellipsoid(const Vector<3>& axes, double p);
+
+	virtual Vector<3> GetSupportPoint(const Vector<3>& n);
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
 class CollideFootball : public CollideGeometry
 {
 
@@ -301,12 +315,18 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////////////////
-inline Vector<3> CompMul(const Vector<3>& a, const Vector<3>& b)
+inline Vector<3> CompMul(const Vector<3>& a, const Vector<3>& b, double power=1)
 {
 	Vector<3> v;
-	v[0] = a[0]*b[0];
-	v[1] = a[1]*b[1];
-	v[2] = a[2]*b[2];
+	if (power==1){
+		v[0] = a[0]*b[0];
+		v[1] = a[1]*b[1];
+		v[2] = a[2]*b[2];
+	}else{
+		v[0] = std::pow(a[0]*b[0], power);
+		v[1] = std::pow(a[1]*b[1], power);
+		v[2] = std::pow(a[2]*b[2], power);
+	}
 	return v;
 }
 

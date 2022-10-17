@@ -185,8 +185,13 @@ void BodyBuilder::sphere(double r){
 	mShapeStack.push_back( new XCShape(geom) );
 }
 
-void BodyBuilder::sphere(double rx, double ry, double rz){
+void BodyBuilder::ellipsoid(double rx, double ry, double rz){
 	MapPtr<CollideGeometry> geom = new CollideEllipsoid(Vector<3>({rx, ry, rz}));
+	mShapeStack.push_back( new XCShape(geom) );
+}
+
+void BodyBuilder::superellipsoid(double rx, double ry, double rz, double p){
+	MapPtr<CollideGeometry> geom = new CollideSuperellipsoid(Vector<3>({rx, ry, rz}), p);
 	mShapeStack.push_back( new XCShape(geom) );
 }
 
@@ -327,15 +332,24 @@ void BodyBuilder::ProcessCommand(std::string& commandLine){
 		this->segment(x);
 	}
 	else if(command=="sphere"){
+		double r;
+		ss >> r;
+		this->sphere(r);
+	}
+	else if(command=="ellipsoid"){
 		double rx, ry, rz;
 		ss >> rx;
-		if(!ss.eof()){
-			ss >> ry;
-			ss >> rz;
-			this->sphere(rx, ry, rz);
-		}else{
-			this->sphere(rx);
-		}
+		ss >> ry;
+		ss >> rz;
+		this->ellipsoid(rx, ry, rz);
+	}
+	else if(command=="superellipsoid"){
+		double rx, ry, rz, p;
+		ss >> rx;
+		ss >> ry;
+		ss >> rz;
+		ss >> p;
+		this->superellipsoid(rx, ry, rz, p);
 	}
 	else if (command == "swap"){
 		this->swap();
