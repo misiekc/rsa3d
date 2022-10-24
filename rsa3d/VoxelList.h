@@ -24,27 +24,8 @@ private:
 	// allows voxels to overlap - only for testing purposes and normally should be set to 1
 	const double dxFactor = 1.0; // 1.0000000001;
 
-	// array of top level voxel. If a top level voxel becomes inactive (due to shape placement, all its child voxels becomes obsolete
-	bool* activeTopLevelVoxels;
-
-	double spatialVoxelSize;
-	double angularVoxelSize;
-
-	// probability distrubutions for drawing position inside a voxel
-	std::uniform_real_distribution<double> *spatialDistribution;
-	std::uniform_real_distribution<double> *angularDistribution;
-
-	// returns initial size of a vovel. It is not grater than d and be an integer power of 2 (due to numerical issues)
-	double findFloorSize(double d);
-
-	// returns initial size of a vovel. It is not smaller than d and be an integer power of 2 (due to numerical issues)
-	double findCeilSize(double d);
-
 	// for a given voxel returns index of its root
 	int getIndexOfTopLevelVoxel(const RSAVector &da);
-
-	// checks consistency of indexes of root voxels
-	void checkTopLevelVoxels();
 
 	// sets status basing on existing voxels
 	void refreshTopLevelVoxels();
@@ -65,19 +46,39 @@ protected:
 	double initialVoxelSize;
 	double initialAngularVoxelSize;
 
+	double spatialVoxelSize;
+	double angularVoxelSize;
+
 	double angularRange;
 	double spatialRange;
+
+	// array of top level voxel. If a top level voxel becomes inactive (due to shape placement, all its child voxels becomes obsolete
+	bool* activeTopLevelVoxels;
+
+	// probability distrubutions for drawing position inside a voxel
+	std::uniform_real_distribution<double> *spatialDistribution;
+	std::uniform_real_distribution<double> *angularDistribution;
 
 	//size_t beginningVoxelNumber;
 
 	// neighbour grid structure for voxels. Needed to quickly find a voxel using its location
 	NeighbourGrid<Voxel>* voxelNeighbourGrid;
 
+	VoxelList();
+
+	// returns initial size of a vovel. It is not grater than d and be an integer power of 2 (due to numerical issues)
+	static double findFloorSize(double d);
+
+	// returns initial size of a vovel. It is not smaller than d and be an integer power of 2 (due to numerical issues)
+	static double findCeilSize(double d);
+
 	virtual void allocateVoxels(size_t size);
 
 	// initialize voxels, returns number of initial voxels
-	unsigned int initVoxelsOld(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl);
-	unsigned int initVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl);
+	virtual unsigned int initVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl);
+
+	// checks consistency of indexes of root voxels
+	void checkTopLevelVoxels();
 
 	// checks if a top level voxel for voxel v is active (if not v should be removed
 	bool isTopLevelVoxelActive(Voxel *v);
@@ -90,7 +91,7 @@ protected:
                                     std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc,
                                     unsigned short depth = 0);
 
-	void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes);
+	virtual void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes);
 
 	// fills neigbour grid with voxels
 	void rebuildNeighbourGrid();
@@ -102,6 +103,8 @@ protected:
 	// voxels array will not have NULLs between pointers to objects - they can appear when splitting or analyze voxels in parallel
 	// returns number of not null values in list
 	void compactVoxelArray();
+
+	virtual void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd);
 
 	// Returns number of grid cells in each direction of the simulation box.
 	// The default implementation gives the same number of cells in each directions covering the whole simulation box,
@@ -147,15 +150,14 @@ public:
 
 	virtual void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd);
 	Voxel *getVoxel(int i);
-	virtual Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle);
-	virtual void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd);
-	double getSpatialVoxelSize() const;
-	double getAngularVoxelSize() const;
+	virtual Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle) const;
+	virtual double getSpatialVoxelSize() const;
+	virtual double getAngularVoxelSize() const;
 	Voxel* get(int i);
 	size_t getLength() const;
-	virtual double getVoxelsVolume();
-	std::string toPovray();
-	std::string toWolfram();
+	virtual double getVoxelsVolume() const;
+	std::string toPovray() const;
+	std::string toWolfram() const;
 
 	void store(std::ostream &f) const;
 	void restore(std::istream &f);

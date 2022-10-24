@@ -98,7 +98,7 @@ void CurvedSurfaceVoxelList::fillInLastCoordinate(RSAVector &position) {
     Ensures(position[RSA_SPATIAL_DIMENSION - 1] >= 0);
 }
 
-double CurvedSurfaceVoxelList::getVoxelsVolume() {
+double CurvedSurfaceVoxelList::getVoxelsVolume() const{
     if (!this->voxelsInitialized)
         return std::pow(this->spatialRange, RSA_SPATIAL_DIMENSION - 1);
 

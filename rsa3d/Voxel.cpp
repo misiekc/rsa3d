@@ -52,7 +52,7 @@ bool Voxel::isInside(const RSAVector &pos, double size, const RSAOrientation &an
 	for(int i=0; i<RSA_ANGULAR_DIMENSION; i++){
 		if (angle[i]<this->orientation[i])
 			return false;
-		if (angle[i]>=(this->orientation[i]+asize))
+		if (angle[i]>=(this->orientation[i]+asize) && asize!=0)
 			return false;
 	}
 

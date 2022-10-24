@@ -19,9 +19,9 @@ private:
 
 	double *voxelMap;
 
-	double getSpatialVoxelSize(size_t i);
-	double getAngularVoxelSize(size_t i);
-	double getVoxelVolume(size_t i);
+	double getSpatialVoxelSize(size_t i) const;
+	double getAngularVoxelSize(size_t i) const;
+	double getVoxelVolume(size_t i) const;
 	void createVoxelMap();
 
 protected:
@@ -38,9 +38,9 @@ public:
 	void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd) override;
 
 	unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc) override;
-	double getVoxelsVolume() override;
+	double getVoxelsVolume() const override;
 
-	Voxel* getVoxel(const RSAVector &pos, const RSAOrientation &angle) override;
+	Voxel* getVoxel(const RSAVector &pos, const RSAOrientation &angle) const override;
 
 
 };

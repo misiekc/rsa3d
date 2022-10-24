@@ -62,7 +62,7 @@ public:
     unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl,
                                RSABoundaryConditions *bc) override;
     void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) override;
-    double getVoxelsVolume() override;
+    double getVoxelsVolume() const override;
 };
 
 

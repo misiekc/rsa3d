@@ -48,6 +48,35 @@ void VoxelList::allocateVoxels(size_t size){
 	}
 }
 
+/**
+ * Dummy constructor for derived classes
+ */
+VoxelList::VoxelList(){
+	this->surfaceDimension = RSA_SPATIAL_DIMENSION;
+	this->spatialRange = 0.0;
+	this->angularRange = 0.0;
+	this->angularVoxelSize = this->angularRange;
+
+
+	this->initialVoxelSize = 0.0;
+	this->initialAngularVoxelSize = 0.0;
+	this->spatialVoxelSize = 0.0;
+	//this->beginningVoxelNumber = 1;
+	this->activeTopLevelVoxels = nullptr;
+	this->voxelNeighbourGrid = nullptr;
+
+
+	this->spatialDistribution = new std::uniform_real_distribution<double>(0.0, this->spatialVoxelSize);
+	this->angularDistribution = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize);
+	this->disabled = true;
+	this->voxelsInitialized = false;
+
+	this->voxels = nullptr;
+	this->length = 0;
+}
+
+
+
 VoxelList::VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange, double requestedAngularVoxelSize){
 	Expects(dim > 0);
 	Expects(dim <= RSA_SPATIAL_DIMENSION);
@@ -311,7 +340,7 @@ void VoxelList::refreshTopLevelVoxels(){
 }
 
 
-Voxel *VoxelList::getVoxel(const RSAVector &pos, const RSAOrientation &angle){
+Voxel *VoxelList::getVoxel(const RSAVector &pos, const RSAOrientation &angle) const{
 	if (!this->voxelsInitialized)
 		return this->voxels[0];
 	std::vector<Voxel *> *vTmp = this->voxelNeighbourGrid->getCell(pos);
@@ -551,7 +580,12 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 	// number of created voxels
 	size_t newVoxelsCounter = 0;
 
-	size_t voxelsFactor = (size_t)round( pow(2, this->surfaceDimension+RSA_ANGULAR_DIMENSION) );
+	size_t voxelsFactor = 1;
+	if (this->spatialVoxelSize>0)
+		voxelsFactor *= (size_t)round( pow(2, this->surfaceDimension));
+	if (this->angularVoxelSize>0)
+		voxelsFactor *= (size_t)round( pow(2, RSA_ANGULAR_DIMENSION));
+
 	size_t newListSize = voxelsFactor*(this->length);
 	Voxel** newList = new Voxel*[ newListSize ];
 	for(size_t i=0; i<newListSize; i++){
@@ -691,7 +725,7 @@ size_t VoxelList::getLength() const{
 }
 
 
-double VoxelList::getVoxelsVolume(){
+double VoxelList::getVoxelsVolume() const{
 	double result = 0;
 	for(size_t i = 0; i< this->length; i++){
 		double s = 1.0;
@@ -720,7 +754,7 @@ double VoxelList::getVoxelsVolume(){
 }
 
 
-std::string VoxelList::toPovray(){
+std::string VoxelList::toPovray() const{
 	std::string sRes = "";
 
 	for(size_t i=0; i<this->length; i++){
@@ -730,7 +764,7 @@ std::string VoxelList::toPovray(){
 }
 
 
-std::string VoxelList::toWolfram(){
+std::string VoxelList::toWolfram() const{
 	std::stringstream out;
 
 	for(size_t i=0; i<this->length; i++){

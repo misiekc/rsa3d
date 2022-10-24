@@ -34,21 +34,21 @@ void VariableSizeVoxelList::allocateVoxels(size_t size){
 	}
 }
 
-double VariableSizeVoxelList::getSpatialVoxelSize(size_t i){
+double VariableSizeVoxelList::getSpatialVoxelSize(size_t i) const{
 	if (!this->voxelsInitialized)
 		return this->spatialRange;
 	else
 		return this->initialVoxelSize/std::pow(2.0, this->voxelsDivisionCounters[i]);
 }
 
-double VariableSizeVoxelList::getAngularVoxelSize(size_t i){
+double VariableSizeVoxelList::getAngularVoxelSize(size_t i) const{
 	if (!this->voxelsInitialized)
 		return this->angularRange;
 	else
 		return this->initialAngularVoxelSize/std::pow(2.0, this->voxelsDivisionCounters[i]);
 }
 
-double VariableSizeVoxelList::getVoxelVolume(size_t i){
+double VariableSizeVoxelList::getVoxelVolume(size_t i) const{
 	double spatialVolume = std::pow(this->getSpatialVoxelSize(i), this->surfaceDimension);
 	double angularVolume = std::pow(this->getAngularVoxelSize(i), RSA_ANGULAR_DIMENSION);
 	return (spatialVolume*angularVolume);
@@ -215,7 +215,7 @@ void VariableSizeVoxelList::moveVoxelInList(size_t from, size_t to){
 	this->voxelsDivisionCounters[from] = 0;
 }
 
-double VariableSizeVoxelList::getVoxelsVolume(){
+double VariableSizeVoxelList::getVoxelsVolume() const{
 	double result = 0;
 	for(size_t i = 0; i< this->length; i++){
 		double s = 1.0;
@@ -243,7 +243,7 @@ double VariableSizeVoxelList::getVoxelsVolume(){
 	return result;
 }
 
-Voxel *VariableSizeVoxelList::getVoxel(const RSAVector &pos, const RSAOrientation &angle){
+Voxel *VariableSizeVoxelList::getVoxel(const RSAVector &pos, const RSAOrientation &angle) const{
 	if (!this->voxelsInitialized)
 		return this->voxels[0];
 	std::vector<Voxel *> *vTmp = this->voxelNeighbourGrid->getCell(pos);

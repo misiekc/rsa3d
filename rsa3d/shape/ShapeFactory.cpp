@@ -22,6 +22,7 @@
     #endif
 #elif RSA_SPATIAL_DIMENSION == 2
 	#if RSA_ANGULAR_DIMENSION == 0
+		#include "shapes/Rectangle.h"
         #include "shapes/Ellipse.h"
         #include "shapes/polydisk/Polydisk.h"
         #include "shapes/polydisk/Fibrinogen.h"
@@ -29,7 +30,6 @@
     #elif RSA_ANGULAR_DIMENSION == 1
 		#include "shapes/spherocylinder/SpheroCylinder2D.h"
 		#include "shapes/Ellipse.h"
-		#include "shapes/AlignedRectangle.h"
 		#include "shapes/Rectangle.h"
         #include "shapes/RegularDiskopolygon.h"
         #include "shapes/polydisk/Fibrinogen.h"
@@ -44,6 +44,8 @@
 		#include "shapes/polygon/SBPolygon.h"
 		#include "shapes/polygon/HBPolygon.h"
         #include "shapes/polygon/Triangle.h"
+        #include "shapes/DiscreteOrientationsShape2_1.h"
+		#include "../DiscreteAngleVoxelList.h"
     #endif
 #elif RSA_SPATIAL_DIMENSION == 3
     #if RSA_ANGULAR_DIMENSION == 0
@@ -145,9 +147,6 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
             } else if (sClass == "Ellipse") {
                 Ellipse::initClass(attr);
                 return;
-            } else if (sClass == "AlignedRectangle") {
-                AlignedRectangle::initClass(attr);
-                return;
             } else if (sClass == "Rectangle") {
                 Rectangle::initClass(attr);
                 return;
@@ -190,6 +189,9 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
             } else if (sClass == "RegularDiskopolygon") {
                 RegularDiskopolygon::initClass(attr);
                 return;
+            } else if (sClass == "DiscreteOrientationsRectangle") {
+            	DiscreteOrientationsShape2_1::initClass(attr, Rectangle::initClass);
+            	return;
             }
         #endif
 
@@ -288,8 +290,11 @@ VoxelList *ShapeFactory::createVoxelList(const std::string &sClass, unsigned sho
 {
     #if RSA_ANGULAR_DIMENSION == 0
 
-        if (sClass == "OrientedCuboid")
+        if (sClass == "OrientedCuboid"){
             return new OrientedCuboidVoxelList(surfaceDimension, spatialSize, voxelSpatialSize, angularSize, requestedAngularVoxelSize);
+	#elif RSA_ANGULAR_DIMENSION == 1
+        if (sClass == "DiscreteOrientationsRectangle")
+            return new DiscreteAngleVoxelList(surfaceDimension, spatialSize, voxelSpatialSize, DiscreteOrientationsShape2_1::allowedOrientations);
     #endif
 
 	return new VoxelList(surfaceDimension, spatialSize, voxelSpatialSize, angularSize, requestedAngularVoxelSize);
