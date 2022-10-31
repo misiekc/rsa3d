@@ -54,8 +54,9 @@ bool Voxel::isInside(const RSAVector &pos, double size, const RSAOrientation &an
 			return false;
 		if (angle[i]>=(this->orientation[i]+asize) && asize!=0)
 			return false;
+		if (asize==0 && (angle[i]!=this->orientation[i]) )
+			return false;
 	}
-
 	return true;
 }
 
