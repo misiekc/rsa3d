@@ -14,14 +14,26 @@ void DiscreteOrientationsShape2_1::initClass(const std::string &args, InitClassF
     std::istringstream argsStream(args);
     size_t n;
     argsStream >> n;
-    for(size_t i=0; i<n; i++){
-    	double decAngle;
-    	argsStream >> decAngle;
-    	RSAOrientation orientation({decAngle*M_PI/180.0});
-    	allowedOrientations.push_back(orientation);
-        ValidateMsg(decAngle >= 0 && decAngle < 360, "Angle shuld be from [0, 360) interval");
+    ValidateMsg(n>0, "At least one angle needed");
+    std::string sToken;
+    argsStream >> sToken;
+    if (sToken=="auto"){
+    	for(double angle = 0; angle<2.0*M_PI; angle +=2.0*M_PI/n){
+        	RSAOrientation orientation({angle});
+        	allowedOrientations.push_back(orientation);
+    	}
+    }else{
+    	for(size_t i=0; i<n; i++){
+    		double decAngle = std::atoi(sToken.c_str());
+    		ValidateMsg(decAngle >= 0 && decAngle < 360, "Angle should be from [0, 360) interval");
+    		RSAOrientation orientation({decAngle*M_PI/180.0});
+    		allowedOrientations.push_back(orientation);
+    		if (i<n-1){
+    			argsStream >> sToken;
+    		    ValidateMsg(argsStream, " n angle1 angle 2 ... angleN in degrees \n or \n n auto");
+    		}
+    	}
     }
-    ValidateMsg(argsStream, "n angle1 angle 2 ... angleN in degrees");
 
     std::string baseShapeArgs;
     std::getline(argsStream, baseShapeArgs);
