@@ -21,6 +21,7 @@ class DiscreteOrientationsShape2_1 : public Shape<2, 0>
 {
 private:
     std::unique_ptr<Shape<2, 1>> underlyingShape;
+    static void initAngles(const std::string &args);
 
 public:
 	static std::vector<RSAOrientation> allowedOrientations;

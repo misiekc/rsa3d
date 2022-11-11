@@ -192,6 +192,12 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
             } else if (sClass == "DiscreteOrientationsRectangle") {
             	DiscreteOrientationsShape2_1::initClass(attr, Rectangle::initClass);
             	return;
+            } else if (sClass == "DiscreteOrientationsEllipse") {
+            	DiscreteOrientationsShape2_1::initClass(attr, Ellipse::initClass);
+            	return;
+            } else if (sClass == "DiscreteOrientationsSpherocylinder") {
+            	DiscreteOrientationsShape2_1::initClass(attr, SpheroCylinder2D::initClass);
+            	return;
             }
         #endif
 
@@ -293,7 +299,9 @@ VoxelList *ShapeFactory::createVoxelList(const std::string &sClass, unsigned sho
         if (sClass == "OrientedCuboid"){
             return new OrientedCuboidVoxelList(surfaceDimension, spatialSize, voxelSpatialSize, angularSize, requestedAngularVoxelSize);
 	#elif RSA_ANGULAR_DIMENSION == 1
-        if (sClass == "DiscreteOrientationsRectangle")
+        if (sClass == "DiscreteOrientationsRectangle" ||
+        	sClass == "DiscreteOrientationsEllipse" ||
+			sClass == "DiscreteOrientationsSpherocylinder")
             return new DiscreteAngleVoxelList(surfaceDimension, spatialSize, voxelSpatialSize, DiscreteOrientationsShape2_1::allowedOrientations);
     #endif
 

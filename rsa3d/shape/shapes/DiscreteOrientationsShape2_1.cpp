@@ -9,16 +9,19 @@
 
 std::vector<RSAOrientation> DiscreteOrientationsShape2_1::allowedOrientations{};
 
-/* Arguments in format: (angle distribution average) (angle distribution sigma) (encapsulated class parameters) */
-void DiscreteOrientationsShape2_1::initClass(const std::string &args, InitClassFunction baseShapeInitClassFunction) {
+
+void DiscreteOrientationsShape2_1::initAngles(const std::string &args){
     std::istringstream argsStream(args);
     size_t n;
     argsStream >> n;
     ValidateMsg(n>0, "At least one angle needed");
+    double maxAngle = Shape<2,1>::getAngularVoxelSize();
+
+
     std::string sToken;
     argsStream >> sToken;
     if (sToken=="auto"){
-    	for(double angle = 0; angle<2.0*M_PI; angle +=2.0*M_PI/n){
+    	for(double angle = 0; angle<maxAngle; angle += maxAngle/n){
         	RSAOrientation orientation({angle});
         	allowedOrientations.push_back(orientation);
     	}
@@ -26,13 +29,32 @@ void DiscreteOrientationsShape2_1::initClass(const std::string &args, InitClassF
     	for(size_t i=0; i<n; i++){
     		double decAngle = std::atoi(sToken.c_str());
     		ValidateMsg(decAngle >= 0 && decAngle < 360, "Angle should be from [0, 360) interval");
-    		RSAOrientation orientation({decAngle*M_PI/180.0});
-    		allowedOrientations.push_back(orientation);
+    		if (decAngle*M_PI/180.0 <= maxAngle){
+    			RSAOrientation orientation({decAngle*M_PI/180.0});
+    			allowedOrientations.push_back(orientation);
+    		}
     		if (i<n-1){
     			argsStream >> sToken;
     		    ValidateMsg(argsStream, " n angle1 angle 2 ... angleN in degrees \n or \n n auto");
     		}
     	}
+    }
+}
+
+
+/* Arguments in format: (angle distribution average) (angle distribution sigma) (encapsulated class parameters) */
+void DiscreteOrientationsShape2_1::initClass(const std::string &args, InitClassFunction baseShapeInitClassFunction) {
+    std::istringstream argsStream(args);
+    size_t n;
+
+    //skipping angles information and going directly to shape init
+    argsStream >> n;
+    ValidateMsg(n>0, "At least one angle needed");
+    for (size_t i=0; i<n; i++){
+    	std::string sToken;
+    	argsStream >> sToken;
+		if (sToken == "auto")
+			break;
     }
 
     std::string baseShapeArgs;
@@ -45,6 +67,8 @@ void DiscreteOrientationsShape2_1::initClass(const std::string &args, InitClassF
     shapeInfo.setInsphereRadius(baseShapeInfo.getInsphereRadius());
     shapeInfo.setCreateShapeImpl(createShape);
     Shape<2, 0>::setShapeStaticInfo(shapeInfo);
+
+    DiscreteOrientationsShape2_1::initAngles(args);
 }
 
 Shape<2, 0> *DiscreteOrientationsShape2_1::createShape(RND *rnd) {
