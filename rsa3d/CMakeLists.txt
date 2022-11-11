@@ -40,6 +40,7 @@ set(RSA_SOURCE
         CurvedSurface.cpp
         CurvedSurfaceVoxelList.cpp
         boundary_conditions/FreeBC.h
+        boundary_conditions/PeriodicBC.h
         NeighbourGrid.h
         OrientedCuboidVoxelList.cpp
         Packing.cpp

@@ -1,8 +1,8 @@
 /*
- * VoxelList.cpp
+ * DiscreteAngleVoxelList.cpp
  *
- *  Created on: 23.03.2017
- *      Author: ciesla
+ *  Created on: 11.11.2022
+ *      Author: Michal Ciesla
  */
 
 #include <iostream>
@@ -14,7 +14,7 @@
 #include "utils/Assertions.h"
 
 
-DiscreteAngleVoxelList::DiscreteAngleVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, std::vector<RSAOrientation> &orientations) : VoxelList(){
+DiscreteAngleVoxelList::DiscreteAngleVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const std::vector<RSAOrientation> &orientations) : VoxelList(){
 	Expects(dim > 0);
 	Expects(dim <= RSA_SPATIAL_DIMENSION);
 	Expects(packingSpatialSize > 0.0);

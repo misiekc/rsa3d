@@ -1,8 +1,8 @@
 /*
- * VoxelList.h
+ * DiscreteAngleVoxelList.h
  *
- *  Created on: 23.03.2017
- *      Author: ciesla
+ *  Created on: 11.11.2022
+ *      Author: Michal Ciesla
  */
 
 #ifndef DISCRETEANGLEVOXELLIST_H_
@@ -26,7 +26,7 @@ public:
 	 * @param requestedSpatialVoxelSize suggested initial size of a voxel. Initial size of a allocated voxels will not be larger than the requested one.
 	 * @param orientations vector of allowed orientations.
 	 */
-	DiscreteAngleVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, std::vector<Orientation<1>> &orientations);
+	DiscreteAngleVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const std::vector<Orientation<1>> &orientations);
 
 	Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle) const override;
 	virtual double getAngularVoxelSize() const override;
