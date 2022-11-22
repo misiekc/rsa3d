@@ -21,6 +21,7 @@
 #include "modes/ExclusionZonesMode.h"
 #include "modes/WolframMode.h"
 #include "modes/SurfaceAreaMode.h"
+#include "modes/DomainsMode.h"
 
 
 namespace {
@@ -39,6 +40,7 @@ namespace {
             {"debug", std::make_shared<DebugMode>()},
             {"dat", std::make_shared<DatFileGenerationMode>()},
             {"analyze", std::make_shared<AnalyzeMode>()},
+            {"domains", std::make_shared<DomainsMode>()},
             {"povray", std::make_shared<PovrayMode>()},
             {"wolfram", std::make_shared<WolframMode>()},
             {"bc_expand", std::make_shared<BCExpandMode>()},

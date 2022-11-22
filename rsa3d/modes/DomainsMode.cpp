@@ -1,0 +1,30 @@
+//
+// Created by Michal Ciesla on 16.11.2022.
+//
+
+#include "DomainsMode.h"
+#include "../utils/Assertions.h"
+#include "../analizator/DomainAnalyzer.h"
+
+void DomainsMode::initializeForArguments(const ProgramArguments &arguments) {
+    this->params = arguments.getParameters();
+    std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
+    if (positionalArguments.size() < 1)
+        die(arguments.formatUsage("directory - directory with packings"));
+
+    this->dirFile = positionalArguments[0];
+}
+
+void DomainsMode::run() {
+    ValidateMsg(this->params.particleType.rfind("DiscreteOrientations", 0)==0, "Only DiscreteOrientations shape are supported by this mode");
+    ValidateMsg(this->params.particleAttributes.rfind("2 ", 0)==0, "Only two discrete orientations are supported by this mode");
+    DomainAnalyzer::analyzeOrderDirectory(this->dirFile);
+    DomainAnalyzer::analyzeDomains(this->dirFile);
+}
+
+void DomainsMode::printHelp(std::ostream &out, const ProgramArguments &arguments) {
+    out << arguments.formatUsage("dirFile [fileOut]") << std::endl;
+    out << std::endl;
+    out << "It searches [directory] for '*.bin' files and analyzes domains. It produces a few file" << std::endl;
+    out << "with prefix '[directory]_domains.txt' and prints on the standard output order parameter." << std::endl;
+}

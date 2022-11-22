@@ -13,6 +13,7 @@
 #include "../../statistics/ArrayFunction.h"
 #include "../utils/OMPMacros.h"
 #include "../utils/Assertions.h"
+#include "DomainAnalyzer.h"
 
 #include <fstream>
 #include <iostream>

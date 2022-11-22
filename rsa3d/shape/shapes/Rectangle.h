@@ -15,8 +15,6 @@
 
 class Rectangle: public AnisotropicShape2D, public OrderCalculable {
 private:
-    static double longer;
-    static double shorter;
 
     // b is shorter
     double a, b, halfA, halfB;
@@ -45,6 +43,8 @@ protected:
 
 
 public:
+    static double longer;
+    static double shorter;
     static void initClass(const std::string &args);
 
     Rectangle();
