@@ -4,6 +4,7 @@
 
 #include <cstdlib>
 #include <fstream>
+#include <unistd.h>
 #include "DomainAnalyzer.h"
 #include "../shape/shapes/DiscreteOrientationsShape2_1.h"
 #include "../PackingGenerator.h"
@@ -42,21 +43,6 @@ void DomainAnalyzer::analyzeOrderDirectory(const std::string &dirName) {
     std::cout << std::endl;
     std::cout << dirName << "\t" << sq / counter << "\t"
               << sqrt((sq2 / counter - sq * sq / (counter * counter)) / counter) << std::endl;
-}
-
-void DomainAnalyzer::exportPacking(const std::string &fileIn, const std::string &fileOut){
-    Packing packing;
-    packing.restore(fileIn);
-    std::ofstream file(fileOut);
-    for(const RSAShape *s : packing){
-        file << s->getPosition()[0] << "\t" << s->getPosition()[1] << "\t";
-        if (s->getOrientation()[0]==0){
-            file << Rectangle::longer << "\t" << Rectangle::shorter;
-        }else{
-            file << Rectangle::shorter << "\t" << Rectangle::longer;
-        }
-        file << std::endl;
-    }
 }
 
 void DomainAnalyzer::addNeighboursToQueue(std::vector<const RSAShape*> &neighbours, std::unordered_set<const RSAShape *> &queue){
@@ -136,20 +122,38 @@ void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
     std::vector<size_t> domainSizes;
     auto packingPaths = PackingGenerator::findPackingsInDir(dirName);
     std::cout << "[DomainAnalyzer::analyzeDomains] " << std::flush;
-    for (const auto &packingPath: packingPaths) {
-        Packing packing;
-        packing.restore(packingPath);
-        std::vector<const Domain *> domains;
-        DomainAnalyzer::dividePackingIntoDomains(packing, domains);
-        for (const Domain *d: domains){
-            domainSizes.push_back(d->size());
-            delete d;
+    std::string rawFilename = dirName + "_domains.raw";
+    if (access(rawFilename.c_str(), F_OK)==0) { // if exists file the analysis is obsolete
+        std::ifstream rawFile(rawFilename);
+        size_t size;
+        while (!rawFile.eof()) {
+            rawFile >> size;
+            _OMP_CRITICAL(domainSizes)
+            domainSizes.push_back(size);
+        }
+        rawFile.close();
+    }else{ // performing domain analysis
+        _OMP_PARALLEL_FOR
+        for (const auto &packingPath: packingPaths) {
+            Packing packing;
+            packing.restore(packingPath);
+            std::vector<const Domain *> domains;
+            DomainAnalyzer::dividePackingIntoDomains(packing, domains);
+            std::ofstream rawFile(rawFilename);
+            for (const Domain *d: domains){
+                size_t size = d->size();
+                delete d;
+                rawFile << size << std::endl;
+                _OMP_CRITICAL(domainSizes)
+                domainSizes.push_back(size);
+            }
+            rawFile.close();
         }
         std::cout << "." << std::flush;
     }
     std::cout << std::endl;
-    std::sort(domainSizes.begin(), domainSizes.end());
-    Plot pDomains(domainSizes[0], domainSizes[domainSizes.size()-1], 100);
+
+    Plot pDomains(domainSizes[0], domainSizes[domainSizes.size()-1], 50);
     for(size_t size: domainSizes) {
         pDomains.add(size);
     }
