@@ -5,12 +5,13 @@
 #include "DomainsMode.h"
 #include "../utils/Assertions.h"
 #include "../analizator/DomainAnalyzer.h"
+#include <filesystem>
 
 void DomainsMode::initializeForArguments(const ProgramArguments &arguments) {
     this->params = arguments.getParameters();
     std::vector<std::string> positionalArguments = arguments.getPositionalArguments();
     if (positionalArguments.size() < 1)
-        die(arguments.formatUsage("directory - directory with packings"));
+        die(arguments.formatUsage("name - directory name with packings to analyze or filename to draw"));
 
     this->dirFile = positionalArguments[0];
 }
@@ -18,8 +19,15 @@ void DomainsMode::initializeForArguments(const ProgramArguments &arguments) {
 void DomainsMode::run() {
     ValidateMsg(this->params.particleType.rfind("DiscreteOrientations", 0)==0, "Only DiscreteOrientations shape are supported by this mode");
     ValidateMsg(this->params.particleAttributes.rfind("2 ", 0)==0, "Only two discrete orientations are supported by this mode");
-    DomainAnalyzer::analyzeOrderDirectory(this->dirFile);
-    DomainAnalyzer::analyzeDomains(this->dirFile);
+    DomainAnalyzer::init(this->params);
+    if (std::filesystem::is_directory((this->dirFile))) {
+        DomainAnalyzer::analyzeOrderDirectory(this->dirFile);
+        DomainAnalyzer::analyzeDomains(this->dirFile);
+    }else if(std::filesystem::is_regular_file(this->dirFile)) {
+        Packing packing;
+        packing.restore(this->dirFile);
+        DomainAnalyzer::toWolfram(packing, this->dirFile + ".nb");
+    }
 }
 
 void DomainsMode::printHelp(std::ostream &out, const ProgramArguments &arguments) {

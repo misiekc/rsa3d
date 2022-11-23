@@ -1,5 +1,5 @@
 //
-// Created by ciesla on 11/14/22.
+// Created by Michal Ciesla on 11/14/22.
 //
 
 #include <cstdlib>
@@ -7,8 +7,12 @@
 #include "DomainAnalyzer.h"
 #include "../shape/shapes/DiscreteOrientationsShape2_1.h"
 #include "../PackingGenerator.h"
-#include "../shape/shapes/Rectangle.h"
-#include "../../statistics/LogPlot.h"
+
+Parameters DomainAnalyzer::params;
+
+void DomainAnalyzer::init(const Parameters &p){
+    DomainAnalyzer::params = p;
+}
 
 double DomainAnalyzer::analyzeOrder(const Packing &packing) {
     size_t nh=0, nv=0;
@@ -33,9 +37,8 @@ void DomainAnalyzer::analyzeOrderDirectory(const std::string &dirName) {
         sq += q;
         sq2 += q * q;
         counter++;
-        std::cout << ".";
+        std::cout << "." << std::flush;
     }
-
     std::cout << std::endl;
     std::cout << dirName << "\t" << sq / counter << "\t"
               << sqrt((sq2 / counter - sq * sq / (counter * counter)) / counter) << std::endl;
@@ -56,24 +59,49 @@ void DomainAnalyzer::exportPacking(const std::string &fileIn, const std::string 
     }
 }
 
-void DomainAnalyzer::dividePackingIntoDomains(const Packing &packing, std::vector<Domain> &domains){
-    bool nextLoop;
-    std::vector<const RSAShape *> copy = packing.getVector();
+void DomainAnalyzer::addNeighboursToQueue(std::vector<const RSAShape*> &neighbours, std::unordered_set<const RSAShape *> &queue){
+    for (const RSAShape *s : neighbours){
+        if (queue.find(s)==queue.end())
+            queue.insert(s);
+    }
+}
+
+void DomainAnalyzer::dividePackingIntoDomains(const Packing &packing, std::vector<const Domain *> &domains){
+    std::unordered_set<const RSAShape *> copy;
+    copy.insert(packing.getVector().begin(), packing.getVector().end());
+    RSAPeriodicBC bc(DomainAnalyzer::params.surfaceSize);
+
     while (copy.size()>0) {
-        Domain d;
-        d.addShape(copy[0]);
-        copy.erase(copy.begin());
-        nextLoop = true;
-        while (nextLoop) {
-            nextLoop = false;
-            for (size_t i = 0; i < copy.size(); i++) {
-                if (d.testShape(copy[i])) {
-                    d.addShape(copy[i]);
-                    copy.erase(copy.begin() + i);
-                    i--;
-                    nextLoop = true;
-                    break;
+        Domain* d = new Domain(DomainAnalyzer::params);
+        std::unordered_set<const RSAShape *> analyzeStack;
+        std::vector<const RSAShape *> neighbours;
+        NeighbourGrid<const RSAShape> ng(DomainAnalyzer::params.surfaceDimension, DomainAnalyzer::params.surfaceSize, RSAShape::getNeighbourListCellSize());
+        for(const RSAShape *s: copy) {
+            ng.add(s, s->getPosition());
+        }
+        const RSAShape *s = *(copy.begin());
+        copy.erase(s);
+        d->addShape(s);
+        ng.remove(s, s->getPosition());
+        ng.getNeighbours(&neighbours, s->getPosition());
+        DomainAnalyzer::addNeighboursToQueue(neighbours, analyzeStack);
+
+        while (analyzeStack.size()>0) {
+            const RSAShape *s = *analyzeStack.begin();
+            analyzeStack.erase(s);
+            if (d->testShape(s)) {
+                d->addShape(s);
+                std::unordered_set<const RSAShape *>::iterator it = copy.find(s);
+                if (it!=copy.end()) {
+                    copy.erase(it);
+                    ng.remove(s, s->getPosition());
+                }else {
+                    std::cout << "Something wrong" << std::endl;
                 }
+                ng.getNeighbours(&neighbours, s->getPosition());
+                DomainAnalyzer::addNeighboursToQueue(neighbours, analyzeStack);
+                if (d->size()%1000 !=0)
+                    continue;
             }
         }
         domains.push_back(d);
@@ -111,18 +139,40 @@ void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
     for (const auto &packingPath: packingPaths) {
         Packing packing;
         packing.restore(packingPath);
-        std::vector<Domain> domains;
+        std::vector<const Domain *> domains;
         DomainAnalyzer::dividePackingIntoDomains(packing, domains);
-        for (Domain d: domains){
-            domainSizes.push_back(d.size());
+        for (const Domain *d: domains){
+            domainSizes.push_back(d->size());
+            delete d;
         }
-        std::cout << ".";
+        std::cout << "." << std::flush;
     }
     std::cout << std::endl;
     std::sort(domainSizes.begin(), domainSizes.end());
-    LogPlot pDomains(domainSizes[0], domainSizes[domainSizes.size()-1], 100);
+    Plot pDomains(domainSizes[0], domainSizes[domainSizes.size()-1], 100);
     for(size_t size: domainSizes) {
         pDomains.add(size);
     }
     printHistogram(pDomains, dirName + "_domains.txt");
 }
+
+void DomainAnalyzer::toWolfram(Packing packing, const std::string &filename) {
+    std::vector<std::string> colors = {"Red", "Green", "Blue", "Black", "Gray", "Cyan", "Magenta", "Yellow", "Brown", "Orange", "Pink", "Purple"};
+    size_t colorsSize = colors.size();
+    std::vector<const Domain *> domains;
+    DomainAnalyzer::dividePackingIntoDomains(packing, domains);
+    size_t i = 0;
+    std::ofstream file(filename);
+    file << "Graphics[{" << colors[i%colorsSize];
+    for (const Domain* d: domains){
+        i++;
+        for (const RSAShape *s : d->shapes)
+            file << ", " << std::endl << s->toWolfram();
+        file << ", " << colors[i%colorsSize];
+    }
+    file << "}";
+    file << "]" << std::endl;
+
+    file.close();
+}
+
