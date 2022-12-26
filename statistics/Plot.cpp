@@ -9,13 +9,13 @@
 #include <cmath>
 #include <algorithm>
 
-Plot::Plot(double min, double max, int bins) {
+Plot::Plot(double min, double max, size_t bins) {
 
 	this->yValues = new double[bins];
 	this->y2Values = new double[bins];
 	this->yCounter = new unsigned long int[bins];
 
-	for(int i=0; i<bins; i++){
+	for(size_t i=0; i<bins; i++){
 		this->yValues[i] = 0.0;
 		this->y2Values[i] = 0.0;
 		this->yCounter[i] = 0;
@@ -25,7 +25,7 @@ Plot::Plot(double min, double max, int bins) {
 
 	this->min = min;
 	this->max = max;
-	this->step = (this->max - this->min) / bins;
+	this->step = (this->max - this->min) / static_cast<double>(bins);
 }
 
 Plot::~Plot() {
@@ -34,16 +34,19 @@ Plot::~Plot() {
 	delete[] this->yCounter;
 }
 
-double Plot::getMax() {
+double Plot::getMax() const {
 	return this->max;
 }
 
-int Plot::size() {
+size_t Plot::size() const {
 	return this->bins;
 }
 
-int Plot::getIndex(double x) {
-	return (int) ((x - this->min) / this->step);
+size_t Plot::getIndex(double x) {
+    if (x < this->min) {
+        return 0;
+    }
+	return static_cast<size_t>((x - this->min) / this->step);
 }
 
 /**
@@ -52,7 +55,7 @@ int Plot::getIndex(double x) {
  * @param x
  */
 void Plot::add(double x) {
-	int i = this->getIndex(x);
+	size_t i = this->getIndex(x);
 	if (i >= 0 && i < this->bins) {
 		this->yValues[i] += 0.0;
 		this->y2Values[i] += 0.0;
@@ -67,7 +70,7 @@ void Plot::add(double x) {
  * @param y
  */
 void Plot::add(double x, double y) {
-	int i = this->getIndex(x);
+	size_t i = this->getIndex(x);
 	if (i >= 0 && i < this->bins) {
 		this->yValues[i] += y;
 		this->y2Values[i] += y*y;
@@ -82,12 +85,12 @@ void Plot::add(double x, double y) {
  * @param y
  */
 void Plot::addBetween(double x0, double x1, double y) {
-	int index0 = this->getIndex(x0);
-	int index1 = this->getIndex(x1);
+	size_t index0 = this->getIndex(x0);
+	size_t index1 = this->getIndex(x1);
 //	if (index0 == index1) {
 //		this.add(x0, y);
 //	} else {
-		for (int i = std::max(0, index0); i < index1; i++) {
+		for (size_t i = index0; i < index1; i++) {
 			if (i < this->bins){
 				this->yValues[i] += y;
 				this->y2Values[i] += y*y;
@@ -102,11 +105,10 @@ void Plot::addBetween(double x0, double x1, double y) {
  */
 double** Plot::getAsPoints(double** points) {
 	double x, y;
-	int i;
-	for (i = 0; i < this->bins; i++) {
-		x = this->min + i * this->step + this->step / 2;
+	for (size_t i = 0; i < this->bins; i++) {
+		x = this->min + static_cast<double>(i) * this->step + this->step / 2;
 		if (this->yCounter[i]!=0)
-			y = this->yValues[i] / this->yCounter[i];
+			y = this->yValues[i] / static_cast<double>(this->yCounter[i]);
 		else
 			y = 0.0;
 		points[i][0] = x;
@@ -120,12 +122,11 @@ double** Plot::getAsPoints(double** points) {
  */
 double** Plot::getAsPointsWithErrors(double **points) {
 	double x, y, z;
-	int i;
-	for (i = 0; i < this->bins; i++) {
-		x = this->min + i * this->step + this->step / 2;
+	for (size_t i = 0; i < this->bins; i++) {
+		x = this->min + static_cast<double>(i) * this->step + this->step / 2;
 		if (this->yCounter[i]!=0){
-			y = this->yValues[i] / this->yCounter[i];
-			z = sqrt(this->y2Values[i] / this->yCounter[i] - y*y);
+			y = this->yValues[i] / static_cast<double>(this->yCounter[i]);
+			z = sqrt(this->y2Values[i] / static_cast<double>(this->yCounter[i]) - y*y);
 		}else{
 			y = 0.0;
 			z = 0.0;
@@ -139,10 +140,9 @@ double** Plot::getAsPointsWithErrors(double **points) {
 
 double** Plot::getAsHistogramPoints(double** points) {
 	double x, y;
-	int i;
-	for (i = 0; i < this->bins; i++) {
-		x = this->min + i * this->step + this->step / 2;
-		y = this->yCounter[i];
+	for (size_t i = 0; i < this->bins; i++) {
+		x = this->min + static_cast<double>(i) * this->step + this->step / 2;
+		y = static_cast<double>(this->yCounter[i]);
 		points[i][0] = x;
 		points[i][1] = y;
 	}
@@ -151,7 +151,7 @@ double** Plot::getAsHistogramPoints(double** points) {
 
 unsigned long int Plot::getTotalNumberOfHistogramPoints(){
 	unsigned long int res = 0;
-	for (int i = 0; i < this->bins; i++) {
+	for (size_t i = 0; i < this->bins; i++) {
 		res += this->yCounter[i];
 	}
 	return res;

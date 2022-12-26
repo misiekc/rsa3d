@@ -56,7 +56,7 @@ PackingGenerator::PackingGenerator(int seed, std::size_t collector, const Parame
         this->surface = new Surface(this->params.surfaceDimension, this->params.surfaceSize, gridSize,
                                     RSAShape::getVoxelSpatialSize(), std::move(bc));
 
-        this->voxels = ShapeFactory::createVoxelList(params->particleType, this->params.surfaceDimension, this->spatialSize,
+        this->voxels = ShapeFactory::createVoxelList(params->particleType, params->particleAttributes, this->params.surfaceDimension, this->spatialSize,
                                                      RSAShape::getVoxelSpatialSize(), this->angularSize,
                                                      this->params.requestedAngularVoxelSize);
     } else {

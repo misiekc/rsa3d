@@ -271,7 +271,7 @@ void VoxelList::compactVoxelArray(){
 	this->refreshTopLevelVoxels();
 }
 
-int VoxelList::getIndexOfTopLevelVoxel(const RSAVector &da){
+int VoxelList::getIndexOfTopLevelVoxel(const RSAVector &da) const{
 
 	double daArray[RSA_SPATIAL_DIMENSION];
 	da.copyToArray(daArray);
@@ -352,7 +352,7 @@ Voxel *VoxelList::getVoxel(const RSAVector &pos, const RSAOrientation &angle) co
 	return nullptr;
 }
 
-void VoxelList::splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes){
+void VoxelList::splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes) const{
 
 	unsigned short spatialLoop = 1 << this->surfaceDimension;
 	unsigned short angularLoop = 1 << RSA_ANGULAR_DIMENSION;
@@ -406,7 +406,7 @@ bool VoxelList::isVoxelInsidePacking(const Voxel *v, [[maybe_unused]] double spa
  */
 bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
 										   std::vector<const RSAShape *> *shapes, RSABoundaryConditions *bc,
-                                           unsigned short depth){
+                                           unsigned short depth) const{
 
 	size_t finalArrayLength = (size_t)round( pow(pow(2.0, depth), this->surfaceDimension+RSA_ANGULAR_DIMENSION) );
 	Voxel **finalVoxels = new Voxel*[ finalArrayLength ];
@@ -507,7 +507,7 @@ bool VoxelList::isVoxelInsideExclusionZoneOld(Voxel *v, double spatialSize, doub
 	}
 }
 
-bool VoxelList::isTopLevelVoxelActive(Voxel *v){
+bool VoxelList::isTopLevelVoxelActive(Voxel *v) const{
 
 	// checking if initial voxel containing v is active (do not have a shape inside)
 	if (!this->voxelsInitialized)
@@ -516,7 +516,7 @@ bool VoxelList::isTopLevelVoxelActive(Voxel *v){
 	return this->activeTopLevelVoxels[index];
 }
 
-bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, double angularSize, unsigned short depth){
+bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, double angularSize, unsigned short depth) const{
 	if (!this->disabled){ // && (depth > v->depth || depth==0) ){
 
 	    if (!isTopLevelVoxelActive(v) || !this->isVoxelInsidePacking(v, spatialSize) )

@@ -21,11 +21,8 @@ class VoxelList {
 
 private:
 
-	// allows voxels to overlap - only for testing purposes and normally should be set to 1
-	const double dxFactor = 1.0; // 1.0000000001;
-
 	// for a given voxel returns index of its root
-	int getIndexOfTopLevelVoxel(const RSAVector &da);
+	int getIndexOfTopLevelVoxel(const RSAVector &da) const;
 
 	// sets status basing on existing voxels
 	void refreshTopLevelVoxels();
@@ -34,7 +31,9 @@ private:
 	Voxel * findVoxel(Voxel **list, size_t listSize, const RSAVector &pos,
 					  const RSAOrientation &angle);
 protected:
-	// disables voxel list for debug purposes - typically is false
+    // allows voxels to overlap - only for testing purposes and normally should be set to 1
+    const double dxFactor = 1.0; // 1.0000000001;
+    // disables voxel list for debug purposes - typically is false
 	bool disabled;
 	// to optimize memory occupations voxels are initialized in the first invoke split()
 	bool voxelsInitialized;
@@ -81,22 +80,22 @@ protected:
 	void checkTopLevelVoxels();
 
 	// checks if a top level voxel for voxel v is active (if not v should be removed
-	bool isTopLevelVoxelActive(Voxel *v);
+	bool isTopLevelVoxelActive(Voxel *v) const;
 
 	virtual bool isVoxelInsidePacking(const Voxel *v, double spatialSize) const;
 	virtual bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
                                     std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc,
-                                    unsigned short depth = 0);
+                                    unsigned short depth = 0) const;
 	bool isVoxelInsideExclusionZoneOld(Voxel *v, double spatialSize, double angularSize,
                                     std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc,
                                     unsigned short depth = 0);
 
-	virtual void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes);
+	virtual void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes) const;
 
 	// fills neigbour grid with voxels
 	void rebuildNeighbourGrid();
 
-	bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, double angularSize, unsigned short depth = 0);
+	virtual bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, double angularSize, unsigned short depth = 0) const;
 
 	virtual void moveVoxelInList(size_t from, size_t to);
 

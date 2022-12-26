@@ -134,7 +134,7 @@ Voxel *DiscreteAngleVoxelList::getVoxel(const RSAVector &pos, const RSAOrientati
 }
 
 
-void DiscreteAngleVoxelList::splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes)
+void DiscreteAngleVoxelList::splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes) const
 {
 	unsigned short spatialLoop = 1 << this->surfaceDimension;
 

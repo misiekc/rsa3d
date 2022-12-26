@@ -2,7 +2,6 @@
 // Created by Michal Ciesla on 11/14/22.
 //
 
-#include <cstdlib>
 #include <fstream>
 #include <unistd.h>
 #include "DomainAnalyzer.h"
@@ -23,7 +22,7 @@ double DomainAnalyzer::analyzeOrder(const Packing &packing) {
         else
             nv++;
     }
-    return 1 - 2.0 * static_cast<double>(std::min(nv, nh) / static_cast<double>(nv + nh));
+    return 1 - 2.0 * static_cast<double>(std::min(nv, nh)) / static_cast<double>(nv + nh);
 }
 
 void DomainAnalyzer::analyzeOrderDirectory(const std::string &dirName) {
@@ -57,27 +56,27 @@ void DomainAnalyzer::dividePackingIntoDomains(const Packing &packing, std::vecto
     copy.insert(packing.getVector().begin(), packing.getVector().end());
     RSAPeriodicBC bc(DomainAnalyzer::params.surfaceSize);
 
-    while (copy.size()>0) {
-        Domain* d = new Domain(DomainAnalyzer::params);
+    while (!copy.empty()) {
+        auto* d = new Domain(DomainAnalyzer::params);
         std::unordered_set<const RSAShape *> analyzeStack;
         std::vector<const RSAShape *> neighbours;
         NeighbourGrid<const RSAShape> ng(DomainAnalyzer::params.surfaceDimension, DomainAnalyzer::params.surfaceSize, RSAShape::getNeighbourListCellSize());
         for(const RSAShape *s: copy) {
             ng.add(s, s->getPosition());
         }
-        const RSAShape *s = *(copy.begin());
-        copy.erase(s);
-        d->addShape(s);
-        ng.remove(s, s->getPosition());
-        ng.getNeighbours(&neighbours, s->getPosition());
+        const RSAShape *seed = *(copy.begin());
+        copy.erase(seed);
+        d->addShape(seed);
+        ng.remove(seed, seed->getPosition());
+        ng.getNeighbours(&neighbours, seed->getPosition());
         DomainAnalyzer::addNeighboursToQueue(neighbours, analyzeStack);
 
-        while (analyzeStack.size()>0) {
+        while (!analyzeStack.empty()) {
             const RSAShape *s = *analyzeStack.begin();
             analyzeStack.erase(s);
             if (d->testShape(s)) {
                 d->addShape(s);
-                std::unordered_set<const RSAShape *>::iterator it = copy.find(s);
+                auto it = copy.find(s);
                 if (it!=copy.end()) {
                     copy.erase(it);
                     ng.remove(s, s->getPosition());
@@ -95,15 +94,15 @@ void DomainAnalyzer::dividePackingIntoDomains(const Packing &packing, std::vecto
 }
 
 void DomainAnalyzer::printHistogram(Plot& plot, const std::string &filename){
-    double **plotPoints = new double*[plot.size()];
-    for(int i=0; i<plot.size(); i++){
+    auto **plotPoints = new double*[plot.size()];
+    for(size_t i=0; i<plot.size(); i++){
         plotPoints[i] = new double[2];
     }
     plot.getAsHistogramPoints(plotPoints);
 
     std::ofstream file(filename);
 
-    for (int i = 0; i < plot.size()-1; i++) {
+    for (size_t i = 0; i < plot.size()-1; i++) {
         if (plotPoints[i][1] != 0) {
             file << plotPoints[i][0] << "\t" << plotPoints[i][1];
             file << std::endl;
@@ -111,24 +110,23 @@ void DomainAnalyzer::printHistogram(Plot& plot, const std::string &filename){
     }
     file.close();
 
-    for(int i=0; i<plot.size(); i++){
+    for(size_t i=0; i<plot.size(); i++){
         delete[] plotPoints[i];
     }
     delete[] plotPoints;
 }
-
 
 void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
     std::vector<size_t> domainSizes;
     auto packingPaths = PackingGenerator::findPackingsInDir(dirName);
     std::cout << "[DomainAnalyzer::analyzeDomains] " << std::flush;
     std::string rawFilename = dirName + "_domains.raw";
+    size_t percolating = 0;
     if (access(rawFilename.c_str(), F_OK)==0) { // if exists file the analysis is obsolete
         std::ifstream rawFile(rawFilename);
         size_t size;
         while (!rawFile.eof()) {
             rawFile >> size;
-            _OMP_CRITICAL(domainSizes)
             domainSizes.push_back(size);
         }
         rawFile.close();
@@ -139,32 +137,44 @@ void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
             packing.restore(packingPath);
             std::vector<const Domain *> domains;
             DomainAnalyzer::dividePackingIntoDomains(packing, domains);
-            std::ofstream rawFile(rawFilename);
             for (const Domain *d: domains){
                 size_t size = d->size();
-                delete d;
-                rawFile << size << std::endl;
+                if (d->isPercolating()) {
+                    _OMP_CRITICAL(percolating)
+                    percolating++;
+                    DomainAnalyzer::toWolfram(domains, packingPath + "percolation.nb");
+                }
                 _OMP_CRITICAL(domainSizes)
                 domainSizes.push_back(size);
             }
-            rawFile.close();
+            for (const Domain *d: domains) {
+                delete d;
+            }
+            std::cout << "." << std::flush;
         }
-        std::cout << "." << std::flush;
+        std::sort(domainSizes.begin(), domainSizes.end());
+        std::ofstream rawFile(rawFilename);
+        for(size_t size : domainSizes)
+            rawFile << size << std::endl;
+        rawFile.close();
     }
     std::cout << std::endl;
+    std::cout << static_cast<double>(percolating) / static_cast<double>(packingPaths.size());
 
-    Plot pDomains(domainSizes[0], domainSizes[domainSizes.size()-1], 50);
-    for(size_t size: domainSizes) {
-        pDomains.add(size);
+    LogPlot pDomainsLog(static_cast<double>(domainSizes[0]), static_cast<double>(domainSizes[domainSizes.size()-1]), 50);
+//    Plot pDomainsLin(static_cast<double>(domainSizes[0]), static_cast<double>(domainSizes[domainSizes.size()-1]), 50);
+    for (size_t size: domainSizes) {
+        pDomainsLog.add(static_cast<double>(size));
+//        pDomainsLin.add(static_cast<double>(size));
     }
-    printHistogram(pDomains, dirName + "_domains.txt");
+
+    printHistogram(pDomainsLog, dirName + "_domains.txt");
+//    printHistogram(pDomainsLin, dirName + "_domains_lin.txt");
 }
 
-void DomainAnalyzer::toWolfram(Packing packing, const std::string &filename) {
+void DomainAnalyzer::toWolfram(const std::vector<const Domain *> &domains, const std::string &filename) {
     std::vector<std::string> colors = {"Red", "Green", "Blue", "Black", "Gray", "Cyan", "Magenta", "Yellow", "Brown", "Orange", "Pink", "Purple"};
     size_t colorsSize = colors.size();
-    std::vector<const Domain *> domains;
-    DomainAnalyzer::dividePackingIntoDomains(packing, domains);
     size_t i = 0;
     std::ofstream file(filename);
     file << "Graphics[{" << colors[i%colorsSize];
@@ -178,5 +188,13 @@ void DomainAnalyzer::toWolfram(Packing packing, const std::string &filename) {
     file << "]" << std::endl;
 
     file.close();
+}
+
+void DomainAnalyzer::toWolfram(const Packing& packing, const std::string &filename) {
+    std::vector<const Domain *> domains;
+    DomainAnalyzer::dividePackingIntoDomains(packing, domains);
+    DomainAnalyzer::toWolfram(domains, filename);
+    for(const Domain *d : domains)
+        delete d;
 }
 

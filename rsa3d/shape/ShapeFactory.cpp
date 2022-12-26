@@ -49,6 +49,7 @@
         #include "shapes/polygon/Triangle.h"
         #include "shapes/DiscreteOrientationsShape2_1.h"
 		#include "../DiscreteAngleVoxelList.h"
+		#include "../NewDiscreteAngleVoxelList.h"
     #endif
 #elif RSA_SPATIAL_DIMENSION == 3
     #if RSA_ANGULAR_DIMENSION == 0
@@ -293,7 +294,7 @@ RSAShape *ShapeFactory::createShape(RND *rnd) {
     return createShapeImpl(rnd);
 }
 
-VoxelList *ShapeFactory::createVoxelList(const std::string &sClass, unsigned short surfaceDimension, double spatialSize,
+VoxelList *ShapeFactory::createVoxelList(const std::string &sClass, const std::string &attr, unsigned short surfaceDimension, double spatialSize,
                                          double voxelSpatialSize, double angularSize,
                                          double requestedAngularVoxelSize)
 {
@@ -309,7 +310,13 @@ VoxelList *ShapeFactory::createVoxelList(const std::string &sClass, unsigned sho
             if (sClass == "DiscreteOrientationsRectangle" ||
         	    sClass == "DiscreteOrientationsEllipse" ||
 			    sClass == "DiscreteOrientationsSpherocylinder") {
-                return new DiscreteAngleVoxelList(surfaceDimension, spatialSize, voxelSpatialSize, DiscreteOrientationsShape2_1::allowedOrientations);
+                if (std::stoi(attr)<20){
+                    std::cout << "Using zero angular sized voxels" << std::endl;
+                    return new DiscreteAngleVoxelList(surfaceDimension, spatialSize, voxelSpatialSize, DiscreteOrientationsShape2_1::allowedOrientations);
+                }else{
+                    std::cout << "Using variable angular sized voxels" << std::endl;
+                    return new NewDiscreteAngleVoxelList(surfaceDimension, spatialSize, voxelSpatialSize, angularSize, requestedAngularVoxelSize, DiscreteOrientationsShape2_1::allowedOrientations);
+                }
             }
 
         #endif

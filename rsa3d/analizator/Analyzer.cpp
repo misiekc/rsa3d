@@ -11,9 +11,6 @@
 #include "../../statistics/PowerRegression.h"
 #include "../../statistics/ASFRegression.h"
 #include "../../statistics/ArrayFunction.h"
-#include "../utils/OMPMacros.h"
-#include "../utils/Assertions.h"
-#include "DomainAnalyzer.h"
 
 #include <fstream>
 #include <iostream>
@@ -45,7 +42,7 @@ void Analyzer::fillOrderParameterRange(const RSAShape *s){
 	    _OMP_CRITICAL(vParameters)
         vParameters.push_back(particle1->calculateOrder(particle2));
 	}
-	int numberOfParameters = particle1->getNumOfOrderParameters();
+	size_t numberOfParameters = particle1->getNumOfOrderParameters();
 	for(int i=0; i<numberOfParameters; i++){
 		std::vector<double> statistics;
 		statistics.push_back(-std::numeric_limits<double>::infinity());
@@ -273,7 +270,7 @@ double Analyzer::analyzePacking(const Packing &packing, LogPlot *nvt, Plot *asf,
 void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA, double surfaceFactor, double dTime, Result *res){
 	double parameterD = 0.0, errorD = 0.0;
 	double **points = new double*[nvt.size()];
-	for(int i=0; i<nvt.size(); i++)
+	for(size_t i=0; i<nvt.size(); i++)
 		points[i] = new double[2];
 	nvt.getAsPoints(points);
 	ArrayFunction theta(points, nvt.size());
@@ -283,7 +280,7 @@ void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA,
 	LinearRegression lr1;
 	LinearRegression lr2;
 	std::ofstream file(filename);
- 	for (int i = 1, lasti =0; i < nvt.size(); i++) {
+ 	for (size_t i = 1, lasti =0; i < nvt.size(); i++) {
 		if (points[i][1]==0) // no data
 			continue;
 		diff = (points[i][1] - points[lasti][1])/(points[i][0] - points[lasti][0]);
@@ -349,7 +346,7 @@ void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA,
 		}
 	}
 	file.close();
-	for(int i=0; i<nvt.size(); i++)
+	for(size_t i=0; i<nvt.size(); i++)
 		delete[] points[i];
 	delete[] points;
 	res->d.value = parameterD;
@@ -358,13 +355,13 @@ void Analyzer::printKinetics(LogPlot &nvt, std::string filename, double* fixedA,
 
 void Analyzer::printASF(Plot &asf, std::string filename, int counter, double packingFraction, Result *res){
 	double **points = new double*[asf.size()];
-	for(int i=0; i<asf.size(); i++)
+	for(size_t i=0; i<asf.size(); i++)
 		points[i] = new double[2];
 	asf.getAsPoints(points);
 
 	std::ofstream file(filename);
 	ASFRegression asfreg;
-	for (int i = 0; i < asf.size(); i++) {
+	for (size_t i = 0; i < asf.size(); i++) {
 		if (points[i][1]>0.0){
 			if (points[i][0] < 0.2*packingFraction){
 				asfreg.addXY(points[i][0], 1.0 / points[i][1]);
@@ -373,7 +370,7 @@ void Analyzer::printASF(Plot &asf, std::string filename, int counter, double pac
 		}
 	}
 	file.close();
-	for(int i=0; i<asf.size(); i++)
+	for(size_t i=0; i<asf.size(); i++)
 		delete[] points[i];
 	delete[] points;
 	asfreg.calculate();
@@ -385,20 +382,20 @@ void Analyzer::printASF(Plot &asf, std::string filename, int counter, double pac
 
 void Analyzer::printHistogram(Plot& plot, std::string filename){
 	double **plotPoints = new double*[plot.size()];
-	for(int i=0; i<plot.size(); i++){
+	for(size_t i=0; i<plot.size(); i++){
 		plotPoints[i] = new double[2];
 	}
 	plot.getAsHistogramPoints(plotPoints);
 
     std::ofstream file(filename);
 
-    for (int i = 0; i < plot.size()-1; i++) {
+    for (size_t i = 0; i < plot.size()-1; i++) {
 		file << plotPoints[i][0] << "\t" << plotPoints[i][1];
 		file << std::endl;
 	}
 	file.close();
 
-	for(int i=0; i<plot.size(); i++){
+	for(size_t i=0; i<plot.size(); i++){
 		delete[] plotPoints[i];
 	}
 	delete[] plotPoints;
@@ -406,7 +403,7 @@ void Analyzer::printHistogram(Plot& plot, std::string filename){
 
 void Analyzer::printCorrelations(Plot& correlations, std::string filename){
 	double **correlationPoints = new double*[correlations.size()];
-	for(int i=0; i<correlations.size(); i++){
+	for(size_t i=0; i<correlations.size(); i++){
 		correlationPoints[i] = new double[2];
 	}
 	correlations.getAsHistogramPoints(correlationPoints);
@@ -426,7 +423,7 @@ void Analyzer::printCorrelations(Plot& correlations, std::string filename){
     unsigned long int totalPoints = correlations.getTotalNumberOfHistogramPoints();
 
     double r{};
-	for (int i = 0; i < correlations.size()-1; i++) {
+	for (size_t i = 0; i < correlations.size()-1; i++) {
 	    double thinShellVolume{};
 		if (i>0){
 			if (dim==2)
@@ -449,7 +446,7 @@ void Analyzer::printCorrelations(Plot& correlations, std::string filename){
 	}
 	file.close();
 
-	for(int i=0; i<correlations.size(); i++){
+	for(size_t i=0; i<correlations.size(); i++){
 		delete[] correlationPoints[i];
 	}
 	delete[] correlationPoints;
@@ -469,7 +466,7 @@ void Analyzer::printOrder(const std::vector<Plot*> &order, const std::string &fi
 
 	std::ofstream file(filename);
 
-	for (int i = 0; i < order[0]->size()-1; i++) {
+	for (size_t i = 0; i < order[0]->size()-1; i++) {
 		file << orderPoints[0][i][0];
 		for (unsigned short j=0; j<order.size(); j++)
 			file << "\t" << orderPoints[j][i][1];
@@ -478,7 +475,7 @@ void Analyzer::printOrder(const std::vector<Plot*> &order, const std::string &fi
 	file.close();
 
 	for(unsigned short i=0; i<order.size(); i++){
-		for(int j=0; j<order[i]->size(); j++){
+		for(size_t j=0; j<order[i]->size(); j++){
 			delete[] orderPoints[i][j];
 		}
 		delete[] orderPoints[i];

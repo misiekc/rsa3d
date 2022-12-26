@@ -15,8 +15,7 @@ LogPlot::LogPlot(double min, double max, int bins) : Plot(min, max, bins){
 LogPlot::LogPlot(double max, int bins) : LogPlot(1.0, max, bins){
 }
 
-LogPlot::~LogPlot() {
-}
+LogPlot::~LogPlot() = default;
 
 
 /*
@@ -32,7 +31,7 @@ LogPlot::~LogPlot() {
 	}
 */
 
-int LogPlot::getIndex(double d){
+size_t LogPlot::getIndex(double d){
 	d /= this->min;
 	if (d>1.0)
 		return (int)(log(d)/log(this->factor));
@@ -44,11 +43,11 @@ int LogPlot::getIndex(double d){
  */
 double ** LogPlot::getAsPoints(double **points){
 	double x, y;
-	int i;
-	for(i=0; i<this->bins; i++){
-		x = this->min*pow(this->factor, i+0.5);
+
+	for(size_t i=0; i<this->bins; i++){
+		x = this->min*pow(this->factor, static_cast<double>(i)+0.5);
 		if (this->yCounter[i]!=0)
-			y = this->yValues[i] / this->yCounter[i];
+			y = this->yValues[i] / static_cast<double>(this->yCounter[i]);
 		else
 			y = 0;
 		points[i][0] = x;
@@ -62,12 +61,11 @@ double ** LogPlot::getAsPoints(double **points){
 	 */
 double** LogPlot::getAsPointsWithErrors(double **points){
 	double x, y, z;
-	int i;
-	for(i=0; i<this->bins; i++){
-		x = this->min*pow(this->factor, i+0.5);
+	for(size_t i=0; i<this->bins; i++){
+		x = this->min*pow(this->factor, static_cast<double>(i)+0.5);
 		if (this->yCounter[i]!=0){
-			y = this->yValues[i] / this->yCounter[i];
-			z = sqrt(this->y2Values[i] / this->yCounter[i] - y*y);
+			y = this->yValues[i] / static_cast<double>(this->yCounter[i]);
+			z = sqrt(static_cast<double>(this->y2Values[i]) / static_cast<double>(this->yCounter[i]) - y*y);
 		}else{
 			y = 0.0;
 			z = 0.0;
@@ -78,3 +76,18 @@ double** LogPlot::getAsPointsWithErrors(double **points){
 	}
 	return points;
 }
+
+double** LogPlot::getAsHistogramPoints(double** points) {
+    double x, y, binWidth;
+    double linearBinWidth = (this->max - this->min) / static_cast<double>(bins);
+
+    for (size_t i = 0; i < this->bins; i++) {
+        x = this->min*pow(this->factor, static_cast<double>(i)+0.5);
+        binWidth = this->min*pow(this->factor, static_cast<double>(i))*(this->factor-1);
+        y = static_cast<double>(this->yCounter[i])*linearBinWidth/binWidth;
+        points[i][0] = x;
+        points[i][1] = y;
+    }
+    return points;
+}
+

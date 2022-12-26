@@ -20,6 +20,7 @@ VariableSizeVoxelList::VariableSizeVoxelList(int dim, double packingSpatialSize,
 VariableSizeVoxelList::~VariableSizeVoxelList() {
 	delete this->voxelMap;
 	delete this->voxelsDivisionCounters;
+    delete this->u01Distribution;
 }
 
 void VariableSizeVoxelList::allocateVoxels(size_t size){

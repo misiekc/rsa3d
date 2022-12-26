@@ -15,17 +15,19 @@ private:
 	double factor;
 
 protected:
-	int getIndex(double x) override;
+	size_t getIndex(double x) override;
 
 public:
 	LogPlot(double min, double max, int bins);
 	LogPlot(double max, int bins);
 	LogPlot(const LogPlot &other) = delete;
 	LogPlot &operator=(const LogPlot &other) = delete;
-	virtual ~LogPlot();
+	~LogPlot() override;
 
-	virtual double** getAsPoints(double **points) override;
-	virtual double** getAsPointsWithErrors(double **points) override;
-};
+	double** getAsPoints(double **points) override;
+	double** getAsPointsWithErrors(double **points) override;
+    double** getAsHistogramPoints(double** points) override;
+
+    };
 
 #endif /* LOGPLOT_H_ */

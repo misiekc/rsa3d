@@ -24,7 +24,7 @@ OrientedCuboidVoxelList::OrientedCuboidVoxelList(int dim, double packingSpatialS
  */
 bool OrientedCuboidVoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
 										   std::vector<const RSAShape *> *shapes, RSABoundaryConditions *bc,
-                                           unsigned short depth){
+                                           unsigned short depth) const{
 
 	size_t finalArrayLength = (size_t)round( pow(pow(2.0, depth), this->surfaceDimension+RSA_ANGULAR_DIMENSION) );
 	Voxel **finalVoxels = new Voxel*[ finalArrayLength ];

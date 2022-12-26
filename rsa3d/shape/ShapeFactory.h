@@ -48,7 +48,7 @@ public:
 	 * it can help delete voxels faster
 	 * @return `new`-allocated proper implementation of VoxelList
 	 */
-	static VoxelList *createVoxelList(const std::string &sClass, unsigned short surfaceDimension, double spatialSize,
+	static VoxelList *createVoxelList(const std::string &sClass, const std::string &attr, unsigned short surfaceDimension, double spatialSize,
 	                                  double voxelSpatialSize, double angularSize, double requestedAngularVoxelSize);
 
     /**

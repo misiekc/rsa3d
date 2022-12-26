@@ -15,7 +15,7 @@ class DiscreteAngleVoxelList: public VoxelList {
 private:
 protected:
 	virtual unsigned int initVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl) override;
-	virtual void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes) override;
+	virtual void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes) const override;
 	virtual void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd);
 
 public:

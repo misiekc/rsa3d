@@ -49,6 +49,7 @@ add_library(shapes.2.1
         shapes/spherocylinder/SpheroCylinder2D.cpp
         shapes/DiscreteOrientationsShape2_1.cpp
         ../DiscreteAngleVoxelList.cpp
+        ../NewDiscreteAngleVoxelList.cpp
         shapes/Ellipse.cpp
         shapes/Rectangle.cpp
         shapes/RegularDiskopolygon.cpp
