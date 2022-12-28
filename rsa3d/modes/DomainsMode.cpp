@@ -19,14 +19,14 @@ void DomainsMode::initializeForArguments(const ProgramArguments &arguments) {
 void DomainsMode::run() {
     ValidateMsg(this->params.particleType.rfind("DiscreteOrientations", 0)==0, "Only DiscreteOrientations shape are supported by this mode");
     ValidateMsg(this->params.particleAttributes.rfind("2 ", 0)==0, "Only two discrete orientations are supported by this mode");
-    DomainAnalyzer::init(this->params);
+    DomainAnalyzer analyzer(this->params);
     if (std::filesystem::is_directory((this->dirFile))) {
-        DomainAnalyzer::analyzeOrderDirectory(this->dirFile);
-        DomainAnalyzer::analyzeDomains(this->dirFile);
+        analyzer.analyzeOrderDirectory(this->dirFile);
+        analyzer.analyzeDomains(this->dirFile);
     }else if(std::filesystem::is_regular_file(this->dirFile)) {
         Packing packing;
         packing.restore(this->dirFile);
-        DomainAnalyzer::toWolfram(packing, this->dirFile + ".nb");
+        analyzer.toWolfram(packing, this->dirFile + ".nb");
     }
 }
 

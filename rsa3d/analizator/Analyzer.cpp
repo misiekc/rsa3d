@@ -43,7 +43,7 @@ void Analyzer::fillOrderParameterRange(const RSAShape *s){
         vParameters.push_back(particle1->calculateOrder(particle2));
 	}
 	size_t numberOfParameters = particle1->getNumOfOrderParameters();
-	for(int i=0; i<numberOfParameters; i++){
+	for(size_t i=0; i<numberOfParameters; i++){
 		std::vector<double> statistics;
 		statistics.push_back(-std::numeric_limits<double>::infinity());
 		statistics.push_back(std::numeric_limits<double>::infinity());
@@ -51,7 +51,7 @@ void Analyzer::fillOrderParameterRange(const RSAShape *s){
 		this->orderParameterRange.push_back(statistics);
 	}
 	for(int i=0; i<total; i++){
-		for(int j=0; j<numberOfParameters; j++){
+		for(size_t j=0; j<numberOfParameters; j++){
 			double d = vParameters[i][j];
 			if (this->orderParameterRange[j][0]<d) // max update
 				this->orderParameterRange[j][0]=d;
@@ -60,7 +60,7 @@ void Analyzer::fillOrderParameterRange(const RSAShape *s){
 			this->orderParameterRange[j][2] += d;
 		}
 	}
-	for(int j=0; j<numberOfParameters; j++){
+	for(size_t j=0; j<numberOfParameters; j++){
 		this->orderParameterRange[j][2] /= total;
 	}
 }

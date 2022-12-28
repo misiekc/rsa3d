@@ -5,13 +5,10 @@
 #include <fstream>
 #include <unistd.h>
 #include "DomainAnalyzer.h"
-#include "../shape/shapes/DiscreteOrientationsShape2_1.h"
 #include "../PackingGenerator.h"
 
-Parameters DomainAnalyzer::params;
-
-void DomainAnalyzer::init(const Parameters &p){
-    DomainAnalyzer::params = p;
+DomainAnalyzer::DomainAnalyzer(const Parameters &p){
+    this->params = p;
 }
 
 double DomainAnalyzer::analyzeOrder(const Packing &packing) {
@@ -29,11 +26,11 @@ void DomainAnalyzer::analyzeOrderDirectory(const std::string &dirName) {
     auto packingPaths = PackingGenerator::findPackingsInDir(dirName);
     double sq = 0.0, sq2 = 0.0;
     int counter = 0;
-    std::cout << "[DomainAnalyzer::analyzePackingsInDirectory] " << std::flush;
+    std::cout << "[DomainAnalyzer::analyzeOrderDirectory] " << std::flush;
     for (const auto &packingPath: packingPaths) {
         Packing packing;
         packing.restore(packingPath);
-        double q = DomainAnalyzer::analyzeOrder(packing);
+        double q = this->analyzeOrder(packing);
         sq += q;
         sq2 += q * q;
         counter++;
@@ -44,38 +41,36 @@ void DomainAnalyzer::analyzeOrderDirectory(const std::string &dirName) {
               << sqrt((sq2 / counter - sq * sq / (counter * counter)) / counter) << std::endl;
 }
 
-void DomainAnalyzer::addNeighboursToQueue(std::vector<const RSAShape*> &neighbours, std::unordered_set<const RSAShape *> &queue){
+void DomainAnalyzer::addNeighboursToQueue(std::vector<const RSAShape *> &neighbours,
+                                          std::unordered_set<const RSAShape *> &queue) {
     for (const RSAShape *s : neighbours){
         if (queue.find(s)==queue.end())
             queue.insert(s);
     }
 }
-
-void DomainAnalyzer::dividePackingIntoDomains(const Packing &packing, std::vector<const Domain *> &domains){
+template<typename InputIterator>
+void DomainAnalyzer::getComponents(InputIterator begin, InputIterator end, RSABoundaryConditions *bc, std::vector<const Domain *> &domains){
     std::unordered_set<const RSAShape *> copy;
-    copy.insert(packing.getVector().begin(), packing.getVector().end());
-    RSAPeriodicBC bc(DomainAnalyzer::params.surfaceSize);
+    copy.insert(begin, end);
 
     while (!copy.empty()) {
-        auto* d = new Domain(DomainAnalyzer::params);
         std::unordered_set<const RSAShape *> analyzeStack;
         std::vector<const RSAShape *> neighbours;
-        NeighbourGrid<const RSAShape> ng(DomainAnalyzer::params.surfaceDimension, DomainAnalyzer::params.surfaceSize, RSAShape::getNeighbourListCellSize());
+        NeighbourGrid<const RSAShape> ng(this->params.surfaceDimension, this->params.surfaceSize, RSAShape::getNeighbourListCellSize());
         for(const RSAShape *s: copy) {
             ng.add(s, s->getPosition());
         }
         const RSAShape *seed = *(copy.begin());
         copy.erase(seed);
-        d->addShape(seed);
+        Domain *d = new Domain(this->params.surfaceSize, this->params.surfaceDimension, seed);
         ng.remove(seed, seed->getPosition());
         ng.getNeighbours(&neighbours, seed->getPosition());
-        DomainAnalyzer::addNeighboursToQueue(neighbours, analyzeStack);
+        this->addNeighboursToQueue(neighbours, analyzeStack);
 
         while (!analyzeStack.empty()) {
             const RSAShape *s = *analyzeStack.begin();
             analyzeStack.erase(s);
-            if (d->testShape(s)) {
-                d->addShape(s);
+            if (d->testAndAddShape(s, bc)) {
                 auto it = copy.find(s);
                 if (it!=copy.end()) {
                     copy.erase(it);
@@ -84,13 +79,42 @@ void DomainAnalyzer::dividePackingIntoDomains(const Packing &packing, std::vecto
                     std::cout << "Something wrong" << std::endl;
                 }
                 ng.getNeighbours(&neighbours, s->getPosition());
-                DomainAnalyzer::addNeighboursToQueue(neighbours, analyzeStack);
+                this->addNeighboursToQueue(neighbours, analyzeStack);
                 if (d->size()%1000 !=0)
                     continue;
             }
         }
         domains.push_back(d);
     }
+}
+
+bool DomainAnalyzer::isPercolating(const Domain &domain){
+    RSAFreeBC fbc;
+    std::vector<const Domain *> domains;
+    this->getComponents(domain.getShapes().begin(), domain.getShapes().end(), &fbc, domains);
+//    DomainAnalyzer::toWolfram(domains, "divided.nb");
+    for (const Domain *d: domains) {
+        double xMin = this->params.surfaceSize, yMin = this->params.surfaceSize, xMax = 0, yMax = 0;
+        for (const RSAShape *s: d->getShapes()) {
+            RSAVector pos = s->getPosition();
+            if (pos[0] < xMin) xMin = pos[0];
+            if (pos[1] < yMin) yMin = pos[1];
+            if (pos[0] > xMax) xMax = pos[0];
+            if (pos[1] > yMax) yMax = pos[1];
+        }
+        if (d->getOrientation() == 0) {
+            if ((xMax - xMin) > this->params.surfaceSize - (Rectangle::longer + Rectangle::shorter))
+                return true;
+            if ((yMax - yMin) > this->params.surfaceSize - (Rectangle::shorter + Rectangle::shorter))
+                return true;
+        } else {
+            if ((yMax - yMin) > this->params.surfaceSize - (Rectangle::longer + Rectangle::shorter))
+                return true;
+            if ((xMax - xMin) > this->params.surfaceSize - (Rectangle::shorter + Rectangle::shorter))
+                return true;
+        }
+    }
+    return false;
 }
 
 void DomainAnalyzer::printHistogram(Plot& plot, const std::string &filename){
@@ -117,6 +141,7 @@ void DomainAnalyzer::printHistogram(Plot& plot, const std::string &filename){
 }
 
 void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
+    RSAPeriodicBC pbc(this->params.surfaceSize);
     std::vector<size_t> domainSizes;
     auto packingPaths = PackingGenerator::findPackingsInDir(dirName);
     std::cout << "[DomainAnalyzer::analyzeDomains] " << std::flush;
@@ -136,13 +161,19 @@ void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
             Packing packing;
             packing.restore(packingPath);
             std::vector<const Domain *> domains;
-            DomainAnalyzer::dividePackingIntoDomains(packing, domains);
+            this->getComponents(packing.getVector().begin(), packing.getVector().end(), &pbc, domains);
             for (const Domain *d: domains){
+/*
+                std::vector<const Domain*> v;
+                v.push_back(d);
+                this->toWolfram(v, packingPath + "_tested.nb");
+*/
                 size_t size = d->size();
-                if (d->isPercolating()) {
+                if (this->isPercolating(*d)) {
                     _OMP_CRITICAL(percolating)
                     percolating++;
-                    DomainAnalyzer::toWolfram(domains, packingPath + "percolation.nb");
+                    this->toWolfram(domains, packingPath + "_percolation.nb");
+                    break;
                 }
                 _OMP_CRITICAL(domainSizes)
                 domainSizes.push_back(size);
@@ -180,7 +211,7 @@ void DomainAnalyzer::toWolfram(const std::vector<const Domain *> &domains, const
     file << "Graphics[{" << colors[i%colorsSize];
     for (const Domain* d: domains){
         i++;
-        for (const RSAShape *s : d->shapes)
+        for (const RSAShape *s : d->getShapes())
             file << ", " << std::endl << s->toWolfram();
         file << ", " << colors[i%colorsSize];
     }
@@ -192,9 +223,9 @@ void DomainAnalyzer::toWolfram(const std::vector<const Domain *> &domains, const
 
 void DomainAnalyzer::toWolfram(const Packing& packing, const std::string &filename) {
     std::vector<const Domain *> domains;
-    DomainAnalyzer::dividePackingIntoDomains(packing, domains);
-    DomainAnalyzer::toWolfram(domains, filename);
+    RSAPeriodicBC pbc(this->params.surfaceSize);
+    this->getComponents(packing.getVector().begin(), packing.getVector().end(), &pbc, domains);
+    this->toWolfram(domains, filename);
     for(const Domain *d : domains)
         delete d;
 }
-
