@@ -17,12 +17,13 @@
 class Domain {
 
 private:
-    std::unordered_set<const RSAShape *> shapes;
+    std::vector<const RSAShape *> shapes;
     NeighbourGrid<const RSAShape> *ng;
     double orientation{};
     double rectangleSides[2] = {Rectangle::longer, Rectangle::shorter};
     double surfaceSize;
     unsigned short int surfaceDimension;
+    bool active = true;
 
 
     void addShape(const RSAShape *shape);
@@ -37,7 +38,8 @@ public:
 
     size_t size() const;
     double getOrientation() const;
-    std::unordered_set<const RSAShape *> getShapes() const;
+    std::vector<const RSAShape *> getShapes() const;
+    void makePasive();
 };
 
 

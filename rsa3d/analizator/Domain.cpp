@@ -5,7 +5,10 @@
 #include "Domain.h"
 
 void Domain::addShape(const RSAShape *shape) {
-    this->shapes.insert(shape);
+    if(!this->active){
+        throw std::runtime_error("cannot modify passive domain");
+    }
+    this->shapes.push_back(shape);
     this->ng->add(shape, shape->getPosition());
 }
 
@@ -18,10 +21,14 @@ Domain::Domain(double surfaceSize, unsigned short int surfaceDimension, const RS
 }
 
 Domain::~Domain(){
-    delete this->ng;
+    if (this->ng != nullptr)
+        delete this->ng;
 }
 
 bool Domain::testAndAddShape(const RSAShape *shape, RSABoundaryConditions *bc){
+    if(!this->active){
+        throw std::runtime_error("cannot modify passive domain");
+    }
     if (this->orientation != shape->getOrientation()[0])
         return false;
 
@@ -60,7 +67,13 @@ double Domain::getOrientation() const{
     return this->orientation;
 }
 
-std::unordered_set<const RSAShape *> Domain::getShapes() const{
+std::vector<const RSAShape *> Domain::getShapes() const{
     return this->shapes;
+}
+
+void Domain::makePasive() {
+    this->active = false;
+    delete this->ng;
+    this->ng = nullptr;
 }
 

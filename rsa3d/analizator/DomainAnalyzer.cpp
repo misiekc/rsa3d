@@ -48,10 +48,10 @@ void DomainAnalyzer::addNeighboursToQueue(std::vector<const RSAShape *> &neighbo
             queue.insert(s);
     }
 }
-template<typename InputIterator>
-void DomainAnalyzer::getComponents(InputIterator begin, InputIterator end, RSABoundaryConditions *bc, std::vector<const Domain *> &domains){
+template<typename Collection>
+void DomainAnalyzer::getComponents(const Collection &collection, RSABoundaryConditions *bc, std::vector<const Domain *> &domains){
     std::unordered_set<const RSAShape *> copy;
-    copy.insert(begin, end);
+    copy.insert(collection.begin(), collection.end());
 
     while (!copy.empty()) {
         std::unordered_set<const RSAShape *> analyzeStack;
@@ -84,6 +84,7 @@ void DomainAnalyzer::getComponents(InputIterator begin, InputIterator end, RSABo
                     continue;
             }
         }
+        d->makePasive();
         domains.push_back(d);
     }
 }
@@ -91,7 +92,7 @@ void DomainAnalyzer::getComponents(InputIterator begin, InputIterator end, RSABo
 bool DomainAnalyzer::isPercolating(const Domain &domain){
     RSAFreeBC fbc;
     std::vector<const Domain *> domains;
-    this->getComponents(domain.getShapes().begin(), domain.getShapes().end(), &fbc, domains);
+    this->getComponents(domain.getShapes(), &fbc, domains);
 //    DomainAnalyzer::toWolfram(domains, "divided.nb");
     for (const Domain *d: domains) {
         double xMin = this->params.surfaceSize, yMin = this->params.surfaceSize, xMax = 0, yMax = 0;
@@ -161,7 +162,7 @@ void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
             Packing packing;
             packing.restore(packingPath);
             std::vector<const Domain *> domains;
-            this->getComponents(packing.getVector().begin(), packing.getVector().end(), &pbc, domains);
+            this->getComponents(packing.getVector(), &pbc, domains);
             for (const Domain *d: domains){
 /*
                 std::vector<const Domain*> v;
@@ -172,7 +173,7 @@ void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
                 if (this->isPercolating(*d)) {
                     _OMP_CRITICAL(percolating)
                     percolating++;
-                    this->toWolfram(domains, packingPath + "_percolation.nb");
+//                    this->toWolfram(domains, packingPath + "_percolation.nb");
                     break;
                 }
                 _OMP_CRITICAL(domainSizes)
@@ -190,7 +191,7 @@ void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
         rawFile.close();
     }
     std::cout << std::endl;
-    std::cout << static_cast<double>(percolating) / static_cast<double>(packingPaths.size());
+    std::cout << static_cast<double>(percolating) / static_cast<double>(packingPaths.size()) << std::endl;
 
     LogPlot pDomainsLog(static_cast<double>(domainSizes[0]), static_cast<double>(domainSizes[domainSizes.size()-1]), 50);
 //    Plot pDomainsLin(static_cast<double>(domainSizes[0]), static_cast<double>(domainSizes[domainSizes.size()-1]), 50);
@@ -224,7 +225,7 @@ void DomainAnalyzer::toWolfram(const std::vector<const Domain *> &domains, const
 void DomainAnalyzer::toWolfram(const Packing& packing, const std::string &filename) {
     std::vector<const Domain *> domains;
     RSAPeriodicBC pbc(this->params.surfaceSize);
-    this->getComponents(packing.getVector().begin(), packing.getVector().end(), &pbc, domains);
+    this->getComponents(packing.getVector(), &pbc, domains);
     this->toWolfram(domains, filename);
     for(const Domain *d : domains)
         delete d;

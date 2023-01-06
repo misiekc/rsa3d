@@ -23,8 +23,8 @@ private:
     double analyzeOrder(const Packing &packing);
     void addNeighboursToQueue(std::vector<const RSAShape*> &neighbours, std::unordered_set<const RSAShape *> &queue);
 
-    template<typename InputIterator>
-    void getComponents(InputIterator begin, InputIterator end, RSABoundaryConditions *bc, std::vector<const Domain *> &domains);
+    template<typename Collection>
+    void getComponents(const Collection &collection, RSABoundaryConditions *bc, std::vector<const Domain *> &domains);
 
     bool isPercolating(const Domain &domain);
     void printHistogram(Plot &plot, const std::string &filename);
