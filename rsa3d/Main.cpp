@@ -109,7 +109,11 @@ int main(int argc, char **argv) {
 
     Parameters params = arguments->getParameters();
     ShapeFactory::initShapeClass(params.particleType, params.particleAttributes);
-    
+
+#ifdef _OPENMP
+    omp_set_num_threads(params.ompThreads);
+#endif
+
     auto &modeObject = *(programModes[mode]);
     modeObject.initializeForArguments(*arguments);
     modeObject.run();

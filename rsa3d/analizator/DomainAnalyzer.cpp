@@ -80,8 +80,6 @@ void DomainAnalyzer::getComponents(const Collection &collection, RSABoundaryCond
                 }
                 ng.getNeighbours(&neighbours, s->getPosition());
                 this->addNeighboursToQueue(neighbours, analyzeStack);
-                if (d->size()%1000 !=0)
-                    continue;
             }
         }
         d->makePasive();
@@ -145,7 +143,7 @@ void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
     RSAPeriodicBC pbc(this->params.surfaceSize);
     std::vector<size_t> domainSizes;
     auto packingPaths = PackingGenerator::findPackingsInDir(dirName);
-    std::cout << "[DomainAnalyzer::analyzeDomains] " << std::flush;
+    std::cout << "[DomainAnalyzer::analyzeDomains (" << _OMP_MAXTHREADS << ")]" << std::flush;
     std::string rawFilename = dirName + "_domains.raw";
     size_t percolating = 0;
     if (access(rawFilename.c_str(), F_OK)==0) { // if exists file the analysis is obsolete
@@ -161,23 +159,23 @@ void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
         for (const auto &packingPath: packingPaths) {
             Packing packing;
             packing.restore(packingPath);
+            size_t packingSize = packing.size();
             std::vector<const Domain *> domains;
             this->getComponents(packing.getVector(), &pbc, domains);
+            size_t domainsSize = 0;
             for (const Domain *d: domains){
-/*
-                std::vector<const Domain*> v;
-                v.push_back(d);
-                this->toWolfram(v, packingPath + "_tested.nb");
-*/
                 size_t size = d->size();
+                domainsSize += size;
+                _OMP_CRITICAL(domainSizes)
+                domainSizes.push_back(size);
+            }
+            ValidateMsg(packingSize==domainsSize, "Number of shapes in domains does not match the number of shapes in packing");
+            for (const Domain *d: domains) {
                 if (this->isPercolating(*d)) {
                     _OMP_CRITICAL(percolating)
                     percolating++;
-//                    this->toWolfram(domains, packingPath + "_percolation.nb");
                     break;
                 }
-                _OMP_CRITICAL(domainSizes)
-                domainSizes.push_back(size);
             }
             for (const Domain *d: domains) {
                 delete d;
