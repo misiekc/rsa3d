@@ -39,6 +39,7 @@
         #include "shapes/polydisk/Kmer.h"
         #include "shapes/polydisk/Polydisk.h"
 		#include "shapes/polygon/Polygon.h"
+		#include "shapes/polygon/RegularPolygon.h"
 		#include "shapes/polygon/RegularRoundedPolygon.h"
 		#include "shapes/polygon/RoundedPolygon.h"
 		#include "shapes/polygon/RoundedRectangle.h"
@@ -166,6 +167,9 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
             } else if (sClass == "Polygon") {
                 Polygon::initClass(attr);
                 return;
+            } else if (sClass == "RegularPolygon") {
+                RegularPolygon::initClass(attr);
+                return;
             } else if (sClass == "RegularRoundedPolygon") {
                  RegularRoundedPolygon::initClass(attr);
                  return;
@@ -201,6 +205,9 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
             	return;
             } else if (sClass == "DiscreteOrientationsSpherocylinder") {
             	DiscreteOrientationsShape2_1::initClass(attr, SpheroCylinder2D::initClass);
+            	return;
+            } else if (sClass == "DiscreteOrientationsRegularPolygon") {
+            	DiscreteOrientationsShape2_1::initClass(attr, RegularPolygon::initClass);
             	return;
             }
         #endif
@@ -309,7 +316,8 @@ VoxelList *ShapeFactory::createVoxelList(const std::string &sClass, const std::s
 
             if (sClass == "DiscreteOrientationsRectangle" ||
         	    sClass == "DiscreteOrientationsEllipse" ||
-			    sClass == "DiscreteOrientationsSpherocylinder") {
+			    sClass == "DiscreteOrientationsSpherocylinder" ||
+                sClass == "DiscreteOrientationsRegularPolygon") {
                 if (std::stoi(attr)<20){
                     std::cout << "Using zero angular sized voxels" << std::endl;
                     return new DiscreteAngleVoxelList(surfaceDimension, spatialSize, voxelSpatialSize, DiscreteOrientationsShape2_1::allowedOrientations);

@@ -143,7 +143,7 @@ void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
     RSAPeriodicBC pbc(this->params.surfaceSize);
     std::vector<size_t> domainSizes;
     auto packingPaths = PackingGenerator::findPackingsInDir(dirName);
-    std::cout << "[DomainAnalyzer::analyzeDomains (" << _OMP_MAXTHREADS << ")]" << std::flush;
+    std::cout << "[DomainAnalyzer::analyzeDomains]" << std::flush;
     std::string rawFilename = dirName + "_domains.raw";
     size_t percolating = 0;
     if (access(rawFilename.c_str(), F_OK)==0) { // if exists file the analysis is obsolete
