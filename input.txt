@@ -1,24 +1,26 @@
-maxVoxels = 100000000             # upper bound on number of voxels
-requestedAngularVoxelSize = 0.3  # upper bound on voxel angular size (doesn't affect "initial voxels")
-minDx = 0.0                      # lower bound on voxel spatial size
-from = 0                         # first collector (packing) number <=> rnd seed
-collectors = 1                  # number of collectors
+maxVoxels = 50000000                 # upper bound on number of voxels
+requestedAngularVoxelSize = 0.3    # upper bound on voxel angular size (doesn't affect "initial voxels")
+angularVoxelRange = 1.6            # limit of possible rotations in radians (default 2*M_PI)
+minDx = 0.0                        # lower bound on voxel spatial size
+from = 0                           # first collector (packing) number <=> rnd seed
+collectors = 1                     # number of collectors
 #maxTime = 100.0                  # dimensionless time to stop after - for shapes not supporting saturation
-split = 1000                      # number of failed RSA iterations to split voxels
+split = 20000                    # number of failed RSA iterations to split voxels
 #surfaceDimension = 1            # surface dimension - can be smaller than RSA_SPATIAL_DIMENSION
-surfaceVolume = 1000000.0           # volume of a packing
-storePackings = true             # true if packings are to be saved to packing_[...].bin files
-seedOrigin = 0                   # the seed of packing = seedOrigin + collector id. seedOrigin can be set to "random"
+surfaceVolume = 400.0          # volume of a packing
+storePackings = true               # true if packings are to be saved to packing_[...].bin files
+seedOrigin = 0                     # the seed of packing = seedOrigin + collector id. seedOrigin can be set to "random"
 goDeep = false
 #modifiedRSA = true              # no idea :/. Some kind of debugging?
 #thresholdDistance = 25.0        # lower bound on shapes' neighbour grid size
 boundaryConditions = periodic    # periodic or free
 
-particleType = DiscreteOrientationsRectangle
-particleAttributes = 2 auto 10
+particleType = Ellipse
+particleAttributes = 2
 #particleType = GenericXCShape
 #particleAttributes = sphere 0.5 & move 0 0 -0.5 & sphere 1 & move 0 0 0.5 & wrap
 #particleAttributes = 1 3 superellipsoid 1 2 3 2
 
 #generatorProcesses = 1            # number of processes to fork
 ompThreads = 12                   # upper bound on number of OpenMP threads to spawn
+

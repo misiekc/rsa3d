@@ -209,6 +209,9 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
             } else if (sClass == "DiscreteOrientationsRegularPolygon") {
             	DiscreteOrientationsShape2_1::initClass(attr, RegularPolygon::initClass);
             	return;
+            } else if (sClass == "DiscreteOrientationsRoundedRegularPolygon") {
+            	DiscreteOrientationsShape2_1::initClass(attr, RegularRoundedPolygon::initClass);
+            	return;
             }
         #endif
 
@@ -317,7 +320,8 @@ VoxelList *ShapeFactory::createVoxelList(const std::string &sClass, const std::s
             if (sClass == "DiscreteOrientationsRectangle" ||
         	    sClass == "DiscreteOrientationsEllipse" ||
 			    sClass == "DiscreteOrientationsSpherocylinder" ||
-                sClass == "DiscreteOrientationsRegularPolygon") {
+                sClass == "DiscreteOrientationsRegularPolygon" ||
+                sClass == "DiscreteOrientationsRoundedRegularPolygon") {
                 if (std::stoi(attr)<20){
                     std::cout << "Using zero angular sized voxels" << std::endl;
                     return new DiscreteAngleVoxelList(surfaceDimension, spatialSize, voxelSpatialSize, DiscreteOrientationsShape2_1::allowedOrientations);

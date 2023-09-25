@@ -12,7 +12,8 @@ set(SHAPE_BASE_SOURCE
 
 add_library(shapes.1.1
         ${SHAPE_BASE_SOURCE}
-        shapes/Ellipse1Dim.cpp ../analizator/Domain.cpp ../analizator/Domain.h)
+        shapes/Ellipse1Dim.cpp ../analizator/Domain.cpp ../analizator/Domain.h
+)
 target_compile_definitions(shapes.1.1 PUBLIC RSA_SPATIAL_DIMENSION=1 RSA_ANGULAR_DIMENSION=1)
 
 add_library(shapes.2.0
@@ -54,7 +55,8 @@ add_library(shapes.2.1
         shapes/Ellipse.cpp
         shapes/Rectangle.cpp
         shapes/RegularDiskopolygon.cpp
-        shapes/polygon/RegularRoundedPolygon.cpp)
+        shapes/polygon/RegularRoundedPolygon.cpp
+)
 target_compile_definitions(shapes.2.1 PUBLIC RSA_SPATIAL_DIMENSION=2 RSA_ANGULAR_DIMENSION=1)
 
 add_library(shapes.3.0

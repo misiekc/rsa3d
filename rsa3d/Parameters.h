@@ -23,6 +23,7 @@ public:
 	std::size_t maxTriesWithoutSuccess = std::numeric_limits<std::size_t>::max();
 	std::size_t maxVoxels = 40000000;
 	double requestedAngularVoxelSize = 2*M_PI;
+    double angularVoxelRange = 2*M_PI;
 	double minDx = 0.0;
 	std::size_t from = 0;
 	std::size_t collectors = 1;

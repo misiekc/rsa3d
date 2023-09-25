@@ -19,7 +19,7 @@ double DomainAnalyzer::analyzeOrder(const Packing &packing) {
         else
             nv++;
     }
-    return 1 - 2.0 * static_cast<double>(std::min(nv, nh)) / static_cast<double>(nv + nh);
+    return std::fabs( (static_cast<double>(nv) - static_cast<double>(nh)) / (static_cast<double>(nv) + static_cast<double>(nh)) );
 }
 
 void DomainAnalyzer::analyzeOrderDirectory(const std::string &dirName) {
@@ -38,7 +38,7 @@ void DomainAnalyzer::analyzeOrderDirectory(const std::string &dirName) {
     }
     std::cout << std::endl;
     std::cout << dirName << "\t" << sq / counter << "\t"
-              << sqrt((sq2 / counter - sq * sq / (counter * counter)) / counter) << std::endl;
+              << sqrt((sq2 / counter - sq * sq / (counter * counter)) / counter); // << std::endl;
 }
 
 void DomainAnalyzer::addNeighboursToQueue(std::vector<const RSAShape *> &neighbours,
@@ -143,7 +143,7 @@ void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
     RSAPeriodicBC pbc(this->params.surfaceSize);
     std::vector<size_t> domainSizes;
     auto packingPaths = PackingGenerator::findPackingsInDir(dirName);
-    std::cout << "[DomainAnalyzer::analyzeDomains]" << std::flush;
+//    std::cout << "[DomainAnalyzer::analyzeDomains]" << std::flush;
     std::string rawFilename = dirName + "_domains.raw";
     size_t percolating = 0;
     if (access(rawFilename.c_str(), F_OK)==0) { // if exists file the analysis is obsolete
@@ -180,7 +180,7 @@ void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
             for (const Domain *d: domains) {
                 delete d;
             }
-            std::cout << "." << std::flush;
+//            std::cout << "." << std::flush;
         }
         std::sort(domainSizes.begin(), domainSizes.end());
         std::ofstream rawFile(rawFilename);
@@ -188,8 +188,8 @@ void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
             rawFile << size << std::endl;
         rawFile.close();
     }
-    std::cout << std::endl;
-    std::cout << static_cast<double>(percolating) / static_cast<double>(packingPaths.size()) << std::endl;
+//    std::cout << std::endl;
+    std::cout << "\t" << static_cast<double>(percolating) / static_cast<double>(packingPaths.size()) << std::endl;
 
     LogPlot pDomainsLog(static_cast<double>(domainSizes[0]), static_cast<double>(domainSizes[domainSizes.size()-1]), 50);
 //    Plot pDomainsLin(static_cast<double>(domainSizes[0]), static_cast<double>(domainSizes[domainSizes.size()-1]), 50);
@@ -203,20 +203,29 @@ void DomainAnalyzer::analyzeDomains(const std::string &dirName) {
 }
 
 void DomainAnalyzer::toWolfram(const std::vector<const Domain *> &domains, const std::string &filename) {
-    std::vector<std::string> colors = {"Red", "Green", "Blue", "Black", "Gray", "Cyan", "Magenta", "Yellow", "Brown", "Orange", "Pink", "Purple"};
+    std::vector<std::string> colors = {"Red", "Green", "Blue", "Black", "Gray", "Cyan", "Magenta", "Yellow", "Brown", "Orange", "Pink", "Purple",
+                                       "LightRed", "LightGreen", "LightBlue", "LightGray", "LightCyan", "LightMagenta", "LightYellow", "LightBrown", "LightOrange", "LightPink", "LightPurple"};
     size_t colorsSize = colors.size();
     size_t i = 0;
+    bool bPercolation = false;
     std::ofstream file(filename);
     file << "Graphics[{" << colors[i%colorsSize];
     for (const Domain* d: domains){
+        if (this->isPercolating(*d)){
+            std::cout << "Percolating domain found in color " << colors[i%colorsSize] << std::endl;
+            bPercolation = true;
+        }
         i++;
         for (const RSAShape *s : d->getShapes())
             file << ", " << std::endl << s->toWolfram();
         file << ", " << colors[i%colorsSize];
+
     }
     file << "}";
     file << "]" << std::endl;
-
+    if(!bPercolation){
+        std::cout << "No percolating domain found" << std::endl;
+    }
     file.close();
 }
 

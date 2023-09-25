@@ -531,7 +531,7 @@ void Analyzer::analyzePackingsInDirectory(const std::string &dirName, double min
 	std::cout << std::endl;
 
 	Result result;
-	double dTime = (minmaxTimes[0]>0.01*minmaxTimes[1])? minmaxTimes[0] : minmaxTimes[0]/10;
+	double dTime = (minmaxTimes[0]<0.01*minmaxTimes[1])? minmaxTimes[0] : minmaxTimes[0]/10;
 	this->printKinetics(nvt, (dirName + "_kinetics.txt"), nullptr, particleSize / packingSize, dTime, &result);
 	double packingFraction = result.thetaInf.value;
 	this->printASF(asf, dirName + "_asf.txt", counter, packingFraction, &result);

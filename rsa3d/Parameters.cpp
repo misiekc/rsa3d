@@ -17,7 +17,8 @@ Parameters::Parameters(std::istream &stream) {
 	for (const auto &key : config.getKeys()){
 		if (key == "maxTriesWithoutSuccess") 	        this->maxTriesWithoutSuccess = config.getUnsignedLong(key);
 		else if (key == "maxVoxels")					this->maxVoxels = config.getUnsignedLong(key);
-		else if (key == "requestedAngularVoxelSize")	this->requestedAngularVoxelSize = config.getDouble(key);
+        else if (key == "requestedAngularVoxelSize")	this->requestedAngularVoxelSize = config.getDouble(key);
+        else if (key == "angularVoxelRange")        	this->angularVoxelRange = config.getDouble(key);
 		else if (key == "minDx")						this->minDx = config.getDouble(key);
         else if (key == "maxTime") 					    this->maxTime = config.getDouble(key);
         else if (key == "maxDensity") 					this->maxDensity = config.getDouble(key);
@@ -61,6 +62,8 @@ Parameters::Parameters(const std::string &fileName) {
 }
 
 void Parameters::validateData() {
+    Validate(requestedAngularVoxelSize > 0);
+    Validate(angularVoxelRange > 0);
     Validate(maxTriesWithoutSuccess > 0);
 	Validate(maxVoxels >= 0);
 	Validate(requestedAngularVoxelSize > 0);
@@ -105,6 +108,7 @@ bool Parameters::operator==(const Parameters &rhs) const {
     return maxTriesWithoutSuccess == rhs.maxTriesWithoutSuccess &&
            maxVoxels == rhs.maxVoxels &&
            requestedAngularVoxelSize == rhs.requestedAngularVoxelSize &&
+           angularVoxelRange == rhs.angularVoxelRange &&
            minDx == rhs.minDx &&
            from == rhs.from &&
            collectors == rhs.collectors &&
