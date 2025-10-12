@@ -12,8 +12,7 @@ set(SHAPE_BASE_SOURCE
 
 add_library(shapes.1.1
         ${SHAPE_BASE_SOURCE}
-        shapes/Ellipse1Dim.cpp ../analizator/Domain.cpp ../analizator/Domain.h
-)
+        shapes/Ellipse1Dim.cpp)
 target_compile_definitions(shapes.1.1 PUBLIC RSA_SPATIAL_DIMENSION=1 RSA_ANGULAR_DIMENSION=1)
 
 add_library(shapes.2.0
@@ -23,15 +22,16 @@ add_library(shapes.2.0
         shapes/polydisk/Fibrinogen.cpp
         shapes/polydisk/Polydisk.cpp
         shapes/spherocylinder/OwnOverlapSC.h
-        shapes/spherocylinder/SpheroCylinder2D.cpp
         shapes/spherocylinder/Spherocylinder.h
         shapes/spherocylinder/Spherocylinder.tpp
         shapes/spherocylinder/Stolen2DOverlapSC.cpp
+        shapes/spherocylinder/SpheroCylinder2D.cpp
         shapes/Ellipse.cpp
         shapes/OrientedCuboid.h
         shapes/OrientedCuboid.tpp
         shapes/Sphere.h
-        shapes/Sphere.tpp)
+        shapes/Sphere.tpp
+)
 target_compile_definitions(shapes.2.0 PUBLIC RSA_SPATIAL_DIMENSION=2 RSA_ANGULAR_DIMENSION=0)
 
 add_library(shapes.2.1

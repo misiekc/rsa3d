@@ -7856,7 +7856,9 @@ namespace Catch {
     };
 
     // 32kb for the alternate stack seems to be sufficient. However, this value
-    // is experimentally determined, so that's not guaranteed.
+        // is experimentally determined, so that's not guaranteed.
+#undef MINSIGSTKSZ
+#define MINSIGSTKSZ 16384
     constexpr static std::size_t sigStackSize = 32768 >= MINSIGSTKSZ ? 32768 : MINSIGSTKSZ;
 
     static SignalDefs signalDefs[] = {

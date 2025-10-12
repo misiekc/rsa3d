@@ -1,7 +1,7 @@
 set(RSA_SOURCE
         analizator/Analyzer.cpp
-        analizator/Domain.cpp
-        analizator/DomainAnalyzer.cpp
+#        analizator/Domain.cpp
+#        analizator/DomainAnalyzer.cpp
         analizator/ExclusionZoneVisualizer.cpp
         geometry/xenocollide/BodyBuilder.cpp
         geometry/xenocollide/Collide.cpp
@@ -15,7 +15,7 @@ set(RSA_SOURCE
         geometry/Vector.tpp
         modes/AccuracySimulation.cpp
         modes/AnalyzeMode.cpp
-        modes/DomainsMode.cpp
+#        modes/DomainsMode.cpp
         modes/BCExpandMode.cpp
         modes/BoundariesSimulation.cpp
         modes/ContactFunctionMode.cpp
