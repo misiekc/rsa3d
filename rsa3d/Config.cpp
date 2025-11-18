@@ -8,6 +8,7 @@
 #include "utils/Utils.h"
 
 #include <memory>
+#include <regex>
 
 
 Config Config::parse(std::istream & in, char delim, bool allowRedefinition) {
@@ -72,8 +73,18 @@ unsigned long Config::getUnsignedLong(const std::string & field) const {
     return std::stoul(str);
 }
 
+double Config::parseDouble(const std::string & value) const {
+    size_t pos;
+    if ( (pos=value.find("M_PI"))!=std::string::npos){
+        std::string s = value.substr(0, pos);
+        double res = std::stod(s) * M_PI;
+        return res;
+    }
+    return std::stod(value);
+}
+
 double Config::getDouble(const std::string & field) const {
-    return std::stod(this->getString(field));
+    return (this->parseDouble(this->getString(field)));
 }
 
 float Config::getFloat(const std::string & field) const

@@ -63,6 +63,8 @@ private:
 
     Config() = default;
 
+    double parseDouble(const std::string &field) const;
+
 public:
 
     /**

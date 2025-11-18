@@ -314,9 +314,9 @@ bool Polysphere::voxelInside(BoundaryConditions<3> *bc, const Vector<3> &voxelPo
 
     double angularVoxelSize = Shape<3, 3>::getAngularVoxelSize();
     if (
-            voxelOrientation[0] > angularVoxelSize ||
-            voxelOrientation[1] > angularVoxelSize ||
-            voxelOrientation[2] > angularVoxelSize
+            voxelOrientation[0] > std::max(2*M_PI, angularVoxelSize) ||
+            voxelOrientation[1] > std::max(M_PI, angularVoxelSize) ||
+            voxelOrientation[2] > std::max(2*M_PI, angularVoxelSize)
     )
         return true;
 

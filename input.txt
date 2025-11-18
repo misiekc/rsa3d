@@ -1,6 +1,6 @@
 maxVoxels = 50000000                 # upper bound on number of voxels
 requestedAngularVoxelSize = 0.3    # upper bound on voxel angular size (doesn't affect "initial voxels")
-#angularVoxelRange = 6.3            # limit of possible rotations in radians (default 2*M_PI)
+angularVoxelRange = 2*M_PI            # limit of possible rotations in radians (default 2*M_PI)
 minDx = 0.0                        # lower bound on voxel spatial size
 from = 0                           # first collector (packing) number <=> rnd seed
 collectors = 1                     # number of collectors
