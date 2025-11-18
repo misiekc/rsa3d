@@ -1,5 +1,4 @@
 set(SHAPE_BASE_SOURCE
-        AnisotropicShape2D.cpp
         ConvexShape.h
         ConvexShape.tpp
         OrderCalculable.h
@@ -36,6 +35,7 @@ target_compile_definitions(shapes.2.0 PUBLIC RSA_SPATIAL_DIMENSION=2 RSA_ANGULAR
 
 add_library(shapes.2.1
         ${SHAPE_BASE_SOURCE}
+        AnisotropicShape2D.cpp
         shapes/polydisk/Fibrinogen.cpp
         shapes/polydisk/Polydisk.cpp
         shapes/polygon/HBPolygon.cpp
@@ -105,3 +105,8 @@ add_library(shapes.3.0
         shapes/Sphere.tpp
         shapes/Superellipsoid.cpp)
 target_compile_definitions(shapes.3.0 PUBLIC RSA_SPATIAL_DIMENSION=3 RSA_ANGULAR_DIMENSION=0)
+
+add_library(shapes.3.3
+        ${SHAPE_BASE_SOURCE}
+        shapes/polysphere/Polysphere.cpp)
+target_compile_definitions(shapes.3.3 PUBLIC RSA_SPATIAL_DIMENSION=3 RSA_ANGULAR_DIMENSION=3)

@@ -80,6 +80,10 @@
     #endif
 #endif
 
+#if RSA_ANGULAR_DIMENSION == 3
+    #include "shapes/polysphere/Polysphere.h"
+#endif
+
 struct UnknownShapeException : public std::domain_error {
     UnknownShapeException() : domain_error("") { }
 };
@@ -294,6 +298,14 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
         #endif
 
     #endif
+
+#if RSA_ANGULAR_DIMENSION == 3
+    if (sClass == "Polysphere") {
+        Polysphere::initClass(attr);
+        return;
+    }
+#endif
+
 
     throw UnknownShapeException();
 }

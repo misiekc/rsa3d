@@ -78,6 +78,7 @@ function(register_targets_for_dimensions SD AD)
 endfunction()
 
 register_targets_for_dimensions(3 0)    # 3D spheres, cuboids, platonic solids and so on
+register_targets_for_dimensions(3 3)    # 3D spheres, cuboids, platonic solids and so on
 register_targets_for_dimensions(2 0)    # 2D disks
 register_targets_for_dimensions(2 1)    # AnisotropicShape2D's
 register_targets_for_dimensions(1 1)    # paris car parking problem

@@ -1,13 +1,13 @@
 maxVoxels = 50000000                 # upper bound on number of voxels
 requestedAngularVoxelSize = 0.3    # upper bound on voxel angular size (doesn't affect "initial voxels")
-angularVoxelRange = 1.6            # limit of possible rotations in radians (default 2*M_PI)
+#angularVoxelRange = 6.3            # limit of possible rotations in radians (default 2*M_PI)
 minDx = 0.0                        # lower bound on voxel spatial size
 from = 0                           # first collector (packing) number <=> rnd seed
 collectors = 1                     # number of collectors
 #maxTime = 100.0                  # dimensionless time to stop after - for shapes not supporting saturation
-split = 20000                    # number of failed RSA iterations to split voxels
-#surfaceDimension = 1            # surface dimension - can be smaller than RSA_SPATIAL_DIMENSION
-surfaceVolume = 1000000.0          # volume of a packing
+split = 1000000                    # number of failed RSA iterations to split voxels
+#surfaceDimensions = 1            # surface dimension - can be smaller than RSA_SPATIAL_DIMENSION
+surfaceVolume = 500.0          # volume of a packing
 storePackings = true               # true if packings are to be saved to packing_[...].bin files
 seedOrigin = 0                     # the seed of packing = seedOrigin + collector id. seedOrigin can be set to "random"
 goDeep = false
@@ -15,8 +15,8 @@ goDeep = false
 #thresholdDistance = 25.0        # lower bound on shapes' neighbour grid size
 boundaryConditions = periodic    # periodic or free
 
-particleType = Sphere
-particleAttributes = 2
+particleType = Polysphere
+particleAttributes = 2 0 0 -0.5 1 0 0 0.5 1 0.86602540378 7.06858
 #particleType = GenericXCShape
 #particleAttributes = sphere 0.5 & move 0 0 -0.5 & sphere 1 & move 0 0 0.5 & wrap
 #particleAttributes = 1 3 superellipsoid 1 2 3 2
