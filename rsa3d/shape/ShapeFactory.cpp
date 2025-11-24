@@ -82,6 +82,7 @@
 
 #if RSA_ANGULAR_DIMENSION == 3
     #include "shapes/polysphere/Polysphere.h"
+    #include "shapes/polysphere/Kmer3D.h"
 #endif
 
 struct UnknownShapeException : public std::domain_error {
@@ -302,6 +303,9 @@ void ShapeFactory::initShapeClass0(const std::string &sClass, const std::string 
 #if RSA_ANGULAR_DIMENSION == 3
     if (sClass == "Polysphere") {
         Polysphere::initClass(attr);
+        return;
+    }else if (sClass == "Kmer3D") {
+        Kmer3D::initClass(attr);
         return;
     }
 #endif

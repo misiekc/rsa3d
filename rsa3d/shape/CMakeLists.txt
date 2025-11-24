@@ -108,5 +108,6 @@ target_compile_definitions(shapes.3.0 PUBLIC RSA_SPATIAL_DIMENSION=3 RSA_ANGULAR
 
 add_library(shapes.3.3
         ${SHAPE_BASE_SOURCE}
-        shapes/polysphere/Polysphere.cpp)
+        shapes/polysphere/Polysphere.cpp
+        shapes/polysphere/Kmer3D.cpp)
 target_compile_definitions(shapes.3.3 PUBLIC RSA_SPATIAL_DIMENSION=3 RSA_ANGULAR_DIMENSION=3)

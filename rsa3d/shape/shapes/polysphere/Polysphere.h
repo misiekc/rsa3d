@@ -16,27 +16,11 @@ private:
     // normalize shape to have unit area
     static void normalizeArea(double area);
 
-    // finds minimum and maximum value of cosine function in [theta, theta+dt]
-    static std::array<double, 2> minmaxCos(double theta, double dt);
-
-    // finds minimum and maximum value of sine function in [theta, theta+dt]
-    static std::array<double, 2> minmaxSin(double theta, double dt);
-
     //test if line segment from point 1 to 2 intersects with line segment from point 3 to 4
     static bool sphereSphereIntersect(size_t sphere0, const Vector<3> sphere0Position, const Orientation<3> sphere0Orientation,
                                   size_t sphere1, const Vector<3> sphere1Position, const Orientation<3> sphere1Orientation);
 
-    //same as above, except that endpoints 3 and 4 comes from a line in a voxel, and thus carry an uncertainty
-    static bool sphereVoxelIntersect(size_t sphere0, const Vector<3> sphere0Position, const Orientation<3> sphere0Orientation,
-                                   size_t sphere1, const Vector<3> sphere1Position, const Orientation<3> sphere1Orientation,
-                                   double spatialSize, double angularSize, std::array<std::array<double, 2>, 6> minMaxTrigonometricArray);
-
-    static std::array<double, 3> getStaticSpherePosition(size_t diskIndex, Vector<3> position, Orientation<3> orientation);
     std::array<double, 3> getSpherePosition(size_t index) const;
-
-
-        //like voxelInside, but optimized for full angle angularSize
-    bool fullAngleVoxelInside(BoundaryConditions<3> *bc, const Vector<3> &voxelPosition, double spatialSize) const;
 
 protected:
     //polar coordinates of all disks
@@ -44,6 +28,17 @@ protected:
     //assume vertex (VertexR.size()-1) is linked to vertex 0
     static std::vector<std::array<double, 3>> sphereCentre;
     static std::vector<double> sphereR;
+    // finds minimum and maximum value of cosine function in [theta, theta+dt]
+    static std::array<double, 2> minmaxCos(double theta, double dt);
+    // finds minimum and maximum value of sine function in [theta, theta+dt]
+    static std::array<double, 2> minmaxSin(double theta, double dt);
+
+    static std::array<double, 3> getStaticSpherePosition(size_t diskIndex, const Vector<3> &position, const Orientation<3> &orientation);
+
+    virtual std::array<std::array<double, 2>, 3> getMinMaxVoxelCoordinates(size_t sphereIndex, const Vector<3> &position, const Orientation<3> &orientation, double spatialSize, double angularSize) const;
+
+    //like voxelInside, but optimized for full angle angularSize
+    virtual bool fullAngleVoxelInside(BoundaryConditions<3> *bc, const Vector<3> &voxelPosition, double spatialSize) const;
 
 public:
     /**
@@ -70,7 +65,7 @@ public:
     double getVolume(unsigned short dim) const override;
 
     bool overlap(BoundaryConditions<3> *bc, const Shape<3, 3> *s) const override;
-    bool voxelInside(BoundaryConditions<3> *bc, const Vector<3> &voxelPosition, const Orientation<3> &voxelOrientation,
+    virtual bool voxelInside(BoundaryConditions<3> *bc, const Vector<3> &voxelPosition, const Orientation<3> &voxelOrientation,
                      double spatialSize, double angularSize) const override;
     std::string toPovray() const override;
     std::string toWolfram() const override;
