@@ -15,30 +15,31 @@
 
 #include "shape/shapes/OrientedCuboid.h"
 
-OrientedCuboidVoxelList::OrientedCuboidVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange, double requestedAngularVoxelSize) : VariableSizeVoxelList(dim, packingSpatialSize, requestedSpatialVoxelSize, shapeAngularRange, requestedAngularVoxelSize){
+OrientedCuboidVoxelList::OrientedCuboidVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, RSAOrientation shapeAngularRange, RSAOrientation requestedAngularVoxelSize) : VariableSizeVoxelList(dim, packingSpatialSize, requestedSpatialVoxelSize, shapeAngularRange, requestedAngularVoxelSize){
 }
 
 /**
  * returns true when the whole voxel is inside an exclusion area of any shape in shapes
  * To determine it the method tires to split voxel up to level of maxDepth
  */
-bool OrientedCuboidVoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
+bool OrientedCuboidVoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, RSAOrientation angularSize,
 										   std::vector<const RSAShape *> *shapes, RSABoundaryConditions *bc,
                                            unsigned short depth) const{
 
 	size_t finalArrayLength = (size_t)round( pow(pow(2.0, depth), this->surfaceDimension+RSA_ANGULAR_DIMENSION) );
 	Voxel **finalVoxels = new Voxel*[ finalArrayLength ];
 	double ss = spatialSize;
-	double as = angularSize;
+	RSAOrientation as = angularSize;
 	size_t length = 1;
 	// dzielimy voxel na mniejsze (gdy depth > 0)
 	size_t tmpArrayLength = (size_t)round( pow(2, this->surfaceDimension+RSA_ANGULAR_DIMENSION) );
 	Voxel **tmpVoxels = new Voxel*[ tmpArrayLength ];
 	finalVoxels[0] = v;
 	size_t last = 0;
-	for(unsigned short i=0; i<depth; i++){
+	for(unsigned short int i=0; i<depth; i++){
 		ss /= 2.0;
-		as /= 2.0;
+		for (unsigned short int j=0; j<RSA_ANGULAR_DIMENSION; j++)
+			as[i] /= 2.0;
 		for(size_t j=0; j<length; j++){
 			this->splitVoxel(finalVoxels[j], ss, as, tmpVoxels);
 			finalVoxels[j] = tmpVoxels[0];

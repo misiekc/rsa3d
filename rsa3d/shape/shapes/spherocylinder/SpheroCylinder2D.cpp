@@ -51,7 +51,9 @@ void SpheroCylinder2D::initClass(const std::string &attr) {
     // SpheroCylinder2D internally, it has to initialize it at the beginning
     SpheroCylinder2D::spherocylinderShapeInfo.setCircumsphereRadius(halfDistance + radius);
     SpheroCylinder2D::spherocylinderShapeInfo.setInsphereRadius(radius);
-    SpheroCylinder2D::spherocylinderShapeInfo.setAngularVoxelSize(M_PI);
+    RSAOrientation avSize;
+    avSize[0] = M_PI;
+    SpheroCylinder2D::spherocylinderShapeInfo.setAngularVoxelSize(avSize);
     SpheroCylinder2D::spherocylinderShapeInfo.setSupportsSaturation(true);
     SpheroCylinder2D::spherocylinderShapeInfo.setDefaultCreateShapeImpl <SpheroCylinder2D> ();
 

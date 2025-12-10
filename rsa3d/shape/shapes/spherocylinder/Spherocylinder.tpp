@@ -205,7 +205,7 @@ bool Spherocylinder<DIMENSION>::overlap(BoundaryConditions<DIMENSION> *bc, const
 }
 
 template<unsigned short DIMENSION>
-bool Spherocylinder<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position, const Orientation<0> &orientation, double orientationRange) const {
+bool Spherocylinder<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position, const Orientation<0> &orientation, const Orientation<0> &orientationRange) const {
     Vector<DIMENSION> bcPos = position + bc->getTranslation(this->getPosition(), position);
 
     double d = this->distanceFrom(&bcPos);

@@ -4,6 +4,7 @@
 
 #include "Stolen2DOverlapSC.h"
 #include "Spherocylinder.h"
+#include "../../../boundary_conditions/FreeBC.h"
 
 SpheroCylinder2D toSpheroCylinder2D(const Spherocylinder<2> &sc) {
     Orientation<1> rotation = {{sc.getAngle()}};

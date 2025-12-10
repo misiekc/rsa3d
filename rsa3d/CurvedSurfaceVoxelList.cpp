@@ -78,7 +78,7 @@ bool CurvedSurfaceVoxelList::isVoxelInsidePacking(const Voxel *v, double spatial
 }
 
 CurvedSurfaceVoxelList::CurvedSurfaceVoxelList(double packingSpatialSize, double requestedSpatialVoxelSize,
-                                               double shapeAngularRange, double requestedAngularVoxelSize,
+                                               RSAOrientation shapeAngularRange, RSAOrientation requestedAngularVoxelSize,
                                                CurvedSurface *surface)
         : VoxelList(RSA_SPATIAL_DIMENSION, packingSpatialSize, requestedSpatialVoxelSize, shapeAngularRange,
                     requestedAngularVoxelSize),

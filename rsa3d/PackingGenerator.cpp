@@ -39,11 +39,12 @@ PackingGenerator::PackingGenerator(int seed, std::size_t collector, const Parame
 {
     this->spatialSize = this->params.surfaceSize;
     this->angularSize = RSAShape::getAngularVoxelSize();
-    if (this->params.angularVoxelRange < this->angularSize)
-        this->angularSize = this->params.angularVoxelRange;
-    if (this->params.requestedAngularVoxelSize > this->angularSize)
-        this->params.requestedAngularVoxelSize = this->angularSize;
-
+	for (unsigned short int i=0; i<RSA_ANGULAR_DIMENSION; i++) {
+		if (this->params.angularVoxelRange[i] < this->angularSize[i])
+			this->angularSize[i] = this->params.angularVoxelRange[i];
+		if (this->params.requestedAngularVoxelSize[i] > this->angularSize[i])
+			this->params.requestedAngularVoxelSize[i] = this->angularSize[i];
+	}
     double gridSize = RSAShape::getNeighbourListCellSize();
     if (gridSize < this->params.thresholdDistance)
         gridSize = this->params.thresholdDistance;
@@ -152,13 +153,13 @@ void PackingGenerator::modifiedRSA(RSAShape *s, Voxel *v){
 }
 
 
-bool PackingGenerator::isInside(const RSAVector &position, RSAOrientation &orientation){
+bool PackingGenerator::isInside(const RSAVector &position, const RSAOrientation &orientation){
 	for(unsigned short i=0; i<RSA_SPATIAL_DIMENSION; i++){
 		if (position[i]>=this->spatialSize || position[i]<0)
 			return false;
 	}
 	for(unsigned short i=0; i<RSA_ANGULAR_DIMENSION; i++){
-		if (orientation[i]>=this->angularSize || orientation[i]<0)
+		if (orientation[i]>=this->angularSize[i] || orientation[i]<0)
 			return false;
 	}
 	return true;
@@ -204,7 +205,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 				for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++)
 					pos[k] = threadRND.get()->nextValue()*this->spatialSize;
 				for(unsigned short k=0; k<RSA_ANGULAR_DIMENSION; k++)
-					angle[k] = threadRND.get()->nextValue()*this->angularSize;
+					angle[k] = threadRND.get()->nextValue()*this->angularSize[k];
 			}while(!this->isInside(pos, angle));
 			// setting shape position and orientation
 			sVirtual->translate(pos);
@@ -232,15 +233,18 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 				}
 				RSAVector position = sVirtual->getPosition();
 				RSAOrientation orientation = sVirtual->getOrientation();
-				double delta = 0.0001;
-				for(unsigned short j = 0; j< RSA_ANGULAR_DIMENSION; j++)
+				RSAOrientation angularRange;
+				const double delta = 0.0001;
+				for(unsigned short j = 0; j< RSA_ANGULAR_DIMENSION; j++) {
 					orientation[j] -= 0.5*delta;
+					angularRange[j] = delta;
+				}
 
 				const RSAShape *sCovers = nullptr;
 				std::vector<const RSAShape*> vNeighbours;
 				this->surface->getNeighbours(&vNeighbours, position);
 				for(const RSAShape *sTmp : vNeighbours){
-					if (sTmp->voxelInside(this->surface->getBC(), position, orientation, 0.0001, delta)){
+					if (sTmp->voxelInside(this->surface->getBC(), position, orientation, delta, angularRange)){
 						sCovers = sTmp;
 						break;
 					}
@@ -355,11 +359,14 @@ void PackingGenerator::createPacking(Packing *packing) {
 					if (aVoxels[i]!=this->voxels->getVoxel(aVoxels[i]->getPosition(), aVoxels[i]->getOrientation())){
 						Voxel *v = this->voxels->getVoxel(aVoxels[i]->getPosition(), aVoxels[i]->getOrientation());
 						std::cout << std::endl << "Problem: PackingGenerator - inconsistent voxels positions: [" << aVoxels[i]->toString() << "], [" << v->toString() << "]" << std::endl;
-						std::cout << "size: " << this->voxels->getSpatialVoxelSize() << ", angular size: " << this->voxels->getAngularVoxelSize() << std::endl;
-						std::cout << "shape: " << sVirtual[i]->toString() << std::endl;
-
+						std::cout << "size: " << this->voxels->getSpatialVoxelSize() << ", angular size: ";
+						RSAOrientation avSize = this->voxels->getAngularVoxelSize();
+						for (unsigned short int j=0; j<RSA_ANGULAR_DIMENSION; j++) {
+							std::cout << avSize[j] << ", ";
+						}
+						std::cout << '\b' << '\b' << std::endl;
+						std::cout << ", shape: " << sVirtual[i]->toString() << std::endl;
 					}
-
 					this->surface->add(sVirtual[i]);
 					this->packing.addShape(sVirtual[i]);
 					this->voxels->removeTopLevelVoxel(aVoxels[i]);
@@ -395,7 +402,12 @@ void PackingGenerator::createPacking(Packing *packing) {
 			if (status == VoxelList::NORMAL_SPLIT || status == VoxelList::NO_SPLIT_BUT_INITIALIZED){
 //				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
 				std::cout.precision(5);
-				std::cout << " done. " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels, new voxel size: " << voxels->getSpatialVoxelSize() << ", angular size: " << this->voxels->getAngularVoxelSize() << ", factor: " << factor << ", change: " << (factor/oldFactor) << std::endl;
+				std::cout << " done. " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels, new voxel size: " << voxels->getSpatialVoxelSize() << ", angular size: ";
+				RSAOrientation avSize = this->voxels->getAngularVoxelSize();
+				for (unsigned short int i=0; i<RSA_ANGULAR_DIMENSION; i++) {
+					std:: cout << avSize[i] << " ";
+				}
+				std::cout << ", factor: " << factor << ", change: " << (factor/oldFactor) << std::endl;
 				std::cout.precision(std::numeric_limits< double >::max_digits10);
 				missCounter = 0;
 				addedSinceLastSplit = 0;

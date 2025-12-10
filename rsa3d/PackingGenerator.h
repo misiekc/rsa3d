@@ -31,12 +31,12 @@ private:
 	Surface *surface;
 
 	double spatialSize;
-	double angularSize;
+	RSAOrientation angularSize;
 
     void modifiedRSA(RSAShape *s, Voxel *v);
 	bool isSaturated();
 	double getFactor();
-	bool isInside(const RSAVector &position, RSAOrientation &orientation);
+	bool isInside(const RSAVector &position, const RSAOrientation &orientation);
 	void createPacking(Packing *packing);
 
 	void toPovray(const std::string &filename);

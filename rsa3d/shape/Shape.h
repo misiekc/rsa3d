@@ -189,7 +189,7 @@ public:
      * (0, getVoxelAngularSize()) describes all possible shape's orientations.
      * @return angular size of a voxel
      */
-	static double getAngularVoxelSize() {
+	static RSAOrientation getAngularVoxelSize() {
         return shapeStaticInfo.getVoxelAngularSize();
 	}
 
@@ -258,7 +258,7 @@ public:
      * @brief Increases all shape's angles by respective values from array @a v.
      * @param v an array of angle deltas
      */
-    void rotate(const Orientation<ANGULAR_DIMENSION> &v);
+    virtual void rotate(const Orientation<ANGULAR_DIMENSION> &v);
 
 	/**
 	 * @brief Checks if there is overlap with the shape pointed by @a s.
@@ -327,7 +327,7 @@ public:
      */
 	virtual bool voxelInside(BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &voxelPosition,
                              const Orientation<ANGULAR_DIMENSION> &orientation, double spatialSize,
-                             double angularSize) const = 0;
+                             const Orientation<ANGULAR_DIMENSION> &angularSize) const = 0;
 
     /**
      * @brief Makes a quick check for a whole voxel being inside an exclusion zone of @this shape using inscribed and
@@ -346,7 +346,7 @@ public:
 	EarlyRejectionResult voxelInsideEarlyRejection(BoundaryConditions<SPATIAL_DIMENSION> *bc,
 	                                               const Vector<SPATIAL_DIMENSION> &voxelPosition,
 	                                               const Orientation<ANGULAR_DIMENSION> &orientation,
-	                                               double spatialSize, double angularSize) const;
+	                                               double spatialSize, const Orientation<ANGULAR_DIMENSION> &angularSize) const;
 
     /**
      * @brief ?? Moves the shape towards given shape s.
@@ -459,7 +459,7 @@ private:
     double insphereRadius = NOT_SPECIFIED;
     double neighbourListCellSize = NOT_SPECIFIED;
     double voxelSpatialSize = NOT_SPECIFIED;
-    double voxelAngularSize = 2*M_PI;
+    RSAOrientation voxelAngularSize;
     double exclusionZoneMinSpan = NOT_SPECIFIED;
     double exclusionZoneMaxSpan = NOT_SPECIFIED;
     bool supportsSaturation = false;
@@ -511,7 +511,7 @@ public:
      *
      * @return the initial angular size of a voxel
      */
-    double getVoxelAngularSize() const {
+    RSAOrientation getVoxelAngularSize() const {
         this->throwIfIncomplete();
         return voxelAngularSize;
     }
@@ -606,7 +606,7 @@ public:
      * It indicates the range of angular variable [0, size). By default, the angular size is 2*M_PI.
      * @param size angular size of a voxel
      */
-    void setAngularVoxelSize(double voxelAngularSize);
+    void setAngularVoxelSize(const RSAOrientation &voxelAngularSize);
 
     /**
      * @brief Sets the smallest possible distance to exclusion zone boundary.

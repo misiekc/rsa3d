@@ -49,7 +49,7 @@ public:
 	 * @return `new`-allocated proper implementation of VoxelList
 	 */
 	static VoxelList *createVoxelList(const std::string &sClass, const std::string &attr, unsigned short surfaceDimension, double spatialSize,
-	                                  double voxelSpatialSize, double angularSize, double requestedAngularVoxelSize);
+	                                  double voxelSpatialSize, RSAOrientation angularSize, RSAOrientation requestedAngularVoxelSize);
 
     /**
      * @brief Initializes a shape class based on passed name and attributes.

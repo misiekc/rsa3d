@@ -29,9 +29,9 @@ public:
 
     bool overlap(BoundaryConditions<DIMENSION> *bc, const Shape<DIMENSION, 0> *s) const override;
 	bool pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position,
-					 const Orientation<0> &orientation, double orientationRange) const override;
+					 const Orientation<0> &orientation, const Orientation<0> &orientationRange) const override;
 	bool voxelInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &voxelPosition,
-					 const Orientation<0> &orientation, double spatialSize, double angularSize) const override;
+					 const Orientation<0> &orientation, double spatialSize, const Orientation<0> &angularSize) const override;
 
     double getVolume(unsigned short dim) const override;
 	Shape<DIMENSION, 0> *clone() const override;

@@ -13,10 +13,10 @@
 class OrientedCuboidVoxelList : public VariableSizeVoxelList {
 
 	protected:
-		bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize, std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc, unsigned short depth = 0) const override ;
+		bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, RSAOrientation angularSize, std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc, unsigned short depth = 0) const override ;
 
 	public:
-		OrientedCuboidVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange, double requestedAngularVoxelSize);
+		OrientedCuboidVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, RSAOrientation shapeAngularRange, RSAOrientation requestedAngularVoxelSize);
 };
 
 #endif /* ORIENTEDCUBOIDVOXELLIST_H_ */

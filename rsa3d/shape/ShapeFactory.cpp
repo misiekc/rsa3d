@@ -321,8 +321,8 @@ RSAShape *ShapeFactory::createShape(RND *rnd) {
 }
 
 VoxelList *ShapeFactory::createVoxelList(const std::string &sClass, const std::string &attr, unsigned short surfaceDimension, double spatialSize,
-                                         double voxelSpatialSize, double angularSize,
-                                         double requestedAngularVoxelSize)
+                                         double voxelSpatialSize, RSAOrientation angularSize,
+                                         RSAOrientation requestedAngularVoxelSize)
 {
     #if RSA_ANGULAR_DIMENSION == 0
 

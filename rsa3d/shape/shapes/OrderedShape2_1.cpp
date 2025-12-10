@@ -79,8 +79,8 @@ double OrderedShape2_1::getVolume(unsigned short dim) const {
 
 bool OrderedShape2_1::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition,
                                   const Orientation<0> &voxelOrientation, double spatialSize,
-                                  double angularSize) const {
-    return this->underlyingShape->voxelInside(bc, voxelPosition, {{0}}, spatialSize, 2*M_PI);
+                                  const Orientation<0> &angularSize) const {
+    return this->underlyingShape->voxelInside(bc, voxelPosition, {{0}}, spatialSize, {2*M_PI});
 }
 
 double OrderedShape2_1::minDistance(const Shape<2, 0> *s) const {

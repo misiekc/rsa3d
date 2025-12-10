@@ -56,10 +56,10 @@ void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setOrientation(
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 void Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::rotate(const Orientation<ANGULAR_DIMENSION> &v){
-    Orientation<ANGULAR_DIMENSION> orientation;
+    Orientation<ANGULAR_DIMENSION> angles = this->getOrientation();
 	for(unsigned short i=0; i<ANGULAR_DIMENSION; i++)
-		orientation[i] = this->getOrientation()[i] + v[i];
-    this->setOrientation(orientation);
+		angles[i] += v[i];
+    this->setOrientation(angles);
 }
 
 template <unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
@@ -172,7 +172,7 @@ template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 typename Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::EarlyRejectionResult
 Shape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelInsideEarlyRejection(
         BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &voxelPosition,
-        const Orientation<ANGULAR_DIMENSION> &orientation, double spatialSize, double angularSize) const {
+        const Orientation<ANGULAR_DIMENSION> &orientation, double spatialSize, const Orientation<ANGULAR_DIMENSION> &angularSize) const {
     if (!earlyRejectionEnabled)
         return UNKNOWN;
 
@@ -262,17 +262,19 @@ void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setNeighbourListCell
 }
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setSpatialVoxelSize(double voxelSpatialSize) {
-    Expects(voxelSpatialSize > 0);
-    Expects(voxelSpatialSize < std::numeric_limits<double>::infinity());
-    ShapeStaticInfo::voxelSpatialSize = voxelSpatialSize;
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setSpatialVoxelSize(double vsSize) {
+    Expects(vsSize > 0);
+    Expects(vsSize < std::numeric_limits<double>::infinity());
+    ShapeStaticInfo::voxelSpatialSize = vsSize;
 }
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
-void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setAngularVoxelSize(double voxelAngularSize) {
-    Expects(voxelAngularSize > 0);
-    Expects(voxelAngularSize <= 2*M_PI);
-    ShapeStaticInfo::voxelAngularSize = voxelAngularSize;
+void ShapeStaticInfo<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::setAngularVoxelSize(const RSAOrientation &vaSize) {
+    for (unsigned short i=0; i<ANGULAR_DIMENSION; i++) {
+        Expects(vaSize[i] >= 0);
+        Expects(vaSize[i] <= 2*M_PI);
+    }
+    ShapeStaticInfo::voxelAngularSize = vaSize;
 }
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>

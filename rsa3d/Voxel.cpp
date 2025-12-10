@@ -41,20 +41,20 @@ bool Voxel::isInside(const RSAVector &pos, double size){
 
 
 bool Voxel::isInside(const RSAVector &pos, double size, const RSAOrientation &angle,
-                     double asize) {
-	for(int i=0; i<RSA_SPATIAL_DIMENSION; i++){
+                     RSAOrientation asize) {
+	for(ushort i=0; i<RSA_SPATIAL_DIMENSION; i++){
 		if (pos[i]<this->position[i])
 			return false;
 		if (pos[i]>=(this->position[i]+size))
 			return false;
 	}
 
-	for(int i=0; i<RSA_ANGULAR_DIMENSION; i++){
+	for(ushort i=0; i<RSA_ANGULAR_DIMENSION; i++){
 		if (angle[i]<this->orientation[i])
 			return false;
-		if (angle[i]>=(this->orientation[i]+asize) && asize!=0)
+		if (angle[i]>=(this->orientation[i]+asize[i]) && asize[i]!=0)
 			return false;
-		if (asize==0 && (angle[i]!=this->orientation[i]) )
+		if (asize[i]==0 && (angle[i]!=this->orientation[i]) )
 			return false;
 	}
 	return true;
@@ -100,7 +100,7 @@ std::string Voxel::toPovray(double ssize){
 
 
 
-std::string Voxel::toWolfram(double ssize, double asize){
+std::string Voxel::toWolfram(double ssize, const RSAOrientation &asize){
 	std::stringstream out;
 	out.precision(std::numeric_limits< double >::max_digits10);
 
@@ -113,7 +113,11 @@ std::string Voxel::toWolfram(double ssize, double asize){
 			<< "{" << x2 << ", " << y2 << "}, "
 			<< "{" << x2 << ", " << y1 << "} }]";
 	if (RSA_ANGULAR_DIMENSION > 0){
-		out << "(* angles: [ " << this->getOrientation()[0] << ", " << (this->getOrientation()[0] + asize) << ") *)" << std::endl;
+		out << "(* angles: [ ";
+		for (unsigned short int i=0; i<RSA_ANGULAR_DIMENSION; i++) {
+			out << "(" << this->getOrientation()[i] << ", " << (this->getOrientation()[i] + asize[i]) << ") ";
+		}
+		out << "*)" << std::endl;
 	}
 	return out.str();
 }

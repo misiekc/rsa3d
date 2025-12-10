@@ -11,7 +11,7 @@
 #include <math.h>
 
 
-VariableSizeVoxelList::VariableSizeVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange, double requestedAngularVoxelSize) : VoxelList(dim, packingSpatialSize, requestedSpatialVoxelSize, shapeAngularRange, requestedAngularVoxelSize){
+VariableSizeVoxelList::VariableSizeVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, RSAOrientation shapeAngularRange, RSAOrientation requestedAngularVoxelSize) : VoxelList(dim, packingSpatialSize, requestedSpatialVoxelSize, shapeAngularRange, requestedAngularVoxelSize){
 	this->voxelMap = new double[1];
 	this->voxelsDivisionCounters = new unsigned short[1];
 	this->u01Distribution = new std::uniform_real_distribution<double>(0.0, 1.0);
@@ -42,17 +42,26 @@ double VariableSizeVoxelList::getSpatialVoxelSize(size_t i) const{
 		return this->initialVoxelSize/std::pow(2.0, this->voxelsDivisionCounters[i]);
 }
 
-double VariableSizeVoxelList::getAngularVoxelSize(size_t i) const{
+RSAOrientation VariableSizeVoxelList::getAngularVoxelSize(size_t i) const{
 	if (!this->voxelsInitialized)
 		return this->angularRange;
-	else
-		return this->initialAngularVoxelSize/std::pow(2.0, this->voxelsDivisionCounters[i]);
+	else {
+		RSAOrientation result;
+		for (ushort j=0; j<RSA_ANGULAR_DIMENSION; j++) {
+			result[j] = this->initialAngularVoxelSize[j]/std::pow(2.0, this->voxelsDivisionCounters[i]);
+		}
+		return result;
+	}
 }
 
 double VariableSizeVoxelList::getVoxelVolume(size_t i) const{
+	double volume = 1.0;
 	double spatialVolume = std::pow(this->getSpatialVoxelSize(i), this->surfaceDimension);
-	double angularVolume = std::pow(this->getAngularVoxelSize(i), RSA_ANGULAR_DIMENSION);
-	return (spatialVolume*angularVolume);
+	volume *= spatialVolume;
+	RSAOrientation angularDimension = this->getAngularVoxelSize(i);
+	for (ushort j=0; j<RSA_ANGULAR_DIMENSION; j++)
+		volume *= angularDimension[j];
+	return (volume);
 }
 
 void VariableSizeVoxelList::createVoxelMap(){
@@ -91,8 +100,9 @@ void VariableSizeVoxelList::getRandomPositionAndOrientation(RSAVector *position,
 	for (unsigned short i=this->surfaceDimension; i < RSA_SPATIAL_DIMENSION; i++)
         (*position)[i] = 0.0;
 
+	RSAOrientation angularDimension = this->getAngularVoxelSize(v->index);
 	for (unsigned short i=0; i < RSA_ANGULAR_DIMENSION; i++)
-        (*orientation)[i] = vangle[i] + rnd->nextValue(this->u01Distribution)*this->getAngularVoxelSize(v->index);
+        (*orientation)[i] = vangle[i] + rnd->nextValue(this->u01Distribution)*angularDimension[i];
 }
 
 
@@ -133,12 +143,15 @@ unsigned short VariableSizeVoxelList::splitVoxels(double minDx, size_t maxVoxels
 			// if too much new voxels there is no point in further splitting
 			if (newVoxelsCounter[_OMP_THREAD_ID]*_OMP_MAXTHREADS <= maxVoxels){
 				// preparing array of new voxels after division of this->voxels[i] (aVoxels)
-				this->splitVoxel(this->voxels[i], this->getSpatialVoxelSize(i)/2.0, this->getAngularVoxelSize(i)/2.0, aVoxels[_OMP_THREAD_ID]);
+				RSAOrientation angularVoxelSize = this->getAngularVoxelSize(i);
+				for (ushort j=0; j<RSA_ANGULAR_DIMENSION; j++)
+					angularVoxelSize[j] /= 2;
+				this->splitVoxel(this->voxels[i], this->getSpatialVoxelSize(i)/2.0, angularVoxelSize, aVoxels[_OMP_THREAD_ID]);
 				// analyzing new voxels, only the non covered ones will be added to the new array (newList)
 				initialNewVoxelsCounter[_OMP_THREAD_ID] = newVoxelsCounter[_OMP_THREAD_ID];
 				for(size_t j=0; j<voxelsFactor; j++){
 					Voxel *v = aVoxels[_OMP_THREAD_ID][j];
-					if( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc, this->getSpatialVoxelSize(i)/2.0, this->getAngularVoxelSize(i)/2.0) ){
+					if( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc, this->getSpatialVoxelSize(i)/2.0, angularVoxelSize) ){
 						if(this->voxels[i]->depth > 0){
 							v->depth = this->voxels[i]->depth-1;
 						}
@@ -231,13 +244,14 @@ double VariableSizeVoxelList::getVoxelsVolume() const{
 		}
 	    double a = 1.0;
 		RSAOrientation orientation = v->getOrientation();
+		RSAOrientation angularSize = this->getAngularVoxelSize(i);
 		for(unsigned char j=0; j<RSA_ANGULAR_DIMENSION; j++){
-			if (orientation[j]+this->getAngularVoxelSize(i) > this->angularRange){
-				a *= this->angularRange - orientation[j];
+			if (orientation[j]+angularSize[j] > this->angularRange[j]){
+				a *= this->angularRange[j] - orientation[j];
 			}else{
-				a *= this->getAngularVoxelSize(i);
+				a *= angularSize[j];
 			}
-			a /= this->angularRange;
+			a /= this->angularRange[j];
 		}
 		result += s*a;
 	}

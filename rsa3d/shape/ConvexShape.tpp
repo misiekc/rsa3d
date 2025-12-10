@@ -7,14 +7,16 @@ bool ConvexShape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::pointInside(BoundaryCond
                                                                     const Vector<SPATIAL_DIMENSION> &position) const{
     Orientation<ANGULAR_DIMENSION> zeroAngle;
     zeroAngle.fill(0);
-    return this->pointInside(bc, position, zeroAngle, 2*M_PI);
+    Orientation<ANGULAR_DIMENSION> oRange;
+    oRange.fill(2*M_PI);
+    return this->pointInside(bc, position, zeroAngle, oRange);
 }
 
 template<unsigned short SPATIAL_DIMENSION, unsigned short ANGULAR_DIMENSION>
 bool ConvexShape<SPATIAL_DIMENSION, ANGULAR_DIMENSION>::voxelInside(BoundaryConditions<SPATIAL_DIMENSION> *bc,
                                                                     const Vector<SPATIAL_DIMENSION> &voxelPosition,
                                                                     const Orientation<ANGULAR_DIMENSION> &orientation,
-                                                                    double spatialSize, double angularSize) const {
+                                                                    double spatialSize, const Orientation<ANGULAR_DIMENSION> &angularSize) const {
     switch(this->voxelInsideEarlyRejection(bc, voxelPosition, orientation, spatialSize, angularSize)) {
         case EarlyRejectionResult::TRUE:      return true;
         case EarlyRejectionResult::FALSE:     return false;

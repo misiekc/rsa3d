@@ -20,7 +20,7 @@ private:
 	double *voxelMap;
 
 	double getSpatialVoxelSize(size_t i) const;
-	double getAngularVoxelSize(size_t i) const;
+	RSAOrientation getAngularVoxelSize(size_t i) const;
 	double getVoxelVolume(size_t i) const;
 	void createVoxelMap();
 
@@ -31,7 +31,7 @@ protected:
 	void moveVoxelInList(size_t from, size_t to) override;
 
 public:
-	VariableSizeVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange, double requestedAngularVoxelSize);
+	VariableSizeVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, RSAOrientation shapeAngularRange, RSAOrientation requestedAngularVoxelSize);
 	virtual ~VariableSizeVoxelList();
 
 	void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) override;

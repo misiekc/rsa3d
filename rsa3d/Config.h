@@ -14,6 +14,8 @@
 #include <vector>
 #include <algorithm>
 
+#include "utils/Utils.h"
+
 
 // Parse exception class
 class ConfigParseException : public std::runtime_error
@@ -95,6 +97,8 @@ public:
     unsigned long getUnsignedLong(const std::string &field) const;
     double getDouble(const std::string &field) const;
     float getFloat(const std::string &field) const;
+    RSAOrientation getOrientation(const std::string & field) const;
+
 
     /**
      * Returns keys in a config, preserving order from an input

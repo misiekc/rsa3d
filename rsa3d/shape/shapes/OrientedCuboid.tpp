@@ -51,12 +51,13 @@ void OrientedCuboid<DIMENSION>::initClass(const std::string &args){
 
 template <unsigned short DIMENSION>
 bool OrientedCuboid<DIMENSION>::overlap(BoundaryConditions<DIMENSION> *bc, const Shape<DIMENSION, 0> *s) const{
-    return this->pointInside(bc, s->getPosition(), s->getOrientation(), 0.0);
+	Orientation<0> oRange;
+    return this->pointInside(bc, s->getPosition(), s->getOrientation(), oRange);
 }
 
 template <unsigned short DIMENSION>
 bool OrientedCuboid<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position,
-										   const Orientation<0> &orientation, double orientationRange) const{
+										   const Orientation<0> &orientation, const Orientation<0> &orientationRange) const{
 	Vector<DIMENSION> ta = bc->getTranslation(this->getPosition(), position);
 	for(unsigned short i=0; i<DIMENSION; i++){
 		if (std::fabs(this->getPosition()[i] - (position[i] + ta[i])) > size[i]){
@@ -77,7 +78,8 @@ template <unsigned short DIMENSION>
 int OrientedCuboid<DIMENSION>::voxelFullyOrPartiallyInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &voxelPosition, double spatialSize) const {
 
 	Orientation<0> orientation;
-	double angularSize = 0;
+	Orientation<0> angularSize;
+
     switch(this->voxelInsideEarlyRejection(bc, voxelPosition, orientation, spatialSize, angularSize)) {
         case EarlyRejectionResult::TRUE:      return (1 << DIMENSION)-1;
         case EarlyRejectionResult::FALSE:     return -1;
@@ -105,7 +107,7 @@ template <unsigned short DIMENSION>
 bool OrientedCuboid<DIMENSION>::voxelInside(BoundaryConditions<DIMENSION> *bc,
 											const Vector<DIMENSION> &voxelPosition,
 											const Orientation<0> &orientation,
-                                            double spatialSize, double angularSize) const {
+                                            double spatialSize, const Orientation<0> &angularSize) const {
 
 	return (this->voxelFullyOrPartiallyInside(bc, voxelPosition, spatialSize) == (1 << DIMENSION)-1);
 }

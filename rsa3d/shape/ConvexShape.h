@@ -26,7 +26,7 @@ protected:
 public:
     virtual bool voxelInside(BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &voxelPosition,
                      const Orientation<ANGULAR_DIMENSION> &orientation, double spatialSize,
-                     double angularSize) const;
+                     const Orientation<ANGULAR_DIMENSION> &angularSize) const;
 
     /**
      * @brief Checks if a virtual particle of the same size is within intersection of all excluded volumes for all its
@@ -40,7 +40,7 @@ public:
      */
     virtual bool pointInside(BoundaryConditions<SPATIAL_DIMENSION> *bc, const Vector<SPATIAL_DIMENSION> &position,
                              const Orientation<ANGULAR_DIMENSION> &orientation,
-                             double orientationRange) const = 0;
+                             const Orientation<ANGULAR_DIMENSION> &orientationRange) const = 0;
 
     /**
      * @brief Checks if a virtual particle of the same size is within excluded volume for any orientation of it.

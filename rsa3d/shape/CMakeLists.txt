@@ -16,6 +16,7 @@ target_compile_definitions(shapes.1.1 PUBLIC RSA_SPATIAL_DIMENSION=1 RSA_ANGULAR
 
 add_library(shapes.2.0
         ${SHAPE_BASE_SOURCE}
+        AnisotropicShape2D.cpp
         shapes/OrderedShape2_1.h
         shapes/OrderedShape2_1.cpp
         shapes/polydisk/Fibrinogen.cpp

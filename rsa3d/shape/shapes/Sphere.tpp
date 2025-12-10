@@ -86,7 +86,7 @@ bool Sphere<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, const Vec
 
 template <unsigned short DIMENSION>
 bool Sphere<DIMENSION>::pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position,
-									const Orientation<0> &orientation, double orientationRange) const {
+									const Orientation<0> &orientation, const Orientation<0> &orientationRange) const {
     return this->pointInside(bc, position);
 }
 

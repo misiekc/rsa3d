@@ -73,7 +73,7 @@ public:
 
 	bool overlap(BoundaryConditions<3> *bc, const Shape<3,0> *s) const override;
 	bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
-                     double orientationRange) const override;
+                     const Orientation<0> &orientationRange) const override;
 	std::string toPovray() const override;
 	std::string toWolfram() const override;
 	void store(std::ostream &f) const override;

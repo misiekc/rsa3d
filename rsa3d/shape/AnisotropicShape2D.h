@@ -28,7 +28,7 @@ private:
     void setOrientation(const Orientation<1> &orientation) final;
     /* Delegated to AnisotropicShape2D::pointInside(BoundaryConditions*,double*,double,double). */
     bool pointInside(BoundaryConditions<2> *bc, const Vector<2> &position, const Orientation<1> &orientation,
-                     double orientationRange) const final;
+                     const Orientation<1> &orientationRange) const final;
 
 protected:
 

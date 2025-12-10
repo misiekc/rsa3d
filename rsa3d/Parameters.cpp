@@ -17,8 +17,8 @@ Parameters::Parameters(std::istream &stream) {
 	for (const auto &key : config.getKeys()){
 		if (key == "maxTriesWithoutSuccess") 	        this->maxTriesWithoutSuccess = config.getUnsignedLong(key);
 		else if (key == "maxVoxels")					this->maxVoxels = config.getUnsignedLong(key);
-        else if (key == "requestedAngularVoxelSize")	this->requestedAngularVoxelSize = config.getDouble(key);
-        else if (key == "angularVoxelRange")        	this->angularVoxelRange = config.getDouble(key);
+        else if (key == "requestedAngularVoxelSize")	this->requestedAngularVoxelSize = config.getOrientation(key);
+        else if (key == "angularVoxelRange")        	this->angularVoxelRange = config.getOrientation(key);
 		else if (key == "minDx")						this->minDx = config.getDouble(key);
         else if (key == "maxTime") 					    this->maxTime = config.getDouble(key);
         else if (key == "maxDensity") 					this->maxDensity = config.getDouble(key);
@@ -62,11 +62,12 @@ Parameters::Parameters(const std::string &fileName) {
 }
 
 void Parameters::validateData() {
-    Validate(requestedAngularVoxelSize > 0);
-    Validate(angularVoxelRange > 0);
-    Validate(maxTriesWithoutSuccess > 0);
+	for (unsigned short int i=0; i<RSA_ANGULAR_DIMENSION; i++) {
+		Validate(requestedAngularVoxelSize[i] >= 0);
+		Validate(angularVoxelRange[i] >= 0);
+	}
+	Validate(maxTriesWithoutSuccess > 0);
 	Validate(maxVoxels >= 0);
-	Validate(requestedAngularVoxelSize > 0);
 	Validate(minDx >= 0.0);
 	Validate(from >= 0);
 	Validate(collectors > 0);

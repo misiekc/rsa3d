@@ -15,6 +15,7 @@ goDeep = false
 #thresholdDistance = 25.0        # lower bound on shapes' neighbour grid size
 boundaryConditions = periodic    # periodic or free
 
+#particleType = Sphere
 particleType = Kmer3D
 particleAttributes = 2 1
 #particleType = Polysphere

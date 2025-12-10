@@ -37,7 +37,7 @@ public:
 	double getVolume(unsigned short dim) const override;
 	bool pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &da) const override;
 	bool pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position,
-					 const std::array<double ,0> &orientation, double orientationRange) const override;
+					 const Orientation<0> &orientation, const Orientation<0> &orientationRange) const override;
 	double minDistance(const Shape<DIMENSION, 0> *s) const override;
 
 	std::string toPovray() const;

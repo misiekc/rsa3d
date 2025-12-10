@@ -87,6 +87,17 @@ double Config::getDouble(const std::string & field) const {
     return (this->parseDouble(this->getString(field)));
 }
 
+RSAOrientation Config::getOrientation(const std::string & field) const {
+    RSAOrientation result;
+    std::string value;
+    std::istringstream in(this->getString(field));
+    for (unsigned short int i=0; i<RSA_ANGULAR_DIMENSION; i++) {
+        in >> value;
+        result[i] = this->parseDouble(value);
+    }
+    return result;
+}
+
 float Config::getFloat(const std::string & field) const
 {
     return std::stof(this->getString(field));

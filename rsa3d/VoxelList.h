@@ -38,17 +38,17 @@ protected:
 	// to optimize memory occupations voxels are initialized in the first invoke split()
 	bool voxelsInitialized;
 
-	int surfaceDimension;
+	unsigned short int surfaceDimension;
 	Voxel** voxels;
 	size_t length;
 
 	double initialVoxelSize;
-	double initialAngularVoxelSize;
+	RSAOrientation initialAngularVoxelSize;
 
 	double spatialVoxelSize;
-	double angularVoxelSize;
+	RSAOrientation angularVoxelSize;
 
-	double angularRange;
+	RSAOrientation angularRange;
 	double spatialRange;
 
 	// array of top level voxel. If a top level voxel becomes inactive (due to shape placement, all its child voxels becomes obsolete
@@ -56,8 +56,11 @@ protected:
 
 	// probability distrubutions for drawing position inside a voxel
 	std::uniform_real_distribution<double> *spatialDistribution;
-	std::uniform_real_distribution<double> *angularDistribution;
-
+	#if RSA_ANGULAR_DIMENSION > 0
+		std::uniform_real_distribution<double> *angularDistribution[RSA_ANGULAR_DIMENSION];
+	#else
+		std::uniform_real_distribution<double> **angularDistribution;
+	#endif
 	//size_t beginningVoxelNumber;
 
 	// neighbour grid structure for voxels. Needed to quickly find a voxel using its location
@@ -83,19 +86,20 @@ protected:
 	bool isTopLevelVoxelActive(Voxel *v) const;
 
 	virtual bool isVoxelInsidePacking(const Voxel *v, double spatialSize) const;
-	virtual bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, double angularSize,
+	virtual bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, RSAOrientation angularSize,
                                     std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc,
                                     unsigned short depth = 0) const;
-	bool isVoxelInsideExclusionZoneOld(Voxel *v, double spatialSize, double angularSize,
+
+	bool isVoxelInsideExclusionZoneOld(Voxel *v, double spatialSize, const RSAOrientation &angularSize,
                                     std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc,
                                     unsigned short depth = 0);
 
-	virtual void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes) const;
+	virtual void splitVoxel(Voxel *v, double spatialSize, const RSAOrientation &angularSize, Voxel **vRes) const;
 
 	// fills neigbour grid with voxels
 	void rebuildNeighbourGrid();
 
-	virtual bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, double angularSize, unsigned short depth = 0) const;
+	virtual bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, RSAOrientation angularSize, unsigned short depth = 0) const;
 
 	virtual void moveVoxelInList(size_t from, size_t to);
 
@@ -130,7 +134,7 @@ public:
 	 * @param shapeAngularRange typpically 2*M_PI. Can be smaller for shapes with rotational symmetry. For example for squares it should be M_PI/2.0, and for ellipses, sherocylinders or rectangles M_PI.
 	 * @param requestedAngularVoxelSize suggested initial angular size of a voxel. Initial angular size of allocaced voxels will not be larger than requested one.
 	 */
-	VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange, double requestedAngularVoxelSize);
+	VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, RSAOrientation shapeAngularRange, RSAOrientation requestedAngularVoxelSize);
 
 	void disable();
 
@@ -151,7 +155,7 @@ public:
 	Voxel *getVoxel(int i);
 	virtual Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle) const;
 	virtual double getSpatialVoxelSize() const;
-	virtual double getAngularVoxelSize() const;
+	virtual RSAOrientation getAngularVoxelSize() const;
 	Voxel* get(int i);
 	size_t getLength() const;
 	virtual double getVoxelsVolume() const;

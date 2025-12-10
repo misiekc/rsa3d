@@ -85,7 +85,9 @@ void Polydisk::initClass(const std::string &args){
 
 	shapeInfo.setCircumsphereRadius(circumsphereRadius);
 	shapeInfo.setInsphereRadius(insphereRadius);
-	shapeInfo.setAngularVoxelSize(2*M_PI);
+	RSAOrientation avSize;
+	avSize[0] = 2*M_PI;
+	shapeInfo.setAngularVoxelSize(avSize);
 	shapeInfo.setSupportsSaturation(true);
 	shapeInfo.setDefaultCreateShapeImpl <Polydisk> ();
 
@@ -176,8 +178,8 @@ void Polydisk::normalizeArea(double area){
 	}
 }
 
-bool Polydisk::diskDiskIntersect(size_t disk0, const Vector<2> shape0Position, const Orientation<1> shape0Orientation,
-								 size_t disk1, const Vector<2> shape1Position, const Orientation<1> shape1Orientation){
+bool Polydisk::diskDiskIntersect(size_t disk0, const Vector<2> &shape0Position, const Orientation<1> &shape0Orientation,
+								 size_t disk1, const Vector<2> &shape1Position, const Orientation<1> &shape1Orientation){
 	double x0 = shape0Position[0] + Polydisk::diskCentreR[disk0]*std::cos(Polydisk::diskCentreTheta[disk0] + shape0Orientation[0]);
 	double y0 = shape0Position[1] + Polydisk::diskCentreR[disk0]*std::sin(Polydisk::diskCentreTheta[disk0] + shape0Orientation[0]);
 
@@ -234,17 +236,17 @@ Vector<2> Polydisk::minmaxSin(double theta, double dt){
 }
 
 // checks if disk1 beeing a part of a particle inside the voxel intersects with disk0 beeing a part of a particle in packing
-bool Polydisk::diskVoxelIntersect(size_t disk0, const Vector<2> shape0Position, const Orientation<1> shape0Orientation,
-		 	 	 	 	 	 	  size_t disk1, const Vector<2> shape1Position, const Orientation<1> shape1Orientation,
-								  double spatialSize, double angularSize){
+bool Polydisk::diskVoxelIntersect(size_t disk0, const Vector<2> &shape0Position, const Orientation<1> &shape0Orientation,
+		 	 	 	 	 	 	  size_t disk1, const Vector<2> &shape1Position, const Orientation<1> &shape1Orientation,
+								  double spatialSize, const Orientation<1> &angularSize){
 
-	Vector<2> minmax = Polydisk::minmaxCos(Polydisk::diskCentreTheta[disk1]+shape1Orientation[0], angularSize);
+	Vector<2> minmax = Polydisk::minmaxCos(Polydisk::diskCentreTheta[disk1]+shape1Orientation[0], angularSize[0]);
 	// minmaxX stores ranges for x coordinate on the disk1 (inside voxel)
 	Vector<2> minmaxX = Vector<2>{{
 		shape1Position[0] + Polydisk::diskCentreR[disk1]*minmax[0],
 		shape1Position[0] + Polydisk::diskCentreR[disk1]*minmax[1] + spatialSize
 	}};
-	minmax = Polydisk::minmaxSin(Polydisk::diskCentreTheta[disk1]+shape1Orientation[0], angularSize);
+	minmax = Polydisk::minmaxSin(Polydisk::diskCentreTheta[disk1]+shape1Orientation[0], angularSize[0]);
 	Vector<2> minmaxY = Vector<2>{{
 		shape1Position[1] + Polydisk::diskCentreR[disk1]*minmax[0],
 		shape1Position[1] + Polydisk::diskCentreR[disk1]*minmax[1] + spatialSize
@@ -318,9 +320,9 @@ bool Polydisk::fullAngleVoxelInside(BoundaryConditions<2> *bc, const Vector<2> &
     return false;
 }
 
-bool Polydisk::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition, const Orientation<1> &voxelOrientation, double spatialSize, double angularSize) const{
+bool Polydisk::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition, const Orientation<1> &voxelOrientation, double spatialSize, const Orientation<1> &angularSize) const{
 
-	if (voxelOrientation[0] > Shape<2, 1>::getAngularVoxelSize())
+	if (voxelOrientation[0] > Shape<2, 1>::getAngularVoxelSize()[0])
 		return true;
 
     switch(this->voxelInsideEarlyRejection(bc, voxelPosition, voxelOrientation, spatialSize, angularSize)) {
@@ -330,7 +332,7 @@ bool Polydisk::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosi
     }
 
     // Version optimized for full angle - it was made mainly for OrientedFibrinogen, because it took ages to generate
-    if (angularSize >= 2*M_PI)
+    if (angularSize[0] >= 2*M_PI)
 	    return this->fullAngleVoxelInside(bc, voxelPosition, spatialSize);
 
 	Vector<2> translation = bc->getTranslation(voxelPosition, this->getPosition());

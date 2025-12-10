@@ -28,7 +28,8 @@ std::string Kmer3D::preparePolysphereAttr(int numberOfDisks, double length) {
     polydiskAttrStream << numberOfDisks;
     double firstDiskOffset = length * (numberOfDisks - 1) / 2;
     for (int i = 0; i < numberOfDisks; i++)
-        polydiskAttrStream << " 0 0 " << (length * i - firstDiskOffset) << " 1";
+//        polydiskAttrStream << " 0 0 " << (length * i - firstDiskOffset) << " 1";
+        polydiskAttrStream << " " << (length * i - firstDiskOffset) << " 0 0 1";
     polydiskAttrStream << " 1 " << volume;
 
     return polydiskAttrStream.str();
@@ -48,57 +49,52 @@ double Kmer3D::calculateVolume(int numberOfSpheres, double distance) {
     else
         return (4.0 / 3.0) * M_PI * numberOfSpheres;
 }
+std::array<Vector<3>, 2> Kmer3D::getMinMaxVoxelCoordinates(size_t sphereIndex, const Vector<3> &voxelPosition, const Orientation<3> &voxelOrientation, double spatialSize, const Orientation<3> &angularSize) const {
+    Orientation<3> orientation = Polysphere::fromVoxel(voxelOrientation);
+    double angularSize1 = std::asin(voxelOrientation[1]+angularSize[1]-1.0) - std::asin(voxelOrientation[1]-1.0);
 
-std::array<std::array<double, 2>, 3> Kmer3D::getMinMaxVoxelCoordinates(size_t sphereIndex, const Vector<3> &position, const Orientation<3> &orientation, double spatialSize, double angularSize) const{
-    std::array<double, 2>   sinAlpha = Polysphere::minmaxSin(orientation[0], angularSize),
-                            cosAlpha = Polysphere::minmaxCos(orientation[0], angularSize),
-                            sinBeta  = Polysphere::minmaxSin(orientation[1], angularSize),
-                            cosBeta  = Polysphere::minmaxCos(orientation[1], angularSize);
+    std::array<double, 2> sin_ay = Polysphere::minmaxSin(orientation[1], angularSize1);
+    std::array<double, 2> sin_az = Polysphere::minmaxSin(orientation[2], angularSize[2]);
+    std::array<double, 2> cos_ay = Polysphere::minmaxCos(orientation[1], angularSize1);
+    std::array<double, 2> cos_az = Polysphere::minmaxCos(orientation[2], angularSize[2]);
 
-    double xmin = position[0] +
-        (
-            Polysphere::sphereCentre[sphereIndex][0] * (cosAlpha[0]) +
-            Polysphere::sphereCentre[sphereIndex][1] * (-sinAlpha[1] * cosBeta[1]) +
-            Polysphere::sphereCentre[sphereIndex][2] * (sinAlpha[0] * sinBeta[0])
-        );
-    double xmax = position[0] + spatialSize +
-        (
-            Polysphere::sphereCentre[sphereIndex][0] * (cosAlpha[1]) +
-            Polysphere::sphereCentre[sphereIndex][1] * (-sinAlpha[0] * cosBeta[0]) +
-            Polysphere::sphereCentre[sphereIndex][2] * (sinAlpha[1] * sinBeta[1])
-        );
+    Matrix<3, 3, double> minMatrix({
+        cos_ay[0] * cos_az[0],
+        -sin_az[1],
+        sin_ay[0] * cos_az[0],
 
-    double ymin = position[1] +
-        (
-            Polysphere::sphereCentre[sphereIndex][0] * (sinAlpha[0]) +
-            Polysphere::sphereCentre[sphereIndex][1] * (cosAlpha[0] * cosBeta[0]) +
-            Polysphere::sphereCentre[sphereIndex][2] * (- cosAlpha[1] * sinBeta[1])
-        );
+        cos_ay[0] * sin_az[0],
+        cos_az[0],
+        sin_ay[0] * sin_az[0],
 
-    double ymax = position[1] + spatialSize +
-        (
-            Polysphere::sphereCentre[sphereIndex][0] * (sinAlpha[1]) +
-            Polysphere::sphereCentre[sphereIndex][1] * (cosAlpha[1] * cosBeta[1]) +
-            Polysphere::sphereCentre[sphereIndex][2] * (- cosAlpha[0] * sinBeta[0])
-        );
+        -sin_ay[1],
+        0.0,
+        cos_ay[0]
+    });
+    Matrix<3, 3, double> maxMatrix({
+        cos_ay[1] * cos_az[1],
+        -sin_az[0],
+        sin_ay[1] * cos_az[1],
 
-    double zmin = position[2] +
-        (
-            Polysphere::sphereCentre[sphereIndex][1] * (sinBeta[0]) +
-            Polysphere::sphereCentre[sphereIndex][2] * (cosBeta[0])
-        );
+        cos_ay[1] * sin_az[1],
+        cos_az[1],
+        sin_ay[1] * sin_az[1],
 
-    double zmax = position[2] + spatialSize +
-        (
-            Polysphere::sphereCentre[sphereIndex][1] * (sinBeta[1]) +
-            Polysphere::sphereCentre[sphereIndex][2] * (cosBeta[1])
-        );
-
-    return std::array<std::array<double, 2>, 3>{std::array<double, 2>{xmin, xmax}, std::array<double, 2>{ymin, ymax}, std::array<double, 2>{zmin, zmax}};;
+        -sin_ay[0],
+        0.0,
+        cos_ay[1]
+    });
+    Vector<3> vMin = voxelPosition + minMatrix*Polysphere::sphereCentre[sphereIndex];
+    Vector<3> vMax = voxelPosition + maxMatrix*Polysphere::sphereCentre[sphereIndex];
+    for (unsigned short i=0; i<3; i++) {
+        vMax[i] += spatialSize;
+    }
+    return {vMin, vMax};
 }
 
-bool Kmer3D::voxelInside(BoundaryConditions<3> *bc, const Vector<3> &voxelPosition, const Orientation<3> &voxelOrientation, double spatialSize, double angularSize) const{
-    if (voxelOrientation[2] > 0.0)
+bool Kmer3D::voxelInside(BoundaryConditions<3> *bc, const Vector<3> &voxelPosition, const Orientation<3> &voxelOrientation, double spatialSize, const Orientation<3> &angularSize) const{
+//    if (voxelOrientation[2] > 0.0)
+    if (voxelOrientation[0] > 0.0)
         return true;
     else
         return Polysphere::voxelInside(bc, voxelPosition, voxelOrientation, spatialSize, angularSize);

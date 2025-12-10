@@ -5,8 +5,8 @@
 #include "AnisotropicShape2D.h"
 
 bool AnisotropicShape2D::pointInside(BoundaryConditions<2> *bc, const Vector<2> &position,
-                                     const Orientation<1> &orientation, double orientationRange) const {
-	return this->pointInside(bc, position, orientation[0], orientation[0]+orientationRange);
+                                     const Orientation<1> &orientation, const Orientation<1> &orientationRange) const{
+	return this->pointInside(bc, position, orientation[0], orientation[0]+orientationRange[0]);
 }
 
 Matrix<2, 2> AnisotropicShape2D::getRotationMatrix() const {

@@ -40,7 +40,7 @@ public:
 	explicit Spherocylinder(const Matrix<DIMENSION, DIMENSION> &orientation);
 
     bool overlap(BoundaryConditions<DIMENSION> *bc, const Shape<DIMENSION, 0> *s) const override;
-    bool pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position, const Orientation<0> &orientation, double orientationRange) const override;
+    bool pointInside(BoundaryConditions<DIMENSION> *bc, const Vector<DIMENSION> &position, const Orientation<0> &orientation, const Orientation<0> &orientationRange) const override;
     void store(std::ostream &f) const override;
     void restore(std::istream &f) override;
     Shape<DIMENSION, 0> *clone() const override;

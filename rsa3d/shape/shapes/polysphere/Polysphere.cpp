@@ -4,7 +4,7 @@
 
 #include "Polysphere.h"
 
-std::vector<std::array<double, 3>> Polysphere::sphereCentre;
+std::vector<Vector<3>> Polysphere::sphereCentre;
 std::vector<double> Polysphere::sphereR;
 
 /* If one wants to center automatically on the largest disk:
@@ -29,7 +29,7 @@ void Polysphere::initClass(const std::string &args){
         if (sphereR_ <= 0.0)
             throw std::runtime_error("sphereR <= 0 for " + std::to_string(i) + " coord");
 
-        Polysphere::sphereCentre.push_back({c1, c2, c3});
+        Polysphere::sphereCentre.push_back(Vector<3>({c1, c2, c3}));
         Polysphere::sphereR.push_back(sphereR_);
     }
 
@@ -47,7 +47,7 @@ void Polysphere::initClass(const std::string &args){
 
     double circumsphereRadius = 0;
     for (size_t i=0; i<Polysphere::sphereCentre.size(); i++) {
-        std::array<double, 3> coordinates = Polysphere::sphereCentre[i];
+        Vector<3> coordinates = Polysphere::sphereCentre[i];
         double r = std::sqrt(
                 coordinates[0] * coordinates[0] + coordinates[1] * coordinates[1] + coordinates[2] * coordinates[2]) +
                    Polysphere::sphereR[i];
@@ -60,7 +60,7 @@ void Polysphere::initClass(const std::string &args){
 
     shapeInfo.setCircumsphereRadius(circumsphereRadius);
     shapeInfo.setInsphereRadius(insphereRadius);
-    shapeInfo.setAngularVoxelSize(2*M_PI);
+    shapeInfo.setAngularVoxelSize({2*M_PI, 2, 2*M_PI});
     shapeInfo.setSupportsSaturation(true);
     shapeInfo.setDefaultCreateShapeImpl <Polysphere> ();
 
@@ -70,7 +70,7 @@ void Polysphere::initClass(const std::string &args){
 double Polysphere::mcArea(size_t mcTrials){
     double maxSize = 1.0;
     for (size_t i = 0; i < Polysphere::sphereCentre.size(); i++){
-        std::array<double, 3> coordinates = Polysphere::sphereCentre[i];
+        Vector<3> coordinates = Polysphere::sphereCentre[i];
         double r = std::sqrt(
                 coordinates[0] * coordinates[0] + coordinates[1] * coordinates[1] + coordinates[2] * coordinates[2]) +
                    Polysphere::sphereR[i];
@@ -86,7 +86,7 @@ double Polysphere::mcArea(size_t mcTrials){
         y = (2.0*rnd.nextValue()-1.0)*maxSize;
         z = (2.0*rnd.nextValue()-1.0)*maxSize;
         for(size_t index = 0; index < Polysphere::sphereR.size(); index++){
-            std::array<double, 3> coordinates = Polysphere::sphereCentre[i];
+            Vector<3> coordinates = Polysphere::sphereCentre[i];
             dx = coordinates[0] - x;
             dy = coordinates[1] - y;
             dz = coordinates[2] - z;
@@ -110,7 +110,14 @@ void Polysphere::normalizeArea(double area){
     }
 }
 
-std::array<double, 3> Polysphere::getStaticSpherePosition(std::size_t index, const Vector<3> &position, const Orientation<3> &orientation){
+Vector<3> Polysphere::getStaticSpherePosition(std::size_t index, const Vector<3> &position, const Orientation<3> &orientation) {
+    Matrix<3,3> rotation = Matrix<3,3>::rotation(orientation[0], orientation[1], orientation[2]);
+    Vector<3> result = position + rotation * Polysphere::sphereCentre[index];
+    return result;
+}
+
+/*
+Vector<3> Polysphere::getStaticSpherePosition(std::size_t index, const Vector<3> &position, const Orientation<3> &orientation){
     Expects(index < Polysphere::sphereCentre.size());
     const double s_alpha = sin(orientation[0]);
     const double s_beta = sin(orientation[1]);
@@ -134,23 +141,21 @@ std::array<double, 3> Polysphere::getStaticSpherePosition(std::size_t index, con
             Polysphere::sphereCentre[index][1] * (s_beta * c_gamma) +
             Polysphere::sphereCentre[index][2] * (c_beta)
     );
-    return {x, y, z};
+    return Vector<3>({x, y, z});
 }
+*/
 
-std::array<double, 3> Polysphere::getSpherePosition(size_t index) const {
+Vector<3> Polysphere::getSpherePosition(size_t index) const {
     return Polysphere::getStaticSpherePosition(index, this->getPosition(), this->getOrientation());
 }
 
 
-bool Polysphere::sphereSphereIntersect(size_t sphere0, const Vector<3> shape0Position, const Orientation<3> shape0Orientation,
-                                 size_t sphere1, const Vector<3> shape1Position, const Orientation<3> shape1Orientation){
-    std::array<double, 3> coords0 = Polysphere::getStaticSpherePosition(sphere0, shape0Position, shape0Orientation);
-    std::array<double, 3> coords1 = Polysphere::getStaticSpherePosition(sphere1, shape1Position, shape1Orientation);
+bool Polysphere::sphereSphereIntersect(size_t sphere0, const Vector<3> &shape0Position, const Orientation<3> &shape0Orientation,
+                                 size_t sphere1, const Vector<3> &shape1Position, const Orientation<3> &shape1Orientation){
+    Vector<3> coords0 = Polysphere::getStaticSpherePosition(sphere0, shape0Position, shape0Orientation);
+    Vector<3> coords1 = Polysphere::getStaticSpherePosition(sphere1, shape1Position, shape1Orientation);
 
-    double distance2 =
-            (coords0[0] - coords1[0])*(coords0[0] - coords1[0]) +
-            (coords0[1] - coords1[1])*(coords0[1] - coords1[1]) +
-            (coords0[2] - coords1[2])*(coords0[2] - coords1[2]);
+    double distance2 = (coords0 - coords1).norm2();
     distance2 -= (Polysphere::sphereR[sphere0] + Polysphere::sphereR[sphere1])*(Polysphere::sphereR[sphere0] + Polysphere::sphereR[sphere1]);
     return distance2 < 0.0;
 }
@@ -199,12 +204,30 @@ std::array<double, 2> Polysphere::minmaxSin(double theta, double dt){
     return result;
 }
 
+Orientation<3> Polysphere::fromVoxel(const Orientation<3> &voxelOrientation) {
+    Orientation<3> result;
+    result[0] = voxelOrientation[0];
+    result[1] = std::asin(voxelOrientation[1]-1.0);
+    result[2] = voxelOrientation[2];
+    return result;
+}
+
 double Polysphere::getVolume(unsigned short dim) const {
     if (dim != 3)
         throw std::runtime_error ("Polysphere supports only 3D packings");
 
     return 1.0;
 }
+
+void Polysphere::rotate(const Orientation<3> &voxelOrientation){
+    Orientation<3> angles = this->getOrientation();
+    Orientation<3> translatefOrientation = Polysphere::fromVoxel(voxelOrientation);
+    angles[0] += translatefOrientation[0];
+    angles[1] += translatefOrientation[1];
+    angles[2] += translatefOrientation[2];
+    this->setOrientation(angles);
+}
+
 
 bool Polysphere::overlap(BoundaryConditions<3> *bc, const Shape<3, 3> *s) const{
     switch (this->overlapEarlyRejection(bc, s)) {
@@ -244,14 +267,58 @@ bool Polysphere::fullAngleVoxelInside(BoundaryConditions<3> *bc, const Vector<3>
     }
     return false;
 }
+std::array<Vector<3>, 2> Polysphere::getMinMaxVoxelCoordinates(size_t sphereIndex, const Vector<3> &voxelPosition, const Orientation<3> &voxelOrientation, double spatialSize, const Orientation<3> &angularSize) const {
+    Orientation<3> orientation = Polysphere::fromVoxel(voxelOrientation);
+    double angularSize1 = std::asin(voxelOrientation[1]+angularSize[1]-1.0) - std::asin(voxelOrientation[1]-1.0);
 
-std::array<std::array<double, 2>, 3> Polysphere::getMinMaxVoxelCoordinates(size_t sphereIndex, const Vector<3> &position, const Orientation<3> &orientation, double spatialSize, double angularSize) const{
-    std::array<double, 2>   sinAlpha = Polysphere::minmaxSin(orientation[0], angularSize),
-                            cosAlpha = Polysphere::minmaxCos(orientation[0], angularSize),
-                            sinBeta  = Polysphere::minmaxSin(orientation[1], angularSize),
-                            cosBeta  = Polysphere::minmaxCos(orientation[1], angularSize),
-                            sinGamma = Polysphere::minmaxSin(orientation[2], angularSize),
-                            cosGamma = Polysphere::minmaxCos(orientation[2], angularSize);
+    std::array<double, 2> sin_ax = Polysphere::minmaxSin(orientation[0], angularSize[0]);
+    std::array<double, 2> sin_ay = Polysphere::minmaxSin(orientation[1], angularSize1);
+    std::array<double, 2> sin_az = Polysphere::minmaxSin(orientation[2], angularSize[2]);
+    std::array<double, 2> cos_ax = Polysphere::minmaxCos(orientation[0], angularSize[0]);
+    std::array<double, 2> cos_ay = Polysphere::minmaxCos(orientation[1], angularSize1);
+    std::array<double, 2> cos_az = Polysphere::minmaxCos(orientation[2], angularSize[2]);
+
+    Matrix<3, 3, double> minMatrix({
+        cos_ay[0] * cos_az[0],
+        sin_ax[0] * sin_ay[0] * cos_az[0] - cos_ax[1] * sin_az[1],
+        cos_ax[0] * sin_ay[0] * cos_az[0] + sin_ax[0] * sin_az[0],
+
+        cos_ay[0] * sin_az[0],
+        sin_ax[0] * sin_ay[0] * sin_az[0] + cos_ax[0] * cos_az[0],
+        cos_ax[0] * sin_ay[0] * sin_az[0] - sin_ax[1] * cos_az[1],
+
+        -sin_ay[1],
+        sin_ax[0] * cos_ay[0],
+        cos_ax[0] * cos_ay[0]
+    });
+    Matrix<3, 3, double> maxMatrix({
+        cos_ay[1] * cos_az[1],
+        sin_ax[1] * sin_ay[1] * cos_az[1] - cos_ax[0] * sin_az[0],
+        cos_ax[1] * sin_ay[1] * cos_az[1] + sin_ax[1] * sin_az[1],
+
+        cos_ay[1] * sin_az[1],
+        sin_ax[1] * sin_ay[1] * sin_az[1] + cos_ax[1] * cos_az[1],
+        cos_ax[1] * sin_ay[1] * sin_az[1] - sin_ax[0] * cos_az[0],
+
+        -sin_ay[0],
+        sin_ax[1] * cos_ay[1],
+        cos_ax[1] * cos_ay[1]
+    });
+    Vector<3> vMin = voxelPosition + minMatrix*Polysphere::sphereCentre[sphereIndex];
+    Vector<3> vMax = voxelPosition + maxMatrix*Polysphere::sphereCentre[sphereIndex];
+    for (unsigned short i=0; i<3; i++) {
+        vMax[i] += spatialSize;
+    }
+    return {vMin, vMax};
+}
+/*
+std::array<std::array<double, 2>, 3> Polysphere::getMinMaxVoxelCoordinates(size_t sphereIndex, const Vector<3> &position, const Orientation<3> &orientation, double spatialSize, const Orientation<3> &angularSize) const{
+    std::array<double, 2>   sinAlpha = Polysphere::minmaxSin(orientation[0], angularSize[0]),
+                            cosAlpha = Polysphere::minmaxCos(orientation[0], angularSize[0]),
+                            sinBeta  = Polysphere::minmaxSin(orientation[1], angularSize[1]),
+                            cosBeta  = Polysphere::minmaxCos(orientation[1], angularSize[1]),
+                            sinGamma = Polysphere::minmaxSin(orientation[2], angularSize[2]),
+                            cosGamma = Polysphere::minmaxCos(orientation[2], angularSize[2]);
 
     double xmin = position[0] +
         (
@@ -296,14 +363,15 @@ std::array<std::array<double, 2>, 3> Polysphere::getMinMaxVoxelCoordinates(size_
 
     return std::array<std::array<double, 2>, 3>{std::array<double, 2>{xmin, xmax}, std::array<double, 2>{ymin, ymax}, std::array<double, 2>{zmin, zmax}};;
 }
+*/
 
-bool Polysphere::voxelInside(BoundaryConditions<3> *bc, const Vector<3> &voxelPosition, const Orientation<3> &voxelOrientation, double spatialSize, double angularSize) const{
+bool Polysphere::voxelInside(BoundaryConditions<3> *bc, const RSAVector &voxelPosition, const RSAOrientation &voxelOrientation, double spatialSize, const RSAOrientation &angularSize) const{
 
-    double angularVoxelSize = Shape<3, 3>::getAngularVoxelSize();
+    Orientation<3> angularVoxelSize = Shape<3, 3>::getAngularVoxelSize();
     if (
-            voxelOrientation[0] > std::max(2*M_PI, angularVoxelSize) ||
-            voxelOrientation[1] > std::max(M_PI, angularVoxelSize) ||
-            voxelOrientation[2] > std::max(2*M_PI, angularVoxelSize)
+            (voxelOrientation[0] > angularVoxelSize[0]) ||
+            (voxelOrientation[1] > angularVoxelSize[1]) ||
+            (voxelOrientation[2] > angularVoxelSize[2])
     )
         return true;
 
@@ -314,7 +382,7 @@ bool Polysphere::voxelInside(BoundaryConditions<3> *bc, const Vector<3> &voxelPo
     }
 
     // Version optimized for full angle - it was made mainly for OrientedFibrinogen, because it took ages to generate
-    if (angularSize >= 2*M_PI)
+    if (angularSize[0] >= 2*M_PI && angularSize[1] >= M_PI && angularSize[2] >= 2*M_PI)
         return this->fullAngleVoxelInside(bc, voxelPosition, spatialSize);
 
     Vector<3> translation = bc->getTranslation(voxelPosition, this->getPosition());
@@ -323,15 +391,17 @@ bool Polysphere::voxelInside(BoundaryConditions<3> *bc, const Vector<3> &voxelPo
 
     // loop over disks in virtual particle inside voxel
     for (size_t i = 0; i < Polysphere::sphereCentre.size(); i++){
-        std::array<std::array<double, 2>, 3> minMaxVoxelCoordinates = this->getMinMaxVoxelCoordinates(i, voxelPosition, voxelOrientation, spatialSize, angularSize);
+        std::array<Vector<3>, 2> minMaxVoxelCoordinates = this->getMinMaxVoxelCoordinates(i, voxelPosition, voxelOrientation, spatialSize, angularSize);
+        Vector<3> vMin = minMaxVoxelCoordinates[0];
+        Vector<3> vMax = minMaxVoxelCoordinates[1];
         // loop over disks in this particle
         for (size_t j = 0; j < Polysphere::sphereCentre.size(); j++){
             // if a disk of virtual particle (placed anywhere in the voxel) intersects with disk of this particle, the voxel is fully inside the exclusion zone
-            std::array<double, 3> coordinates = Polysphere::getStaticSpherePosition(j, thisPosition, thisOrientation);
+            Vector<3> coordinates = Polysphere::getStaticSpherePosition(j, thisPosition, thisOrientation);
 
-            double xmax2 = std::max( (minMaxVoxelCoordinates[0][0] - coordinates[0])*(minMaxVoxelCoordinates[0][0] - coordinates[0]) ,(minMaxVoxelCoordinates[0][1] - coordinates[0])*(minMaxVoxelCoordinates[0][1] - coordinates[0]));
-            double ymax2 = std::max( (minMaxVoxelCoordinates[1][0] - coordinates[1])*(minMaxVoxelCoordinates[1][0] - coordinates[1]) ,(minMaxVoxelCoordinates[1][1] - coordinates[1])*(minMaxVoxelCoordinates[1][1] - coordinates[1]));
-            double zmax2 = std::max( (minMaxVoxelCoordinates[2][0] - coordinates[2])*(minMaxVoxelCoordinates[2][0] - coordinates[2]) ,(minMaxVoxelCoordinates[2][1] - coordinates[2])*(minMaxVoxelCoordinates[2][1] - coordinates[2]));
+            double xmax2 = std::max( (vMin[0] - coordinates[0])*(vMin[0] - coordinates[0]) ,(vMax[0] - coordinates[0])*(vMax[0] - coordinates[0]));
+            double ymax2 = std::max( (vMin[1] - coordinates[1])*(vMin[1] - coordinates[1]) ,(vMax[1] - coordinates[1])*(vMax[1] - coordinates[1]));
+            double zmax2 = std::max( (vMin[2] - coordinates[2])*(vMin[2] - coordinates[2]) ,(vMax[2] - coordinates[2])*(vMax[2] - coordinates[2]));
             double r2 = (Polysphere::sphereR[i] + Polysphere::sphereR[j]) * (Polysphere::sphereR[i] + Polysphere::sphereR[j]);
             if (r2 > xmax2 + ymax2 + zmax2)
                 return true;
@@ -348,7 +418,7 @@ std::string Polysphere::toPovray() const{
     std::stringstream out;
     out.precision(std::numeric_limits< double >::max_digits10);
     for (size_t i=0; i < Polysphere::sphereCentre.size(); i++) {
-        std::array<double, 3> spherePosition = this->getSpherePosition(i);
+        Vector<3> spherePosition = this->getSpherePosition(i);
         double r = Polysphere::sphereR[i];
         out << "  sphere { < " << spherePosition[0] << ", " << spherePosition[1] << ", " << spherePosition[2] << ">, ";
         out << r << std::endl;
@@ -364,7 +434,7 @@ std::string Polysphere::toWolfram() const {
 
     out << std::fixed << "{";
     for (std::size_t i = 0, max = Polysphere::sphereCentre.size(); i < max; i++) {
-        std::array<double, 3> spherePosition = this->getSpherePosition(i);
+        Vector<3> spherePosition = this->getSpherePosition(i);
         out << "Sphere[{" << spherePosition[0] << ", " << spherePosition[1] << ", " << spherePosition[2] << "}, " << Polysphere::sphereR[i] << "]";
         if (i < max - 1)
             out << ", ";

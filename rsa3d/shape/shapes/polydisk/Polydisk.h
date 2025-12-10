@@ -32,13 +32,13 @@ private:
 	static Vector<2> minmaxSin(double theta, double dt);
 
 	//test if line segment from point 1 to 2 intersects with line segment from point 3 to 4
-	static bool diskDiskIntersect(size_t disk0, const Vector<2> disk0Position, const Orientation<1> disk0Orientation,
-								  size_t disk1, const Vector<2> disk1Position, const Orientation<1> disk1Orientation);
+	static bool diskDiskIntersect(size_t disk0, const Vector<2> &disk0Position, const Orientation<1> &disk0Orientation,
+								  size_t disk1, const Vector<2> &disk1Position, const Orientation<1> &disk1Orientation);
 
 	//same as above, except that endpoints 3 and 4 comes from a line in a voxel, and thus carry an uncertainty
-	static bool diskVoxelIntersect(size_t disk0, const Vector<2> disk0Position, const Orientation<1> disk0Orientation,
-			 	 	 	 	 	   size_t disk1, const Vector<2> disk1Position, const Orientation<1> disk1Orientation,
-								   double spatialSize, double angularSize);
+	static bool diskVoxelIntersect(size_t disk0, const Vector<2> &disk0Position, const Orientation<1> &disk0Orientation,
+			 	 	 	 	 	   size_t disk1, const Vector<2> &disk1Position, const Orientation<1> &disk1Orientation,
+								   double spatialSize, const Orientation<1> &angularSize);
 
     static std::vector<std::size_t> getIndicesOfLargestDisks();
     static Vector<2> getApproximateMassCentre();
@@ -86,7 +86,7 @@ public:
 
 	bool overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const override;
 	bool voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition, const Orientation<1> &voxelOrientation,
-					 double spatialSize, double angularSize) const override;
+					 double spatialSize, const Orientation<1> &angularSize) const override;
     std::string toPovray() const override;
     std::string toWolfram() const override;
 };

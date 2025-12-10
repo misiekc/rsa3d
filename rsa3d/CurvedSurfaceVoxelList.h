@@ -56,8 +56,8 @@ protected:
     std::array<std::size_t, RSA_SPATIAL_DIMENSION> calculateSpatialGridLinearSize() const override;
 
 public:
-    CurvedSurfaceVoxelList(double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange,
-                           double requestedAngularVoxelSize, CurvedSurface *surface);
+    CurvedSurfaceVoxelList(double packingSpatialSize, double requestedSpatialVoxelSize, RSAOrientation shapeAngularRange,
+                           RSAOrientation requestedAngularVoxelSize, CurvedSurface *surface);
 
     unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl,
                                RSABoundaryConditions *bc) override;
