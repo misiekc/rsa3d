@@ -42,14 +42,14 @@ bool Voxel::isInside(const RSAVector &pos, double size){
 
 bool Voxel::isInside(const RSAVector &pos, double size, const RSAOrientation &angle,
                      RSAOrientation asize) {
-	for(ushort i=0; i<RSA_SPATIAL_DIMENSION; i++){
+	for(unsigned short i=0; i<RSA_SPATIAL_DIMENSION; i++){
 		if (pos[i]<this->position[i])
 			return false;
 		if (pos[i]>=(this->position[i]+size))
 			return false;
 	}
 
-	for(ushort i=0; i<RSA_ANGULAR_DIMENSION; i++){
+	for(unsigned short i=0; i<RSA_ANGULAR_DIMENSION; i++){
 		if (angle[i]<this->orientation[i])
 			return false;
 		if (angle[i]>=(this->orientation[i]+asize[i]) && asize[i]!=0)

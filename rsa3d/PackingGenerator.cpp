@@ -212,7 +212,8 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 			sVirtual->rotate(angle);
 			// checking if shape overlaps with any shape in the packing
 			if (this->surface->check(sVirtual)== nullptr){
-				_OMP_CRITICAL(stdout)
+//				_OMP_CRITICAL(stdout)
+				_OMP_CRITICAL_SIMPLE
 				{
 					std::cout << std::endl << "\t non overlapping shape found at (" << std::setprecision(10);
 					for (unsigned char i=0; i<RSA_SPATIAL_DIMENSION; i++){
@@ -250,7 +251,8 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 					}
 				}
 				if (sCovers!= nullptr)
-				_OMP_CRITICAL(stdout)
+//				_OMP_CRITICAL(stdout)
+				_OMP_CRITICAL_SIMPLE
 				std::cout << "\t in exclusion zone of " << sCovers->toString() << std::endl;
 			}
 			delete sVirtual;
@@ -529,6 +531,7 @@ bool PackingGenerator::generationCompleted(size_t missCounter, double t) {
 
 void PackingGenerator::run(Packing *packing){
 
+/*
 #ifdef _OPENMP
 	struct timeval timeout;
 	timeout.tv_sec = 0;
@@ -551,7 +554,7 @@ void PackingGenerator::run(Packing *packing){
 		}
 	}
 #endif
-
+*/
 	this->createPacking(packing);
 }
 

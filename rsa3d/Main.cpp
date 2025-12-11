@@ -1,4 +1,3 @@
-#include <sys/wait.h>
 #include <memory>
 #include <map>
 #include <iterator>

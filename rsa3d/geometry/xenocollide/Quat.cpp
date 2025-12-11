@@ -100,7 +100,7 @@ void Quat::Build(const Matrix<3,3>& R)
 	else
 	{
 		double mx = R(0,0);
-		uint ix = 0;
+		unsigned int ix = 0;
 
 		if (R(1,1) > mx)
 		{

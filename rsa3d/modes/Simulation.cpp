@@ -48,8 +48,12 @@ namespace {
                     >> O >> itrealvalue >> starttime >> vsize >> rss; // don't care about the rest
 
         stat_stream.close();
+        #ifdef _SC_PAGE_SIZE
+            long page_size_kb = sysconf(_SC_PAGE_SIZE); // in case x86-64 is configured to use 2MB pages
+        #else
+            long page_size_kb = 2048;
+        #endif
 
-        long page_size_kb = sysconf(_SC_PAGE_SIZE); // in case x86-64 is configured to use 2MB pages
         vm_usage = vsize / 1024.0 / 1024.0;
         resident_set = rss * page_size_kb / 1024.0 / 1024.0;
     }
