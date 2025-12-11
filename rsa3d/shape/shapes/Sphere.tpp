@@ -10,6 +10,10 @@
 
 #include "../../BoundaryConditions.h"
 
+template <unsigned short DIMENSION>
+double Sphere<DIMENSION>::g20 = 1.0; // Gamma(2.0)
+template <unsigned short DIMENSION>
+double Sphere<DIMENSION>::g15 = 0.5*std::sqrt(M_PI); // Gamma(1.5)
 
 template <unsigned short DIMENSION>
 double Sphere<DIMENSION>::radius;

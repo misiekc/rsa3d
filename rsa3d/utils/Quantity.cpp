@@ -4,12 +4,12 @@
 
 #include "Quantity.h"
 #include <fstream>
-#include <bits/unique_ptr.h>
 #include <iomanip>
 #include <chrono>
 #include <vector>
 #include <numeric>
 #include <cmath>
+#include <sstream>
 
 
 namespace {

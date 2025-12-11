@@ -36,7 +36,7 @@ public:
     double getVolume(unsigned short dim) const override;
 	Shape<DIMENSION, 0> *clone() const override;
 
-	std::string toPovray() const;
+	std::string toPovray() const override;
 };
 
 #include "OrientedCuboid.tpp"

@@ -3,7 +3,7 @@
 //
 
 #ifndef RSA3D_KMER3D_H
-#define RSA3D_KMER3D_Hz
+#define RSA3D_KMER3D_H
 
 
 #include "Polysphere.h"

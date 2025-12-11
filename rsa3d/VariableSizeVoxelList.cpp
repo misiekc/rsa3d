@@ -35,14 +35,14 @@ void VariableSizeVoxelList::allocateVoxels(size_t size){
 	}
 }
 
-double VariableSizeVoxelList::getSpatialVoxelSize(size_t i) const{
+double VariableSizeVoxelList::getSpatialVariableVoxelSize(size_t i) const{
 	if (!this->voxelsInitialized)
 		return this->spatialRange;
 	else
 		return this->initialVoxelSize/std::pow(2.0, this->voxelsDivisionCounters[i]);
 }
 
-RSAOrientation VariableSizeVoxelList::getAngularVoxelSize(size_t i) const{
+RSAOrientation VariableSizeVoxelList::getAngularVariableVoxelSize(size_t i) const{
 	if (!this->voxelsInitialized)
 		return this->angularRange;
 	else {
@@ -56,7 +56,7 @@ RSAOrientation VariableSizeVoxelList::getAngularVoxelSize(size_t i) const{
 
 double VariableSizeVoxelList::getVoxelVolume(size_t i) const{
 	double volume = 1.0;
-	double spatialVolume = std::pow(this->getSpatialVoxelSize(i), this->surfaceDimension);
+	double spatialVolume = std::pow(this->getSpatialVariableVoxelSize(i), this->surfaceDimension);
 	volume *= spatialVolume;
 	RSAOrientation angularDimension = this->getAngularVoxelSize(i);
 	for (unsigned short j=0; j<RSA_ANGULAR_DIMENSION; j++)
@@ -96,7 +96,7 @@ void VariableSizeVoxelList::getRandomPositionAndOrientation(RSAVector *position,
 	RSAOrientation vangle = v->getOrientation();
 
 	for (unsigned short i=0; i < this->surfaceDimension; i++)
-        (*position)[i] = vpos[i] + rnd->nextValue(this->u01Distribution)*this->getSpatialVoxelSize(v->index);
+        (*position)[i] = vpos[i] + rnd->nextValue(this->u01Distribution)*this->getSpatialVariableVoxelSize(v->index);
 	for (unsigned short i=this->surfaceDimension; i < RSA_SPATIAL_DIMENSION; i++)
         (*position)[i] = 0.0;
 
@@ -139,19 +139,19 @@ unsigned short VariableSizeVoxelList::splitVoxels(double minDx, size_t maxVoxels
 	_OMP_PARALLEL_FOR
 	for(size_t i=0; i<this->length; i++){
 		// voxel is tested if it should remain active and if so it is divided
-		if (!this->analyzeVoxel(this->voxels[i], nl, bc, this->getSpatialVoxelSize(i), this->getAngularVoxelSize(i))){
+		if (!this->analyzeVoxel(this->voxels[i], nl, bc, this->getSpatialVariableVoxelSize(i), this->getAngularVoxelSize(i))){
 			// if too much new voxels there is no point in further splitting
 			if (newVoxelsCounter[_OMP_THREAD_ID]*_OMP_MAXTHREADS <= maxVoxels){
 				// preparing array of new voxels after division of this->voxels[i] (aVoxels)
 				RSAOrientation angularVoxelSize = this->getAngularVoxelSize(i);
 				for (unsigned short j=0; j<RSA_ANGULAR_DIMENSION; j++)
 					angularVoxelSize[j] /= 2;
-				this->splitVoxel(this->voxels[i], this->getSpatialVoxelSize(i)/2.0, angularVoxelSize, aVoxels[_OMP_THREAD_ID]);
+				this->splitVoxel(this->voxels[i], this->getSpatialVariableVoxelSize(i)/2.0, angularVoxelSize, aVoxels[_OMP_THREAD_ID]);
 				// analyzing new voxels, only the non covered ones will be added to the new array (newList)
 				initialNewVoxelsCounter[_OMP_THREAD_ID] = newVoxelsCounter[_OMP_THREAD_ID];
 				for(size_t j=0; j<voxelsFactor; j++){
 					Voxel *v = aVoxels[_OMP_THREAD_ID][j];
-					if( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc, this->getSpatialVoxelSize(i)/2.0, angularVoxelSize) ){
+					if( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc, this->getSpatialVariableVoxelSize(i)/2.0, angularVoxelSize) ){
 						if(this->voxels[i]->depth > 0){
 							v->depth = this->voxels[i]->depth-1;
 						}
@@ -236,10 +236,10 @@ double VariableSizeVoxelList::getVoxelsVolume() const{
 		Voxel *v = this->voxels[i];
 		RSAVector position = v->getPosition();
 		for(unsigned short j=0; j<this->surfaceDimension; j++){
-			if (position[j]+this->getSpatialVoxelSize(i) > this->spatialRange){
+			if (position[j]+this->getSpatialVariableVoxelSize(i) > this->spatialRange){
 				s *= this->spatialRange - position[j];
 			}else{
-				s *= this->getSpatialVoxelSize(i);
+				s *= this->getSpatialVariableVoxelSize(i);
 			}
 		}
 	    double a = 1.0;
@@ -263,7 +263,7 @@ Voxel *VariableSizeVoxelList::getVoxel(const RSAVector &pos, const RSAOrientatio
 		return this->voxels[0];
 	std::vector<Voxel *> *vTmp = this->voxelNeighbourGrid->getCell(pos);
 	for(Voxel *v : *vTmp){
-		if (v->isInside(pos, this->getSpatialVoxelSize(v->index), angle, this->getAngularVoxelSize(v->index))){
+		if (v->isInside(pos, this->getSpatialVariableVoxelSize(v->index), angle, this->getAngularVoxelSize(v->index))){
 			return v;
 		}
 	}

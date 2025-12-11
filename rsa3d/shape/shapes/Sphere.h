@@ -8,7 +8,6 @@
 #ifndef SHAPES_SPHERE_H_
 #define SHAPES_SPHERE_H_
 
-#include <cmath>
 #include <string>
 #include "../../RND.h"
 #include "../ConvexShape.h"
@@ -18,9 +17,8 @@ class Sphere : public ConvexShape<DIMENSION, 0>{
 
 private:
 	static double radius;
-
-	static constexpr double g20 = 1.0; // Gamma(2.0)
-	static constexpr double g15 = 0.5*sqrt(M_PI); // Gamma(1.5)
+	static double g20;
+	static double g15;
 
 	double r;
 
@@ -40,11 +38,11 @@ public:
 					 const Orientation<0> &orientation, const Orientation<0> &orientationRange) const override;
 	double minDistance(const Shape<DIMENSION, 0> *s) const override;
 
-	std::string toPovray() const;
+	std::string toPovray() const override;
     std::string toWolfram() const override;
 
-    void store(std::ostream &f) const;
-	void restore(std::istream &f);
+    void store(std::ostream &f) const override;
+	void restore(std::istream &f) override;
 
 	Shape<DIMENSION, 0> *clone() const override;
 };

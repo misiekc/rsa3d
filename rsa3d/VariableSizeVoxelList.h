@@ -19,8 +19,8 @@ private:
 
 	double *voxelMap;
 
-	double getSpatialVoxelSize(size_t i) const;
-	RSAOrientation getAngularVoxelSize(size_t i) const;
+	double getSpatialVariableVoxelSize(size_t i) const;
+	RSAOrientation getAngularVariableVoxelSize(size_t i) const;
 	double getVoxelVolume(size_t i) const;
 	void createVoxelMap();
 
