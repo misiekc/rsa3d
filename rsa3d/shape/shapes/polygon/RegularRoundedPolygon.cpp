@@ -28,6 +28,6 @@ void RegularRoundedPolygon::initClass(const std::string &attr) {
 
     // Make angular voxel size smaller - regular polygon has an n-fold rotational symmetry
     ShapeStaticInfo<2, 1> shapeInfo = Shape::getShapeStaticInfo();
-    shapeInfo.setAngularVoxelSize(2*M_PI/nSides);
+    shapeInfo.setAngularVoxelSize({2*M_PI/nSides});
     Shape::setShapeStaticInfo(shapeInfo);
 }

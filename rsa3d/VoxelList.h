@@ -86,7 +86,7 @@ protected:
 	bool isTopLevelVoxelActive(Voxel *v) const;
 
 	virtual bool isVoxelInsidePacking(const Voxel *v, double spatialSize) const;
-	virtual bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, RSAOrientation angularSize,
+	virtual bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, const RSAOrientation &angularSize,
                                     std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc,
                                     unsigned short depth = 0) const;
 
@@ -99,7 +99,7 @@ protected:
 	// fills neigbour grid with voxels
 	void rebuildNeighbourGrid();
 
-	virtual bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, RSAOrientation angularSize, unsigned short depth = 0) const;
+	virtual bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, const RSAOrientation &angularSize, unsigned short depth = 0) const;
 
 	virtual void moveVoxelInList(size_t from, size_t to);
 
@@ -134,7 +134,7 @@ public:
 	 * @param shapeAngularRange typpically 2*M_PI. Can be smaller for shapes with rotational symmetry. For example for squares it should be M_PI/2.0, and for ellipses, sherocylinders or rectangles M_PI.
 	 * @param requestedAngularVoxelSize suggested initial angular size of a voxel. Initial angular size of allocaced voxels will not be larger than requested one.
 	 */
-	VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, RSAOrientation shapeAngularRange, RSAOrientation requestedAngularVoxelSize);
+	VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const RSAOrientation &shapeAngularRange, const RSAOrientation &requestedAngularVoxelSize);
 
 	void disable();
 

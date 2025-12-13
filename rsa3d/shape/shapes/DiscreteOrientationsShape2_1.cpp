@@ -15,13 +15,13 @@ void DiscreteOrientationsShape2_1::initAngles(const std::string &args){
     size_t n;
     argsStream >> n;
     ValidateMsg(n>0, "At least one angle needed");
-    double maxAngle = Shape<2,1>::getAngularVoxelSize();
+    Orientation<1> maxAngle = Shape<2,1>::getAngularVoxelSize();
 
 
     std::string sToken;
     argsStream >> sToken;
     if (sToken=="auto"){
-    	for(double angle = 0; angle<maxAngle; angle += maxAngle/n){
+    	for(double angle = 0; angle<maxAngle[0]; angle += (maxAngle[0])/n){
         	RSAOrientation orientation({angle});
         	allowedOrientations.push_back(orientation);
     	}
@@ -29,7 +29,7 @@ void DiscreteOrientationsShape2_1::initAngles(const std::string &args){
     	for(size_t i=0; i<n; i++){
     		double decAngle = std::atoi(sToken.c_str());
     		ValidateMsg(decAngle >= 0 && decAngle < 360, "Angle should be from [0, 360) interval");
-    		if (decAngle*M_PI/180.0 <= maxAngle){
+    		if (decAngle*M_PI/180.0 <= maxAngle[0]){
     			RSAOrientation orientation({decAngle*M_PI/180.0});
     			allowedOrientations.push_back(orientation);
     		}
@@ -106,9 +106,10 @@ double DiscreteOrientationsShape2_1::getVolume(unsigned short dim) const {
 
 bool DiscreteOrientationsShape2_1::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition,
                                   const Orientation<0> &voxelOrientation, double spatialSize,
-                                  double angularSize) const {
+                                  const Orientation<0> &angularSize) const {
+    Orientation<1> aSize = {0};
 	for(Orientation<1> orientation: allowedOrientations)
-		if (!this->underlyingShape->voxelInside(bc, voxelPosition, orientation, spatialSize, 0.0))
+		if (!this->underlyingShape->voxelInside(bc, voxelPosition, orientation, spatialSize, aSize))
 			return false;
 	return true;
 }

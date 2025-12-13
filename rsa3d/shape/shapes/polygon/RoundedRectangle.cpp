@@ -47,7 +47,7 @@ void RoundedRectangle::initClass(const std::string &args) {
 
     // Make angular voxel size smaller - regular polygon has an 2-fold rotational symmetry
     ShapeStaticInfo<2, 1> shapeInfo = Shape::getShapeStaticInfo();
-    shapeInfo.setAngularVoxelSize(M_PI);
+    shapeInfo.setAngularVoxelSize({M_PI});
     Shape::setShapeStaticInfo(shapeInfo);
 }
 

@@ -15,14 +15,14 @@
 
 #include "shape/shapes/OrientedCuboid.h"
 
-OrientedCuboidVoxelList::OrientedCuboidVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, RSAOrientation shapeAngularRange, RSAOrientation requestedAngularVoxelSize) : VariableSizeVoxelList(dim, packingSpatialSize, requestedSpatialVoxelSize, shapeAngularRange, requestedAngularVoxelSize){
+OrientedCuboidVoxelList::OrientedCuboidVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const RSAOrientation &shapeAngularRange, const RSAOrientation &requestedAngularVoxelSize) : VariableSizeVoxelList(dim, packingSpatialSize, requestedSpatialVoxelSize, shapeAngularRange, requestedAngularVoxelSize){
 }
 
 /**
  * returns true when the whole voxel is inside an exclusion area of any shape in shapes
  * To determine it the method tires to split voxel up to level of maxDepth
  */
-bool OrientedCuboidVoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, RSAOrientation angularSize,
+bool OrientedCuboidVoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, const RSAOrientation &angularSize,
 										   std::vector<const RSAShape *> *shapes, RSABoundaryConditions *bc,
                                            unsigned short depth) const{
 

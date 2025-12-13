@@ -11,7 +11,7 @@
 #include <math.h>
 
 
-VariableSizeVoxelList::VariableSizeVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, RSAOrientation shapeAngularRange, RSAOrientation requestedAngularVoxelSize) : VoxelList(dim, packingSpatialSize, requestedSpatialVoxelSize, shapeAngularRange, requestedAngularVoxelSize){
+VariableSizeVoxelList::VariableSizeVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const RSAOrientation &shapeAngularRange, const RSAOrientation &requestedAngularVoxelSize) : VoxelList(dim, packingSpatialSize, requestedSpatialVoxelSize, shapeAngularRange, requestedAngularVoxelSize){
 	this->voxelMap = new double[1];
 	this->voxelsDivisionCounters = new unsigned short[1];
 	this->u01Distribution = new std::uniform_real_distribution<double>(0.0, 1.0);
@@ -42,7 +42,7 @@ double VariableSizeVoxelList::getSpatialVariableVoxelSize(size_t i) const{
 		return this->initialVoxelSize/std::pow(2.0, this->voxelsDivisionCounters[i]);
 }
 
-RSAOrientation VariableSizeVoxelList::getAngularVariableVoxelSize(size_t i) const{
+RSAOrientation VariableSizeVoxelList::getAngularVoxelSize(size_t i) const{
 	if (!this->voxelsInitialized)
 		return this->angularRange;
 	else {

@@ -15,7 +15,7 @@ class DiscreteAngleVoxelList: public VoxelList {
 private:
 protected:
 	virtual unsigned int initVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl) override;
-	virtual void splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes) const override;
+	virtual void splitVoxel(Voxel *v, double spatialSize, const RSAOrientation &angularSize, Voxel **vRes) const override;
 	virtual void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd);
 
 public:
@@ -29,7 +29,7 @@ public:
 	DiscreteAngleVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const std::vector<Orientation<1>> &orientations);
 
 	Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle) const override;
-	virtual double getAngularVoxelSize() const override;
+	virtual RSAOrientation getAngularVoxelSize() const override;
 	virtual double getVoxelsVolume() const override;
 
 

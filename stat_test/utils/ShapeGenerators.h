@@ -66,12 +66,11 @@ std::unique_ptr<Shape<SD, AD>> generate_shape(const Vector<SD> &pos, const std::
  */
 template<std::size_t SD = RSA_SPATIAL_DIMENSION, std::size_t AD = RSA_ANGULAR_DIMENSION>
 std::unique_ptr<Shape<SD, AD>> generate_randomly_oriented_shape(const Vector<SD> &pos, RND *rnd) {
-    double angularSize = Shape<SD, AD>::getAngularVoxelSize();
+    Orientation<AD> angularSize = Shape<SD, AD>::getAngularVoxelSize();
     std::array<double, AD> orientation{};
-    std::for_each(orientation.begin(), orientation.end(), [rnd, angularSize](double &elem) {
-        elem = rnd->nextValue() * angularSize;
-    });
-
+    for (std::size_t i = 0; i < AD; i++) {
+        orientation[i] = rnd->nextValue() * angularSize[i];
+    }
     return generate_shape<SD, AD>(pos, orientation, rnd);
 }
 

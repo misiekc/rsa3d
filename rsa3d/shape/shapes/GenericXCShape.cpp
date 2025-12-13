@@ -76,7 +76,7 @@ bool GenericXCShape::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) co
 	return result;
 }
 
-bool GenericXCShape::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation, double orientationRange) const {
+bool GenericXCShape::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation, const Orientation<0> &orientationRange) const {
     Vector<3> bcPos = position + bc->getTranslation(this->getPosition(), position);
     CollideGeometry *point = new CollidePoint(Vector<3>({0, 0, 0}));
     Quat q1(this->orientation);

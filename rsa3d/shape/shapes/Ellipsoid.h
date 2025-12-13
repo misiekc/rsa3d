@@ -41,7 +41,7 @@ public:
 
     bool overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const override;
     bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
-                     double orientationRange) const override;
+                     const Orientation<0> &orientationRange) const override;
     void store(std::ostream &f) const override;
     void restore(std::istream &f) override;
     Shape<3, 0> *clone() const override;

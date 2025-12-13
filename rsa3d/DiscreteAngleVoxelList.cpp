@@ -27,8 +27,10 @@ DiscreteAngleVoxelList::DiscreteAngleVoxelList(int dim, double packingSpatialSiz
 
 	this->initialVoxelSize = VoxelList::findFloorSize(requestedSpatialVoxelSize);
 	this->spatialVoxelSize = this->spatialRange;
-	this->angularVoxelSize = 0;
-	this->angularRange = 2*M_PI;
+	for (unsigned short int i=0; i<RSA_ANGULAR_DIMENSION; i++)
+		this->angularVoxelSize[i] = 0;
+	for (unsigned short i=0; i<RSA_ANGULAR_DIMENSION; i++)
+		this->angularRange[i] = 2*M_PI;
 	this->activeTopLevelVoxels = nullptr;
 	this->voxelNeighbourGrid = nullptr;
 
@@ -90,7 +92,11 @@ unsigned int DiscreteAngleVoxelList::initVoxels(RSABoundaryConditions *bc, Neigh
 		for(size_t angularIndex=0; angularIndex<this->allowedOrientations.size(); angularIndex++){
 			size_t index = spatialIndex * this->allowedOrientations.size() + angularIndex;
 			this->voxels[index] = new Voxel(position, this->allowedOrientations[angularIndex]);
-			if (this->analyzeVoxel(this->voxels[index], nl, bc, this->spatialVoxelSize, 0)){ // dividing only not overlapping voxels
+			RSAOrientation aSize;
+			for (unsigned short i=0; i<RSA_ANGULAR_DIMENSION; i++) {
+				aSize[i]=0;
+			}
+			if (this->analyzeVoxel(this->voxels[index], nl, bc, this->spatialVoxelSize, aSize)){ // dividing only not overlapping voxels
 				delete this->voxels[index];
 				this->voxels[index] = nullptr;
 			}else{
@@ -134,7 +140,7 @@ Voxel *DiscreteAngleVoxelList::getVoxel(const RSAVector &pos, const RSAOrientati
 }
 
 
-void DiscreteAngleVoxelList::splitVoxel(Voxel *v, double spatialSize, double angularSize, Voxel **vRes) const
+void DiscreteAngleVoxelList::splitVoxel(Voxel *v, double spatialSize, const RSAOrientation &angularSize, Voxel **vRes) const
 {
 	unsigned short spatialLoop = 1 << this->surfaceDimension;
 
@@ -169,8 +175,11 @@ void DiscreteAngleVoxelList::getRandomPositionAndOrientation(RSAVector *position
 }
 
 
-double DiscreteAngleVoxelList::getAngularVoxelSize() const{
-	return 0.0;
+RSAOrientation DiscreteAngleVoxelList::getAngularVoxelSize() const{
+	RSAOrientation aSize;
+	for (unsigned short i=0; i<RSA_ANGULAR_DIMENSION; i++)
+		aSize[i] = 0;
+	return aSize;
 }
 
 double DiscreteAngleVoxelList::getVoxelsVolume() const{

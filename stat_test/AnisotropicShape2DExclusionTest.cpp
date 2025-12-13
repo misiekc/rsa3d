@@ -231,9 +231,9 @@ bool as2d_extest::point_inside(const Shape<2, 1> &shape, const Vector<2> &point,
 
     try {
         auto &convexShape = dynamic_cast<const ConvexShape<2, 1>&>(shape);
-        return convexShape.pointInside(&bc, point, {{angleFrom}}, angleTo - angleFrom);
+        return convexShape.pointInside(&bc, point, {{angleFrom}}, {angleTo - angleFrom});
     } catch (std::bad_cast&) {
-        return shape.voxelInside(&bc, point, {{angleFrom}}, 0, angleTo - angleFrom);
+        return shape.voxelInside(&bc, point, {{angleFrom}}, 0, {angleTo - angleFrom});
     }
 }
 

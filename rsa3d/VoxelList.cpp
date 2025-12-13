@@ -80,7 +80,7 @@ VoxelList::VoxelList(){
 
 
 
-VoxelList::VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, RSAOrientation shapeAngularRange, RSAOrientation requestedAngularVoxelSize){
+VoxelList::VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const RSAOrientation &shapeAngularRange, const RSAOrientation &requestedAngularVoxelSize){
 	Expects(dim > 0);
 	Expects(dim <= RSA_SPATIAL_DIMENSION);
 	Expects(packingSpatialSize > 0.0);
@@ -418,7 +418,7 @@ bool VoxelList::isVoxelInsidePacking(const Voxel *v, [[maybe_unused]] double spa
  * returns true when the whole voxel is inside an exclusion area of any shape in shapes
  * To determine it the method tires to split voxel up to level of maxDepth
  */
-bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, RSAOrientation angularSize,
+bool VoxelList::isVoxelInsideExclusionZone(Voxel *v, double spatialSize, const RSAOrientation &angularSize,
 										   std::vector<const RSAShape *> *shapes, RSABoundaryConditions *bc,
                                            unsigned short depth) const{
 
@@ -534,7 +534,7 @@ bool VoxelList::isTopLevelVoxelActive(Voxel *v) const{
 	return this->activeTopLevelVoxels[index];
 }
 
-bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, RSAOrientation angularSize, unsigned short depth) const{
+bool VoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, const RSAOrientation &angularSize, unsigned short depth) const{
 	if (!this->disabled){ // && (depth > v->depth || depth==0) ){
 
 	    if (!isTopLevelVoxelActive(v) || !this->isVoxelInsidePacking(v, spatialSize) )

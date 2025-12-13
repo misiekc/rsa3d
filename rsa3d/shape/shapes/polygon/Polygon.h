@@ -96,7 +96,7 @@ public:
 #endif
 
 	bool voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition, const Orientation<1> &voxelOrientation,
-					 double spatialSize, double angularSize) const override;
+					 double spatialSize, const Orientation<1> &angularSize) const override;
 	std::string toPovray() const override;
 	std::string toString() const override;
 	std::string toWolfram() const override;

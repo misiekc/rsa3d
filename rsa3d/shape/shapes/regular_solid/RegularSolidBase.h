@@ -110,7 +110,7 @@ public:
     static constexpr double tribonacciConstant = (1 + std::cbrt(19 + 3*std::sqrt(33.)) + std::cbrt(19 - 3*std::sqrt(33.)))/3;
 
     bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
-                     double orientationRange) const override;
+                     const Orientation<0> &orientationRange) const override;
     void store(std::ostream &f) const override;
     void restore(std::istream &f) override;
     std::string toWolfram() const override;

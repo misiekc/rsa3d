@@ -61,7 +61,7 @@ TEST_CASE("RegularDiskopolygonAttributes: initClass") {
         auto shapeInfo = Shape<2, 1>::getShapeStaticInfo();
         REQUIRE(shapeInfo.getCircumsphereRadius() == Approx(0.6060354510869270));
         REQUIRE(shapeInfo.getInsphereRadius() == Approx(0.5102971745443950));
-        REQUIRE(shapeInfo.getVoxelAngularSize() == Approx(2.094395102393195));
+        REQUIRE(shapeInfo.getVoxelAngularSize()[0] == Approx(2.094395102393195));
     }
 
     SECTION("spherocylinder parameters") {

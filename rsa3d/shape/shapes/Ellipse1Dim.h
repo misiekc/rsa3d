@@ -57,7 +57,7 @@ public:
     void store(std::ostream &f) const override;
 	void restore(std::istream &f) override;
     bool pointInside(BoundaryConditions<1> *bc, const Vector<1> &position, const Orientation<1> &orientation,
-                    double orientationRange) const final;
+                    const Orientation<1> &orientationRange) const final;
     double getAngle() const;
 };
 

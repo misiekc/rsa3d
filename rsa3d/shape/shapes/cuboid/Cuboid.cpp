@@ -163,7 +163,7 @@ bool Cuboid::pointInsideCuboid(const Vector<3> &vertex) const
 // It is an interior of a set of point which distanse from
 //----------------------------------------------------------------------------
 bool Cuboid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &pos, const Orientation<0> &orientation,
-                        double orientationRange) const
+                        const Orientation<0> &orientationRange) const
 {
     // Transform point coordinates to Cuboid coordinate system
     Vector<3> bcPos = pos + bc->getTranslation(this->getPosition(), pos);

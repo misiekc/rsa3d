@@ -123,7 +123,7 @@ std::vector<Vector<3>> RegularSolidBase::applyPosition(const std::vector<Vector<
 }
 
 bool RegularSolidBase::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position,
-                                   const Orientation<0> &orientation, double orientationRange) const {
+                                   const Orientation<0> &orientation, const Orientation<0> &orientationRange) const {
     Vector<3> bcPos = position + bc->getTranslation(this->getPosition(), position);
     auto vertices = this->getVertices();
     switch (pointInsideFace(bcPos, vertices)) {

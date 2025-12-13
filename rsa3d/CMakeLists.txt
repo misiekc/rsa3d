@@ -57,7 +57,7 @@ set(RSA_SOURCE
         Surface.cpp
         SurfaceFunction.h
         ThreadLocalRND.cpp
-#        VariableSizeVoxelList.cpp
+        VariableSizeVoxelList.cpp
         Voxel.cpp
         VoxelList.cpp)
 

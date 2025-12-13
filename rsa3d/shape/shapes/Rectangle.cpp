@@ -69,7 +69,7 @@ void Rectangle::initClass(const std::string &args) {
 
     shapeInfo.setCircumsphereRadius(std::sqrt(std::pow(Rectangle::longer, 2) + std::pow(Rectangle::shorter, 2)) / 2);
     shapeInfo.setInsphereRadius(Rectangle::shorter / 2);
-    shapeInfo.setAngularVoxelSize(M_PI);
+    shapeInfo.setAngularVoxelSize({M_PI});
     shapeInfo.setSupportsSaturation(true);
     shapeInfo.setDefaultCreateShapeImpl<Rectangle>();
 

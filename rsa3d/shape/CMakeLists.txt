@@ -104,7 +104,8 @@ add_library(shapes.3.0
         shapes/RoundedCone.cpp
         shapes/Sphere.h
         shapes/Sphere.tpp
-        shapes/Superellipsoid.cpp)
+        shapes/Superellipsoid.cpp
+)
 target_compile_definitions(shapes.3.0 PUBLIC RSA_SPATIAL_DIMENSION=3 RSA_ANGULAR_DIMENSION=0)
 
 add_library(shapes.3.3

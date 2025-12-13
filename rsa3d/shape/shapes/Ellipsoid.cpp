@@ -96,7 +96,7 @@ bool Ellipsoid::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) const {
 	return false;
 }
 
-bool Ellipsoid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation, double orientationRange) const {
+bool Ellipsoid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation, const Orientation<0> &orientationRange) const {
     // Transform point coordinates to Ellipsoid coordinate system
     Vector<3> bcPos = position + bc->getTranslation(this->getPosition(), position);
     Vector<3> pointAligned = this->orientation.transpose() * (bcPos - this->getPosition());

@@ -37,7 +37,8 @@ void Superellipsoid::initClass(const std::string &attr) {
         return new Superellipsoid(Matrix<3, 3>::rotation(
                 2 * M_PI * rnd->nextValue(),
                 std::asin(2 * rnd->nextValue() - 1),
-                2 * M_PI * rnd->nextValue()));
+                2 * M_PI * rnd->nextValue())
+                );
     });
 
     Shape::setShapeStaticInfo(shapeInfo);
@@ -176,7 +177,7 @@ bool Superellipsoid::overlap(BoundaryConditions<3> *bc, const Shape<3, 0> *s) co
     	return pw_potential<0;
 }
 
-bool Superellipsoid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation, double orientationRange) const {
+bool Superellipsoid::pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation, const Orientation<0> &orientationRange) const {
     // Transform point coordinates to Ellipsoid coordinate system
     Vector<3> bcPos = position + bc->getTranslation(this->getPosition(), position);
     Vector<3> pointAligned = this->orientationTr * (bcPos - this->getPosition());

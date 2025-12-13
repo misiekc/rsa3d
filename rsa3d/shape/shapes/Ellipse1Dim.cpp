@@ -34,7 +34,7 @@ void Ellipse1Dim::initClass(const std::string &args){
 	ShapeStaticInfo<1, 1> shapeInfo;
 	shapeInfo.setCircumsphereRadius(longSemiAxis);
 	shapeInfo.setInsphereRadius(shortSemiAxis);
-	shapeInfo.setAngularVoxelSize(M_PI);
+	shapeInfo.setAngularVoxelSize({M_PI});
 	shapeInfo.setSupportsSaturation(true);
 	shapeInfo.setDefaultCreateShapeImpl <Ellipse1Dim> ();
 	
@@ -49,8 +49,8 @@ double Ellipse1Dim::calculateF(double* r, double g) const {
 }
 
 void Ellipse1Dim::setAngle(double angle){
-	double interval = getAngularVoxelSize();
-	Orientation<1> orientation{{normalizeAngle(angle, interval)}};
+	Orientation<1> interval = getAngularVoxelSize();
+	Orientation<1> orientation{{normalizeAngle(angle, interval[0])}};
 	Shape::setOrientation(orientation);  // Now use the original setter from Shape
 
 	this->calculateU();
@@ -278,8 +278,8 @@ Shape<1, 1> *Ellipse1Dim::clone() const {
 }
 
 bool Ellipse1Dim::pointInside(BoundaryConditions<1> *bc, const Vector<1> &position,
-									 const Orientation<1> &orientation, double orientationRange) const {
-	return this->pointInside(bc, position, orientation[0], orientation[0]+orientationRange);
+									 const Orientation<1> &orientation, const Orientation<1> &orientationRange) const {
+	return this->pointInside(bc, position, orientation[0], orientation[0]+orientationRange[0]);
 }
 
 Matrix<2, 2> Ellipse1Dim::getRotationMatrix() const {

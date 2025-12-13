@@ -8,7 +8,7 @@
 #include <cmath>
 
 
-NewDiscreteAngleVoxelList::NewDiscreteAngleVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, double shapeAngularRange, double requestedAngularVoxelSize, const std::vector<Orientation<1>> &orientations) : VoxelList(dim, packingSpatialSize, requestedSpatialVoxelSize, shapeAngularRange, requestedAngularVoxelSize){
+NewDiscreteAngleVoxelList::NewDiscreteAngleVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const Orientation<1> &shapeAngularRange, const Orientation<1> &requestedAngularVoxelSize, const std::vector<RSAOrientation> &orientations) : VoxelList(dim, packingSpatialSize, requestedSpatialVoxelSize, shapeAngularRange, requestedAngularVoxelSize){
     this->allowedOrientations = orientations;
     this->voxelMap = new double[1];
     this->u01Distribution = new std::uniform_real_distribution<double>(0.0, 1.0);
@@ -41,7 +41,7 @@ std::vector<RSAOrientation> NewDiscreteAngleVoxelList::getPossibleOrientations(d
     std::vector<RSAOrientation> v;
 
     size_t i = start / range;
-    if (range == this->orientationsVectorRange){
+    if (range == this->orientationsVectorRange[0]){
         v = this->orientationsVector[i];
     }else if (range == this->orientationsHalfVectorRange){
         v = this->orientationsHalfVector[i];
@@ -55,18 +55,18 @@ std::vector<RSAOrientation> NewDiscreteAngleVoxelList::getPossibleOrientations(d
     return v;
 }
 
-double NewDiscreteAngleVoxelList::getAngularVoxelSize(size_t i) const{
+RSAOrientation NewDiscreteAngleVoxelList::getAngularVoxelSize(size_t i) const{
     if (!this->voxelsInitialized)
         return this->angularRange;
     else{
-        std::vector<RSAOrientation> v = this->getPossibleOrientations(this->voxels[i]->getOrientation()[0], this->angularVoxelSize);
-        return this->angularRange * static_cast<double>(v.size()) / static_cast<double>(this->allowedOrientations.size());
+        std::vector<RSAOrientation> v = this->getPossibleOrientations(this->voxels[i]->getOrientation()[0], this->angularVoxelSize[0]);
+        return {this->angularRange[0] * static_cast<double>(v.size()) / static_cast<double>(this->allowedOrientations.size())};
     }
 }
 
 double NewDiscreteAngleVoxelList::getVoxelVolume(size_t i) const{
     double spatialVolume = std::pow(this->getSpatialVoxelSize(), this->surfaceDimension);
-    double angularVolume = std::pow(this->getAngularVoxelSize(i), RSA_ANGULAR_DIMENSION);
+    double angularVolume = std::pow(this->getAngularVoxelSize(i)[0], RSA_ANGULAR_DIMENSION);
     return (spatialVolume*angularVolume);
 }
 
@@ -92,18 +92,18 @@ void NewDiscreteAngleVoxelList::createOrientationsMap(double range) {
         this->orientationsVector = this->orientationsHalfVector;
         this->orientationsHalfVector = nullptr;
     } else {
-        size_t iMax = this->angularRange / range + 1;
+        size_t iMax = this->angularRange[0] / range + 1;
         this->orientationsVector = new std::vector<RSAOrientation>[iMax];
         for (const RSAOrientation orientation: this->allowedOrientations) {
             size_t i = orientation[0] / range;
             this->orientationsVector[i].push_back(orientation);
         }
     }
-    this->orientationsVectorRange = range;
+    this->orientationsVectorRange[0] = range;
 
     if (this->orientationsHalfVector != nullptr)
         delete[] this->orientationsHalfVector;
-    size_t iMax = this->angularRange / ((range / 2.0) * this->dxFactor) + 1;
+    size_t iMax = this->angularRange[0] / ((range / 2.0) * this->dxFactor) + 1;
     this->orientationsHalfVector = new std::vector<RSAOrientation>[iMax];
     for (const RSAOrientation orientation: this->allowedOrientations) {
         size_t i = orientation[0] / ((range / 2.0) * this->dxFactor);
@@ -112,7 +112,7 @@ void NewDiscreteAngleVoxelList::createOrientationsMap(double range) {
     this->orientationsHalfVectorRange = ((range / 2.0) * this->dxFactor);
 }
 
-void NewDiscreteAngleVoxelList::getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) {
+void NewDiscreteAngleVoxelList::getRandomEntry(RSAVector *position, Orientation<1> *orientation, Voxel **v, RND *rnd) {
     double d = rnd->nextValue();
     size_t i1=0, i2=this->length-1, i;
     while(i2>i1+1 && i2>0){
@@ -126,7 +126,7 @@ void NewDiscreteAngleVoxelList::getRandomEntry(RSAVector *position, RSAOrientati
     this->getRandomPositionAndOrientation(position, orientation, *v, rnd);
 }
 
-void NewDiscreteAngleVoxelList::getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd){
+void NewDiscreteAngleVoxelList::getRandomPositionAndOrientation(RSAVector *position, Orientation<1> *orientation, Voxel *v, RND *rnd){
     RSAVector vpos = v->getPosition();
 
     for (unsigned short i=0; i < this->surfaceDimension; i++)
@@ -134,7 +134,7 @@ void NewDiscreteAngleVoxelList::getRandomPositionAndOrientation(RSAVector *posit
     for (unsigned short i=this->surfaceDimension; i < RSA_SPATIAL_DIMENSION; i++)
         (*position)[i] = 0.0;
 
-    std::vector<RSAOrientation> vo = this->getPossibleOrientations(v->getOrientation()[0], this->angularVoxelSize);
+    std::vector<RSAOrientation> vo = this->getPossibleOrientations(v->getOrientation()[0], this->angularVoxelSize[0]);
     RSAOrientation o = vo[static_cast<size_t>(vo.size()*rnd->nextValue(this->u01Distribution))];
     for (unsigned short i=0; i < RSA_ANGULAR_DIMENSION; i++)
         (*orientation)[i] = o[i];
@@ -143,14 +143,14 @@ void NewDiscreteAngleVoxelList::getRandomPositionAndOrientation(RSAVector *posit
 
 unsigned short NewDiscreteAngleVoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc){
     if (!this->voxelsInitialized){
-        this->createOrientationsMap(this->initialAngularVoxelSize);
+        this->createOrientationsMap(this->initialAngularVoxelSize[0]);
         this->initVoxels(bc, nl);
         this->createVoxelMap();
         return VoxelList::NO_SPLIT_BUT_INITIALIZED;
     }
     unsigned short uRet = VoxelList::splitVoxels(minDx, maxVoxels, nl, bc);
     this->createVoxelMap();
-    this->createOrientationsMap(this->angularVoxelSize);
+    this->createOrientationsMap(this->angularVoxelSize[0]);
     return uRet;
 }
 
@@ -169,18 +169,20 @@ double NewDiscreteAngleVoxelList::getVoxelsVolume() const{
         }
         double a = 1.0;
         for(unsigned char j=0; j<RSA_ANGULAR_DIMENSION; j++){
-            a *= this->getAngularVoxelSize(i);
-            a /= this->angularRange;
+            a *= this->getAngularVoxelSize(i)[0];
+            a /= this->angularRange[0];
         }
         result += s*a;
     }
     return result;
 }
 
-bool NewDiscreteAngleVoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, double angularSize, unsigned short depth) const{
-    if (v->getOrientation()[0]>this->angularRange)
-        return true;
-    std::vector<RSAOrientation> vo = this->getPossibleOrientations(v->getOrientation()[0], angularSize);
+bool NewDiscreteAngleVoxelList::analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, const Orientation<1> &angularSize, unsigned short depth) const{
+    for (unsigned short i=0; i<RSA_ANGULAR_DIMENSION; i++) {
+        if (v->getOrientation()[i]>this->angularRange[i])
+            return true;
+    }
+    std::vector<RSAOrientation> vo = this->getPossibleOrientations(v->getOrientation()[0], angularSize[0]);
     if (vo.size()==0)
         return true;
     else

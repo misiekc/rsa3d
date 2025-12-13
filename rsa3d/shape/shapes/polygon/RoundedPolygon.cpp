@@ -74,7 +74,7 @@ void RoundedPolygon::initClass(const std::string &args){
     ShapeStaticInfo<2, 1> shapeInfo;
     shapeInfo.setCircumsphereRadius(Polygon::calculateCircumscribedCircleRadius() + RoundedPolygon::radius);
 	shapeInfo.setInsphereRadius(Polygon::calculateInscribedCircleRadius() + RoundedPolygon::radius);
-	shapeInfo.setAngularVoxelSize(2*M_PI);
+	shapeInfo.setAngularVoxelSize({2*M_PI});
 	shapeInfo.setSupportsSaturation(true);
 	shapeInfo.setDefaultCreateShapeImpl <RoundedPolygon> ();
 

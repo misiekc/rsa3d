@@ -82,7 +82,7 @@ public:
 
     bool overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *s) const override;
     bool voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition, const Orientation<1> &orientation,
-                     double spatialSize, double angularSize) const override;
+                     double spatialSize, const Orientation<1> &angularSize) const override;
     Shape<2, 1> *clone() const override;
     std::string toWolfram() const override;
     double getVolume(unsigned short dim) const override { return 1; }

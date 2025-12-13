@@ -21,7 +21,7 @@ void RegularDiskopolygon::initClass(const std::string &attr) {
     ShapeStaticInfo<2, 1> shapeInfo;
     shapeInfo.setCircumsphereRadius(getHalfDiagonal() + getRadius());
     shapeInfo.setInsphereRadius(getHeight() + getRadius());
-    shapeInfo.setAngularVoxelSize(2*M_PI / getNSides());
+    shapeInfo.setAngularVoxelSize({2*M_PI / getNSides()});
     shapeInfo.setSupportsSaturation(true);
     shapeInfo.setDefaultCreateShapeImpl<RegularDiskopolygon>();
     Shape::setShapeStaticInfo(shapeInfo);
@@ -62,7 +62,7 @@ bool RegularDiskopolygon::overlap(BoundaryConditions<2> *bc, const Shape<2, 1> *
 }
 
 bool RegularDiskopolygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition,
-                                      const Orientation<1> &orientation, double spatialSize, double angularSize) const
+                                      const Orientation<1> &orientation, double spatialSize, const Orientation<1> &angularSize) const
 {
     switch (this->voxelInsideEarlyRejection(bc, voxelPosition, orientation, spatialSize, angularSize)) {
         case EarlyRejectionResult::TRUE:      return true;
@@ -74,7 +74,7 @@ bool RegularDiskopolygon::voxelInside(BoundaryConditions<2> *bc, const Vector<2>
 
     for (std::size_t i{}; i < getNSides(); i++) {
         double virtualScAngleFrom = orientation[0] + static_cast<double>(i) * 2 * M_PI / getNSides();
-        double virtualScAngleTo = virtualScAngleFrom + angularSize;
+        double virtualScAngleTo = virtualScAngleFrom + angularSize[0];
         AnisotropicShape2D::normalizeAngleRange(0, &virtualScAngleFrom, &virtualScAngleTo, 2*M_PI);
 
         RectangularBounding rectangularBounding = RectangularBoundingBuilder::forArch(defaultSpherocylinderOffset,

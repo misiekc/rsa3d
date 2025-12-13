@@ -1,5 +1,5 @@
 //
-// Created by pkua on 15.11.2019.
+// Created by ciesla on 15.11.2025.
 //
 
 #include "Kmer3D.h"
@@ -28,7 +28,6 @@ std::string Kmer3D::preparePolysphereAttr(int numberOfDisks, double length) {
     polydiskAttrStream << numberOfDisks;
     double firstDiskOffset = length * (numberOfDisks - 1) / 2;
     for (int i = 0; i < numberOfDisks; i++)
-//        polydiskAttrStream << " 0 0 " << (length * i - firstDiskOffset) << " 1";
         polydiskAttrStream << " " << (length * i - firstDiskOffset) << " 0 0 1";
     polydiskAttrStream << " 1 " << volume;
 

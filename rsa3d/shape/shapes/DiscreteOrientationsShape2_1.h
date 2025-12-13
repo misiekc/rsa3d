@@ -50,7 +50,7 @@ public:
     bool overlap(BoundaryConditions<2> *bc, const Shape<2, 0> *s) const override;
     double getVolume(unsigned short dim) const override;
     bool voxelInside(BoundaryConditions<2> *bc, const Vector<2> &voxelPosition, const Orientation<0> &voxelOrientation,
-                     double spatialSize, double angularSize) const override;
+                     double spatialSize, const Orientation<0> &angularSize) const override;
     double minDistance(const Shape<2, 0> *s) const override;
 
     std::string toString() const override;

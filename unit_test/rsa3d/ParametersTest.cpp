@@ -40,7 +40,7 @@ TEST_CASE("Parameters: valid") {
 
         REQUIRE(parameters.maxTriesWithoutSuccess == 1);
         REQUIRE(parameters.maxVoxels == 2);
-        REQUIRE(parameters.requestedAngularVoxelSize == Approx(3.5));
+        REQUIRE(parameters.requestedAngularVoxelSize[0] == Approx(3.5));
         REQUIRE(parameters.minDx == Approx(4.5));
         REQUIRE(parameters.maxTime == Approx(5.5));
         REQUIRE(parameters.split == 6);
