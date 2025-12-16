@@ -32,7 +32,7 @@ public:
         _OMP_ATOMIC
         counter++;
         if (counter > toReport) {
-            _OMP_CRITICAL(stdout)
+            _OMP_CRITICAL_SIMPLE
             {
                 if (counter > toReport) {
                     out << ">> " << toReport << text << std::endl;

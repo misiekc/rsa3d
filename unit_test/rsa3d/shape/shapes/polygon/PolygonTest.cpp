@@ -50,10 +50,10 @@ TEST_CASE("Polygon: initClass basic parsing") {
         auto segments = Polygon::getSegments();
         auto helperSegments = Polygon::getHelperSegments();
         REQUIRE(segments.size() == 4);
-        REQUIRE(segments[0] == std::make_pair(0ul, 1ul));
-        REQUIRE(segments[1] == std::make_pair(1ul, 2ul));
-        REQUIRE(segments[2] == std::make_pair(2ul, 3ul));
-        REQUIRE(segments[3] == std::make_pair(3ul, 0ul));
+        REQUIRE(segments[0] == std::make_pair((size_t)0, (size_t)1));
+        REQUIRE(segments[1] == std::make_pair((size_t)1, (size_t)2));
+        REQUIRE(segments[2] == std::make_pair((size_t)2, (size_t)3));
+        REQUIRE(segments[3] == std::make_pair((size_t)3, (size_t)0));
         REQUIRE(helperSegments.empty());
     }
 }
@@ -111,8 +111,8 @@ TEST_CASE("Polygon: initClass helperSegments") {
 
         auto helperSegments = Polygon::getHelperSegments();
         REQUIRE(helperSegments.size() == 2);
-        REQUIRE(helperSegments[0] == std::make_pair(3ul, 1ul));
-        REQUIRE(helperSegments[1] == std::make_pair(2ul, 0ul));
+        REQUIRE(helperSegments[0] == std::make_pair((size_t)3, (size_t)1));
+        REQUIRE(helperSegments[1] == std::make_pair((size_t)2, (size_t)0));
     }
 
     SECTION("starHelper segments additional vertex") {
@@ -131,10 +131,10 @@ TEST_CASE("Polygon: initClass helperSegments") {
 
         auto helperSegments = Polygon::getHelperSegments();
         REQUIRE(helperSegments.size() == 4);
-        REQUIRE(helperSegments[0] == std::make_pair(0ul, 4ul));
-        REQUIRE(helperSegments[1] == std::make_pair(1ul, 4ul));
-        REQUIRE(helperSegments[2] == std::make_pair(2ul, 4ul));
-        REQUIRE(helperSegments[3] == std::make_pair(3ul, 4ul));
+        REQUIRE(helperSegments[0] == std::make_pair((size_t)0, (size_t)4));
+        REQUIRE(helperSegments[1] == std::make_pair((size_t)1, (size_t)4));
+        REQUIRE(helperSegments[2] == std::make_pair((size_t)2, (size_t)4));
+        REQUIRE(helperSegments[3] == std::make_pair((size_t)3, (size_t)4));
     }
 }
 
