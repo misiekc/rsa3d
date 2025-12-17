@@ -15,6 +15,7 @@
 #include "modes/DatFileGenerationMode.h"
 #include "modes/AnalyzeMode.h"
 #include "modes/PovrayMode.h"
+#include "modes/OrientationsMode.h"
 #include "modes/BCExpandMode.h"
 #include "modes/ContactFunctionMode.h"
 #include "modes/ExclusionZonesMode.h"
@@ -42,6 +43,7 @@ namespace {
 //            {"domains", std::make_shared<DomainsMode>()},
             {"povray", std::make_shared<PovrayMode>()},
             {"wolfram", std::make_shared<WolframMode>()},
+            {"orientations", std::make_shared<OrientationsMode>()},
             {"bc_expand", std::make_shared<BCExpandMode>()},
             {"contact_function", std::make_shared<ContactFunctionMode>()},
             {"exclusion_zones", std::make_shared<ExclusionZonesMode>()},
