@@ -32,7 +32,7 @@ void CurvedSurfaceVoxelList::rebuildActiveSurfaceCells() {
     }
 }
 
-void CurvedSurfaceVoxelList::getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) {
+void CurvedSurfaceVoxelList::getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) const{
     if (!this->voxelsInitialized) {
         VoxelList::getRandomEntry(position, orientation, v, rnd);
         this->fillInLastCoordinate(*position);
@@ -90,7 +90,7 @@ CurvedSurfaceVoxelList::CurvedSurfaceVoxelList(double packingSpatialSize, double
     Expects(RSA_SPATIAL_DIMENSION > 1);
 }
 
-void CurvedSurfaceVoxelList::fillInLastCoordinate(RSAVector &position) {
+void CurvedSurfaceVoxelList::fillInLastCoordinate(RSAVector &position) const{
     this->surface->fillInLastCoordinate(position);
 
     // Minimal value of function should land on 0 on the last coordinate

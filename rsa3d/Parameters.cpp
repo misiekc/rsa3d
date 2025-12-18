@@ -88,9 +88,9 @@ Parameters::Parameters() {
 
 std::string Parameters::getPackingSignature() const {
     std::string sPackingFile;
-    char buf[20];
-    sprintf(buf, "%.0f", pow(this->surfaceSize, this->surfaceDimension));
-    std::string size(buf);
+	std::stringstream buf;
+	buf << std::fixed << std::setprecision(0) << std::pow(this->surfaceSize, this->surfaceDimension);
+	std::string size = buf.str();
 
     std::string particleAttributes;
     if (this->particleAttributes.length() < 100)

@@ -16,7 +16,7 @@ private:
 protected:
 	virtual unsigned int initVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl) override;
 	virtual void splitVoxel(Voxel *v, double spatialSize, const RSAOrientation &angularSize, Voxel **vRes) const override;
-	virtual void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd);
+	virtual void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd) const override;
 
 public:
 	std::vector<RSAOrientation> allowedOrientations;

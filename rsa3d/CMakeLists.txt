@@ -3,6 +3,8 @@ set(RSA_SOURCE
 #        analizator/Domain.cpp
 #        analizator/DomainAnalyzer.cpp
         analizator/ExclusionZoneVisualizer.cpp
+        analizator/OrientationAnalyzer.cpp
+        analizator/OrientationAnalyzer.h
         geometry/xenocollide/BodyBuilder.cpp
         geometry/xenocollide/Collide.cpp
         geometry/xenocollide/CollideGeometry.cpp
@@ -24,6 +26,7 @@ set(RSA_SOURCE
         modes/DefaultSimulation.cpp
         modes/DensitySimulation.cpp
         modes/ExclusionZonesMode.cpp
+        modes/OrientationsMode.cpp
         modes/PackingTestMode.cpp
         modes/PovrayMode.cpp
         modes/Simulation.cpp
@@ -59,7 +62,8 @@ set(RSA_SOURCE
         ThreadLocalRND.cpp
         VariableSizeVoxelList.cpp
         Voxel.cpp
-        VoxelList.cpp)
+        VoxelList.cpp
+)
 
 add_subdirectory(shape)
 

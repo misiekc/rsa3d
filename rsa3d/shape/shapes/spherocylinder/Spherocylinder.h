@@ -44,7 +44,7 @@ public:
     void store(std::ostream &f) const override;
     void restore(std::istream &f) override;
     Shape<DIMENSION, 0> *clone() const override;
-	std::string toPovray() const;
+	std::string toPovray() const override;
 	std::string toWolfram() const override;
 
     std::vector<double> calculateOrder(const OrderCalculable *other) const override;

@@ -151,12 +151,12 @@ void ExclusionZoneVisualizer::main(const Parameters &params, std::string &packin
 	xzv.normalizeShapeOrientation(*trialShape);
 
 	orientation[0] = M_PI / 180;
-	char buf[20];
+	std::stringstream buf;
 
 	for(int i=0; i<180; i++){
 		trialShape->rotate(orientation);
-		std::sprintf(buf, "output_%03d.pov", i);
-		xzv.toPovray(std::string(buf), trialShape);
+		buf << std::setw(3) << std::setfill('0') << "output_" << i << ".pov";
+		xzv.toPovray(buf.str(), trialShape);
 	}
 	delete trialShape;
 }

@@ -107,7 +107,7 @@ protected:
 	// returns number of not null values in list
 	void compactVoxelArray();
 
-	virtual void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd);
+	virtual void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd) const;
 
 	// Returns number of grid cells in each direction of the simulation box.
 	// The default implementation gives the same number of cells in each directions covering the whole simulation box,
@@ -151,7 +151,7 @@ public:
 	// counts active top level voxels
 	size_t countActiveTopLevelVoxels();
 
-	virtual void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd);
+	virtual void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) const;
 	Voxel *getVoxel(int i);
 	virtual Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle) const;
 	virtual double getSpatialVoxelSize() const;

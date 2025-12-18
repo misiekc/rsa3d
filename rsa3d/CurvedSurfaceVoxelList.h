@@ -49,7 +49,7 @@ private:
     CurvedSurface *surface;
 
     void rebuildActiveSurfaceCells();
-    void fillInLastCoordinate(RSAVector &position);
+    void fillInLastCoordinate(RSAVector &position) const;
 
 protected:
     bool isVoxelInsidePacking(const Voxel *v, double spatialSize) const override;
@@ -61,7 +61,7 @@ public:
 
     unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl,
                                RSABoundaryConditions *bc) override;
-    void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) override;
+    void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) const override;
     double getVoxelsVolume() const override;
 };
 
