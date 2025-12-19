@@ -6,6 +6,7 @@
 #include "../shape/Shape.h"
 
 void OrientationAnalyzer::analyzeOrientations(const Packing &packing) {
+    #if RSA_ANGULAR_DIMENSION==3
     for (const RSAShape *s: packing) {
 
         RSAOrientation orientation = s->getOrientation();
@@ -13,4 +14,5 @@ void OrientationAnalyzer::analyzeOrientations(const Packing &packing) {
         Vector<3> direction = rotation*Vector<3>({1,0,0}).normalized();
         std::cout << direction[0] << ", " << direction[1] << ", " << direction[2] << std::endl;
     }
+    #endif
 }

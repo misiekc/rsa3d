@@ -160,7 +160,7 @@ void DiscreteAngleVoxelList::splitVoxel(Voxel *v, double spatialSize, const RSAO
 	} // for i
 }
 
-void DiscreteAngleVoxelList::getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd)
+void DiscreteAngleVoxelList::getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd) const
 {
 	RSAVector vpos = v->getPosition();
 	RSAOrientation vangle = v->getOrientation();

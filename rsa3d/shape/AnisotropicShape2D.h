@@ -88,6 +88,7 @@ public:
      */
     double getAngle() const;
 
+    using ConvexShape::pointInside;
     /**
      * @brief Checks if a given point @a da is within intersection of all excluded zone for all orientations in
      * (@a angleFrom, @a angleTo) range. It replaces Shape::pointInside(BoundaryConditions*,double*,double*,double).

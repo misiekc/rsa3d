@@ -35,8 +35,8 @@ public:
     NewDiscreteAngleVoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const Orientation<1> &shapeAngularRange, const Orientation<1> &requestedAngularVoxelSize, const std::vector<Orientation<1>> &orientations);
     virtual ~NewDiscreteAngleVoxelList();
 
-    void getRandomEntry(RSAVector *position, Orientation<1> *orientation, Voxel **v, RND *rnd) override;
-    void getRandomPositionAndOrientation(RSAVector *position, Orientation<1> *orientation, Voxel *v, RND *rnd) override;
+    void getRandomEntry(RSAVector *position, Orientation<1> *orientation, Voxel **v, RND *rnd);
+    void getRandomPositionAndOrientation(RSAVector *position, Orientation<1> *orientation, Voxel *v, RND *rnd);
 
     unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc) override;
     double getVoxelsVolume() const override;

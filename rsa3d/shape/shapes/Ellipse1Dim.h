@@ -50,13 +50,13 @@ public:
     double getVolume(unsigned short dim) const override;
     bool overlap(BoundaryConditions<1> *bc, const Shape<1, 1> *s) const override;
     //bool pointInside(BoundaryConditions *bc, double* da) const override;
-	using ConvexShape<1, 1>::pointInside;
     bool pointInside(BoundaryConditions<1> *bc, const Vector<1> &da, double angleFrom, double angleTo) const;
     std::string toWolfram() const override;
 	std::string toPovray() const override;
     std::string toString() const override;
     void store(std::ostream &f) const override;
 	void restore(std::istream &f) override;
+	using ConvexShape<1, 1>::pointInside;
     bool pointInside(BoundaryConditions<1> *bc, const Vector<1> &position, const Orientation<1> &orientation,
                     const Orientation<1> &orientationRange) const final;
     double getAngle() const;

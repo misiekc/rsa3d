@@ -14,6 +14,7 @@
 #include "../geometry/Vector.h"
 #include <fstream>
 #include <memory>
+#include <iomanip>
 
 ExclusionZoneVisualizer::ExclusionZoneVisualizer(const Parameters &params) {
 	this->params = &params;
