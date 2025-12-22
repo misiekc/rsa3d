@@ -379,7 +379,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 			}
 		}  // for
 
-		std::cout << "done, double checked: " << checkedAgain << " added: " << added << ", time: " << t << ", shapes: " << l << std::endl << std::flush;
+		std::cout << "done, double checked: " << checkedAgain << " added: " << added << ", time: " << std::fixed << std::setprecision(1) << t << ", shapes: " << l << std::endl << std::flush;
 		addedSinceLastSplit += added;
 		//whether splitting voxels
 		if (added == 0) { // v.getMissCounter() % iSplit == 0){ //
@@ -442,7 +442,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 
 
 			if (status == VoxelList::NO_SPLIT_BUT_INITIALIZED){
-				tmpSplit = (int)(tmpSplit/factor);
+				tmpSplit = (int)(tmpSplit/(std::pow(factor,1.0/(RSA_SPATIAL_DIMENSION+RSA_ANGULAR_DIMENSION))));
 			}else{
 				// standard grow of tmpSplit
 				tmpSplit = (int)(tmpSplit * 1.1* v1 / v0);

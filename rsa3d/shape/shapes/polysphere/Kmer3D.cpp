@@ -13,23 +13,26 @@ void Kmer3D::initClass(const std::string &attr) {
     ValidateMsg(attrStream, "arguments format: [number of disks] [distance between neighbouring disks]");
     Validate(numberOfSpheres >= 2);
     Validate(distance >= 0);
+    Validate(distance < std::sqrt(2));
     Validate(distance <= 2*M_SQRT2);
 
     Polysphere::initClass(Kmer3D::preparePolysphereAttr(numberOfSpheres, distance));
     ShapeStaticInfo<3,3> shapeInfo = Shape::getShapeStaticInfo();
     shapeInfo.setDefaultCreateShapeImpl <Kmer3D> ();
+//    shapeInfo.setAngularVoxelSize({2*M_PI, 1.0, 2*M_PI});
     Shape::setShapeStaticInfo(shapeInfo);
 }
 
-std::string Kmer3D::preparePolysphereAttr(int numberOfDisks, double length) {
-    double volume = Kmer3D::calculateVolume(numberOfDisks, length);
+std::string Kmer3D::preparePolysphereAttr(int numberOfDisks, double distance) {
+    double volume = Kmer3D::calculateVolume(numberOfDisks, distance);
+    double inSphereRadius = ((numberOfDisks % 2)==0)? 0.5*std::sqrt(4-2*distance*distance) : 1.0;
 
     std::ostringstream polydiskAttrStream;
     polydiskAttrStream << numberOfDisks;
-    double firstDiskOffset = length * (numberOfDisks - 1) / 2;
+    double firstDiskOffset = distance * (numberOfDisks - 1) / 2;
     for (int i = 0; i < numberOfDisks; i++)
-        polydiskAttrStream << " " << (length * i - firstDiskOffset) << " 0 0 1";
-    polydiskAttrStream << " 1 " << volume;
+        polydiskAttrStream << " " << (distance * i - firstDiskOffset) << " 0 0 1 ";
+    polydiskAttrStream << inSphereRadius << " " << volume;
 
     return polydiskAttrStream.str();
 }
@@ -92,8 +95,8 @@ std::array<Vector<3>, 2> Kmer3D::getMinMaxVoxelCoordinates(size_t sphereIndex, c
 }
 
 bool Kmer3D::voxelInside(BoundaryConditions<3> *bc, const Vector<3> &voxelPosition, const Orientation<3> &voxelOrientation, double spatialSize, const Orientation<3> &angularSize) const{
-//    if (voxelOrientation[2] > 0.0)
-    if (voxelOrientation[0] > 0.0)
+//    if (voxelOrientation[0] > 0.0)
+    if (voxelOrientation[0] > 0.0 || voxelOrientation[1]>1.0)
         return true;
     else
         return Polysphere::voxelInside(bc, voxelPosition, voxelOrientation, spatialSize, angularSize);

@@ -84,6 +84,10 @@ void Parameters::validateData() {
 }
 
 Parameters::Parameters() {
+	for (unsigned short int i=0; i<RSA_ANGULAR_DIMENSION; i++) {
+		this->requestedAngularVoxelSize[i] = 0.125*M_PI;
+		this->angularVoxelRange[i] = 2*M_PI;
+	}
     this->validateData();       // Make sure default construction is valid
 }
 
