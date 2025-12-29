@@ -7,6 +7,9 @@
 #include <unistd.h>
 
 #include "Simulation.h"
+
+#include <iomanip>
+
 #include "../PackingGenerator.h"
 
 
@@ -84,7 +87,7 @@ Packing Simulation::runSingleSimulation(unsigned int seed, std::size_t collector
     process_mem_usage(vm, rss);
 
     auto generationSeconds = std::chrono::duration_cast<std::chrono::seconds>(end - begin).count();
-    std::cout << "[Simulation::runSingleSimulation] T: " << generationSeconds << "; VM: " << vm << "; RSS: " << rss;
+    std::cout << "[Simulation::runSingleSimulation] T: " << generationSeconds << "; VM: " << std::setprecision(4) << vm << "; RSS: " << rss;
     std::cout << std::endl << std::endl;
 
     return packing;

@@ -311,59 +311,6 @@ std::array<Vector<3>, 2> Polysphere::getMinMaxVoxelCoordinates(size_t sphereInde
     }
     return {vMin, vMax};
 }
-/*
-std::array<std::array<double, 2>, 3> Polysphere::getMinMaxVoxelCoordinates(size_t sphereIndex, const Vector<3> &position, const Orientation<3> &orientation, double spatialSize, const Orientation<3> &angularSize) const{
-    std::array<double, 2>   sinAlpha = Polysphere::minmaxSin(orientation[0], angularSize[0]),
-                            cosAlpha = Polysphere::minmaxCos(orientation[0], angularSize[0]),
-                            sinBeta  = Polysphere::minmaxSin(orientation[1], angularSize[1]),
-                            cosBeta  = Polysphere::minmaxCos(orientation[1], angularSize[1]),
-                            sinGamma = Polysphere::minmaxSin(orientation[2], angularSize[2]),
-                            cosGamma = Polysphere::minmaxCos(orientation[2], angularSize[2]);
-
-    double xmin = position[0] +
-        (
-            Polysphere::sphereCentre[sphereIndex][0] * (cosAlpha[0] * cosGamma[0] - sinAlpha[1] * cosBeta[1] * sinGamma[1]) +
-            Polysphere::sphereCentre[sphereIndex][1] * (-cosAlpha[1] * sinGamma[1] - sinAlpha[1] * cosBeta[1] * cosGamma[1]) +
-            Polysphere::sphereCentre[sphereIndex][2] * (sinAlpha[0] * sinBeta[0])
-        );
-    double xmax = position[0] + spatialSize +
-        (
-            Polysphere::sphereCentre[sphereIndex][0] * (cosAlpha[1] * cosGamma[1] - sinAlpha[0] * cosBeta[0] * sinGamma[0]) +
-            Polysphere::sphereCentre[sphereIndex][1] * (-cosAlpha[0] * sinGamma[0] - sinAlpha[0] * cosBeta[0] * cosGamma[0]) +
-            Polysphere::sphereCentre[sphereIndex][2] * (sinAlpha[1] * sinBeta[1])
-        );
-
-    double ymin = position[1] +
-        (
-            Polysphere::sphereCentre[sphereIndex][0] * (sinAlpha[0] * cosGamma[0] + cosAlpha[0] * cosBeta[0] * sinGamma[0]) +
-            Polysphere::sphereCentre[sphereIndex][1] * (- sinAlpha[1] * sinGamma[1] + cosAlpha[0] * cosBeta[0] * cosGamma[0]) +
-            Polysphere::sphereCentre[sphereIndex][2] * (- cosAlpha[1] * sinBeta[1])
-        );
-
-    double ymax = position[1] + spatialSize +
-        (
-            Polysphere::sphereCentre[sphereIndex][0] * (sinAlpha[1] * cosGamma[1] + cosAlpha[1] * cosBeta[1] * sinGamma[1]) +
-            Polysphere::sphereCentre[sphereIndex][1] * (- sinAlpha[0] * sinGamma[0] + cosAlpha[1] * cosBeta[1] * cosGamma[1]) +
-            Polysphere::sphereCentre[sphereIndex][2] * (- cosAlpha[0] * sinBeta[0])
-        );
-
-    double zmin = position[2] +
-        (
-            Polysphere::sphereCentre[sphereIndex][0] * (sinBeta[0] * sinGamma[0]) +
-            Polysphere::sphereCentre[sphereIndex][1] * (sinBeta[0] * cosGamma[0]) +
-            Polysphere::sphereCentre[sphereIndex][2] * (cosBeta[0])
-        );
-
-    double zmax = position[2] + spatialSize +
-        (
-            Polysphere::sphereCentre[sphereIndex][0] * (sinBeta[1] * sinGamma[1]) +
-            Polysphere::sphereCentre[sphereIndex][1] * (sinBeta[1] * cosGamma[1]) +
-            Polysphere::sphereCentre[sphereIndex][2] * (cosBeta[1])
-        );
-
-    return std::array<std::array<double, 2>, 3>{std::array<double, 2>{xmin, xmax}, std::array<double, 2>{ymin, ymax}, std::array<double, 2>{zmin, zmax}};;
-}
-*/
 
 bool Polysphere::voxelInside(BoundaryConditions<3> *bc, const RSAVector &voxelPosition, const RSAOrientation &voxelOrientation, double spatialSize, const RSAOrientation &angularSize) const{
 

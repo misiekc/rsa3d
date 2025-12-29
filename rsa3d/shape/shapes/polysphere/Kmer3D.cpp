@@ -13,7 +13,7 @@ void Kmer3D::initClass(const std::string &attr) {
     ValidateMsg(attrStream, "arguments format: [number of disks] [distance between neighbouring disks]");
     Validate(numberOfSpheres >= 2);
     Validate(distance >= 0);
-    Validate(distance < std::sqrt(2));
+    Validate(distance < 2*std::sqrt(2));
     Validate(distance <= 2*M_SQRT2);
 
     Polysphere::initClass(Kmer3D::preparePolysphereAttr(numberOfSpheres, distance));
@@ -25,7 +25,7 @@ void Kmer3D::initClass(const std::string &attr) {
 
 std::string Kmer3D::preparePolysphereAttr(int numberOfDisks, double distance) {
     double volume = Kmer3D::calculateVolume(numberOfDisks, distance);
-    double inSphereRadius = ((numberOfDisks % 2)==0)? 0.5*std::sqrt(4-2*distance*distance) : 1.0;
+    double inSphereRadius = ((numberOfDisks % 2)==0)? 0.5*std::sqrt(4-0.5*distance*distance) : 1.0;
 
     std::ostringstream polydiskAttrStream;
     polydiskAttrStream << numberOfDisks;

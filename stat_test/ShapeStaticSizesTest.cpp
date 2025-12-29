@@ -35,7 +35,11 @@ namespace
         std::size_t smallerNeighbourListConflicts{};
         ShapePair neighbourListConflictExample{};
 
+        double maximumOverlappingDistance = 0.0;
+        double minimumNonOverlappingDistance = std::numeric_limits<double>::max();
+
     public:
+        void evaluateSizes(const ShapePair &pair, double distance);
         void evaluateForVoxel(const ShapePair &pair);
         void evaluateForNeighbourList(const ShapePair &pair);
         void evaluateForBiggerVoxel(const ShapePair &pair);
@@ -44,6 +48,18 @@ namespace
         void print(std::ostream &out) const;
         bool success() const;
     };
+
+    void Result::evaluateSizes(const ShapePair &pair, double distance) {
+        if (pair.first()->overlap(&bc, pair.second())) {
+            if (this->maximumOverlappingDistance < distance) {
+                this->maximumOverlappingDistance = distance;
+            }
+        }else{
+            if (this->minimumNonOverlappingDistance > distance) {
+                this->minimumNonOverlappingDistance = distance;
+            }
+        }
+    }
 
     void Result::evaluateForVoxel(const ShapePair &pair) {
         if (!pair.first()->overlap(&bc, pair.second())) {
@@ -73,7 +89,12 @@ namespace
 
     /* Presents result on the out ostream */
     void Result::print(std::ostream &out) const {
-        out << std::endl;
+        out << std::fixed << std::setprecision(4) << std::endl;
+        out << "Spatial voxel size is " << RSAShape::getVoxelSpatialSize() << std::endl;
+        out << "Minimum nonoverlapping distance is " << this->minimumNonOverlappingDistance << std::endl;
+        out << "NeighbourList cell size is " << RSAShape::getNeighbourListCellSize() << std::endl;
+        out << "Maximum overlapping distance is " << this->maximumOverlappingDistance << std::endl;
+
         if (voxelConflicts != 0) {
             out << "[FAILED] Voxel size too big, or Shape::overlap incorrect. " << std::endl;
             out << "[INFO] Example configuration of two non-overlapping (according to the overlap() method) shapes:";
@@ -122,7 +143,8 @@ namespace
         InfoLooper looper(max_tries, 10000, "pairs tested...");
         while (looper.step()) {
             const double SD_SQRT = std::sqrt(RSA_SPATIAL_DIMENSION);
-
+            double distance = 2.0*RSAShape::getNeighbourListCellSize()*rnd.nextValue();
+            result.evaluateSizes(random_pair(&rnd, distance), distance);
             result.evaluateForVoxel(random_pair(&rnd, 0.9999*SD_SQRT * RSAShape::getVoxelSpatialSize()));
             result.evaluateForBiggerVoxel(random_pair(&rnd, 1.05*SD_SQRT * RSAShape::getVoxelSpatialSize()));
             result.evaluateForNeighbourList(random_pair(&rnd, 1.0001 * RSAShape::getNeighbourListCellSize()));

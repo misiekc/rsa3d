@@ -6,6 +6,7 @@
 #define RSA3D_INFORMINGLOOPER_H
 
 
+#include <iomanip>
 #include <iostream>
 #include <string>
 
@@ -26,8 +27,11 @@ public:
 
     bool step() {
         i++;
-        if (i % infoStep == 0)
-            out << ">> " << i << " " << text << std::endl;
+        if (i % infoStep == 0){
+            if (i>infoStep)
+                out << "\x1b[A";
+            out << ">> " << std::fixed << std::setprecision(2) << 100.0*i/max << "% " << text << std::endl;
+        }
         return i <= max;
     }
 

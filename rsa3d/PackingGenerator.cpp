@@ -379,7 +379,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 			}
 		}  // for
 
-		std::cout << "done, double checked: " << checkedAgain << " added: " << added << ", time: " << std::fixed << std::setprecision(1) << t << ", shapes: " << l << std::endl << std::flush;
+		std::cout << "done, double checked: " << checkedAgain << " added: " << added << ", time: " << t << ", shapes: " << l << std::endl << std::flush;
 		addedSinceLastSplit += added;
 		//whether splitting voxels
 		if (added == 0) { // v.getMissCounter() % iSplit == 0){ //
