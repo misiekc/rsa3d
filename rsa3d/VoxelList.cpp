@@ -36,8 +36,8 @@ double VoxelList::findCeilSize(double d){
 	return 2*dRes;
 }
 
-size_t VoxelList::findArraySize(double range, double cellSize) const {
-	return (size_t)(range/cellSize) + 1;
+std::size_t VoxelList::findArraySize(double range, double cellSize) {
+	return static_cast<size_t>((range/cellSize) + 1);
 }
 
 void VoxelList::allocateVoxels(size_t size){
@@ -194,7 +194,7 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 			}
 			size_t index = spatialIndex * angularGridSize + angularIndex;
 			this->voxels[index] = new Voxel(position, orientation);
-			if (this->analyzeVoxel(this->voxels[index], nl, bc, this->spatialVoxelSize, this->angularVoxelSize)){ // dividing only not overlapping voxels
+			if (this->analyzeVoxel(this->voxels[index], nl, bc, this->spatialVoxelSize, this->angularVoxelSize, 0)){ // dividing only not overlapping voxels
 				delete this->voxels[index];
 				this->voxels[index] = nullptr;
 			}else{
@@ -302,7 +302,7 @@ void VoxelList::removeTopLevelVoxel(Voxel *v){
 }
 
 
-void VoxelList::checkTopLevelVoxels(){
+void VoxelList::checkTopLevelVoxels() const{
 
 	RND rnd;
 	RSAVector pos;
@@ -327,7 +327,7 @@ void VoxelList::checkTopLevelVoxels(){
 	}
 }
 
-size_t VoxelList::countActiveTopLevelVoxels(){
+std::size_t VoxelList::countActiveTopLevelVoxels() const{
 	size_t result = 0;
 	size_t n = (size_t)(this->spatialRange/this->initialVoxelSize) + 1;
 	auto max = static_cast<std::size_t>(std::round(std::pow(n, this->surfaceDimension)));
@@ -339,8 +339,10 @@ size_t VoxelList::countActiveTopLevelVoxels(){
 }
 
 void VoxelList::refreshTopLevelVoxels(){
-	size_t n = (size_t)(this->spatialRange/this->initialVoxelSize) + 1;
-    auto max = static_cast<std::size_t>(std::round(std::pow(n, this->surfaceDimension)));
+
+	size_t n = this->findArraySize(this->spatialRange, this->initialVoxelSize);
+    auto max = static_cast<std::size_t>(std::pow(n, this->surfaceDimension) +0.5);
+	_OMP_PARALLEL_FOR
 	for(size_t i=0; i<max; i++){
 		this->activeTopLevelVoxels[i] = false;
 	}
@@ -610,6 +612,7 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 
 	size_t newListSize = voxelsFactor*(this->length);
 	Voxel** newList = new Voxel*[ newListSize ];
+	_OMP_PARALLEL_FOR
 	for(size_t i=0; i<newListSize; i++){
 		newList[i] = nullptr;
 	}
@@ -625,7 +628,7 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 	_OMP_PARALLEL_FOR
 	for(size_t i=0; i<this->length; i++){
 		// voxel is tested if it should remain active and if so it is divided
-		if (!this->analyzeVoxel(this->voxels[i], nl, bc, this->spatialVoxelSize, this->angularVoxelSize)){
+		if (!this->analyzeVoxel(this->voxels[i], nl, bc, this->spatialVoxelSize, this->angularVoxelSize, 0)){
 			// if too much new voxels there is no point in further splitting
 			if (newVoxelsCounter <= maxVoxels){
 				// preparing array of new voxels after division of this->voxels[i] (aVoxels)
@@ -633,7 +636,7 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 				// analyzing new voxels, only the non covered ones will be added to the new array (newList)
 				for(size_t j=0; j<voxelsFactor; j++){
 					Voxel *v = aVoxels[_OMP_THREAD_ID][j];
-					if( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc, this->spatialVoxelSize/2.0, newAngularVoxelSize) ){
+					if( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc, this->spatialVoxelSize/2.0, newAngularVoxelSize, 0) ){
 						if(this->voxels[i]->depth > 0){
 							v->depth = this->voxels[i]->depth-1;
 						}
@@ -663,6 +666,7 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 	if (newVoxelsCounter > maxVoxels){
 		// too much voxels. Voxel splitting cancelled - using oryginal list instead of the new one
 		std::cout << " too many new voxels (" << newVoxelsCounter << ">" << maxVoxels <<"): - cancel splitting," << std::flush;
+		_OMP_PARALLEL_FOR
 		for(size_t i=0; i<newListSize; i++){
 			if (newList[i]!=nullptr)
 				delete newList[i];
@@ -676,6 +680,7 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 
 	}else{
 		// clearing the old list and processing the new one
+		_OMP_PARALLEL_FOR
 		for(size_t i=0; i<this->length; i++){
 			if(this->voxels[i]!=nullptr)
 				delete this->voxels[i];

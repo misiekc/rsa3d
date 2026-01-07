@@ -45,7 +45,7 @@ public:
 
 	std::size_t generatorProcesses = 1;
 	int ompThreads = _OMP_MAXTHREADS;
-	bool goDeep = true;
+	size_t goDeep = std::numeric_limits<std::size_t>::max();
 	bool timestamp = false;
 
 	bool coverageByNumber = false;

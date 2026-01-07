@@ -139,7 +139,7 @@ unsigned short VariableSizeVoxelList::splitVoxels(double minDx, size_t maxVoxels
 	_OMP_PARALLEL_FOR
 	for(size_t i=0; i<this->length; i++){
 		// voxel is tested if it should remain active and if so it is divided
-		if (!this->analyzeVoxel(this->voxels[i], nl, bc, this->getSpatialVariableVoxelSize(i), this->getAngularVoxelSize(i))){
+		if (!this->analyzeVoxel(this->voxels[i], nl, bc, this->getSpatialVariableVoxelSize(i), this->getAngularVoxelSize(i),0)){
 			// if too much new voxels there is no point in further splitting
 			if (newVoxelsCounter[_OMP_THREAD_ID]*_OMP_MAXTHREADS <= maxVoxels){
 				// preparing array of new voxels after division of this->voxels[i] (aVoxels)
@@ -151,7 +151,7 @@ unsigned short VariableSizeVoxelList::splitVoxels(double minDx, size_t maxVoxels
 				initialNewVoxelsCounter[_OMP_THREAD_ID] = newVoxelsCounter[_OMP_THREAD_ID];
 				for(size_t j=0; j<voxelsFactor; j++){
 					Voxel *v = aVoxels[_OMP_THREAD_ID][j];
-					if( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc, this->getSpatialVariableVoxelSize(i)/2.0, angularVoxelSize) ){
+					if( nl==nullptr || bc==nullptr || !this->analyzeVoxel(v, nl, bc, this->getSpatialVariableVoxelSize(i)/2.0, angularVoxelSize, 0) ){
 						if(this->voxels[i]->depth > 0){
 							v->depth = this->voxels[i]->depth-1;
 						}

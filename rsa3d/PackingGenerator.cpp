@@ -275,7 +275,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 	std::size_t added = 0;
 	std::size_t addedSinceLastSplit = 0;
 	std::size_t missCounter = 0;
-	unsigned short depthAnalyze = 0;
+	bool skippedSplit = false;
 
 	RND rnd(this->seed);
 	RSAShape *s = ShapeFactory::createShape(&rnd);
@@ -382,8 +382,23 @@ void PackingGenerator::createPacking(Packing *packing) {
 		std::cout << "done, double checked: " << checkedAgain << " added: " << added << ", time: " << t << ", shapes: " << l << std::endl << std::flush;
 		addedSinceLastSplit += added;
 		//whether splitting voxels
-		if (added == 0) { // v.getMissCounter() % iSplit == 0){ //
+		if (added==0) {
 			missCounter += tmpSplit;
+//			if (missCounter > tmpSplit)
+//				std::cout << "[" << this->collector << " PackingGenerator::createPacking] miss counter =  " << missCounter << " out of " << params.goDeep << std::endl << std::flush;
+			if (params.goDeep<missCounter) {
+				size_t voxelNumber = this->voxels->getLength();
+				unsigned short depthAnalyze = 1;
+				do {
+					std::cout << "[" << this->collector << " PackingGenerator::createPacking] deep analysing of " << this->voxels->getLength() << " voxels, depth " << depthAnalyze << " " << std::flush;
+					this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), depthAnalyze);
+					std::cout << " remaining voxels: " << this->voxels->getLength() << std::endl << std::flush;
+					depthAnalyze++;
+				}while (voxelNumber < 2*this->voxels->getLength());
+				skippedSplit = false;
+			}
+		}
+		if (added == 0 && !skippedSplit) { // v.getMissCounter() % iSplit == 0){ //
 			size_t v0 = this->voxels->getLength();
 
 			if (this->params.timestamp){
@@ -414,16 +429,11 @@ void PackingGenerator::createPacking(Packing *packing) {
 				missCounter = 0;
 				addedSinceLastSplit = 0;
 			}else if (status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
-				if(RSAShape::getSupportsSaturation() || rnd.nextValue() < 0.1){
-					if (!this->params.goDeep && addedSinceLastSplit==0){
-						std::cout << " skipped after generating " << l << " shapes" << std::endl;
-						delete[] sOverlapped;
-						delete[] sVirtual;
-						delete[] aVoxels;
-						return;
-					}
-					std::cout << " skipped, analyzing " << this->voxels->getLength() << " voxels, depth = " << depthAnalyze << " " << std::flush;
-					this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), depthAnalyze);
+				if(RSAShape::getSupportsSaturation()){
+					skippedSplit = true;
+					std::cout << " done." << std::endl << std::flush;
+					std::cout << "[" << this->collector << " PackingGenerator::createPacking] analysing of " << this->voxels->getLength() << " voxels ";
+					this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), 0);
 					factor = this->getFactor();
 					std::cout.precision(5);
 					std::cout << " done: " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels remained, factor = " << factor << ", change: " << (factor/oldFactor) << std::endl << std::flush;
@@ -432,8 +442,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 				}
 				addedSinceLastSplit = 0;
 			}else{
-				std::cout << "skipped" << std::endl << std::flush;
-				depthAnalyze = 1;
+				std::cout << "skipped." << std::endl << std::flush;
 				addedSinceLastSplit = 0;
 			}
 			size_t v1 = this->voxels->getLength();
@@ -453,12 +462,8 @@ void PackingGenerator::createPacking(Packing *packing) {
 			// increase split when number of voxels limit is reached
 			if (status == VoxelList::NO_SPLIT || status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
 				if ((double)(v0-v1)/(double)v0 < 0.1){ // not much voxels removed
-					depthAnalyze++;
 					tmpSplit = 2*tmpSplit;
 				}
-			}else{
-				if (depthAnalyze>0)
-					depthAnalyze--;
 			}
 
 			// additional tweaking
@@ -495,8 +500,8 @@ void PackingGenerator::createPacking(Packing *packing) {
 //			std::ofstream file(filename, std::ios::binary);
 //			this->store(file);
 //			file.close();
-
-		}else{
+		}else if (added>0){
+			skippedSplit = false;
 			missCounter = 0;
 		}
 	} // while
@@ -512,6 +517,9 @@ void PackingGenerator::createPacking(Packing *packing) {
 
 	}
 	std::cout << "[" << this->collector << " PackingGenerator::createPacking] finished after generating " << l << " shapes" << std::endl;
+	if (missCounter >= params.maxTriesWithoutSuccess) {
+		std::cout << "[" << this->collector << " PackingGenerator::createPacking] WARNING: finished due to " << missCounter << " usuccessfull tries. Probaility to add a next object to the packing is approximatelly of the order " << 1.0/(factor*missCounter) << std::endl;
+	}
 }
 
 bool PackingGenerator::generationCompleted(size_t missCounter, double t) {

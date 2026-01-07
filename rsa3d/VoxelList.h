@@ -22,14 +22,11 @@ class VoxelList {
 private:
 
 	// for a given voxel returns index of its root
-	int getIndexOfTopLevelVoxel(const RSAVector &da) const;
+	[[nodiscard]] int getIndexOfTopLevelVoxel(const RSAVector &da) const;
 
 	// sets status basing on existing voxels
 	void refreshTopLevelVoxels();
 
-	// finds voxel containing given point - not used - only for debugging
-	Voxel * findVoxel(Voxel **list, size_t listSize, const RSAVector &pos,
-					  const RSAOrientation &angle);
 protected:
     // allows voxels to overlap - only for testing purposes and normally should be set to 1
     const double dxFactor = 1.0; // 1.0000000001;
@@ -40,7 +37,7 @@ protected:
 
 	unsigned short int surfaceDimension;
 	Voxel** voxels;
-	size_t length;
+	std::size_t length;
 
 	double initialVoxelSize;
 	RSAOrientation initialAngularVoxelSize;
@@ -74,13 +71,13 @@ protected:
 	// returns initial size of a vovel. It is not smaller than d and be an integer power of 2 (due to numerical issues)
 	static double findCeilSize(double d);
 
-	virtual void allocateVoxels(size_t size);
+	virtual void allocateVoxels(std::size_t size);
 
 	// initialize voxels, returns number of initial voxels
 	virtual unsigned int initVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl);
 
 	// checks consistency of indexes of root voxels
-	void checkTopLevelVoxels();
+	void checkTopLevelVoxels() const;
 
 	// checks if a top level voxel for voxel v is active (if not v should be removed
 	bool isTopLevelVoxelActive(Voxel *v) const;
@@ -88,7 +85,7 @@ protected:
 	virtual bool isVoxelInsidePacking(const Voxel *v, double spatialSize) const;
 	virtual bool isVoxelInsideExclusionZone(Voxel *v, double spatialSize, const RSAOrientation &angularSize,
                                     std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc,
-                                    unsigned short depth = 0) const;
+                                    unsigned short depth) const;
 
 	bool isVoxelInsideExclusionZoneOld(Voxel *v, double spatialSize, const RSAOrientation &angularSize,
                                     std::vector<const RSAShape*> *shapes, RSABoundaryConditions *bc,
@@ -99,7 +96,7 @@ protected:
 	// fills neigbour grid with voxels
 	void rebuildNeighbourGrid();
 
-	virtual bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, const RSAOrientation &angularSize, unsigned short depth = 0) const;
+	virtual bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, const RSAOrientation &angularSize, unsigned short depth) const;
 
 	virtual void moveVoxelInList(size_t from, size_t to);
 
@@ -115,7 +112,7 @@ protected:
     [[nodiscard]] virtual std::array<std::size_t, RSA_SPATIAL_DIMENSION> calculateSpatialGridLinearSize() const;
 
     // returns number of elements of size cellSize needed to cover a desired range
-    std::size_t findArraySize(double range, double cellSize) const;
+    static std::size_t findArraySize(double range, double cellSize) ;
 
 public:
 
@@ -129,6 +126,7 @@ public:
 
 	/**
 	 * @brief Constructor
+	 * @param dim surface dimension
 	 * @param packingSpatialSize packing size to be covered by voxels
 	 * @param requestedSpatialVoxelSize suggested initial size of a voxel. Initial size of a allocated voxels will not be larger than the requested one.
 	 * @param shapeAngularRange typpically 2*M_PI. Can be smaller for shapes with rotational symmetry. For example for squares it should be M_PI/2.0, and for ellipses, sherocylinders or rectangles M_PI.
@@ -143,24 +141,24 @@ public:
 	void getNeighbours(std::vector<Voxel *> *result, const RSAVector &da);
 	void removeTopLevelVoxel(Voxel *v);
 
-	size_t analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth);
+	std::size_t analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth);
 
 
 	virtual unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc);
 
 	// counts active top level voxels
-	size_t countActiveTopLevelVoxels();
+	[[nodiscard]] std::size_t countActiveTopLevelVoxels() const;
 
 	virtual void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) const;
 	Voxel *getVoxel(int i);
-	virtual Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle) const;
-	virtual double getSpatialVoxelSize() const;
-	virtual RSAOrientation getAngularVoxelSize() const;
+	[[nodiscard]] virtual Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle) const;
+	[[nodiscard]] virtual double getSpatialVoxelSize() const;
+	[[nodiscard]] virtual RSAOrientation getAngularVoxelSize() const;
 	Voxel* get(int i);
-	size_t getLength() const;
-	virtual double getVoxelsVolume() const;
-	std::string toPovray() const;
-	std::string toWolfram() const;
+	[[nodiscard]] std::size_t getLength() const;
+	[[nodiscard]] virtual double getVoxelsVolume() const;
+	[[nodiscard]] std::string toPovray() const;
+	[[nodiscard]] std::string toWolfram() const;
 
 	void store(std::ostream &f) const;
 	void restore(std::istream &f);
