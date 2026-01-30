@@ -382,7 +382,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 		std::cout << "done, double checked: " << checkedAgain << " added: " << added << ", time: " << t << ", shapes: " << l << std::endl << std::flush;
 		addedSinceLastSplit += added;
 		//whether splitting voxels
-		if (added==0) {
+		if (added==0 && addedSinceLastSplit==0) {
 			missCounter += tmpSplit;
 //			if (missCounter > tmpSplit)
 //				std::cout << "[" << this->collector << " PackingGenerator::createPacking] miss counter =  " << missCounter << " out of " << params.goDeep << std::endl << std::flush;
@@ -468,8 +468,8 @@ void PackingGenerator::createPacking(Packing *packing) {
 
 			// additional tweaking
 
-			if (tmpSplit > std::max(this->params.maxVoxels/5, 10*this->params.split))
-				tmpSplit = std::max(this->params.maxVoxels/5, 10*this->params.split);
+			if (tmpSplit > std::max(this->params.maxVoxels, 100*this->params.split))
+				tmpSplit = std::max(this->params.maxVoxels, 100*this->params.split);
 			if(v1<v0 && voxels->getLength()<0.001*this->params.maxVoxels && tmpSplit > 10ul*_OMP_MAXTHREADS)
 				tmpSplit /= 10.0;
 

@@ -95,6 +95,7 @@ public:
     std::string getString(const std::string &field) const;
     int getInt(const std::string &field) const;
     unsigned long getUnsignedLong(const std::string &field) const;
+    unsigned long long getUnsignedLongLong(const std::string & field) const;
     double getDouble(const std::string &field) const;
     float getFloat(const std::string &field) const;
     RSAOrientation getOrientation(const std::string & field) const;

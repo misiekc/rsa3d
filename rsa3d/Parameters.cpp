@@ -16,8 +16,8 @@
 Parameters::Parameters(std::istream &stream) {
 	auto config = Config::parse(stream, '=', true);
 	for (const auto &key : config.getKeys()){
-		if (key == "maxTriesWithoutSuccess") 	        this->maxTriesWithoutSuccess = config.getUnsignedLong(key);
-		else if (key == "maxVoxels")					this->maxVoxels = config.getUnsignedLong(key);
+		if (key == "maxTriesWithoutSuccess") 	        this->maxTriesWithoutSuccess = config.getUnsignedLongLong(key);
+		else if (key == "maxVoxels")					this->maxVoxels = config.getUnsignedLongLong(key);
         else if (key == "requestedAngularVoxelSize")	this->requestedAngularVoxelSize = config.getOrientation(key);
         else if (key == "angularVoxelRange")        	this->angularVoxelRange = config.getOrientation(key);
 		else if (key == "minDx")						this->minDx = config.getDouble(key);
@@ -26,7 +26,7 @@ Parameters::Parameters(std::istream &stream) {
 		else if (key == "split") 						this->split = config.getUnsignedLong(key);
 		else if (key == "surfaceDimension") 		    this->surfaceDimension = config.getInt(key);
 		else if (key == "surfaceVolume") 				this->surfaceSize = pow(config.getDouble(key), 1.0/this->surfaceDimension);
-		else if (key == "goDeep")	 					this->goDeep = config.getUnsignedLong(key);
+		else if (key == "goDeep")	 					this->goDeep = config.getUnsignedLongLong(key);
 		else if (key == "storePackings")	 			this->storePackings = config.getString(key) != "false";
 		else if (key == "modifiedRSA")		 		    this->modifiedRSA = config.getString(key) != "false";
 		else if (key == "thresholdDistance") 			this->thresholdDistance = config.getDouble(key);

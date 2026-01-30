@@ -73,6 +73,13 @@ unsigned long Config::getUnsignedLong(const std::string & field) const {
     return std::stoul(str);
 }
 
+unsigned long long Config::getUnsignedLongLong(const std::string & field) const {
+    auto str = this->getString(field);
+    if (std::stoll(str) < 0)
+        throw std::invalid_argument("unsigned long field negative");
+    return std::stoull(str);
+}
+
 double Config::parseDouble(const std::string & value) const {
     size_t pos;
     if ( (pos=value.find("M_PI"))!=std::string::npos){
