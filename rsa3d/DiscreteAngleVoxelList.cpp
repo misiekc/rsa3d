@@ -96,7 +96,7 @@ unsigned int DiscreteAngleVoxelList::initVoxels(RSABoundaryConditions *bc, Neigh
 			for (unsigned short i=0; i<RSA_ANGULAR_DIMENSION; i++) {
 				aSize[i]=0;
 			}
-			if (this->analyzeVoxel(this->voxels[index], nl, bc, this->spatialVoxelSize, aSize)){ // dividing only not overlapping voxels
+			if (this->analyzeVoxel(this->voxels[index], nl, bc, this->spatialVoxelSize, aSize, 0)){ // dividing only not overlapping voxels
 				delete this->voxels[index];
 				this->voxels[index] = nullptr;
 			}else{
