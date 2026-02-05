@@ -133,6 +133,7 @@ public:
 	 * @param requestedAngularVoxelSize suggested initial angular size of a voxel. Initial angular size of allocaced voxels will not be larger than requested one.
 	 */
 	VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const RSAOrientation &shapeAngularRange, const RSAOrientation &requestedAngularVoxelSize);
+	VoxelList(const VoxelList &vl);
 
 	void disable();
 
@@ -148,6 +149,10 @@ public:
 
 	// counts active top level voxels
 	[[nodiscard]] std::size_t countActiveTopLevelVoxels() const;
+
+	// remove all top level voxels apart from the given one - used only during sequential voxel analysis
+	size_t removeAllTopLevelVoxelsBut(size_t number);
+	void removeTopLevelVoxel(size_t index);
 
 	virtual void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) const;
 	Voxel *getVoxel(int i);

@@ -17,6 +17,9 @@
 #include <unistd.h>
 
 #include "PackingGenerator.h"
+
+#include <filesystem>
+
 #include "boundary_conditions/PeriodicBC.h"
 #include "boundary_conditions/FreeBC.h"
 #include "shape/ShapeFactory.h"
@@ -264,18 +267,157 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 	std::cout << "[" << this->collector << " PackingGenerator::testPacking] finished after time " << t << std::endl;
 }
 
+std::size_t PackingGenerator::updateSplit(std::size_t tmpSplit, unsigned short status, double factor, std::size_t v0) {
+
+	std::size_t v1 = this->voxels->getLength();
+
+	if (status == VoxelList::NO_SPLIT_BUT_INITIALIZED){
+		tmpSplit = (int)(tmpSplit/(std::pow(factor,1.0/(RSA_SPATIAL_DIMENSION+RSA_ANGULAR_DIMENSION))));
+	}else{
+		// standard grow of tmpSplit
+		tmpSplit = (int)(tmpSplit * 1.1* v1 / v0);
+	}
+	// increase split when number of voxels closes to its limit
+	if (v1 > 0.05*this->params.maxVoxels)
+		tmpSplit *= 1.5;
+	// increase split when number of voxels limit is reached
+	if (status == VoxelList::NO_SPLIT || status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
+		if ((double)(v0-v1)/(double)v0 < 0.1){ // not much voxels removed
+			tmpSplit = 2*tmpSplit;
+		}
+	}
+
+	// additional tweaking
+
+	if (tmpSplit > std::max(this->params.maxVoxels, 100*this->params.split))
+		tmpSplit = std::max(this->params.maxVoxels, 100*this->params.split);
+	if(v1<v0 && v1<0.001*this->params.maxVoxels && tmpSplit > 10ul*_OMP_MAXTHREADS)
+		tmpSplit /= 10.0;
+
+	tmpSplit = ((tmpSplit / _OMP_MAXTHREADS)+1) * _OMP_MAXTHREADS;
+
+	if(tmpSplit < 10ul*_OMP_MAXTHREADS)
+		tmpSplit = 10ul*_OMP_MAXTHREADS;
+
+	return tmpSplit;
+}
+
+void PackingGenerator::sequentialVoxelAnalysis() {
+	std::cout << "[" << this->collector << " PackingGenerator::createPacking] sequential voxel analysis of " << this->voxels->countActiveTopLevelVoxels() << " top level voxels" << std::endl << std::flush;
+
+	for (size_t i = 0; i < this->voxels->countActiveTopLevelVoxels(); i++) {
+		VoxelList tmpList(*this->voxels);
+		size_t index = tmpList.removeAllTopLevelVoxelsBut(i);
+		unsigned short status;
+		std::cout << "[" << this->collector << " PackingGenerator::createPacking] analysing top level voxel " << index << std::flush;
+		do {
+			std::cout << ", splitting " << tmpList.getLength() << " voxels " << std::flush;
+			status = tmpList.splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface->getBC());
+			std::cout << ", remained " << tmpList.getLength() << " voxels of spatial size: "  << tmpList.getSpatialVoxelSize() << " " << std::flush;
+		}while (status != VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT && tmpList.getLength()>0);
+			std::cout << std::endl << "[" << this->collector << " PackingGenerator::createPacking] top level voxel " << index;
+		if (tmpList.getLength() == 0) {
+			this->voxels->removeTopLevelVoxel(index);
+			i--;
+			std::cout << " removed" << std::endl << std::flush;
+		}else
+			std::cout << " left unchanged" << std::endl << std::flush;
+	}
+	std::cout << "[" << this->collector << " PackingGenerator::createPacking] analysing of " << this->voxels->getLength() << " voxels ";
+	this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), 0);
+	std::cout.precision(5);
+	std::cout << " done: " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels remained, factor = " << this->getFactor() << "." << std::endl << std::flush;
+	std::cout << "[" << this->collector << " PackingGenerator::createPacking] sequential voxel analysis of top level voxels finished. " << this->voxels->countActiveTopLevelVoxels() << " top level voxels left" << std::endl << std::flush;
+}
+
+unsigned short PackingGenerator::splitVoxels(PGInfo &pginfo, std::chrono::steady_clock::time_point begin) {
+	double oldFactor = this->getFactor();
+	unsigned short status = VoxelList::NO_SPLIT;
+	if (pginfo.addedSinceLastSplit==0) {
+		// no added shapes so considering deep analysis
+		if (params.goDeep < pginfo.missCounter && pginfo.deepAnalysis == false) {
+			size_t voxelNumber = this->voxels->getLength();
+			unsigned short depthAnalyze = 1;
+			do {
+				std::cout << "[" << this->collector << " PackingGenerator::createPacking] deep analysing of " << this->voxels->getLength() << " voxels, depth " << depthAnalyze << " " << std::flush;
+				this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), depthAnalyze);
+				std::cout << " remaining voxels: " << this->voxels->getLength() << std::endl << std::flush;
+				depthAnalyze++;
+			}while (voxelNumber < 2*this->voxels->getLength());
+			pginfo.skippedSplit = false;
+			pginfo.deepAnalysis = true;
+		}
+		if ((params.maxTriesWithoutSuccess/2) < pginfo.missCounter && pginfo.sequentialAnalysis == false) {
+			this->sequentialVoxelAnalysis();
+			pginfo.skippedSplit = false;
+			pginfo.sequentialAnalysis = true;
+		}
+	}
+	if (!pginfo.skippedSplit) {
+		size_t v0 = this->voxels->getLength();
+
+		if (this->params.timestamp){
+		    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+		    auto miliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now - begin).count();
+		    std::cout << "[" << miliseconds << "]";
+		}
+
+		std::cout << "[" << this->collector << " PackingGenerator::createPacking] shapes added since last split " << pginfo.addedSinceLastSplit << std::endl;
+		std::cout << "[" << this->collector << " PackingGenerator::createPacking] splitting " << v0 << " voxels ";
+		std::cout.flush();
+//					this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
+		status = voxels->splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface->getBC());
+		double factor = this->getFactor();
+
+		if (status == VoxelList::NORMAL_SPLIT || status == VoxelList::NO_SPLIT_BUT_INITIALIZED){
+//			this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
+			std::cout.precision(5);
+			std::cout << " done. " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels, new voxel size: " << voxels->getSpatialVoxelSize() << ", angular size: ";
+			RSAOrientation avSize = this->voxels->getAngularVoxelSize();
+			for (unsigned short int i=0; i<RSA_ANGULAR_DIMENSION; i++) {
+				std:: cout << avSize[i] << " ";
+			}
+			std::cout << ", factor: " << factor << ", change: " << (factor/oldFactor) << std::endl;
+			std::cout.precision(std::numeric_limits< double >::max_digits10);
+			pginfo.missCounter = 0;
+			pginfo.addedSinceLastSplit = 0;
+		}else if (status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
+			if(RSAShape::getSupportsSaturation()){
+				pginfo.skippedSplit = true;
+				std::cout << " done." << std::endl << std::flush;
+				std::cout << "[" << this->collector << " PackingGenerator::createPacking] analysing of " << this->voxels->getLength() << " voxels ";
+				this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), 0);
+				factor = this->getFactor();
+				std::cout.precision(5);
+				std::cout << " done: " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels remained, factor = " << factor << ", change: " << (factor/oldFactor) << std::endl << std::flush;
+				std::cout.precision(std::numeric_limits< double >::max_digits10);
+			}
+			pginfo.addedSinceLastSplit = 0;
+		}else{
+			std::cout << "skipped." << std::endl << std::flush;
+			pginfo.addedSinceLastSplit = 0;
+		}
+	}
+	return status;
+}
+
+
+
 
 void PackingGenerator::createPacking(Packing *packing) {
+
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
+	PGInfo pginfo;
+	pginfo.addedSinceLastSplit = 0;
+	pginfo.missCounter = 0;
+	pginfo.skippedSplit = false;
+	pginfo.deepAnalysis = false;
+	pginfo.sequentialAnalysis = false;
 
 	std::cout.precision(std::numeric_limits< double >::max_digits10);
 	std::cout << "[" << this->collector << " PackingGenerator::createPacking] using up to " << _OMP_MAXTHREADS;
 	std::cout << " concurrent treads" << std::endl;
-
-	std::size_t checkedAgain = 0;
-	std::size_t added = 0;
-	std::size_t addedSinceLastSplit = 0;
-	std::size_t missCounter = 0;
-	bool skippedSplit = false;
 
 	RND rnd(this->seed);
 	RSAShape *s = ShapeFactory::createShape(&rnd);
@@ -290,6 +432,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 		for(const RSAShape *s : *packing)
 			this->surface->add(s);
 		l = this->packing.size();
+		t = this->packing.back()->time;
 	}
 
 	std::size_t tmpSplit = this->params.split, oldTmpSplit = tmpSplit;
@@ -301,9 +444,8 @@ void PackingGenerator::createPacking(Packing *packing) {
 	RSAShape **sVirtual = new RSAShape*[tmpSplit];
 	Voxel **aVoxels = new Voxel *[tmpSplit];
 
-	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
-	while (!this->generationCompleted(missCounter, t)) {
+	while (!this->generationCompleted(pginfo.missCounter, t)) {
 		if (this->params.timestamp){
 		    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
 		    auto miliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now - begin).count();
@@ -330,8 +472,8 @@ void PackingGenerator::createPacking(Packing *packing) {
 
 		std::cout << " processing shapes..." << std::flush;
 
-		checkedAgain = 0;
-		added = 0;
+		std::size_t checkedAgain = 0;
+		std::size_t added = 0;
 
 		// sequentially processing potentially non overlaping shapes
 		for(std::size_t i=0; i<tmpSplit; i++){
@@ -380,103 +522,15 @@ void PackingGenerator::createPacking(Packing *packing) {
 		}  // for
 
 		std::cout << "done, double checked: " << checkedAgain << " added: " << added << ", time: " << t << ", shapes: " << l << std::endl << std::flush;
-		addedSinceLastSplit += added;
+		pginfo.addedSinceLastSplit += added;
 		//whether splitting voxels
-		if (added==0 && addedSinceLastSplit==0) {
-			missCounter += tmpSplit;
-//			if (missCounter > tmpSplit)
-//				std::cout << "[" << this->collector << " PackingGenerator::createPacking] miss counter =  " << missCounter << " out of " << params.goDeep << std::endl << std::flush;
-			if (params.goDeep<missCounter) {
-				size_t voxelNumber = this->voxels->getLength();
-				unsigned short depthAnalyze = 1;
-				do {
-					std::cout << "[" << this->collector << " PackingGenerator::createPacking] deep analysing of " << this->voxels->getLength() << " voxels, depth " << depthAnalyze << " " << std::flush;
-					this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), depthAnalyze);
-					std::cout << " remaining voxels: " << this->voxels->getLength() << std::endl << std::flush;
-					depthAnalyze++;
-				}while (voxelNumber < 2*this->voxels->getLength());
-				skippedSplit = false;
-			}
-		}
-		if (added == 0 && !skippedSplit) { // v.getMissCounter() % iSplit == 0){ //
-			size_t v0 = this->voxels->getLength();
-
-			if (this->params.timestamp){
-			    std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-			    auto miliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now - begin).count();
-			    std::cout << "[" << miliseconds << "]";
-
-			}
-			std::cout << "[" << this->collector << " PackingGenerator::createPacking] shapes added since last split " << addedSinceLastSplit << std::endl;
-			std::cout << "[" << this->collector << " PackingGenerator::createPacking] splitting " << v0 << " voxels ";
-			std::cout.flush();
-//						this->toPovray("snapshot_before_" + std::to_string(snapshotCounter++) + ".pov");
-
-			unsigned short status = voxels->splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface->getBC());
-			double oldFactor = factor;
-			factor = this->getFactor();
-
-			if (status == VoxelList::NORMAL_SPLIT || status == VoxelList::NO_SPLIT_BUT_INITIALIZED){
-//				this->toPovray("snapshot_after_" + std::to_string(snapshotCounter++) + ".pov");
-				std::cout.precision(5);
-				std::cout << " done. " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels, new voxel size: " << voxels->getSpatialVoxelSize() << ", angular size: ";
-				RSAOrientation avSize = this->voxels->getAngularVoxelSize();
-				for (unsigned short int i=0; i<RSA_ANGULAR_DIMENSION; i++) {
-					std:: cout << avSize[i] << " ";
-				}
-				std::cout << ", factor: " << factor << ", change: " << (factor/oldFactor) << std::endl;
-				std::cout.precision(std::numeric_limits< double >::max_digits10);
-				missCounter = 0;
-				addedSinceLastSplit = 0;
-			}else if (status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
-				if(RSAShape::getSupportsSaturation()){
-					skippedSplit = true;
-					std::cout << " done." << std::endl << std::flush;
-					std::cout << "[" << this->collector << " PackingGenerator::createPacking] analysing of " << this->voxels->getLength() << " voxels ";
-					this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), 0);
-					factor = this->getFactor();
-					std::cout.precision(5);
-					std::cout << " done: " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels remained, factor = " << factor << ", change: " << (factor/oldFactor) << std::endl << std::flush;
-					std::cout.precision(std::numeric_limits< double >::max_digits10);
-					tmpSplit = (int)(1.1 * tmpSplit);
-				}
-				addedSinceLastSplit = 0;
-			}else{
-				std::cout << "skipped." << std::endl << std::flush;
-				addedSinceLastSplit = 0;
-			}
-			size_t v1 = this->voxels->getLength();
+		if (added==0) {
+			std::size_t v0 = this->voxels->getLength();
+			pginfo.missCounter += tmpSplit;
+			unsigned short status = this->splitVoxels(pginfo, begin);
 
 			// determining new value of tmpSplit
-
-
-			if (status == VoxelList::NO_SPLIT_BUT_INITIALIZED){
-				tmpSplit = (int)(tmpSplit/(std::pow(factor,1.0/(RSA_SPATIAL_DIMENSION+RSA_ANGULAR_DIMENSION))));
-			}else{
-				// standard grow of tmpSplit
-				tmpSplit = (int)(tmpSplit * 1.1* v1 / v0);
-			}
-			// increase split when number of voxels closes to its limit
-			if (this->voxels->getLength() > 0.05*this->params.maxVoxels)
-				tmpSplit *= 1.5;
-			// increase split when number of voxels limit is reached
-			if (status == VoxelList::NO_SPLIT || status == VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT){
-				if ((double)(v0-v1)/(double)v0 < 0.1){ // not much voxels removed
-					tmpSplit = 2*tmpSplit;
-				}
-			}
-
-			// additional tweaking
-
-			if (tmpSplit > std::max(this->params.maxVoxels, 100*this->params.split))
-				tmpSplit = std::max(this->params.maxVoxels, 100*this->params.split);
-			if(v1<v0 && voxels->getLength()<0.001*this->params.maxVoxels && tmpSplit > 10ul*_OMP_MAXTHREADS)
-				tmpSplit /= 10.0;
-
-			tmpSplit = ((tmpSplit / _OMP_MAXTHREADS)+1) * _OMP_MAXTHREADS;
-
-			if(tmpSplit < 10ul*_OMP_MAXTHREADS)
-				tmpSplit = 10ul*_OMP_MAXTHREADS;
+			tmpSplit = this->updateSplit(tmpSplit, status, factor, v0);
 
 			if(tmpSplit != oldTmpSplit){
 
@@ -501,9 +555,13 @@ void PackingGenerator::createPacking(Packing *packing) {
 //			this->store(file);
 //			file.close();
 		}else if (added>0){
-			skippedSplit = false;
-			missCounter = 0;
+			pginfo.skippedSplit = false;
+			pginfo.deepAnalysis = false;
+			pginfo.sequentialAnalysis = false;
+			pginfo.missCounter = 0;
+
 		}
+		factor = this->getFactor();
 	} // while
 
 	delete[] sOverlapped;
@@ -517,8 +575,8 @@ void PackingGenerator::createPacking(Packing *packing) {
 
 	}
 	std::cout << "[" << this->collector << " PackingGenerator::createPacking] finished after generating " << l << " shapes" << std::endl;
-	if (missCounter >= params.maxTriesWithoutSuccess) {
-		std::cout << "[" << this->collector << " PackingGenerator::createPacking] WARNING: finished due to " << missCounter << " usuccessfull tries. Probaility to add a next object to the packing is approximatelly of the order " << 1.0/(factor*missCounter) << std::endl;
+	if (pginfo.missCounter >= params.maxTriesWithoutSuccess) {
+		std::cout << "[" << this->collector << " PackingGenerator::createPacking] WARNING: finished due to " << pginfo.missCounter << " usuccessfull tries. Probaility to add a next object to the packing is approximatelly of the order " << 1.0/(factor*pginfo.missCounter) << std::endl;
 	}
 }
 

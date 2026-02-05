@@ -10,6 +10,9 @@
 #include <algorithm>
 
 #include "VoxelList.h"
+
+#include <cstring>
+
 #include "utils/OMPMacros.h"
 #include "utils/Assertions.h"
 
@@ -63,7 +66,6 @@ VoxelList::VoxelList(){
 
 	this->initialVoxelSize = 0.0;
 	this->spatialVoxelSize = 0.0;
-	//this->beginningVoxelNumber = 1;
 	this->activeTopLevelVoxels = nullptr;
 	this->voxelNeighbourGrid = nullptr;
 
@@ -78,7 +80,68 @@ VoxelList::VoxelList(){
 	this->length = 0;
 }
 
+VoxelList::VoxelList(const VoxelList &vl) {
+	Expects(vl.voxelsInitialized);
 
+	this->surfaceDimension = vl.surfaceDimension;
+	this->spatialRange = vl.spatialRange;
+	this->angularRange = vl.angularRange;
+	this->angularVoxelSize = vl.angularVoxelSize;
+
+
+	this->initialVoxelSize = vl.initialVoxelSize;
+	for (unsigned short int i=0; i<RSA_ANGULAR_DIMENSION; i++)
+		this->initialAngularVoxelSize[i] = vl.initialAngularVoxelSize[i];
+	this->spatialVoxelSize = vl.spatialVoxelSize;
+
+	this->initialAngularVoxelSize = vl.initialAngularVoxelSize;
+	this->angularVoxelSize = vl.angularVoxelSize;
+
+	size_t n = (size_t)(this->spatialRange/this->initialVoxelSize) + 1;
+	auto max = static_cast<std::size_t>(std::round(std::pow(n, this->surfaceDimension)));
+
+	this->activeTopLevelVoxels = new bool[max];
+	std::memcpy(this->activeTopLevelVoxels, vl.activeTopLevelVoxels, max*sizeof(bool));
+
+	size_t fullSpatialGridLinearSize = this->findArraySize(this->spatialRange, this->initialVoxelSize);
+	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(this->surfaceDimension,
+														this->initialVoxelSize * fullSpatialGridLinearSize,
+														this->initialVoxelSize);
+
+
+	this->spatialDistribution = new std::uniform_real_distribution<double>(0.0, this->spatialVoxelSize);
+	for (unsigned short int i=0; i<RSA_ANGULAR_DIMENSION; i++)
+		this->angularDistribution[i] = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize[i]);
+	this->disabled = false;
+	this->voxelsInitialized = vl.voxelsInitialized;
+
+
+	this->voxels = new Voxel*[vl.length];
+	for (size_t i=0; i<vl.length; i++) {
+		Voxel *v = vl.voxels[i];
+		this->voxels[i] = new Voxel(v->getPosition(), v->getOrientation());
+	}
+	this->length = vl.length;
+	this->rebuildNeighbourGrid();
+}
+
+size_t VoxelList::removeAllTopLevelVoxelsBut(size_t number) {
+	Expects(number < this->countActiveTopLevelVoxels());
+	size_t n = (size_t)(this->spatialRange/this->initialVoxelSize) + 1;
+	auto max = static_cast<std::size_t>(std::round(std::pow(n, this->surfaceDimension)));
+	size_t counter = 0;
+	size_t result = max;
+	for (size_t i=0; i<max; i++) {
+		if (this->activeTopLevelVoxels[i]) {
+			if (counter!=number)
+				this->activeTopLevelVoxels[i] = false;
+			else
+				result = i;
+			counter++;
+		}
+	}
+	return result;
+}
 
 VoxelList::VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const RSAOrientation &shapeAngularRange, const RSAOrientation &requestedAngularVoxelSize){
 	Expects(dim > 0);
@@ -168,8 +231,8 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 	this->spatialVoxelSize = this->initialVoxelSize;
 	this->angularVoxelSize = this->initialAngularVoxelSize;
 	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(this->surfaceDimension,
-														this->spatialVoxelSize * fullSpatialGridLinearSize,
-														this->spatialVoxelSize);
+														this->initialVoxelSize * fullSpatialGridLinearSize,
+														this->initialVoxelSize);
 
 	std::cout << " alocating " << (spatialGridSize * angularGridSize) << " voxels, now checking " << std::flush;
 
@@ -299,6 +362,12 @@ void VoxelList::removeTopLevelVoxel(Voxel *v){
 	if (this->disabled || !this->voxelsInitialized)
 		return;
 	this->activeTopLevelVoxels[this->getIndexOfTopLevelVoxel(v->getPosition())]=false;
+}
+
+void VoxelList::removeTopLevelVoxel(std::size_t index){
+	if (this->disabled || !this->voxelsInitialized)
+		return;
+	this->activeTopLevelVoxels[index]=false;
 }
 
 

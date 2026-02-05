@@ -16,8 +16,16 @@
 #include "Surface.h"
 #include "Packing.h"
 #include <vector>
-#include <map>
+#include <chrono>
 
+class PGInfo {
+public:
+	std::size_t addedSinceLastSplit;
+	std::size_t missCounter;
+	bool sequentialAnalysis;
+	bool deepAnalysis;
+	bool skippedSplit;
+};
 
 class PackingGenerator {
 private:
@@ -37,6 +45,9 @@ private:
 	bool isSaturated();
 	double getFactor();
 	bool isInside(const RSAVector &position, const RSAOrientation &orientation);
+	std::size_t updateSplit(std::size_t tmpSplit, unsigned short status, double factor, std::size_t v0);
+	unsigned short splitVoxels(PGInfo &pginfo, std::chrono::steady_clock::time_point begin);
+	void sequentialVoxelAnalysis();
 	void createPacking(Packing *packing);
 
 	void toPovray(const std::string &filename);

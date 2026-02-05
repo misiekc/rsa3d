@@ -44,6 +44,9 @@ private:
 		for(short i=this->surfaceDimension-1; i>=0; i--){
 			Expects(position[i] >= 0);
             // TODO: is this conditions necessary? Maybe this->linearSize + this->dx is also ok?
+			if (position[i] >= this->linearSize) {
+				std::cout << std::endl << i << ": " << position[i] << " >= " << this->linearSize << " (" << this->dx << ")" << std::endl << std::flush;
+			}
 			Expects(position[i] < this->linearSize);
 			ix = (int)(position[i]/this->dx) + 1;
 
@@ -182,6 +185,8 @@ public:
 		Expects(surfaceDim <= RSA_SPATIAL_DIMENSION);
 		Expects(size > 0);
 		Expects(dx > 0);
+
+//		std::cout << std::endl << "DEBUG: NeighbourGrid(" << surfaceDim << ", " << size << ", " << dx << ")" << std::endl;
 
 		size_t n;
 		this->surfaceDimension = surfaceDim;
