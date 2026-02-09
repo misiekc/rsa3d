@@ -45,7 +45,7 @@ public:
 
 	std::size_t generatorProcesses = 1;
 	int ompThreads = _OMP_MAXTHREADS;
-	size_t goDeep = std::numeric_limits<std::size_t>::max();
+	unsigned short maxDeepLevel = 0;
 	bool timestamp = false;
 
 	bool coverageByNumber = false;

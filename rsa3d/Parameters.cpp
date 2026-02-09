@@ -26,7 +26,7 @@ Parameters::Parameters(std::istream &stream) {
 		else if (key == "split") 						this->split = config.getUnsignedLong(key);
 		else if (key == "surfaceDimension") 		    this->surfaceDimension = config.getInt(key);
 		else if (key == "surfaceVolume") 				this->surfaceSize = pow(config.getDouble(key), 1.0/this->surfaceDimension);
-		else if (key == "goDeep")	 					this->goDeep = config.getUnsignedLongLong(key);
+		else if (key == "maxDeepLevel")	 				this->maxDeepLevel = config.getInt(key);
 		else if (key == "storePackings")	 			this->storePackings = config.getString(key) != "false";
 		else if (key == "modifiedRSA")		 		    this->modifiedRSA = config.getString(key) != "false";
 		else if (key == "thresholdDistance") 			this->thresholdDistance = config.getDouble(key);
@@ -124,7 +124,7 @@ bool Parameters::operator==(const Parameters &rhs) const {
            surfaceDimension == rhs.surfaceDimension &&
            surfaceSize == rhs.surfaceSize &&
            storePackings == rhs.storePackings &&
-		   goDeep == rhs.goDeep &&
+		   maxDeepLevel == rhs.maxDeepLevel &&
            modifiedRSA == rhs.modifiedRSA &&
            thresholdDistance == rhs.thresholdDistance &&
            boundaryConditions == rhs.boundaryConditions &&

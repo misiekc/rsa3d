@@ -304,8 +304,8 @@ std::size_t PackingGenerator::updateSplit(std::size_t tmpSplit, unsigned short s
 
 void PackingGenerator::sequentialVoxelAnalysis() {
 	std::cout << "[" << this->collector << " PackingGenerator::createPacking] sequential voxel analysis of " << this->voxels->countActiveTopLevelVoxels() << " top level voxels" << std::endl << std::flush;
-
-	for (size_t i = 0; i < this->voxels->countActiveTopLevelVoxels(); i++) {
+	size_t max = this->voxels->countActiveTopLevelVoxels();
+	for (size_t i = 0; i < max; i++) {
 		VoxelList tmpList(*this->voxels);
 		size_t index = tmpList.removeAllTopLevelVoxelsBut(i);
 		unsigned short status;
@@ -319,9 +319,12 @@ void PackingGenerator::sequentialVoxelAnalysis() {
 		if (tmpList.getLength() == 0) {
 			this->voxels->removeTopLevelVoxel(index);
 			i--;
-			std::cout << " removed" << std::endl << std::flush;
-		}else
-			std::cout << " left unchanged" << std::endl << std::flush;
+			std::cout << " removed";
+		}else {
+			std::cout << " left unchanged";
+		}
+		max = this->voxels->countActiveTopLevelVoxels();
+		std::cout << " (" << max << ")" << std::endl << std::flush;
 	}
 	std::cout << "[" << this->collector << " PackingGenerator::createPacking] analysing of " << this->voxels->getLength() << " voxels ";
 	this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), 0);
@@ -330,27 +333,36 @@ void PackingGenerator::sequentialVoxelAnalysis() {
 	std::cout << "[" << this->collector << " PackingGenerator::createPacking] sequential voxel analysis of top level voxels finished. " << this->voxels->countActiveTopLevelVoxels() << " top level voxels left" << std::endl << std::flush;
 }
 
+void PackingGenerator::deepVoxelAnalysis() {
+	size_t voxelNumber = this->voxels->getLength();
+	unsigned short depthAnalyze = 1;
+	do {
+		std::cout << "[" << this->collector << " PackingGenerator::createPacking] deep analysing of " << this->voxels->getLength() << " voxels, depth " << depthAnalyze << " " << std::flush;
+		this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), depthAnalyze);
+		std::cout << " remaining voxels: " << this->voxels->getLength() << std::endl << std::flush;
+		depthAnalyze++;
+	}while (voxelNumber < 2*this->voxels->getLength() && depthAnalyze <= params.maxDeepLevel);
+}
+
 unsigned short PackingGenerator::splitVoxels(PGInfo &pginfo, std::chrono::steady_clock::time_point begin) {
 	double oldFactor = this->getFactor();
 	unsigned short status = VoxelList::NO_SPLIT;
+//	std::cout << "(DEBUG addedSinceLastSplit " << pginfo.addedSinceLastSplit << ") ";
 	if (pginfo.addedSinceLastSplit==0) {
-		// no added shapes so considering deep analysis
-		if (params.goDeep < pginfo.missCounter && pginfo.deepAnalysis == false) {
-			size_t voxelNumber = this->voxels->getLength();
-			unsigned short depthAnalyze = 1;
-			do {
-				std::cout << "[" << this->collector << " PackingGenerator::createPacking] deep analysing of " << this->voxels->getLength() << " voxels, depth " << depthAnalyze << " " << std::flush;
-				this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), depthAnalyze);
-				std::cout << " remaining voxels: " << this->voxels->getLength() << std::endl << std::flush;
-				depthAnalyze++;
-			}while (voxelNumber < 2*this->voxels->getLength());
-			pginfo.skippedSplit = false;
-			pginfo.deepAnalysis = true;
-		}
-		if ((params.maxTriesWithoutSuccess/2) < pginfo.missCounter && pginfo.sequentialAnalysis == false) {
-			this->sequentialVoxelAnalysis();
-			pginfo.skippedSplit = false;
-			pginfo.sequentialAnalysis = true;
+		// no added shapes so considering sequential voxel analysis or deep analysis
+//		std::cout << "(DEBUG missCounter " << pginfo.missCounter << ") ";
+		if ((params.maxTriesWithoutSuccess/3) < pginfo.missCounter){
+//			std::cout << "(DEBUG sequentialAnalysis " << pginfo.sequentialAnalysis << ") ";
+//			std::cout << "(DEBUG deepAnalysis " << pginfo.deepAnalysis << ") ";
+			if (pginfo.sequentialAnalysis == false) {
+				this->sequentialVoxelAnalysis();
+				pginfo.skippedSplit = false;
+				pginfo.sequentialAnalysis = true;
+			}else if (pginfo.deepAnalysis == false) {
+				this->deepVoxelAnalysis();
+				pginfo.skippedSplit = false;
+				pginfo.deepAnalysis = true;
+			}
 		}
 	}
 	if (!pginfo.skippedSplit) {
@@ -400,9 +412,6 @@ unsigned short PackingGenerator::splitVoxels(PGInfo &pginfo, std::chrono::steady
 	}
 	return status;
 }
-
-
-
 
 void PackingGenerator::createPacking(Packing *packing) {
 

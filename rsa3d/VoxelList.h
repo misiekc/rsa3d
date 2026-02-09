@@ -50,6 +50,7 @@ protected:
 
 	// array of top level voxel. If a top level voxel becomes inactive (due to shape placement, all its child voxels becomes obsolete
 	bool* activeTopLevelVoxels;
+	size_t activeTopLevelVoxelsSize;
 
 	// probability distrubutions for drawing position inside a voxel
 	std::uniform_real_distribution<double> *spatialDistribution;

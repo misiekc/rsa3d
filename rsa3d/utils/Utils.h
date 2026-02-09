@@ -18,7 +18,7 @@ using RSAVector = Vector<RSA_SPATIAL_DIMENSION>;
 using RSAOrientation = Orientation<RSA_ANGULAR_DIMENSION>;
 
 bool increment(int* in, int inlength, int max);
-int position2i(const double* da, int dalength, double size, double dx, int n);
+size_t position2i(const double* da, unsigned short int dalength, double size, double dx, size_t n);
 void i2position(double* da, int dalength, int index, double dx, int n);
 void coordinates(int* result, const double* da, int dalength, double size, double dx, int n);
 int neighbour2i(int* coordinates, int* neighbour, int clength, int offset, int n);

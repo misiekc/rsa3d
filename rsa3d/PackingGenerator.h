@@ -48,6 +48,7 @@ private:
 	std::size_t updateSplit(std::size_t tmpSplit, unsigned short status, double factor, std::size_t v0);
 	unsigned short splitVoxels(PGInfo &pginfo, std::chrono::steady_clock::time_point begin);
 	void sequentialVoxelAnalysis();
+	void deepVoxelAnalysis();
 	void createPacking(Packing *packing);
 
 	void toPovray(const std::string &filename);
