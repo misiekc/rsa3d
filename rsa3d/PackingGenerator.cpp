@@ -305,26 +305,29 @@ std::size_t PackingGenerator::updateSplit(std::size_t tmpSplit, unsigned short s
 void PackingGenerator::sequentialVoxelAnalysis() {
 	std::cout << "[" << this->collector << " PackingGenerator::createPacking] sequential voxel analysis of " << this->voxels->countActiveTopLevelVoxels() << " top level voxels" << std::endl << std::flush;
 	size_t max = this->voxels->countActiveTopLevelVoxels();
-	for (size_t i = 0; i < max; i++) {
-		VoxelList tmpList(*this->voxels);
-		size_t index = tmpList.removeAllTopLevelVoxelsBut(i);
-		unsigned short status;
-		std::cout << "[" << this->collector << " PackingGenerator::createPacking] analysing top level voxel " << index << std::flush;
-		do {
-			std::cout << ", splitting " << tmpList.getLength() << " voxels " << std::flush;
-			status = tmpList.splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface->getBC());
-			std::cout << ", remained " << tmpList.getLength() << " voxels of spatial size: "  << tmpList.getSpatialVoxelSize() << " " << std::flush;
-		}while (status != VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT && tmpList.getLength()>0);
+	if (max>1) {
+		for (size_t i = 0; i < max; i++) {
+			VoxelList tmpList(*this->voxels);
+			size_t index = tmpList.removeAllTopLevelVoxelsBut(i);
+			unsigned short status;
+			std::cout << "[" << this->collector << " PackingGenerator::createPacking] analysing top level voxel " << index << " " << std::flush;
+			tmpList.analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), 0);
+			do {
+				std::cout << ", splitting " << tmpList.getLength() << " voxels " << std::flush;
+				status = tmpList.splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface->getBC());
+				std::cout << ", remained " << tmpList.getLength() << " voxels of spatial size: "  << tmpList.getSpatialVoxelSize() << " " << std::flush;
+			}while (status != VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT && tmpList.getLength()>0);
 			std::cout << std::endl << "[" << this->collector << " PackingGenerator::createPacking] top level voxel " << index;
-		if (tmpList.getLength() == 0) {
-			this->voxels->removeTopLevelVoxel(index);
-			i--;
-			std::cout << " removed";
-		}else {
-			std::cout << " left unchanged";
+			if (tmpList.getLength() == 0) {
+				this->voxels->removeTopLevelVoxel(index);
+				i--;
+				std::cout << " removed";
+			}else {
+				std::cout << " left unchanged";
+			}
+			max = this->voxels->countActiveTopLevelVoxels();
+			std::cout << " (" << max << ")" << std::endl << std::flush;
 		}
-		max = this->voxels->countActiveTopLevelVoxels();
-		std::cout << " (" << max << ")" << std::endl << std::flush;
 	}
 	std::cout << "[" << this->collector << " PackingGenerator::createPacking] analysing of " << this->voxels->getLength() << " voxels ";
 	this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), 0);
