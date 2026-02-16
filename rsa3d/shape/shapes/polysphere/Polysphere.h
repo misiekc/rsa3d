@@ -10,6 +10,9 @@
 class Polysphere : public Shape<3, 3>{
 private:
 
+    static double constexpr TWO_PI = 2.0*M_PI;
+    static double constexpr HALF_PI = 0.5*M_PI;
+    static double constexpr ONEHALF_PI = 1.5*M_PI;
     // finds shape area using Monte-Carlo sampling
     static double mcArea(size_t mcTrials);
 
@@ -28,15 +31,15 @@ protected:
     //assume vertex (VertexR.size()-1) is linked to vertex 0
     static std::vector<Vector<3>> sphereCentre;
     static std::vector<double> sphereR;
-    // finds minimum and maximum value of cosine function in [theta, theta+dt]
-    static std::array<double, 2> minmaxCos(double theta, double dt);
-    // finds minimum and maximum value of sine function in [theta, theta+dt]
-    static std::array<double, 2> minmaxSin(double theta, double dt);
+    // finds minimum and maximum value of sine and cosine function in [theta, theta+dt]
+     static std::array<std::array<double, 2>, 2> minmaxSinCos(double theta, double dt, double sinTheta, double cosTheta, double sinDt, double cosDt);
+
 
     static Vector<3> getStaticSpherePosition(size_t diskIndex, const Vector<3> &position, const Orientation<3> &orientation);
     static Orientation<3> fromVoxel(const Orientation<3> &voxelOrientation);
 
-    virtual std::array<Vector<3>, 2> getMinMaxVoxelCoordinates(size_t sphereIndex, const Vector<3> &voxelPosition, const Orientation<3> &voxelOrientation, double spatialSize, const Orientation<3> &angularSize) const;
+    virtual std::array<Matrix<3, 3>, 2> getMinMaxMatrices(const Orientation<3> &voxelOrientation, const Orientation<3> &angularSize) const;
+    virtual std::array<Vector<3>, 2> getMinMaxVoxelCoordinates(size_t sphereIndex, const Vector<3> &voxelPosition, double spatialSize, const std::array<Matrix<3,3>, 2>&minmaxMatrices) const;
 
     //like voxelInside, but optimized for full angle angularSize
     virtual bool fullAngleVoxelInside(BoundaryConditions<3> *bc, const Vector<3> &voxelPosition, double spatialSize) const;

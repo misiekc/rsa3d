@@ -22,11 +22,16 @@ RND::~RND() {
 	delete this->distribution;
 }
 
-double RND::nextValue(){
+double RND::nextValue() const {
 	return (*this->distribution)(*this->mt);
 }
 
-double RND::nextValue(std::uniform_real_distribution<double> *distr){
+double RND::nextValue(std::uniform_real_distribution<double> *distr) const {
+
+	return (*distr)(*this->mt);
+}
+
+double RND::nextNormalValue(std::normal_distribution<double> *distr) const {
 
 	return (*distr)(*this->mt);
 }

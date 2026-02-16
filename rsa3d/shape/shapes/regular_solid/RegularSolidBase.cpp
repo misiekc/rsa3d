@@ -13,6 +13,8 @@
 //#define PRINT_FACE_AXES
 //#define PRINT_VERTEX_AXES
 
+double RegularSolidBase::goldRatio = (1 + std::sqrt(5.)) / 2;
+double RegularSolidBase::tribonacciConstant = (1 + std::cbrt(19 + 3*std::sqrt(33.)) + std::cbrt(19 - 3*std::sqrt(33.)))/3;
 
 void RegularSolidBase::complementShapeData(ShapeData &shapeDataToComplement) {
     // No faces provided - generate wolfram notebook to recognize faces manually

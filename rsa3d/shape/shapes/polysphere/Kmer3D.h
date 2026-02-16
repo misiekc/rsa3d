@@ -10,7 +10,7 @@
 
 class Kmer3D : public Polysphere {
 protected:
-    std::array<Vector<3>, 2> getMinMaxVoxelCoordinates(size_t sphereIndex, const Vector<3> &position, const Orientation<3> &orientation, double spatialSize, const Orientation<3> &angularSize) const override;
+    std::array<Matrix<3, 3>, 2> getMinMaxMatrices(const Orientation<3> &voxelOrientation, const Orientation<3> &angularSize) const override;
 
 public:
     static void initClass(const std::string &attr);

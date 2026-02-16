@@ -51,14 +51,28 @@ double Kmer3D::calculateVolume(int numberOfSpheres, double distance) {
     else
         return (4.0 / 3.0) * M_PI * numberOfSpheres;
 }
-std::array<Vector<3>, 2> Kmer3D::getMinMaxVoxelCoordinates(size_t sphereIndex, const Vector<3> &voxelPosition, const Orientation<3> &voxelOrientation, double spatialSize, const Orientation<3> &angularSize) const {
-    Orientation<3> orientation = Polysphere::fromVoxel(voxelOrientation);
+
+std::array<Matrix<3,3>, 2> Kmer3D::getMinMaxMatrices(const Orientation<3> &voxelOrientation, const Orientation<3> &angularSize) const{
+    Orientation<3> translatedVoxelOrientation = Polysphere::fromVoxel(voxelOrientation);
     double angularSize1 = std::asin(voxelOrientation[1]+angularSize[1]-1.0) - std::asin(voxelOrientation[1]-1.0);
 
-    std::array<double, 2> sin_ay = Polysphere::minmaxSin(orientation[1], angularSize1);
-    std::array<double, 2> sin_az = Polysphere::minmaxSin(orientation[2], angularSize[2]);
-    std::array<double, 2> cos_ay = Polysphere::minmaxCos(orientation[1], angularSize1);
-    std::array<double, 2> cos_az = Polysphere::minmaxCos(orientation[2], angularSize[2]);
+    Orientation<3> sinTheta{ std::sin(translatedVoxelOrientation[0]), std::sin(translatedVoxelOrientation[1]), std::sin(translatedVoxelOrientation[2]) };
+    Orientation<3> cosTheta{ std::cos(translatedVoxelOrientation[0]), std::cos(translatedVoxelOrientation[1]), std::cos(translatedVoxelOrientation[2]) };
+    Orientation<3> sinDt{ std::sin(angularSize[0]), std::sin(angularSize1), std::sin(angularSize[2])};
+    Orientation<3> cosDt{ std::cos(angularSize[0]), std::cos(angularSize1), std::cos(angularSize[2])};
+
+
+    std::array<std::array<double, 2>, 2> minmaxSinCos;
+
+    minmaxSinCos = Polysphere::minmaxSinCos(translatedVoxelOrientation[0], angularSize[0], sinTheta[0], cosTheta[0], sinDt[0], cosDt[0]);
+    std::array<double, 2> sin_ax = minmaxSinCos[0];
+    std::array<double, 2> cos_ax = minmaxSinCos[1];
+    minmaxSinCos = Polysphere::minmaxSinCos(translatedVoxelOrientation[1], angularSize1, sinTheta[1], cosTheta[1], sinDt[1], cosDt[1]);
+    std::array<double, 2> sin_ay = minmaxSinCos[0];
+    std::array<double, 2> cos_ay = minmaxSinCos[1];
+    minmaxSinCos = Polysphere::minmaxSinCos(translatedVoxelOrientation[2], angularSize[2], sinTheta[2], cosTheta[2], sinDt[2], cosDt[2]);
+    std::array<double, 2> sin_az = minmaxSinCos[0];
+    std::array<double, 2> cos_az = minmaxSinCos[1];
 
     Matrix<3, 3, double> minMatrix({
         cos_ay[0] * cos_az[0],
@@ -86,12 +100,7 @@ std::array<Vector<3>, 2> Kmer3D::getMinMaxVoxelCoordinates(size_t sphereIndex, c
         0.0,
         cos_ay[1]
     });
-    Vector<3> vMin = voxelPosition + minMatrix*Polysphere::sphereCentre[sphereIndex];
-    Vector<3> vMax = voxelPosition + maxMatrix*Polysphere::sphereCentre[sphereIndex];
-    for (unsigned short i=0; i<3; i++) {
-        vMax[i] += spatialSize;
-    }
-    return {vMin, vMax};
+    return{minMatrix, maxMatrix};
 }
 
 bool Kmer3D::voxelInside(BoundaryConditions<3> *bc, const Vector<3> &voxelPosition, const Orientation<3> &voxelOrientation, double spatialSize, const Orientation<3> &angularSize) const{

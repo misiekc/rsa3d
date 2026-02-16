@@ -45,10 +45,8 @@ void OrderedShape2_1::initClass(const std::string &args, InitClassFunction baseS
 Shape<2, 0> *OrderedShape2_1::createShape(RND *rnd) {
     auto createShape = Shape<2, 1>::getCreateShapeImpl();
     auto underlyingShape = std::unique_ptr<Shape<2, 1>>(createShape(rnd));
-
     if (angleDistributionSigma > 0) {
-        RNDUniformRandomBitGenerator bitGenerator(*rnd);
-        double angle = angleDistribution(bitGenerator);
+        double angle = rnd->nextNormalValue(&angleDistribution);
         underlyingShape->rotate({{angle}});
     }
     return new OrderedShape2_1(std::move(underlyingShape));

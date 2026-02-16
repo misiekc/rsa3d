@@ -21,8 +21,9 @@ public:
 	RND(int seed);
 	virtual ~RND();
 
-	double nextValue();
-	double nextValue(std::uniform_real_distribution<double> *distr);
+	double nextValue() const;
+	double nextValue(std::uniform_real_distribution<double> *distr) const;
+	double nextNormalValue(std::normal_distribution<double> *distr) const;
 };
 
 #endif /* RND_H_ */

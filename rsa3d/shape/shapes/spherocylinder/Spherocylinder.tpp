@@ -16,6 +16,12 @@ double Spherocylinder<DIMENSION>::radius;
 template<unsigned short DIMENSION>
 double Spherocylinder<DIMENSION>::length;
 
+template<unsigned short DIMENSION>
+double Spherocylinder<DIMENSION>::g20 = 1.0; // Gamma(2.0)
+template<unsigned short DIMENSION>
+double Spherocylinder<DIMENSION>::g15 = 0.5*sqrt(M_PI); // Gamma(1.5)
+
+
 template <unsigned short DIMENSION>
 double Spherocylinder<DIMENSION>::gamma(unsigned short dim){
 	double result;

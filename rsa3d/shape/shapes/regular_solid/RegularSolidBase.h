@@ -106,8 +106,8 @@ protected:
     inline std::vector<Vector<3>> applyPosition(const std::vector<Vector<3>> &vectors) const;
 
 public:
-    constexpr static double goldRatio = (1 + std::sqrt(5.)) / 2;
-    static constexpr double tribonacciConstant = (1 + std::cbrt(19 + 3*std::sqrt(33.)) + std::cbrt(19 - 3*std::sqrt(33.)))/3;
+    static double goldRatio; //= (1 + std::sqrt(5.)) / 2;
+    static double tribonacciConstant; // = (1 + std::cbrt(19 + 3*std::sqrt(33.)) + std::cbrt(19 - 3*std::sqrt(33.)))/3;
 
     bool pointInside(BoundaryConditions<3> *bc, const Vector<3> &position, const Orientation<0> &orientation,
                      const Orientation<0> &orientationRange) const override;
