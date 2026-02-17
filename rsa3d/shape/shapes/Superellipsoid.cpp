@@ -9,6 +9,8 @@
 #include "../../utils/Assertions.h"
 #include "../OrderParameters.h"
 
+#include <cmath>
+
 double Superellipsoid::a{};
 double Superellipsoid::b{};
 double Superellipsoid::c{};
@@ -46,9 +48,15 @@ void Superellipsoid::initClass(const std::string &attr) {
 
 void Superellipsoid::normalizeVolume() {
     double volume = (2.0/3.0)*a*b*c/(p*p);
-    volume *= std::beta(1.0/(2*p), 1.0/(2*p));
-    volume *= std::beta(1.0/p, 1.0/(2*p));
-    double factor = 1/std::cbrt(volume);
+
+//    volume *= std::beta(1.0/(2.0*p), 1.0/(2.0*p));
+//    volume *= std::beta(1.0/p, 1.0/(2.0*p));
+	double factor = 1/std::cbrt(volume);
+	double gamma_1_p = std::tgamma(1.0/p);
+	double gamma_1_2p = std::tgamma(1.0/(2.0*p));
+	volume *= gamma_1_2p*gamma_1_2p / gamma_1_p;
+	volume *= gamma_1_p*gamma_1_2p / std::tgamma(3.0/(2.0*p));
+
     Superellipsoid::a *= factor;
     Superellipsoid::b *= factor;
     Superellipsoid::c *= factor;
@@ -88,14 +96,14 @@ Vector<3> Superellipsoid::inner_shape_function_gradient(const Vector<3> &r) cons
 	return this->orientation*gradient;
 }
 
-Vector<3> Superellipsoid::shape_function_gradient(const Vector<3> r) const{
+Vector<3> Superellipsoid::shape_function_gradient(const Vector<3> &r) const{
 	Vector<3> gradient;
 	double factor = (1.0/p)*std::pow(this->inner_shape_function(r), 1.0/p - 1);
 	gradient = factor*this->inner_shape_function_gradient(r);
 	return gradient;
 }
 
-Matrix<3, 3> Superellipsoid::inner_shape_function_hesian(const Vector<3> r) const{
+Matrix<3, 3> Superellipsoid::inner_shape_function_hesian(const Vector<3> &r) const{
 	Matrix<3, 3> hesian{};
 	Vector<3> r_relative = this->r_relative(r);
 	hesian(0, 0) = (2*p*(2*p-1)*std::pow(std::abs(r_relative[0]/a), 2*p-2))/(a*a);
@@ -110,7 +118,7 @@ Matrix<3, 3> Superellipsoid::inner_shape_function_hesian(const Vector<3> r) cons
 	return this->orientation*hesian*this->orientationTr;
 }
 
-Matrix<3, 3> Superellipsoid::shape_function_hesian(const Vector<3> r) const{
+Matrix<3, 3> Superellipsoid::shape_function_hesian(const Vector<3> &r) const{
 	Matrix<3, 3> hesian;
 	double inner_shape = this->inner_shape_function(r);
 	Vector<3> inner_gradient = this->inner_shape_function_gradient(r);

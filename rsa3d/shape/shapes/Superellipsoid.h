@@ -26,14 +26,14 @@ private:
     double inner_shape_function(const Vector<3> &r) const;
     double shape_function(const Vector<3> &r) const;
     Vector<3> inner_shape_function_gradient(const Vector<3> &r) const;
-    Vector<3> shape_function_gradient(const Vector<3> r) const;
-    Matrix<3, 3> inner_shape_function_hesian(const Vector<3> r) const;
-    Matrix<3, 3> shape_function_hesian(const Vector<3> r) const;
+    Vector<3> shape_function_gradient(const Vector<3> &r) const;
+    Matrix<3, 3> inner_shape_function_hesian(const Vector<3> &r) const;
+    Matrix<3, 3> shape_function_hesian(const Vector<3> &r) const;
 
-    Vector<3> gradient(const Vector<3> r) const;
-    Vector<3> nabla(const Vector<3> r) const;
-    Matrix<3,3> hesian(const Vector<3> r) const;
-    Matrix<3,3> nabla_2(const Vector<3> r) const;
+    Vector<3> gradient(const Vector<3> &r) const;
+    Vector<3> nabla(const Vector<3> &r) const;
+    Matrix<3,3> hesian(const Vector<3> &r) const;
+    Matrix<3,3> nabla_2(const Vector<3> &r) const;
 
 public:
     static void initClass(const std::string &attr);
@@ -51,8 +51,8 @@ public:
 
     std::vector<double> calculateOrder(const OrderCalculable *other) const override;
 
-    std::string toPovray() const;
-    std::string toWolfram() const;
+    std::string toPovray() const override;
+    std::string toWolfram() const override;
 //    Matrix<3, 3> getEllipsoidMatrix() const;
 
 };
