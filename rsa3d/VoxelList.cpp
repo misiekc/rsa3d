@@ -672,11 +672,7 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 	}
 
 	size_t newListSize = voxelsFactor*(this->length);
-	Voxel** newList = new Voxel*[ newListSize ];
-	_OMP_PARALLEL_FOR
-	for(size_t i=0; i<newListSize; i++){
-		newList[i] = nullptr;
-	}
+	Voxel** newList = new Voxel*[ newListSize ](); // automatic nullptr initialization
 
 	// temporary metrices for voxels after divisions. One separate matrix for each thread
 	Voxel ***aVoxels = new Voxel**[_OMP_MAXTHREADS];

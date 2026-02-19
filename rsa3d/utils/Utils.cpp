@@ -13,39 +13,33 @@
 #include <algorithm>
 #include "../geometry/Vector.h"
 
-bool increment(int* in, int inlength, int max){
-	if(inlength==0)
-		return false;
-	int i=0;
-	while(i<inlength){
-		in[i]++;
-		if (in[i]>max && i<inlength-1){
-			in[i] = 0;
-			i++;
-		}else{
-			break;
-		}
+bool increment(int *in, int inlength, int max) {
+	size_t i = 0;
+	while(i < inlength && in[i] == max) {
+		in[i] = 0;
+		i++;
 	}
-	if(in[inlength-1]>max)
+	if(i < inlength) {
+		in[i]++;
+		return true;
+	} else {
 		return false;
-	return true;
+	}
 }
 
-
-size_t position2i(const double* da, unsigned short int dalength, double size, double dx, size_t n){
+size_t position2i(const double* da, size_t dim, double size, double dx, size_t n){
+	// Generic fallback (for 5..10..etc.)
 	size_t result = 0;
-	int ix;
-	for(int i=dalength-1; i>=0; i--){
-		if (da[i]<0)
-			ix = static_cast<int>((da[i] + size) / dx);
-		else if (da[i]>=size)
-			ix = static_cast<int>((da[i] - size) / dx);
-		else
-			ix = static_cast<int>(da[i] / dx);
+	for (size_t i = 0; i < dim; ++i){
+		double v = da[i];
 
-		if ( (ix+1)*dx == da[i])
-			ix++;
-		result = n*result + ix;
+		if (v < 0.0)
+			v += size;
+		else if (v >= size)
+			v -= size;
+
+		size_t ix = static_cast<size_t>(v/dx);
+		result = result * n + ix;
 	}
 	return result;
 }
@@ -59,13 +53,14 @@ void i2position(double* da, int dalength, int index, double dx, int n){
 }
 
 void coordinates(int* result, const double* da, int dalength, double size, double dx, int n){
-	for(int i=dalength-1; i>=0; i--){
-		if (da[i]<0)
-			result[i] = static_cast<int>((da[i] + size) / dx);
-		else if (da[i]>=size)
-			result[i] = static_cast<int>((da[i] - size) / dx);
-		else
-			result[i] = static_cast<int>(da[i] / dx);
+	for(size_t i=dalength; i-- >0; ){
+		double v = da[i];
+		if (v < 0.0) {
+			v += size;
+		}else if (v >= size) {
+			v -= size;
+		}
+		result[i] = static_cast<int>(v/dx);
 	}
 }
 

@@ -27,6 +27,7 @@ private:
 	double linearSize;
 	unsigned int n;
 	double dx;
+	double invdx;
 	size_t cellSize;
 	// dummy grid stores all shapes in one cell - used for packing of highly anisotropic shapes. By default dummyGrid is equal to false. When it is true there is no advantage of using neighbour grid structure
 	bool dummyGrid;
@@ -41,14 +42,14 @@ private:
 			return 0;
 		int result = 0;
 		int ix;
-		for(short i=this->surfaceDimension-1; i>=0; i--){
+		for(size_t i=this->surfaceDimension; i-- > 0;){
 			Expects(position[i] >= 0);
             // TODO: is this conditions necessary? Maybe this->linearSize + this->dx is also ok?
 			if (position[i] >= this->linearSize) {
 				std::cout << std::endl << i << ": " << position[i] << " >= " << this->linearSize << " (" << this->dx << ")" << std::endl << std::flush;
 			}
 			Expects(position[i] < this->linearSize);
-			ix = (int)(position[i]/this->dx) + 1;
+			ix = (int)(position[i]*this->invdx) + 1;
 
 			result = this->n*result + ix;
 		}
@@ -56,18 +57,17 @@ private:
 	}
 
 	void coordinates(size_t* result, const RSAVector &position) const{
-		for(short i=this->surfaceDimension-1; i>=0; i--){
+		for(size_t i=this->surfaceDimension; i-- >0;){
 			Expects(position[i] >= 0);
             // TODO: is this conditions necessary? Maybe this->linearSize + this->dx is also ok?
 			Expects(position[i] < this->linearSize);
 
-			result[i] = (int)(position[i]/this->dx) + 1;
+			result[i] = (int)(position[i]*this->invdx) + 1;
 		}
 	}
 
 	void coordinates(size_t* result, size_t cellNo) const{
-
-		for(unsigned short i=0; i < this->surfaceDimension; i++){
+		for(size_t i=0; i < this->surfaceDimension; i++){
 			result[i] = cellNo % this->n;
 			cellNo /= this->n;
 		}
@@ -75,7 +75,7 @@ private:
 
 	size_t coordinates2i(const size_t *coords){
 		size_t result = 0;
-		for(short i=this->surfaceDimension-1; i>=0; i--){
+		for(size_t i=this->surfaceDimension; i-- >0;){
 			result = this->n*result + coords[i];
 		}
 		return result;
@@ -154,6 +154,7 @@ private:
 			this->dx = size;
 		else
 			this->dx = size/(this->n-2);
+		this->invdx = 1.0/this->dx;
 		this->cellSize = (int) round(pow(this->n, this->surfaceDimension));
 		this->cells = new std::vector<E *> *[this->cellSize];
 
