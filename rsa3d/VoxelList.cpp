@@ -101,7 +101,7 @@ VoxelList::VoxelList(const VoxelList &vl) {
 	this->activeTopLevelVoxels = new bool[this->activeTopLevelVoxelsSize];
 	std::memcpy(this->activeTopLevelVoxels, vl.activeTopLevelVoxels, this->activeTopLevelVoxelsSize*sizeof(bool));
 
-	size_t fullSpatialGridLinearSize = this->findArraySize(this->spatialRange, this->initialVoxelSize);
+	size_t fullSpatialGridLinearSize = VoxelList::findArraySize(this->spatialRange, this->initialVoxelSize);
 	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(this->surfaceDimension,
 														this->initialVoxelSize * fullSpatialGridLinearSize,
 														this->initialVoxelSize);
@@ -113,30 +113,19 @@ VoxelList::VoxelList(const VoxelList &vl) {
 	this->disabled = false;
 	this->voxelsInitialized = vl.voxelsInitialized;
 
-
 	this->voxels = new Voxel*[vl.length];
+	_OMP_PARALLEL_FOR
 	for (size_t i=0; i<vl.length; i++) {
 		Voxel *v = vl.voxels[i];
-		this->voxels[i] = new Voxel(v->getPosition(), v->getOrientation());
+		if (v!=nullptr) {
+			this->voxels[i] = new Voxel(v->getPosition(), v->getOrientation());
+			this->voxels[i]->index = i;
+		}else {
+			this->voxels[i] = nullptr;
+		}
 	}
 	this->length = vl.length;
 	this->rebuildNeighbourGrid();
-}
-
-size_t VoxelList::removeAllTopLevelVoxelsBut(size_t number) {
-	Expects(number < this->countActiveTopLevelVoxels());
-	size_t counter = 0;
-	size_t result = this->activeTopLevelVoxelsSize;
-	for (size_t i=0; i<this->activeTopLevelVoxelsSize; i++) {
-		if (this->activeTopLevelVoxels[i]) {
-			if (counter!=number)
-				this->activeTopLevelVoxels[i] = false;
-			else
-				result = i;
-			counter++;
-		}
-	}
-	return result;
 }
 
 VoxelList::VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const RSAOrientation &shapeAngularRange, const RSAOrientation &requestedAngularVoxelSize){
@@ -366,6 +355,53 @@ void VoxelList::removeTopLevelVoxel(std::size_t index){
 	this->activeTopLevelVoxels[index]=false;
 }
 
+void VoxelList::removeVoxel(std::size_t index){
+	if (this->disabled || !this->voxelsInitialized)
+		return;
+	if (this->voxels[index]!=nullptr) {
+		delete this->voxels[index];
+		this->voxels[index] = nullptr;
+	}
+}
+
+void VoxelList::restoreStructure() {
+	this->compactVoxelArray();
+	this->rebuildNeighbourGrid();
+}
+
+/*
+size_t VoxelList::removeAllTopLevelVoxelsBut(size_t number) {
+	Expects(number < this->countActiveTopLevelVoxels());
+	size_t counter = 0;
+	size_t result = this->activeTopLevelVoxelsSize;
+	for (size_t i=0; i<this->activeTopLevelVoxelsSize; i++) {
+		if (this->activeTopLevelVoxels[i]) {
+			if (counter!=number)
+				this->activeTopLevelVoxels[i] = false;
+			else
+				result = i;
+			counter++;
+		}
+	}
+	return result;
+}
+*/
+void VoxelList::removeAllTopLevelVoxelsBut(size_t index) {
+	Expects(index < this->activeTopLevelVoxelsSize);
+	for (size_t i=0; i<this->activeTopLevelVoxelsSize; i++) {
+		if (i!=index){
+			this->activeTopLevelVoxels[i] = false;
+		}
+	}
+	_OMP_PARALLEL_FOR
+	for (size_t i=0; i<this->length; i++) {
+		Voxel *v = this->voxels[i];
+		if (v!=nullptr && !this->isTopLevelVoxelActive(v)) {
+			delete v;
+			this->voxels[i] = nullptr;
+		}
+	}
+}
 
 void VoxelList::checkTopLevelVoxels() const{
 
@@ -390,6 +426,16 @@ void VoxelList::checkTopLevelVoxels() const{
 		}
 
 	}
+}
+
+std::vector<size_t> VoxelList::getActiveTopLevelVoxels() const{
+	std::vector<size_t> result;
+	result.clear();
+	for(size_t i=0; i<this->activeTopLevelVoxelsSize; i++){
+		if(this->activeTopLevelVoxels[i])
+			result.push_back(i);
+	}
+	return result;
 }
 
 std::size_t VoxelList::countActiveTopLevelVoxels() const{
@@ -642,8 +688,7 @@ size_t VoxelList::analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const R
 
 	std::cout << " compacting" << std::flush;
 
-	this->compactVoxelArray();
-	this->rebuildNeighbourGrid();
+	this->restoreStructure();
 
 	return begin - this->length;
 }
@@ -731,8 +776,7 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 		delete[] newList;
 
 		std::cout << " compacting" << std::flush;
-		this->compactVoxelArray();
-		this->rebuildNeighbourGrid();
+		this->restoreStructure();
 		return VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT;
 
 	}else{
@@ -757,8 +801,7 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 		}
 
 		std::cout << " compacting" << std::flush;
-		this->compactVoxelArray();
-		this->rebuildNeighbourGrid();
+		this->restoreStructure();
 		return VoxelList::NORMAL_SPLIT;
 
 	}
@@ -771,7 +814,7 @@ void VoxelList::getRandomEntry(RSAVector *position, RSAOrientation *orientation,
 	this->getRandomPositionAndOrientation(position, orientation, *v, rnd);
 }
 
-Voxel * VoxelList::getVoxel(int i) {
+Voxel * VoxelList::getVoxel(size_t i) {
 	return this->voxels[i];
 }
 
@@ -838,6 +881,46 @@ double VoxelList::getVoxelsVolume() const{
 	return result;
 }
 
+// returns list of voxels' indices from the first list that are not in the second list
+std::vector<size_t> VoxelList::compareLists(const VoxelList &vl1, const VoxelList &vl2) {
+	Expects(vl1.spatialVoxelSize >= vl2.spatialVoxelSize);
+	std::cout << " comparing lists ..." << std::flush;
+	bool *exists = new bool[vl1.length];
+	bool *counter = new bool[vl1.length];
+	_OMP_PARALLEL_FOR
+	for (size_t i=0; i < vl1.length; i++) {
+		counter[i] = false;
+		if (vl1.voxels[i]==nullptr) {
+			exists[i] = false;
+		}else {
+			exists[i] = true;
+		}
+	}
+	_OMP_PARALLEL_FOR
+	for (size_t i=0; i < vl2.length; i++) {
+		const Voxel *v2 = vl2.voxels[i];
+		if (v2!=nullptr) {
+			const Voxel *v1 = vl1.getVoxel(v2->getPosition(), v2->getOrientation());
+			counter[v1->index] = true;
+		}
+	}
+	std::vector<size_t> result;
+	result.clear();
+
+	_OMP_PARALLEL_FOR
+	for (size_t i=0; i < vl1.length; i++) {
+		if (exists[i] && !counter[i]) {
+			_OMP_CRITICAL_SIMPLE
+			result.push_back(i);
+		}else if (!exists[i] && counter[i]) {
+			std::cout << "VoxelList::compareLists problem" << std::endl << std::flush;
+		}
+	}
+	delete[] exists;
+	delete[] counter;
+	std::cout << "done, " << result.size() << " voxels will be removed... " << std::flush;
+	return result;
+}
 
 std::string VoxelList::toPovray() const{
 	std::string sRes = "";
@@ -935,8 +1018,7 @@ void VoxelList::restore(std::istream &f){
 		this->activeTopLevelVoxels[topIndex] = true;
 	}
 	this->length = size;
-	this->compactVoxelArray();
-	this->rebuildNeighbourGrid();
+	this->restoreStructure();
 	this->voxelsInitialized = true;
 }
 

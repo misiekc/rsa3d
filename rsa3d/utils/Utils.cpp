@@ -13,7 +13,7 @@
 #include <algorithm>
 #include "../geometry/Vector.h"
 
-bool increment(int *in, int inlength, int max) {
+bool increment(int *in, size_t inlength, int max) {
 	size_t i = 0;
 	while(i < inlength && in[i] == max) {
 		in[i] = 0;
@@ -44,15 +44,15 @@ size_t position2i(const double* da, size_t dim, double size, double dx, size_t n
 	return result;
 }
 
-void i2position(double* da, int dalength, int index, double dx, int n){
-	for(int i=0; i<dalength; i++){
-		int iTmp = index % n;
+void i2position(double* da, size_t dalength, size_t index, double dx, int n){
+	for(size_t i=0; i<dalength; i++){
+		size_t iTmp = index % n;
 		da[i] = (iTmp+0.5)*dx;
 		index /= n;
 	}
 }
 
-void coordinates(int* result, const double* da, int dalength, double size, double dx, int n){
+void coordinates(int* result, const double* da, size_t dalength, double size, double dx){
 	for(size_t i=dalength; i-- >0; ){
 		double v = da[i];
 		if (v < 0.0) {
@@ -64,10 +64,10 @@ void coordinates(int* result, const double* da, int dalength, double size, doubl
 	}
 }
 
-int neighbour2i(int* coordinates, int* neighbour, int clength, int offset, int n){
+int neighbour2i(int* coordinates, int* neighbour, size_t clength, int offset, int n){
 	int result = 0;
 
-	for(int i=clength-1; i>=0; i--){
+	for(size_t i=clength-1; i>=0; i--){
 		int ix = coordinates[i] + neighbour[i] - offset;
 		if (ix>=n)
 			ix -= n;

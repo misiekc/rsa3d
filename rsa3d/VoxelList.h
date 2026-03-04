@@ -125,6 +125,9 @@ public:
 	static const unsigned short NO_SPLIT_BUT_INITIALIZED = 2;
 	static const unsigned short NORMAL_SPLIT = 3;
 
+	static std::vector<size_t> compareLists(const VoxelList &vl1, const VoxelList &vl2);
+
+
 	/**
 	 * @brief Constructor
 	 * @param dim surface dimension
@@ -141,22 +144,27 @@ public:
 	virtual ~VoxelList();
 
 	void getNeighbours(std::vector<Voxel *> *result, const RSAVector &da);
-	void removeTopLevelVoxel(Voxel *v);
 
 	std::size_t analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth);
 
-
 	virtual unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc);
 
+	// returns vector of active top level voxels indices
+	[[nodiscard]] std::vector<size_t> getActiveTopLevelVoxels() const;
 	// counts active top level voxels
 	[[nodiscard]] std::size_t countActiveTopLevelVoxels() const;
 
 	// remove all top level voxels apart from the given one - used only during sequential voxel analysis
-	size_t removeAllTopLevelVoxelsBut(size_t number);
+//	size_t removeAllTopLevelVoxelsBut(size_t number);
+	void removeAllTopLevelVoxelsBut(size_t index);
 	void removeTopLevelVoxel(size_t index);
+	void removeTopLevelVoxel(Voxel *v);
+	void removeVoxel(std::size_t index);
+	void restoreStructure();
+
 
 	virtual void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) const;
-	Voxel *getVoxel(int i);
+	Voxel *getVoxel(size_t i);
 	[[nodiscard]] virtual Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle) const;
 	[[nodiscard]] virtual double getSpatialVoxelSize() const;
 	[[nodiscard]] virtual RSAOrientation getAngularVoxelSize() const;
