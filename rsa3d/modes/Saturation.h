@@ -16,6 +16,7 @@ private:
     std::string packingFilename;
 
 	unsigned long getSeedOrigin() const;
+    unsigned long getCollectorNumber(std::string sfile);
 
 public:
     void initializeForArguments(const ProgramArguments &arguments) final;

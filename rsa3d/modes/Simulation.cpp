@@ -71,12 +71,12 @@ Packing Simulation::runSingleSimulation(unsigned int seed, std::size_t collector
     PackingGenerator pg(seed, collector, &params);
     Packing packing;
     if (access(pg.getPackingFilename().c_str(), F_OK)!=0){
-    	pg.run();
+    	bool bSaturated = pg.run();
     	packing = pg.getPacking();
     	this->postProcessPacking(packing);
 
     	if (this->params.storePackings)
-    		packing.store(pg.getPackingFilename());
+    		packing.store(pg.getPackingFilename(bSaturated));
         dataFile << collector << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;
         dataFile.flush();
     }else{

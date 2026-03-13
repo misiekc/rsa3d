@@ -44,7 +44,7 @@ size_t position2i(const double* da, size_t dim, double size, double dx, size_t n
 	return result;
 }
 
-void i2position(double* da, size_t dalength, size_t index, double dx, int n){
+void i2position(double* da, size_t dalength, size_t index, double dx, size_t n){
 	for(size_t i=0; i<dalength; i++){
 		size_t iTmp = index % n;
 		da[i] = (iTmp+0.5)*dx;

@@ -21,17 +21,40 @@ void Saturation::initializeForArguments(const ProgramArguments &arguments) {
 
 void Saturation::run() {
     Packing packing;
-    packing.restore(this->packingFilename);
-    std::size_t collector = params.from;
-    unsigned long seedOrigin = this->getSeedOrigin();
-    unsigned long seed = seedOrigin + collector;
-    PackingGenerator pg(seed, collector, &this->params);
-    pg.run(&packing);
-    if (params.storePackings)
-        packing.store(pg.getPackingFilename());
-
+    std::filesystem::path path(this->packingFilename);
+    std::error_code ec;
+    std::vector<std::string> filenames{};
+    if (std::filesystem::is_directory(path, ec) ){
+        auto allFilenames = PackingGenerator::findPackingsInDir(this->packingFilename);
+        for (auto sfile : allFilenames) {
+            if (sfile.find(".ns.")!=std::string::npos)
+                filenames.push_back(sfile);
+        }
+    }else {
+        filenames.push_back(this->packingFilename);
+    }
+    for (auto sfile : filenames) {
+        packing.restore(sfile);
+        std::size_t collector = this->getCollectorNumber(sfile);
+        unsigned long seedOrigin = this->getSeedOrigin();
+        unsigned long seed = seedOrigin + collector;
+        PackingGenerator pg(seed, collector, &this->params);
+        bool bSaturated = pg.run(&packing);
+        if (params.storePackings) {
+            std::string spath = sfile.substr(0, sfile.rfind(std::filesystem::path::preferred_separator)+1);
+            std::string sfilename = spath + pg.getPackingFilename(bSaturated);
+            packing.store(sfilename);
+        }
+        std::cout << std::endl << std::flush;
+    }
 }
 
+unsigned long Saturation::getCollectorNumber(std::string sfile) {
+    size_t i0 = sfile.rfind("_")+1;
+    size_t i1 = sfile.find(".ns.bin");
+    std::string sindex = sfile.substr(i0, i1-i0);
+    return static_cast<unsigned long>(atol(sindex.c_str()));
+}
 unsigned long Saturation::getSeedOrigin() const {
     if (this->params.seedOrigin == "random")
         return std::random_device{}();

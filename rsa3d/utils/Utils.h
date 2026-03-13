@@ -19,7 +19,7 @@ using RSAOrientation = Orientation<RSA_ANGULAR_DIMENSION>;
 
 bool increment(int* in, size_t inlength, int max);
 size_t position2i(const double* __restrict da, size_t dim, double size, double dx, size_t n);
-void i2position(double* da, size_t dalength, int index, double dx, int n);
+void i2position(double* da, size_t dalength, size_t index, double dx, size_t n);
 void coordinates(int* result, const double* da, size_t dalength, double size, double dx);
 int neighbour2i(int* coordinates, int* neighbour, size_t clength, int offset, int n);
 

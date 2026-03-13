@@ -32,6 +32,7 @@
 #include "surface_functions/VirtualSineSurfaceFunction.h"
 #include "CurvedSurface.h"
 #include "CurvedSurfaceVoxelList.h"
+#include "SubVoxelList.h"
 
 
 double PackingGenerator::FACTOR_LIMIT = 5.0;
@@ -308,9 +309,8 @@ void PackingGenerator::sequentialVoxelAnalysis() {
 	if (indices.size()>1) {
 		for (size_t index: indices) {
 			std::cout << "[" << this->collector << " PackingGenerator::createPacking] cloning voxel list " << std::flush;
-			VoxelList tmpList(*this->voxels);
-			tmpList.removeAllTopLevelVoxelsBut(index);
-			tmpList.restoreStructure();
+
+			VoxelList tmpList = VoxelList::cloneOneTopLevelVoxelList(*this->voxels, index);
 //			VoxelList backupList(*this->voxels);
 //			backupList.removeAllTopLevelVoxelsBut(index);
 			std::cout << " done, analysing top level voxel " << index << " " << std::flush;
@@ -435,7 +435,7 @@ unsigned short PackingGenerator::splitVoxels(PGInfo &pginfo, std::chrono::steady
 	return status;
 }
 
-void PackingGenerator::createPacking(Packing *packing) {
+bool PackingGenerator::createPacking(Packing *packing) {
 
 	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
@@ -609,6 +609,7 @@ void PackingGenerator::createPacking(Packing *packing) {
 	if (pginfo.missCounter >= params.maxTriesWithoutSuccess) {
 		std::cout << "[" << this->collector << " PackingGenerator::createPacking] WARNING: finished due to " << pginfo.missCounter << " usuccessfull tries. Probaility to add a next object to the packing is approximatelly of the order " << 1.0/(factor*pginfo.missCounter) << std::endl;
 	}
+	return (this->voxels->getLength()==0);
 }
 
 bool PackingGenerator::generationCompleted(size_t missCounter, double t) {
@@ -626,7 +627,7 @@ bool PackingGenerator::generationCompleted(size_t missCounter, double t) {
 }
 
 
-void PackingGenerator::run(Packing *packing){
+bool PackingGenerator::run(Packing *packing){
 
 /*
 #ifdef _OPENMP
@@ -652,7 +653,7 @@ void PackingGenerator::run(Packing *packing){
 	}
 #endif
 */
-	this->createPacking(packing);
+	return this->createPacking(packing);
 }
 
 
@@ -846,6 +847,6 @@ std::vector<std::string> PackingGenerator::findPackingsInDir(const std::string &
     return filenames;
 }
 
-std::string PackingGenerator::getPackingFilename() const {
-    return this->params.getPackingSignature() + "_" + std::to_string(this->collector) + ".bin";
+std::string PackingGenerator::getPackingFilename(bool bSaturated) const {
+    return this->params.getPackingSignature() + "_" + std::to_string(this->collector) + (bSaturated?".bin":".ns.bin");
 }

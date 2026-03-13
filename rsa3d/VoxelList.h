@@ -21,14 +21,14 @@ class VoxelList {
 
 private:
 
-	// for a given voxel returns index of its root
-	[[nodiscard]] int getIndexOfTopLevelVoxel(const RSAVector &da) const;
-
 	// sets status basing on existing voxels
 	void refreshTopLevelVoxels();
 
 protected:
-    // allows voxels to overlap - only for testing purposes and normally should be set to 1
+	// for a given voxel returns index of its root
+	[[nodiscard]] virtual size_t getIndexOfTopLevelVoxel(const RSAVector &da) const;
+
+	// allows voxels to overlap - only for testing purposes and normally should be set to 1
     const double dxFactor = 1.0; // 1.0000000001;
     // disables voxel list for debug purposes - typically is false
 	bool disabled;
@@ -95,7 +95,7 @@ protected:
 	virtual void splitVoxel(Voxel *v, double spatialSize, const RSAOrientation &angularSize, Voxel **vRes) const;
 
 	// fills neigbour grid with voxels
-	void rebuildNeighbourGrid();
+	virtual void rebuildNeighbourGrid();
 
 	virtual bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, const RSAOrientation &angularSize, unsigned short depth) const;
 
@@ -114,6 +114,8 @@ protected:
 
     // returns number of elements of size cellSize needed to cover a desired range
     static std::size_t findArraySize(double range, double cellSize) ;
+
+	void removeAllTopLevelVoxelsBut(size_t index);
 
 public:
 
@@ -137,7 +139,7 @@ public:
 	 * @param requestedAngularVoxelSize suggested initial angular size of a voxel. Initial angular size of allocaced voxels will not be larger than requested one.
 	 */
 	VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const RSAOrientation &shapeAngularRange, const RSAOrientation &requestedAngularVoxelSize);
-	VoxelList(const VoxelList &vl);
+	static VoxelList cloneOneTopLevelVoxelList(const VoxelList &vl, size_t index);
 
 	void disable();
 
@@ -156,7 +158,6 @@ public:
 
 	// remove all top level voxels apart from the given one - used only during sequential voxel analysis
 //	size_t removeAllTopLevelVoxelsBut(size_t number);
-	void removeAllTopLevelVoxelsBut(size_t index);
 	void removeTopLevelVoxel(size_t index);
 	void removeTopLevelVoxel(Voxel *v);
 	void removeVoxel(std::size_t index);
