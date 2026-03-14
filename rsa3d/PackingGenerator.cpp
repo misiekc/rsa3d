@@ -32,7 +32,6 @@
 #include "surface_functions/VirtualSineSurfaceFunction.h"
 #include "CurvedSurface.h"
 #include "CurvedSurfaceVoxelList.h"
-#include "SubVoxelList.h"
 
 
 double PackingGenerator::FACTOR_LIMIT = 5.0;

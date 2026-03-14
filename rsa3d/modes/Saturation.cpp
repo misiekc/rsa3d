@@ -5,6 +5,7 @@
 #include <chrono>
 #include <fstream>
 #include <unistd.h>
+#include <filesystem>
 
 #include "Saturation.h"
 #include "../PackingGenerator.h"
