@@ -141,14 +141,14 @@ void NewDiscreteAngleVoxelList::getRandomPositionAndOrientation(RSAVector *posit
 }
 
 
-unsigned short NewDiscreteAngleVoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc){
+unsigned short NewDiscreteAngleVoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, bool printDot){
     if (!this->voxelsInitialized){
         this->createOrientationsMap(this->initialAngularVoxelSize[0]);
         this->initVoxels(bc, nl);
         this->createVoxelMap();
         return VoxelList::NO_SPLIT_BUT_INITIALIZED;
     }
-    unsigned short uRet = VoxelList::splitVoxels(minDx, maxVoxels, nl, bc);
+    unsigned short uRet = VoxelList::splitVoxels(minDx, maxVoxels, nl, bc, printDot);
     this->createVoxelMap();
     this->createOrientationsMap(this->angularVoxelSize[0]);
     return uRet;
