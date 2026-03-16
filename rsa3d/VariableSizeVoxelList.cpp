@@ -106,7 +106,7 @@ void VariableSizeVoxelList::getRandomPositionAndOrientation(RSAVector *position,
 }
 
 
-unsigned short VariableSizeVoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc){
+unsigned short VariableSizeVoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, bool printDot){
 	if (this->disabled)
 		return VoxelList::NO_SPLIT;
 
@@ -188,7 +188,7 @@ unsigned short VariableSizeVoxelList::splitVoxels(double minDx, size_t maxVoxels
 			delete this->voxels[i];
 			this->voxels[i] = nullptr;
 		}
-		if (i%10000 == 0){ std::cout << "." << std::flush; }
+		if (printDot && i%10000 == 0){ std::cout << "." << std::flush; }
 	}
 
 	// delete temporary thread matrices. Covered voxels have been already removed

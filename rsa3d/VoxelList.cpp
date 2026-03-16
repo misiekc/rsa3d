@@ -79,7 +79,7 @@ VoxelList::VoxelList(){
 	this->length = 0;
 }
 
-VoxelList VoxelList::cloneOneTopLevelVoxelList(const VoxelList &vl, size_t index) {
+VoxelList VoxelList::cloneVoxelList(const VoxelList &vl) {
 	Expects(vl.voxelsInitialized);
 	VoxelList result{};
 	result.surfaceDimension = vl.surfaceDimension;
@@ -112,6 +112,11 @@ VoxelList VoxelList::cloneOneTopLevelVoxelList(const VoxelList &vl, size_t index
 	result.disabled = false;
 	result.voxelsInitialized = vl.voxelsInitialized;
 
+	return result;
+}
+
+VoxelList VoxelList::cloneOneTopLevelVoxelList(const VoxelList &vl, size_t index) {
+	VoxelList result = VoxelList::cloneVoxelList(vl);
 	result.voxels = new Voxel*[vl.length];
 	_OMP_PARALLEL_FOR
 	for (size_t i=0; i<vl.length; i++) {
@@ -129,6 +134,25 @@ VoxelList VoxelList::cloneOneTopLevelVoxelList(const VoxelList &vl, size_t index
 	result.restoreStructure();
 	return result;
 }
+
+VoxelList VoxelList::clonePartOfVoxelList(const VoxelList &vl, size_t minIndex, size_t maxIndex) {
+	VoxelList result = VoxelList::cloneVoxelList(vl);
+	result.voxels = new Voxel*[maxIndex-minIndex];
+	_OMP_PARALLEL_FOR
+	for (size_t i=minIndex; i<maxIndex; i++) {
+		Voxel *v = vl.voxels[i];
+		if (v!=nullptr) {
+			result.voxels[i-minIndex] = new Voxel(v->getPosition(), v->getOrientation());
+			result.voxels[i-minIndex]->index = i-minIndex;
+		}else {
+			result.voxels[i-minIndex] = nullptr;
+		}
+	}
+	result.length = maxIndex - minIndex;
+	result.restoreStructure();
+	return result;
+}
+
 
 VoxelList::VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const RSAOrientation &shapeAngularRange, const RSAOrientation &requestedAngularVoxelSize){
 	Expects(dim > 0);
@@ -363,6 +387,17 @@ void VoxelList::removeVoxel(std::size_t index){
 	if (this->voxels[index]!=nullptr) {
 		delete this->voxels[index];
 		this->voxels[index] = nullptr;
+	}
+}
+
+void VoxelList::removeVoxels(std::size_t fromIndex, std::size_t toIndex){
+	if (this->disabled || !this->voxelsInitialized)
+		return;
+	for (size_t index=fromIndex; index<toIndex; index++) {
+		if (this->voxels[index]!=nullptr) {
+			delete this->voxels[index];
+			this->voxels[index] = nullptr;
+		}
 	}
 }
 
@@ -678,7 +713,7 @@ size_t VoxelList::analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const R
 	return begin - this->length;
 }
 
-unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc){
+unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, bool printDot){
 	if (this->disabled || this->spatialVoxelSize<2*minDx)
 		return VoxelList::NO_SPLIT;
 
@@ -741,7 +776,7 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 			delete this->voxels[i];
 			this->voxels[i] = nullptr;
 		}
-		if (i%dotEvery == 0){ std::cout << "." << std::flush; }
+		if (printDot && i%dotEvery == 0){ std::cout << "." << std::flush; }
 	}
 
 	// delete temporary thread matrices. Covered voxels have been already removed

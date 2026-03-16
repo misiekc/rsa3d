@@ -69,6 +69,9 @@ protected:
 	// returns initial size of a vovel. It is not grater than d and be an integer power of 2 (due to numerical issues)
 	static double findFloorSize(double d);
 
+	static VoxelList cloneVoxelList(const VoxelList &vl);
+
+
 	// returns initial size of a vovel. It is not smaller than d and be an integer power of 2 (due to numerical issues)
 	static double findCeilSize(double d);
 
@@ -140,6 +143,7 @@ public:
 	 */
 	VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const RSAOrientation &shapeAngularRange, const RSAOrientation &requestedAngularVoxelSize);
 	static VoxelList cloneOneTopLevelVoxelList(const VoxelList &vl, size_t index);
+	static VoxelList clonePartOfVoxelList(const VoxelList &vl, size_t minIndex, size_t maxIndex);
 
 	void disable();
 
@@ -149,7 +153,7 @@ public:
 
 	std::size_t analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth);
 
-	virtual unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc);
+	virtual unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, bool printDot = true);
 
 	// returns vector of active top level voxels indices
 	[[nodiscard]] std::vector<size_t> getActiveTopLevelVoxels() const;
@@ -161,6 +165,7 @@ public:
 	void removeTopLevelVoxel(size_t index);
 	void removeTopLevelVoxel(Voxel *v);
 	void removeVoxel(std::size_t index);
+	void removeVoxels(std::size_t fromIndex, std::size_t toIndex);
 	void restoreStructure();
 
 
