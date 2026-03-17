@@ -23,6 +23,7 @@ public:
 	std::size_t addedSinceLastSplit;
 	std::size_t missCounter;
 	bool sequentialAnalysis;
+	bool partialAnalysis;
 	bool deepAnalysis;
 	bool skippedSplit;
 };

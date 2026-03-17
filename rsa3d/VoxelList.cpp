@@ -713,7 +713,7 @@ size_t VoxelList::analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const R
 	return begin - this->length;
 }
 
-unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, bool printDot){
+unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, bool verbose){
 	if (this->disabled || this->spatialVoxelSize<2*minDx)
 		return VoxelList::NO_SPLIT;
 
@@ -776,7 +776,7 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 			delete this->voxels[i];
 			this->voxels[i] = nullptr;
 		}
-		if (printDot && i%dotEvery == 0){ std::cout << "." << std::flush; }
+		if (verbose && i%dotEvery == 0){ std::cout << "." << std::flush; }
 	}
 
 	// delete temporary thread matrices. Covered voxels have been already removed
@@ -787,7 +787,8 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 
 	if (newVoxelsCounter > maxVoxels){
 		// too much voxels. Voxel splitting cancelled - using oryginal list instead of the new one
-		std::cout << " too many new voxels (" << newVoxelsCounter << ">" << maxVoxels <<"): - cancel splitting," << std::flush;
+		if (verbose)
+			std::cout << " too many new voxels (" << newVoxelsCounter << ">" << maxVoxels <<"): - cancel splitting," << std::flush;
 		_OMP_PARALLEL_FOR
 		for(size_t i=0; i<newListSize; i++){
 			if (newList[i]!=nullptr)
@@ -795,7 +796,8 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 		}
 		delete[] newList;
 
-		std::cout << " compacting" << std::flush;
+		if (verbose)
+			std::cout << " compacting" << std::flush;
 		this->restoreStructure();
 		return VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT;
 
@@ -819,8 +821,8 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 			delete this->angularDistribution[i];
 			this->angularDistribution[i] = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize[i]);
 		}
-
-		std::cout << " compacting" << std::flush;
+		if (verbose)
+			std::cout << " compacting" << std::flush;
 		this->restoreStructure();
 		return VoxelList::NORMAL_SPLIT;
 

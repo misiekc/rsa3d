@@ -153,7 +153,7 @@ public:
 
 	std::size_t analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth);
 
-	virtual unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, bool printDot = true);
+	virtual unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, bool verbose = true);
 
 	// returns vector of active top level voxels indices
 	[[nodiscard]] std::vector<size_t> getActiveTopLevelVoxels() const;
