@@ -38,7 +38,7 @@ public:
     void getRandomEntry(RSAVector *position, Orientation<1> *orientation, Voxel **v, RND *rnd);
     void getRandomPositionAndOrientation(RSAVector *position, Orientation<1> *orientation, Voxel *v, RND *rnd);
 
-    unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, bool printDot=true) override;
+    unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, bool verbose=true) override;
     double getVoxelsVolume() const override;
 
     bool analyzeVoxel(Voxel *v, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, double spatialSize, const Orientation<1> &angularSize, unsigned short depth=0) const override;

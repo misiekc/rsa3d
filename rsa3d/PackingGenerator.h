@@ -50,15 +50,16 @@ private:
 	unsigned short splitVoxels(PGInfo &pginfo, std::chrono::steady_clock::time_point begin);
 	void sequentialVoxelAnalysis();
 	void partialVoxelAnalysis();
+	void partialVoxelAnalysisOld();
 	void deepVoxelAnalysis();
 	/**
 	 * returns true if generated packing is saturated, otherwise returns false
 	 */
 	bool createPacking(Packing *packing);
 
-	void toPovray(const std::string &filename);
+	void toPovray(const std::string &filename) const;
     void toWolfram(const std::string &filename);
-	void toWolfram(const RSAVector &da, const std::string &filename);
+	void toWolfram(const RSAVector &da, const std::string &filename) const;
 
 	void printRemainingVoxels(const std::string &prefix);
 
@@ -77,7 +78,7 @@ public:
 
 	void testPacking(const Packing &packing, double maxTime);
 	void restore(std::istream &f);
-	std::string getPackingFilename(bool bSaturated = true) const;
+	[[nodiscard]] std::string getPackingFilename(bool bSaturated = true) const;
 
 	static void toPovray(Packing packing, double size, VoxelList *voxels, bool drawPBC,
                          const std::string &filename);

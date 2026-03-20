@@ -79,78 +79,84 @@ VoxelList::VoxelList(){
 	this->length = 0;
 }
 
-VoxelList VoxelList::cloneVoxelList(const VoxelList &vl) {
+/**
+ * Dummy constructor for derived classes
+ */
+VoxelList::VoxelList(const VoxelList &vl){
 	Expects(vl.voxelsInitialized);
-	VoxelList result{};
-	result.surfaceDimension = vl.surfaceDimension;
-	result.spatialRange = vl.spatialRange;
-	result.angularRange = vl.angularRange;
-	result.angularVoxelSize = vl.angularVoxelSize;
+
+	this->surfaceDimension = vl.surfaceDimension;
+	this->spatialRange = vl.spatialRange;
+	this->angularRange = vl.angularRange;
+	this->angularVoxelSize = vl.angularVoxelSize;
 
 
-	result.initialVoxelSize = vl.initialVoxelSize;
+	this->initialVoxelSize = vl.initialVoxelSize;
 	for (unsigned short int i=0; i<RSA_ANGULAR_DIMENSION; i++)
-		result.initialAngularVoxelSize[i] = vl.initialAngularVoxelSize[i];
-	result.spatialVoxelSize = vl.spatialVoxelSize;
+		this->initialAngularVoxelSize[i] = vl.initialAngularVoxelSize[i];
+	this->spatialVoxelSize = vl.spatialVoxelSize;
 
-	result.initialAngularVoxelSize = vl.initialAngularVoxelSize;
-	result.angularVoxelSize = vl.angularVoxelSize;
+	this->initialAngularVoxelSize = vl.initialAngularVoxelSize;
+	this->angularVoxelSize = vl.angularVoxelSize;
 
-	result.activeTopLevelVoxelsSize = vl.activeTopLevelVoxelsSize;
-	result.activeTopLevelVoxels = new bool[result.activeTopLevelVoxelsSize];
-	std::memcpy(result.activeTopLevelVoxels, vl.activeTopLevelVoxels, result.activeTopLevelVoxelsSize*sizeof(bool));
+	this->activeTopLevelVoxelsSize = vl.activeTopLevelVoxelsSize;
+	this->activeTopLevelVoxels = new bool[this->activeTopLevelVoxelsSize];
+	std::memcpy(this->activeTopLevelVoxels, vl.activeTopLevelVoxels, this->activeTopLevelVoxelsSize*sizeof(bool));
 
-	size_t fullSpatialGridLinearSize = VoxelList::findArraySize(result.spatialRange, result.initialVoxelSize);
-	result.voxelNeighbourGrid = new NeighbourGrid<Voxel>(result.surfaceDimension,
-														result.initialVoxelSize * fullSpatialGridLinearSize,
-														result.initialVoxelSize);
+	size_t fullSpatialGridLinearSize = VoxelList::findArraySize(this->spatialRange, this->initialVoxelSize);
+	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(this->surfaceDimension,
+														this->initialVoxelSize * fullSpatialGridLinearSize,
+														this->initialVoxelSize);
 
 
-	result.spatialDistribution = new std::uniform_real_distribution<double>(0.0, result.spatialVoxelSize);
+	this->spatialDistribution = new std::uniform_real_distribution<double>(0.0, this->spatialVoxelSize);
 	for (unsigned short int i=0; i<RSA_ANGULAR_DIMENSION; i++)
-		result.angularDistribution[i] = new std::uniform_real_distribution<double>(0.0, result.angularVoxelSize[i]);
-	result.disabled = false;
-	result.voxelsInitialized = vl.voxelsInitialized;
-
-	return result;
+		this->angularDistribution[i] = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize[i]);
+	this->disabled = false;
+	this->voxelsInitialized = vl.voxelsInitialized;
 }
 
-VoxelList VoxelList::cloneOneTopLevelVoxelList(const VoxelList &vl, size_t index) {
-	VoxelList result = VoxelList::cloneVoxelList(vl);
-	result.voxels = new Voxel*[vl.length];
+VoxelList::VoxelList(const VoxelList &vl, size_t index) : VoxelList(vl) {
+
+	// removing all top level voxels but one;
+	Expects(index < this->activeTopLevelVoxelsSize);
+	for (size_t i=0; i<this->activeTopLevelVoxelsSize; i++) {
+		if (i!=index){
+			this->activeTopLevelVoxels[i] = false;
+		}
+	}
+
+	// copying voxels
+	this->voxels = new Voxel*[vl.length];
 	_OMP_PARALLEL_FOR
 	for (size_t i=0; i<vl.length; i++) {
 		Voxel *v = vl.voxels[i];
-		if (v!=nullptr) {
-			result.voxels[i] = new Voxel(v->getPosition(), v->getOrientation());
-			result.voxels[i]->index = i;
+		if (v!=nullptr && this->isTopLevelVoxelActive(v)) {
+			this->voxels[i] = new Voxel(v->getPosition(), v->getOrientation());
+			this->voxels[i]->index = i;
 		}else {
-			result.voxels[i] = nullptr;
+			this->voxels[i] = nullptr;
 		}
 	}
-	result.length = vl.length;
+	this->length = vl.length;
 
-	result.removeAllTopLevelVoxelsBut(index);
-	result.restoreStructure();
-	return result;
+	this->restoreStructure();
 }
 
-VoxelList VoxelList::clonePartOfVoxelList(const VoxelList &vl, size_t minIndex, size_t maxIndex) {
-	VoxelList result = VoxelList::cloneVoxelList(vl);
-	result.voxels = new Voxel*[maxIndex-minIndex];
+VoxelList::VoxelList(const VoxelList &vl, size_t minIndex, size_t maxIndex) : VoxelList(vl){
+	this->voxels = new Voxel*[maxIndex-minIndex];
 	_OMP_PARALLEL_FOR
 	for (size_t i=minIndex; i<maxIndex; i++) {
 		Voxel *v = vl.voxels[i];
 		if (v!=nullptr) {
-			result.voxels[i-minIndex] = new Voxel(v->getPosition(), v->getOrientation());
-			result.voxels[i-minIndex]->index = i-minIndex;
+			this->voxels[i-minIndex] = new Voxel(v->getPosition(), v->getOrientation());
+			this->voxels[i-minIndex]->index = i-minIndex;
 		}else {
-			result.voxels[i-minIndex] = nullptr;
+			this->voxels[i-minIndex] = nullptr;
 		}
 	}
-	result.length = maxIndex - minIndex;
-	result.restoreStructure();
-	return result;
+	this->length = maxIndex - minIndex;
+	this->restoreStructure();
 }
 
 
@@ -207,8 +213,10 @@ VoxelList::~VoxelList() {
 		delete this->voxels[i];
 	}
 	delete[] this->voxels;
-	delete[] this->activeTopLevelVoxels;
-	delete this->voxelNeighbourGrid;
+	if (activeTopLevelVoxels != nullptr)
+		delete[] this->activeTopLevelVoxels;
+	if (this->voxelNeighbourGrid != nullptr)
+		delete this->voxelNeighbourGrid;
 }
 
 void VoxelList::disable(){
@@ -403,24 +411,8 @@ void VoxelList::removeVoxels(std::size_t fromIndex, std::size_t toIndex){
 
 void VoxelList::restoreStructure() {
 	this->compactVoxelArray();
-	this->rebuildNeighbourGrid();
-}
-
-void VoxelList::removeAllTopLevelVoxelsBut(size_t index) {
-	Expects(index < this->activeTopLevelVoxelsSize);
-	for (size_t i=0; i<this->activeTopLevelVoxelsSize; i++) {
-		if (i!=index){
-			this->activeTopLevelVoxels[i] = false;
-		}
-	}
-	_OMP_PARALLEL_FOR
-	for (size_t i=0; i<this->length; i++) {
-		Voxel *v = this->voxels[i];
-		if (v!=nullptr && !this->isTopLevelVoxelActive(v)) {
-			delete v;
-			this->voxels[i] = nullptr;
-		}
-	}
+	if (this->voxelNeighbourGrid!=nullptr)
+		this->rebuildNeighbourGrid();
 }
 
 void VoxelList::checkTopLevelVoxels() const{
@@ -836,7 +828,7 @@ void VoxelList::getRandomEntry(RSAVector *position, RSAOrientation *orientation,
 	this->getRandomPositionAndOrientation(position, orientation, *v, rnd);
 }
 
-Voxel * VoxelList::getVoxel(size_t i) {
+Voxel * VoxelList::getVoxel(size_t i) const{
 	return this->voxels[i];
 }
 

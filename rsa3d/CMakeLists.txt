@@ -57,6 +57,8 @@ set(RSA_SOURCE
         ProgramArguments.cpp
         ProgramMode.h
         RND.cpp
+        SubVoxelList.cpp
+        SubVoxelList.h
         Surface.cpp
         SurfaceFunction.h
         ThreadLocalRND.cpp

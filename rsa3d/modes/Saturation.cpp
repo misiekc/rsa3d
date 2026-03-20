@@ -44,6 +44,9 @@ void Saturation::run() {
         if (params.storePackings) {
             std::string spath = sfile.substr(0, sfile.rfind(std::filesystem::path::preferred_separator)+1);
             std::string sfilename = spath + pg.getPackingFilename(bSaturated);
+            if (!endsWith(sfilename, "ns")) {
+                std::filesystem::remove(sfile);
+            }
             packing.store(sfilename);
         }
         std::cout << std::endl << std::flush;

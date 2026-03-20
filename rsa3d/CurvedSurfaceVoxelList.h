@@ -60,7 +60,7 @@ public:
                            RSAOrientation requestedAngularVoxelSize, CurvedSurface *surface);
 
     unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl,
-                               RSABoundaryConditions *bc, bool printDot=true) override;
+                               RSABoundaryConditions *bc, bool verbose=true) override;
     void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) const override;
     double getVoxelsVolume() const override;
 };

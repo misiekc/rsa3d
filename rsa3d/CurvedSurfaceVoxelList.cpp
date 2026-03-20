@@ -8,9 +8,9 @@
 #include "utils/Utils.h"
 
 unsigned short CurvedSurfaceVoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl,
-                                                   RSABoundaryConditions *bc, bool printDot)
+                                                   RSABoundaryConditions *bc, bool verbose)
 {
-    auto returnCode = VoxelList::splitVoxels(minDx, maxVoxels, nl, bc, printDot);
+    auto returnCode = VoxelList::splitVoxels(minDx, maxVoxels, nl, bc, verbose);
     this->rebuildActiveSurfaceCells();
     return returnCode;
 }

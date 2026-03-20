@@ -65,12 +65,10 @@ protected:
 	NeighbourGrid<Voxel>* voxelNeighbourGrid;
 
 	VoxelList();
+	VoxelList(const VoxelList &vl);
 
 	// returns initial size of a vovel. It is not grater than d and be an integer power of 2 (due to numerical issues)
 	static double findFloorSize(double d);
-
-	static VoxelList cloneVoxelList(const VoxelList &vl);
-
 
 	// returns initial size of a vovel. It is not smaller than d and be an integer power of 2 (due to numerical issues)
 	static double findCeilSize(double d);
@@ -106,7 +104,7 @@ protected:
 
 	// voxels array will not have NULLs between pointers to objects - they can appear when splitting or analyze voxels in parallel
 	// returns number of not null values in list
-	void compactVoxelArray();
+	virtual void compactVoxelArray();
 
 	virtual void getRandomPositionAndOrientation(RSAVector *position, RSAOrientation *orientation, Voxel *v, RND *rnd) const;
 
@@ -117,8 +115,6 @@ protected:
 
     // returns number of elements of size cellSize needed to cover a desired range
     static std::size_t findArraySize(double range, double cellSize) ;
-
-	void removeAllTopLevelVoxelsBut(size_t index);
 
 public:
 
@@ -142,8 +138,21 @@ public:
 	 * @param requestedAngularVoxelSize suggested initial angular size of a voxel. Initial angular size of allocaced voxels will not be larger than requested one.
 	 */
 	VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const RSAOrientation &shapeAngularRange, const RSAOrientation &requestedAngularVoxelSize);
-	static VoxelList cloneOneTopLevelVoxelList(const VoxelList &vl, size_t index);
-	static VoxelList clonePartOfVoxelList(const VoxelList &vl, size_t minIndex, size_t maxIndex);
+
+	/**
+	 * Constructor that creates new voxel list based on the one provided as an argument with only one top level voxel active
+	 * @param vl voxel list
+	 * @param index index of teh only top level voxel that will be active in the created list
+	 */
+	VoxelList(const VoxelList &vl, size_t index);
+
+	/**
+	 * Constructor that creates new voxel list based on the one provided as an argument with only voxels with index in range [minIndex, naxIndex)
+	 * @param vl voxel list
+	 * @param minIndex minimal index of voxel. The first voxel is of index minIndex
+	 * @param maxIndex maximal index of voxel. The last voxel is of index maxIndex-1
+	 */
+	VoxelList(const VoxelList &vl, size_t minIndex, size_t maxIndex);
 
 	void disable();
 
@@ -153,7 +162,7 @@ public:
 
 	std::size_t analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth);
 
-	virtual unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, bool verbose = true);
+	virtual unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, bool verbose);
 
 	// returns vector of active top level voxels indices
 	[[nodiscard]] std::vector<size_t> getActiveTopLevelVoxels() const;
@@ -170,7 +179,7 @@ public:
 
 
 	virtual void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) const;
-	Voxel *getVoxel(size_t i);
+	Voxel *getVoxel(size_t i) const;
 	[[nodiscard]] virtual Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle) const;
 	[[nodiscard]] virtual double getSpatialVoxelSize() const;
 	[[nodiscard]] virtual RSAOrientation getAngularVoxelSize() const;

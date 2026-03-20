@@ -75,8 +75,13 @@ Packing Simulation::runSingleSimulation(unsigned int seed, std::size_t collector
     	packing = pg.getPacking();
     	this->postProcessPacking(packing);
 
-    	if (this->params.storePackings)
-    		packing.store(pg.getPackingFilename(bSaturated));
+    	if (this->params.storePackings) {
+    	    std::string sfilename = pg.getPackingFilename(bSaturated);
+    	    packing.store(sfilename);
+    	    if (!endsWith(sfilename, ".ns")) {
+    	        std::filesystem::remove(sfilename+".ns");
+    	    }
+    	}
         dataFile << collector << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;
         dataFile.flush();
     }else{
