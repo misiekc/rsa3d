@@ -7,11 +7,11 @@
 
 #include <iostream>
 #include <cmath>
-#include <algorithm>
 
 #include "VoxelList.h"
 
 #include <cstring>
+#include <fstream>
 
 #include "utils/OMPMacros.h"
 #include "utils/Assertions.h"
@@ -20,7 +20,7 @@
  * d - requested initial size of a voxel
  */
 
-double VoxelList::findFloorSize(double d){
+double VoxelList::findFloorSize(const double d){
 	double dRes = 1.0;
 	while (dRes > d)
 		dRes /= 2;
@@ -30,7 +30,7 @@ double VoxelList::findFloorSize(double d){
 }
 
 
-double VoxelList::findCeilSize(double d){
+double VoxelList::findCeilSize(const double d){
 	double dRes = 1.0;
 	while (dRes < d)
 		dRes *= 2;
@@ -39,11 +39,11 @@ double VoxelList::findCeilSize(double d){
 	return 2*dRes;
 }
 
-std::size_t VoxelList::findArraySize(double range, double cellSize) {
+std::size_t VoxelList::findArraySize(const double range, const double cellSize) {
 	return static_cast<size_t>((range/cellSize) + 1);
 }
 
-void VoxelList::allocateVoxels(size_t size){
+void VoxelList::allocateVoxels(const size_t size){
 	delete[] this->voxels;
 	this->voxels = new Voxel*[size];
 	for(size_t i=0; i<size; i++){
@@ -223,6 +223,25 @@ void VoxelList::disable(){
 	this->disabled = true;
 }
 
+void VoxelList::printDot(const size_t dotCounter, const size_t max, const std::string &dot) {
+	Expects(dotCounter > 0);
+	Expects(dotCounter <= max);
+	const size_t maxLength = std::to_string(max).size();
+	const size_t counterLength = std::to_string(dotCounter-1).size();
+	_OMP_CRITICAL_SIMPLE
+	{
+		if (dotCounter > 1) {
+			for(size_t i=0; i<counterLength+maxLength+1; i++)
+				std::cout << "\b";
+		}
+		if (dotCounter < max) {
+			std::cout << dot << dotCounter << "/" << max << std::flush;
+		}else {
+			std::cout << dot << std::flush;
+		}
+	}
+}
+
 unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl) {
 	// "Full spatial" variables correspond to the whole cube simulation box (for initial voxels and neighbour grid)
 	// "Spatial" (without "full") variables correspond to the acutal part where voxels will be created (for ordinary
@@ -257,6 +276,7 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 	std::cout << " alocating " << (spatialGridSize * angularGridSize) << " voxels, now checking " << std::flush;
 
 	size_t dotEvery = (spatialGridSize / 100) + 1;
+	size_t dotCounter = 0;
 	_OMP_PARALLEL_FOR
 	for (size_t spatialIndex = 0; spatialIndex < spatialGridSize; spatialIndex++){
 		RSAVector position;
@@ -287,7 +307,10 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 		}
 		if (removeTopLevelVoxel == true)
 			this->removeTopLevelVoxel(this->voxels[spatialIndex * angularGridSize]);
-		if (spatialIndex%dotEvery == 0){ std::cout << "."; std::cout.flush(); }
+		if (spatialIndex%dotEvery == 0) {
+			dotCounter++;
+			VoxelList::printDot(dotCounter, 100);
+		}
 	}
 
 	delete this->spatialDistribution;
@@ -328,7 +351,6 @@ void VoxelList::moveVoxelInList(size_t from, size_t to){
 void VoxelList::compactVoxelArray(){
 	if (this->length==0)
 		return;
-
 	size_t counter = 0;
 	for(size_t i=0; i<this->length; i++)
 		if (this->voxels[i]!=nullptr)
@@ -336,6 +358,7 @@ void VoxelList::compactVoxelArray(){
 
 	if (counter==0 || counter==this->length){
 		this->length = counter;
+		this->refreshTopLevelVoxels();
 		return;
 	}
 
@@ -685,6 +708,7 @@ size_t VoxelList::analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const R
 
 	size_t begin = this->length;
 	size_t dotEvery = (this->length/100)+1;
+	size_t dotCounter = 0;
 
 
 	_OMP_PARALLEL_FOR
@@ -695,7 +719,10 @@ size_t VoxelList::analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const R
 			delete v;
 			this->voxels[i] = nullptr;
 		}
-		if (i%dotEvery == 0){ std::cout << "."; std::cout.flush(); }
+		if (i%dotEvery == 0) {
+			dotCounter++;
+			printDot(dotCounter, 100);
+		}
 	}
 
 	std::cout << " compacting" << std::flush;
@@ -738,6 +765,7 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 	}
 
 	size_t dotEvery = (this->length/100)+1;
+	size_t dotCounter = 0;
 
 	_OMP_PARALLEL_FOR
 	for(size_t i=0; i<this->length; i++){
@@ -768,7 +796,10 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 			delete this->voxels[i];
 			this->voxels[i] = nullptr;
 		}
-		if (verbose && i%dotEvery == 0){ std::cout << "." << std::flush; }
+		if (verbose && i%dotEvery == 0) {
+			dotCounter++;
+			printDot(dotCounter, 100);
+		}
 	}
 
 	// delete temporary thread matrices. Covered voxels have been already removed
@@ -941,6 +972,12 @@ void VoxelList::store(std::ostream &f) const{
 	}
 }
 
+void VoxelList::store(const std::string &filename) const {
+	std::ofstream file(filename, std::ios::binary);
+	if (!file) throw std::runtime_error("Cannot open file " + filename + " to store packing");
+	this->store(file);
+	file.close();
+}
 
 void VoxelList::restore(std::istream &f){
 	unsigned char sd = RSA_SPATIAL_DIMENSION;
@@ -964,15 +1001,16 @@ void VoxelList::restore(std::istream &f){
 		this->angularDistribution[i] = new std::uniform_real_distribution<double>(0.0, this->angularVoxelSize[i]);
 	}
 
-	size_t ns = this->findArraySize(this->spatialRange, this->initialVoxelSize);
+	const size_t ns = this->findArraySize(this->spatialRange, this->initialVoxelSize);
 	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(this->surfaceDimension, this->initialVoxelSize*ns, this->initialVoxelSize);
 	this->voxelNeighbourGrid->clear();
-	size_t ss = (size_t)(pow(ns, this->surfaceDimension)+0.5);
+	const size_t ss = (size_t)(pow(ns, this->surfaceDimension)+0.5);
 
 	this->activeTopLevelVoxels = new bool[ss];
 	for(size_t i = 0; i<ss; i++){
 		this->activeTopLevelVoxels[i] = false;
 	}
+	this->activeTopLevelVoxelsSize = ss;
 
 	for(size_t i=0; i<this->length; i++){
 		delete this->voxels[i];
@@ -980,19 +1018,25 @@ void VoxelList::restore(std::istream &f){
 	delete[] this->voxels;
 
 	size_t size;
-	int topIndex;
 	f.read((char *)&size, sizeof(size_t));
 	this->voxels = new Voxel *[size];
 	for(size_t i=0; i<size; i++){
 		Voxel *v = new Voxel();
 		v->restore(f);
 		this->voxels[i] = v;
-		topIndex = this->getIndexOfTopLevelVoxel(v->getPosition());
+		size_t topIndex = this->getIndexOfTopLevelVoxel(v->getPosition());
 		this->activeTopLevelVoxels[topIndex] = true;
 	}
 	this->length = size;
 	this->restoreStructure();
 	this->voxelsInitialized = true;
+}
+
+void VoxelList::restore(const std::string &filename) {
+	std::ifstream file(filename, std::ios_base::binary);
+	if (!file) throw std::runtime_error("Cannot open file " + filename + " to restore packing");
+	this->restore(file);
+	file.close();
 }
 
 std::array<std::size_t, RSA_SPATIAL_DIMENSION> VoxelList::calculateSpatialGridLinearSize() const {

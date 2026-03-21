@@ -40,12 +40,18 @@ void Saturation::run() {
         unsigned long seedOrigin = this->getSeedOrigin();
         unsigned long seed = seedOrigin + collector;
         PackingGenerator pg(seed, collector, &this->params);
+        std::filesystem::path voxelsPath(this->packingFilename + ".voxels");
+        if (std::filesystem::exists(voxelsPath)) {
+            pg.getVoxels()->restore(voxelsPath.filename());
+        }
         bool bSaturated = pg.run(&packing);
         if (params.storePackings) {
             std::string spath = sfile.substr(0, sfile.rfind(std::filesystem::path::preferred_separator)+1);
             std::string sfilename = spath + pg.getPackingFilename(bSaturated);
-            if (!endsWith(sfilename, "ns")) {
+            if (!endsWith(sfilename, "ns.bin")) {
                 std::filesystem::remove(sfile);
+                std::filesystem::remove(sfile + ".voxels");
+
             }
             packing.store(sfilename);
         }

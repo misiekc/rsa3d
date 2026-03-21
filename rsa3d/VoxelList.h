@@ -12,7 +12,6 @@
 #include "shape/Shape.h"
 #include "RND.h"
 #include "BoundaryConditions.h"
-#include "Positioned.h"
 #include <vector>
 
 #include "NeighbourGrid.h"
@@ -121,13 +120,13 @@ public:
 	/**
 	 * constants returned by splitVoxels method
 	 */
-	static const unsigned short NO_SPLIT = 0;
-	static const unsigned short NO_SPLIT_DUE_TO_VOXELS_LIMIT = 1;
-	static const unsigned short NO_SPLIT_BUT_INITIALIZED = 2;
-	static const unsigned short NORMAL_SPLIT = 3;
+	static constexpr unsigned short NO_SPLIT = 0;
+	static constexpr unsigned short NO_SPLIT_DUE_TO_VOXELS_LIMIT = 1;
+	static constexpr unsigned short NO_SPLIT_BUT_INITIALIZED = 2;
+	static constexpr unsigned short NORMAL_SPLIT = 3;
 
-	static std::vector<size_t> compareLists(const VoxelList &vl1, const VoxelList &vl2);
-
+	// prints dot in std::cout
+	static void printDot(size_t dotCounter, size_t max, const std::string &dot = "");
 
 	/**
 	 * @brief Constructor
@@ -179,7 +178,7 @@ public:
 
 
 	virtual void getRandomEntry(RSAVector *position, RSAOrientation *orientation, Voxel **v, RND *rnd) const;
-	Voxel *getVoxel(size_t i) const;
+	[[nodiscard]] Voxel *getVoxel(size_t i) const;
 	[[nodiscard]] virtual Voxel *getVoxel(const RSAVector &pos, const RSAOrientation &angle) const;
 	[[nodiscard]] virtual double getSpatialVoxelSize() const;
 	[[nodiscard]] virtual RSAOrientation getAngularVoxelSize() const;
@@ -190,7 +189,12 @@ public:
 	[[nodiscard]] std::string toWolfram() const;
 
 	void store(std::ostream &f) const;
+
+	void store(const std::string &filename) const;
+
 	void restore(std::istream &f);
+
+	void restore(const std::string &filename);
 };
 
 

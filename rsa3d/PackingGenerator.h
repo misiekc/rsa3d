@@ -2,7 +2,7 @@
  * PackingGenerator.h
  *
  *  Created on: 16.04.2017
- *      Author: ciesla
+ *      Author: Michal Ciesla
  */
 
 #ifndef PACKINGGENERATOR_H_
@@ -10,7 +10,6 @@
 
 #include "RND.h"
 #include "shape/Shape.h"
-#include "BoundaryConditions.h"
 #include "Parameters.h"
 #include "VoxelList.h"
 #include "Surface.h"
@@ -32,7 +31,7 @@ class PackingGenerator {
 private:
 	static double FACTOR_LIMIT;
 
-	int seed;
+	unsigned int seed;
 	std::size_t collector{};
 	Parameters params;
 	Packing packing;
@@ -66,7 +65,7 @@ private:
 	void store(std::ostream &f) const;
 
 public:
-    PackingGenerator(int seed, std::size_t collector, const Parameters *params);
+    PackingGenerator(unsigned int seed, std::size_t collector, const Parameters *params);
 
 	virtual ~PackingGenerator();
 	/**
@@ -75,6 +74,8 @@ public:
 	bool run(Packing *packing=nullptr);
 
 	const Packing &getPacking();
+
+	[[nodiscard]] VoxelList *getVoxels() const;
 
 	void testPacking(const Packing &packing, double maxTime);
 	void restore(std::istream &f);

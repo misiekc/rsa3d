@@ -37,7 +37,7 @@
 double PackingGenerator::FACTOR_LIMIT = 5.0;
 
 
-PackingGenerator::PackingGenerator(int seed, std::size_t collector, const Parameters *params)
+PackingGenerator::PackingGenerator(unsigned int seed, std::size_t collector, const Parameters *params)
         : seed{seed}, collector{collector}, params{*params}
 {
     this->spatialSize = this->params.surfaceSize;
@@ -205,10 +205,10 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 			RSAVector pos;
 			RSAOrientation angle{};
 			do{
-				for(unsigned short k=0; k<RSA_SPATIAL_DIMENSION; k++)
-					pos[k] = threadRND.get()->nextValue()*this->spatialSize;
-				for(unsigned short k=0; k<RSA_ANGULAR_DIMENSION; k++)
-					angle[k] = threadRND.get()->nextValue()*this->angularSize[k];
+				for(unsigned short j=0; j<RSA_SPATIAL_DIMENSION; j++)
+					pos[j] = threadRND.get()->nextValue()*this->spatialSize;
+				for(unsigned short j=0; j<RSA_ANGULAR_DIMENSION; j++)
+					angle[j] = threadRND.get()->nextValue()*this->angularSize[j];
 			}while(!this->isInside(pos, angle));
 			// setting shape position and orientation
 			sVirtual->translate(pos);
@@ -219,15 +219,15 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 				_OMP_CRITICAL_SIMPLE
 				{
 					std::cout << std::endl << "\t non overlapping shape found at (" << std::setprecision(10);
-					for (unsigned char i=0; i<RSA_SPATIAL_DIMENSION; i++){
-						std::cout << pos[i];
-						if(i<RSA_SPATIAL_DIMENSION-1)
+					for (unsigned char j=0; j<RSA_SPATIAL_DIMENSION; j++){
+						std::cout << pos[j];
+						if(j<RSA_SPATIAL_DIMENSION-1)
 							std::cout << ", ";
 					}
 					std::cout << "), (";
-					for (unsigned char i=0; i<RSA_ANGULAR_DIMENSION; i++){
-						std::cout << angle[i];
-						if(i<RSA_ANGULAR_DIMENSION-1)
+					for (unsigned char j=0; j<RSA_ANGULAR_DIMENSION; j++){
+						std::cout << angle[j];
+						if(j<RSA_ANGULAR_DIMENSION-1)
 							std::cout << ", ";
 					}
 					std::cout <<")" << std::endl;
@@ -238,7 +238,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 				RSAVector position = sVirtual->getPosition();
 				RSAOrientation orientation = sVirtual->getOrientation();
 				RSAOrientation angularRange;
-				const double delta = 0.0001;
+				constexpr double delta = 0.0001;
 				for(unsigned short j = 0; j< RSA_ANGULAR_DIMENSION; j++) {
 					orientation[j] -= 0.5*delta;
 					angularRange[j] = delta;
@@ -269,7 +269,7 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 
 std::size_t PackingGenerator::updateSplit(std::size_t tmpSplit, unsigned short status, double factor, std::size_t v0) {
 
-	std::size_t v1 = this->voxels->getLength();
+	const std::size_t v1 = this->voxels->getLength();
 
 	if (status == VoxelList::NO_SPLIT_BUT_INITIALIZED){
 		tmpSplit = (int)(tmpSplit/(std::pow(factor,1.0/(RSA_SPATIAL_DIMENSION+RSA_ANGULAR_DIMENSION))));
@@ -306,17 +306,19 @@ void PackingGenerator::sequentialVoxelAnalysis() {
 	std::cout << "[" << this->collector << " PackingGenerator::createPacking] sequential voxel analysis of " << this->voxels->countActiveTopLevelVoxels() << " top level voxels " << std::flush;
 	std::vector<size_t> indices = this->voxels->getActiveTopLevelVoxels();
 	if (indices.size()>1) {
+		size_t dotCounter = 0;
 		for (size_t index: indices) {
 			VoxelList tmpList(*this->voxels, index);
 			unsigned short status;
 			do {
 				status = tmpList.splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface->getBC(), false);
 			}while (status != VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT && tmpList.getLength()>0);
+			dotCounter++;
 			if (tmpList.getLength() == 0) {
 				this->voxels->removeTopLevelVoxel(index);
-				std::cout << "." << std::flush;
+				VoxelList::printDot(dotCounter, indices.size(), ".");
 			}else {
-				std::cout << "-" << std::flush;
+				VoxelList::printDot(dotCounter, indices.size(), "-");
 			}
 		}
 	}
@@ -329,7 +331,9 @@ void PackingGenerator::sequentialVoxelAnalysis() {
 
 void PackingGenerator::partialVoxelAnalysisOld() {
 	size_t length = this->voxels->getLength();
-	size_t range = static_cast<size_t>(length/(1 << (RSA_SPATIAL_DIMENSION + RSA_ANGULAR_DIMENSION))) + 1;
+	size_t max = 1 << (RSA_SPATIAL_DIMENSION + RSA_ANGULAR_DIMENSION + params.partialVoxelAnalysisModifier);
+	size_t dotCounter = 0;
+	size_t range = static_cast<size_t>(length/(max)) + 1;
 	std::cout << "[" << this->collector << " PackingGenerator::createPacking] partial voxel analysis of " << this->voxels->getLength() << " voxels in packs of " << range << " voxels " <<  std::flush;
 	size_t minIndex = 0;
 
@@ -340,11 +344,12 @@ void PackingGenerator::partialVoxelAnalysisOld() {
 		do {
 			status = tmpList.splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface->getBC(), false);
 		}while (status != VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT && tmpList.getLength()>0);
+		dotCounter++;
 		if (tmpList.getLength() == 0) {
 			this->voxels->removeVoxels(minIndex, maxIndex);
-			std::cout << "." << std::flush;
+			VoxelList::printDot(dotCounter, max, ".");
 		}else {
-			std::cout << "x" << std::flush;
+			VoxelList::printDot(dotCounter, max, "-");
 		}
 		minIndex = maxIndex;
 	}
@@ -358,7 +363,9 @@ void PackingGenerator::partialVoxelAnalysisOld() {
 
 void PackingGenerator::partialVoxelAnalysis() {
 	size_t length = this->voxels->getLength();
-	size_t range = static_cast<size_t>(length/(1 << (RSA_SPATIAL_DIMENSION + RSA_ANGULAR_DIMENSION))) + 1;
+	size_t max = 1 << (RSA_SPATIAL_DIMENSION + RSA_ANGULAR_DIMENSION + params.partialVoxelAnalysisModifier);
+	size_t dotCounter = 0;
+	size_t range = static_cast<size_t>(length/(max)) + 1;
 	std::cout << "[" << this->collector << " PackingGenerator::createPacking] partial voxel analysis of " << this->voxels->getLength() << " voxels in packs of " << range << " voxels " <<  std::flush;
 	size_t beginIndex = 0;
 
@@ -369,18 +376,19 @@ void PackingGenerator::partialVoxelAnalysis() {
 		do {
 			status = tmpList.splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface->getBC(), false);
 		}while (status != VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT && tmpList.getLength()>0);
+		dotCounter++;
 		if (tmpList.getLength() == 0) {
 			this->voxels->removeVoxels(beginIndex, endIndex);
-			std::cout << "." << std::flush;
+			VoxelList::printDot(dotCounter, max, ".");
 		}else {
 			std::vector<size_t> indices = tmpList.getIndicesOfRemovedVoxels();
 			if (!indices.empty()) {
 	//			std::cout << " " << indices.size() << " to remove " << std::flush;
 				for (size_t index: indices)
 					this->voxels->removeVoxel(beginIndex+index);
-				std::cout << ":" << std::flush;
+				VoxelList::printDot(dotCounter, max, ":");
 			}else
-				std::cout << "-" << std::flush;
+				VoxelList::printDot(dotCounter, max, "-");
 		}
 		beginIndex = endIndex;
 	}
@@ -705,6 +713,10 @@ bool PackingGenerator::run(Packing *packing){
 
 const Packing &PackingGenerator::getPacking(){
 	return this->packing;
+}
+
+VoxelList *PackingGenerator::getVoxels() const {
+	return this->voxels;
 }
 
 

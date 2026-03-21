@@ -21,6 +21,7 @@ private:
 
 public:
 	std::size_t maxTriesWithoutSuccess = std::numeric_limits<std::size_t>::max();
+	int partialVoxelAnalysisModifier = 0;
 	std::size_t maxVoxels = 40000000;
 	RSAOrientation requestedAngularVoxelSize;
     RSAOrientation angularVoxelRange;

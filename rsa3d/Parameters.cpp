@@ -17,6 +17,7 @@ Parameters::Parameters(std::istream &stream) {
 	auto config = Config::parse(stream, '=', true);
 	for (const auto &key : config.getKeys()){
 		if (key == "maxTriesWithoutSuccess") 	        this->maxTriesWithoutSuccess = config.getUnsignedLongLong(key);
+		else if (key == "partialVoxelAnalysisModifier")	this->partialVoxelAnalysisModifier = config.getInt(key);
 		else if (key == "maxVoxels")					this->maxVoxels = config.getUnsignedLongLong(key);
         else if (key == "requestedAngularVoxelSize")	this->requestedAngularVoxelSize = config.getOrientation(key);
         else if (key == "angularVoxelRange")        	this->angularVoxelRange = config.getOrientation(key);
@@ -112,6 +113,7 @@ double Parameters::sufraceVolume() const {
 
 bool Parameters::operator==(const Parameters &rhs) const {
     return maxTriesWithoutSuccess == rhs.maxTriesWithoutSuccess &&
+    	   partialVoxelAnalysisModifier == rhs.partialVoxelAnalysisModifier &&
            maxVoxels == rhs.maxVoxels &&
            requestedAngularVoxelSize == rhs.requestedAngularVoxelSize &&
            angularVoxelRange == rhs.angularVoxelRange &&

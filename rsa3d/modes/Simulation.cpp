@@ -9,6 +9,7 @@
 #include "Simulation.h"
 
 #include <iomanip>
+#include <filesystem>
 
 #include "../PackingGenerator.h"
 
@@ -78,8 +79,11 @@ Packing Simulation::runSingleSimulation(unsigned int seed, std::size_t collector
     	if (this->params.storePackings) {
     	    std::string sfilename = pg.getPackingFilename(bSaturated);
     	    packing.store(sfilename);
-    	    if (!endsWith(sfilename, ".ns")) {
-    	        std::filesystem::remove(sfilename+".ns");
+    	    if (endsWith(sfilename, ".ns.bin")) {
+    	        VoxelList *vl = pg.getVoxels();
+    	        vl->store(sfilename + ".voxels");
+    	    }else {
+    	        std::filesystem::remove(sfilename + ".ns.bin");
     	    }
     	}
         dataFile << collector << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;
