@@ -22,6 +22,8 @@ private:
 
 	// sets status basing on existing voxels
 	void refreshTopLevelVoxels();
+	static int compareVoxels(const void *v1, const void *v2);
+
 
 protected:
 	// for a given voxel returns index of its root
@@ -48,8 +50,8 @@ protected:
 	double spatialRange;
 
 	// array of top level voxel. If a top level voxel becomes inactive (due to shape placement, all its child voxels becomes obsolete
-	bool* activeTopLevelVoxels;
-	size_t activeTopLevelVoxelsSize;
+	bool* topLevelVoxels;
+	size_t topLevelVoxelsSize;
 
 	// probability distrubutions for drawing position inside a voxel
 	std::uniform_real_distribution<double> *spatialDistribution;
@@ -139,13 +141,6 @@ public:
 	VoxelList(int dim, double packingSpatialSize, double requestedSpatialVoxelSize, const RSAOrientation &shapeAngularRange, const RSAOrientation &requestedAngularVoxelSize);
 
 	/**
-	 * Constructor that creates new voxel list based on the one provided as an argument with only one top level voxel active
-	 * @param vl voxel list
-	 * @param index index of teh only top level voxel that will be active in the created list
-	 */
-	VoxelList(const VoxelList &vl, size_t index);
-
-	/**
 	 * Constructor that creates new voxel list based on the one provided as an argument with only voxels with index in range [minIndex, naxIndex)
 	 * @param vl voxel list
 	 * @param minIndex minimal index of voxel. The first voxel is of index minIndex
@@ -162,6 +157,8 @@ public:
 	std::size_t analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const RSAShape> *nl, unsigned short depth);
 
 	virtual unsigned short splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, bool verbose);
+
+	void sortVoxels();
 
 	// returns vector of active top level voxels indices
 	[[nodiscard]] std::vector<size_t> getActiveTopLevelVoxels() const;

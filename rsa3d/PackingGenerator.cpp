@@ -308,20 +308,27 @@ void PackingGenerator::sequentialVoxelAnalysis() {
 	if (indices.size()>1) {
 		size_t dotCounter = 0;
 		for (size_t index: indices) {
-			VoxelList tmpList(*this->voxels, index);
+			SubVoxelList tmpList(*this->voxels, index);
+			size_t voxelsCount = tmpList.getLength();
 			unsigned short status;
 			do {
 				status = tmpList.splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface->getBC(), false);
 			}while (status != VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT && tmpList.getLength()>0);
 			dotCounter++;
-			if (tmpList.getLength() == 0) {
-				this->voxels->removeTopLevelVoxel(index);
+			std::vector<size_t> vIndices = tmpList.getIndicesOfRemovedVoxels();
+//			std::cout << "removing " << vIndices.size() << "/" << voxelsCount << " voxels     " << std::endl;
+			for (size_t vIndex: vIndices)
+				this->voxels->removeVoxel(vIndex);
+			if (vIndices.size() == voxelsCount) {
 				VoxelList::printDot(dotCounter, indices.size(), ".");
-			}else {
+			}else if (!vIndices.empty()) {
+				VoxelList::printDot(dotCounter, indices.size(), ":");
+			}else{
 				VoxelList::printDot(dotCounter, indices.size(), "-");
 			}
 		}
 	}
+	this->voxels->restoreStructure();
 	std::cout << " done, analysing of remaining " << this->voxels->getLength() << " voxels ";
 	this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), 0);
 	std::cout.precision(5);

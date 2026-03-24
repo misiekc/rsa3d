@@ -10,15 +10,48 @@
 
 SubVoxelList::SubVoxelList(const VoxelList &vl, size_t beginIndex, size_t endIndex) : VoxelList(vl, beginIndex, endIndex) {
 	this->parents = new size_t[this->length];
+	this->nulls = new bool[this->length];
+	this->initialLength = this->length;
 	_OMP_PARALLEL_FOR
 	for (size_t i=0; i<this->length; i++) {
-		parents[i] = i;
+		if (this->voxels[i]==nullptr) {
+			parents[i] = this->length+1;
+			this->nulls[i] = true;
+		}else {
+			parents[i] = i;
+			this->nulls[i] = false;
+		}
 	}
+}
+
+SubVoxelList::SubVoxelList(const VoxelList &vl, size_t topIndex) : VoxelList(vl, 0, vl.getLength()) {
+	this->parents = new size_t[this->length];
+	this->nulls = new bool[this->length];
 	this->initialLength = this->length;
+
+	_OMP_PARALLEL_FOR
+	for (size_t i=0; i<this->length; i++) {
+		Voxel *v = this->voxels[i];
+		if (this->voxels[i]==nullptr) {
+			parents[i] = this->length+1;
+			this->nulls[i] = true;
+		}else if (this->VoxelList::getIndexOfTopLevelVoxel(v->getPosition())!=topIndex) {
+			delete v;
+			this->voxels[i] = nullptr;
+			parents[i] = this->length+1;
+			this->nulls[i] = true;
+		}else {
+			parents[i] = i;
+			this->nulls[i] = false;
+		}
+	}
+	this->restoreStructure();
+//	std::cout << "      " << this->length << ", " << this->initialLength << " (" << this->countActiveTopLevelVoxels() << ")         ";
 }
 
 SubVoxelList::~SubVoxelList() {
-	delete[] parents;
+	delete[] this->parents;
+	delete[] this->nulls;
 }
 
 unsigned short SubVoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourGrid<const RSAShape> *nl, RSABoundaryConditions *bc, bool verbose){
@@ -146,6 +179,9 @@ void SubVoxelList::moveVoxelInList(size_t from, size_t to){
 }
 
 std::vector<size_t> SubVoxelList::getIndicesOfRemovedVoxels() const {
+
+//	std::cout << std::endl << "     " << this->length << ", " << this->initialLength << " (" << this->countActiveTopLevelVoxels() <<")         ";
+
 	bool *bExists = new bool[this->initialLength]();
 
 	_OMP_PARALLEL_FOR
@@ -156,7 +192,8 @@ std::vector<size_t> SubVoxelList::getIndicesOfRemovedVoxels() const {
 
 	std::vector<size_t> indices;
 	for(size_t i=0; i<this->initialLength; i++) {
-		if(!bExists[i]) {
+		// removed are voxels which aren't referred and wasn't null
+		if(!bExists[i] && !this->nulls[i]) {
 			indices.push_back(i);
 		}
 	}

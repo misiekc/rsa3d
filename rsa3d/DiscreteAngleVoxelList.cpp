@@ -31,7 +31,7 @@ DiscreteAngleVoxelList::DiscreteAngleVoxelList(int dim, double packingSpatialSiz
 		this->angularVoxelSize[i] = 0;
 	for (unsigned short i=0; i<RSA_ANGULAR_DIMENSION; i++)
 		this->angularRange[i] = 2*M_PI;
-	this->activeTopLevelVoxels = nullptr;
+	this->topLevelVoxels = nullptr;
 	this->voxelNeighbourGrid = nullptr;
 
 
@@ -66,9 +66,9 @@ unsigned int DiscreteAngleVoxelList::initVoxels(RSABoundaryConditions *bc, Neigh
 	for (size_t i=0; i<this->allowedOrientations.size(); i++)
 		delete this->voxels[i];
 	this->allocateVoxels(this->allowedOrientations.size()*spatialGridSize);
-	this->activeTopLevelVoxels = new bool[this->allowedOrientations.size()*fullSpatialGridSize];
+	this->topLevelVoxels = new bool[this->allowedOrientations.size()*fullSpatialGridSize];
 	for(size_t i = 0; i < this->allowedOrientations.size()*fullSpatialGridSize; i++){
-		this->activeTopLevelVoxels[i] = true;
+		this->topLevelVoxels[i] = true;
 	}
 	this->spatialVoxelSize = this->initialVoxelSize;
 	this->voxelNeighbourGrid = new NeighbourGrid<Voxel>(this->surfaceDimension,
