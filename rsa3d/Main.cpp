@@ -92,6 +92,7 @@ namespace {
 }
 
 int main(int argc, char **argv) {
+    std::cout << "Random sequential adsorption tool, version " << __DATE__ << " " << __TIME__ << std::endl;
     std::unique_ptr<ProgramArguments> arguments;
     try {
         arguments = std::make_unique<ProgramArguments>(argc, argv);

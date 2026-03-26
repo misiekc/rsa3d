@@ -84,6 +84,8 @@ Packing Simulation::runSingleSimulation(unsigned int seed, std::size_t collector
     	        vl->store(sfilename + ".voxels");
     	    }else {
     	        std::filesystem::remove(sfilename + ".ns.bin");
+    	        std::filesystem::remove(sfilename + ".ns.bin.voxels");
+
     	    }
     	}
         dataFile << collector << "\t" << packing.size() << "\t" << packing.back()->time << std::endl;

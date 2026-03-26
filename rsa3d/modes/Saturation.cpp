@@ -47,13 +47,15 @@ void Saturation::run() {
         bool bSaturated = pg.run(&packing);
         if (params.storePackings) {
             std::string spath = sfile.substr(0, sfile.rfind(std::filesystem::path::preferred_separator)+1);
-            std::string sfilename = spath + pg.getPackingFilename(bSaturated);
-            if (!endsWith(sfilename, "ns.bin")) {
-                std::filesystem::remove(sfile);
-                std::filesystem::remove(sfile + ".voxels");
+            std::string sfilename = spath + pg.getPackingFilename(bSaturated);packing.store(sfilename);
+            if (endsWith(sfilename, ".ns.bin")) {
+                VoxelList *vl = pg.getVoxels();
+                vl->store(sfilename + ".voxels");
+            }else {
+                std::filesystem::remove(sfile + ".ns.bin");
+                std::filesystem::remove(sfile + ".ns.bin.voxels");
 
             }
-            packing.store(sfilename);
         }
         std::cout << std::endl << std::flush;
     }
