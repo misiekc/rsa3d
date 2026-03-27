@@ -13,6 +13,7 @@
 #include <cstring>
 #include <fstream>
 
+#include "PackingGenerator.h"
 #include "utils/OMPMacros.h"
 #include "utils/Assertions.h"
 
@@ -251,6 +252,8 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 	size_t dotCounter = 0;
 	_OMP_PARALLEL_FOR
 	for (size_t spatialIndex = 0; spatialIndex < spatialGridSize; spatialIndex++){
+		if (PackingGenerator::terminateNow)
+			continue;
 		RSAVector position;
 		RSAOrientation orientation{};
 
@@ -685,6 +688,8 @@ size_t VoxelList::analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const R
 
 	_OMP_PARALLEL_FOR
 	for (size_t i = 0; i < this->length; i++) {
+		if (PackingGenerator::terminateNow)
+			continue;
 		Voxel *v = this->voxels[i];
 		bool bRemove = this->analyzeVoxel(v, nl, bc, this->spatialVoxelSize, this->angularVoxelSize, depth);
 		if (bRemove){
@@ -741,6 +746,8 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 
 	_OMP_PARALLEL_FOR
 	for(size_t i=0; i<this->length; i++){
+		if (PackingGenerator::terminateNow)
+			continue;
 		// voxel is tested if it should remain active and if so it is divided
 		if (!this->analyzeVoxel(this->voxels[i], nl, bc, this->spatialVoxelSize, this->angularVoxelSize, 0)){
 			// if too much new voxels there is no point in further splitting
@@ -773,6 +780,8 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 			printDot(dotCounter, 100);
 		}
 	}
+	if (PackingGenerator::terminateNow)
+		return VoxelList::NO_SPLIT;
 
 	// delete temporary thread matrices. Covered voxels have been already removed
 	for(int i=0; i<_OMP_MAXTHREADS; i++){
@@ -1017,6 +1026,7 @@ void VoxelList::restore(std::istream &f){
 	}
 	this->length = size;
 	this->restoreStructure();
+	this->refreshTopLevelVoxels();
 	this->voxelsInitialized = true;
 }
 

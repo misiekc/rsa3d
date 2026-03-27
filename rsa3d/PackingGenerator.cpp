@@ -36,6 +36,9 @@
 
 double PackingGenerator::FACTOR_LIMIT = 5.0;
 
+PackingGenerator *PackingGenerator::instance = nullptr;
+
+bool PackingGenerator::terminateNow = false;
 
 PackingGenerator::PackingGenerator(unsigned int seed, std::size_t collector, const Parameters *params)
         : seed{seed}, collector{collector}, params{*params}
@@ -111,8 +114,29 @@ PackingGenerator::PackingGenerator(unsigned int seed, std::size_t collector, con
 
     if (params->maxVoxels == 0)
         this->voxels->disable();
+
+	PackingGenerator::instance = this;
+	// signal(SIGSEGV, PackingGenerator::signalHandler);
+	signal(SIGTERM, PackingGenerator::signalHandler);
+	signal(SIGINT, PackingGenerator::signalHandler);
+	signal(SIGHUP, PackingGenerator::signalHandler);
 }
 
+void PackingGenerator::signalHandler(int signum) {
+	PackingGenerator::terminateNow = true;
+	std::cout << std::endl << strsignal(signum);
+	PackingGenerator *pg = PackingGenerator::instance;
+	if (pg != nullptr) {
+		std::cout << ": storing packing with " << pg->packing.size() << " shapes";
+		std::string sfilename = pg->getPackingFilename(false);
+		pg->packing.store(sfilename);
+		pg->getVoxels()->restoreStructure();
+		std::cout << ", storing voxel list with " << pg->voxels->getLength() << " (" << pg->voxels->countActiveTopLevelVoxels() << ") voxels";
+		pg->voxels->store(sfilename + ".voxels");
+		std::cout << " done. Terminating." << std::endl;
+	}
+	exit(0);
+}
 
 PackingGenerator::~PackingGenerator() {
 	delete this->voxels;
@@ -518,7 +542,7 @@ bool PackingGenerator::createPacking(Packing *packing) {
 	int l = 0;
 	double t = 0;
 	double factor = this->getFactor();
-	if (packing!=nullptr){
+	if (packing!=nullptr && packing->size()>0){
 		this->packing = *packing;
 		for(const RSAShape *s : *packing)
 			this->surface->add(s);

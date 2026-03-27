@@ -71,8 +71,28 @@ Packing Simulation::runSingleSimulation(unsigned int seed, std::size_t collector
 
     PackingGenerator pg(seed, collector, &params);
     Packing packing;
-    if (access(pg.getPackingFilename().c_str(), F_OK)!=0){
-    	bool bSaturated = pg.run();
+    bool bSaturated;
+
+    std::string sfilename = pg.getPackingFilename();
+    std::filesystem::path packingPath(sfilename);
+    if (!std::filesystem::exists(packingPath)){
+        sfilename = pg.getPackingFilename(false);
+        std::filesystem::path nspackingPath(sfilename);
+        if (std::filesystem::exists(nspackingPath)) {
+            std::cout << "Non saturated packing found. Restoring packing with ";
+            packing.restore(sfilename);
+            std::cout << packing.size() << " shapes";
+             std::filesystem::path voxelsPath(sfilename + ".voxels");
+            if (std::filesystem::exists(voxelsPath)) {
+                std::cout << ", restoring voxel list with ";
+                pg.getVoxels()->restore(voxelsPath.filename());
+                std::cout << pg.getVoxels()->getLength() << " (" << pg.getVoxels()->countActiveTopLevelVoxels() << ") voxels.";
+            }
+            std::cout << std::endl;
+            bSaturated = pg.run(&packing);
+        }else {
+            bSaturated = pg.run();
+        }
     	packing = pg.getPacking();
     	this->postProcessPacking(packing);
 
@@ -83,6 +103,7 @@ Packing Simulation::runSingleSimulation(unsigned int seed, std::size_t collector
     	        VoxelList *vl = pg.getVoxels();
     	        vl->store(sfilename + ".voxels");
     	    }else {
+    	        sfilename = sfilename.substr(0, sfilename.find_last_of("."));
     	        std::filesystem::remove(sfilename + ".ns.bin");
     	        std::filesystem::remove(sfilename + ".ns.bin.voxels");
 

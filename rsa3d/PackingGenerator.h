@@ -30,6 +30,7 @@ public:
 class PackingGenerator {
 private:
 	static double FACTOR_LIMIT;
+	static PackingGenerator *instance;
 
 	unsigned int seed;
 	std::size_t collector{};
@@ -40,6 +41,8 @@ private:
 
 	double spatialSize;
 	RSAOrientation angularSize;
+
+	static void signalHandler(int signum);
 
     void modifiedRSA(RSAShape *s, Voxel *v);
 	bool isSaturated();
@@ -65,6 +68,9 @@ private:
 	void store(std::ostream &f) const;
 
 public:
+
+	static bool terminateNow;
+
     PackingGenerator(unsigned int seed, std::size_t collector, const Parameters *params);
 
 	virtual ~PackingGenerator();
