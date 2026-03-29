@@ -28,32 +28,38 @@ void Saturation::run() {
     if (std::filesystem::is_directory(path, ec) ){
         auto allFilenames = PackingGenerator::findPackingsInDir(this->packingFilename);
         for (auto sfile : allFilenames) {
-            if (sfile.find(".ns.")!=std::string::npos)
+            if (endsWith(sfile, ".ns.bin"))
                 filenames.push_back(sfile);
         }
     }else {
         filenames.push_back(this->packingFilename);
     }
+    std::cout << "[Saturation] founded " << filenames.size() << " packing(s) to saturate " << std::endl;
     for (auto sfile : filenames) {
+        std::cout << "[Saturation] restoring packing from " << sfile;
         packing.restore(sfile);
         std::size_t collector = this->getCollectorNumber(sfile);
         unsigned long seedOrigin = this->getSeedOrigin();
         unsigned long seed = seedOrigin + collector;
         PackingGenerator pg(seed, collector, &this->params);
-        std::filesystem::path voxelsPath(this->packingFilename + ".voxels");
+        std::filesystem::path voxelsPath(sfile + ".voxels");
         if (std::filesystem::exists(voxelsPath)) {
-            pg.getVoxels()->restore(voxelsPath.filename());
+            std::cout << " with voxels" << std::endl;
+            pg.getVoxels()->restore(sfile + ".voxels");
         }
         bool bSaturated = pg.run(&packing);
         if (params.storePackings) {
             std::string spath = sfile.substr(0, sfile.rfind(std::filesystem::path::preferred_separator)+1);
-            std::string sfilename = spath + pg.getPackingFilename(bSaturated);packing.store(sfilename);
+            std::string sfilename = spath + pg.getPackingFilename(bSaturated);
+            std::cout << "[Saturation] storing packing " << sfilename;
+            packing.store(sfilename);
             if (endsWith(sfilename, ".ns.bin")) {
                 VoxelList *vl = pg.getVoxels();
                 vl->store(sfilename + ".voxels");
             }else {
-                std::filesystem::remove(sfile + ".ns.bin");
-                std::filesystem::remove(sfile + ".ns.bin.voxels");
+                sfilename = sfilename.substr(0, sfilename.find_last_of("."));
+                std::filesystem::remove(sfilename + ".ns.bin");
+                std::filesystem::remove(sfilename + ".ns.bin.voxels");
 
             }
         }

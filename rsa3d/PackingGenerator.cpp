@@ -15,10 +15,10 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
-
+#include <filesystem>
+#include <csignal>
 #include "PackingGenerator.h"
 
-#include <filesystem>
 
 #include "boundary_conditions/PeriodicBC.h"
 #include "boundary_conditions/FreeBC.h"
@@ -112,8 +112,9 @@ PackingGenerator::PackingGenerator(unsigned int seed, std::size_t collector, con
                                                   this->params.requestedAngularVoxelSize, curvedSurface);
     }
 
-    if (params->maxVoxels == 0)
-        this->voxels->disable();
+    if (params->maxVoxels == 0) {
+	    this->voxels->disable();
+    }
 
 	PackingGenerator::instance = this;
 	// signal(SIGSEGV, PackingGenerator::signalHandler);
