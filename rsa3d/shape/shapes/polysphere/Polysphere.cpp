@@ -151,15 +151,20 @@ std::array<std::array<double, 2>, 2> Polysphere::minmaxSinCos(double theta, doub
             std::max(c1,c2)
     };
 
-    if ( (theta < 0 && theta+dt > 0 ) || (theta < TWO_PI && theta+dt > TWO_PI) ){
+    double thetadt = theta+dt;
+    auto crosses = [](double a, double b, double x) {
+        return (a < x && b > x);
+    };
+
+    if ( (thetadt > TWO_PI) ){
         cr[1] = 1.0;
-    }else if (theta < M_PI && theta+dt > M_PI){
+    }else if (crosses(theta, thetadt, M_PI)){
         cr[0] = -1.0;
     }
 
-    if (theta < HALF_PI && theta+dt > HALF_PI ){
+    if (crosses(theta, thetadt, HALF_PI)){
         sr[1] = 1.0;
-    }else if (theta < ONEHALF_PI && theta+dt > ONEHALF_PI){
+    }else if (crosses(theta, thetadt, ONEHALF_PI)){
         sr[0] = -1.0;
     }
 
