@@ -105,20 +105,29 @@ std::string Voxel::toWolfram(double ssize, const RSAOrientation &asize){
 	out.precision(std::numeric_limits< double >::max_digits10);
 
 	RSAVector da = this->getPosition();
+
+#if RSA_SPATIAL_DIMENSION == 2
 	double x1 = da[0], x2 = da[0] + ssize;
 	double y1 = da[1], y2 = da[1] + ssize;
-
 	out << "Polygon[{ {" << x1 << ", " << y1 << "}, "
 			<< "{" << x1 << ", " << y2 << "}, "
 			<< "{" << x2 << ", " << y2 << "}, "
 			<< "{" << x2 << ", " << y1 << "} }]";
-	if (RSA_ANGULAR_DIMENSION > 0){
+#elif RSA_SPATIAL_DIMENSION == 3
+	double x = da[0] + 0.5*ssize;
+	double y = da[1] + 0.5*ssize;
+	double z = da[2] + 0.5*ssize;
+	out << "Cube[{" << x <<", " << y << ", " << z <<"}, " << ssize << "]";
+#endif
+
+#if RSA_ANGULAR_DIMENSION > 0
 		out << "(* angles: [ ";
 		for (unsigned short int i=0; i<RSA_ANGULAR_DIMENSION; i++) {
 			out << "(" << this->getOrientation()[i] << ", " << (this->getOrientation()[i] + asize[i]) << ") ";
 		}
 		out << "*)" << std::endl;
-	}
+#endif
+
 	return out.str();
 }
 

@@ -44,8 +44,9 @@ void Saturation::run() {
         PackingGenerator pg(seed, collector, &this->params);
         std::filesystem::path voxelsPath(sfile + ".voxels");
         if (std::filesystem::exists(voxelsPath)) {
-            std::cout << " with voxels" << std::endl;
+            std::cout << " with voxels";
             pg.getVoxels()->restore(sfile + ".voxels");
+            std::cout << " of spatial size " << pg.getVoxels()->getSpatialVoxelSize() << std::endl;
         }
         bool bSaturated = pg.run(&packing);
         if (params.storePackings) {

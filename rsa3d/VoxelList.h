@@ -128,7 +128,7 @@ public:
 	static constexpr unsigned short NORMAL_SPLIT = 3;
 
 	// prints dot in std::cout
-	static void printDot(size_t dotCounter, size_t max, const std::string &dot = "");
+	static void printDot(size_t dotCounter, size_t max, const std::string additionalInfo, const std::string &dot);
 
 	/**
 	 * @brief Constructor

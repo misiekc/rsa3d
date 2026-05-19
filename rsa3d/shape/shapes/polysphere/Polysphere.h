@@ -37,9 +37,29 @@ protected:
 
     static Vector<3> getStaticSpherePosition(size_t diskIndex, const Vector<3> &position, const Orientation<3> &orientation);
     static Orientation<3> fromVoxel(const Orientation<3> &voxelOrientation);
+    static double sphereSphereDistance2(size_t sphere0, const Vector<3> &shape0Position, const Orientation<3> &shape0Orientation,
+                                 size_t sphere1, const Vector<3> &shape1Position, const Orientation<3> &shape1Orientation);
+    static double sphereSphereDistance2New(size_t sphere0, const Vector<3> &shape0Position, const Orientation<3> &shape0Orientation,
+                                     size_t sphere1, const Vector<3> &shape1Position, const Orientation<3> &shape1Orientation);
 
     virtual std::array<Matrix<3, 3>, 2> getMinMaxMatrices(const Orientation<3> &voxelOrientation, const Orientation<3> &angularSize) const;
     virtual std::array<Vector<3>, 2> getMinMaxVoxelCoordinates(size_t sphereIndex, const Vector<3> &voxelPosition, double spatialSize, const std::array<Matrix<3,3>, 2>&minmaxMatrices) const;
+
+    bool isVoxelInsideSimple(BoundaryConditions<3> *bc, const RSAVector &voxelPosition,
+                           const RSAOrientation &voxelOrientation, double spatialSize,
+                           const RSAOrientation &angularSize) const;
+
+    bool isVoxelInsideOld(BoundaryConditions<3> *bc, const RSAVector &voxelPosition,
+                            const RSAOrientation &voxelOrientation, double spatialSize,
+                            const RSAOrientation &angularSize) const;
+
+    virtual double voxelSphereMaxDistance(const RSAVector &voxelPosition, const RSAOrientation &voxelOrientation,
+                            double spatialSize, const RSAOrientation &angularSize, const RSAVector &virtualSphere,
+                            const RSAVector &thisSphere) const;
+
+    virtual bool isVoxelInside(BoundaryConditions<3> *bc, const RSAVector &voxelPosition,
+                                    const RSAOrientation &voxelOrientation, double spatialSize,
+                                    const RSAOrientation &angularSize) const;
 
     //like voxelInside, but optimized for full angle angularSize
     virtual bool fullAngleVoxelInside(BoundaryConditions<3> *bc, const Vector<3> &voxelPosition, double spatialSize) const;

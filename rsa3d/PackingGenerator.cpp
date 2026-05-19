@@ -214,8 +214,6 @@ void PackingGenerator::testPacking(const Packing &packing, double maxTime){
 		this->surface->add(s);
 	std::cout << "[" << this->collector << " PackingGenerator::testPacking] " << packing.size() << " shapes restored" << std::endl;
 
-
-
 	double t = 0;
 
     ThreadLocalRND threadRND(rnd);
@@ -345,11 +343,11 @@ void PackingGenerator::sequentialVoxelAnalysis() {
 			for (size_t vIndex: vIndices)
 				this->voxels->removeVoxel(vIndex);
 			if (vIndices.size() == voxelsCount) {
-				VoxelList::printDot(dotCounter, indices.size(), ".");
+				VoxelList::printDot(dotCounter, indices.size(), "", ".");
 			}else if (!vIndices.empty()) {
-				VoxelList::printDot(dotCounter, indices.size(), ":");
+				VoxelList::printDot(dotCounter, indices.size(), "", ":");
 			}else{
-				VoxelList::printDot(dotCounter, indices.size(), "-");
+				VoxelList::printDot(dotCounter, indices.size(), "", "-");
 			}
 		}
 	}
@@ -359,38 +357,6 @@ void PackingGenerator::sequentialVoxelAnalysis() {
 	std::cout.precision(5);
 	std::cout << " done: " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels remained, factor = " << this->getFactor() << "." << std::endl << std::flush;
 	std::cout << "[" << this->collector << " PackingGenerator::createPacking] sequential voxel analysis of top level voxels finished. " << this->voxels->countActiveTopLevelVoxels() << " top level voxels left" << std::endl << std::flush;
-}
-
-void PackingGenerator::partialVoxelAnalysisOld() {
-	size_t length = this->voxels->getLength();
-	size_t max = 1 << (RSA_SPATIAL_DIMENSION + RSA_ANGULAR_DIMENSION + params.partialVoxelAnalysisModifier);
-	size_t dotCounter = 0;
-	size_t range = static_cast<size_t>(length/(max)) + 1;
-	std::cout << "[" << this->collector << " PackingGenerator::createPacking] partial voxel analysis of " << this->voxels->getLength() << " voxels in packs of " << range << " voxels " <<  std::flush;
-	size_t minIndex = 0;
-
-	while (minIndex<length) {
-		size_t maxIndex = std::min(minIndex + range, length);
-		VoxelList tmpList(*this->voxels, minIndex, maxIndex);
-		unsigned short status;
-		do {
-			status = tmpList.splitVoxels(this->params.minDx, this->params.maxVoxels, this->surface->getNeighbourGrid(), this->surface->getBC(), false);
-		}while (status != VoxelList::NO_SPLIT_DUE_TO_VOXELS_LIMIT && tmpList.getLength()>0);
-		dotCounter++;
-		if (tmpList.getLength() == 0) {
-			this->voxels->removeVoxels(minIndex, maxIndex);
-			VoxelList::printDot(dotCounter, max, ".");
-		}else {
-			VoxelList::printDot(dotCounter, max, "-");
-		}
-		minIndex = maxIndex;
-	}
-	this->voxels->restoreStructure();
-	std::cout << " done, analysing of remaining " << this->voxels->getLength() << " voxels ";
-	this->voxels->analyzeVoxels(this->surface->getBC(), this->surface->getNeighbourGrid(), 0);
-	std::cout.precision(5);
-	std::cout << " done: " << this->voxels->getLength() << " (" << this->voxels->countActiveTopLevelVoxels() << ") voxels remained, factor = " << this->getFactor() << "." << std::endl << std::flush;
-	std::cout << "[" << this->collector << " PackingGenerator::createPacking] partial voxel analysis of top level voxels finished. " << this->voxels->countActiveTopLevelVoxels() << " top level voxels left" << std::endl << std::flush;
 }
 
 void PackingGenerator::partialVoxelAnalysis() {
@@ -411,16 +377,17 @@ void PackingGenerator::partialVoxelAnalysis() {
 		dotCounter++;
 		if (tmpList.getLength() == 0) {
 			this->voxels->removeVoxels(beginIndex, endIndex);
-			VoxelList::printDot(dotCounter, max, ".");
+			VoxelList::printDot(dotCounter, max, "", ".");
 		}else {
 			std::vector<size_t> indices = tmpList.getIndicesOfRemovedVoxels();
 			if (!indices.empty()) {
 	//			std::cout << " " << indices.size() << " to remove " << std::flush;
 				for (size_t index: indices)
 					this->voxels->removeVoxel(beginIndex+index);
-				VoxelList::printDot(dotCounter, max, ":");
-			}else
-				VoxelList::printDot(dotCounter, max, "-");
+				VoxelList::printDot(dotCounter, max, "", ":");
+			}else {
+				VoxelList::printDot(dotCounter, max, "", "-");
+			}
 		}
 		beginIndex = endIndex;
 	}
@@ -532,13 +499,13 @@ bool PackingGenerator::createPacking(Packing *packing) {
 	pginfo.sequentialAnalysis = false;
 
 	std::cout.precision(std::numeric_limits< double >::max_digits10);
-	std::cout << "[" << this->collector << " PackingGenerator::createPacking] using up to " << _OMP_MAXTHREADS;
-	std::cout << " concurrent treads" << std::endl;
+	std::cout << "[" << this->collector << " PackingGenerator::createPacking] packing size: " << params.sufraceVolume() << " build of " << params.particleType << "(" << params.particleAttributes << ") using up to " << _OMP_MAXTHREADS << " concurrent treads" << std::endl;
 
 	RND rnd(this->seed);
 	RSAShape *s = ShapeFactory::createShape(&rnd);
 	double dt = s->getVolume(RSA_SPATIAL_DIMENSION) / this->surface->getArea();
 	delete s;
+	std::cout << "[" << this->collector << " PackingGenerator::createPacking] circumsphere radius:  " << s->getCircumsphereRadius() << ", insphere radius: "  << s->getInsphereRadius() << std::endl;
 
 	int l = 0;
 	double t = 0;
@@ -660,16 +627,18 @@ bool PackingGenerator::createPacking(Packing *packing) {
 
 				oldTmpSplit = tmpSplit;
 			}
+			/*
 //			this code is for debugging purposes in case of problems with subsequent stages of packing generation
 
-//			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getSpatialVoxelSize()));
-//			this->toWolfram("test_" + std::to_string(this->voxels->getSpatialVoxelSize()) + ".nb");
+			this->printRemainingVoxels("voxels_" + std::to_string(this->voxels->getSpatialVoxelSize()));
+			this->toWolfram("test_" + std::to_string(this->voxels->getSpatialVoxelSize()) + ".nb");
 //			this->toPovray("test_" + std::to_string(this->voxels->getSpatialVoxelSize()) + ".pov");
 //			this->toPovray(this->packing, this->params.surfaceSize, nullptr, false, "test_" + std::to_string(this->voxels->getSpatialVoxelSize()) + ".pov");
-//			std::string filename = "snapshot_" + std::to_string(this->packing.size()) + "_" + std::to_string(this->voxels->getLength()) + ".dbg";
-//			std::ofstream file(filename, std::ios::binary);
-//			this->store(file);
-//			file.close();
+			std::string filename = "snapshot_" + std::to_string(this->packing.size()) + "_" + std::to_string(this->voxels->getLength()) + ".dbg";
+			std::ofstream file(filename, std::ios::binary);
+			this->store(file);
+			file.close();
+			*/
 		}else if (added>0){
 			pginfo.skippedSplit = false;
 			pginfo.deepAnalysis = false;

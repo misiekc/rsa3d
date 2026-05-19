@@ -12,6 +12,21 @@ class Kmer3D : public Polysphere {
 protected:
     std::array<Matrix<3, 3>, 2> getMinMaxMatrices(const Orientation<3> &voxelOrientation, const Orientation<3> &angularSize) const override;
 
+    static std::array<double, 2> minMaxCos2(double x, double y0, double y1);
+    static std::array<double, 2> minMaxCos(double x, double y0, double y1);
+
+    static double angularTerm(double prefactor, const RSAVector &v, const Orientation<3> &translatedVoxelOrientation,
+                              const Orientation<3> &translatedAngularSize, double &beta_star, double &gamma_star);
+
+    static double voxelSphereMaxDistance(const RSAVector &voxelPosition, const RSAOrientation &translatedVoxelOrientation,
+                                         double spatialSize, const RSAOrientation &translatedAngularSize,
+                                         const RSAVector &virtualSphere, const RSAVector &thisSphere,
+                                         RSAVector &vShapePosition, RSAOrientation &vShapeOrientation);
+
+    bool isVoxelInside(BoundaryConditions<3> *bc, const RSAVector &voxelPosition,
+                            const RSAOrientation &translatedVoxelOrientation, double spatialSize,
+                            const RSAOrientation &translatedAngularSize) const override;
+
 public:
     static void initClass(const std::string &attr);
 

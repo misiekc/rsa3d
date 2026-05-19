@@ -12,6 +12,7 @@
 
 #include <cstring>
 #include <fstream>
+#include <unordered_set>
 
 #include "PackingGenerator.h"
 #include "utils/OMPMacros.h"
@@ -196,19 +197,21 @@ void VoxelList::disable(){
 	this->disabled = true;
 }
 
-void VoxelList::printDot(const size_t dotCounter, const size_t max, const std::string &dot) {
+void VoxelList::printDot(const size_t dotCounter, const size_t max, const std::string additionalInfo, const std::string &dot) {
 	Expects(dotCounter > 0);
 	Expects(dotCounter <= max);
 	const size_t maxLength = std::to_string(max).size();
 	const size_t counterLength = std::to_string(dotCounter-1).size();
+	static size_t lastInfoLength;
 	_OMP_CRITICAL_SIMPLE
 	{
 		if (dotCounter > 1) {
-			for(size_t i=0; i<counterLength+maxLength+1; i++)
+			for(size_t i=0; i<counterLength+maxLength+lastInfoLength+1; i++)
 				std::cout << "\b";
 		}
 		if (dotCounter < max) {
-			std::cout << dot << dotCounter << "/" << max << std::flush;
+			std::cout << dot << dotCounter << "/" << max << additionalInfo << std::flush;
+			lastInfoLength = additionalInfo.size();
 		}else {
 			std::cout << dot << std::flush;
 		}
@@ -233,6 +236,8 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 												  spatialGridLinearSize.begin() + this->surfaceDimension, 1.,
 												  std::multiplies<>{});
 
+	std::cout << "alocating " << (spatialGridSize * angularGridSize) << " voxels" << std::flush;
+
 	delete this->voxels[0];
 	this->allocateVoxels(spatialGridSize * angularGridSize);
 	this->topLevelVoxelsSize = fullSpatialGridSize;
@@ -246,7 +251,7 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 														this->initialVoxelSize * fullSpatialGridLinearSize,
 														this->initialVoxelSize);
 
-	std::cout << " alocating " << (spatialGridSize * angularGridSize) << " voxels, now checking " << std::flush;
+	std::cout << ", now checking " << std::flush;
 
 	size_t dotEvery = (spatialGridSize / 100) + 1;
 	size_t dotCounter = 0;
@@ -284,7 +289,7 @@ unsigned int VoxelList::initVoxels(RSABoundaryConditions *bc, NeighbourGrid<cons
 			this->removeTopLevelVoxel(this->voxels[spatialIndex * angularGridSize]);
 		if (spatialIndex%dotEvery == 0) {
 			dotCounter++;
-			VoxelList::printDot(dotCounter, 100);
+			VoxelList::printDot(dotCounter, 100, "", "");
 		}
 	}
 
@@ -698,7 +703,7 @@ size_t VoxelList::analyzeVoxels(RSABoundaryConditions *bc, NeighbourGrid<const R
 		}
 		if (i%dotEvery == 0) {
 			dotCounter++;
-			printDot(dotCounter, 100);
+			printDot(dotCounter, 100, "", "");
 		}
 	}
 
@@ -777,7 +782,7 @@ unsigned short VoxelList::splitVoxels(double minDx, size_t maxVoxels, NeighbourG
 		}
 		if (verbose && i%dotEvery == 0) {
 			dotCounter++;
-			printDot(dotCounter, 100);
+			printDot(dotCounter, 100, "", "");
 		}
 	}
 	if (PackingGenerator::terminateNow)
@@ -932,23 +937,33 @@ std::string VoxelList::toPovray() const{
 	return sRes;
 }
 
-
 std::string VoxelList::toWolfram() const{
 	std::stringstream out;
 
-	for(size_t i=0; i<this->length; i++){
-		out << this->voxels[i]->toWolfram(this->spatialVoxelSize, this->angularVoxelSize);
-		if (i!=this->length-1)
-			out << ", ";
-		out << std::endl;
-		if (RSA_ANGULAR_DIMENSION > 0){
-			out << "(* angles: [ ";
-			for (unsigned short int j=0; j<RSA_ANGULAR_DIMENSION; j++) {
-				out << "(" << this->voxels[i]->getOrientation()[j] << ", " << (this->voxels[i]->getOrientation()[j] + this->angularVoxelSize[j]) << ") ";
-			}
-			out << "*)" << std::endl;
+	std::vector<RSAVector> voxels_set;
+	Voxel** varray = new Voxel*[this->length];
+	for (size_t i=0; i<this->length; i++) {
+		Voxel *v = this->voxels[i];
+		RSAVector pos = v->getPosition();
+		if (std::find(voxels_set.begin(), voxels_set.end(), pos) == voxels_set.end()) {
+			voxels_set.push_back(pos);
+			varray[i] = v;
+		}else {
+			varray[i] = nullptr;
 		}
 	}
+
+	size_t j=0;
+	for(size_t i=0; i<this->length; i++){
+		if (varray[i] != nullptr) {
+			j++;
+			out << varray[i]->toWolfram(this->spatialVoxelSize, this->angularVoxelSize);
+			if (j<voxels_set.size())
+				out << ", " << std::endl;
+		}
+	}
+	delete [] varray;
+	out << std::endl;
 	return out.str();
 }
 
