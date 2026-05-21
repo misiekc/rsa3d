@@ -105,12 +105,12 @@ double normalize(double a)
     while (a >   M_PI) a -= 2*M_PI;
     return a;
 }
-
+/*
 bool in_interval(double x, double a, double b)
 {
     return x >= a && x <= b;
 }
-
+*/
 // Clamp angle into interval (used when optimum is outside)
 double clamp(double x, double a, double b)
 {
@@ -123,7 +123,7 @@ double cos_min(double phi, double g0, double g1, double &arg)
     // candidate: cos = -1 at gamma = phi ± pi
     double g_star = normalize(phi + M_PI);
 
-    if (in_interval(g_star, g0, g1)) {
+    if (g_star >= g0 && g_star <= g1) {
         arg = g_star;
         return -1.0;
     }
@@ -145,7 +145,7 @@ double cos_max(double phi, double g0, double g1, double &arg)
     // candidate: cos = 1 at gamma = phi
     double g_star = normalize(phi);
 
-    if (in_interval(g_star, g0, g1)) {
+    if (g_star >= g0 && g_star <= g1) {
         arg = g_star;
         return 1.0;
     }
@@ -163,9 +163,8 @@ double cos_max(double phi, double g0, double g1, double &arg)
 }
 
 // ---- main solver ----
-double minimize_expr(
-    double A, const RSAVector &v, double b0, double b1, double g0, double g1, double &beta_out, double &gamma_out)
-{
+double minimize_expr(double A, const RSAVector &v, double vlength, double b0, double b1, double g0, double g1,
+                     double &beta_out, double vxy, double &gamma_out){
     double best = std::numeric_limits<double>::infinity();
 
     auto update = [&best, &beta_out, &gamma_out](double val, double b, double g){
@@ -176,19 +175,14 @@ double minimize_expr(
         }
     };
 
-    double R = std::sqrt(v[0]*v[0] + v[1]*v[1]);
-    double phi = std::atan2(v[1], v[0]);
-    double vnorm = v.norm();
-
     // ---- 1. interior stationary point ----
-    if (vnorm > 0.0) {
-        double beta_star = std::atan2(v[2], R);
-        double gamma_star = phi;
+    if (vlength > 0.0) {
+        double beta_star = std::atan2(v[2], vxy);
+        double gamma_star = gamma_out;
 
-        if (in_interval(beta_star, b0, b1) &&
-            in_interval(gamma_star, g0, g1))
+        if ((beta_star >= b0 && beta_star <= b1) && (gamma_star >= g0 && gamma_star <= g1))
         {
-            double val = -std::abs(A) * vnorm;
+            double val = -std::abs(A) * vlength;
             update(val, beta_star, gamma_star);
         }
     }
@@ -202,12 +196,12 @@ double minimize_expr(
         double gamma_candidate;
         double cos_val;
 
-        if (A * R * c >= 0)
-            cos_val = cos_min(phi, g0, g1, gamma_candidate);
+        if (A * vxy * c >= 0)
+            cos_val = cos_min(gamma_out, g0, g1, gamma_candidate);
         else
-            cos_val = cos_max(phi, g0, g1, gamma_candidate);
+            cos_val = cos_max(gamma_out, g0, g1, gamma_candidate);
 
-        double val = A * (R * c * cos_val - v[2] * s);
+        double val = A * (vxy * c * cos_val - v[2] * s);
         update(val, beta, gamma_candidate);
     }
 
@@ -224,7 +218,7 @@ double minimize_expr(
         beta_star = normalize(beta_star);
 
         double beta_candidate;
-        if (in_interval(beta_star, b0, b1))
+        if (beta_star >= b0 && beta_star <= b1)
             beta_candidate = beta_star;
         else
             beta_candidate = (std::abs(b0 - beta_star) < std::abs(b1 - beta_star)) ? b0 : b1;
@@ -237,15 +231,10 @@ double minimize_expr(
 }
 
 double maximize_expr(
-    double A, const RSAVector &v, double b0, double b1, double g0, double g1, double &beta_out, double &gamma_out){
+    double A, const RSAVector &v, double vlength, double b0, double b1, double g0, double g1, double &beta_out, double vxy, double &gamma_out){
     // First find the minimizer of -f
-    double beta_tmp, gamma_tmp;
 
-    double min_neg = minimize_expr(-A, v, b0, b1, g0, g1, beta_tmp, gamma_tmp);
-
-    // That point is the maximizer of original function
-    beta_out = beta_tmp;
-    gamma_out = gamma_tmp;
+    double min_neg = minimize_expr(-A, v, vlength, b0, b1, g0, g1, beta_out, vxy, gamma_out);
 
     // Evaluate the true maximum value
     double val = A * (std::cos(beta_out)*(v[0] * std::cos(gamma_out) + v[1] * std::sin(gamma_out))
@@ -261,20 +250,24 @@ double Kmer3D::voxelSphereMaxDistance(const RSAVector &voxelPosition, const RSAO
 
     double dMax2 = -std::numeric_limits<double>::infinity();
     double virtualSphereLength = virtualSphere.norm();
+    Vector<3> voxelVector;
     for (size_t ix=0; ix<=1; ix++) {
+        voxelVector[0] = voxelPosition[0]+ix*spatialSize - thisSphere[0];
         for (size_t iy=0; iy<=1; iy++) {
+            voxelVector[1] = voxelPosition[1]+iy*spatialSize - thisSphere[1];
+            double vxy = std::sqrt(voxelVector[0]*voxelVector[0]+voxelVector[1]*voxelVector[1]);
+            double gamma_star = std::atan2(voxelVector[1], voxelVector[0]);
             for (size_t iz=0; iz<=1; iz++) {
-                RSAVector voxelVortex({voxelPosition[0]+ix*spatialSize, voxelPosition[1]+iy*spatialSize,
-                                       voxelPosition[2]+iz*spatialSize});
-                RSAVector voxelVector = voxelVortex - thisSphere;
+                voxelVector[2] = voxelPosition[2]+iz*spatialSize - thisSphere[2];
                 double voxelVectorLength = voxelVector.norm();
-                double gamma_star, beta_star;
+                double beta_star;
 
-                double angularTerm = maximize_expr(virtualSphere[0], voxelVector,
+                double angularTerm = maximize_expr(virtualSphere[0], voxelVector, voxelVectorLength,
                     translatedVoxelOrientation[1], translatedVoxelOrientation[1]+translatedAngularSize[1],
                     translatedVoxelOrientation[2], translatedVoxelOrientation[2]+translatedAngularSize[2],
-                    beta_star,gamma_star);
+                    beta_star, vxy, gamma_star);
 
+                // maximum distance between virtual sphere in the voxel and the existing one
                 double dMaxVortex2 = voxelVectorLength*voxelVectorLength +
                             virtualSphereLength*virtualSphereLength +
                             2*angularTerm;
@@ -282,7 +275,7 @@ double Kmer3D::voxelSphereMaxDistance(const RSAVector &voxelPosition, const RSAO
                 if (dMaxVortex2 > dMax2) {
                     dMax2 = dMaxVortex2;
                     vShapeOrientation = {0, beta_star, gamma_star};
-                    vShapePosition = voxelVortex;
+                    vShapePosition = voxelVector + thisSphere;
                 }
             }
         }
@@ -299,12 +292,12 @@ bool Kmer3D::isVoxelInside(BoundaryConditions<3> *bc, const RSAVector &voxelPosi
     double dMax, dMinMax = std::numeric_limits<double>::infinity();
     Vector<3> voxelPositionLocal = voxelPosition + bc->getTranslation(thisPosition, voxelPosition);
 
-    // loop over disks in virtual particle inside voxel
+    // loop over disks in this particle
     for (size_t i = 0; i < Polysphere::sphereCentre.size(); i++){
-        Vector<3> virtualSphere = Polysphere::sphereCentre[i];
-        // loop over disks in this particle
-        for (size_t j = 0; j < Polysphere::sphereCentre.size(); j++){
-            Vector<3> thisSphere = Polysphere::getStaticSpherePosition(j, thisPosition, thisOrientation);
+        Vector<3> thisSphere = Polysphere::getStaticSpherePosition(i, thisPosition, thisOrientation);
+        // loop over disks in virtual particle inside voxel
+    for (size_t j = 0; j < Polysphere::sphereCentre.size(); j++){
+        Vector<3> virtualSphere = Polysphere::sphereCentre[j];
             dMax = Kmer3D::voxelSphereMaxDistance(voxelPositionLocal, translatedVoxelOrientation, spatialSize,
                                                          translatedAngularSize, virtualSphere, thisSphere,
                                                          vShapePosition, vShapeOrientation);
@@ -313,10 +306,10 @@ bool Kmer3D::isVoxelInside(BoundaryConditions<3> *bc, const RSAVector &voxelPosi
 
             if (dMax < dMinMax) {
                 dMinMax = dMax;
-                vShapePositionMin = vShapePosition;
-                vShapeOrientationMin = vShapeOrientation;
-                imax = i;
-                jmax = j;
+//                vShapePositionMin = vShapePosition;
+//                vShapeOrientationMin = vShapeOrientation;
+//                imax = i;
+//                jmax = j;
             }
         }
     }
