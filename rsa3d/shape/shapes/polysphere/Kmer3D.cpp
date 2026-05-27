@@ -243,6 +243,71 @@ double maximize_expr(
     return val;
 }
 
+bool isAngleInInterval(double vx, double vy,
+                              double sin_g0, double cos_g0,
+                              double sin_g1, double cos_g1) {
+    // u0 x v: vector v must be "on the left" to g0
+    double cross0 = cos_g0 * vy - sin_g0 * vx;
+
+    // v x u1: vector v must be "on the right" to g1
+    double cross1 = vx * sin_g1 - vy * cos_g1;
+
+    return (cross0 >= 0.0) && (cross1 >= 0.0);
+}
+
+// ---- find max of Vx cos(gamma) + Vy sin(gamma) = sqrt() cos(gamma - atan2(vy/vx))
+double simple_max(double vx, double vy, double sin_g0, double cos_g0, double sin_g1, double cos_g1) {
+    if (isAngleInInterval(vx, vy, sin_g0, cos_g0, sin_g1, cos_g1)) {return std::sqrt(vx * vx + vy * vy);}
+    return std::max(vx * cos_g0 + vy * sin_g0,vx * cos_g1 + vy * sin_g1);
+}
+
+double simple_min(double vx, double vy, double sin_g0, double cos_g0, double sin_g1, double cos_g1) {
+    if (isAngleInInterval(vx, vy, -sin_g0, -cos_g0, -sin_g1, -cos_g1)) {return -std::sqrt(vx * vx + vy * vy);}
+    return std::min(vx * cos_g0 + vy * sin_g0,vx * cos_g1 + vy * sin_g1);
+}
+double new_maximize_expr(double R, const RSAVector &v, double sin_b0, double cos_b0,
+                                                        double sin_b1, double cos_b1,
+                                                        double sin_g0, double cos_g0,
+                                                        double sin_g1, double cos_g1) {
+    if (cos_b1 * cos_b0 <= 0) {
+        double vxy_max = simple_max(v[0], v[1], sin_g0, cos_g0, sin_g1, cos_g1);
+        double vxy_min = simple_min(v[0], v[1], sin_g0, cos_g0, sin_g1, cos_g1);
+
+        if (R > 0) {
+            double val1 = R * simple_max(vxy_max, v[2], -sin_b1, cos_b1, -sin_b0, cos_b0);
+            double val2 = R * simple_max(vxy_min, v[2], -sin_b1, cos_b1, -sin_b0, cos_b0);
+            return std::max(val1, val2);
+        } else {
+            double val1 = R * simple_min(vxy_max, v[2], -sin_b1, cos_b1, -sin_b0, cos_b0);
+            double val2 = R * simple_min(vxy_min, v[2], -sin_b1, cos_b1, -sin_b0, cos_b0);
+            return std::max(val1, val2);
+        }
+    }
+
+    // R(vxy cos(beta) -vz sin(beta))
+
+    if (cos_b0 * R > 0) {
+        double vxy = simple_max(v[0], v[1], sin_g0, cos_g0, sin_g1, cos_g1);
+        if (R > 0) {
+            double vxyz = simple_max(vxy, v[2], -sin_b1, cos_b1, -sin_b0, cos_b0);
+            return R * vxyz;
+        } else {
+            double vxyz = simple_min(vxy, v[2], -sin_b1, cos_b1, -sin_b0, cos_b0);
+            return R * vxyz;
+        }
+    } else {
+        double vxy = simple_min(v[0], v[1], sin_g0, cos_g0, sin_g1, cos_g1);
+        if (R > 0) {
+            double vxyz = simple_max(vxy, v[2], -sin_b1, cos_b1, -sin_b0, cos_b0);
+            return R * vxyz;
+        } else {
+            double vxyz = simple_min(vxy, v[2], -sin_b1, cos_b1, -sin_b0, cos_b0);
+            return R * vxyz;
+        }
+    }
+}
+
+/*
 double Kmer3D::voxelSphereMaxDistance(const RSAVector &voxelPosition, const RSAOrientation &translatedVoxelOrientation,
                                       double spatialSize, const RSAOrientation &translatedAngularSize,
                                       const RSAVector &virtualSphere, const RSAVector &thisSphere,
@@ -282,6 +347,50 @@ double Kmer3D::voxelSphereMaxDistance(const RSAVector &voxelPosition, const RSAO
     }
     return std::sqrt(dMax2);
 }
+*/
+
+double Kmer3D::voxelSphereMaxDistance(const RSAVector &voxelPosition, const RSAOrientation &translatedVoxelOrientation,
+                                      double spatialSize, const RSAOrientation &translatedAngularSize,
+                                      const RSAVector &virtualSphere, const RSAVector &thisSphere,
+                                      RSAVector &vShapePosition, RSAOrientation &vShapeOrientation) {
+
+    double dMax2 = -std::numeric_limits<double>::infinity();
+    double virtualSphereLength = virtualSphere.norm();
+
+    double sin_b0 = std::sin(translatedVoxelOrientation[1]);
+    double cos_b0 = std::cos(translatedVoxelOrientation[1]);
+    double sin_b1 = std::sin(translatedVoxelOrientation[1]+translatedAngularSize[1]);
+    double cos_b1 = std::cos(translatedVoxelOrientation[1]+translatedAngularSize[1]);
+    double sin_g0 = std::sin(translatedVoxelOrientation[2]);
+    double cos_g0 = std::cos(translatedVoxelOrientation[2]);
+    double sin_g1 = std::sin(translatedVoxelOrientation[2]+translatedAngularSize[2]);
+    double cos_g1 = std::cos(translatedVoxelOrientation[2]+translatedAngularSize[2]);
+
+    Vector<3> voxelVector;
+    for (size_t ix=0; ix<=1; ix++) {
+        voxelVector[0] = voxelPosition[0]+ix*spatialSize - thisSphere[0];
+        for (size_t iy=0; iy<=1; iy++) {
+            voxelVector[1] = voxelPosition[1]+iy*spatialSize - thisSphere[1];
+            for (size_t iz=0; iz<=1; iz++) {
+                voxelVector[2] = voxelPosition[2]+iz*spatialSize - thisSphere[2];
+                double voxelVectorLength = voxelVector.norm();
+
+                double angularTerm = new_maximize_expr(virtualSphere[0], voxelVector, sin_b0, cos_b0, sin_b1, cos_b1, sin_g0, cos_g0, sin_g1, cos_g1);
+
+                // maximum distance between virtual sphere in the voxel and the existing one
+                double dMaxVortex2 = voxelVectorLength*voxelVectorLength +
+                            virtualSphereLength*virtualSphereLength +
+                            2*angularTerm;
+
+                if (dMaxVortex2 > dMax2) {
+                    dMax2 = dMaxVortex2;
+                }
+            }
+        }
+    }
+    return std::sqrt(dMax2);
+}
+
 
 bool Kmer3D::isVoxelInside(BoundaryConditions<3> *bc, const RSAVector &voxelPosition, const RSAOrientation &translatedVoxelOrientation, double spatialSize, const RSAOrientation &translatedAngularSize) const{
     Vector<3> vShapePosition, vShapePositionMin;
@@ -289,18 +398,23 @@ bool Kmer3D::isVoxelInside(BoundaryConditions<3> *bc, const RSAVector &voxelPosi
     int imax=-1, jmax=-1;
     Vector<3> thisPosition = this->getPosition();
     Orientation<3> thisOrientation = this->getOrientation();
-    double dMax, dMinMax = std::numeric_limits<double>::infinity();
+    double dMinMax = std::numeric_limits<double>::infinity();
     Vector<3> voxelPositionLocal = voxelPosition + bc->getTranslation(thisPosition, voxelPosition);
 
     // loop over disks in this particle
     for (size_t i = 0; i < Polysphere::sphereCentre.size(); i++){
         Vector<3> thisSphere = Polysphere::getStaticSpherePosition(i, thisPosition, thisOrientation);
         // loop over disks in virtual particle inside voxel
-    for (size_t j = 0; j < Polysphere::sphereCentre.size(); j++){
-        Vector<3> virtualSphere = Polysphere::sphereCentre[j];
-            dMax = Kmer3D::voxelSphereMaxDistance(voxelPositionLocal, translatedVoxelOrientation, spatialSize,
+        for (size_t j = 0; j < Polysphere::sphereCentre.size(); j++){
+            Vector<3> virtualSphere = Polysphere::sphereCentre[j];
+//            double dMax = Kmer3D::voxelSphereMaxDistance(voxelPositionLocal, translatedVoxelOrientation, spatialSize,
+//                                                         translatedAngularSize, virtualSphere, thisSphere,
+//                                                         vShapePosition, vShapeOrientation);
+            double dMax = Kmer3D::voxelSphereMaxDistance(voxelPositionLocal, translatedVoxelOrientation, spatialSize,
                                                          translatedAngularSize, virtualSphere, thisSphere,
                                                          vShapePosition, vShapeOrientation);
+//            if (dMax - dMaxAR > 0.0000001)
+//                std::cout << "here";
             if (Polysphere::sphereR[i] + Polysphere::sphereR[j] > dMax)
                 return true;
 
